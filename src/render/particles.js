@@ -28,6 +28,7 @@ export function createParticles(scene) {
   scene.add(points);
 
   let cursor = 0;
+  let live = 0;
   const tmp = new THREE.Color();
 
   /**
@@ -40,6 +41,7 @@ export function createParticles(scene) {
     for (let k = 0; k < n; k++) {
       const i = cursor;
       cursor = (cursor + 1) % POOL;
+      if (life[i] <= 0) live += 1; // slot was parked
       const i3 = i * 3;
       const a = Math.random() * Math.PI * 2;
       const sp = (0.35 + Math.random() * 0.65) * (o.speed ?? 9);
@@ -61,6 +63,7 @@ export function createParticles(scene) {
   }
 
   function sync(dt) {
+    if (live === 0) return; // I36: no live particles -> skip loop + attribute uploads
     const drag = Math.exp(-3 * dt);
     for (let i = 0; i < POOL; i++) {
       if (life[i] <= 0 || age[i] >= life[i]) continue;
@@ -70,6 +73,7 @@ export function createParticles(scene) {
         positions[i3 + 1] = -9999; // park + blacken (additive => invisible)
         colors[i3] = colors[i3 + 1] = colors[i3 + 2] = 0;
         life[i] = 0;
+        live -= 1;
         continue;
       }
       vel[i3] *= drag;
@@ -87,5 +91,5 @@ export function createParticles(scene) {
     geo.attributes.color.needsUpdate = true;
   }
 
-  return { points, burst, sync };
+  return { points, burst, sync, get live() { return live; } };
 }

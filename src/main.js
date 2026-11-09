@@ -17,6 +17,7 @@ import { createWaveBanner } from './render/waveBanner.js';
 import { createScorePopups } from './render/scorePopups.js';
 import { createTutorialHint } from './render/tutorialHint.js';
 import { createBloom } from './render/bloom.js';
+import { createFpsMeter } from './render/fpsMeter.js';
 import { STATE } from './core/state.js';
 import { Storage } from './core/storage.js';
 import { CONFIG } from './core/config.js';
@@ -28,6 +29,8 @@ const app = document.getElementById('app');
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+// I36: keep per-frame GPU stats across all composer passes (autoReset would zero them per pass)
+renderer.info.autoReset = false;
 renderer.setSize(window.innerWidth, window.innerHeight);
 app.appendChild(renderer.domElement);
 
@@ -39,6 +42,11 @@ const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerH
 
 // I35: bloom post-fx - composer path for High quality, direct render for Low (GDD line 74).
 const bloom = createBloom(renderer, scene, camera);
+
+// I36: opt-in FPS meter - ?fps=1 (fps + ms) or ?fps=2 (+ draw calls/tris).
+const fpsParam = new URLSearchParams(window.location.search).get('fps');
+const fpsMeter = fpsParam ? createFpsMeter(fpsParam === '2' ? renderer : null) : null;
+if (fpsMeter) fpsMeter.show();
 
 scene.add(new THREE.HemisphereLight(0x33437a, 0x04060f, 0.55));
 scene.add(new THREE.AmbientLight(0x8899ff, 0.35));
@@ -154,7 +162,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, fpsMeter, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -220,11 +228,18 @@ function tick(dt, intent) {
   shake.step(dt);
 }
 
+const hudOpts = { best: 0 };
+const screenOpts = { muted: false, best: 0, newBest: false };
 function syncVisuals(dt) {
   const st = world.game.state;
   hud.setVisible(st === STATE.PLAYING || st === STATE.PAUSED);
-  hud.render(world, { best: bestScore });
-  screens.update(st, world, { muted, best: bestScore, newBest });
+  // I36: reuse opts objects instead of allocating per frame
+  hudOpts.best = bestScore;
+  screenOpts.muted = muted;
+  screenOpts.best = bestScore;
+  screenOpts.newBest = newBest;
+  hud.render(world, hudOpts);
+  screens.update(st, world, screenOpts);
   shipMesh.sync(world.ship, simT, !motionOff);
   bullets.sync(world.weapons);
   rockRenders.sync(world.field);
@@ -255,6 +270,7 @@ function syncVisuals(dt) {
   } else if (flashEl.style.opacity !== '0') flashEl.style.opacity = '0';
 
   stars.rotation.y += dt * 0.004;
+  if (fpsMeter) fpsMeter.sync(dt); // I36
 }
 
 function frame() {
@@ -271,7 +287,8 @@ function frame() {
     n++;
   }
   if (n === MAX_SUBSTEPS) acc = 0; // drop backlog
-  syncVisuals(frameDt);
+  syncVisuals(frameDt); // I36: reads previous frame GPU stats
+  renderer.info.reset(); // I36: clear before this frame accumulates (autoReset off)
   bloom.render();
 }
 frame();
