@@ -41,3 +41,4 @@
 - I34: spawn safety (rim rocks re-roll to stay 8+ units from the ship) + balance pass 1 (combo window 3.5 -> 4s, power-up drop 22% -> 25%).
 - I35: bloom post-fx on High quality (UnrealBloomPass via composer); Low disables bloom and keeps the direct render path.
 - I36: ?fps=1/?fps=2 performance meter + perf pass (idle-frame particle upload skip, per-frame allocation reuse, accurate multi-pass GPU stats).
+- I37: fix stray Enter mid-game re-showing the tutorial hint and clearing score popups; Enter now only acts on MENU/GAME_OVER transitions.

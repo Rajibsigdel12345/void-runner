@@ -133,16 +133,24 @@ window.addEventListener('keydown', (e) => {
   if (e.repeat) return;
   const st = world.game.state;
   if (e.key === 'Enter') {
-    newBest = false;
-    popups.clear(); // ST-030: no stale popups across sessions
-    hint.show(); // ST-032: first-wave tutorial hint
-    if (st === STATE.MENU) world.begin();
-    else if (st === STATE.GAME_OVER) world.restart();
+    // I37: side effects only on the transitions that use them - stray Enter
+    // mid-game (PLAYING/PAUSED) must not clear popups or re-show the tutorial hint.
+    if (st === STATE.MENU) {
+      newBest = false;
+      popups.clear(); // ST-030: no stale popups across sessions
+      hint.show(); // ST-032: first-wave tutorial hint
+      world.begin();
+    } else if (st === STATE.GAME_OVER) {
+      newBest = false;
+      popups.clear();
+      hint.show();
+      world.restart();
+    }
   } else if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
     togglePause();
   } else if (e.key === 'm' || e.key === 'M') {
     muted = !muted;
-    audio.setMuted(muted);;
+    audio.setMuted(muted);
   }
 });
 const raycaster = new THREE.Raycaster();
