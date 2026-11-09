@@ -1,0 +1,21 @@
+﻿{
+  "project": "void-runner",
+  "engine": "three.js",
+  "engine_version": "0.160.0",
+  "build_tool": "vite",
+  "test_runner": "node --test",
+  "stage": "production",
+  "workflow": [
+    "cgs-start", "cgs-brainstorm", "cgs-map-systems", "cgs-create-epics",
+    "cgs-create-stories", "cgs-sprint-plan", "cgs-setup-engine", "cgs-test-setup",
+    "cgs-dev-story", "cgs-story-done", "cgs-bugfix", "cgs-balance-check",
+    "cgs-code-review", "cgs-smoke-check", "cgs-regression-suite",
+    "cgs-playtest-report", "cgs-ui-ux-review", "cgs-vertical-slice",
+    "cgs-gate-check", "cgs-milestone-review"
+  ],
+  "gates": {
+    "vertical_slice": "full loop: menu -> play -> score -> game over -> restart, with power-ups and waves",
+    "milestone_m1": "50+ iterations logged, all tests green, build green, playtested"
+  },
+  "update": "iteration log in production/iterations.md"
+}
