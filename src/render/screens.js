@@ -109,7 +109,7 @@ export function createScreens(root, settings = {}) {
   const menuBest = line(menu, '', 'font-size:calc(13px * var(--vr-fs,1));opacity:0.85;'); // best score lands in I18 (I44 contrast)
   const credit = document.createElement('div'); // I65: credits
   credit.className = 'vr-credit';
-  credit.textContent = 'a three.js arcade shooter � 100% procedural, no external assets � built with the Codex Game Studio pipeline';
+  credit.textContent = 'a three.js arcade shooter \u25c6 Blender-modeled low-poly assets \u25c6 built with the Codex Game Studio pipeline';
   menu.appendChild(credit);
   if (settings.menu) menu.appendChild(settings.menu.el); // ST-026 settings (menu)
 

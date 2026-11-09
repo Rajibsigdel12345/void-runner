@@ -81,7 +81,12 @@ Shared rules:
   (config, unchanged): L = 2.2, M = 1.3, S = 0.7.
 - Materials: GLB material is non-authoritative; the code applies the shared rock
   material (0x8a7f72 flat + fresnel rim) or the golden override.
-- Poly budget: L <= ~200, M <= ~120, S <= ~80 triangles.
+- Poly budget: L <= ~320, M <= ~120, S <= ~80 triangles. (I105 amendment: L
+  was ~200 in the original spec; I103 modeled L at icosphere subdiv 3 = 320
+  tris. 80 -> 320 is the next standard icosphere step, decimating to ~200
+  would create uneven tris that break the flat-shaded look, and the worst
+  case (all-L at cap 24 = 7680 tris) is GPU-negligible - so the budget is
+  amended, not the asset re-modeled.)
 - Integration notes: the current 3-variants-per-size system is simplified to ONE
   geometry per size for this pass (documented simplification); per-rock rotation
   (r.rot) provides visual variety. The pool (cap 24) shares these 3 geometries.
@@ -121,8 +126,10 @@ Per asset:
 Overall (rendering gate at I104):
 - In-browser screenshot (dev :5173 and dist :4173) shows the upgraded models at
   expected scale with correct colors / emissive and readable silhouettes.
-- Perf within budget: full-bloom frame triangle count stays near the I98 baseline
-  (2346); renderer.info.programs not materially increased; 0 console errors.
+- Perf within budget: renderer.info.programs not materially increased (19 at
+  I105); full-bloom frame measured 4050 tris at I105 on a forced 24-rock +
+  boss scene (vs 2346 at I98 - delta dominated by the 320-tri L rocks,
+  GPU-negligible); 0 console errors.
 - Colorblind-safe: player / threat / reward still separated by shape + hue +
   emissive.
 

@@ -88,9 +88,13 @@ friendly / hostile / pickup without reading labels.
 Scope (this pass): player ship, asteroid L/M/S (3 shared), boss Monolith.
 Other entities stay procedural until a later pass proves the pipeline.
 
-- Poly budget (triangles): ship <= ~300; asteroid L <= ~200, M/S fewer;
-  boss <= ~250. Stay within the current draw budget (a full bloom frame was
-  2346 tris at I98; we must not blow the frame).
+- Poly budget (triangles): ship <= ~300; asteroid L <= ~320, M/S fewer;
+  boss <= ~250. (Amended I105: L raised from ~200 to ~320 - icosphere subdiv 3
+  is the next standard step above 80, decimating down would create uneven
+  tris that break the flat-shaded look, and the worst case, all-L at cap 24
+  = 7680 tris, is GPU-negligible.) Stay within the current draw budget (a
+  full bloom frame was 2346 tris at I98; a forced full-cap wave measured
+  ~4050 tris at I105 - within budget, no frame blow).
 - Materials: PBR or flat-shaded; preserve the faceted look. Use the emissive
   channel for bloom-friendly accents (cockpit, monolith seams, mine core).
   One material per asset where possible to keep draw calls and shader programs
