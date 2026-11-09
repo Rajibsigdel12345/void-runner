@@ -527,3 +527,9 @@ One entry per iteration. Format:
 - Goal: a durable regression harness proving the core sim is fully deterministic (prerequisite for netcode/replay features and for pinning bug reports to seeds).
 - Changed: tests/determinism.test.js (NEW: snapshot() exact-float state capture + deterministic aim-at-nearest input script + 3 tests: 90s same-seed replay identical incl. 15s checkpoints; different-seed divergence sanity; mid-replay pause/resume stays identical). No source files touched.
 - Verification: node --check clean; 203/203 (3 new); build exit 0. The 90s replay reaches wave 5 with the boss engaged (96 kills, 14354 pts, boss 35/40, GAME_OVER) - full system coverage under bit-exact comparison.
+
+## I77 - soak test: 10-min headless sim, no NaN, pools stable (ST-077)
+
+- Goal: a long headless stress proving the sim never produces non-finite state and no entity pool grows unbounded over waves/bosses/restarts.
+- Changed: tests/soak-pools.test.js (NEW: 36000-step aggressive soak with 5s sampling of (a) nonFinite walk (same ALLOWED_INF sentinel as I43) and (b) pool caps for rocks/bullets/enemyBullets/mines/drops, plus empty-event-buffer check after each drain; accumulates kills + peak wave across restarts for a liveness assertion). No source files touched.
+- Verification: node --check clean; 204/204 (1 new); build exit 0. Observed run: peaks {rocks 22/24, bullets 6/64, eb 1/24, mines 1/10, drops 1/1}, 7 restarts, peakWave 5, 517 kills, all finite.

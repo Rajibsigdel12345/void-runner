@@ -266,3 +266,10 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - Input script is deterministic: oscillating thrust + always-firing + aim at nearest live rock (aim derived from state, so identical state => identical intent => a true replay, not just fixed inputs).
 - Coverage achieved by the 90s (5400-step) replay: reaches WAVE 5 with the Monolith engaged (96 kills, 14354 score, boss damaged to 35/40, run ends GAME_OVER) - i.e. waves, splits, golden rolls, mines, boss rings/bolts, power-ups and game-over all verified bit-identical across two same-seed runs, including 15s-interval mid-run checkpoints.
 - Also verified: different seeds with the same script DIVERGE (determinism is not a constant), and a mid-replay pause/resume window keeps two runs identical.
+
+## I77 - 10-minute soak: finite state + bounded pools (ST-077)
+
+- No gameplay changes: test-only. 204/204 (1 new soak test).
+- Extends the I43 5-min NaN soak to 10 minutes (36000 sim steps, aggressive circular thrust + edge-aim + burst fire, auto-restart on game over) and adds POOL-BOUND invariants sampled every 5s: rocks, player bullets, enemy bullets, mines and power-up drops must never exceed their configured caps (24 / 64 / 24 / 10 / 1) - a slow leak across waves/bosses/restarts would trip it.
+- Result (observed run): peaks rocks 22/24, bullets 6/64, enemyBullets 1/24, mines 1/10, drops 1/1 - every pool far inside its cap; the live event buffer is empty after every drain (the ST-074 double-buffer holds at most one drain of events by construction). 7 full lives burned + restarts, peak wave 5 (Monolith engaged), 517 total kills, zero non-finite values at every 5s sample and at the end.
+- Also confirms the restart path under soak: scoreKeeper/wave/field all reset cleanly on repeated game-over + restart with no state bleed (peaks tracked across the 7 restarts).
