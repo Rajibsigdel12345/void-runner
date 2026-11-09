@@ -56,6 +56,7 @@ export const CONFIG = {
     maxActiveDrops: 1,
     magnetRadius: 7,
     drift: 1.2,
+    magnetAccel: 40,   // I38: pull acceleration (u/s^2) inside the magnet ring
     types: {
       rapid:  { dur: 8, rate: 2 },
       spread: { dur: 8, count: 3, arc: 0.35 },

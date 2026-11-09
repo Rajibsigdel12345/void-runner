@@ -26,6 +26,7 @@ test('config: numeric tunables are positive finite', () => {
   assert.ok(CONFIG.combo.cap >= 1, 'combo.cap');
   assert.ok(CONFIG.combo.step > 0, 'combo.step');
   assert.ok(CONFIG.powerup.dropChance >= 0 && CONFIG.powerup.dropChance <= 1, 'powerup.dropChance in [0,1]');
+  check(CONFIG.powerup.magnetAccel, 'powerup.magnetAccel');
 });
 
 test('config: asteroid size chain L->M->S with decreasing radius', () => {

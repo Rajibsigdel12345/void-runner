@@ -42,3 +42,4 @@
 - I35: bloom post-fx on High quality (UnrealBloomPass via composer); Low disables bloom and keeps the direct render path.
 - I36: ?fps=1/?fps=2 performance meter + perf pass (idle-frame particle upload skip, per-frame allocation reuse, accurate multi-pass GPU stats).
 - I37: fix stray Enter mid-game re-showing the tutorial hint and clearing score popups; Enter now only acts on MENU/GAME_OVER transitions.
+- I38: code review pass (full source, cgs-code-review contract) - verdict APPROVE, security clean; magnet pull acceleration moved to config as powerup.magnetAccel (behavior identical); tab-blur auto-pause + WebGL context-loss recovery deferred to I43.
