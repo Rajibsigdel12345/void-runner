@@ -8,6 +8,8 @@ import { CONFIG } from './config.js';
 import { v2 } from './math.js';
 import { ScoreKeeper } from './score.js';
 import { WaveDirector } from './waves.js';
+import { Lives } from './lives.js';
+import { GameState, STATE } from './state.js';
 
 export class World {
   constructor(rng, cfg = CONFIG) {
@@ -19,15 +21,22 @@ export class World {
     this.events = [];
     this.scoreKeeper = new ScoreKeeper(cfg);
     this.waves = new WaveDirector(rng, this.field, cfg);
-    this.lives = cfg.ship.lives;
-    this.gameOver = false;
+    this.livesMgr = new Lives(cfg.ship.lives);
+    this.game = new GameState();
     this.time = 0;
   }
 
   get score() { return this.scoreKeeper.score; }
   get wave() { return this.waves.wave; }
+  get lives() { return this.livesMgr.count; }
+  get gameOver() { return this.game.in(STATE.GAME_OVER); }
 
-  start() { this.waves.start(); }
+  /** MENU -> PLAYING and start the wave director. No-op unless in MENU. */
+  begin() {
+    if (!this.game.to(STATE.PLAYING)) return false;
+    this.waves.start();
+    return true;
+  }
 
   emit(type, data) { this.events.push({ type, data }); }
   drainEvents() { const e = this.events; this.events = []; return e; }
@@ -37,7 +46,7 @@ export class World {
    * @param {{thrust:{x:number,y:number}, aimPoint:{x:number,y:number}|null, firing:boolean}} intent
    */
   step(dt, intent = { thrust: v2(), aimPoint: null, firing: false }) {
-    if (this.gameOver) return;
+    if (!this.game.in(STATE.PLAYING)) return;
     this.time += dt;
 
     this.ship.step(dt, intent.thrust, intent.aimPoint);
@@ -75,12 +84,12 @@ export class World {
     const hit = shipHitRock(this.ship.pos.x, this.ship.pos.y, this.cfg.ship.radius, this.field.rocks);
     if (!hit) return;
     this.field.destroy(hit.id);
-    this.lives -= 1;
+    const livesLeft = this.livesMgr.damage();
     this.scoreKeeper.onDamage();
-    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: hit.nx, y: hit.ny }, lives: this.lives });
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: hit.nx, y: hit.ny }, lives: livesLeft });
     this.ship.damage(v2(hit.nx, hit.ny));
-    if (this.lives <= 0) {
-      this.gameOver = true;
+    if (livesLeft <= 0) {
+      this.game.to(STATE.GAME_OVER);
       this.emit('gameover', { score: this.score });
     }
   }
@@ -91,11 +100,13 @@ export class World {
     this.field.clear();
     this.scoreKeeper.reset();
     this.waves.reset();
-    this.lives = this.cfg.ship.lives;
+    this.livesMgr.reset();
+    this.game.reset();
     this.gameOver = false;
     this.time = 0;
     this.events.length = 0;
   }
 }
+
 
 

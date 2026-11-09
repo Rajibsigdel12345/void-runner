@@ -11,6 +11,7 @@ const DT = 1 / 60;
 
 test('world: bullet kill -> score + fragments + kill event', () => {
   const w = new World(new RNG(1));
+  w.begin();
   const rock = w.field.spawn('L', 1, { x: 3, y: 0 });
   rock.vel = v2(0, 0);
   // drop a bullet directly onto the rock
@@ -25,6 +26,7 @@ test('world: bullet kill -> score + fragments + kill event', () => {
 
 test('world: multiple kills accumulate score', () => {
   const w = new World(new RNG(2));
+  w.begin();
   for (let i = 0; i < 3; i++) {
     const r = w.field.spawn('M', 1, { x: i * 10 - 10, y: 5 });
     r.vel = v2(0, 0);
@@ -38,6 +40,7 @@ test('world: multiple kills accumulate score', () => {
 
 test('world: ship hit -> lose life, knockback, invuln, rock destroyed', () => {
   const w = new World(new RNG(3));
+  w.begin();
   const rock = w.field.spawn('S', 1, { x: 1.5, y: 0 }); // overlapping ship radius 0.9 + rock 0.7
   rock.vel = v2(0, 0);
   w.step(DT, NOINTENT);
@@ -51,6 +54,7 @@ test('world: ship hit -> lose life, knockback, invuln, rock destroyed', () => {
 
 test('world: invulnerable ship takes no second hit', () => {
   const w = new World(new RNG(4));
+  w.begin();
   const r1 = w.field.spawn('S', 1, { x: 1.5, y: 0 });
   r1.vel = v2(0, 0);
   w.step(DT, NOINTENT);
@@ -63,7 +67,8 @@ test('world: invulnerable ship takes no second hit', () => {
 
 test('world: game over at zero lives + event', () => {
   const w = new World(new RNG(5));
-  w.lives = 1;
+  w.begin();
+  w.livesMgr.count = 1;
   const r = w.field.spawn('S', 1, { x: 1.5, y: 0 });
   r.vel = v2(0, 0);
   w.step(DT, NOINTENT);
@@ -77,6 +82,7 @@ test('world: game over at zero lives + event', () => {
 
 test('world: firing emits fire events at cadence', () => {
   const w = new World(new RNG(6));
+  w.begin();
   const intent = { thrust: v2(0, 0), aimPoint: null, firing: true };
   for (let i = 0; i < 60; i++) w.step(DT, intent); // 1s of firing @5.5rps
   const fires = w.drainEvents().filter(e => e.type === 'fire').length;
@@ -86,6 +92,7 @@ test('world: firing emits fire events at cadence', () => {
 test('world: deterministic replay (same seed + same intents)', () => {
   const mk = () => new World(new RNG(99));
   const a = mk(), b = mk();
+  a.begin(); b.begin();
   // both start with an identical rock
   for (const w of [a, b]) {
     const r = w.field.spawn('L', 1, { x: 8, y: 2 });
@@ -105,5 +112,6 @@ test('world: deterministic replay (same seed + same intents)', () => {
   assert.equal(a.field.count, b.field.count);
   assert.ok(Math.abs(a.ship.pos.x - b.ship.pos.x) < 1e-9);
 });
+
 
 

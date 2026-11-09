@@ -41,7 +41,7 @@ const shipMesh = createShipMesh();
 scene.add(shipMesh.group);
 const bullets = createBulletPool(scene);
 const rockRenders = createAsteroidRenderer(scene);
-world.start(); // wave director now owns spawning
+world.begin(); // wave director now owns spawning (menu gate lands in I17)
 
 const input = createInput();
 const raycaster = new THREE.Raycaster();
@@ -129,6 +129,7 @@ function frame() {
   renderer.render(scene, camera);
 }
 frame();
+
 
 
 

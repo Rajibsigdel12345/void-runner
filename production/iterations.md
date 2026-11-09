@@ -97,3 +97,9 @@ One entry per iteration. Format:
 - Verification: npm test 67/67 pass; build exit 0.
 - Result: DONE
 - Follow-up: waves banner (I29); state machine I15; HUD I16.
+## I15 - Lives + game state machine (ST-015)
+- Goal: lives manager (no negatives, reset) and explicit state machine (MENU/PLAYING/PAUSED/GAME_OVER) with legal-transition table; World only steps in PLAYING; begin() starts a session.
+- Changed: src/core/lives.js (new), src/core/state.js (new), tests/lives.test.js + tests/state.test.js (new, 8 tests), src/core/game.js (Lives/GameState wired, begin()/gameOver/lives accessors), tests/game.test.js (begin() in world tests), src/main.js (world.begin())
+- Verification: npm test 75/75 pass; build exit 0.
+- Result: DONE
+- Follow-up: HUD reads state/score/lives/combo/wave (I16); menu/pause screens I17.

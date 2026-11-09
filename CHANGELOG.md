@@ -17,3 +17,4 @@
 - I12: World orchestrator (full collision loop, events), fixed-timestep sim, deterministic advance() hook.
 - I13: score + combo chain (window/cap/step, damage+timeout reset) wired into World; 7 new unit tests.
 - I14: wave director (escalating ramp, trickle spawn, intermission, clear detection) + 7 unit tests.
+- I15: lives manager + state machine (MENU/PLAYING/PAUSED/GAME_OVER) + 8 unit tests.
