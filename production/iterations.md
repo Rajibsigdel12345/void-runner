@@ -42,3 +42,9 @@ One entry per iteration. Format:
 - Verification: npm test 25/25 pass; build exit 0.
 - Result: DONE
 - Follow-up: I06 renders ship + mouse aim + camera follow.
+## I06 - Ship mesh + mouse aim + follow camera (ST-006)
+- Goal: procedural low-poly ship rendered from core state; raycast mouse aim to arena plane; smooth follow camera with look-ahead.
+- Changed: src/render/shipMesh.js (new), src/render/input.js (new: WASD/arrows + Space/mouse fire + pointer NDC), src/main.js (ship wiring, raycast aim, follow cam, window.__vr debug handle)
+- Verification: npm test 25/25; build exit 0; browser: console clean, D-key hold moved ship 0 -> 4.74u (speed 10.9), mouse left -> aim -2.94 rad (tracks), screenshot .evidence/i06-ship.png.
+- Result: DONE
+- Follow-up: firing wired next (I07 weapons core, I08 bullet render + fire input).
