@@ -27,4 +27,4 @@
 - I20: power-up render meshes (pooled, per-type shape/color, hover + pulse).
 - I21: RAPID + SPREAD fire path — power-ups modify cadence (x2 for 8s) and 3-way spread burst.
 - I22: SHIELD absorption — cyan ring around ship, absorbs 1 hit with pop flash (GDD-compliant).
-- I23: BOMB shatter-all (per-rock kills feed combo) + MAGNET bullet homing (slight, 6s).- I24: pooled particle bursts on kill/hit/shield-pop/bomb (FX-tier aware, reduced-motion aware).- I25: screen shake, hit flash and invulnerability blink (FX-tier + reduced-motion aware).
+- I23: BOMB shatter-all (per-rock kills feed combo) + MAGNET bullet homing (slight, 6s).- I24: pooled particle bursts on kill/hit/shield-pop/bomb (FX-tier aware, reduced-motion aware).- I25: screen shake, hit flash and invulnerability blink (FX-tier + reduced-motion aware).- I26: settings panel (volume, sfx, fx tier, reduced motion) with live persistence.

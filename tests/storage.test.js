@@ -96,3 +96,13 @@ test('storage: settings validate and clamp bad values', () => {
 });
 
 
+
+test('storage: invalid settings values rejected, numerics clamped', () => {
+  const store = memStore();
+  const a = new Storage(store);
+  const r = a.setSettings({ fx: 'ultra', volume: 2.5, sfx: 'yes', reducedMotion: 1 });
+  assert.equal(r.fx, 'high', "non high/low fx ignored");
+  assert.equal(r.volume, 1, 'volume clamped to 1');
+  assert.equal(r.sfx, true, 'non-boolean sfx ignored');
+  assert.equal(r.reducedMotion, false, 'non-boolean reducedMotion ignored');
+});

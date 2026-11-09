@@ -11,6 +11,7 @@ import { createParticles } from './render/particles.js';
 import { createShake } from './core/fx.js';
 import { createHUD } from './render/hud.js';
 import { createScreens } from './render/screens.js';
+import { createSettingsPanel } from './render/settingsPanel.js';
 import { STATE } from './core/state.js';
 import { Storage } from './core/storage.js';
 import { CONFIG } from './core/config.js';
@@ -53,7 +54,6 @@ const rockRenders = createAsteroidRenderer(scene);
 const powerupRenders = createPowerupRenderer(scene);
 const shieldRing = createShieldRing(scene);
 const hud = createHUD(document.body);
-const screens = createScreens(document.body);
 let muted = false; // M key (ST-017); consumed by the audio system in I27
 
 // Persistent best + settings (ST-018); raw store adapted from window.localStorage.
@@ -68,9 +68,19 @@ let newBest = false;
 
 // Juice (ST-024): pooled particle bursts, honoring saved FX tier + reduced
 // motion (the settings panel lands in I26; values are read at boot).
-const startSettings = storage.getSettings();
-const fxCount = startSettings.fx === 'low' ? CONFIG.fx.particleLow : CONFIG.fx.particleHigh;
-const motionOff = startSettings.reducedMotion === true;
+let fxCount = 0;
+let motionOff = false;
+let liveSettings = storage.getSettings(); // ST-026: settings panel keeps this fresh (audio consumes in I27)
+function applySettings(s) {
+  liveSettings = s;
+  fxCount = s.fx === 'low' ? CONFIG.fx.particleLow : CONFIG.fx.particleHigh;
+  motionOff = s.reducedMotion === true;
+}
+applySettings(liveSettings);
+// ST-026: settings panels (menu + pause) - after storage/applySettings (TDZ order).
+const menuSettings = createSettingsPanel(storage, applySettings);
+const pauseSettings = createSettingsPanel(storage, applySettings);
+const screens = createScreens(document.body, { menu: menuSettings, pause: pauseSettings });
 const particles = createParticles(scene);
 // Screen shake (ST-025): core envelope, render layer applies the camera offset.
 const shake = createShake({ master: CONFIG.fx.shake, decay: CONFIG.fx.shakeDecay, amplitude: CONFIG.fx.shakeAmplitude }, new RNG(0x57ab));
@@ -113,7 +123,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;

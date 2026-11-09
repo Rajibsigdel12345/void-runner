@@ -1,7 +1,7 @@
 ﻿// Void Runner - menu / pause / game-over screens (ST-017). DOM only; text change-cached.
 import { STATE } from '../core/state.js';
 
-export function createScreens(root) {
+export function createScreens(root, settings = {}) {
   const overlay = document.createElement('div');
   overlay.id = 'screens';
   overlay.style.cssText = [
@@ -58,12 +58,14 @@ export function createScreens(root) {
   menu.appendChild(controls);
   line(menu, 'PRESS ENTER TO START', 'font-size:18px;font-weight:700;letter-spacing:4px;margin-top:14px;animation:vrPulse 1.6s ease-in-out infinite;');
   const menuBest = line(menu, '', 'font-size:13px;opacity:0.7;'); // best score lands in I18
+  if (settings.menu) menu.appendChild(settings.menu.el); // ST-026 settings (menu)
 
   // --- PAUSED ---
   const paused = panel('screen-paused', 'rgba(2,4,12,0.55)');
   line(paused, 'PAUSED', 'font-size:36px;font-weight:800;letter-spacing:8px;');
   line(paused, 'P / ESC — RESUME', 'font-size:15px;letter-spacing:2px;opacity:0.85;');
   const muteLabel = line(paused, 'M — MUTE (OFF)', 'font-size:13px;letter-spacing:2px;opacity:0.7;');
+  if (settings.pause) paused.appendChild(settings.pause.el); // ST-026 settings (pause)
 
   // --- GAME OVER ---
   const gameOver = panel('screen-gameover', 'rgba(8,2,6,0.72)');
@@ -92,6 +94,8 @@ export function createScreens(root) {
     if (shown === state) return;
     shown = state;
     for (const p of Object.values(PANELS)) if (p) p.style.display = PANELS[state] === p ? 'flex' : 'none';
+    if (state === STATE.MENU && settings.menu) settings.menu.sync();
+    if (state === STATE.PAUSED && settings.pause) settings.pause.sync();
   }
 
   root.appendChild(overlay);
