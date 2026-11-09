@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E7 (extended content/UX/hardening, I51-I100)
-- current_story: ST-095
-- current_iteration: I95
+- current_story: ST-096
+- current_iteration: I96
 - branch: main
-- notes: I95 done (perf profile: steady-state comfortably within 60fps budget; one-time ~90-600ms first-gameplay-frame WebGL init cost identified; compile() warm-up proven insufficient + reverted; offscreen warm-up render proposed for follow-up; docs-only, 233/233 + build green). Next: I96 gate-check (ST-096).
+- notes: I96 done (pre-wrap gate: PASS - code side ready to wrap; 233/233 + build + sequential + CHANGELOG consistent + open items dispositioned; CHANGELOG I17 false-positive cleared; outstanding = human playtest + Blender graphics pass after I100 + deferred perf warm-up; docs-only). Next: I97 milestone-review/retrospective (ST-097).
