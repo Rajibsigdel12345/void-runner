@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I62: shield pulse (ST-062) - active shield now breathes (scale + opacity) with a repeating expanding additive ring; reduced-motion freezes to a static ring; presentation-only, 175/175.
 - I61: bullet trails (ST-061) - additive comet streak behind each player bullet (head-bright -> tail-fade), oriented along the shot; pooled, zero per-frame allocs; presentation-only, 175/175.
 - I60: starfield twinkle + parallax and rim-lit rock material (ST-060) - per-star twinkle shader, two-depth parallax offsets (0.25/0.6 x camera), cool fresnel rim on rocks; presentation-only, 175/175.
 - I59: gravity vortex hazard (ST-059) - from wave 8 a seeded mid-arena disk telegraphs 1s then pulls rocks + ship for 4.5s (re-roll 12-20s), spiral-disk FX + rumble SFX; 6 new tests (175/175).

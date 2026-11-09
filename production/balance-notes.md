@@ -150,3 +150,9 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - Presentation-only: no config tunables, no changes to fire rate, damage, scoring, or any core rule. 175/175 tests unchanged.
 - Trail length (1.15u) and thickness (0.16) live in src/render/bulletPool.js, not config - they are visual, not balance, levers.
 - Cost: one additive ribbon per active bullet (+1 draw call each, bounded by weapon.maxBullets=64). Steady state at ~6-8 live bullets is a few calls; verified 26 total in a 6-bullet test scene vs the 15-call I60 baseline (no bullets). Shared geo + one material for all trails; zero per-frame allocs (preallocated basis + scratch vectors).
+
+## I62 - shield pulse (ST-062)
+
+- Presentation-only: no config tunables, no changes to shield duration, absorption, damage, or scoring. 175/175 tests unchanged.
+- Breathing period (2.1s) and pulse-ring cycle (1.6s) live in src/render/shieldRing.js, not config - visual levers, not balance.
+- Cost: one extra additive ring mesh, drawn only while the shield is active (occasional, short-lived). Verified breathing (scale/opacity oscillate over time) and a static ring under Reduced Motion (0.5 opacity, scale 1); 0 console.

@@ -429,3 +429,11 @@ One entry per iteration. Format:
 - Verification: 175/175 unit tests green (render-only; core unchanged); build exit 0. Browser: 6-bullet test row - trail head sits exactly on the bullet, tail extends opposite velocity, orientation follows shot direction; unused pool slots hidden; 26 draw calls in the 6-bullet scene; 0 console errors; no NaN. Screenshot .evidence/i61-bullet-trails.png.
 - Result: DONE
 - Follow-up: I62 shield pulse animation + ring visual (ST-062).
+
+## I62 - shield pulse animation + ring visual (ST-062)
+
+- Goal: presentation pass (render-only) - the active SHIELD now breathes (subtle scale + opacity) with a second additive ring that repeatedly expands outward and fades; absorb flash kept; reduced-motion freezes to a static ring.
+- Changed: src/render/shieldRing.js (breathing + expanding pulse ring; motion flag; reduced-motion static fallback), src/main.js (pass !motionOff to shieldRing.sync; shieldRing on __vr).
+- Verification: 175/175 unit tests green (render-only; core unchanged); build exit 0. Browser: shield active -> ring visible, scale/opacity oscillate over time (breathing), expanding pulse ring visible (two concentric cyan rings in shot); Reduced Motion -> static ring (opacity 0.5, scale 1, no breathing); 0 console errors. Screenshot .evidence/i62-shield-pulse.png.
+- Result: DONE
+- Follow-up: I63 ship engine flame - thrust flicker (ST-063).

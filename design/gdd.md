@@ -88,6 +88,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 - MAGNET (green): attracts power-ups + slight bullet homing for 6s
 - OVERDRIVE (magenta): all score x2 for 6s (kills, combo multipliers, near-miss bonuses) - hex prism drop
 Stacks: each has its own timer; grabbing the same type refreshes its timer.
+- Shield visual (I62, presentation): while SHIELD is live, a cyan ring breathes (subtle scale + opacity) and a second additive ring repeatedly expands outward and fades. An absorbed hit flashes a quick expanding pop. All frozen to a static ring under Reduced Motion. Visual only; no gameplay effect.
 
 ## Scoring & Records
 - Score = sum(kill base score x current multiplier).
