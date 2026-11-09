@@ -66,6 +66,10 @@ export const CONFIG = {
 
   fx: {
     shake: 1,                 // master screen-shake scale (0..1)
+    shakeDecay: 6,            // shake energy decay (1/s, exponential)
+    shakeAmplitude: 0.5,      // max camera jitter (world units) at energy 1
+    shakeHit: 0.5,            // energy added on a ship hit
+    shakeBomb: 1.0,           // energy added on a bomb blast
     particleHigh: 48,         // burst size at FX quality High
     particleLow: 16           // burst size at FX quality Low
   },

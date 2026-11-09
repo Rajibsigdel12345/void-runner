@@ -8,6 +8,7 @@ import { createAsteroidRenderer } from './render/asteroidRenderer.js';
 import { createPowerupRenderer } from './render/powerupMesh.js';
 import { createShieldRing } from './render/shieldRing.js';
 import { createParticles } from './render/particles.js';
+import { createShake } from './core/fx.js';
 import { createHUD } from './render/hud.js';
 import { createScreens } from './render/screens.js';
 import { STATE } from './core/state.js';
@@ -71,6 +72,12 @@ const startSettings = storage.getSettings();
 const fxCount = startSettings.fx === 'low' ? CONFIG.fx.particleLow : CONFIG.fx.particleHigh;
 const motionOff = startSettings.reducedMotion === true;
 const particles = createParticles(scene);
+// Screen shake (ST-025): core envelope, render layer applies the camera offset.
+const shake = createShake({ master: CONFIG.fx.shake, decay: CONFIG.fx.shakeDecay, amplitude: CONFIG.fx.shakeAmplitude }, new RNG(0x57ab));
+const shakeOff = { x: 0, y: 0, z: 0 };
+let simT = 0; // sim-clock for timed visuals (invuln blink)
+const flashEl = document.getElementById('flash'); // hit/bomb flash overlay (index.html)
+let flashA = 0;
 
 const input = createInput();
 
@@ -106,7 +113,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -138,9 +145,16 @@ function tick(dt, intent) {
     eventTally[e.type] = (eventTally[e.type] || 0) + 1;
     if (!motionOff) {
       if (e.type === 'kill') particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xffd27a, speed: 9, life: 0.5 });
-      else if (e.type === 'hit') particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xff6b57, speed: 11, life: 0.45 });
-      else if (e.type === 'shieldPop') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.75), color: 0x53d8ff, speed: 8, life: 0.5 });
-      else if (e.type === 'bomb') particles.burst(0, 0, { count: fxCount * 2, color: 0xfff3b0, speed: 16, life: 0.7 });
+      else if (e.type === 'hit') {
+        particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xff6b57, speed: 11, life: 0.45 });
+        shake.trigger(CONFIG.fx.shakeHit);
+        flashA = Math.min(0.8, flashA + 0.5);
+      } else if (e.type === 'shieldPop') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.75), color: 0x53d8ff, speed: 8, life: 0.5 });
+      else if (e.type === 'bomb') {
+        particles.burst(0, 0, { count: fxCount * 2, color: 0xfff3b0, speed: 16, life: 0.7 });
+        shake.trigger(CONFIG.fx.shakeBomb);
+        flashA = Math.min(0.8, flashA + 0.35);
+      }
     }
     if (e.type === 'shieldPop') {
       shieldRing.pulse();
@@ -149,6 +163,8 @@ function tick(dt, intent) {
       bestScore = storage.getBest();
     }
   }
+  simT += dt;
+  shake.step(dt);
 }
 
 function syncVisuals(dt) {
@@ -156,7 +172,7 @@ function syncVisuals(dt) {
   hud.setVisible(st === STATE.PLAYING || st === STATE.PAUSED);
   hud.render(world, { best: bestScore });
   screens.update(st, world, { muted, best: bestScore, newBest });
-  shipMesh.sync(world.ship);
+  shipMesh.sync(world.ship, simT, !motionOff);
   bullets.sync(world.weapons);
   rockRenders.sync(world.field);
   powerupRenders.sync(world.powerups, dt);
@@ -173,6 +189,14 @@ function syncVisuals(dt) {
   camLook.z = damp(camLook.z, ship.pos.y + f.y * 4, 6, dt);
   camera.position.set(camPos.x, camPos.y, camPos.z);
   camera.lookAt(camLook.x, camLook.y, camLook.z);
+  shake.offset(shakeOff); // ST-025: apply shake after follow-camera (offset() writes in place)
+  camera.position.x += shakeOff.x;
+  camera.position.y += shakeOff.y;
+  camera.position.z += shakeOff.z;
+  if (flashA > 0) { // hit/bomb flash decay
+    flashA = Math.max(0, flashA - dt * 2.2);
+    flashEl.style.opacity = String(flashA);
+  } else if (flashEl.style.opacity !== '0') flashEl.style.opacity = '0';
 
   stars.rotation.y += dt * 0.004;
 }

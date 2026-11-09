@@ -32,10 +32,12 @@ export function createShipMesh() {
 
   group.position.y = 0.4; // hover just above the arena plane
 
-  function sync(ship) {
+  function sync(ship, t, blinkEnabled) {
     group.position.x = ship.pos.x;
     group.position.z = ship.pos.y;
     group.rotation.y = Math.PI / 2 - ship.aim;
+    // Invuln blink (ST-025): ~6 Hz toggle; disabled under reduced motion.
+    group.visible = !(blinkEnabled && ship.isInvulnerable && Math.floor(t * 12) % 2 === 1);
   }
 
   return { group, sync };
