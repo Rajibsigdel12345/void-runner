@@ -122,3 +122,10 @@ One entry per iteration. Format:
 - Verification: npm test 86/86 pass; build exit 0; browser: clean-slate game to 570 -> GAME OVER "SCORE 570 / BEST 570 / NEW BEST!", raw localStorage {version:1,value:570}; reload -> menu "BEST 570", in-play HUD "BEST 570"; console 0 errors; screenshot .evidence/i18-best.png.
 - Result: DONE
 - Follow-up: power-ups core + rendering (I19+).
+
+## I19 - Power-up field core (ST-019)
+- Goal: drops at kill positions (22% per kill, max 1 active), drift + arena bounce, magnet attraction, pickup radius, timed effects with refresh-not-stacking (rapid 8s / spread 8s / shield 12s+1hit / magnet 6s), instant BOMB queued for World; World emits powerupDrop/powerup/instant and clears on reset.
+- Changed: src/core/powerups.js (new), tests/powerups.test.js (new, 8 tests), src/core/game.js (PowerUpField wired: maybeDrop on kill, step + pickup events, reset clear)
+- Verification: npm test 94/94 pass; build exit 0; browser (no render changes): chaos loop over 50 kills -> powerupDrop 9, powerup 9, instant 2 (bombs queued); console 0 errors.
+- Result: DONE
+- Follow-up: power-up render meshes (I20), then RAPID/SPREAD gameplay wiring (I21).

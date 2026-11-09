@@ -9,6 +9,7 @@ import { v2 } from './math.js';
 import { ScoreKeeper } from './score.js';
 import { WaveDirector } from './waves.js';
 import { Lives } from './lives.js';
+import { PowerUpField } from './powerups.js';
 import { GameState, STATE } from './state.js';
 
 export class World {
@@ -21,6 +22,7 @@ export class World {
     this.events = [];
     this.scoreKeeper = new ScoreKeeper(cfg);
     this.waves = new WaveDirector(rng, this.field, cfg);
+    this.powerups = new PowerUpField(rng, cfg);
     this.livesMgr = new Lives(cfg.ship.lives);
     this.game = new GameState();
     this.time = 0;
@@ -64,6 +66,12 @@ export class World {
     }
     this.weapons.step(dt);
     this.field.step(dt);
+    const pickups = this.powerups.step(dt, this.ship);
+    for (const pk of pickups) {
+      const inst = this.powerups.takeInstant();
+      if (inst) this.emit('instant', { type: inst }); // BOMB resolution lands in I23
+      this.emit('powerup', { type: pk.type, pos: pk.pos });
+    }
     this.scoreKeeper.tick(this.time);
     const wv = this.waves.step(dt);
     if (wv.startedWave) this.emit('wave', { n: wv.startedWave });
@@ -83,6 +91,8 @@ export class World {
       this.field.destroy(id);
       const points = this.scoreKeeper.kill(base, this.time);
       this.emit('kill', { pos: { x: rock.pos.x, y: rock.pos.y }, size: rock.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier });
+      const drop = this.powerups.maybeDrop({ x: rock.pos.x, y: rock.pos.y });
+      if (drop) this.emit('powerupDrop', { type: drop.type, pos: { x: drop.pos.x, y: drop.pos.y } });
     }
     this.weapons.compact();
   }
@@ -108,6 +118,7 @@ export class World {
     this.field.clear();
     this.scoreKeeper.reset();
     this.waves.reset();
+    this.powerups.clear();
     this.livesMgr.reset();
     this.game.reset(); // also clears the gameOver getter (it derives from game state)
     this.time = 0;
