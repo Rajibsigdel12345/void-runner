@@ -129,3 +129,12 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - S-share 0.30 -> 0.45 cap at 0.02/wave, capped by wave 18 (0.44 at 17, 0.45 from 18 on).
 - L:M ratio stays 3:4 inside the non-S bucket, so waves 1-9 are byte-identical in behavior to pre-I58 (existing tests pass unchanged).
 - Mines (1/wave from 5) and the boss (every 5) are already endless; the curve only adds rock-side pressure - no new hazards, no changes to lives or power-ups.
+
+## I59 - gravity vortex (ST-059)
+
+- pullShip 2.4 u/s^2 ~= 9% of ship.accel (26): the ship out-muscles the pull 10:1; terminal drift under damping ~= 1.5 u/s - noticeable, never punishing.
+- pullRocks 1.6 u/s^2 across the 4.5s phase: a rock parked at the center gains up to ~7 u/s; typical transit through the 11u radius is 2-3s, so most rocks gain 3-5 u/s of inward drift. The vortex clumps and funnels; it does not freeze the field (rocks have no damping, so this stays bounded by the phase length).
+- firstWave 8: mines (5) and the boss (5) are learned first; the vortex lands just before the endless curve (10) tightens the wave pacing.
+- Spawn safety: disk fully inside the arena (center <= 11u from arena center) and >= 6u from the ship at telegraph. The 1.0s telegraph is longer than the ~0.8s a top-speed ship needs to exit the disk from its center - the pull is always avoidable.
+- Interval 12-20s seeded from the world RNG: deterministic per seed, no overlap possible (single state machine).
+- No changes to lives, scoring, power-ups, or waves; no new damage sources.

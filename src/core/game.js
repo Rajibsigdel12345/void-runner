@@ -6,6 +6,7 @@ import { AsteroidField } from './asteroids.js';
 import { MineField } from './mines.js';
 import { Monolith } from './boss.js';
 import { EnemyBulletField } from './enemyBullets.js';
+import { VortexField } from './vortex.js'; // ST-059
 import { bulletHitRock, shipHitRock } from './collision.js';
 import { CONFIG } from './config.js';
 import { v2 } from './math.js';
@@ -25,6 +26,7 @@ export class World {
     this.mines = new MineField(rng, cfg); // ST-054
     this.boss = null; // ST-055
     this.enemyBullets = new EnemyBulletField(cfg); // ST-056
+    this.vortex = new VortexField(rng, cfg); // ST-059
     this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056
     this.events = [];
     this.scoreKeeper = new ScoreKeeper(cfg);
@@ -66,6 +68,18 @@ export class World {
     if (!this.game.in(STATE.PLAYING)) return;
     this.time += dt;
 
+    const vt = this.vortex.step(dt, { wave: this.waves.wave, shipPos: this.ship.pos, rocks: this.field.rocks }); // ST-059
+    for (const ev of vt.events) this.emit(ev.type, ev.data); // ST-059
+    if (vt.pull) { // ST-059: vortex pull on the ship (clamped at maxSpeed)
+      this.ship.vel.x += vt.pull.x * dt;
+      this.ship.vel.y += vt.pull.y * dt;
+      const vsp = Math.hypot(this.ship.vel.x, this.ship.vel.y);
+      if (vsp > this.cfg.ship.maxSpeed) {
+        const s = this.cfg.ship.maxSpeed / vsp;
+        this.ship.vel.x *= s;
+        this.ship.vel.y *= s;
+      }
+    }
     this.ship.step(dt, intent.thrust, intent.aimPoint);
     if (intent.firing) this.fireWeapon();
     this.weapons.step(dt, this.powerups.active('magnet'), this.field.rocks);
@@ -354,6 +368,7 @@ export class World {
     this.mines.clear();
     this.boss = null; // ST-055
     this.enemyBullets.clear(); // ST-056
+    this.vortex.reset(); // ST-059
     this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056
     this.scoreKeeper.reset();
     this.waves.reset();

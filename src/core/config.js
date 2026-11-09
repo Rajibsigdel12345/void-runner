@@ -111,6 +111,21 @@ export const CONFIG = {
     mineSpeed: 8      // mine bolt u/s (a touch softer)
   },
 
+  vortex: {
+    // ST-059: gravity vortex - a pulsing pull field that appears mid-arena from
+    // wave 8: telegraphs, then bends rocks and ship toward its center for a few
+    // seconds. Pressure hazard, not a damage source; always dodgeable.
+    firstWave: 8,       // the base loop (mines at 5, boss at 5) is learned first
+    intervalMin: 12,    // seconds between vortices (seeded roll, min)
+    intervalMax: 20,    // seeded roll, max
+    telegraph: 1.0,     // warning phase before the pull engages
+    duration: 4.5,      // seconds the pull field stays active
+    radius: 11,         // pull radius (the full disk always fits the arena)
+    pullRocks: 1.6,     // u/s^2 on rocks inside (no rock damping: bounded by the 4.5s phase)
+    pullShip: 2.4,      // u/s^2 on the ship (~9% of ship.accel 26 - always counterable)
+    minDistFromShip: 6  // telegraph keeps the disk center at least this far from the ship
+  },
+
   combo: {
     window: 4.0,        // seconds to keep a chain alive
     cap: 10,            // max combo

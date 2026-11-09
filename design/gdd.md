@@ -62,6 +62,10 @@ multipliers, and grab power-ups. Survive as long as you can.
 - Bolts never collide with rocks and cannot be shot down.
 - Bolts render as red-orange glowing orbs, clearly distinct from the player's cyan bolts.
 
+## Gravity Vortex (ST-059)
+- From wave 8, a gravity vortex periodically appears mid-arena: a pulsing disk telegraphs for 1.0s (seeded position, fully inside the arena, center at least 6u from the ship), then pulls everything inside its 11u radius toward its center for 4.5s - rocks at 1.6 u/s^2, the ship at 2.4 u/s^2 (~9% of thrust; always counterable, clamped at maxSpeed).
+- It is a pressure hazard, not a damage source: the pull itself costs nothing; rocks funneled into the ship are the danger. Vortices re-roll every 12-20s (seeded) and never overlap. The bomb does not clear a vortex; the shield does not block the pull.
+
 ## Waves & Difficulty
 - Wave n: startAsteroids = 4 + n, maxConcurrent = 6 + 2n (cap 24), speedMult = 1 + 0.06n (cap 2.1).
 - Wave advances when all spawned asteroids for that wave are destroyed, or after 45s without a clear (stall advance): the wave increments regardless, undestroyed asteroids carry into the next wave, and the intermission is skipped (I42, closes playtest finding F1 - a camped field can no longer freeze the escalation).

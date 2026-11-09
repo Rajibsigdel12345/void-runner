@@ -405,3 +405,11 @@ One entry per iteration. Format:
 - Verification: 169/169 unit tests green; build exit 0 (164 before). Browser: wave-10 boundary probe (event endless:true, 14 rocks, boss + mine spawned, intermissionFor(11)=2.12), banner DOM WAVE 10/ENDLESS at full opacity, 0 console. Screenshot .evidence/i58-endless.png.
 - Result: DONE
 - Follow-up: I59 gravity vortex hazard (ST-059) - periodic pull field that bends rocks and ship.
+
+## I59 - gravity vortex hazard (ST-059)
+
+- Goal: periodic pull-field hazard from wave 8 - seeded mid-arena disk telegraphs 1s, pulls rocks + ship for 4.5s, re-rolls every 12-20s.
+- Changed: src/core/config.js, src/core/vortex.js (new: VortexField state machine), src/core/game.js, src/render/vortexFx.js (new: spiral disk + ring, canvas texture), src/render/audio.js, src/main.js, tests/vortex.test.js (new: 6 tests, seeds 71-76).
+- Verification: 175/175 unit tests green; build exit 0 (169 before). Browser: deterministic full-cycle probe (event order telegraph->start->end, 270 pull steps = exactly 4.5s, avgDot 1.28 > 0 toward center, 0 telegraph-pull steps, spawn 7.06u from ship >= 6, disk inside arena), wiring probe via vr.advance (eventTally 1/1, fx group at core pos, opacity 0.55), audio cues both played with pan, 0 console. Screenshot .evidence/i59-vortex.png (active spiral, ship inside disk).
+- Result: DONE
+- Follow-up: I60 starfield twinkle + parallax, rock rim-lit material upgrade (ST-060).
