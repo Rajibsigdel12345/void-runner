@@ -25,6 +25,7 @@ import { createTutorialHint } from './render/tutorialHint.js';
 import { createBloom } from './render/bloom.js';
 import { createFpsMeter } from './render/fpsMeter.js';
 import { createAdaptiveQuality } from './core/adaptiveQuality.js'; // ST-073
+import { createClock } from './core/clock.js'; // ST-078
 import { STATE } from './core/state.js';
 import { Storage } from './core/storage.js';
 import { CONFIG } from './core/config.js';
@@ -305,13 +306,13 @@ renderer.domElement.addEventListener('webglcontextrestored', () => {
 });
 window.__vr.ctxOverlay = ctxOverlay; // I75: expose after declaration (TDZ-safe)
 
-// Fixed-timestep simulation (60Hz) with render at display rate.
-// Substeps keep sim time tracking wall time even when rAF is throttled;
-// backlog is dropped past MAX_SUBSTEPS (hidden tab / slow device) instead of spiraling.
+// Fixed-timestep simulation (60Hz) with render at display rate (ST-078: the
+// accumulator + dt clamp live in the pure core clock; huge gaps are clamped to
+// 0.25s and the backlog dropped past 8 substeps, so resume never fast-forwards).
 const STEP = 1 / 60;
 const MAX_SUBSTEPS = 8;
-let lastNow = performance.now();
-let acc = 0;
+const clock = createClock({ step: STEP, maxFrameDt: 0.25, maxSubsteps: MAX_SUBSTEPS });
+let prevState = null; // ST-078: detect PAUSED->PLAYING to reset the clock on resume
 
 function resolveAimPoint() {
   if (input.touchDrag) { // ST-033: while drag-thrusting, aim along the drag (fire forward)
@@ -444,17 +445,12 @@ function syncVisuals(dt) {
 function frame() {
   requestAnimationFrame(frame);
   const now = performance.now();
-  let frameDt = (now - lastNow) / 1000;
-  lastNow = now;
-  if (frameDt > 0.25) frameDt = 0.25; // clamp huge gaps (tab switch); I078 refines this
-  acc += frameDt;
-  let n = 0;
-  while (acc >= STEP && n < MAX_SUBSTEPS) {
-    tick(STEP);
-    acc -= STEP;
-    n++;
-  }
-  if (n === MAX_SUBSTEPS) acc = 0; // drop backlog
+  const cur = world.game.state;
+  if (prevState === STATE.PAUSED && cur === STATE.PLAYING) clock.reset(now); // ST-078: no accumulated dt carried into resume
+  const r = clock.tick(now); // ST-078: fixed-timestep clock (clamped dt, dropped backlog)
+  for (let i = 0; i < r.steps; i++) tick(STEP);
+  const frameDt = r.dt;
+  prevState = cur;
   if (world.game.state === STATE.PLAYING) adaptive.noteFrame(frameDt); // ST-073: adaptive quality (real frame dt, PLAYING only)
   syncVisuals(frameDt); // I36: reads previous frame GPU stats
   renderer.info.reset(); // I36: clear before this frame accumulates (autoReset off)

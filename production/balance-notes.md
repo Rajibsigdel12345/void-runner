@@ -273,3 +273,9 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - Extends the I43 5-min NaN soak to 10 minutes (36000 sim steps, aggressive circular thrust + edge-aim + burst fire, auto-restart on game over) and adds POOL-BOUND invariants sampled every 5s: rocks, player bullets, enemy bullets, mines and power-up drops must never exceed their configured caps (24 / 64 / 24 / 10 / 1) - a slow leak across waves/bosses/restarts would trip it.
 - Result (observed run): peaks rocks 22/24, bullets 6/64, enemyBullets 1/24, mines 1/10, drops 1/1 - every pool far inside its cap; the live event buffer is empty after every drain (the ST-074 double-buffer holds at most one drain of events by construction). 7 full lives burned + restarts, peak wave 5 (Monolith engaged), 517 total kills, zero non-finite values at every 5s sample and at the end.
 - Also confirms the restart path under soak: scoreKeeper/wave/field all reset cleanly on repeated game-over + restart with no state bleed (peaks tracked across the 7 restarts).
+
+## I78 - resume sync: fixed-timestep clock, no fast-forward on unpause (ST-078)
+
+- No gameplay/tuning changes: timing-robustness only. 210/210 (6 new clock tests).
+- Replaced the inline frame accumulator with a pure clock (src/core/clock.js): clamps frame dt to 0.25s and drops backlog past 8 substeps, so tab-switch/resume cannot fast-forward the arena; adds clock.reset() on PAUSED->PLAYING as a belt-and-suspenders guard.
+- In-play sim cadence is unchanged (same STEP=1/60, same 8-substep cap) - only the gap-clamp and resume paths are hardened, so I064 balance numbers are unaffected.

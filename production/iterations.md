@@ -533,3 +533,9 @@ One entry per iteration. Format:
 - Goal: a long headless stress proving the sim never produces non-finite state and no entity pool grows unbounded over waves/bosses/restarts.
 - Changed: tests/soak-pools.test.js (NEW: 36000-step aggressive soak with 5s sampling of (a) nonFinite walk (same ALLOWED_INF sentinel as I43) and (b) pool caps for rocks/bullets/enemyBullets/mines/drops, plus empty-event-buffer check after each drain; accumulates kills + peak wave across restarts for a liveness assertion). No source files touched.
 - Verification: node --check clean; 204/204 (1 new); build exit 0. Observed run: peaks {rocks 22/24, bullets 6/64, eb 1/24, mines 1/10, drops 1/1}, 7 restarts, peakWave 5, 517 kills, all finite.
+
+## I78 - resume sync: fixed-timestep clock, no fast-forward on unpause (ST-078)
+
+- Goal: make pause/resume timing safe - a paused game must never fast-forward the sim on resume, and huge frame gaps (tab switch) must clamp instead of spiralling.
+- Changed: src/core/clock.js (NEW, pure: wall-clock accumulator -> fixed sim steps; dt<0 -> 0 NTP guard, dt>0.25s clamped, backlog dropped past 8 substeps; tick/reset/state). src/main.js (frame() rewired to clock.tick; prevState PAUSED->PLAYING transition calls clock.reset(now) so the first resume frame carries no accumulated dt; removed dead lastNow/acc). tests/clock.test.js (NEW, 6 tests: baseline, steady step, huge-gap clamp+drop, negative-dt guard, reset discards backlog, state shape).
+- Verification: node --check clean on all 3 files; 210/210 (6 new); build exit 0. Browser: begin->pause->600ms (rAF running)->resume->400ms: world.time frozen during pause (0 advanced), no jump on resume, post-resume advance 0.367s (real frames only, not ~1.0s a non-reset clock would replay); console 0 errors/0 warnings; screenshot .evidence/i78-playing.png (healthy PLAYING, no NaN).

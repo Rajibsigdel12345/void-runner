@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E7 (extended content/UX/hardening, I51-I100)
-- current_story: ST-078
-- current_iteration: I78
+- current_story: ST-079
+- current_iteration: I79
 - branch: main
-- notes: I77 committed (10-min soak: finite + all pools bounded, 7 restarts, peakWave 5; 204/204 + build). Next: resume sync - clock reset on unpause, dt clamp verified (ST-078).
+- notes: I78 committed (resume sync: fixed-timestep clock in core, dt clamp 0.25s + drop backlog past 8 substeps, clock reset on unpause; 210/210 + build + browser no-jump verified). Next: storage versioning + corruption guards for settings/scores (ST-079).
