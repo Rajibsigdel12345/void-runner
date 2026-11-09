@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I86: per-entity particle palettes + burst shapes (ST-086) - every entity/event gets a config-driven color ramp (10 palettes) and bursts gain radial/ring/fountain shapes - ring shockwaves for boss beats/bomb/shield, an upward fountain for the overdrive pickup; backward-compatible (232/232)
 - I85: vignette overlay (ST-085) - static cinematic frame + red danger-edge that holds on the last life and pulses on a hit; the transient hit pulse is suppressed under reduced motion (the static last-life tint still shows) (232/232)
 - I84: audio master-chain pass (ST-084) - post-compressor makeup gain (1.4x) restores loudness after limiting, plus a post-makeup master level-meter probe (peak/rms) as the base for the sound-level pass; stereo pan math verified in-browser (+0.4 / -0.4 at x=+13 / -13) (232/232)
 - I83: audio polish (ST-083) - quiet space-drone ambience bed that sidechain-ducks under every SFX, low tritone Monolith stinger, 4-note wave-clear jingle, fuller near-miss whoosh; ambience runs only in play (232/232)

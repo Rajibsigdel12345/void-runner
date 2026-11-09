@@ -37,20 +37,35 @@ export function createParticles(scene) {
    */
   function burst(x, y, o = {}) {
     const n = Math.min(o.count ?? 16, POOL);
-    tmp.set(o.color ?? 0xffd27a);
+    const pal = Array.isArray(o.palette) && o.palette.length ? o.palette : [o.color ?? 0xffd27a]; // ST-086: per-entity palette (a single color is a 1-item palette)
+    const shape = o.shape || 'radial'; // ST-086: radial | ring | fountain
+    const speed = o.speed ?? 9;
     for (let k = 0; k < n; k++) {
       const i = cursor;
       cursor = (cursor + 1) % POOL;
       if (life[i] <= 0) live += 1; // slot was parked
       const i3 = i * 3;
-      const a = Math.random() * Math.PI * 2;
-      const sp = (0.35 + Math.random() * 0.65) * (o.speed ?? 9);
+      tmp.set(pal[(Math.random() * pal.length) | 0]); // ST-086: pick a palette color per particle
+      let vx, vy, vz;
+      if (shape === 'ring') { // ST-086: flat even shockwave ring (small angle jitter, near-constant speed)
+        const a = (k / n) * Math.PI * 2 + (Math.random() - 0.5) * 0.3;
+        const sp = (0.85 + Math.random() * 0.3) * speed;
+        vx = Math.cos(a) * sp; vz = Math.sin(a) * sp; vy = (Math.random() - 0.5) * 0.6;
+      } else if (shape === 'fountain') { // ST-086: upward-biased plume (pickups)
+        const a = Math.random() * Math.PI * 2;
+        const sp = (0.3 + Math.random() * 0.5) * speed;
+        vx = Math.cos(a) * sp; vz = Math.sin(a) * sp; vy = (0.8 + Math.random() * 0.7) * speed;
+      } else { // radial (default): isotropic with a slight vertical pop
+        const a = Math.random() * Math.PI * 2;
+        const sp = (0.35 + Math.random() * 0.65) * speed;
+        vx = Math.cos(a) * sp; vz = Math.sin(a) * sp; vy = (Math.random() - 0.5) * 2;
+      }
       positions[i3] = x;
       positions[i3 + 1] = 0.4;
       positions[i3 + 2] = y;
-      vel[i3] = Math.cos(a) * sp;
-      vel[i3 + 1] = (Math.random() - 0.5) * 2; // slight vertical pop
-      vel[i3 + 2] = Math.sin(a) * sp;
+      vel[i3] = vx;
+      vel[i3 + 1] = vy;
+      vel[i3 + 2] = vz;
       const shade = 0.7 + Math.random() * 0.3;
       base[i3] = tmp.r * shade;
       base[i3 + 1] = tmp.g * shade;

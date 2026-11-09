@@ -193,6 +193,18 @@ export const CONFIG = {
       strength: 0.6,
       radius: 0.35,
       threshold: 0.72
+    },
+    palette: {                // ST-086: per-entity particle color palettes (hex, additive-blended)
+      rock:     [0xffb24a, 0xff8a3c, 0xffd27a],  // warm amber shatter
+      golden:   [0xfff0a0, 0xffe070, 0xfff8dc],  // gold
+      graze:    [0x7fd4ff, 0x9fe0ff, 0x54b4ff],  // cool cyan near-miss
+      mine:     [0xff5a3c, 0xff8a5a, 0xffc4a0],  // hot red-orange
+      boss:     [0xb18cff, 0x8a5cff, 0xe0ccff],  // purple
+      bossKill: [0xfff0b8, 0xfff6e0, 0xd8c8ff],  // bright boss death
+      shield:   [0x53d8ff, 0x7fe8ff, 0x33c4ff],  // cyan shield
+      hit:      [0xff6b57, 0xff8f7a, 0xffb4a4],  // ship damage
+      bomb:     [0xfff3b0, 0xffd27a, 0xffffff],  // bright blast
+      power:    [0xff5ad8, 0xff8ae8, 0xffb6f2]   // magenta overdrive
     }
   },
 
