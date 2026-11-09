@@ -72,7 +72,12 @@ export const CONFIG = {
     shakeHit: 0.5,            // energy added on a ship hit
     shakeBomb: 1.0,           // energy added on a bomb blast
     particleHigh: 48,         // burst size at FX quality High
-    particleLow: 16           // burst size at FX quality Low
+    particleLow: 16,          // burst size at FX quality Low
+    bloom: {                  // I35: post-fx, High quality only (GDD: "Low disables bloom")
+      strength: 0.6,
+      radius: 0.35,
+      threshold: 0.72
+    }
   },
 
   storage: {

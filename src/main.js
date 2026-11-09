@@ -16,6 +16,7 @@ import { createAudio } from './render/audio.js';
 import { createWaveBanner } from './render/waveBanner.js';
 import { createScorePopups } from './render/scorePopups.js';
 import { createTutorialHint } from './render/tutorialHint.js';
+import { createBloom } from './render/bloom.js';
 import { STATE } from './core/state.js';
 import { Storage } from './core/storage.js';
 import { CONFIG } from './core/config.js';
@@ -35,6 +36,9 @@ scene.background = new THREE.Color(0x04060f);
 scene.fog = new THREE.Fog(0x04060f, 60, 240);
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 400);
+
+// I35: bloom post-fx - composer path for High quality, direct render for Low (GDD line 74).
+const bloom = createBloom(renderer, scene, camera);
 
 scene.add(new THREE.HemisphereLight(0x33437a, 0x04060f, 0.55));
 scene.add(new THREE.AmbientLight(0x8899ff, 0.35));
@@ -94,6 +98,7 @@ function applySettings(s) {
   liveSettings = s;
   fxCount = s.fx === 'low' ? CONFIG.fx.particleLow : CONFIG.fx.particleHigh;
   motionOff = s.reducedMotion === true;
+  bloom.setEnabled(s.fx === 'high');
   if (audio.state() !== 'uninitialized') { audio.setVolume(s.volume); audio.setSfx(s.sfx); }
 }
 applySettings(liveSettings);
@@ -149,7 +154,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -157,6 +162,7 @@ window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  bloom.resize(window.innerWidth, window.innerHeight);
 });
 
 // Fixed-timestep simulation (60Hz) with render at display rate.
@@ -266,7 +272,7 @@ function frame() {
   }
   if (n === MAX_SUBSTEPS) acc = 0; // drop backlog
   syncVisuals(frameDt);
-  renderer.render(scene, camera);
+  bloom.render();
 }
 frame();
 

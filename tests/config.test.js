@@ -60,3 +60,10 @@ test('config: powerup types complete with durations', () => {
   assert.ok(types.spread.count >= 2, 'spread needs >=2 shots');
   assert.ok(types.spread.arc > 0, 'spread arc');
 });
+
+test('config: fx.bloom values are sane (I35)', () => {
+  const b = CONFIG.fx.bloom;
+  assert.ok(Number.isFinite(b.strength) && b.strength > 0, 'strength positive finite');
+  assert.ok(Number.isFinite(b.radius) && b.radius > 0, 'radius positive finite');
+  assert.ok(b.threshold >= 0 && b.threshold <= 1, 'threshold in [0,1]');
+});

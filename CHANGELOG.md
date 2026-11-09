@@ -39,3 +39,4 @@
 - I32: tutorial hint on session start (controls line, fades after 6s, reduced-motion aware).
 - I33: touch controls (drag thrust + fire, tap fire with guaranteed bullet, two-finger pause).
 - I34: spawn safety (rim rocks re-roll to stay 8+ units from the ship) + balance pass 1 (combo window 3.5 -> 4s, power-up drop 22% -> 25%).
+- I35: bloom post-fx on High quality (UnrealBloomPass via composer); Low disables bloom and keeps the direct render path.
