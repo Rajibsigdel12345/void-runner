@@ -108,7 +108,12 @@ const shakeOff = { x: 0, y: 0, z: 0 };
 let simT = 0; // sim-clock for timed visuals (invuln blink)
 const flashEl = document.getElementById('flash'); // hit/bomb flash overlay (index.html)
 let flashA = 0;
-const input = createInput();
+function togglePause() { // ST-033: shared by keyboard and two-finger touch
+  const st = world.game.state;
+  if (st === STATE.PLAYING) world.pause();
+  else if (st === STATE.PAUSED) world.resume();
+}
+const input = createInput({ onPause: togglePause });
 
 // Session keys (ST-017): Enter start/restart, P/Esc pause, M mute.
 window.addEventListener('keydown', (e) => {
@@ -121,8 +126,7 @@ window.addEventListener('keydown', (e) => {
     if (st === STATE.MENU) world.begin();
     else if (st === STATE.GAME_OVER) world.restart();
   } else if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
-    if (st === STATE.PLAYING) world.pause();
-    else if (st === STATE.PAUSED) world.resume();
+    togglePause();
   } else if (e.key === 'm' || e.key === 'M') {
     muted = !muted;
     audio.setMuted(muted);;
@@ -164,6 +168,10 @@ let lastNow = performance.now();
 let acc = 0;
 
 function resolveAimPoint() {
+  if (input.touchDrag) { // ST-033: while drag-thrusting, aim along the drag (fire forward)
+    const sp = world.ship.pos;
+    return { x: sp.x + input.touchDrag.x * 10, y: sp.y + input.touchDrag.y * 10 };
+  }
   if (!input.pointer.active) return null;
   raycaster.setFromCamera(input.pointer.ndc, camera);
   if (raycaster.ray.intersectPlane(groundPlane, aimWorld)) {
@@ -173,6 +181,7 @@ function resolveAimPoint() {
 }
 
 function tick(dt, intent) {
+  if (!intent) input.tick(dt); // ST-033: decay touch fire-tail / pause cooldown
   const it = intent || { thrust: input.state.thrust, aimPoint: resolveAimPoint(), firing: input.state.firing };
   world.step(dt, it);
   for (const e of world.drainEvents()) {
