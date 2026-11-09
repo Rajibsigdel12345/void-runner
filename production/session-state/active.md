@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: Blender graphics pass (post-I100, I101+)
-- current_story: ST-101
-- current_iteration: I101
+- current_story: ST-102
+- current_iteration: I102
 - branch: main
-- notes: I101 done (art bible: design/art-bible.md authored - neon-on-void visual identity + verbatim palette + shape language + Blender-pass asset constraints; scope = ship + asteroids L/M/S + boss; docs-only, 233/233 + build exit 0, sequence 1..101). Next: I102 = cgs-asset-spec (design/asset-spec.md) specifying each GLB asset geometry/material/export/scale, then I103 Blender modeling (bpy API -> GLB into assets/), I104 integrate GLB into three.js + verify (screenshots), I105 cgs-asset-audit.
+- notes: I102 done (asset spec: design/asset-spec.md authored - 5 GLB assets ship + asteroid L/M/S + boss; export rules, in-code vs GLB material split, poly budgets, acceptance criteria, verified GLTFLoader import path, build must copy assets/ into dist; 1-geo-per-size simplification; docs-only, 233/233 + build exit 0, sequence 1..102). Next: I103 = Blender modeling via bpy API (model 5 assets flat-shaded, correct scale/origin, VR_ naming, export binary GLB into assets/).
