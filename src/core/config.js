@@ -1,0 +1,76 @@
+﻿// ALL tunables live here (balance table). See design/gdd.md for rationale.
+export const CONFIG = {
+  arena: { radius: 26 },
+
+  ship: {
+    accel: 26,        // units/s^2
+    maxSpeed: 14,     // units/s
+    damping: 1.6,     // exponential drag /s
+    radius: 0.9,      // collision radius
+    aimEase: 9,       // how fast nose eases toward aim (lambda)
+    invulnTime: 1.6,  // seconds of invulnerability after a hit
+    knockback: 7,     // knockback impulse on hit
+    lives: 3
+  },
+
+  weapon: {
+    fireInterval: 1 / 5.5, // seconds between shots
+    bulletSpeed: 34,
+    bulletLife: 1.1,
+    bulletRadius: 0.18,
+    maxBullets: 64
+  },
+
+  asteroid: {
+    // size key: L -> M -> S. splits = how many fragments a destroyed rock produces.
+    sizes: {
+      L: { radius: 2.2, speed: [2.2, 3.6], score: 25,  splits: [2, 3], child: 'M' },
+      M: { radius: 1.3, speed: [3.0, 4.6], score: 50,  splits: [2, 3], child: 'S' },
+      S: { radius: 0.7, speed: [3.8, 5.8], score: 100, splits: [],     child: null }
+    },
+    spin: [0.4, 1.8],   // rad/s tumble range
+    maxConcurrent: 24
+  },
+
+  wave: {
+    base: 4,            // wave n spawns base + growth*n asteroids
+    growth: 1,
+    maxConcurrentGrowth: 2,
+    speedPerWave: 0.06, // speedMult = 1 + n*speedPerWave (capped)
+    speedCap: 1.9,
+    maxConcurrentCap: 24,
+    intermission: 2.2   // seconds between waves
+  },
+
+  combo: {
+    window: 3.5,        // seconds to keep a chain alive
+    cap: 10,            // max combo
+    step: 0.1           // multiplier per combo step (1.0x .. 1.9x)
+  },
+
+  powerup: {
+    dropChance: 0.22,   // chance per kill
+    pickupRadius: 1.6,
+    maxActiveDrops: 1,
+    magnetRadius: 7,
+    drift: 1.2,
+    types: {
+      rapid:  { dur: 8 },
+      spread: { dur: 8, count: 3, arc: 0.35 },
+      shield: { dur: 12 },
+      bomb:   { dur: 0 },
+      magnet: { dur: 6 }
+    }
+  },
+
+  fx: {
+    shake: 1,                 // master screen-shake scale (0..1)
+    particleHigh: 48,         // burst size at FX quality High
+    particleLow: 16           // burst size at FX quality Low
+  },
+
+  storage: {
+    bestKey: 'voidrunner.best',
+    settingsKey: 'voidrunner.settings'
+  }
+};
