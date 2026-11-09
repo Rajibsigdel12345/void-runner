@@ -180,6 +180,22 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
   bloom.resize(window.innerWidth, window.innerHeight);
 });
+// I43: auto-pause when the tab is hidden (rAF stalls anyway; pausing gives the
+// player the pause screen instead of a dt spike on return).
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && world.game.state === STATE.PLAYING) world.pause();
+});
+// I43: WebGL context loss - three.js reinitializes its GL state on restore; we
+// pause the game, and force render-target re-allocation (composer + bloom).
+renderer.domElement.addEventListener('webglcontextlost', (e) => {
+  e.preventDefault(); // mark the context as restorable
+  if (world.game.state === STATE.PLAYING) world.pause();
+});
+renderer.domElement.addEventListener('webglcontextrestored', () => {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  bloom.resize(window.innerWidth, window.innerHeight);
+  renderer.info.reset();
+});
 
 // Fixed-timestep simulation (60Hz) with render at display rate.
 // Substeps keep sim time tracking wall time even when rAF is throttled;
@@ -274,8 +290,8 @@ function syncVisuals(dt) {
   hint.sync(dt, motionOff); // ST-032
   if (flashA > 0) { // hit/bomb flash decay
     flashA = Math.max(0, flashA - dt * 2.2);
-    flashEl.style.opacity = String(flashA);
-  } else if (flashEl.style.opacity !== '0') flashEl.style.opacity = '0';
+    if (flashEl) flashEl.style.opacity = String(flashA); // I43: #flash is optional in the DOM
+  } else if (flashEl && flashEl.style.opacity !== '0') flashEl.style.opacity = '0';
 
   stars.rotation.y += dt * 0.004;
   if (fpsMeter) fpsMeter.sync(dt); // I36

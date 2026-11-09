@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E1 Foundations -> E7 (plan extended to 100 iterations per user request)
-- current_story: ST-043
-- current_iteration: I43
+- current_story: ST-044
+- current_iteration: I44
 - branch: main
-- notes: I42 committed (wave stall advance - wave.stallTime 45s, leftover rocks carry, closes playtest F1; 120/120; browser-verified). Next: edge cases (ST-043).
+- notes: I43 committed (edge cases: visibility pause, context-loss recovery, flash guard, NaN soak; 121/121; browser verified). Next: UI/UX pass (ST-044).

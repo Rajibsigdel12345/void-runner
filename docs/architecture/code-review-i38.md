@@ -84,3 +84,11 @@ Proposed (deferred, no code this iteration):
 ## Next owner or decision
 
 ? **I39 (ST-039): balance pass 2** (producer/design owns; inputs: this review's no-blocker verdict + I41 playtest data when it lands).
+
+## I43 Closure (2026-11-13)
+
+- **C3 - CLOSED (I43):** `visibilitychange` auto-pause added in `src/main.js` - entering hidden state while PLAYING pauses the game; resume returns to PLAYING. Browser-verified (hidden -> PAUSED -> resume OK).
+- **C4 - CLOSED (I43):** `webglcontextlost` -> `preventDefault()` + auto-pause; `webglcontextrestored` -> `renderer.setSize` + bloom resize + `renderer.info.reset()`, forcing render-target re-allocation. Browser-verified via `WEBGL_lose_context` during PLAYING: auto-paused, render is a guarded no-op during loss (three r160 `render()` early-returns while `_isContextLost`), and after restore three r160 `onContextRestore -> initGLContext()` reinitializes all internals (program cache, properties, textures, info) - no vendor patch needed; healthy frame renders post-restore.
+- **C5 - CLOSED (I43):** `#flash` DOM writes in `syncVisuals` now guarded with `if (flashEl)`. Verified: removing `#flash` + forcing a hit causes no exception.
+- **C1 drift check (related):** the I43 5-min seeded NaN soak (`tests/soak-nan.test.js`, World seed 20260113 / intent RNG 777) shows no rim/position drift and no NaN in any world field over 18,000 substeps.
+- **Note (documented, not fixed):** after context restore, three r160 emits ~39 harmless `WebGL: INVALID_OPERATION: delete` warnings from its own stale-context object cleanup during reinit. No action required.

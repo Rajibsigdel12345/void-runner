@@ -278,3 +278,10 @@ One entry per iteration. Format:
 - Verification: node --test 120/120 green; build exit 0. Browser smoke (live dev build, new config confirmed loaded with stallTime 45): start game, wave 1 active (5 rocks), waveElapsed parked at 44s, advanced 2s -> wave advanced to 2 with the "WAVE 2" banner, 5/5 leftover rocks carried (none deleted), toSpawn set for wave 2 (6), waveElapsed reset, wave event x1 / waveCleared x0, lives intact, 0 console errors/warnings. Screenshots: .evidence/i42-stall-advance-wave2.png (mid-play: WAVE 2 banner, score 0, 10 rocks) and .evidence/i42-stall-advance.png (game over after real-time drift reached wave 2 with 0 kills - the stall path end-to-end).
 - Result: DONE
 - Follow-up: I43 edge cases (ST-043) - visibilitychange auto-pause, resize, WebGL context-loss recovery, #flash null guard (QA plan R7, deferred from I38).
+## I43 - edge cases (ST-043)
+
+- Goal: close the I38-deferred robustness gaps (C3/C4/C5) and QA-plan R7 - tab-hide auto-pause, WebGL context-loss recovery, `#flash` null guard - plus a deterministic NaN soak.
+- Changed: src/main.js (visibilitychange auto-pause; webglcontextlost preventDefault + auto-pause; webglcontextrestored -> renderer/bloom resize + info reset; `#flash` writes guarded). tests/soak-nan.test.js (NEW: 5-min aggressive seeded soak; NaN always fails, +/-Infinity allowed only at the documented scoreKeeper.lastKillTime sentinel). docs/architecture/code-review-i38.md (C3/C4/C5 closed).
+- Verification: 121/121 + build 0. Browser: hidden->PAUSED->resume OK; context loss while PLAYING -> auto-pause, guarded no-op render during loss, full scene recovery after restore (three r160 reinitializes all internals incl. program cache in onContextRestore - no vendor patch needed); 0 console errors (39 harmless INVALID_OPERATION delete warnings from three reinit, documented); `#flash` removed + forced hit -> no exception; resize 1024x600 verified (buffer 1280x750). Screenshot .evidence/i43-context-restore.png.
+- Result: DONE
+- Follow-up: I44 UI/UX pass (ST-044) - HUD power-up indicators, optional fire-line reticle (playtest rec #3), menu/pause polish.
