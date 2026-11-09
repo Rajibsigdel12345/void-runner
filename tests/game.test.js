@@ -289,3 +289,56 @@ test('world: invulnerable ship does not consume the shield', () => {
   assert.equal(w.powerups.shieldHits, 1, 'shield untouched while invulnerable');
   assert.equal(w.lives, CONFIG.ship.lives, 'no life lost either');
 });
+
+// --- ST-023: BOMB shatter-all + MAGNET bullet homing ---
+test('world: bomb shatters all rocks with per-rock kills (combo chain)', () => {
+  const w = new World(new RNG(29));
+  w.begin();
+  const a = w.field.spawn('L', 1, { x: 6, y: 0 }); a.vel = v2(0, 0);
+  const b = w.field.spawn('M', 1, { x: -6, y: 3 }); b.vel = v2(0, 0);
+  const cc = w.field.spawn('S', 1, { x: 0, y: -6 }); cc.vel = v2(0, 0);
+  assert.equal(w.field.count, 3);
+  w.powerups.apply('bomb'); // queues the instant, resolved on the next step
+  w.step(DT, NOINTENT);
+  assert.equal(w.field.count, 0, 'all rocks shattered, no fragments');
+  const s = CONFIG.asteroid.sizes;
+  const expected = s.L.score + Math.floor(s.M.score * 1.1) + Math.floor(s.S.score * 1.2);
+  assert.equal(w.score, expected, 'per-rock kills feed the combo chain');
+  const evs = w.drainEvents();
+  assert.equal(evs.filter(e => e.type === 'kill').length, 3, 'three kill events');
+  assert.ok(evs.some(e => e.type === 'bomb' && e.data.count === 3), 'bomb event with count');
+  assert.ok(evs.some(e => e.type === 'instant' && e.data.type === 'bomb'), 'instant event kept');
+});
+
+test('world: bomb with no rocks is inert (no bomb event, no score)', () => {
+  const w = new World(new RNG(30));
+  w.begin();
+  w.powerups.apply('bomb');
+  w.step(DT, NOINTENT);
+  const evs = w.drainEvents();
+  assert.ok(!evs.some(e => e.type === 'bomb'), 'no bomb event');
+  assert.ok(!evs.some(e => e.type === 'kill'), 'no kills');
+  assert.equal(w.score, 0);
+});
+
+test('world: magnet homing steers an off-axis bullet onto the rock', () => {
+  const w = new World(new RNG(31));
+  w.begin();
+  w.powerups.apply('magnet');
+  const rock = w.field.spawn('S', 1, { x: 8, y: 0 }); // S: no split on kill
+  rock.vel = v2(0, 0);
+  // straight line from (0,0) toward (10,4) misses the rock (radius 0.7) by ~2.1 units
+  w.weapons._spawn({ x: 0, y: 0 }, Math.atan2(4, 10));
+  for (let i = 0; i < 120 && w.field.count > 0; i++) w.step(DT, NOINTENT);
+  assert.equal(w.field.count, 0, 'homing bullet found the rock');
+});
+
+test('world: without magnet the same off-axis bullet misses (control)', () => {
+  const w = new World(new RNG(31)); // same seed, same scenario, no magnet
+  w.begin();
+  const rock = w.field.spawn('S', 1, { x: 8, y: 0 }); // S: no split on kill
+  rock.vel = v2(0, 0);
+  w.weapons._spawn({ x: 0, y: 0 }, Math.atan2(4, 10));
+  for (let i = 0; i < 120; i++) w.step(DT, NOINTENT);
+  assert.ok(w.field.count > 0, 'bullet flew straight and missed');
+});

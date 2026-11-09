@@ -52,10 +52,36 @@ export class Weapons {
     return b;
   }
 
-  step(dt) {
+  /** Step bullets; while `homing` (MAGNET) is on, each bullet gently steers toward the
+   * nearest rock within homing.range (max turn homing.turn rad/s, speed preserved). */
+  step(dt, homing = false, rocks = null) {
     this.cooldown = Math.max(0, this.cooldown - dt);
+    const h = !!(homing && rocks && rocks.length);
+    const hw = h ? this.cfg.weapon.homing : null;
+    const rangeSq = h ? hw.range * hw.range : 0;
     for (const b of this.bullets) {
       if (b.dead) continue;
+      if (h) {
+        let bx = 0, by = 0, best = null, bestD2 = rangeSq;
+        for (const r of rocks) {
+          if (r.dead) continue;
+          const dx = r.pos.x - b.pos.x, dy = r.pos.y - b.pos.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < bestD2) { bestD2 = d2; best = r; bx = r.pos.x; by = r.pos.y; }
+        }
+        if (best) {
+          const sp = Math.hypot(b.vel.x, b.vel.y) || 1;
+          let cur = Math.atan2(b.vel.y, b.vel.x);
+          const tgt = Math.atan2(by - b.pos.y, bx - b.pos.x);
+          let diff = tgt - cur;
+          while (diff > Math.PI) diff -= 2 * Math.PI;
+          while (diff < -Math.PI) diff += 2 * Math.PI;
+          const maxTurn = hw.turn * dt;
+          cur += diff > maxTurn ? maxTurn : diff < -maxTurn ? -maxTurn : diff;
+          b.vel.x = Math.cos(cur) * sp;
+          b.vel.y = Math.sin(cur) * sp;
+        }
+      }
       b.pos.x += b.vel.x * dt;
       b.pos.y += b.vel.y * dt;
       b.life -= dt;

@@ -150,3 +150,10 @@ One entry per iteration. Format:
 - Verification: npm test 101/101 pass; build exit 0; browser: shield applied -> rock on ship -> lives 3->3, shieldPop=1, shieldHits 0; steady-state ring screenshot .evidence/i22-shield.png (cyan torus around ship); console 0 errors. Pop-flash frame not capturable headless (0.66fps rAF + 0.25s dt clamp skips the 0.3s window) — logic verified by code + steady-state render.
 - Result: DONE
 - Follow-up: BOMB shatter-all + MAGNET bullet homing (I23); HUD effect indicators deferred to I44 UI/UX pass.
+
+## I23 - BOMB shatter-all + MAGNET bullet homing (ST-023)
+- Goal: complete the power-up set gameplay-wise. BOMB shatters all on-screen asteroids, each counting as a kill that feeds the combo (GDD). MAGNET adds slight bullet homing for 6s (GDD) on top of its existing drop-attraction.
+- Changed: src/core/config.js (weapon.homing {turn:3, range:8}), src/core/asteroids.js (shatter(): no-fragment bomb kill), src/core/weapons.js (step(dt, homing, rocks): gentle turn-rate steering toward nearest rock in range, speed preserved, zero-alloc), src/core/game.js (weapons.step gets homing args; takeInstant resolves BOMB via bombBlast(); emits bomb {count} + per-rock kill), tests/game.test.js (+4: bomb combo-chain score, inert bomb, homing hit, no-homing control miss).
+- Verification: npm test 105/105 pass (1 homing test re-scoped to an S rock after M split its kill into S fragments - field never emptied); build exit 0; browser: bomb on 8 rocks -> 0 left, 8 kills, 1 bomb event, score +732; magnet homing steered an off-axis bullet onto a parked S rock in 14 steps; console 0 errors.
+- Result: DONE
+- Follow-up: juice pass begins (I24) - particle bursts on kill/hit from the kill/hit events these paths emit.

@@ -84,6 +84,15 @@ export class AsteroidField {
     return children;
   }
 
+  /** Bomb path (ST-023): shatter a rock with no fragments - total shatter. */
+  shatter(id) {
+    const rock = this.rocks.find(r => r.id === id && !r.dead);
+    if (!rock) return false;
+    rock.dead = true;
+    this.compact();
+    return true;
+  }
+
   compact() {
     let w = 0;
     for (let i = 0; i < this.rocks.length; i++) {

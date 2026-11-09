@@ -61,13 +61,14 @@ export class World {
 
     this.ship.step(dt, intent.thrust, intent.aimPoint);
     if (intent.firing) this.fireWeapon();
-    this.weapons.step(dt);
+    this.weapons.step(dt, this.powerups.active('magnet'), this.field.rocks);
     this.field.step(dt);
     const pickups = this.powerups.step(dt, this.ship);
-    for (const pk of pickups) {
-      const inst = this.powerups.takeInstant();
-      if (inst) this.emit('instant', { type: inst }); // BOMB resolution lands in I23
-      this.emit('powerup', { type: pk.type, pos: pk.pos });
+    for (const pk of pickups) this.emit('powerup', { type: pk.type, pos: pk.pos });
+    const inst = this.powerups.takeInstant();
+    if (inst) {
+      if (inst === 'bomb') this.bombBlast();
+      this.emit('instant', { type: inst });
     }
     this.scoreKeeper.tick(this.time);
     const wv = this.waves.step(dt);
@@ -89,6 +90,22 @@ export class World {
       shots = b ? [b] : [];
     }
     for (const b of shots) this.emit('fire', { pos: b.pos });
+  }
+
+  /** GDD: BOMB shatters all on-screen asteroids; each counts as a kill feeding the
+   * combo chain (and can roll a power-up drop like any kill).
+   * Event path (rare), so the slice() copy is acceptable. */
+  bombBlast() {
+    const targets = this.field.rocks.slice();
+    for (const r of targets) {
+      if (!this.field.shatter(r.id)) continue;
+      const base = this.cfg.asteroid.sizes[r.size].score;
+      const points = this.scoreKeeper.kill(base, this.time);
+      this.emit('kill', { pos: { x: r.pos.x, y: r.pos.y }, size: r.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier });
+      const drop = this.powerups.maybeDrop({ x: r.pos.x, y: r.pos.y });
+      if (drop) this.emit('powerupDrop', { type: drop.type, pos: { x: drop.pos.x, y: drop.pos.y } });
+    }
+    if (targets.length > 0) this.emit('bomb', { count: targets.length });
   }
 
   resolveBulletRocks() {

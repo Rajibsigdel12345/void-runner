@@ -18,7 +18,8 @@ export const CONFIG = {
     bulletSpeed: 34,
     bulletLife: 1.1,
     bulletRadius: 0.18,
-    maxBullets: 64
+    maxBullets: 64,
+    homing: { turn: 3, range: 8 } // MAGNET: max steering rad/s, target search radius
   },
 
   asteroid: {
