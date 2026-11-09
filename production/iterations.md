@@ -521,3 +521,9 @@ One entry per iteration. Format:
 - Goal: when the browser drops the 3D rendering context, tell the player (instead of a silent frozen canvas) and give a working restore/reload recovery path.
 - Changed: src/main.js (new #ctx-overlay DOM node - title RENDERING INTERRUPTED + #ctx-status + RELOAD GAME button (location.reload); webglcontextlost now shows the overlay, resets a 10s escalation timer that rewrites the status to a reload prompt, and keeps the existing auto-pause; webglcontextrestored clears the timer, hides the overlay, and keeps the existing renderer.setSize + bloom.resize + info.reset; window.__vr.ctxOverlay exposed after declaration, TDZ-safe).
 - Verification: node --check clean; 200/200 (render-only); build exit 0. Browser: dispatched webglcontextlost -> state PAUSED + overlay display:flex (title/status/button present); dispatched webglcontextrestored -> overlay display:none, state still PAUSED; world.resume() -> PLAYING. Clean run (no events): 0 console warnings/errors. Screenshots .evidence/i75-ctx-lost.png (overlay) + i74/i73 prior. Reload button verified present; its navigation not exercised headlessly.
+
+## I76 - determinism harness: fixed seed + input replay => identical state (ST-076)
+
+- Goal: a durable regression harness proving the core sim is fully deterministic (prerequisite for netcode/replay features and for pinning bug reports to seeds).
+- Changed: tests/determinism.test.js (NEW: snapshot() exact-float state capture + deterministic aim-at-nearest input script + 3 tests: 90s same-seed replay identical incl. 15s checkpoints; different-seed divergence sanity; mid-replay pause/resume stays identical). No source files touched.
+- Verification: node --check clean; 203/203 (3 new); build exit 0. The 90s replay reaches wave 5 with the boss engaged (96 kills, 14354 pts, boss 35/40, GAME_OVER) - full system coverage under bit-exact comparison.

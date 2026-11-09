@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I76: determinism harness (ST-076) - fixed-seed + fixed-input 90s replay proves bit-identical world state (exact-float deep-equal, 15s checkpoints); the replay reaches wave 5 with the Monolith engaged (96 kills, GAME_OVER), so waves/splits/golden/mines/boss/power-ups/game-over are all covered; also pins seed divergence + mid-replay pause/resume (test-only, 203/203).
 - I75: WebGL context-loss recovery (ST-075) - RENDERING INTERRUPTED overlay while the 3D context is gone (auto-paused), status that escalates to a reload prompt after 10s, and a RELOAD GAME fallback; on restore the overlay clears and the pause screen takes over (render-only, 200/200 + browser-verified lost/restore/resume).
 - I74: pool/memory audit (ST-074) - removed the last unconditional per-frame allocations: power-up drops compact in place, event drain uses a pre-allocated double buffer, camera reuses a forward-vector scratch; steady-state hot path now ~0 per-frame JS heap growth (200/200 + build + browser smoke).
 - I73: adaptive quality (ST-073) - rolling 2.0s FPS <45 for two windows auto-drops FX High -> Low (toast + console log, saved settings untouched); options FX choice overrides and locks the automation; pure core module + 9 unit tests (196/196).
