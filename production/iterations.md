@@ -315,3 +315,11 @@ One entry per iteration. Format:
 - Verification: Suite A green (122/122 + build 0). No source/rendering changes, so no browser smoke required; README commands cross-checked against package.json scripts and scripts/ entry points; architecture file list cross-checked against the actual src/ tree.
 - Result: DONE
 - Follow-up: I48 milestone review (ST-048, cgs-milestone-review) + retrospective (cgs-retrospective).
+
+## I48 - milestone review + retrospective (ST-048)
+
+- Goal: close M1 (E1-E6, I01-I48) with the two closing CGS artifacts - cgs-milestone-review (readiness + transition verdict) and cgs-retrospective (went well / did not work / root causes / actions) - plus the doc-accuracy fixes they surfaced.
+- Changed: production/milestone-review.md (NEW: per-epic evidence table, no blockers, PASS transition verdict to E7, risks R6/R5/F2/F4). production/retrospective.md (NEW: 6 went-well, 5 friction items, root causes, 6 action items with owner iterations). production/probe-notes.md (NEW: consolidated proven browser probe patterns - __vr surface, scene-pinning helpers, touch synth, env toggles, gotchas, World API, perf probe rule - for I89-100 regression reuse). AGENTS.md (accuracy fix only: no-bundler import-map engine description, dev/preview ports, src/audio/ -> src/render/audio.js; BOM preserved; no instruction semantics changed).
+- Verification: Suite A green (122/122 + build 0; no source changes). Milestone evidence cross-checked against iteration headers I01-I48 (sequence 1..48 verified), gates.md (I45 PASS), qa-plan.md, playtest-report.md, package.json scripts.
+- Result: DONE (M1 closed; transition to E7 approved)
+- Follow-up: I49 release checklist v1 (ST-049, cgs-release-checklist) - dist build size/load/console-clean, SHIP/NO-SHIP call on the slice.

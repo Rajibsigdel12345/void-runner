@@ -51,3 +51,5 @@
 - I44: UI/UX pass - HUD power-up chips (shape+color+label, drain bars), combo window drain bar, fire-line reticle (playtest rec #3), menu keycaps + pause session snapshot, contrast bumps (ST-044).
 - I45: vertical slice gate - QA Suite C executed green (storage round-trip, resize, touch synth, I43 robustness re-verify, perf 60fps/37 calls/1626 tris @ wave 4 within baseline); verdict PASS (production/gates.md).
 - I46: final regression - Suites A+B+C re-run green after I44 (8-step critical path; perf 60fps/34 calls/1466 tris @ wave 4 within 10% baseline); no source changes (ST-046).
+- I47: docs - README + architecture README rewritten to current layout; CHANGELOG coverage I01-I46 confirmed (ST-047).
+- I48: milestone review + retrospective - M1 (E1-E6, I01-I48) closed: transition PASS to E7, action items logged, probe notes consolidated, AGENTS.md accuracy fix (ST-048).

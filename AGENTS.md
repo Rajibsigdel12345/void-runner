@@ -1,27 +1,27 @@
-﻿# AGENTS.md - Void Runner
+﻿﻿# AGENTS.md - Void Runner
 
 ## Project
 
-Void Runner is a 3D arcade space-asteroid shooter built with **three.js** (Vite + ES modules, no build-time framework).
+Void Runner is a 3D arcade space-asteroid shooter built with **three.js** (no bundler: ES module import maps over vendored modules).
 
 - Genre: arcade survival / asteroids-style, 3D arena
 - Platform: desktop web (keyboard), touch-friendly fallback later
-- Engine: three.js (r160+), Vite dev server + build
+- Engine: three.js (r160+), no bundler (import maps + vendored modules; scripts/serve.mjs + scripts/build.mjs)
 - Test runner: `node --test tests/` (pure-logic modules are DOM-free and unit-testable)
 - No external art assets: procedural geometry + canvas textures; WebAudio-synthesized SFX
 
 ## Commands
 
-- `npm run dev` - start Vite dev server
-- `npm run build` - production build to dist/
-- `npm run preview` - serve the production build
+- `npm run dev` - start the static dev server (http://localhost:5173)
+- `npm run build` - production build to dist/ (static import-map bundle)
+- `npm run preview` - serve the production build (http://localhost:4173)
 - `npm test` - run unit tests (node --test)
 
 ## Layout
 
 - `src/core/` - pure game logic (NO three.js, NO DOM). Unit-testable.
 - `src/render/` - three.js rendering layer (scene, meshes, particles, post fx)
-- `src/audio/` - WebAudio synthesized sound
+- `src/render/audio.js` - WebAudio synthesized sound (browser API, so it lives in render)
 - `src/main.js` - boot, input, game loop, wiring
 - `tests/` - node --test unit tests for core modules
 - `design/` - GDD + system designs
