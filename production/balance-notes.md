@@ -285,3 +285,8 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - No gameplay/tuning changes: persistence-robustness only. 223/223 (13 new).
 - Best score, settings and the high-score board now read through a version-validating path: a payload with a future or corrupt version falls back to safe defaults instead of being mis-parsed; the existing (unversioned-legacy) shape is still accepted, so no existing player data is discarded.
 - In-play numbers unaffected - storage loads at boot and saves on the game-over/menu paths only.
+
+## I80 - debug overlay ?dbg=1 (fps, pools, entities, drawcalls) (ST-080)
+
+- No gameplay/tuning changes: developer tooling only. 223/223 (render-only). Strictly opt-in via ?dbg=1; normal/production loads are unaffected (overlay not mounted, ~0 cost).
+- Gives a live read on pool pressure (rocks/bullets/eb/mines/drops vs caps) and the draw-call/triangle budget, supporting future balance + perf iterations (esp. the I95 perf re-verification and any pool-cap tuning). Observed loaded: ~28 draw calls, ~500-700 tris at 60fps.

@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I80: debug overlay ?dbg=1 (ST-080) - developer-only live HUD (fps/frame-ms, GPU draw calls + tris, entity counts vs pool caps, game state); opt-in, ~0 cost when off (223/223)
 - I79: storage versioning + corruption guards (ST-079) - best/settings/scores read through a version-validating, migratable path; future/corrupt versions fall back to safe defaults while the legacy shape still loads (223/223)
 - I78: resume sync (ST-078) - pause/resume can no longer fast-forward: fixed-timestep clock (src/core/clock.js) clamps frame dt to 0.25s, drops backlog past 8 substeps, and resets on unpause (210/210, browser-verified no-jump)
 - I77: 10-minute headless soak (ST-077) - 36000-step aggressive sim stays finite at every 5s sample and every entity pool (rocks/bullets/enemy-bullets/mines/drops) stays inside its configured cap across waves, boss, and 7 restarts (test-only, 204/204).

@@ -24,6 +24,7 @@ import { createScorePopups } from './render/scorePopups.js';
 import { createTutorialHint } from './render/tutorialHint.js';
 import { createBloom } from './render/bloom.js';
 import { createFpsMeter } from './render/fpsMeter.js';
+import { createDebugOverlay } from './render/debugOverlay.js'; // ST-080
 import { createAdaptiveQuality } from './core/adaptiveQuality.js'; // ST-073
 import { createClock } from './core/clock.js'; // ST-078
 import { STATE } from './core/state.js';
@@ -55,6 +56,11 @@ const bloom = createBloom(renderer, scene, camera);
 const fpsParam = new URLSearchParams(window.location.search).get('fps');
 const fpsMeter = fpsParam ? createFpsMeter(fpsParam === '2' ? renderer : null) : null;
 if (fpsMeter) fpsMeter.show();
+// I80: opt-in debug overlay - ?dbg=1 shows fps/frame-ms, GPU draw calls + tris, live
+// entity counts vs pool caps, and the current game state (throttled to ~4 Hz).
+const dbgParam = new URLSearchParams(window.location.search).get('dbg');
+const debugOverlay = dbgParam === '1' ? createDebugOverlay() : null;
+if (debugOverlay) debugOverlay.show();
 
 scene.add(new THREE.HemisphereLight(0x33437a, 0x04060f, 0.55));
 scene.add(new THREE.AmbientLight(0x8899ff, 0.35));
@@ -248,7 +254,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, bossMesh, bossHealth, enemyBulletRenders, stars, vortexFx, fpsMeter, adaptive, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, bossMesh, bossHealth, enemyBulletRenders, stars, vortexFx, fpsMeter, debugOverlay, adaptive, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -455,6 +461,19 @@ function frame() {
   syncVisuals(frameDt); // I36: reads previous frame GPU stats
   renderer.info.reset(); // I36: clear before this frame accumulates (autoReset off)
   bloom.render();
+  if (debugOverlay) { // I80: sample this frame's GPU stats + entity pools (post-bloom = full frame)
+    const gi = renderer.info.render;
+    debugOverlay.update(frameDt, {
+      drawcalls: gi.calls, tris: gi.triangles,
+      rocks: world.field.rocks.length, rockCap: CONFIG.asteroid.maxConcurrent,
+      bullets: world.weapons.bullets.length, bulletCap: CONFIG.weapon.maxBullets,
+      eb: world.enemyBullets.count, ebCap: CONFIG.enemyBullets.maxConcurrent,
+      mines: world.mines.count, mineCap: CONFIG.mine.maxConcurrent,
+      drops: world.powerups.drops.length, dropCap: CONFIG.powerup.maxActiveDrops,
+      boss: world.boss && world.boss.alive ? 1 : 0,
+      state: world.game.state,
+    });
+  }
 }
 frame();
 
