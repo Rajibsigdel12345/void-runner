@@ -19,6 +19,11 @@ export function createScreens(root, settings = {}) {
     '.vr-menu-anim{animation:vrMenuPan 34s ease-in-out infinite;}',
     '.vr-reduced .vr-title,.vr-reduced .vr-menu-anim{animation:none !important;}',
     '.vr-credit{position:absolute;bottom:16px;left:0;right:0;font-size:11px;letter-spacing:1px;opacity:0.5;}',
+    '.vr-pause-btn{pointer-events:auto;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:2px;color:#cfe4ff;background:rgba(10,18,40,0.85);border:1px solid #2b4a8a;border-radius:8px;padding:10px 18px;transition:background 0.15s,border-color 0.15s;}',
+    '.vr-pause-btn:hover{background:rgba(30,50,100,0.95);border-color:#4a7fd8;}',
+    '.vr-pause-btn:active{transform:translateY(1px);}',
+    '.vr-pause-btn:focus-visible{outline:2px solid #ffe08a;outline-offset:2px;}',
+    '.vr-pause-btn .vr-key{color:#ffe08a;}',
   ].join('');
   overlay.appendChild(style);
 
@@ -87,11 +92,49 @@ export function createScreens(root, settings = {}) {
   menu.appendChild(credit);
   if (settings.menu) menu.appendChild(settings.menu.el); // ST-026 settings (menu)
 
-  // --- PAUSED ---
-  const paused = panel('screen-paused', 'rgba(2,4,12,0.55)');
+  // --- PAUSED (I68: deeper dim + RESUME / RESTART / QUIT actions, mouse + keys) ---
+  const paused = panel('screen-paused', 'radial-gradient(60% 55% at 50% 45%, rgba(30,60,140,0.16), transparent 70%), rgba(2,4,12,0.74)');
   line(paused, 'PAUSED', 'font-size:36px;font-weight:800;letter-spacing:8px;');
-  line(paused, 'P / ESC — RESUME', 'font-size:15px;letter-spacing:2px;opacity:0.85;');
   const pauseSnap = line(paused, '', 'font-size:15px;font-weight:700;letter-spacing:2px;opacity:0.9;'); // I44: session snapshot
+  const pauseActions = (settings.actions && typeof settings.actions.resume === 'function') ? settings.actions : null; // I68
+  if (pauseActions) {
+    const actionsRow = document.createElement('div');
+    actionsRow.style.cssText = 'display:flex;gap:14px;margin-top:2px;';
+    const actionButtons = [];
+    for (const [label, keyHint, fn] of [
+      ['RESUME', 'P', pauseActions.resume],
+      ['RESTART', 'R', pauseActions.restart],
+      ['QUIT TO MENU', 'Q', pauseActions.quit],
+    ]) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'vr-pause-btn';
+      b.appendChild(document.createTextNode(label + '  '));
+      const ks = document.createElement('span');
+      ks.className = 'vr-key';
+      ks.textContent = keyHint;
+      b.appendChild(ks);
+      b.addEventListener('click', fn);
+      actionsRow.appendChild(b);
+      actionButtons.push(b);
+    }
+    paused.appendChild(actionsRow);
+    // I68: arrow-key focus moves within the row; game hotkeys swallowed while a
+    // button holds focus (native button click performs the action instead).
+    actionsRow.addEventListener('keydown', (e) => {
+      const i = actionButtons.indexOf(e.target);
+      if (i < 0) return;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault(); e.stopPropagation();
+        actionButtons[(i + 1) % actionButtons.length].focus();
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault(); e.stopPropagation();
+        actionButtons[(i - 1 + actionButtons.length) % actionButtons.length].focus();
+      } else if (e.key === ' ' || e.key === 'Enter' || e.key === 'Escape' || e.key === 'p' || e.key === 'P' || e.key === 'm' || e.key === 'M' || e.key === 'r' || e.key === 'R' || e.key === 'q' || e.key === 'Q') {
+        e.stopPropagation();
+      }
+    });
+  }
   const muteLabel = line(paused, 'M — MUTE (OFF)', 'font-size:13px;letter-spacing:2px;opacity:0.7;');
   if (settings.pause) paused.appendChild(settings.pause.el); // ST-026 settings (pause)
 

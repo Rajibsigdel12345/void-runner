@@ -49,3 +49,23 @@ test('state: reset returns to MENU and clears history', () => {
   assert.ok(g.in(STATE.MENU));
   assert.equal(g.transitions.length, 0);
 });
+
+// ST-068: quit from pause
+test('state: PAUSED -> MENU quit transition (ST-068)', () => {
+  const g = new GameState();
+  g.to(STATE.PLAYING);
+  g.to(STATE.PAUSED);
+  assert.ok(g.can(STATE.MENU));
+  assert.ok(g.to(STATE.MENU));
+  assert.ok(g.in(STATE.MENU));
+});
+
+test('state: quit transition does not open other back-edges', () => {
+  const g = new GameState();
+  assert.ok(!g.to(STATE.MENU), 'MENU->MENU illegal');
+  g.to(STATE.PLAYING);
+  assert.ok(!g.to(STATE.MENU), 'PLAYING->MENU still illegal');
+  g.to(STATE.PAUSED);
+  g.to(STATE.MENU);
+  assert.ok(!g.to(STATE.PAUSED), 'MENU->PAUSED still illegal');
+});

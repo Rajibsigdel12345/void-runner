@@ -54,6 +54,14 @@ export class World {
   /** PAUSED -> PLAYING only (begin() owns the MENU start, restart() the full reset). */
   resume() { return this.game.in(STATE.PAUSED) && this.game.to(STATE.PLAYING); }
 
+  /** PAUSED -> MENU (ST-068): abandon the run - full system reset, back to the menu. */
+  quitToMenu() {
+    if (!this.game.in(STATE.PAUSED)) return false;
+    this.game.to(STATE.MENU);
+    this.reset();
+    return true;
+  }
+
   /** Full session restart from MENU or GAME_OVER: reset all systems, then begin. */
   restart() { this.reset(); return this.begin(); }
 

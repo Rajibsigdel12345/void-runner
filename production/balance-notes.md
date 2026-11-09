@@ -196,3 +196,9 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - The settings panel (src/render/settingsPanel.js) is restructured into two grouped cards (AUDIO: volume + SFX; VISUALS: FX quality + reduced motion) with labeled headers, a key-nav hint line, gold :focus-visible rings, and aria-labels on all controls.
 - Keyboard operability: Tab moves through the four controls natively; ArrowUp/ArrowDown move focus between the non-native controls (volume slider and FX select keep their native arrow behavior); Space/Enter still run native checkbox/select behavior. While any panel control holds focus, game hotkeys (Enter start, P/Escape pause, M mute, Space fire) are swallowed via stopPropagation so the player can adjust settings without side effects.
 - Live FX preview: changing FX QUALITY fires a one-shot particle burst at the arena center using the NEW tier's count (low 16 / high 48), so the difference is visible immediately; applySettings (live re-derive) still runs first, so the burst already uses the new tier.
+
+## I68 - pause overlay (ST-068)
+
+- UX/flow only: no gameplay, scoring, or pacing changes. 186/186 tests (182 pre-existing + 4 new: PAUSED->MENU transition legality x2, world.quitToMenu reset + no-op-outside-PAUSED).
+- The pause screen now dims the frozen scene more (0.55 -> 0.74 alpha + soft blue vignette) and offers three explicit actions: RESUME (P/Esc/Enter), RESTART (R), QUIT TO MENU (Q). Each is a DOM button (mouse) with hover/active/focus-visible styling, arrow-key focus moves within the row, and a hotkey guard so a focused button's action wins over the window-level key handler.
+- State machine gains PAUSED -> MENU (quit); world.quitToMenu() performs the transition + full system reset and is a no-op outside PAUSED. RESTART from pause reuses the GAME_OVER restart path (reset + begin).

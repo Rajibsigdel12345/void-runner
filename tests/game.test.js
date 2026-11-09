@@ -368,3 +368,23 @@ test('world: time freezes after game over (survival-time accuracy)', () => {
   for (let i = 0; i < 10; i++) w.step(DT, NOINTENT);
   assert.equal(w.time, t, 'time frozen after game over');
 });
+
+// --- ST-068: quit from pause ---
+test('world: quitToMenu abandons the run and returns to MENU', () => {
+  const w = new World(new RNG(71));
+  w.begin();
+  w.field.spawn('M', 1, { x: 8, y: 0 });
+  w.pause();
+  assert.ok(w.quitToMenu());
+  assert.ok(w.game.in('MENU'));
+  assert.equal(w.field.count, 0);
+  assert.equal(w.score, 0);
+  assert.ok(w.begin(), 'a fresh run can begin after quit');
+});
+
+test('world: quitToMenu is a no-op outside PAUSED', () => {
+  const w = new World(new RNG(72));
+  assert.ok(!w.quitToMenu(), 'illegal from MENU');
+  w.begin();
+  assert.ok(!w.quitToMenu(), 'illegal from PLAYING');
+});

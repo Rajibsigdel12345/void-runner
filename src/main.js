@@ -132,7 +132,14 @@ applySettings(liveSettings);
 let fxPreviewFn = null; // ST-067: live FX preview, wired once particles exist
 const menuSettings = createSettingsPanel(storage, applySettings, (tier) => { if (fxPreviewFn) fxPreviewFn(tier); });
 const pauseSettings = createSettingsPanel(storage, applySettings, (tier) => { if (fxPreviewFn) fxPreviewFn(tier); });
-const screens = createScreens(document.body, { menu: menuSettings, pause: pauseSettings });
+const screens = createScreens(document.body, {
+  menu: menuSettings, pause: pauseSettings,
+  actions: { // I68: pause overlay actions
+    resume: () => { world.resume(); },
+    restart: () => { newBest = false; popups.clear(); hint.show(); world.restart(); },
+    quit: () => { newBest = false; popups.clear(); vortexFx.hide(); world.quitToMenu(); },
+  },
+});
 const particles = createParticles(scene);
 fxPreviewFn = (tier) => { // ST-067: show the new tier immediately (arena center, behind the panel)
   const n = tier === 'high' ? CONFIG.fx.particleHigh : CONFIG.fx.particleLow;
@@ -168,9 +175,15 @@ window.addEventListener('keydown', (e) => {
       popups.clear();
       hint.show();
       world.restart();
+    } else if (st === STATE.PAUSED) { // I68: Enter resumes
+      world.resume();
     }
   } else if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
     togglePause();
+  } else if (e.key === 'r' || e.key === 'R') { // I68: restart from pause
+    if (st === STATE.PAUSED) { newBest = false; popups.clear(); hint.show(); world.restart(); }
+  } else if (e.key === 'q' || e.key === 'Q') { // I68: quit from pause
+    if (st === STATE.PAUSED) { newBest = false; popups.clear(); vortexFx.hide(); world.quitToMenu(); }
   } else if (e.key === 'm' || e.key === 'M') {
     muted = !muted;
     audio.setMuted(muted);

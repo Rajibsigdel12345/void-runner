@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I68: pause overlay (ST-068) - deeper dim, RESUME/RESTART/QUIT actions (mouse + keys), arrow-key focus moves, new PAUSED->MENU quit transition
 - I67: options panel polish (ST-067) - grouped AUDIO/VISUALS cards, keyboard operability (arrow focus moves, hotkey guard, focus rings), live particle preview on FX tier change
 - I66: top-5 high-score table (ST-066) - persistent corruption-safe board (score/wave/kills, no timestamps) in a two-column menu card with 'no scores yet' placeholder; NEW BEST! flag retained
 - I65: menu polish (ST-065) - gradient glowing "VOID RUNNER" title, drifting nebula backdrop (starfield shows through), controls in a bordered card, credits line; all new motion freezes under Reduced Motion; presentation-only, 177/177.

@@ -1,5 +1,5 @@
 ﻿// Void Runner - game state machine (ST-015).
-// MENU -> PLAYING -> (PAUSED <-> PLAYING) / GAME_OVER -> PLAYING
+// MENU -> PLAYING -> (PAUSED <-> PLAYING) / PAUSED -> MENU (quit, ST-068) / GAME_OVER -> PLAYING
 export const STATE = Object.freeze({
   MENU: 'MENU',
   PLAYING: 'PLAYING',
@@ -10,7 +10,7 @@ export const STATE = Object.freeze({
 const TRANSITIONS = {
   [STATE.MENU]: [STATE.PLAYING],
   [STATE.PLAYING]: [STATE.PAUSED, STATE.GAME_OVER],
-  [STATE.PAUSED]: [STATE.PLAYING],
+  [STATE.PAUSED]: [STATE.PLAYING, STATE.MENU], // ST-068: quit from pause
   [STATE.GAME_OVER]: [STATE.PLAYING],
 };
 
