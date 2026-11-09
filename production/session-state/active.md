@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E1 Foundations -> E7 (plan extended to 100 iterations per user request)
-- current_story: ST-042
-- current_iteration: I42
+- current_story: ST-043
+- current_iteration: I43
 - branch: main
-- notes: I41 committed (playtest report - scripted self-play A/B: F1 wave-1 stall design gap, F2 hit clustering watch, ~20x skill gap). Next: bugfix B (ST-042).
+- notes: I42 committed (wave stall advance - wave.stallTime 45s, leftover rocks carry, closes playtest F1; 120/120; browser-verified). Next: edge cases (ST-043).

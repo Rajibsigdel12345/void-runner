@@ -91,3 +91,50 @@ test('waves: trickle respects concurrent limit (spawns <= limit per step)', () =
   assert.ok(field.count <= 24, `spawned ${field.count}`);
   assert.equal(dir.toSpawn, 100 - field.count);
 });
+
+test('waves: stall advance after stallTime carries leftover rocks (I42)', () => {
+  const { field, dir } = setup(36);
+  dir.step(DT); // wave 1 active
+  assert.equal(dir.wave, 1);
+  const leftover = field.count;
+  assert.ok(leftover > 0, 'field has rocks to carry');
+  const S = 1 / 60;
+  let stalled = 0;
+  for (let i = 0; i < Math.ceil(CONFIG.wave.stallTime / S) + 2; i++) {
+    const ev = dir.step(S);
+    if (ev.stallAdvance) { stalled = ev.stallAdvance; break; }
+  }
+  assert.equal(stalled, 2, 'stall advanced to wave 2');
+  assert.equal(dir.wave, 2);
+  assert.equal(dir.toSpawn, CONFIG.wave.base + CONFIG.wave.growth * 2);
+  assert.equal(field.count, leftover, 'leftover rocks carried, none deleted');
+  assert.ok(dir.waveElapsed < CONFIG.wave.stallTime, 'stall timer reset');
+});
+
+test('waves: clear in time does not stall (I42)', () => {
+  const { field, dir } = setup(37);
+  dir.step(DT); // wave 1 active
+  field.clear();
+  const ev = dir.step(0.5);
+  assert.equal(ev.waveCleared, 1, 'normal clear fires');
+  assert.equal(ev.stallAdvance, 0, 'no stall on a real clear');
+  assert.equal(dir.state, 'intermission');
+  assert.equal(dir.waveElapsed, 0, 'timer reset on clear');
+});
+
+test('waves: repeated stalls keep escalating (I42)', () => {
+  const { field, dir } = setup(38);
+  dir.step(DT); // wave 1 active
+  const S = 1 / 60;
+  const stalls = [];
+  for (let i = 0; i < 2 * (Math.ceil(CONFIG.wave.stallTime / S)) + 12; i++) {
+    const ev = dir.step(S);
+    if (ev.stallAdvance) {
+      stalls.push(ev.stallAdvance);
+      if (stalls.length === 2) break;
+    }
+  }
+  assert.deepEqual(stalls, [2, 3], 'two consecutive stalls -> waves 2 then 3');
+  assert.equal(dir.wave, 3);
+  assert.ok(field.count > 0, 'leftover rocks persist (concurrent cap bounds density)');
+});

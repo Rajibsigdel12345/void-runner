@@ -46,3 +46,4 @@
 - I39: balance pass 2 - wave speed cap 1.9 -> 2.1 (ramp now runs to wave 18; counterweights the I34 sustain buffs); GDD + balance notes updated, wave cap test made config-derived.
 - I40: QA plan (production/qa-plan.md) - risk ranking, test matrix, regression suites A/B/C, slice-gate entry/exit criteria; Suite A + B executed green (critical path 8/8, combo math verified in-situ).
 - I41: playtest report (scripted self-play, 2 skill profiles) - wave-1 stall gap (F1) + hit-clustering watch (F2) flagged; no bugs found.
+- I42: bugfix B - wave stall advance (wave.stallTime 45s): an uncleared wave now advances anyway with leftover asteroids carried over; closes playtest F1 (camped wave-1 stall).

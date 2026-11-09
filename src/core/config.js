@@ -41,6 +41,7 @@ export const CONFIG = {
     speedCap: 2.1,      // I39: 1.9 -> 2.1, ramp now runs to wave 18 (balance-notes I39)
     maxConcurrentCap: 24,
     intermission: 2.2,
+    stallTime: 45,       // I42: wave advances after 45s without a clear (leftover rocks carry over)
     spawnMinPlayerDist: 8 // I34: rim spawn keeps at least this far from the ship
   },
 

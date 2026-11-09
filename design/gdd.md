@@ -41,7 +41,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 
 ## Waves & Difficulty
 - Wave n: startAsteroids = 4 + n, maxConcurrent = 6 + 2n (cap 24), speedMult = 1 + 0.06n (cap 2.1).
-- Wave advances when all spawned asteroids for that wave are destroyed.
+- Wave advances when all spawned asteroids for that wave are destroyed, or after 45s without a clear (stall advance): the wave increments regardless, undestroyed asteroids carry into the next wave, and the intermission is skipped (I42, closes playtest finding F1 - a camped field can no longer freeze the escalation).
 - 2.2s intermission between waves with "WAVE n" banner.
 
 ## Combo
