@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I85: vignette overlay (ST-085) - static cinematic frame + red danger-edge that holds on the last life and pulses on a hit; the transient hit pulse is suppressed under reduced motion (the static last-life tint still shows) (232/232)
 - I84: audio master-chain pass (ST-084) - post-compressor makeup gain (1.4x) restores loudness after limiting, plus a post-makeup master level-meter probe (peak/rms) as the base for the sound-level pass; stereo pan math verified in-browser (+0.4 / -0.4 at x=+13 / -13) (232/232)
 - I83: audio polish (ST-083) - quiet space-drone ambience bed that sidechain-ducks under every SFX, low tritone Monolith stinger, 4-note wave-clear jingle, fuller near-miss whoosh; ambience runs only in play (232/232)
 - I82: dynamic FOV + speed-scaled look-ahead (ST-082) - FOV kick on bomb/boss death (6/8 deg) plus a speed-proportional FOV boost and look-ahead that leans the camera into the motion; all config-driven (232/232)

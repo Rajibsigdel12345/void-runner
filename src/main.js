@@ -191,7 +191,9 @@ let hitStop = 0; // ST-081: sim-freeze seconds remaining (render loop; rendering
 const fovKick = createFovKick({ decay: CONFIG.fx.fovKick.decay, max: CONFIG.fx.fovKick.max }); // ST-082: dynamic FOV kick
 let simT = 0; // sim-clock for timed visuals (invuln blink)
 const flashEl = document.getElementById('flash'); // hit/bomb flash overlay (index.html)
+const vignetteDangerEl = document.getElementById('vignette-danger'); // I85: red danger-edge vignette (opacity JS-driven; #vignette is static CSS)
 let flashA = 0;
+let dangerA = 0; // I85: transient danger spike on hit (gated by !motionOff like the flash)
 function togglePause() { // ST-033: shared by keyboard and two-finger touch
   const st = world.game.state;
   if (st === STATE.PLAYING) world.pause();
@@ -362,6 +364,7 @@ function tick(dt, intent) {
         particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xff6b57, speed: 11, life: 0.45 });
         shake.trigger(CONFIG.fx.shakeHit);
         flashA = Math.min(0.8, flashA + 0.5);
+        dangerA = Math.min(1, dangerA + (e.data.lives <= 1 ? 1 : 0.6)); // I85: last-life hit reads harder
       } else if (e.type === 'shieldPop') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.75), color: 0x53d8ff, speed: 8, life: 0.5 });
       else if (e.type === 'bomb') {
         particles.burst(0, 0, { count: fxCount * 2, color: 0xfff3b0, speed: 16, life: 0.7 });
@@ -459,6 +462,10 @@ function syncVisuals(dt) {
     flashA = Math.max(0, flashA - dt * 2.2);
     if (flashEl) flashEl.style.opacity = String(flashA); // I43: #flash is optional in the DOM
   } else if (flashEl && flashEl.style.opacity !== '0') flashEl.style.opacity = '0';
+  // I85: danger vignette - steady last-life tint + transient hit spike (spike gated off under reduced motion)
+  if (dangerA > 0) dangerA = Math.max(0, dangerA - dt * 1.4);
+  const dangerOp = Math.max((st === STATE.PLAYING && world.lives <= 1) ? 0.55 : 0, dangerA);
+  if (vignetteDangerEl) { const vo = dangerOp.toFixed(3); if (vignetteDangerEl.style.opacity !== vo) vignetteDangerEl.style.opacity = vo; }
 
   stars.rotation.y += dt * 0.004;
   if (fpsMeter) fpsMeter.sync(dt); // I36
