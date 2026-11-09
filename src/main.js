@@ -13,6 +13,7 @@ import { createHUD } from './render/hud.js';
 import { createScreens } from './render/screens.js';
 import { createSettingsPanel } from './render/settingsPanel.js';
 import { createAudio } from './render/audio.js';
+import { createWaveBanner } from './render/waveBanner.js';
 import { STATE } from './core/state.js';
 import { Storage } from './core/storage.js';
 import { CONFIG } from './core/config.js';
@@ -54,6 +55,7 @@ const bullets = createBulletPool(scene);
 const rockRenders = createAsteroidRenderer(scene);
 const powerupRenders = createPowerupRenderer(scene);
 const shieldRing = createShieldRing(scene);
+const banner = createWaveBanner(document.body);
 const hud = createHUD(document.body);
 let muted = false; // M key (ST-017); consumed by audio (I27)
 
@@ -137,7 +139,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -170,6 +172,8 @@ function tick(dt, intent) {
   for (const e of world.drainEvents()) {
     eventTally[e.type] = (eventTally[e.type] || 0) + 1;
     const cue = SFX_CUES[e.type]; if (cue) audio.sfx(cue);
+    if (e.type === 'wave') banner.showWave(e.data.n);
+    else if (e.type === 'waveCleared') banner.showCleared(e.data.n);
     if (!motionOff) {
       if (e.type === 'kill') particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xffd27a, speed: 9, life: 0.5 });
       else if (e.type === 'hit') {
@@ -205,6 +209,7 @@ function syncVisuals(dt) {
   powerupRenders.sync(world.powerups, dt);
   shieldRing.sync(world, dt);
   particles.sync(dt);
+  banner.sync(world.waves, dt, motionOff); // ST-028
 
   const ship = world.ship;
   const f = ship.forward();

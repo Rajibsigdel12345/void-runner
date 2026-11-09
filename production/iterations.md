@@ -181,4 +181,10 @@ One entry per iteration. Format:
 - Verification: npm test 111/111 pass (browser-layer feature; core unchanged); build exit 0; browser: state 'uninitialized' pre-gesture -> 'running' after markAudioReady; gameplay events scheduled cues (fire->shoot, kill->kill, hit->hit, gameover->gameover observed via played counters across forced kills/hits/game-overs); all 8 cue specs played directly with zero exceptions; setVolume(0.3)/setMuted(true/false) round-trip; console 0 errors. Self-review caught + fixed a TDZ ordering bug (boot applySettings referenced audio before its const) by moving the audio block above applySettings.
 - Result: DONE
 - Follow-up: I28 "WAVE n" banner + intermission display.
+## I28 - WAVE n banner + intermission countdown (ST-028)
+- Goal: readable wave pacing - a big "WAVE n" banner when a wave starts, a "WAVE n CLEARED" line, and a live "NEXT WAVE IN x.x" countdown during the 2.2s intermission.
+- Changed: src/render/waveBanner.js (NEW: single fixed DOM overlay, z-index 10; showWave(n)/showCleared(n) start a timed fade envelope (0.25s in, 0.6s out) driven by sync(waves, dt, motionOff) - reduced-motion uses hard on/off instead of fades; idle branch renders the intermission countdown from the WaveDirector state and hides on state change; big line hidden (fontSize 0) when only the sub line is shown), src/main.js (banner created, drain hooks wave->showWave / waveCleared->showCleared, syncVisuals calls banner.sync(world.waves, dt, motionOff), __vr += banner).
+- Verification: npm test 111/111 pass (render-layer; core unchanged); build exit 0; browser: at game start intermission showed "NEXT WAVE IN 2.1" at opacity 0.6 with the big line empty; after the 2.2s intermission the wave advanced to 1 and the big line read "WAVE 1" with opacity ramping from 0.067; manual showWave(3)+sync(0.4) held opacity 1 / "WAVE 3"; .evidence/i28-wave-banner.png captured the stable intermission countdown; console 0 errors.
+- Result: DONE
+- Follow-up: I29 audio polish (stingers / layering) or I30 floating score popups per the E1 plan.
 
