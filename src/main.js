@@ -1,15 +1,13 @@
-﻿// Void Runner - boot (I06: ship + mouse aim + follow camera)
+﻿// Void Runner - boot (I12: World orchestrator drives ship/weapons/asteroids/collisions)
 import * as THREE from 'three';
 import { createStarfield } from './render/starfield.js';
 import { createShipMesh } from './render/shipMesh.js';
 import { createInput } from './render/input.js';
 import { createBulletPool } from './render/bulletPool.js';
-import { Weapons } from './core/weapons.js';
-import { AsteroidField } from './core/asteroids.js';
-import { RNG } from './core/rng.js';
 import { createAsteroidRenderer } from './render/asteroidRenderer.js';
-import { Ship } from './core/ship.js';
-import { damp } from './core/math.js';
+import { World } from './core/game.js';
+import { RNG } from './core/rng.js';
+import { damp, v2 } from './core/math.js';
 
 const app = document.getElementById('app');
 
@@ -36,19 +34,15 @@ scene.add(grid);
 const stars = createStarfield(1337);
 scene.add(stars);
 
-// --- gameplay entities (I08: ship + weapons) ---
-const ship = new Ship(0, 0);
-const weapons = new Weapons();
+// --- gameplay (I12: World orchestrates core; render layer only syncs visuals) ---
+// Seed is session-random; the determinism harness (I076) pins seeds explicitly.
+const world = new World(new RNG((Date.now() & 0xffff) ^ 0x51ab));
 const shipMesh = createShipMesh();
 scene.add(shipMesh.group);
-
 const bullets = createBulletPool(scene);
-
-// I10: asteroid field (demo rocks until I12 wave logic takes over)
-const worldRng = new RNG(Date.now() & 0xffff);
-const field = new AsteroidField(worldRng);
 const rockRenders = createAsteroidRenderer(scene);
-for (let i = 0; i < 4; i++) field.spawn(i < 2 ? 'L' : 'M');
+// demo rocks until I14 wave logic takes over spawning
+for (let i = 0; i < 4; i++) world.field.spawn(i < 2 ? 'L' : 'M');
 
 const input = createInput();
 const raycaster = new THREE.Raycaster();
@@ -59,7 +53,16 @@ const aimWorld = new THREE.Vector3();
 const camPos = { x: 0, y: 9, z: 13 };
 const camLook = { x: 0, y: 0, z: 0 };
 
-window.__vr = { ship, weapons, field }; // debug/test handle (expanded in I080)
+// event drain sink (I16 HUD / I24 fx / I27 audio hook in here)
+const eventTally = {};
+// Deterministic advance for smoke tests + the I076 harness: runs N fixed substeps
+// (world.step + event drain + visual sync) independent of display rate.
+function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing: false }) {
+  const n = Math.max(1, Math.round(simSeconds / STEP));
+  for (let i = 0; i < n; i++) tick(STEP, intent);
+  syncVisuals(STEP);
+}
+window.__vr = { world, eventTally, input, advance }; // debug/test handle (expanded in I080)
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -67,27 +70,35 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-const clock = new THREE.Clock();
-function frame() {
-  requestAnimationFrame(frame);
-  const dt = Math.min(clock.getDelta(), 0.05);
+// Fixed-timestep simulation (60Hz) with render at display rate.
+// Substeps keep sim time tracking wall time even when rAF is throttled;
+// backlog is dropped past MAX_SUBSTEPS (hidden tab / slow device) instead of spiraling.
+const STEP = 1 / 60;
+const MAX_SUBSTEPS = 8;
+let lastNow = performance.now();
+let acc = 0;
 
-  let aimPoint = null;
-  if (input.pointer.active) {
-    raycaster.setFromCamera(input.pointer.ndc, camera);
-    if (raycaster.ray.intersectPlane(groundPlane, aimWorld)) {
-      aimPoint = { x: aimWorld.x, y: aimWorld.z };
-    }
+function resolveAimPoint() {
+  if (!input.pointer.active) return null;
+  raycaster.setFromCamera(input.pointer.ndc, camera);
+  if (raycaster.ray.intersectPlane(groundPlane, aimWorld)) {
+    return { x: aimWorld.x, y: aimWorld.z };
   }
+  return null;
+}
 
-  ship.step(dt, input.state.thrust, aimPoint);
-  if (input.state.firing) weapons.fire(ship.pos, ship.aim);
-  weapons.step(dt);
-  bullets.sync(weapons);
-  field.step(dt);
-  rockRenders.sync(field);
-  shipMesh.sync(ship);
+function tick(dt, intent) {
+  const it = intent || { thrust: input.state.thrust, aimPoint: resolveAimPoint(), firing: input.state.firing };
+  world.step(dt, it);
+  for (const e of world.drainEvents()) eventTally[e.type] = (eventTally[e.type] || 0) + 1;
+}
 
+function syncVisuals(dt) {
+  shipMesh.sync(world.ship);
+  bullets.sync(world.weapons);
+  rockRenders.sync(world.field);
+
+  const ship = world.ship;
   const f = ship.forward();
   camPos.x = damp(camPos.x, ship.pos.x, 5, dt);
   camPos.y = damp(camPos.y, 9, 5, dt);
@@ -99,8 +110,26 @@ function frame() {
   camera.lookAt(camLook.x, camLook.y, camLook.z);
 
   stars.rotation.y += dt * 0.004;
+}
+
+function frame() {
+  requestAnimationFrame(frame);
+  const now = performance.now();
+  let frameDt = (now - lastNow) / 1000;
+  lastNow = now;
+  if (frameDt > 0.25) frameDt = 0.25; // clamp huge gaps (tab switch); I078 refines this
+  acc += frameDt;
+  let n = 0;
+  while (acc >= STEP && n < MAX_SUBSTEPS) {
+    tick(STEP);
+    acc -= STEP;
+    n++;
+  }
+  if (n === MAX_SUBSTEPS) acc = 0; // drop backlog
+  syncVisuals(frameDt);
   renderer.render(scene, camera);
 }
 frame();
+
 
 

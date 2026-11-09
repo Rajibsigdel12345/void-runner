@@ -78,3 +78,10 @@ One entry per iteration. Format:
 - Verification: npm test 46/46 pass; build exit 0.
 - Result: DONE
 - Follow-up: I12 wires collisions into a World orchestrator.
+## I12 - World orchestrator + full collision loop (ST-012)
+- Goal: single World core owning ship/weapons/field; per-frame intent->step->events; bullet kills (score+fragments), ship hits (life+knockback+invuln), game over, reset.
+- Changed: src/core/game.js (new World), tests/game.test.js (new, 7 tests), src/main.js (rewired around World; fixed-timestep 60Hz sim w/ substeps + backlog drop; advance() test hook)
+- Notes: headless browser throttles rAF to ~0.66fps -> added fixed-timestep substeps (sim tracks wall time) + deterministic advance() hook for smoke/harness; render layer stays a pure sync.
+- Verification: npm test 53/53; build exit 0; browser: console clean, deterministic smoke via advance(): kill->score 175 + 3 kills + fragments, hit->lives 2 + invuln, gameover->event, reset->clean; screenshot .evidence/i12-fullloop.png.
+- Result: DONE
+- Follow-up: score/combo (I13), waves (I14), lives/state machine (I15), HUD (I16).

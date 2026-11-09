@@ -14,3 +14,4 @@
 - I09: asteroid field core (rim spawn, bounce, splits, caps, seeded) + 7 unit tests.
 - I10: asteroid rendering (noise-baked low-poly variants, pooled, tumble).
 - I11: collision helpers (circles, bullet/ship vs rocks) + 6 unit tests.
+- I12: World orchestrator (full collision loop, events), fixed-timestep sim, deterministic advance() hook.
