@@ -202,3 +202,9 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - UX/flow only: no gameplay, scoring, or pacing changes. 186/186 tests (182 pre-existing + 4 new: PAUSED->MENU transition legality x2, world.quitToMenu reset + no-op-outside-PAUSED).
 - The pause screen now dims the frozen scene more (0.55 -> 0.74 alpha + soft blue vignette) and offers three explicit actions: RESUME (P/Esc/Enter), RESTART (R), QUIT TO MENU (Q). Each is a DOM button (mouse) with hover/active/focus-visible styling, arrow-key focus moves within the row, and a hotkey guard so a focused button's action wins over the window-level key handler.
 - State machine gains PAUSED -> MENU (quit); world.quitToMenu() performs the transition + full system reset and is a no-op outside PAUSED. RESTART from pause reuses the GAME_OVER restart path (reset + begin).
+## I69 - game-over stats + new-best celebration (ST-069)
+
+- Presentation/juice only: no gameplay, scoring, or pacing changes. 186/186 tests (no new unit tests - render/main wiring only). No new config tunables.
+- The game-over stats panel (existing kills/wave/combo/time from ST-031) now also shows this run's BOARD RANK #N, derived from the persistent top-5 board via storage.recordScore().rank (I66 high-score data).
+- A NEW BEST run fires a three-colour confetti burst at the ship position - gold 0xffd27a (count = fxCount tier), cyan 0x7fd0ff and magenta 0xd87fd8 at offset corners (count = ceil(fxCount*0.6), speed 6, life ~1.0s) - and the NEW BEST! line pulses (vrBestPulse 1.2s ease-in-out infinite). Confetti count scales with the current FX tier (particleHigh/particleLow).
+- Reduced Motion: no confetti burst and the NEW BEST! pulse is disabled (static line), per the .vr-reduced overrides. The board rank line is always shown (data, not motion).

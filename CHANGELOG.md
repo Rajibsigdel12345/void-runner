@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I69: game-over stats + new-best celebration (ST-069) - board rank line on the game-over panel + three-colour confetti burst and pulsing NEW BEST! on a new best (reduced-motion static)
 - I68: pause overlay (ST-068) - deeper dim, RESUME/RESTART/QUIT actions (mouse + keys), arrow-key focus moves, new PAUSED->MENU quit transition
 - I67: options panel polish (ST-067) - grouped AUDIO/VISUALS cards, keyboard operability (arrow focus moves, hotkey guard, focus rings), live particle preview on FX tier change
 - I66: top-5 high-score table (ST-066) - persistent corruption-safe board (score/wave/kills, no timestamps) in a two-column menu card with 'no scores yet' placeholder; NEW BEST! flag retained

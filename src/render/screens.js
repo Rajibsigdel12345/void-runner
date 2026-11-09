@@ -18,6 +18,9 @@ export function createScreens(root, settings = {}) {
     '.vr-title{background:linear-gradient(180deg,#e6f4ff 0%,#8fd0ff 45%,#3f7fd8 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:vrTitleGlow 3.4s ease-in-out infinite;}',
     '.vr-menu-anim{animation:vrMenuPan 34s ease-in-out infinite;}',
     '.vr-reduced .vr-title,.vr-reduced .vr-menu-anim{animation:none !important;}',
+    '@keyframes vrBestPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 6px rgba(255,210,122,0.7))}50%{transform:scale(1.12);filter:drop-shadow(0 0 18px rgba(255,210,122,1))}}',
+    '.vr-newbest{animation:vrBestPulse 1.2s ease-in-out infinite;}',
+    '.vr-reduced .vr-newbest{animation:none !important;}',
     '.vr-credit{position:absolute;bottom:16px;left:0;right:0;font-size:11px;letter-spacing:1px;opacity:0.5;}',
     '.vr-pause-btn{pointer-events:auto;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:2px;color:#cfe4ff;background:rgba(10,18,40,0.85);border:1px solid #2b4a8a;border-radius:8px;padding:10px 18px;transition:background 0.15s,border-color 0.15s;}',
     '.vr-pause-btn:hover{background:rgba(30,50,100,0.95);border-color:#4a7fd8;}',
@@ -146,6 +149,7 @@ export function createScreens(root, settings = {}) {
   const newBestLine = line(gameOver, '', 'font-size:16px;font-weight:800;letter-spacing:3px;color:#ffe08a;');
   const statsLine1 = line(gameOver, '', 'font-size:15px;font-weight:700;letter-spacing:2px;color:#cfe4ff;margin-top:10px;'); // ST-031
   const statsLine2 = line(gameOver, '', 'font-size:15px;font-weight:700;letter-spacing:2px;color:#cfe4ff;'); // ST-031
+  const rankLine = line(gameOver, '', 'font-size:14px;font-weight:700;letter-spacing:2px;color:#ffe08a;opacity:0.95;'); // I69: board rank
   line(gameOver, 'PRESS ENTER TO RESTART', 'font-size:16px;font-weight:700;letter-spacing:4px;margin-top:10px;animation:vrPulse 1.6s ease-in-out infinite;');
 
   const PANELS = {
@@ -181,6 +185,8 @@ export function createScreens(root, settings = {}) {
       set('finalScore', finalScore, `SCORE ${world.score}`);
       set('overBest', overBest, opts.best > 0 ? `BEST ${opts.best}` : '');
       set('newBest', newBestLine, opts.newBest ? 'NEW BEST!' : '');
+      newBestLine.classList.toggle('vr-newbest', !!opts.newBest); // I69: celebration pulse
+      set('overRank', rankLine, opts.scoreRank > 0 ? 'BOARD RANK #' + opts.scoreRank : ''); // I69
       const mm = Math.floor(world.time / 60); // ST-031: session stats
       const ss = String(Math.floor(world.time) % 60).padStart(2, '0');
       set('stats1', statsLine1, "KILLS " + world.scoreKeeper.kills + "    WAVE " + Math.max(1, world.wave));

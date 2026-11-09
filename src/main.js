@@ -97,6 +97,7 @@ const storage = new Storage(lsStore, CONFIG.storage);
 let bestScore = storage.getBest();
 let newBest = false;
 let scoresText = ''; // I66: top-5 table text for the menu (refreshed at boot + on game over)
+let scoreRank = 0; // I69: this run's board rank (shown on game over)
 function refreshScoresText() {
   const rows = storage.getHighScores();
   scoresText = rows.map((e, i) => (i + 1) + '. ' + e.score + '    W' + e.wave + '  \u00b7  ' + e.kills).join('\n');
@@ -296,8 +297,15 @@ function tick(dt, intent) {
       newBest = storage.setBest(e.data.score); // true when the stored best was raised
       bestScore = storage.getBest();
       if (e.data.score > 0) { // I66: top-5 board (wave/kills from live world state)
-        storage.recordScore({ score: e.data.score, wave: Math.max(1, world.wave), kills: world.scoreKeeper.kills });
+        const rec = storage.recordScore({ score: e.data.score, wave: Math.max(1, world.wave), kills: world.scoreKeeper.kills });
+        scoreRank = rec.rank; // I69
         refreshScoresText();
+      }
+      if (newBest && !motionOff && fxCount > 0) { // I69: new-best confetti (reduced motion: static)
+        const sx = world.ship.pos.x, sy = world.ship.pos.y;
+        particles.burst(sx, sy, { count: fxCount, color: 0xffd27a, speed: 7, life: 1.1 });
+        particles.burst(sx - 2.5, sy + 1.5, { count: Math.ceil(fxCount * 0.6), color: 0x7fd0ff, speed: 6, life: 1.0 });
+        particles.burst(sx + 2.5, sy - 1.5, { count: Math.ceil(fxCount * 0.6), color: 0xd87fd8, speed: 6, life: 1.0 });
       }
       vortexFx.hide(); // ST-059
     }
@@ -318,6 +326,7 @@ function syncVisuals(dt) {
   screenOpts.newBest = newBest;
   screenOpts.reducedMotion = motionOff; // I65: menu polish (reduced-motion gates the new animations)
   screenOpts.scoresText = scoresText; // I66: top-5 table
+  screenOpts.scoreRank = scoreRank; // I69: board rank on game over
   hud.render(world, hudOpts);
   screens.update(st, world, screenOpts);
   shipMesh.sync(world.ship, simT, !motionOff, Math.min(1, Math.hypot(input.state.thrust.x, input.state.thrust.y))); // ST-063 engine flame
