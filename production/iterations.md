@@ -187,4 +187,10 @@ One entry per iteration. Format:
 - Verification: npm test 111/111 pass (render-layer; core unchanged); build exit 0; browser: at game start intermission showed "NEXT WAVE IN 2.1" at opacity 0.6 with the big line empty; after the 2.2s intermission the wave advanced to 1 and the big line read "WAVE 1" with opacity ramping from 0.067; manual showWave(3)+sync(0.4) held opacity 1 / "WAVE 3"; .evidence/i28-wave-banner.png captured the stable intermission countdown; console 0 errors.
 - Result: DONE
 - Follow-up: I29 audio polish (stingers / layering) or I30 floating score popups per the E1 plan.
+## I29 - audio polish: compressor, stereo pan, pitch jitter, stingers (ST-029)
+- Goal: make the synth layer feel less flat and survive stacked cues: a master compressor, world-x stereo pan, per-play pitch jitter, and real multi-note stingers for wave-clear and game-over.
+- Changed: src/render/audio.js (master chain now gain -> DynamicsCompressor[-18/20/6/0.003/0.25] -> destination; every play routes through a per-cue StereoPanner with pan = clamp(x/26,-1..1)*0.8; scheduleNote adds +-3% pitch jitter so repeated cues never sound looped; CUES gains note arrays - cleared = rising 523/659/784 sine arp, gameover = falling 440/330/196 saw motif with noise tail; sfx(name, pos) takes an optional position, lastPan() probe added), src/main.js (SFX_CUES maps waveCleared->cleared, drain passes e.data.pos when present).
+- Verification: npm test 111/111 pass (browser-layer; core unchanged); build exit 0; browser: all 9 cues (incl. both stingers) scheduled with zero exceptions; pan probes with real waits -> left -0.615, center 0, clamped +0.8 (matches clamp(x/26)*0.8); full chain live: shatter field -> waveCleared +1, cleared cue +1, banner "WAVE 1 CLEARED", state -> intermission; console 0 errors. Self-review caught + fixed a swapped gain/time arg in the stinger scheduling loop.
+- Result: DONE
+- Follow-up: I30 floating score popups (+combo) at kill position.
 

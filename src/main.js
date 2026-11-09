@@ -75,7 +75,7 @@ let fxCount = 0;
 let motionOff = false;
 let liveSettings = storage.getSettings(); // ST-026: settings panel keeps this fresh (audio consumes in I27)
 // Audio (ST-027): WebAudio synth, initialized on first user gesture.
-const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', gameover: 'gameover' };
+const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', waveCleared: 'cleared', gameover: 'gameover' };
 const audio = createAudio();
 audio.setVolume(liveSettings.volume);
 audio.setSfx(liveSettings.sfx);
@@ -171,7 +171,7 @@ function tick(dt, intent) {
   world.step(dt, it);
   for (const e of world.drainEvents()) {
     eventTally[e.type] = (eventTally[e.type] || 0) + 1;
-    const cue = SFX_CUES[e.type]; if (cue) audio.sfx(cue);
+    const cue = SFX_CUES[e.type]; if (cue) audio.sfx(cue, e.data && e.data.pos ? e.data.pos : null);
     if (e.type === 'wave') banner.showWave(e.data.n);
     else if (e.type === 'waveCleared') banner.showCleared(e.data.n);
     if (!motionOff) {
