@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E7 (extended content/UX/hardening, I51-I100)
-- current_story: ST-099
-- current_iteration: I99
+- current_story: ST-100
+- current_iteration: I100
 - branch: main
-- notes: I99 done (regression suite closing re-run on the production dist/ after I92/I93: 233/233 + build 0 + six in-browser scenarios all pass - critical path, F1 stall-advance, I92 breather/cap/invuln, I93 mod-tag, game-over/pause/restart, render+NaN; no NaN, 0 console errors/warnings; verdict REGRESSION CLEAN, no code changes). Next: I100 final wrap + the 100th iteration + qa-plan closeout (ST-100).
+- notes: I100 done (qa-plan closeout + final wrap: E7 gate CLOSED - all 5 criteria met, 100 iterations complete sequence 1..100, 233/233 tests, build 0, regression clean I89+I99, playtested twice; no open code defects; E7 code side COMPLETE). Next: the user-requested Blender graphics pass (cgs-art-bible -> cgs-asset-spec -> cgs-asset-audit); a human playtest is recommended before a final release call.

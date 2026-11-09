@@ -77,3 +77,72 @@ Scope: everything shippable in the vertical slice (I01-I45). Layers: **node** (1
 - R7 robustness: no auto-pause on tab blur, no WebGL context-loss recovery, `#flash` element assumed present - all scoped to I43.
 - No automated touch regression yet (synthetic PointerEvents work but aren't in the suite) - added to Suite C for I45.
 - Audio quality is subjective: covered by playtest notes only.
+
+## Closeout (I100, ST-100) - final QA status at the E7 / 100-iteration gate
+
+Skill: cgs-qa-plan | Date: 2026-11-10 | Iteration: I100 (ST-100)
+
+### Summary
+Final QA closeout at the 100-iteration gate. The plan defined at I40 (117 node tests) has grown to 233 node tests
+(+116 across E1-E7, including the I92 breather test and the I90+ regression tests). All risk areas (R1-R8) now have an
+automated guard or a documented acceptance; the regression suite (A/B/C/D) is green on the production dist/. No open code
+defects. The only outstanding items are perception (human playtest) and the scheduled Blender graphics pass - both tracked,
+non-blocking, and outside the automated QA scope.
+
+### Test Matrix (final status)
+- node: 233/233 green, deterministic, seed-pinned. Covers core loop, state machine, restart hygiene, storage, waves (incl.
+  the I92 breather), boss, vortex, mines, powerups, combo/cap, collision, and rng determinism.
+- browser (Playwright, production dist/ on :4173): critical path, full state machine, F1 stall-advance, I92/I93 changes,
+  boss, wave modifiers, powerups, vortex, mines, render+NaN audit, console-clean. Verified at I98 (release checklist) +
+  I99 (round D closing regression).
+- playtest: v1 (I41) + v2 (I90) scripted self-play complete; findings F1-F9 triaged (I91), F9/F4/F2 fixed (I92), F8
+  accepted, 4 perception items deferred to a human session (not bot-verifiable).
+
+### Risk Coverage (final)
+- R1 core loop: node game/world tests + browser critical path - GREEN.
+- R2 state machine: node transition tests + browser state walk (pause freeze / resume / game-over step-gate / restart) - GREEN.
+- R3 restart hygiene: node reset tests + browser game-over->restart probe - GREEN.
+- R4 persistence: node fake-store tests + browser localStorage round-trip (version-guarded) - GREEN.
+- R5 input modes: synthetic pointer/key sequences (touch verified via PointerEvents) - GREEN (physical touch still a known gap).
+- R6 perf: node pool invariants + in-browser profile (I95: steady-state mean 5-7ms, p95 11-14ms, within the 16.67ms budget)
+  - GREEN (low-end physical device untested).
+- R7 robustness: graceful handling (blur/resize/context-loss) - ACCEPTED (not auto-guarded; documented).
+- R8 balance drift: convention enforced (config changes require balance-notes + GDD sync; I92 synced) - GREEN.
+
+### Acceptance Criteria (E7 / 100-iteration gate)
+- 100+ iterations logged: MET (100 at this iteration, sequence 1..100).
+- All tests green: MET (233/233).
+- Build green: MET (exit 0; dist 1.44MB self-contained).
+- Extended regression clean: MET (round C I89 + round D I99, no NaN, console 0).
+- Playtested twice: MET (I41 v1 + I90 v2).
+**Verdict: E7 GATE CLOSED - all 5 criteria met at I100.**
+
+### Evidence
+- npm test 233/233; node scripts/build.mjs exit 0.
+- .evidence/i98-dist-boss.png (production dist, WAVE 5 + MONOLITH + ship + HUD, healthy render).
+- production/regression-report.md round D (I99) - 6 scenarios, all pass.
+- production/playtest-report.md (v1 I41 + v2 I90); production/bug-triage.md (I91); production/balance-notes.md (I92);
+  production/perf-profile.md (I95); production/release-checklist.md v2 (I98).
+
+### Risks (carried, non-blocking)
+- Human playtest perception items (4): post-boss breather feel, vortex dodgeability feel, combo/overdrive feel, in-world
+  wave-modifier legibility - the outstanding player-experience evidence gap (not bot-verifiable).
+- Blender graphics pass: unstarted; the game is fully playable but visually placeholder-grade (procedural + canvas) until
+  it runs. Scheduled after I100 by user request.
+- Perf first-frame init (~90-600ms) deferred (offscreen warm-up proposed, I95); low risk.
+- Low-end physical device / GPU validation untested (dev-machine baselines only; adaptive quality mitigates).
+
+### Changed files or proposed files
+- production/qa-plan.md (append: this closeout).
+- production/milestone-review.md (append: E7 gate CLOSED note).
+- No source changes (QA closeout is evidence + gate confirmation, not code).
+
+### Verification evidence
+- node --test 233/233 green (fresh run); node scripts/build.mjs exit 0 (fresh run).
+- Iteration sequence PASS 1..100.
+- Regression round D (I99) clean; release checklist v2 (I98) SHIP-READY (code side).
+
+### Next owner / decision
+- E7 code side is COMPLETE. Proceed to the user-requested Blender graphics pass: cgs-art-bible -> cgs-asset-spec ->
+  cgs-asset-audit (update graphics/geometry/textures using Blender now that it is available). A human playtest is
+  recommended before a final release call.
