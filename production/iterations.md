@@ -629,3 +629,9 @@ One entry per iteration. Format:
 - Goal: run a UI/UX review of the DOM UI for clarity, comprehension, accessibility, and player feedback, and fix the single real comprehension gap carried from I90 (the "invisible wave-modifier tag").
 - Changed: src/render/hud.js (persistent active-modifier tag under the WAVE counter: MOD_TAG label+color map, waveMod element, lastModTag cache, render logic; shown for fast/small/inward, hidden for plain/breather waves), design/ui-ux-review.md (NEW review artifact).
 - Verification: node --test 233/233 green; build exit 0. Browser (1280x720, live dev build) smoke: forced each modifier and read the DOM - wave 3 activeMod=fast -> tag "FAST ROCKS" (display block, rgb(255,154,107)); wave 9 activeMod=small -> "SMALL ROCKS" (block, rgb(111,227,255)); wave 6 activeMod=none (breather) -> tag hidden. 0 console errors. Screenshot .evidence/i93-smoke-modtag.png (WAVE 3 / FAST ROCKS tag visible in the live HUD). Next: I94 reverse-document.
+
+## I94 - reverse-document: vortex system design doc (ST-094)
+
+- Goal: create design/technical documentation from the existing implementation without inventing unverified behavior (cgs-reverse-document), bounded to one system.
+- Changed: design/systems/vortex.md (NEW reverse-engineered design doc for the gravity vortex: 4-phase machine idle/telegraph/active, constant-magnitude inside-radius pull on rocks (pullRocks*dt) and ship (pullShip, clamped at maxSpeed by the World), fair+seeded spawn placement, the vortexTelegraph/vortexStart/vortexEnd events, presentation-only FX + SFX, reset-on-restart; Observed Behavior separated from Unknowns; config line-range cited).
+- Verification: node --test tests/vortex.test.js 6/6 pass; full suite 233/233 green (unchanged); build exit 0. No source or test changes (docs-only reverse-document). Next: I95 perf-profile (ST-095).
