@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: Blender graphics pass (post-I100, I101+)
-- current_story: ST-103
-- current_iteration: I103
+- current_story: ST-104
+- current_iteration: I104
 - branch: main
-- notes: I103 done (Blender modeling: 5 GLB assets exported to assets/ via the bpy API - ship.glb 22KB/254tris, asteroid_L/M/S.glb 33/9/9KB 320/80/80tris radius-normalized, boss.glb 14KB/192tris tapered obelisk; all flat-shaded, no textures/rig/anim, VR_ naming, validated as well-formed glTF 2.0; total ~88KB; no code changes, 233/233 + build exit 0, sequence 1..103). Next: I104 = three.js integration (GLTFLoader-backed ship/rock/boss renderers with procedural fallback, build.mjs copies assets/ into dist/), then I105 browser verification (screenshots + perf + NaN + orientation), I106 cgs-asset-audit.
+- notes: I104 done (three.js GLB integration: new src/render/assetLoader.js fire-and-forget GLTFLoader with procedural fallback; shipMesh useGLB (ship_body sub-group, material override by name, flames preserved); asteroidRenderer setGLB (per-size geometry swap, fresnel + golden materials stay in code); bossMesh useGLB (geometry swap, emissive-pulse material kept); main.js wiring + window.__vr.assetLoader; build.mjs vendors GLTFLoader/BufferGeometryUtils + copies assets/ into dist/). Verified: 233/233, build exit 0, browser smoke - all 5 assets ready=true, ship 540-vert GLB body, boss 384-vert geometry (bbox 4.17x9.0 origin-centered), rocks 960/240/240-vert GLB geometries, menu + PLAYING screenshots, console 0/0, no NaN, early frame 26 calls/508 tris. Next: I105 = full browser verification (forced ship + rocks + boss scene, nose direction, hitbox parity, perf vs baseline on dev + dist :4173, AGENTS.md assets/ convention update) then I106 = cgs-asset-audit.

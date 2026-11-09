@@ -5,6 +5,12 @@ export function createShipMesh() {
   const group = new THREE.Group();
   group.name = 'ship';
 
+  // I104: body parts live in a sub-group so a GLB swap (useGLB) can replace
+  // the whole procedural hull without touching the in-code additive flames.
+  const shipBody = new THREE.Group();
+  shipBody.name = 'ship_body';
+  group.add(shipBody);
+
   const bodyMat = new THREE.MeshStandardMaterial({ color: 0x8fd8ff, metalness: 0.35, roughness: 0.35, flatShading: true });
   const wingMat = new THREE.MeshStandardMaterial({ color: 0x2f5aa8, metalness: 0.3, roughness: 0.5, flatShading: true });
   const cockpitMat = new THREE.MeshStandardMaterial({ color: 0x0b1830, emissive: 0x59d8ff, emissiveIntensity: 1.4, roughness: 0.2 });
@@ -13,22 +19,22 @@ export function createShipMesh() {
   bodyGeo.rotateX(Math.PI / 2); // tip toward +Z (forward in render space)
   const body = new THREE.Mesh(bodyGeo, bodyMat);
   body.scale.set(1, 0.5, 1);
-  group.add(body);
+  shipBody.add(body);
 
   const wingGeo = new THREE.BoxGeometry(2.5, 0.1, 1.0);
   const wings = new THREE.Mesh(wingGeo, wingMat);
   wings.position.set(0, 0, -0.45);
-  group.add(wings);
+  shipBody.add(wings);
 
   const finGeo = new THREE.BoxGeometry(0.12, 0.5, 0.7);
   const fin = new THREE.Mesh(finGeo, wingMat);
   fin.position.set(0, 0.2, -0.6);
-  group.add(fin);
+  shipBody.add(fin);
 
   const cockpitGeo = new THREE.SphereGeometry(0.22, 12, 10);
   const cockpit = new THREE.Mesh(cockpitGeo, cockpitMat);
   cockpit.position.set(0, 0.12, 0.15);
-  group.add(cockpit);
+  shipBody.add(cockpit);
 
   // ST-063: rear engine flame (additive, thrust-reactive). Apex anchored at the
   // hull rear (+Z end toward the body) so it only grows backward (-Z) with
@@ -61,6 +67,25 @@ export function createShipMesh() {
 
   group.position.y = 0.4; // hover just above the arena plane
 
+  // I104: useGLB(obj) - swap the procedural body for the Blender ship.
+  // Materials are overridden by name to guarantee the exact in-code palette
+  // (Blender's sRGB->linear conversion may have shifted the baked colors).
+  let glbSwapped = false;
+  function useGLB(obj) {
+    if (!obj || glbSwapped) return;
+    glbSwapped = true;
+    group.remove(shipBody);
+    shipBody.traverse((n) => { if (n.isMesh) n.geometry.dispose(); });
+    obj.traverse((n) => {
+      if (!n.isMesh) return;
+      const nm = (n.material && n.material.name) || '';
+      if (nm.indexOf('Cockpit') !== -1) n.material = cockpitMat;
+      else if (nm.indexOf('Wing') !== -1) n.material = wingMat; // wing + fin
+      else n.material = bodyMat;
+    });
+    group.add(obj);
+  }
+
   function setFlame(thrustMag, t, motionOn) {
     const on = thrustMag > 0.05;
     flameOuter.visible = on;
@@ -84,5 +109,5 @@ export function createShipMesh() {
     setFlame(thrustMag || 0, t, motionOn); // ST-063: engine flame
   }
 
-  return { group, sync, flame: flameOuter, flameCore };
+  return { group, sync, flame: flameOuter, flameCore, useGLB };
 }

@@ -45,5 +45,14 @@ export function createBossMesh(scene) {
     mesh.visible = true;
   }
 
-  return { sync, mesh };
+  // I104: useGLB(obj) - swap in the Blender obelisk geometry. The in-code
+  // material (pulsing emissive) is kept, so the GLB's own material is ignored.
+  function useGLB(obj) {
+    if (!obj) return;
+    let g = null;
+    obj.traverse((n) => { if (n.isMesh && !g) g = n.geometry; });
+    if (g) mesh.geometry = g;
+  }
+
+  return { sync, mesh, useGLB };
 }

@@ -5,6 +5,7 @@ import { createShipMesh } from './render/shipMesh.js';
 import { createInput } from './render/input.js';
 import { createBulletPool } from './render/bulletPool.js';
 import { createAsteroidRenderer } from './render/asteroidRenderer.js';
+import { createAssetLoader } from './render/assetLoader.js'; // I104
 import { createMineRenderer } from './render/mineMesh.js';
 import { createBossMesh } from './render/bossMesh.js';
 import { createBossHealth } from './render/bossHealth.js';
@@ -83,6 +84,18 @@ const bullets = createBulletPool(scene);
 const rockRenders = createAsteroidRenderer(scene);
 const mineRenders = createMineRenderer(scene); // ST-054
 const bossMesh = createBossMesh(scene); // ST-055
+// I104: GLB assets (Blender pass) - fire-and-forget load with procedural
+// fallback: renderers start procedural and each asset swaps in as it loads.
+const assetLoader = createAssetLoader();
+assetLoader.onAsset((name, entry) => {
+  if (!entry.ready) return;
+  if (name === 'ship') shipMesh.useGLB(entry.object);
+  else if (name === 'rockL') rockRenders.setGLB('L', entry.object);
+  else if (name === 'rockM') rockRenders.setGLB('M', entry.object);
+  else if (name === 'rockS') rockRenders.setGLB('S', entry.object);
+  else if (name === 'boss') bossMesh.useGLB(entry.object);
+});
+assetLoader.loadAll();
 const bossHealth = createBossHealth(document.body); // ST-055
 const enemyBulletRenders = createEnemyBulletRenderer(scene); // ST-056
 const powerupRenders = createPowerupRenderer(scene);
@@ -259,7 +272,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, bossMesh, bossHealth, enemyBulletRenders, stars, vortexFx, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, bossMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });

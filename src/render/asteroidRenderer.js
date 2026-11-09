@@ -28,6 +28,9 @@ export function createAsteroidRenderer(scene) {
       bakeVariant(321 + sizes.indexOf(s), CONFIG.asteroid.sizes[s].radius),
     ];
   }
+  // I104: GLB geometries (Blender pass) swap in as they load; until then the
+  // procedural 3-variant bakes are used.
+  const glbGeo = {};
   const mat = new THREE.MeshStandardMaterial({ color: 0x8a7f72, roughness: 0.95, metalness: 0.05, flatShading: true });
   // I60: rim-lit upgrade - cool fresnel edge added on top of the standard lighting.
   mat.onBeforeCompile = (shader) => {
@@ -58,7 +61,7 @@ export function createAsteroidRenderer(scene) {
     for (const r of field.rocks) {
       if (r.dead || i >= max) continue;
       const m = pool[i++];
-      m.geometry = geos[r.size][r.variant];
+      m.geometry = glbGeo[r.size] || geos[r.size][r.variant]; // I104: GLB when loaded
       m.material = r.golden ? matGold : mat; // ST-052
       m.position.set(r.pos.x, 0.4, r.pos.y);
       m.rotation.set(r.rot * 0.7, r.rot, r.rot * 0.31);
@@ -67,5 +70,15 @@ export function createAsteroidRenderer(scene) {
     for (; i < max; i++) pool[i].visible = false;
   }
 
-  return { sync, pool };
+  // I104: setGLB(size, obj) - extract the first mesh geometry from a loaded
+  // GLB and use it for every rock of that size (1 geometry per size per
+  // design/asset-spec.md; per-rock rotation gives the visual variety).
+  function setGLB(size, obj) {
+    if (!obj || !size || glbGeo[size]) return;
+    let g = null;
+    obj.traverse((n) => { if (n.isMesh && !g) g = n.geometry; });
+    if (g) glbGeo[size] = g;
+  }
+
+  return { sync, pool, setGLB };
 }

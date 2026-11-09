@@ -8,6 +8,8 @@ const dist = join(root, 'dist');
 rmSync(dist, { recursive: true, force: true });
 mkdirSync(dist, { recursive: true });
 cpSync(join(root, 'index.html'), join(dist, 'index.html'));
+// I104: Blender-pass GLB assets load at runtime from assets/ (dev + dist).
+try { cpSync(join(root, 'assets'), join(dist, 'assets'), { recursive: true }); } catch { /* optional dir */ }
 for (const d of ['src', 'public']) {
   const src = join(root, d);
   try { cpSync(src, join(dist, d), { recursive: true }); } catch { /* optional dir */ }
@@ -16,6 +18,9 @@ for (const d of ['src', 'public']) {
 // closure of the four passes used by bloom.js) instead of the full ~21MB package.
 const VENDOR_FILES = [
   'three.module.js',
+  // I104: GLTFLoader (Blender-pass GLB assets) + its BufferGeometryUtils dep
+  'jsm/loaders/GLTFLoader.js',
+  'jsm/utils/BufferGeometryUtils.js',
   'jsm/postprocessing/EffectComposer.js',
   'jsm/postprocessing/RenderPass.js',
   'jsm/postprocessing/OutputPass.js',
