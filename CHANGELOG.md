@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I88: UI motion pass (ST-088) - screens settle in with an eased entrance (opacity + subtle scale), score popups gain a punch-in scale pop + eased rise + lingering fade, and the wave banner eases in/out with a slide-up into place; all new movement is reduced-motion gated (opacity fades still apply) (232/232)
 - I87: sound-level pass (ST-087) - the master chain now ends in a true-peak limiter so no isolated cue or worst-case stacking can clip the device (an isolated bomb at ~1.02 pre-limiter now lands at 0.77), and cue gains are organized into three weight tiers with the loudest impact cues trimmed for headroom; clean ~4x impact-to-background dynamic range (232/232)
 - I86: per-entity particle palettes + burst shapes (ST-086) - every entity/event gets a config-driven color ramp (10 palettes) and bursts gain radial/ring/fountain shapes - ring shockwaves for boss beats/bomb/shield, an upward fountain for the overdrive pickup; backward-compatible (232/232)
 - I85: vignette overlay (ST-085) - static cinematic frame + red danger-edge that holds on the last life and pulses on a hit; the transient hit pulse is suppressed under reduced motion (the static last-life tint still shows) (232/232)

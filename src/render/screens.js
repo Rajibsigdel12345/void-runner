@@ -21,6 +21,9 @@ export function createScreens(root, settings = {}) {
     '@keyframes vrBestPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 6px rgba(255,210,122,0.7))}50%{transform:scale(1.12);filter:drop-shadow(0 0 18px rgba(255,210,122,1))}}',
     '.vr-newbest{animation:vrBestPulse 1.2s ease-in-out infinite;}',
     '.vr-reduced .vr-newbest{animation:none !important;}',
+    '@keyframes vrPanelIn{0%{opacity:0;transform:scale(0.98)}100%{opacity:1;transform:scale(1)}}', // ST-088: screen entrance settle
+    '.vr-panel{animation:vrPanelIn 0.36s cubic-bezier(0.22,1,0.36,1) both;}',
+    '.vr-reduced .vr-panel{animation:none !important;}',
     '.vr-credit{position:absolute;bottom:16px;left:0;right:0;font-size:calc(11px * var(--vr-fs,1));letter-spacing:1px;opacity:0.5;}',
     '.vr-pause-btn{pointer-events:auto;cursor:pointer;font-family:inherit;font-size:calc(14px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#cfe4ff;background:rgba(10,18,40,0.85);border:1px solid #2b4a8a;border-radius:8px;padding:10px 18px;transition:background 0.15s,border-color 0.15s;}',
     '.vr-pause-btn:hover{background:rgba(30,50,100,0.95);border-color:#4a7fd8;}',
@@ -44,6 +47,7 @@ export function createScreens(root, settings = {}) {
       'align-items:center', 'justify-content:center', 'gap:16px', 'text-align:center',
       `background:${bg}`, 'text-shadow:0 2px 10px rgba(0,0,0,0.9)',
     ].join(';');
+    d.classList.add('vr-panel'); // ST-088: entrance settle
     overlay.appendChild(d);
     return d;
   }

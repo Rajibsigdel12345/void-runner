@@ -31,12 +31,13 @@ export function createWaveBanner(root) {
   }
   function startCleared(n) { anim = { t: 0, dur: 1.2, text: '', subText: 'WAVE ' + n + ' CLEARED' }; el.style.fontSize = '0px'; }
 
+  function easeOut(x) { return 1 - Math.pow(1 - x, 3); } // ST-088
+  function easeIn(x) { return x * x * x; }               // ST-088
   function envelope(t, dur) {
-    if (t <= 0) return 0;
-    if (t >= dur) return 0;
-    if (t < 0.25) return t / 0.25;
+    if (t <= 0 || t >= dur) return 0;
+    if (t < 0.25) return easeOut(t / 0.25);   // ST-088: eased in
     const out = dur - t;
-    if (out < 0.6) return out / 0.6;
+    if (out < 0.6) return easeIn(out / 0.6);  // ST-088: eased out
     return 1;
   }
 
@@ -50,7 +51,9 @@ export function createWaveBanner(root) {
       sub.textContent = s;
       const a = motionOff ? (anim.t < anim.dur ? 1 : 0) : envelope(anim.t, anim.dur);
       el.style.opacity = String(a);
-      if (anim.t >= anim.dur) { anim = null; el.style.opacity = '0'; el.style.fontSize = '40px'; sub.textContent = ''; el.firstChild.nodeValue = ''; }
+      const inP = Math.min(1, anim.t / 0.4); // ST-088: entry slide-in over 0.4s
+      el.style.transform = 'translateY(' + (motionOff ? 0 : (12 * (1 - easeOut(inP))).toFixed(1)) + 'px)'; // ST-088: slide up into place
+      if (anim.t >= anim.dur) { anim = null; el.style.opacity = '0'; el.style.fontSize = '40px'; el.style.transform = 'translateY(0px)'; sub.textContent = ''; el.firstChild.nodeValue = ''; }
       return;
     }
     // idle: intermission countdown

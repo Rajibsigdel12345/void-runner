@@ -63,10 +63,17 @@ export function createScorePopups(root, camera) {
       const sx = (scratch.x * 0.5 + 0.5) * w;
       const sy = (-scratch.y * 0.5 + 0.5) * h;
       const p = it.t / DUR;
-      const rise = motionOff ? 0 : RISE * p;
+      // ST-088: eased rise (easeOutCubic) + a start "pop" scale + quick fade-in / eased fade-out.
+      // Reduced motion: no rise, no scale (both are movement) - the opacity fade still applies.
+      const easeOut = 1 - Math.pow(1 - p, 3);
+      const rise = motionOff ? 0 : RISE * easeOut;
+      const popP = Math.min(1, p / 0.3);
+      const scale = motionOff ? 1 : 0.5 + 0.5 * (1 - Math.pow(1 - popP, 3));
+      const fade = p < 0.12 ? p / 0.12 : p < 0.55 ? 1 : Math.pow(Math.max(0, (1 - p) / 0.45), 1.4);
       el.style.left = sx.toFixed(1) + 'px';
       el.style.top = (sy - rise).toFixed(1) + 'px';
-      el.style.opacity = p < 0.55 ? '1' : String(Math.max(0, (1 - p) / 0.45));
+      el.style.transform = 'translate(-50%,-50%) scale(' + scale.toFixed(3) + ')';
+      el.style.opacity = String(fade);
     }
   }
 
