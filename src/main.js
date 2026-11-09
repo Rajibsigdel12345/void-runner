@@ -5,6 +5,7 @@ import { createShipMesh } from './render/shipMesh.js';
 import { createInput } from './render/input.js';
 import { createBulletPool } from './render/bulletPool.js';
 import { createAsteroidRenderer } from './render/asteroidRenderer.js';
+import { createHUD } from './render/hud.js';
 import { World } from './core/game.js';
 import { RNG } from './core/rng.js';
 import { damp, v2 } from './core/math.js';
@@ -41,6 +42,7 @@ const shipMesh = createShipMesh();
 scene.add(shipMesh.group);
 const bullets = createBulletPool(scene);
 const rockRenders = createAsteroidRenderer(scene);
+const hud = createHUD(document.body);
 world.begin(); // wave director now owns spawning (menu gate lands in I17)
 
 const input = createInput();
@@ -93,6 +95,7 @@ function tick(dt, intent) {
 }
 
 function syncVisuals(dt) {
+  hud.render(world);
   shipMesh.sync(world.ship);
   bullets.sync(world.weapons);
   rockRenders.sync(world.field);
@@ -129,6 +132,7 @@ function frame() {
   renderer.render(scene, camera);
 }
 frame();
+
 
 
 

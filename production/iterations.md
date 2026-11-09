@@ -103,3 +103,9 @@ One entry per iteration. Format:
 - Verification: npm test 75/75 pass; build exit 0.
 - Result: DONE
 - Follow-up: HUD reads state/score/lives/combo/wave (I16); menu/pause screens I17.
+## I16 - DOM HUD (ST-016)
+- Goal: change-cached DOM overlay showing score (TL), wave (TC), lives (TR), combo meter (BC); text only written on change.
+- Changed: src/render/hud.js (new), src/main.js (hud.render(world) in syncVisuals)
+- Verification: npm test 75/75 pass; build exit 0; browser: console 0 errors, scripted kill burst -> "490 WAVE 1, 3 hearts, 5 CHAIN 1.4x", screenshot .evidence/i16-hud.png.
+- Result: DONE
+- Follow-up: menu/pause/game-over screens + key handling (I17).
