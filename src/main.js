@@ -15,6 +15,7 @@ import { createSettingsPanel } from './render/settingsPanel.js';
 import { createAudio } from './render/audio.js';
 import { createWaveBanner } from './render/waveBanner.js';
 import { createScorePopups } from './render/scorePopups.js';
+import { createTutorialHint } from './render/tutorialHint.js';
 import { STATE } from './core/state.js';
 import { Storage } from './core/storage.js';
 import { CONFIG } from './core/config.js';
@@ -58,6 +59,7 @@ const powerupRenders = createPowerupRenderer(scene);
 const shieldRing = createShieldRing(scene);
 const banner = createWaveBanner(document.body);
 const popups = createScorePopups(document.body, camera); // ST-030
+const hint = createTutorialHint(document.body); // ST-032
 const hud = createHUD(document.body);
 let muted = false; // M key (ST-017); consumed by audio (I27)
 
@@ -115,6 +117,7 @@ window.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     newBest = false;
     popups.clear(); // ST-030: no stale popups across sessions
+    hint.show(); // ST-032: first-wave tutorial hint
     if (st === STATE.MENU) world.begin();
     else if (st === STATE.GAME_OVER) world.restart();
   } else if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
@@ -142,7 +145,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -230,6 +233,7 @@ function syncVisuals(dt) {
   camera.position.y += shakeOff.y;
   camera.position.z += shakeOff.z;
   popups.sync(dt, motionOff); // ST-030: after follow-camera + shake
+  hint.sync(dt, motionOff); // ST-032
   if (flashA > 0) { // hit/bomb flash decay
     flashA = Math.max(0, flashA - dt * 2.2);
     flashEl.style.opacity = String(flashA);

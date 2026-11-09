@@ -36,3 +36,4 @@
 - I29: audio polish - compressor, stereo pan, pitch jitter, wave-clear and game-over stingers.
 - I30: floating score popups (+points) at kill position; big gold for combo-multiplier kills.
 - I31: game-over stats (kills, max combo, time survived, wave reached).
+- I32: tutorial hint on session start (controls line, fades after 6s, reduced-motion aware).

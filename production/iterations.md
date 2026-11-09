@@ -206,3 +206,9 @@ One entry per iteration. Format:
 - Verification: npm test 115/115 pass (4 new: kills counted; reset clears kills+maxCombo; world kills tracked across 3 bullet kills; world time freezes after game over); build exit 0; browser: 3-kill session -> game over showed "KILLS 3 WAVE 1" and "MAX COMBO x3 TIME 0:00"; a death before wave 1 started correctly shows WAVE 1 (not 0); restart (Enter) resets kills/maxCombo/time to 0; .evidence/i31-gameover-stats.png captured the full stats block; console 0 errors.
 - Result: DONE
 - Follow-up: I32 tutorial hints (first wave only; controls line fades after ~6s - story table ST-032 row).
+## I32 - tutorial hints on session start (ST-032)
+- Goal: new players see the controls once per session - a bottom-center hint line (WASD/arrows move, mouse aim, hold LMB fire, P pause) shown at start and faded away after ~6s, so it overlaps the opening intermission + first wave only (story table ST-032 row).
+- Changed: src/render/tutorialHint.js (NEW: single fixed DOM overlay, z-index 9, 6s lifetime with 2s fade-out tail, reduced motion uses hard on/off; show()/hide()/sync(dt, motionOff)), src/main.js (hint created, Enter start/restart shows it alongside the popup clear, syncVisuals calls hint.sync after popups, __vr += hint).
+- Verification: npm test 115/115 pass (render layer; core unchanged); build exit 0; browser: hint text verified ("WASD / ARROWS MOVE . MOUSE AIM . HOLD LMB FIRE . P PAUSE"); opacity 1 at start, ~0.49 at t=5s (fade tail), 0 at t=7s; reduced-motion path holds 1 until the lifetime end (hard off); .evidence/i32-tutorial-hint.png captured the live hint in-wave-1; console 0 errors.
+- Result: DONE
+- Follow-up: I33 touch + responsive HUD (story table ST-033 row).
