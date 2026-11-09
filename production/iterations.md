@@ -323,3 +323,11 @@ One entry per iteration. Format:
 - Verification: Suite A green (122/122 + build 0; no source changes). Milestone evidence cross-checked against iteration headers I01-I48 (sequence 1..48 verified), gates.md (I45 PASS), qa-plan.md, playtest-report.md, package.json scripts.
 - Result: DONE (M1 closed; transition to E7 approved)
 - Follow-up: I49 release checklist v1 (ST-049, cgs-release-checklist) - dist build size/load/console-clean, SHIP/NO-SHIP call on the slice.
+
+## I49 - release checklist v1 (ST-049)
+
+- Goal: cgs-release-checklist on the slice build - build evidence, dist measurement, QA/a11y/rollback review, SHIP/NO-SHIP call.
+- Changed: scripts/build.mjs (vendor whitelist: ship only three.module.js + the 4 postprocessing passes and their Pass/ShaderPass/MaskPass + shader closure instead of the full vendored three package - a real packaging defect found by the checklist: 22,895,455 B -> 1,405,436 B, ~16x). production/release-checklist.md (NEW: checklist artifact, verdict SHIP, warnings W1-W4).
+- Verification: 122/122 + build 0. Preview server (serves dist/ only): menu renders (DOMContentLoaded 507ms, full load 519ms), Enter -> PLAYING, wave 1 spawned (5 rocks), no NaN over 2s live play, bloom composer path active (bloom.enabled true - EffectComposer/UnrealBloomPass resolve from the trimmed vendor), 0 console errors + 0 warnings. Screenshot .evidence/i49-preview-playing.png.
+- Result: DONE (verdict SHIP)
+- Follow-up: I50 final polish sweep + E6 closing commit (ST-050).

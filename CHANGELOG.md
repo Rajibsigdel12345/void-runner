@@ -53,3 +53,4 @@
 - I46: final regression - Suites A+B+C re-run green after I44 (8-step critical path; perf 60fps/34 calls/1466 tris @ wave 4 within 10% baseline); no source changes (ST-046).
 - I47: docs - README + architecture README rewritten to current layout; CHANGELOG coverage I01-I46 confirmed (ST-047).
 - I48: milestone review + retrospective - M1 (E1-E6, I01-I48) closed: transition PASS to E7, action items logged, probe notes consolidated, AGENTS.md accuracy fix (ST-048).
+- I49: release checklist v1 - dist trimmed 22.9MB -> 1.4MB (vendor whitelist in build.mjs), preview-server smoke green (load ~0.5s, 0 console errors, bloom active), verdict SHIP (ST-049).
