@@ -5,6 +5,9 @@ import { createShipMesh } from './render/shipMesh.js';
 import { createInput } from './render/input.js';
 import { createBulletPool } from './render/bulletPool.js';
 import { Weapons } from './core/weapons.js';
+import { AsteroidField } from './core/asteroids.js';
+import { RNG } from './core/rng.js';
+import { createAsteroidRenderer } from './render/asteroidRenderer.js';
 import { Ship } from './core/ship.js';
 import { damp } from './core/math.js';
 
@@ -41,6 +44,12 @@ scene.add(shipMesh.group);
 
 const bullets = createBulletPool(scene);
 
+// I10: asteroid field (demo rocks until I12 wave logic takes over)
+const worldRng = new RNG(Date.now() & 0xffff);
+const field = new AsteroidField(worldRng);
+const rockRenders = createAsteroidRenderer(scene);
+for (let i = 0; i < 4; i++) field.spawn(i < 2 ? 'L' : 'M');
+
 const input = createInput();
 const raycaster = new THREE.Raycaster();
 const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -50,7 +59,7 @@ const aimWorld = new THREE.Vector3();
 const camPos = { x: 0, y: 9, z: 13 };
 const camLook = { x: 0, y: 0, z: 0 };
 
-window.__vr = { ship, weapons }; // debug/test handle (expanded in I080)
+window.__vr = { ship, weapons, field }; // debug/test handle (expanded in I080)
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -75,6 +84,8 @@ function frame() {
   if (input.state.firing) weapons.fire(ship.pos, ship.aim);
   weapons.step(dt);
   bullets.sync(weapons);
+  field.step(dt);
+  rockRenders.sync(field);
   shipMesh.sync(ship);
 
   const f = ship.forward();
@@ -91,4 +102,5 @@ function frame() {
   renderer.render(scene, camera);
 }
 frame();
+
 

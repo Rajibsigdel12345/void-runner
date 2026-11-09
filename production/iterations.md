@@ -66,3 +66,9 @@ One entry per iteration. Format:
 - Verification: npm test 40/40 pass; build exit 0.
 - Result: DONE
 - Follow-up: I10 renders rocks (3 noise-baked icosahedron variants + tumble).
+## I10 - Asteroid rendering (ST-010)
+- Goal: render rocks from field core: 3 noise-baked icosahedron variants per size (seeded), pooled meshes, per-rock tumble.
+- Changed: src/render/asteroidRenderer.js (new), src/main.js (field + renderer wiring, 4 demo rocks)
+- Verification: npm test 40/40; build exit 0; browser: console clean, field.count=4, screenshot .evidence/i10-asteroids.png shows L/M rocks with distinct silhouettes.
+- Result: DONE
+- Follow-up: demo rocks replaced by wave logic in I14; collisions land in I11/I12.
