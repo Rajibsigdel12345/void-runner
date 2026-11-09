@@ -12,6 +12,7 @@ import { createShake } from './core/fx.js';
 import { createHUD } from './render/hud.js';
 import { createScreens } from './render/screens.js';
 import { createSettingsPanel } from './render/settingsPanel.js';
+import { createAudio } from './render/audio.js';
 import { STATE } from './core/state.js';
 import { Storage } from './core/storage.js';
 import { CONFIG } from './core/config.js';
@@ -54,7 +55,7 @@ const rockRenders = createAsteroidRenderer(scene);
 const powerupRenders = createPowerupRenderer(scene);
 const shieldRing = createShieldRing(scene);
 const hud = createHUD(document.body);
-let muted = false; // M key (ST-017); consumed by the audio system in I27
+let muted = false; // M key (ST-017); consumed by audio (I27)
 
 // Persistent best + settings (ST-018); raw store adapted from window.localStorage.
 const lsStore = {
@@ -71,10 +72,23 @@ let newBest = false;
 let fxCount = 0;
 let motionOff = false;
 let liveSettings = storage.getSettings(); // ST-026: settings panel keeps this fresh (audio consumes in I27)
+// Audio (ST-027): WebAudio synth, initialized on first user gesture.
+const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', gameover: 'gameover' };
+const audio = createAudio();
+audio.setVolume(liveSettings.volume);
+audio.setSfx(liveSettings.sfx);
+let audioReady = false;
+function markAudioReady() {
+  if (audioReady) return;
+  audioReady = true;
+  audio.init();
+  audio.setMuted(muted);
+}
 function applySettings(s) {
   liveSettings = s;
   fxCount = s.fx === 'low' ? CONFIG.fx.particleLow : CONFIG.fx.particleHigh;
   motionOff = s.reducedMotion === true;
+  if (audio.state() !== 'uninitialized') { audio.setVolume(s.volume); audio.setSfx(s.sfx); }
 }
 applySettings(liveSettings);
 // ST-026: settings panels (menu + pause) - after storage/applySettings (TDZ order).
@@ -88,7 +102,6 @@ const shakeOff = { x: 0, y: 0, z: 0 };
 let simT = 0; // sim-clock for timed visuals (invuln blink)
 const flashEl = document.getElementById('flash'); // hit/bomb flash overlay (index.html)
 let flashA = 0;
-
 const input = createInput();
 
 // Session keys (ST-017): Enter start/restart, P/Esc pause, M mute.
@@ -104,6 +117,7 @@ window.addEventListener('keydown', (e) => {
     else if (st === STATE.PAUSED) world.resume();
   } else if (e.key === 'm' || e.key === 'M') {
     muted = !muted;
+    audio.setMuted(muted);;
   }
 });
 const raycaster = new THREE.Raycaster();
@@ -123,8 +137,10 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
 
+window.addEventListener('pointerdown', markAudioReady, { once: true });
+window.addEventListener('keydown', markAudioReady, { once: true });
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -153,6 +169,7 @@ function tick(dt, intent) {
   world.step(dt, it);
   for (const e of world.drainEvents()) {
     eventTally[e.type] = (eventTally[e.type] || 0) + 1;
+    const cue = SFX_CUES[e.type]; if (cue) audio.sfx(cue);
     if (!motionOff) {
       if (e.type === 'kill') particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xffd27a, speed: 9, life: 0.5 });
       else if (e.type === 'hit') {
