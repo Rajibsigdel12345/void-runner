@@ -60,10 +60,7 @@ export class World {
     this.time += dt;
 
     this.ship.step(dt, intent.thrust, intent.aimPoint);
-    if (intent.firing) {
-      const b = this.weapons.fire(this.ship.pos, this.ship.aim);
-      if (b) this.emit('fire', { pos: b.pos });
-    }
+    if (intent.firing) this.fireWeapon();
     this.weapons.step(dt);
     this.field.step(dt);
     const pickups = this.powerups.step(dt, this.ship);
@@ -78,6 +75,20 @@ export class World {
     if (wv.waveCleared) this.emit('waveCleared', { n: wv.waveCleared });
     this.resolveBulletRocks();
     this.resolveShipRocks();
+  }
+
+  /** Firing with power-up modifiers (ST-021): RAPID doubles cadence, SPREAD fires a 3-way burst. */
+  fireWeapon() {
+    const pt = this.cfg.powerup.types;
+    const rateMul = this.powerups.active('rapid') ? pt.rapid.rate : 1;
+    let shots;
+    if (this.powerups.active('spread')) {
+      shots = this.weapons.fireSpread(this.ship.pos, this.ship.aim, pt.spread.count, pt.spread.arc, rateMul);
+    } else {
+      const b = this.weapons.fire(this.ship.pos, this.ship.aim, rateMul);
+      shots = b ? [b] : [];
+    }
+    for (const b of shots) this.emit('fire', { pos: b.pos });
   }
 
   resolveBulletRocks() {

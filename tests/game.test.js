@@ -187,3 +187,50 @@ test('world: restart() mid-session forces a fresh session', () => {
   assert.notEqual(t0, w.time);
 });
 
+
+// --- ST-021: RAPID + SPREAD fire-path wiring ---
+const AIMX = { thrust: v2(0, 0), aimPoint: { x: 10, y: 0 }, firing: true };
+function countFires(w, steps) {
+  let n = 0;
+  for (let i = 0; i < steps; i++) {
+    w.step(DT, AIMX);
+    for (const e of w.drainEvents()) if (e.type === 'fire') n++;
+  }
+  return n;
+}
+
+test('world: rapid halves the fire cooldown cycle (deterministic)', () => {
+  // steps between consecutive shots at 60Hz: baseline ceil((1/5.5)*60) = 11, rapid ceil((1/11)*60) = 6
+  function cycle(w) {
+    w.step(DT, AIMX);
+    w.drainEvents();
+    for (let k = 1; k < 100; k++) {
+      w.step(DT, AIMX);
+      if (w.drainEvents().some(e => e.type === 'fire')) return k;
+    }
+    return -1;
+  }
+  const w1 = new World(new RNG(21)); w1.begin();
+  const w2 = new World(new RNG(22)); w2.begin(); w2.powerups.apply('rapid');
+  assert.equal(cycle(w1), 11, 'baseline cycle');
+  assert.equal(cycle(w2), 6, 'rapid cycle');
+});
+
+test('world: spread fires a 3-way burst per trigger', () => {
+  const w = new World(new RNG(23));
+  w.begin();
+  w.powerups.apply('spread');
+  w.step(DT, AIMX);
+  const fires = w.drainEvents().filter(e => e.type === 'fire');
+  assert.equal(fires.length, 3, '3-way burst');
+});
+
+test('world: rapid + spread combine (2x cadence, 3-way bursts)', () => {
+  const w = new World(new RNG(24));
+  w.begin();
+  w.powerups.apply('rapid');
+  w.powerups.apply('spread');
+  const combined = countFires(w, 60);
+  assert.ok(combined >= 25, `combined ${combined} bullets/s`);
+});
+

@@ -135,3 +135,11 @@ One entry per iteration. Format:
 - Verification: npm test 94/94 pass; build exit 0; browser: forced 4 drops -> all render with correct shape/color, pool caps at 4, console 0 errors, screenshot .evidence/i20-powerups.png.
 - Result: DONE
 - Follow-up: wire RAPID (rateMul) + SPREAD (fireSpread) into the World fire path (I21).
+
+## I21 - RAPID + SPREAD fire path (ST-021)
+- Goal: power-ups modify firing for real — RAPID doubles fire cadence for 8s, SPREAD fires a 3-way burst (arc 0.35 rad); effects stack (spread fan at 2x cadence).
+- Changed: src/core/config.js (powerup.types.rapid.rate=2), src/core/game.js (World.fireWeapon(): rateMul from RAPID, fireSpread when SPREAD active, fire event per shot), tests/game.test.js (+3 tests: baseline 11 vs rapid 6-step shot cycle, spread 3-way arc, rapid+spread stack), production/balance-notes.md (new: rapid rate rationale + realized-ratio note)
+- Verification: npm test 97/97 pass; build exit 0; browser (fresh session): baseline 11 shots/2s (5.5/s), RAPID 20 shots/2s (10/s, realized 1.82x on discrete timestep), 3-way spread fan measured -0.553/-0.203/+0.147 rad = ±0.35 about eased aim; console 0 errors; screenshot .evidence/i21-firepath.png.
+- Housekeeping: removed duplicate I19 line from CHANGELOG.
+- Result: DONE
+- Follow-up: SHIELD — absorb first hit (consumeShieldHit in resolveShipRocks) + shield ring visual (I22).

@@ -23,6 +23,6 @@
 ### Fixed
 - I17: World.reset() crash (assignment to gameOver getter) caught by new tests.
 - I18: persistent best score + settings (injected store, guarded reads, NEW BEST flag, survives reload).
-- I19: power-up field core (drops, drift, magnet pull, timed effects, bomb queue) wired into World.
 - I19: power-up field core (drops, drift, magnet pull, timed effects, instant bomb queue) wired into World.
 - I20: power-up render meshes (pooled, per-type shape/color, hover + pulse).
+- I21: RAPID + SPREAD fire path — power-ups modify cadence (x2 for 8s) and 3-way spread burst.

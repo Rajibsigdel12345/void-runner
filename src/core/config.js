@@ -55,7 +55,7 @@ export const CONFIG = {
     magnetRadius: 7,
     drift: 1.2,
     types: {
-      rapid:  { dur: 8 },
+      rapid:  { dur: 8, rate: 2 },
       spread: { dur: 8, count: 3, arc: 0.35 },
       shield: { dur: 12 },
       bomb:   { dur: 0 },
@@ -74,3 +74,4 @@ export const CONFIG = {
     settingsKey: 'voidrunner.settings'
   }
 };
+
