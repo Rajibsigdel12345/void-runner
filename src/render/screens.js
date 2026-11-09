@@ -73,6 +73,8 @@ export function createScreens(root, settings = {}) {
   const finalScore = line(gameOver, 'SCORE 0', 'font-size:26px;font-weight:700;letter-spacing:2px;');
   const overBest = line(gameOver, '', 'font-size:13px;opacity:0.7;');
   const newBestLine = line(gameOver, '', 'font-size:16px;font-weight:800;letter-spacing:3px;color:#ffe08a;');
+  const statsLine1 = line(gameOver, '', 'font-size:15px;font-weight:700;letter-spacing:2px;color:#cfe4ff;margin-top:10px;'); // ST-031
+  const statsLine2 = line(gameOver, '', 'font-size:15px;font-weight:700;letter-spacing:2px;color:#cfe4ff;'); // ST-031
   line(gameOver, 'PRESS ENTER TO RESTART', 'font-size:16px;font-weight:700;letter-spacing:4px;margin-top:10px;animation:vrPulse 1.6s ease-in-out infinite;');
 
   const PANELS = {
@@ -107,6 +109,10 @@ export function createScreens(root, settings = {}) {
       set('finalScore', finalScore, `SCORE ${world.score}`);
       set('overBest', overBest, opts.best > 0 ? `BEST ${opts.best}` : '');
       set('newBest', newBestLine, opts.newBest ? 'NEW BEST!' : '');
+      const mm = Math.floor(world.time / 60); // ST-031: session stats
+      const ss = String(Math.floor(world.time) % 60).padStart(2, '0');
+      set('stats1', statsLine1, "KILLS " + world.scoreKeeper.kills + "    WAVE " + Math.max(1, world.wave));
+      set('stats2', statsLine2, "MAX COMBO x" + world.scoreKeeper.maxCombo + "    TIME " + mm + ":" + ss);
     }
     if (state === STATE.MENU) {
       set('menuBest', menuBest, opts.best > 0 ? `BEST ${opts.best}` : '');

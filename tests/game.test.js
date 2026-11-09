@@ -342,3 +342,29 @@ test('world: without magnet the same off-axis bullet misses (control)', () => {
   for (let i = 0; i < 120; i++) w.step(DT, NOINTENT);
   assert.ok(w.field.count > 0, 'bullet flew straight and missed');
 });
+
+test('world: kills tracked on scoreKeeper for game-over stats', () => {
+  const w = new World(new RNG(33));
+  w.begin();
+  for (let i = 0; i < 3; i++) {
+    const r = w.field.spawn('S', 1, { x: i * 8 - 8, y: -5 });
+    r.vel = v2(0, 0);
+    w.weapons._spawn({ x: r.pos.x, y: r.pos.y }, 0);
+    w.step(DT, NOINTENT);
+  }
+  assert.equal(w.scoreKeeper.kills, 3);
+});
+
+test('world: time freezes after game over (survival-time accuracy)', () => {
+  const w = new World(new RNG(34));
+  w.begin();
+  w.livesMgr.count = 1;
+  w.ship.invuln = 0;
+  const rock = w.field.spawn('S', 1, { x: 1.3, y: 0 });
+  rock.vel = v2(0, 0);
+  w.step(DT, NOINTENT);
+  assert.ok(w.gameOver, 'game over reached');
+  const t = w.time;
+  for (let i = 0; i < 10; i++) w.step(DT, NOINTENT);
+  assert.equal(w.time, t, 'time frozen after game over');
+});

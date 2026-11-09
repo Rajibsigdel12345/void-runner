@@ -200,3 +200,9 @@ One entry per iteration. Format:
 - Verification: npm test 111/111 pass (render layer; core unchanged); build exit 0; browser: Enter -> PLAYING; a real bullet kill (killTally 1) produced a "+50" popup at the projected screen position (15px #cfe4ff, mult 1); manual add with big flag rendered 22px gold; .evidence/i30-score-popups.png captured both styles (opacity pinned via stylesheet probe for the still); console 0 errors.
 - Result: DONE
 - Follow-up: I31 game-over stats (kills, max combo, time survived, wave - story table ST-031 row).
+## I31 - game-over stats: kills, max combo, time survived, wave (ST-031)
+- Goal: the game-over screen shows the full session summary - kills, max combo, time survived (m:ss), and the wave reached - so a run is readable at a glance (story table ST-031 row).
+- Changed: src/core/score.js (ScoreKeeper gains a kills counter: incremented in kill(), cleared in reset(); maxCombo already existed), src/render/screens.js (game-over panel gains two stats rows reading world.scoreKeeper.kills / maxCombo / world.time / world.wave directly; wave shown as max(1, wave) so a death during the opening intermission reports WAVE 1, the wave being attempted; time formatted m:ss from the sim clock, which freezes on pause and at game over so it is accurate survival time).
+- Verification: npm test 115/115 pass (4 new: kills counted; reset clears kills+maxCombo; world kills tracked across 3 bullet kills; world time freezes after game over); build exit 0; browser: 3-kill session -> game over showed "KILLS 3 WAVE 1" and "MAX COMBO x3 TIME 0:00"; a death before wave 1 started correctly shows WAVE 1 (not 0); restart (Enter) resets kills/maxCombo/time to 0; .evidence/i31-gameover-stats.png captured the full stats block; console 0 errors.
+- Result: DONE
+- Follow-up: I32 tutorial hints (first wave only; controls line fades after ~6s - story table ST-032 row).

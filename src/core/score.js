@@ -7,6 +7,7 @@ export class ScoreKeeper {
     this.score = 0;
     this.combo = 0;
     this.maxCombo = 0;
+    this.kills = 0;
     this.lastKillTime = -Infinity;
   }
 
@@ -20,6 +21,7 @@ export class ScoreKeeper {
     if (t - this.lastKillTime > this.cfg.combo.window) this.combo = 0;
     this.combo = Math.min(this.combo + 1, this.cfg.combo.cap);
     this.maxCombo = Math.max(this.maxCombo, this.combo);
+    this.kills++;
     this.lastKillTime = t;
     const pts = Math.floor(base * this.multiplier);
     this.score += pts;
@@ -38,6 +40,7 @@ export class ScoreKeeper {
     this.score = 0;
     this.combo = 0;
     this.maxCombo = 0;
+    this.kills = 0;
     this.lastKillTime = -Infinity;
   }
 }

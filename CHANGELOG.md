@@ -35,3 +35,4 @@
 - I28: wave banner + intermission countdown.
 - I29: audio polish - compressor, stereo pan, pitch jitter, wave-clear and game-over stingers.
 - I30: floating score popups (+points) at kill position; big gold for combo-multiplier kills.
+- I31: game-over stats (kills, max combo, time survived, wave reached).

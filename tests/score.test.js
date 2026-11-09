@@ -64,3 +64,19 @@ test('score: points floor non-integer products', () => {
   assert.equal(s.score, 33 + 36);
 });
 
+
+test('score: kills counted', () => {
+  const s = new ScoreKeeper();
+  s.kill(10, 0);
+  s.kill(10, 0.1);
+  s.kill(10, 0.2);
+  assert.equal(s.kills, 3);
+});
+
+test('score: reset clears kills and maxCombo', () => {
+  const s = new ScoreKeeper();
+  for (let i = 0; i < 4; i++) s.kill(10, i * 0.1);
+  s.reset();
+  assert.equal(s.kills, 0);
+  assert.equal(s.maxCombo, 0);
+});
