@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I53: near-miss bonus (ST-053) - graze a rock within 2.6u for a flat +15 (swish SFX, once per approach, no combo); 0.3s split-immunity closes the kill-near-ship farm; 6 new tests (142/142).
 - I52: golden asteroid (ST-052) - rare 5% rim-spawn glowing rock (wave 3+), 35% faster, 5x score, gold popup + bigger burst; 6 new tests (136/136).
 - I51: wave modifiers (ST-051) - per-wave fast/small/inward picks, deterministic (seed,wave) table, banner announces each; 8 new tests (130/130).
 

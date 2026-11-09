@@ -353,5 +353,13 @@ One entry per iteration. Format:
 - Verification: 136/136 + build 0 (was 130). Browser: pool material swap verified (2 golden rocks render emissive 0xffa018); director roll rate 91/2000 = 4.55% (expected 5%, within 1 sigma); live-loop kills golden M +250 (50x5) and golden S +500 (100x5); glow visually confirmed (FX high) at .evidence/i52-golden-rock.png; 0 console errors/warnings.
 - Result: DONE
 - Follow-up: I53 near-miss bonus (ST-053) - close pass = small points + swish.
+## I53 - near-miss bonus (ST-053)
+
+- Goal: ST-053 E7A content - graze bonus: a rock skimming past the ship (no hit) pays a flat +15 once per approach, with a swish SFX.
+- Changed: src/core/config.js (NEW nearMiss section: radius 2.6, points 15, rearmMult 1.6, spawnImmunity 0.3). src/core/score.js (bonus() - flat score, combo untouched). src/core/game.js (resolveNearMisses: once-per-approach with rearm ring, invuln-suppressed, spawn-immunity-gated; called in step after ship hits). src/core/asteroids.js (nearImmune per rock, set on spawn, decayed in step). src/render/audio.js (swish cue - low-gain noise puff + descending sine, 0.15s min gap). src/main.js (SFX_CUES nearmiss->swish; plain small popup; subtle cyan wisp particles). tests/nearmiss.test.js (NEW, 6 tests, seeds 50-52). design/gdd.md (Scoring & Records). production/balance-notes.md (I53 section).
+- Verification: 142/142 + build 0 (was 136). Browser: 3 grazes = +15 each, re-arm after leaving the ring works, no life lost; swish scheduled on live graze (played.swish delta 1, SFX on); split-immunity probe - L killed at (3,0): 0 instant graze points on the kill frame (fragments immune 0.3s), 3 grazes only after immunity; game.test.js original 25-pt expectation holds (would have been 70 without immunity); 0 console errors/warnings. Screenshot .evidence/i53-nearmiss-graze.png.
+- Result: DONE
+- Follow-up: I54 mine drones (ST-054) - slow homing, 1 hit, explode.
+
 
 

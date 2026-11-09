@@ -10,6 +10,8 @@ const CUES = {
   hit:       { type: 'sawtooth', f0: 110, f1: 55,  dur: 0.25, gain: 0.45, min: 0.05, noise: 0.2 },
   powerup:   { type: 'sine',     f0: 660, f1: 990, dur: 0.18, gain: 0.25, min: 0.05 },
   shieldPop: { type: 'sine',     f0: 1320, f1: 1320, dur: 0.15, gain: 0.22, min: 0.05 },
+  // ST-053 near-miss swish: soft low noise puff under a quick descending sine
+  swish:     { type: 'sine',     f0: 240, f1: 90,  dur: 0.16, gain: 0.09, min: 0.15, noise: 0.12 },
   bomb:      { type: 'sine',     f0: 90,  f1: 40,  dur: 0.5,  gain: 0.7,  min: 0.1,  noise: 0.4 },
   wave:      { type: 'sine',     f0: 523, f1: 659, dur: 0.25, gain: 0.16, min: 0.1 },
   // ST-029 stingers: rising arpeggio on wave clear, falling motif on game over

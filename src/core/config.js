@@ -67,6 +67,16 @@ export const CONFIG = {
     step: 0.1           // multiplier per combo step (1.0x .. 1.9x)
   },
 
+  nearMiss: {
+    // ST-053: graze bonus - a rock skimming past the ship (without a hit) pays a
+    // small flat bonus once per approach. It is not a kill: the combo chain
+    // is untouched, so weaving rewards score, not the multiplier.
+    radius: 2.6,        // graze ring: (center distance - rock radius) below this counts
+    points: 15,         // flat bonus per graze
+    rearmMult: 1.6,     // rock must exit graze radius x this before it can score again
+    spawnImmunity: 0.3  // s after spawn (rim or split) a rock can start a graze approach
+  },
+
   powerup: {
     dropChance: 0.25,   // chance per kill
     pickupRadius: 1.6,

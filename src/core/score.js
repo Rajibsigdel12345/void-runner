@@ -28,6 +28,12 @@ export class ScoreKeeper {
     return pts;
   }
 
+  /** Flat score bonus that does NOT touch the combo chain (ST-053 near-miss). */
+  bonus(pts) {
+    this.score += pts;
+    return pts;
+  }
+
   /** Damage breaks the chain (next kill restarts at combo 1). */
   onDamage() { this.combo = 0; this.lastKillTime = -Infinity; }
 

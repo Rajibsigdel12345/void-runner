@@ -76,6 +76,7 @@ export class World {
     if (wv.waveCleared) this.emit('waveCleared', { n: wv.waveCleared });
     this.resolveBulletRocks();
     this.resolveShipRocks();
+    this.resolveNearMisses(); // ST-053 (after ship hits: a hit-rock is destroyed, no double award)
   }
 
   /** Firing with power-up modifiers (ST-021): RAPID doubles cadence, SPREAD fires a 3-way burst. */
@@ -143,6 +144,26 @@ export class World {
     if (livesLeft <= 0) {
       this.game.to(STATE.GAME_OVER);
       this.emit('gameover', { score: this.score });
+    }
+  }
+
+  /** ST-053: near-miss bonus - flat points + swish when a rock grazes the ship.
+   * One award per approach: a rock re-arms only after leaving an extended ring.
+   * Skipped while invulnerable or out of lives. */
+  resolveNearMisses() {
+    if (this.ship.isInvulnerable || this.lives <= 0) return;
+    const nm = this.cfg.nearMiss;
+    const sx = this.ship.pos.x, sy = this.ship.pos.y;
+    for (const r of this.field.rocks) {
+      if (r.dead) continue;
+      const d = Math.hypot(r.pos.x - sx, r.pos.y - sy) - r.radius;
+      if (d < nm.radius && !r.nearHot && (r.nearImmune || 0) <= 0) {
+        r.nearHot = true;
+        const pts = this.scoreKeeper.bonus(nm.points);
+        this.emit('nearmiss', { pos: { x: r.pos.x, y: r.pos.y }, points: pts });
+      } else if (r.nearHot && d > nm.radius * nm.rearmMult) {
+        r.nearHot = false;
+      }
     }
   }
 

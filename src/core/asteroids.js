@@ -47,6 +47,7 @@ export class AsteroidField {
       variant: this.rng.int(0, 2),
       speedMult,
       golden,
+      nearImmune: this.cfg.nearMiss.spawnImmunity, // ST-053: no instant graze from spawn/split
       dead: false,
     };
     this.rocks.push(rock);
@@ -57,6 +58,7 @@ export class AsteroidField {
     const R = this.cfg.arena.radius;
     for (const r of this.rocks) {
       if (r.dead) continue;
+      if (r.nearImmune > 0) r.nearImmune = Math.max(0, r.nearImmune - dt); // ST-053
       if (drift > 0) { // ST-051 'inward' modifier: pull toward the arena center
         const d = v2Len(r.pos) || 1;
         r.vel.x -= (r.pos.x / d) * drift * dt;

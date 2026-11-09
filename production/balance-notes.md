@@ -55,3 +55,17 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
   5x cannot chain through fragment storms (max 1 golden per rim spawn).
 - No new RNG draws beyond one chance() per eligible spawn (shared world stream - seeded
   streams shift from this point; pinned tests use their own seeds). Determinism preserved.
+## I53 - near-miss bonus (ST-053)
+- +15 flat per graze (no combo multiplier): at dense waves (12-24 rocks) a skilled weave can
+  pick up 3-8 grazes/wave = 45-120 pts/wave vs ~300-600 kill pts - meaningful (10-20%) but
+  never dominant. Watch: if I90 playtest shows grazes feeling like noise (too frequent),
+  tighten radius 2.6 -> 2.2 before I92.
+- spawnImmunity 0.3s closes the split-farm: fragments born inside the ring (parent killed
+  near the ship) cannot score until they have actually travelled - verified in game.test.js
+  (its original 25-pt expectation still holds; 3 fragments at (3,0) would have added 45).
+- One award per approach + rearm at radius x 1.6: a rock can score at most twice per orbit
+  around the ship; camping the ring is not possible (the ship is the ring's center and the
+  rocks keep moving).
+- Suppressed while invulnerable: post-hit frames are chaos - awarding grazes there reads as
+  luck, and a rock that hit the ship is destroyed anyway.
+- Swish cue is low-gain (0.09) with 0.15s min gap so a busy frame never stacks more than ~7/s.

@@ -60,6 +60,7 @@ Stacks: each has its own timer; grabbing the same type refreshes its timer.
 
 ## Scoring & Records
 - Score = sum(kill base score x current multiplier).
+- Near-miss (ST-053): a rock skimming within 2.6u of the ship (no hit) pays a flat +15 once per approach (swish SFX, small popup, subtle cyan wisp). Fragments/splits get 0.3s immunity so a kill near the ship cannot farm graze points. Graze is not a kill: it never extends the combo chain.
 - Best score persisted to localStorage key `voidrunner.best` (int).
 - Game over screen shows: final score, best (NEW BEST! flag), kills, max combo, wave reached, time survived.
 
