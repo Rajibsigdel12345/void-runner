@@ -53,6 +53,15 @@ multipliers, and grab power-ups. Survive as long as you can.
 - Contact with the boss costs a life, same flow as a rock hit (knockback + invuln). The boss is not damaged by contact.
 - While alive, a MONOLITH HP bar shows at top center. Only one boss at a time.
 
+## Enemy Bullets (ST-056)
+
+- The MONOLITH fires an aimed bolt at the ship every 2.2s (speed 9 u/s).
+- A MINE fires an aimed bolt only while the ship is within 7u of it, on a 3s cadence (speed 8 u/s).
+- Bolts share one pool capped at 24 concurrent; a bolt vanishes after 4.0s or once it leaves the arena.
+- A bolt touching the ship costs one life (same flow as rock contact; the 1.6s invulnerability applies).
+- Bolts never collide with rocks and cannot be shot down.
+- Bolts render as red-orange glowing orbs, clearly distinct from the player's cyan bolts.
+
 ## Waves & Difficulty
 - Wave n: startAsteroids = 4 + n, maxConcurrent = 6 + 2n (cap 24), speedMult = 1 + 0.06n (cap 2.1).
 - Wave advances when all spawned asteroids for that wave are destroyed, or after 45s without a clear (stall advance): the wave increments regardless, undestroyed asteroids carry into the next wave, and the intermission is skipped (I42, closes playtest finding F1 - a camped field can no longer freeze the escalation).

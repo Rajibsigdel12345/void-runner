@@ -9,6 +9,7 @@ export class MineField {
     this.rng = rng;
     this.cfg = cfg;
     this.mines = [];
+    this.pendingFires = []; // ST-056: {x, y} of mines that fired this frame
     this.nextId = 1;
   }
 
@@ -32,6 +33,7 @@ export class MineField {
       vel: v2(Math.cos(homeAng) * m.speed, Math.sin(homeAng) * m.speed),
       radius: m.radius,
       rot: this.rng.next() * Math.PI * 2,
+      fireTimer: m.fireEvery, // ST-056: first shot after a full interval
       dead: false,
     });
     return this.mines[this.mines.length - 1];
@@ -73,8 +75,21 @@ export class MineField {
         mine.pos.x -= nx * push;
         mine.pos.y -= ny * push;
       }
+      // ST-056: cadence ticks regardless of range; the bolt only goes out in range
+      mine.fireTimer -= dt;
+      if (mine.fireTimer <= 0) {
+        mine.fireTimer += m.fireEvery;
+        if (v2Dist(mine.pos, shipPos) < m.fireRange) this.pendingFires.push({ x: mine.pos.x, y: mine.pos.y });
+      }
     }
     this.compact();
+  }
+
+  /** ST-056: drain this frame's fire requests (World owns the bolt pool). */
+  takeFires() {
+    const f = this.pendingFires;
+    this.pendingFires = [];
+    return f;
   }
 
   /** Destroy a mine by id. Returns the mine or null. */
@@ -95,5 +110,5 @@ export class MineField {
   }
 
   get count() { return this.mines.length; }
-  clear() { this.mines.length = 0; }
+  clear() { this.mines.length = 0; this.pendingFires.length = 0; }
 }

@@ -73,6 +73,7 @@ export const CONFIG = {
     ringEvery: 2.0,  // seconds between ring bursts
     ringCount: 8,    // S rocks per burst (capped by the field's maxConcurrent)
     splitCount: 4,   // M rocks on death
+    fireEvery: 2.2,  // ST-056: seconds between aimed bolts
     score: 1000      // kill reward (the big one)
   },
 
@@ -86,7 +87,16 @@ export const CONFIG = {
     radius: 0.9,      // collision radius (same as the ship)
     speed: 3.2,       // constant u/s (ship maxSpeed is 14 - always outmatched)
     turn: 1.6,        // max heading change rad/s (slow, readable pursuit)
+    fireRange: 7.0,   // ST-056: mines only shoot inside this range
+    fireEvery: 3.0,   // ST-056: per-mine cadence (seconds) while in range
     score: 150        // kill reward (more than an S - you chased the chaser)
+  },
+  enemyBullets: {     // ST-056: enemy bolts - separate pool, always slower than the ship
+    maxConcurrent: 24,
+    radius: 0.22,
+    life: 4.0,        // self-destructs after this many seconds
+    speed: 9,         // boss bolt u/s (ship maxSpeed is 14 - dodgeable)
+    mineSpeed: 8      // mine bolt u/s (a touch softer)
   },
 
   combo: {

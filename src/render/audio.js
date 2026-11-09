@@ -18,6 +18,9 @@ const CUES = {
   bossSpawn: { type: 'sine',   f0: 110, f1: 55,  dur: 0.6,  gain: 0.30, min: 0.4 },
   bossRing:  { type: 'sine',   f0: 300, f1: 120, dur: 0.25, gain: 0.18, min: 0.15, noise: 0.15 },
   bossDeath: { type: 'square', f0: 80,  f1: 30,  dur: 0.7,  gain: 0.50, min: 0.3,  noise: 0.5 },
+  // ST-056 enemy bolts: low saw zap (boss), soft tick (mine)
+  bossFire: { type: 'sawtooth', f0: 520, f1: 180, dur: 0.18, gain: 0.20, min: 0.12 },
+  mineFire: { type: 'square',   f0: 340, f1: 220, dur: 0.10, gain: 0.12, min: 0.1,  noise: 0.08 },
   bomb:      { type: 'sine',     f0: 90,  f1: 40,  dur: 0.5,  gain: 0.7,  min: 0.1,  noise: 0.4 },
   wave:      { type: 'sine',     f0: 523, f1: 659, dur: 0.25, gain: 0.16, min: 0.1 },
   // ST-029 stingers: rising arpeggio on wave clear, falling motif on game over

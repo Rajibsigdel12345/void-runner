@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I56: enemy bullets (ST-056) - boss aimed bolts every 2.2s + in-range mine bolts (3s cadence, <7u) in a separate 24-cap pool with a distinct red glow; bolt contact costs a life; 5 new tests (159/159).
 - I55: monolith boss (ST-055) - huge slow-homing boss every 5 waves (HP 40, 1 dmg per bullet): ring of 8 S rocks every 2s, splits to 4 M rocks on death for +1000, contact costs a life; HP bar + SFX + juice; 6 new tests (154/154).
 - I54: mine drones (ST-054) - slow homing red mine from wave 5 (1/wave, cap 10): 1 bullet kills for +150, contact costs a life; 6 new tests (148/148).
 - I53: near-miss bonus (ST-053) - graze a rock within 2.6u for a flat +15 (swish SFX, once per approach, no combo); 0.3s split-immunity closes the kill-near-ship farm; 6 new tests (142/142).

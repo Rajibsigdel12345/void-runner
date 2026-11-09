@@ -102,3 +102,14 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - Determinism: spawn bearing comes from the world RNG stream (re-rolled if <10u from ship);
   homing is a pure state function; ring geometry is deterministic (angle = i/ringCount*2pi);
   the pinned-seed trajectory test (seed 58) guards the whole system.
+
+## I56 - enemy bullets (ST-056)
+
+- Boss bolt: one per 2.2s (roughly 3-4 shots over a 7.3s base-fire kill of the 40 HP boss; 9 u/s
+  means >=1.5s reaction time from 10u).
+- Mine bolt: only within 7u, 3s cadence (up to ~3.3 shots/s with 10 mines = swarm pressure; 8 u/s).
+- Cap 24 concurrent bolts; 4.0s life; culled at rim+2.
+- Straight-homing mines never fire before contact (fireEvery 3.0 > time-to-contact for any d<7u) -
+  they fire when kited/deflected, which is intentional: the bolt threat is on sustained dodging.
+- 1 bolt = 1 life, same 1.6s invuln (F2 watch item now sharper: dense bolts + rocks + rings).
+- Bullets cannot be shot down (out of scope; note as follow-up candidate).

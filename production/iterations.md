@@ -378,3 +378,14 @@ One entry per iteration. Format:
 - Verification: 154/154 + build 0 (was 148). Browser: boss spawns at wave 5, obelisk mesh visible + MONOLITH HP bar at 100%; ring fires at 2.0s with exactly 8 S rocks (radial-outward verified in unit test); 40-bullet kill pays +1000 (probe delta 1015 = 1000 + 15 near-miss in window), 4 M splits at the death position, bossDeath SFX fired (delta 1), mesh + HP bar hide on death; contact costs a life and the boss survives (unit). 0 console errors/warnings. Screenshot .evidence/i55-monolith-boss.png.
 - Result: DONE
 - Follow-up: I56 enemy bullets (ST-056) - separate pool, distinct look, damage the ship; boss/mines can fire them.
+
+
+
+
+## I56 - enemy bullets (ST-056)
+
+- Goal: ST-056 E7A content - enemy bolts: the Monolith fires aimed bolts every 2.2s and mine drones fire aimed bolts when the ship is within 7u (3s cadence). Bolts share a separate pool (cap 24, 4.0s life), render as red-orange orbs, and cost a life on contact.
+- Changed: src/core/config.js (NEW enemyBullets section: maxConcurrent 24, radius 0.22, life 4.0, speed 9, mineSpeed 8; boss.fireEvery 2.2; mine fireRange 7.0 / fireEvery 3.0). src/core/enemyBullets.js (NEW EnemyBulletField: fire/step/compact/clear/count, rim+2 cull). src/core/mines.js (per-mine fireTimer + pendingFires + takeFires; clear also clears pending). src/core/game.js (drain mine fires -> fireAimedBolt, boss fire timer + aimed bolt, resolveShipEnemyBullets (1 life per bolt, same invuln flow), reset). src/render/enemyBulletMesh.js (NEW pooled red-orange orbs). src/render/audio.js (bossFire / mineFire cues). src/main.js (sync, SFX, muzzle FX, __vr handles). tests/enemyBullets.test.js (NEW, 5 tests, seeds 59-61). design/gdd.md (new Enemy Bullets section). production/balance-notes.md (I56 section).
+- Verification: 159/159 + build 0 (was 154). Browser: boss bolt event + SFX on the 2.2s cadence (probe deltas), pooled orb visible; bolt contact costs a life (999->998) and grants invuln; parked mine at 6.5u fires in range (mineFire + SFX deltas) while out-of-range cadence stays silent (unit); mine bolt contact costs a life (998->997); 3 bolts in frame, clean HUD. 0 console errors/warnings. Screenshot .evidence/i56-enemy-bullets.png.
+- Result: DONE
+- Follow-up: I57 overdrive power-up (ST-057) - 2x score 6s, magenta hex drop.

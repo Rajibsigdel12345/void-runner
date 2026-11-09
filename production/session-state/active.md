@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E7 (extended content/UX/hardening, I51-I100)
-- current_story: ST-056
-- current_iteration: I56
+- current_story: ST-057
+- current_iteration: I57
 - branch: main
-- notes: I55 committed (monolith boss; 154/154). Next: enemy bullets (ST-056).
+- notes: I56 committed (enemy bullets; 159/159). Next: overdrive power-up (ST-057).

@@ -8,6 +8,7 @@ import { createAsteroidRenderer } from './render/asteroidRenderer.js';
 import { createMineRenderer } from './render/mineMesh.js';
 import { createBossMesh } from './render/bossMesh.js';
 import { createBossHealth } from './render/bossHealth.js';
+import { createEnemyBulletRenderer } from './render/enemyBulletMesh.js';
 import { createPowerupRenderer } from './render/powerupMesh.js';
 import { createShieldRing } from './render/shieldRing.js';
 import { createParticles } from './render/particles.js';
@@ -74,6 +75,7 @@ const rockRenders = createAsteroidRenderer(scene);
 const mineRenders = createMineRenderer(scene); // ST-054
 const bossMesh = createBossMesh(scene); // ST-055
 const bossHealth = createBossHealth(document.body); // ST-055
+const enemyBulletRenders = createEnemyBulletRenderer(scene); // ST-056
 const powerupRenders = createPowerupRenderer(scene);
 const shieldRing = createShieldRing(scene);
 const banner = createWaveBanner(document.body);
@@ -99,7 +101,7 @@ let fxCount = 0;
 let motionOff = false;
 let liveSettings = storage.getSettings(); // ST-026: settings panel keeps this fresh (audio consumes in I27)
 // Audio (ST-027): WebAudio synth, initialized on first user gesture.
-const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', waveCleared: 'cleared', gameover: 'gameover', nearmiss: 'swish', mineExplode: 'mine', bossSpawn: 'bossSpawn', bossRing: 'bossRing', bossDeath: 'bossDeath' };
+const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', waveCleared: 'cleared', gameover: 'gameover', nearmiss: 'swish', mineExplode: 'mine', bossSpawn: 'bossSpawn', bossRing: 'bossRing', bossDeath: 'bossDeath', bossFire: 'bossFire', mineFire: 'mineFire' };
 const audio = createAudio();
 audio.setVolume(liveSettings.volume);
 audio.setSfx(liveSettings.sfx);
@@ -178,7 +180,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, rockRenders, mineRenders, bossMesh, bossHealth, fpsMeter, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, rockRenders, mineRenders, bossMesh, bossHealth, enemyBulletRenders, fpsMeter, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -244,6 +246,8 @@ function tick(dt, intent) {
       else if (e.type === 'bossSpawn') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xb18cff, speed: 8, life: 0.7 }); shake.trigger(0.7); flashA = Math.min(0.8, flashA + 0.4); } // ST-055
       else if (e.type === 'bossRing') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.6), color: 0x9d7bff, speed: 7, life: 0.4 }); // ST-055
       else if (e.type === 'bossDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount * 2, color: 0xfff0b8, speed: 14, life: 0.8 }); shake.trigger(1.0); flashA = Math.min(0.8, flashA + 0.5); } // ST-055
+      else if (e.type === 'bossFire') particles.burst(e.data.pos.x, e.data.pos.y, { count: 5, color: 0xff6a4a, speed: 4, life: 0.25 }); // ST-056 muzzle
+      else if (e.type === 'mineFire') particles.burst(e.data.pos.x, e.data.pos.y, { count: 4, color: 0xff5a3c, speed: 3, life: 0.2 }); // ST-056 muzzle
       else if (e.type === 'hit') {
         particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xff6b57, speed: 11, life: 0.45 });
         shake.trigger(CONFIG.fx.shakeHit);
@@ -285,6 +289,7 @@ function syncVisuals(dt) {
   mineRenders.sync(world.mines, simT); // ST-054
   bossMesh.sync(world.boss, simT); // ST-055
   bossHealth.sync(world.boss); // ST-055
+  enemyBulletRenders.sync(world.enemyBullets, simT); // ST-056
   powerupRenders.sync(world.powerups, dt);
   shieldRing.sync(world, dt);
   particles.sync(dt);

@@ -5,6 +5,7 @@ import { Weapons } from './weapons.js';
 import { AsteroidField } from './asteroids.js';
 import { MineField } from './mines.js';
 import { Monolith } from './boss.js';
+import { EnemyBulletField } from './enemyBullets.js';
 import { bulletHitRock, shipHitRock } from './collision.js';
 import { CONFIG } from './config.js';
 import { v2 } from './math.js';
@@ -23,6 +24,8 @@ export class World {
     this.field = new AsteroidField(rng, cfg);
     this.mines = new MineField(rng, cfg); // ST-054
     this.boss = null; // ST-055
+    this.enemyBullets = new EnemyBulletField(cfg); // ST-056
+    this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056
     this.events = [];
     this.scoreKeeper = new ScoreKeeper(cfg);
     this.waves = new WaveDirector(rng, this.field, cfg);
@@ -83,11 +86,25 @@ export class World {
     }
     if (wv.waveCleared) this.emit('waveCleared', { n: wv.waveCleared });
     this.mines.step(dt, this.ship.pos); // ST-054
-    if (this.boss) { if (this.boss.step(dt, this.ship.pos) === 'ring') this.bossRingBurst(); } // ST-055
+    for (const f of this.mines.takeFires()) { // ST-056
+      const b = this.fireAimedBolt(f, this.cfg.enemyBullets.mineSpeed);
+      if (b) this.emit('mineFire', { pos: { x: f.x, y: f.y } });
+    }
+    this.enemyBullets.step(dt); // ST-056
+    if (this.boss) { // ST-055/056
+      if (this.boss.step(dt, this.ship.pos) === 'ring') this.bossRingBurst();
+      this.bossFireTimer -= dt;
+      if (this.bossFireTimer <= 0) {
+        this.bossFireTimer += this.cfg.boss.fireEvery;
+        const b = this.fireAimedBolt(this.boss.pos, this.cfg.enemyBullets.speed);
+        if (b) this.emit('bossFire', { pos: { x: this.boss.pos.x, y: this.boss.pos.y } });
+      }
+    }
     this.resolveBulletMines(); // ST-054
     this.resolveBulletBoss(); // ST-055
     this.resolveShipMines(); // ST-054
     this.resolveShipBoss(); // ST-055
+    this.resolveShipEnemyBullets(); // ST-056
     this.resolveBulletRocks();
     this.resolveShipRocks();
     this.resolveNearMisses(); // ST-053 (after ship hits: a hit-rock is destroyed, no double award)
@@ -218,6 +235,7 @@ export class World {
       tries++;
     } while (Math.hypot(pos.x - this.ship.pos.x, pos.y - this.ship.pos.y) < 10 && tries < 8);
     this.boss = new Monolith(this.rng, this.cfg, pos);
+    this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056: fresh boss starts a full interval
     this.emit('bossSpawn', { pos: { x: pos.x, y: pos.y } });
   }
 
@@ -279,6 +297,35 @@ export class World {
       }
     }
   }
+  /** ST-056: fire an enemy bolt from fromPos aimed at the ship's current position. */
+  fireAimedBolt(fromPos, speed) {
+    const dx = this.ship.pos.x - fromPos.x, dy = this.ship.pos.y - fromPos.y;
+    const d = Math.hypot(dx, dy) || 1;
+    return this.enemyBullets.fire(fromPos, { x: dx / d, y: dy / d }, speed);
+  }
+
+  /** ST-056: a bolt touching the ship costs a life (same flow as rock contact). */
+  resolveShipEnemyBullets() {
+    if (this.ship.isInvulnerable || this.lives <= 0) return;
+    for (const b of this.enemyBullets.bullets) {
+      if (b.dead) continue;
+      if (Math.hypot(b.pos.x - this.ship.pos.x, b.pos.y - this.ship.pos.y) < b.radius + this.cfg.ship.radius) {
+        b.dead = true;
+        this.enemyBullets.compact();
+        const livesLeft = this.livesMgr.damage();
+        this.scoreKeeper.onDamage();
+        const nx = (this.ship.pos.x - b.pos.x), ny = (this.ship.pos.y - b.pos.y);
+        const n = Math.hypot(nx, ny) || 1;
+        this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+        this.ship.damage(v2(nx / n, ny / n));
+        if (livesLeft <= 0) {
+          this.game.to(STATE.GAME_OVER);
+          this.emit('gameover', { score: this.score });
+        }
+        break; // one life per step (invuln prevents chain hits)
+      }
+    }
+  }
   /** ST-053: near-miss bonus - flat points + swish when a rock grazes the ship.
    * One award per approach: a rock re-arms only after leaving an extended ring.
    * Skipped while invulnerable or out of lives. */
@@ -305,6 +352,8 @@ export class World {
     this.field.clear();
     this.mines.clear();
     this.boss = null; // ST-055
+    this.enemyBullets.clear(); // ST-056
+    this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056
     this.scoreKeeper.reset();
     this.waves.reset();
     this.powerups.clear();
