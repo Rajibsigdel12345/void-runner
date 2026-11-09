@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E7 (extended content/UX/hardening, I51-I100)
-- current_story: ST-092
-- current_iteration: I92
+- current_story: ST-093
+- current_iteration: I93
 - branch: main
-- notes: I92 done (balance pass 4 - F9 post-boss breather wave, F4 combo cap 15, F2 ship invuln 1.8s; GDD + balance-notes synced; 233/233 + build + browser smoke green, console clean, no NaN). Next: I93 ui-ux-review (ST-093).
+- notes: I93 done (UI/UX review + persistent wave-modifier tag in hud.js; strong existing accessibility confirmed; in-world colorblind audit deferred to graphics/Blender pass; 233/233 + build + browser smoke green). Next: I94 reverse-document (ST-094).

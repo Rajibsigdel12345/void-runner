@@ -14,6 +14,8 @@ const PU_STYLE = {
   overdrive: { label: 'OVERDRIVE', letter: 'O', color: '#ff6ae2' },
 };
 
+const MOD_TAG = { fast: ['FAST ROCKS', '#ff9a6b'], small: ['SMALL ROCKS', '#6fe3ff'], inward: ['INWARD DRIFT', '#8bff9e'] }; // I93: persistent active-modifier tag
+
 export function createHUD(root) {
   const el = document.createElement('div');
   el.id = 'hud';
@@ -41,6 +43,9 @@ export function createHUD(root) {
   const wave = document.createElement('div');
   wave.style.cssText = 'font-size:calc(18px * var(--vr-fs,1));font-weight:600;letter-spacing:4px;'; // I44: full opacity
   waveBox.appendChild(wave);
+  const waveMod = document.createElement('div'); // I93: active modifier shown for the whole wave (not just the start banner)
+  waveMod.style.cssText = 'font-size:calc(12px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;margin-top:3px;text-shadow:0 1px 3px rgba(0,0,0,0.8);display:none;';
+  waveBox.appendChild(waveMod);
 
   const livesBox = box('top:14px;right:18px;text-align:right');
   const lives = document.createElement('div');
@@ -90,10 +95,17 @@ export function createHUD(root) {
   }
 
   let lastComboBar = -1;
+  let lastModTag = ''; // I93: cache for the persistent modifier tag
   function render(world, opts = {}) {
     set('score', score, String(world.score));
     set('best', best, opts.best > 0 ? `BEST ${opts.best}` : '');
     set('wave', wave, world.wave > 0 ? `WAVE ${world.wave}` : '');
+    const modTag = (world.waves && world.waves.activeMod && MOD_TAG[world.waves.activeMod]) ? world.waves.activeMod : 'none'; // I93
+    if (modTag !== lastModTag) {
+      lastModTag = modTag;
+      if (modTag !== 'none') { waveMod.textContent = MOD_TAG[modTag][0]; waveMod.style.color = MOD_TAG[modTag][1]; waveMod.style.display = 'block'; }
+      else { waveMod.textContent = ''; waveMod.style.display = 'none'; }
+    }
     const n = world.lives;
     set('lives', lives, '♥'.repeat(n) + '♡'.repeat(Math.max(0, world.livesMgr.max - n)));
 
