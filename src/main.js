@@ -403,6 +403,7 @@ const hudOpts = { best: 0 };
 const screenOpts = { muted: false, best: 0, newBest: false };
 function syncVisuals(dt) {
   const st = world.game.state;
+  audio.ambience(st === STATE.PLAYING); // ST-083: ambience bed only while playing
   hud.setVisible(st === STATE.PLAYING || st === STATE.PAUSED);
   // I36: reuse opts objects instead of allocating per frame
   hudOpts.best = bestScore;

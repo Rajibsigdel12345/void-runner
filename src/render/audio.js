@@ -11,11 +11,11 @@ const CUES = {
   powerup:   { type: 'sine',     f0: 660, f1: 990, dur: 0.18, gain: 0.25, min: 0.05 },
   shieldPop: { type: 'sine',     f0: 1320, f1: 1320, dur: 0.15, gain: 0.22, min: 0.05 },
   // ST-053 near-miss swish: soft low noise puff under a quick descending sine
-  swish:     { type: 'sine',     f0: 240, f1: 90,  dur: 0.16, gain: 0.09, min: 0.15, noise: 0.12 },
+  swish:     { type: 'sine',     f0: 300, f1: 100, dur: 0.18, gain: 0.09, min: 0.12, noise: 0.28 }, // ST-083: fuller near-miss whoosh (wider sweep, heavier noise)
   // ST-054 mine drone pop: a short percussive boom (noise tail + low square thump)
   mine:      { type: 'square',   f0: 180, f1: 60,  dur: 0.22, gain: 0.32, min: 0.05, noise: 0.16 },
   // ST-055 the Monolith: low spawn drone, ring-burst crack, big death boom
-  bossSpawn: { type: 'sine',   f0: 110, f1: 55,  dur: 0.6,  gain: 0.30, min: 0.4 },
+  bossSpawn: { type: 'sine',   gain: 0.30, min: 0.4, noise: 0.35, notes: [[55, 41, 0.7, 0, 0.34], [82.4, 79, 0.55, 0.12, 0.2], [164.8, 160, 0.4, 0.06, 0.1]] }, // ST-083: low tritone stinger
   bossRing:  { type: 'sine',   f0: 300, f1: 120, dur: 0.25, gain: 0.18, min: 0.15, noise: 0.15 },
   bossDeath: { type: 'square', f0: 80,  f1: 30,  dur: 0.7,  gain: 0.50, min: 0.3,  noise: 0.5 },
   // ST-056 enemy bolts: low saw zap (boss), soft tick (mine)
@@ -29,7 +29,7 @@ const CUES = {
   bomb:      { type: 'sine',     f0: 90,  f1: 40,  dur: 0.5,  gain: 0.7,  min: 0.1,  noise: 0.4 },
   wave:      { type: 'sine',     f0: 523, f1: 659, dur: 0.25, gain: 0.16, min: 0.1 },
   // ST-029 stingers: rising arpeggio on wave clear, falling motif on game over
-  cleared:   { type: 'sine',     gain: 0.2,  min: 0.2, notes: [[523, 523, 0.12, 0, 0.2], [659, 659, 0.12, 0.09, 0.2], [784, 784, 0.22, 0.18, 0.22]] },
+  cleared:   { type: 'sine',     gain: 0.2,  min: 0.2, notes: [[523, 523, 0.12, 0, 0.2], [659, 659, 0.12, 0.09, 0.2], [784, 784, 0.12, 0.18, 0.2], [1046, 1046, 0.3, 0.27, 0.24]] }, // ST-083: 4-note rising jingle (C5-E5-G5-C6)
   gameover:  { type: 'sawtooth', gain: 0.26, min: 0.3, noise: 0.5, notes: [[440, 440, 0.2, 0, 0.28], [330, 330, 0.2, 0.18, 0.28], [196, 196, 0.55, 0.36, 0.3]] },
 };
 const ARENA_R = 26; // for pan normalization (matches config arena radius)
@@ -79,6 +79,58 @@ export function createAudio() {
   function setMuted(m) { muted = m === true; applyGain(); }
   function state() { return ctx ? ctx.state : 'uninitialized'; }
 
+  // ST-083: ambience bed - a very quiet detuned low drone with a slow "breathing"
+  // LFO, on its own gain bus under the master. sfx() sidechain-ducks it so cues
+  // always sit on top. Runs only while the game is PLAYING (main.js drives it).
+  let ambBus = null, ambNodes = [], ambLfo = null, ambLfoGain = null;
+  const ambBase = 0.05; // bus level at rest (pre master volume)
+
+  function startAmbience() {
+    if (!ctx || ambBus) return;
+    ambBus = ctx.createGain();
+    ambBus.gain.value = ambBase;
+    ambBus.connect(master);
+    const mk = (type, f, g) => {
+      const o = ctx.createOscillator(); o.type = type; o.frequency.value = f;
+      const og = ctx.createGain(); og.gain.value = g;
+      o.connect(og); og.connect(ambBus); o.start();
+      ambNodes.push(o, og);
+    };
+    mk('sine', 55, 0.6);       // A1 bed
+    mk('sine', 82.5, 0.35);    // E2 fifth
+    mk('triangle', 110, 0.12); // A2 shimmer
+    ambLfo = ctx.createOscillator(); ambLfo.type = 'sine'; ambLfo.frequency.value = 0.08;
+    ambLfoGain = ctx.createGain(); ambLfoGain.gain.value = ambBase * 0.4;
+    ambLfo.connect(ambLfoGain); ambLfoGain.connect(ambBus.gain); // slow breathing on top of the bus
+    ambLfo.start();
+  }
+
+  function stopAmbience() {
+    if (!ambBus) return;
+    const t = ctx.currentTime;
+    ambBus.gain.cancelScheduledValues(t);
+    ambBus.gain.setTargetAtTime(0.0001, t, 0.25); // fade out, then disconnect
+    const bus = ambBus, nodes = ambNodes;
+    if (ambLfo) { try { ambLfo.stop(t + 1); } catch (e) {} }
+    if (ambLfoGain) { try { ambLfoGain.disconnect(); } catch (e) {} }
+    ambBus = null; ambNodes = []; ambLfo = null; ambLfoGain = null;
+    setTimeout(() => {
+      try { bus.disconnect(); } catch (e) {}
+      for (const n of nodes) { try { n.disconnect(); } catch (e) {} }
+    }, 1200);
+  }
+
+  function ambience(on) { if (on) startAmbience(); else stopAmbience(); }
+
+  function duck(t) { // ST-083: sidechain dip under any playing cue
+    if (!ambBus) return;
+    const g = ambBus.gain;
+    g.cancelScheduledValues(t);
+    g.setTargetAtTime(ambBase * 0.35, t, 0.01);   // fast dip
+    g.setTargetAtTime(ambBase, t + 0.12, 0.45);   // slow release back
+  }
+
+
   function scheduleNote(type, f0, f1, dur, gain, t, out) {
     const osc = ctx.createOscillator();
     osc.type = type;
@@ -123,11 +175,12 @@ export function createAudio() {
     const t = ctx.currentTime;
     if (lastPlay[name] !== undefined && t - lastPlay[name] < spec.min) return false;
     lastPlay[name] = t;
+    duck(t); // ST-083: dip the ambience bed under the cue
     played[name] = (played[name] || 0) + 1;
     lastPan = pos && isFinite(pos.x) ? Math.max(-1, Math.min(1, pos.x / ARENA_R)) * 0.8 : 0;
     playCue(spec, t, lastPan);
     return true;
   }
 
-  return { init, setVolume, setSfx, setMuted, state, sfx, played, lastPan: () => lastPan, get volume() { return volume; } };
+  return { init, setVolume, setSfx, setMuted, state, sfx, ambience, ambOn: () => !!ambBus, ambLevel: () => (ambBus ? ambBus.gain.value : null), played, lastPan: () => lastPan, get volume() { return volume; } };
 }

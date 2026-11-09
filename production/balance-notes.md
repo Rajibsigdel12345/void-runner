@@ -302,3 +302,9 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - Feel tuning added (no combat/economy numbers changed): camera {fovBase 60 (unchanged from hardcode), fovSpeed 4, lookAhead 4 (unchanged base), lookAheadSpeed 2, fovDamp 8} and fx.fovKick {decay 5/s, bomb 6 deg, bossDeath 8 deg, max 12 deg}.
 - Rationale: +4 deg at full speed is a modest widening that reads as velocity without distorting aim; the look-ahead grows 4 -> 6 units with speed so the camera anticipates where the ship is going rather than where it is (dodge readability at speed). Kick 6/8 deg is clearly bigger than the speed boost (4) so impacts still dominate the frame, and it decays in ~0.5s so it never masks the follow. All values are config-driven for future tuning.
 - 232/232 (4 new, pure-core fovKick envelope). Browser-verified peaks/offsets as logged in iterations I82.
+
+## I83 - audio polish: ambience + sidechain duck, stinger, jingle, whoosh (ST-083)
+
+- Audio-feel tuning (no gameplay numbers changed): ambience bus 0.05 (pre master volume 0.7) - deliberately a floor you feel rather than hear; duck to 35% (attack 0.01s / release 0.45s) so SFX always cut through. Cue changes: cleared 3 -> 4 notes (top C6 tail), bossSpawn drone -> tritone cluster stinger, swish noise 0.12 -> 0.28 with a wider 300 -> 100 Hz sweep (near-miss should be a clear "whip" that rewards close dodges).
+- The tritone (82.4 vs 55) is chosen for menace without harshness at low volume; the jingle stays a pure rising major arpeggio to match the ST-029 game-over falling motif. All values live in the CUES table / ambience constants in src/render/audio.js.
+- 232/232 (render-only). Browser-verified duck 0.05 -> 0.0176 -> 0.045 and event-routed cue scheduling as logged in iterations I83.
