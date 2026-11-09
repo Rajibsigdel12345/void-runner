@@ -5,7 +5,9 @@
 //
 // Payload shape (all values): { version: STORE_VERSION, ...data }
 // getBest/getSettings fall back to safe defaults when the payload is missing or
-// corrupt. I079 formalizes versioning/migration (v1 is the initial shape).
+// corrupt. I079 implements versioning + migration: reads validate the payload version
+// and migrate older known versions up to STORE_VERSION (an unknown future version, or a
+// corrupt/non-integer version, falls back to defaults). migratePayload is pure + tested.
 
 export const STORE_VERSION = 1;
 
@@ -18,6 +20,36 @@ export const DEFAULT_SETTINGS = Object.freeze({
 });
 
 export const FONT_SCALES = Object.freeze([1, 1.25, 1.5]);
+
+// Migration registry: key = the "from" version, value = (data) => next-version data.
+// Steps run in order from the stored version up to STORE_VERSION. v1 is the initial
+// shape so there is no live step yet; when the schema grows, add a step (e.g.
+// 2: (d) => ({ ...d, newField })) and bump STORE_VERSION.
+const MIGRATIONS = Object.freeze({
+  // 1: ... // (none yet - v1 is current)
+});
+
+/**
+ * Validate a stored payload's version and migrate it up to targetVersion.
+ * Pure (unit-tested): returns the current-shape object, or null when the payload is
+ * unknown/incompatible (non-object, corrupt version, or a future version > target).
+ * A missing version is treated as the legacy v1 shape (we have always stamped v1).
+ */
+export function migratePayload(version, data, migrations = MIGRATIONS, targetVersion = STORE_VERSION) {
+  if (data == null || typeof data !== 'object' || Array.isArray(data)) return null;
+  let v = (version === undefined || version === null) ? 1 : version;
+  if (typeof v !== 'number' || !Number.isInteger(v) || v < 1) return null; // corrupt version
+  if (v > targetVersion) return null; // unknown future schema: safer to fall back than mis-parse
+  let out = data;
+  while (v < targetVersion) {
+    const step = migrations[v];
+    if (typeof step !== 'function') return null; // no migration path from v
+    try { out = step(out); } catch { return null; }
+    if (out == null || typeof out !== 'object' || Array.isArray(out)) return null;
+    v++;
+  }
+  return out;
+}
 
 export class Storage {
   /**
@@ -51,9 +83,21 @@ export class Storage {
     }
   }
 
+  /** Read + version-validate + migrate a stored payload (ST-079). null when absent/corrupt/unknown. */
+  _readVersioned(key) {
+    const raw = this._read(key);
+    if (raw == null) return null;
+    const data = migratePayload(raw.version, raw);
+    if (data === null) return null;
+    if (typeof raw.version === 'number' && raw.version >= 1 && raw.version < STORE_VERSION) {
+      this._write(key, { ...data, version: STORE_VERSION }); // best-effort in-place upgrade
+    }
+    return data;
+  }
+
   /** @returns {number} stored best score; 0 when absent/corrupt/non-finite. */
   getBest() {
-    const d = this._read(this.bestKey);
+    const d = this._readVersioned(this.bestKey);
     const n = d && typeof d.value === 'number' && isFinite(d.value) ? d.value : 0;
     return Math.max(0, Math.floor(n));
   }
@@ -70,7 +114,7 @@ export class Storage {
 
   /** @returns {{volume:number, sfx:boolean, fx:string, reducedMotion:boolean}} saved settings merged over defaults. */
   getSettings() {
-    const d = this._read(this.settingsKey);
+    const d = this._readVersioned(this.settingsKey);
     const out = { ...DEFAULT_SETTINGS };
     if (!d || typeof d !== 'object') return out;
     if (typeof d.volume === 'number' && isFinite(d.volume)) out.volume = Math.min(1, Math.max(0, d.volume));
@@ -97,7 +141,7 @@ export class Storage {
 
   /** @returns {Array<{score:number, wave:number, kills:number}>} top-N high scores. No timestamps: core stays deterministic (I66). */
   getHighScores() {
-    const d = this._read(this.highScoresKey);
+    const d = this._readVersioned(this.highScoresKey);
     if (!d || !Array.isArray(d.list)) return [];
     const rows = [];
     for (const e of d.list) {

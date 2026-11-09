@@ -279,3 +279,9 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - No gameplay/tuning changes: timing-robustness only. 210/210 (6 new clock tests).
 - Replaced the inline frame accumulator with a pure clock (src/core/clock.js): clamps frame dt to 0.25s and drops backlog past 8 substeps, so tab-switch/resume cannot fast-forward the arena; adds clock.reset() on PAUSED->PLAYING as a belt-and-suspenders guard.
 - In-play sim cadence is unchanged (same STEP=1/60, same 8-substep cap) - only the gap-clamp and resume paths are hardened, so I064 balance numbers are unaffected.
+
+## I79 - storage versioning + corruption guards (ST-079)
+
+- No gameplay/tuning changes: persistence-robustness only. 223/223 (13 new).
+- Best score, settings and the high-score board now read through a version-validating path: a payload with a future or corrupt version falls back to safe defaults instead of being mis-parsed; the existing (unversioned-legacy) shape is still accepted, so no existing player data is discarded.
+- In-play numbers unaffected - storage loads at boot and saves on the game-over/menu paths only.

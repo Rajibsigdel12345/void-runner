@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I79: storage versioning + corruption guards (ST-079) - best/settings/scores read through a version-validating, migratable path; future/corrupt versions fall back to safe defaults while the legacy shape still loads (223/223)
 - I78: resume sync (ST-078) - pause/resume can no longer fast-forward: fixed-timestep clock (src/core/clock.js) clamps frame dt to 0.25s, drops backlog past 8 substeps, and resets on unpause (210/210, browser-verified no-jump)
 - I77: 10-minute headless soak (ST-077) - 36000-step aggressive sim stays finite at every 5s sample and every entity pool (rocks/bullets/enemy-bullets/mines/drops) stays inside its configured cap across waves, boss, and 7 restarts (test-only, 204/204).
 - I76: determinism harness (ST-076) - fixed-seed + fixed-input 90s replay proves bit-identical world state (exact-float deep-equal, 15s checkpoints); the replay reaches wave 5 with the Monolith engaged (96 kills, GAME_OVER), so waves/splits/golden/mines/boss/power-ups/game-over are all covered; also pins seed divergence + mid-replay pause/resume (test-only, 203/203).

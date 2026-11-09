@@ -1,7 +1,7 @@
 ﻿// ST-018: persistent storage tests
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Storage, DEFAULT_SETTINGS, STORE_VERSION } from '../src/core/storage.js';
+import { Storage, DEFAULT_SETTINGS, STORE_VERSION, migratePayload } from '../src/core/storage.js';
 import { CONFIG } from '../src/core/config.js';
 
 function memStore() {
@@ -177,4 +177,86 @@ test('storage: fontScale defaults to 1, validates, and round-trips (I70)', () =>
   assert.equal(a.setSettings({ fontScale: 0.5 }).fontScale, 1); // below range -> default
   assert.equal(a.setSettings({ fontScale: 1.5 }).fontScale, 1.5); // valid max
   assert.equal(a.setSettings({ fontScale: 1 }).fontScale, 1); // valid min
+});
+
+
+// I79: versioning + migration + corruption guards
+test('migratePayload: current version passes through unchanged', () => {
+  const d = { value: 5 };
+  assert.equal(migratePayload(1, d), d); // v1 === STORE_VERSION -> identity
+});
+
+test('migratePayload: missing version treated as legacy v1', () => {
+  assert.deepEqual(migratePayload(undefined, { value: 7 }), { value: 7 });
+  assert.deepEqual(migratePayload(null, { value: 7 }), { value: 7 });
+});
+
+test('migratePayload: unknown future version rejected (fallback)', () => {
+  assert.equal(migratePayload(2, { value: 5 }), null);
+  assert.equal(migratePayload(99, { list: [] }), null);
+});
+
+test('migratePayload: corrupt / non-integer version rejected', () => {
+  assert.equal(migratePayload(0, { value: 1 }), null);
+  assert.equal(migratePayload(-1, { value: 1 }), null);
+  assert.equal(migratePayload(1.5, { value: 1 }), null);
+  assert.equal(migratePayload('1', { value: 1 }), null);
+});
+
+test('migratePayload: non-object payloads rejected', () => {
+  assert.equal(migratePayload(1, 'str'), null);
+  assert.equal(migratePayload(1, 42), null);
+  assert.equal(migratePayload(1, null), null);
+  assert.equal(migratePayload(1, [1, 2]), null);
+});
+
+test('migratePayload: multi-step migration runs in order to targetVersion', () => {
+  const steps = { 1: (d) => ({ ...d, b: 2 }), 2: (d) => ({ ...d, c: 3 }) };
+  assert.deepEqual(migratePayload(1, { a: 1 }, steps, 3), { a: 1, b: 2, c: 3 });
+});
+
+test('migratePayload: a missing migration step aborts (no partial upgrade)', () => {
+  const steps = { 1: (d) => ({ ...d, b: 2 }) }; // no step for 2 -> 3
+  assert.equal(migratePayload(1, { a: 1 }, steps, 3), null);
+});
+
+test('migratePayload: a throwing migration aborts safely', () => {
+  const steps = { 1: () => { throw new Error('boom'); } };
+  assert.equal(migratePayload(1, { a: 1 }, steps, 2), null);
+});
+
+test('storage: a future-versioned settings payload falls back to defaults (ST-079)', () => {
+  const store = memStore();
+  const a = new Storage(store);
+  store.set(a.settingsKey, JSON.stringify({ version: 2, volume: 0.9 }));
+  assert.deepEqual(a.getSettings(), { ...DEFAULT_SETTINGS });
+});
+
+test('storage: a current-versioned settings payload is honored (ST-079)', () => {
+  const store = memStore();
+  const a = new Storage(store);
+  store.set(a.settingsKey, JSON.stringify({ version: 1, volume: 0.3 }));
+  assert.equal(a.getSettings().volume, 0.3);
+});
+
+test('storage: legacy (unversioned) settings payload still reads (backward compat, ST-079)', () => {
+  const store = memStore();
+  const a = new Storage(store);
+  store.set(a.settingsKey, JSON.stringify({ volume: 0.4, sfx: false }));
+  assert.equal(a.getSettings().volume, 0.4);
+  assert.equal(a.getSettings().sfx, false);
+});
+
+test('storage: a future-versioned high-score board falls back to empty (ST-079)', () => {
+  const store = memStore();
+  const a = new Storage(store);
+  store.set(a.highScoresKey, JSON.stringify({ version: 2, list: [{ score: 100, wave: 1, kills: 1 }] }));
+  assert.deepEqual(a.getHighScores(), []);
+});
+
+test('storage: a future-versioned best falls back to 0 (ST-079)', () => {
+  const store = memStore();
+  const a = new Storage(store);
+  store.set(a.bestKey, JSON.stringify({ version: 2, value: 999 }));
+  assert.equal(a.getBest(), 0);
 });
