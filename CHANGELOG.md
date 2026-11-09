@@ -50,3 +50,4 @@
 - I43: edge cases - visibilitychange auto-pause, WebGL context-loss auto-pause + restore recovery, #flash null guard, 5-min NaN soak (closes I38 C3/C4/C5).
 - I44: UI/UX pass - HUD power-up chips (shape+color+label, drain bars), combo window drain bar, fire-line reticle (playtest rec #3), menu keycaps + pause session snapshot, contrast bumps (ST-044).
 - I45: vertical slice gate - QA Suite C executed green (storage round-trip, resize, touch synth, I43 robustness re-verify, perf 60fps/37 calls/1626 tris @ wave 4 within baseline); verdict PASS (production/gates.md).
+- I46: final regression - Suites A+B+C re-run green after I44 (8-step critical path; perf 60fps/34 calls/1466 tris @ wave 4 within 10% baseline); no source changes (ST-046).

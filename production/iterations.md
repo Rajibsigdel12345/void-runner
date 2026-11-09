@@ -299,3 +299,11 @@ One entry per iteration. Format:
 - Verification: Suite A green (122/122 + build 0). Suite C: storage round-trip (volume/sfx/fx/motion set in panel -> reload -> stored == panel == live); resize 800x600 -> 1600x800 mid-game (0 errors, canvas buffer 1600x800); touch tap -> 2 bullets, drag -> thrust (1,0) vel +10.5, two-finger -> PAUSED; visibility hidden -> PAUSED (stays paused, manual resume), context loss -> PAUSED -> restore -> healthy render, 0 errors; perf @ wave 4 (20 rocks + fire + bloom High, ?fps=2): 60fps / 16.6ms / 37 calls / 1626 tris - within I36 baseline (56-60fps / 40 calls / 1638 tris).
 - Result: PASS (gate) - DONE
 - Follow-up: I46 final regression (ST-046): full node suite + browser regression (Suites A+B+C re-run) + build.
+
+## I46 - final regression (ST-046)
+
+- Goal: final regression before docs/milestone (ST-046) - re-run Suites A+B+C after the I44 UI/UX changes.
+- Changed: none (regression is evidence, not code - same pattern as I41/I45).
+- Verification: Suite A green (122/122 + build 0). Suite B (fresh page, deterministic __vr.advance with parked waves/ship/rocks): start -> PLAYING + hint + wave 1 banner event; fire 3 shots in 0.4s; kill parked S-rock (score 100, "+100" popup); rapid 20 shots in 2s (2x); shield shielding; magnet pulled a drop to pickup (v 17.3 at 0.5s, collected ~0.41s = 1/2*a*t^2 within pickupRadius 1.6 - proof of pull, not a miss); pause froze sim over 900ms of live ticks; hit -> lives 3->2 + invuln + combo 3->0; game over screen with stats (KILLS 1 WAVE 1, MAX COMBO x1) + best persisted (kept pre-existing 104955 > forced 5000 - correct max behavior); restart fresh (score 0 / wave 0 / lives 3 / popups cleared / hint resown). Suite C perf @ wave 4 (parked ship, exactly 20 M rocks held, sustained fire, bloom High, ?fps=2): 60fps / 16.7ms / 34 calls / 1466 tris - within 10% of I36 (40 calls/1638 tris) and I45 (37/1626). Console: 0 errors, 0 warnings on the I46 page load (session-accumulated warnings belong to earlier page loads: HMR reload + I45 context-loss test, both documented-harmless classes).
+- Result: DONE
+- Follow-up: I47 docs (ST-047) - README (run/build/test/controls), docs/architecture README update, CHANGELOG final pass.
