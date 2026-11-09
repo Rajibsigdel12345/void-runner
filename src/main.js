@@ -24,6 +24,7 @@ import { createScorePopups } from './render/scorePopups.js';
 import { createTutorialHint } from './render/tutorialHint.js';
 import { createBloom } from './render/bloom.js';
 import { createFpsMeter } from './render/fpsMeter.js';
+import { createAdaptiveQuality } from './core/adaptiveQuality.js'; // ST-073
 import { STATE } from './core/state.js';
 import { Storage } from './core/storage.js';
 import { CONFIG } from './core/config.js';
@@ -135,10 +136,32 @@ function applySettings(s) {
   if (audio.state() !== 'uninitialized') { audio.setVolume(s.volume); audio.setSfx(s.sfx); }
 }
 applySettings(liveSettings);
+// ST-073: adaptive quality - rolling FPS below threshold auto-downgrades FX (console log + toast).
+const toastEl = document.createElement('div');
+toastEl.id = 'adaptive-toast';
+toastEl.setAttribute('aria-live', 'polite');
+toastEl.style.cssText = 'position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:60;font:calc(12px * var(--vr-fs,1))/1.4 ui-monospace,monospace;letter-spacing:.08em;color:#9fb4d8;background:rgba(4,6,15,0.7);padding:6px 12px;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .25s;';
+document.body.appendChild(toastEl);
+let toastTimer = 0;
+function toast(msg) {
+  toastEl.textContent = msg;
+  if (motionOff) toastEl.style.transition = 'none'; // reduced motion: no fade
+  toastEl.style.opacity = '1';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toastEl.style.opacity = '0'; }, 3000);
+}
+const adaptive = createAdaptiveQuality(CONFIG.adaptive, (info) => {
+  if (info.type === 'autoDowngrade') {
+    fxCount = CONFIG.fx.particleLow;
+    bloom.setEnabled(false);
+    console.info('[voidrunner] adaptive quality: FX high -> low (rolling ' + CONFIG.adaptive.windowSec + 's avg ' + Math.round(info.fps) + ' fps < ' + CONFIG.adaptive.thresholdFps + ')');
+    toast('FX AUTO-SET TO LOW (LOW FPS)');
+  }
+});
 // ST-026: settings panels (menu + pause) - after storage/applySettings (TDZ order).
 let fxPreviewFn = null; // ST-067: live FX preview, wired once particles exist
-const menuSettings = createSettingsPanel(storage, applySettings, (tier) => { if (fxPreviewFn) fxPreviewFn(tier); });
-const pauseSettings = createSettingsPanel(storage, applySettings, (tier) => { if (fxPreviewFn) fxPreviewFn(tier); });
+const menuSettings = createSettingsPanel(storage, applySettings, (tier) => { adaptive.userSet(tier); if (fxPreviewFn) fxPreviewFn(tier); }); // ST-073: user FX choice overrides automation
+const pauseSettings = createSettingsPanel(storage, applySettings, (tier) => { adaptive.userSet(tier); if (fxPreviewFn) fxPreviewFn(tier); }); // ST-073
 const screens = createScreens(document.body, {
   menu: menuSettings, pause: pauseSettings, touch: coarse, // I71: touch-aware menu
   actions: { // I68: pause overlay actions; I71: start for touch
@@ -223,7 +246,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, bossMesh, bossHealth, enemyBulletRenders, stars, vortexFx, fpsMeter, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, bossMesh, bossHealth, enemyBulletRenders, stars, vortexFx, fpsMeter, adaptive, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -401,6 +424,7 @@ function frame() {
     n++;
   }
   if (n === MAX_SUBSTEPS) acc = 0; // drop backlog
+  if (world.game.state === STATE.PLAYING) adaptive.noteFrame(frameDt); // ST-073: adaptive quality (real frame dt, PLAYING only)
   syncVisuals(frameDt); // I36: reads previous frame GPU stats
   renderer.info.reset(); // I36: clear before this frame accumulates (autoReset off)
   bloom.render();

@@ -119,6 +119,7 @@ playing (teaches lead-aim; playtest rec #3, I44).
 
 ## Accessibility
 - Settings: volume 0-100, SFX on/off, FX quality (High/Low - Low disables bloom + reduces particles).
+- Adaptive quality (ST-073): if the rolling 2.0s FPS average stays below 45 fps for two consecutive windows, FX auto-drops High -> Low (fewer particles, no bloom); the change is console-logged + toasted and does NOT alter saved settings. Choosing FX quality in options overrides (locks) the automation.
 - Reduced-motion option cuts screen shake to near-zero.
 - Colorblind-friendly power-up icons (shape + color, not color alone).
 - Font-scale setting (NORMAL / LARGE / XL) scales all in-game UI text via a CSS variable (--vr-fs); the WebGL canvas is unaffected.

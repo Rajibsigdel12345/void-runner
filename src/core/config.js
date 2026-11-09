@@ -162,7 +162,12 @@ export const CONFIG = {
     }
   },
 
-  fx: {
+  // ST-073: adaptive quality - a rolling FPS monitor auto-downgrades FX high -> low
+   // when the window average stays below thresholdFps for confirmWindows consecutive
+   // windows. User FX choice in settings overrides (locks) the automation; the
+   // downgrade is console-logged + toasted and is NOT persisted to saved settings.
+   adaptive: { windowSec: 2.0, thresholdFps: 45, confirmWindows: 2 },
+   fx: {
     shake: 1,                 // master screen-shake scale (0..1)
     shakeDecay: 6,            // shake energy decay (1/s, exponential)
     shakeAmplitude: 0.5,      // max camera jitter (world units) at energy 1

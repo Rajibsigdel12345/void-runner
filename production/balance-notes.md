@@ -231,3 +231,11 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - Fix 1 (hud.js): live combo label was "3 CHAIN  1.3x" -> now "COMBO 3  x1.4". "CHAIN" was an outlier vs the canonical COMBO term (GDD Combo + game-over MAX COMBO); the multiplier now uses the multiplication sign (x) instead of a stray lowercase x, so no UI string carries a bare lowercase letter.
 - Fix 2 (screens.js): game-over stat was "MAX COMBO x5" -> now "MAX COMBO 5". The lowercase x prefix was an ambiguous multiplication on a plain count and the only non-caps char in an all-caps stat line.
 - Deliberately left: "M — MUTE (OFF)" em-dash, credit-line diamond separators, wave-banner middot, 4-space gaps between stat fields, and the touch ("fly the ship") vs keyboard ("thrust") control wording (clearer per input method).
+
+## I73 - adaptive quality (ST-073)
+
+- No gameplay/scoring/pacing changes: adaptive quality only touches the FX tier (particle count + bloom). 196/196 (9 new unit tests; core logic in pure module).
+- New tunables in config.js: adaptive { windowSec 2.0, thresholdFps 45, confirmWindows 2 } - deliberately conservative: two full 2.0s windows below 45fps before dropping, so transient stutters (GC, tab refocus) never trigger it.
+- Deliberately one-way automation (High -> Low only): re-enabling High is always a user choice via options (which also locks the automation for the session), avoiding an auto up/down flap loop.
+- The auto downgrade is a RUNTIME visual change: it never writes to saved settings (localStorage stays as the user set them) - verified in browser (savedFx stayed "high" after autoLow).
+- Cost: one accumulator + integer counters per frame in the rAF loop (PLAYING only); zero allocations, zero extra draw calls.
