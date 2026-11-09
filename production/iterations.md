@@ -339,3 +339,11 @@ One entry per iteration. Format:
 - Verification: repo audit - no unreferenced src modules, no TODO/FIXME/HACK in src, .gitignore covers dist/evidence/caches, all 17 test files map to modules. Suite A green: 122/122 + build 0. Browser sanity on the shipped dist (preview server): fresh load 0 console errors/warnings, start -> PLAYING, live play finite (no NaN).
 - Result: DONE (E6 + Sprint 1 closed at v0.2.0)
 - Follow-up: I51 begins E7A content (ST-051) - first content slice per production/stories.md.
+## I51 - wave modifiers (ST-051)
+
+- Goal: ST-051 E7A content - per-wave modifiers (fast rocks, small bias, inward push), deterministic via a seed-derived RNG.
+- Changed: src/core/config.js (NEW waveMods section). src/core/waves.js (activeMod, modifierFor pure in (seed,wave), fast speedMult x1.4, small pickSize 50% S, inwardAccel getter, set on both start paths). src/core/asteroids.js (field.step drift pull toward center). src/core/game.js (field.step gets inwardAccel; wave event carries mod). src/render/waveBanner.js (MOD_LABELS + startWave(n,mod)). src/main.js (pass mod). tests/waves.test.js (2 ramp tests probe base ramp with activeMod='none'). tests/wavemods.test.js (NEW, 8 tests, seeds 39-45). design/gdd.md (Waves section). production/balance-notes.md (I51 section).
+- Verification: 130/130 + build 0 (was 122). Browser: modifierFor deterministic (1-2 none, 3-6 fast, 7-9 inward, 13 small); INWARD wave 7 parked rock (12,0) vel.x -0.5 + banner "INWARD DRIFT"; FAST wave 3 speedMult 1.652 (exact 1.18x1.4) + banner "FAST ROCKS"; SMALL wave 13 banner "SMALL ROCKS"; 0 console errors/warnings. Screenshot .evidence/i51-wavemods-banner.png.
+- Result: DONE
+- Follow-up: I52 golden asteroid (ST-052) - rare, 5x score, faster, glowing.
+

@@ -31,3 +31,13 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - `wave.stallTime: 45` (new; closes playtest F1): waves previously advanced only on full clear, so a camped field froze escalation forever (Run A farmed wave 1 for 180s, 1 hit). Now a wave also advances after 45s without a clear (stall advance): wave +1, toSpawn set for the new wave, leftover rocks carry (not deleted, not sped up), no intermission, timer reset. 45s is ~2x the skilled bot's early-wave pace (17-21s), so competent play never sees it; a player who stops clearing starts losing the escalation they were farming.
 - Density is self-bounded: carryover rocks count against the concurrent cap 24 (same pool), so repeated stalls converge on a full field rather than unbounded growth; the spawn loop adds nothing while count == cap. No counterweight needed in this pass; watch compound stall-farming density in the I90 human playtest and revisit at I92 (balance pass 4) if it feels strong.
 - No new RNG draws, no speed change: stall advance is pure timer logic (deterministic under seeded step). GDD "Waves & Difficulty" updated (advance rule + carryover + skipped intermission).
+## I51 - wave modifiers (ST-051)
+- FAST: x1.4 spawn speed on top of the ramp (effective max ~2.94x at wave 18+).
+  Watch: combined with dense waves (concurrent 24) fast waves feel aggressive; if
+  playtest v2 (I90) shows clustering complaints (F2), first retune fastSpeedMult 1.4 -> 1.25.
+- SMALL: 50% S spawns (baseline 30%). S rocks do not split, so small waves drain faster -
+  pairs with the stall-time safety net (I42).
+- INWARD: 2.0 u/s^2 center pull keeps late-game rocks from camping the rim; rim reflection
+  bounds the displacement.
+- Selection: 1/3 each, pure function of (world seed, wave) - no RNG stream perturbation,
+  so existing seeded test streams are unaffected.

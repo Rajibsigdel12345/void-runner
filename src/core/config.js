@@ -45,6 +45,16 @@ export const CONFIG = {
     spawnMinPlayerDist: 8 // I34: rim spawn keeps at least this far from the ship
   },
 
+  waveMods: {
+    // ST-051: per-wave modifiers, chosen deterministically from (world seed, wave
+    // number) via a derived RNG - stall-vs-clear timing cannot change the pick.
+    first: 3,             // waves 1-2 stay plain (teach the base loop first)
+    list: ['fast', 'small', 'inward'],
+    fastSpeedMult: 1.4,   // 'fast': extra spawn-speed multiplier on top of the ramp
+    smallSBias: 0.5,      // 'small': spawn rolls S with this probability
+    inwardAccel: 2.0      // 'inward': u/s^2 pull of all rocks toward the arena center
+  },
+
   combo: {
     window: 4.0,        // seconds to keep a chain alive
     cap: 10,            // max combo

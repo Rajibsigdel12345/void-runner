@@ -52,10 +52,15 @@ export class AsteroidField {
     return rock;
   }
 
-  step(dt) {
+  step(dt, drift = 0) {
     const R = this.cfg.arena.radius;
     for (const r of this.rocks) {
       if (r.dead) continue;
+      if (drift > 0) { // ST-051 'inward' modifier: pull toward the arena center
+        const d = v2Len(r.pos) || 1;
+        r.vel.x -= (r.pos.x / d) * drift * dt;
+        r.vel.y -= (r.pos.y / d) * drift * dt;
+      }
       r.pos.x += r.vel.x * dt;
       r.pos.y += r.vel.y * dt;
       r.rot += r.spin * dt;

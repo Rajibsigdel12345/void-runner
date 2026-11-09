@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I51: wave modifiers (ST-051) - per-wave fast/small/inward picks, deterministic (seed,wave) table, banner announces each; 8 new tests (130/130).
 
 ## [0.2.0] - 2026-11-13 (M1: vertical slice SHIP)
 ### Added

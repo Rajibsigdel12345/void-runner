@@ -62,7 +62,7 @@ export class World {
     this.ship.step(dt, intent.thrust, intent.aimPoint);
     if (intent.firing) this.fireWeapon();
     this.weapons.step(dt, this.powerups.active('magnet'), this.field.rocks);
-    this.field.step(dt);
+    this.field.step(dt, this.waves.inwardAccel); // ST-051 inward modifier
     const pickups = this.powerups.step(dt, this.ship);
     for (const pk of pickups) this.emit('powerup', { type: pk.type, pos: pk.pos });
     const inst = this.powerups.takeInstant();
@@ -72,7 +72,7 @@ export class World {
     }
     this.scoreKeeper.tick(this.time);
     const wv = this.waves.step(dt, this.ship.pos);
-    if (wv.startedWave) this.emit('wave', { n: wv.startedWave });
+    if (wv.startedWave) this.emit('wave', { n: wv.startedWave, mod: this.waves.activeMod }); // ST-051
     if (wv.waveCleared) this.emit('waveCleared', { n: wv.waveCleared });
     this.resolveBulletRocks();
     this.resolveShipRocks();

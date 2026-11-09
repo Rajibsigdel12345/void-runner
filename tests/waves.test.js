@@ -37,6 +37,7 @@ test('waves: speed and concurrency ramp with wave number (capped)', () => {
     if (ev.waveCleared === 0 && field.count > 0 && dir.toSpawn === 0) field.clear();
   }
   assert.ok(dir.wave >= capWave, `reached wave ${dir.wave}`);
+  dir.activeMod = 'none'; // ST-051: probe the base ramp; modifier math lives in wavemods.test.js
   assert.ok(Math.abs(dir.speedMult - CONFIG.wave.speedCap) < 1e-9, 'speed capped');
   assert.equal(dir.concurrentLimit, CONFIG.wave.maxConcurrentCap, 'concurrency capped');
 });
@@ -44,6 +45,7 @@ test('waves: speed and concurrency ramp with wave number (capped)', () => {
 test('waves: wave 10 numbers per GDD ramp', () => {
   const { field, dir } = setup();
   dir.wave = 10; // direct probe of the formulas
+  dir.activeMod = 'none'; // ST-051: base-ramp probe
   assert.ok(Math.abs(dir.speedMult - Math.min(CONFIG.wave.speedCap, 1 + CONFIG.wave.speedPerWave * 10)) < 1e-9);
   assert.equal(dir.concurrentLimit, Math.min(CONFIG.wave.maxConcurrentCap, 6 + CONFIG.wave.maxConcurrentGrowth * 10));
 });

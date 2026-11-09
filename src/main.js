@@ -227,7 +227,7 @@ function tick(dt, intent) {
   for (const e of world.drainEvents()) {
     eventTally[e.type] = (eventTally[e.type] || 0) + 1;
     const cue = SFX_CUES[e.type]; if (cue) audio.sfx(cue, e.data && e.data.pos ? e.data.pos : null);
-    if (e.type === 'wave') banner.showWave(e.data.n);
+    if (e.type === 'wave') banner.showWave(e.data.n, e.data.mod);
     else if (e.type === 'waveCleared') banner.showCleared(e.data.n);
     else if (e.type === 'kill') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 }); // ST-030
     if (!motionOff) {
