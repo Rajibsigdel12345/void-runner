@@ -36,3 +36,9 @@ One entry per iteration. Format:
 - Verification: npm test 18/18 pass; build exit 0; browser http://localhost:5173 console clean, screenshot .evidence/i04-starfield.png shows two-shell glowing starfield around polar arena.
 - Result: DONE
 - Follow-up: camera is static until I06 (ship + follow cam).
+## I05 - Ship core simulation (ST-005)
+- Goal: inertial ship: accel + exponential drag, maxSpeed cap, soft arena clamp, damped aim easing (seam-safe), invulnerability + knockback.
+- Changed: src/core/ship.js (new), tests/ship.test.js (new, 7 tests)
+- Verification: npm test 25/25 pass; build exit 0.
+- Result: DONE
+- Follow-up: I06 renders ship + mouse aim + camera follow.

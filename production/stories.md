@@ -63,3 +63,55 @@ Format: ID | story | acceptance criteria | verification
 - ST-048 | Milestone review (cgs-milestone-review) + retrospective (cgs-retrospective) | docs + actions | doc
 - ST-049 | Release checklist (cgs-release-checklist): dist build verified, size, load time, no console warnings | ship/no-ship = SHIP | doc + build
 - ST-050 | Final polish sweep: last visual/audio nits from release checklist + closing commit | all checklist items checked | repo
+
+## E7 Extended Content, UX, Hardening & Release (I51-I100)
+- ST-051 | Wave modifiers (per-wave: fast rocks, small bias, inward push) deterministic via RNG | unit + browser | node + browser
+- ST-052 | Golden asteroid (rare, 5x score, faster, glowing) | unit + browser | node + browser
+- ST-053 | Near-miss bonus (close pass = small points + swish) | unit + browser | node + browser
+- ST-054 | Mine drones (slow homing, 1 hit, explode) | unit + browser | node + browser
+- ST-055 | Monolith boss every 5 waves (HP 40, ring burst, splits to 4 M) | unit + browser | node + browser
+- ST-056 | Enemy bullets (separate pool, distinct look, damage ship) | unit + browser | node + browser
+- ST-057 | Overdrive power-up (2x score 6s, magenta hex) | unit + browser | node + browser
+- ST-058 | Endless difficulty curve post wave 10 (caps lift, documented) | unit + doc | node + doc
+- ST-059 | Gravity vortex hazard (pulsing disc pulls ship+rocks) | unit + browser | node + browser
+- ST-060 | Starfield twinkle + parallax; rock rim-lit material upgrade | browser | browser
+- ST-061 | Bullet trails (additive streak) | browser | browser
+- ST-062 | Shield pulse animation + ring visual | browser | browser
+- ST-063 | Ship engine flame (thrust flicker) | browser | browser
+- ST-064 | Balance pass 3 (new content pacing) + doc | balance notes | doc
+- ST-065 | Menu polish (title, controls, animated bg, credits) | browser | browser
+- ST-066 | Top-5 high-score table (localStorage, guarded) + NEW BEST | unit + browser reload | node + browser
+- ST-067 | Options panel polish (groups, key nav, live FX preview) | browser | browser
+- ST-068 | Pause overlay (dim, resume/restart/quit, mouse+keys) | browser | browser
+- ST-069 | Game-over stats + new-best celebration (confetti burst) | browser | browser
+- ST-070 | Accessibility: power-up letter glyphs (R/S/H/B/M), focus styles, font scale setting | browser | browser
+- ST-071 | Mobile/responsive HUD + touch pass | browser (device emulation) | browser
+- ST-072 | UI text pass (wording/typos/caps consistency) | review notes | repo
+- ST-073 | Adaptive quality (rolling FPS <45 -> auto FX low, logged, overridable) | unit + browser | node + browser
+- ST-074 | Pool/memory audit (no per-frame allocs in hot paths) | audit notes + tests | node
+- ST-075 | WebGL context loss: overlay + restore/reload path | browser (simulated) | browser
+- ST-076 | Determinism harness: fixed input+seed replay => identical state | unit | node
+- ST-077 | Soak test: 10-min headless sim (no NaN, pools stable) | unit (fast sim) | node
+- ST-078 | Resume sync: clock reset on unpause, dt clamp verified | unit + browser | node + browser
+- ST-079 | Storage versioning + corruption guards (settings/scores) | unit | node
+- ST-080 | Debug overlay ?dbg=1 (fps, pools, entities, drawcalls) | browser | browser
+- ST-081 | Hit-stop (boss/bomb) + camera punch | browser | browser
+- ST-082 | Dynamic FOV kick (bomb/boss) + look-ahead tuning | browser | browser
+- ST-083 | Audio: wave-clear jingle, boss stinger, near-miss swish, ambience duck | manual | browser
+- ST-084 | Audio: stereo pan by x, master DynamicsCompressor | manual | browser
+- ST-085 | Vignette overlay (CSS, reduced-motion safe) | browser | browser
+- ST-086 | Per-entity particle palettes + burst shapes | browser | browser
+- ST-087 | Sound-level pass (SFX weight vs visual) | manual | browser
+- ST-088 | UI motion pass (popup/menu/banner easing, reduced-motion) | browser | browser
+- ST-089 | Regression round C (node + extended browser w/ boss+modifiers) | regression clean | node + browser
+- ST-090 | Playtest v2 (scripted self-play + notes) | report doc | doc
+- ST-091 | Bugfix round C + regressions | bugs closed w/ tests | node + browser
+- ST-092 | Balance pass 4 (post all content) + doc | balance notes | doc
+- ST-093 | UI/UX final pass on new screens | review notes applied | browser
+- ST-094 | Docs: GDD addendum, architecture README update, README v2 | docs | repo
+- ST-095 | Perf re-verification post polish (fps note) | browser | browser
+- ST-096 | 100-iteration gate check (cgs-gate-check) | gate verdict PASS | doc
+- ST-097 | Milestone review + retrospective v2 | docs | doc
+- ST-098 | Release checklist v2 + dist verification | ship verdict | doc + build
+- ST-099 | Final polish sweep from checklist + closing commit | checklist complete | repo
+- ST-100 | Wrap: verify 100 log entries, final CHANGELOG, screenshot set | verified | repo

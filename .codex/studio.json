@@ -2,7 +2,7 @@
   "project": "void-runner",
   "engine": "three.js",
   "engine_version": "0.160.0",
-  "build_tool": "vite",
+  "build_tool": "static import-map (scripts/build.mjs)",
   "test_runner": "node --test",
   "stage": "production",
   "workflow": [
@@ -15,7 +15,8 @@
   ],
   "gates": {
     "vertical_slice": "full loop: menu -> play -> score -> game over -> restart, with power-ups and waves",
-    "milestone_m1": "50+ iterations logged, all tests green, build green, playtested"
+    "milestone_m1": "100+ iterations logged, all tests green, build green, playtested"
   },
   "update": "iteration log in production/iterations.md"
 }
+

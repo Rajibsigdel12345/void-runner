@@ -6,3 +6,5 @@
 - I02: seeded RNG (mulberry32) + math utils (damp, v2 helpers, angle helpers) with unit tests.
 - I03: central CONFIG table (arena/ship/weapon/asteroid/wave/combo/powerup/fx/storage) with schema tests.
 - I04: procedural two-shell starfield (soft additive glow sprites, seeded) + scene fog + hemisphere lighting.
+- Plan extended to 100 iterations (E7: extended content, UI/UX, hardening, second QA/release cycle).
+- I05: ship core (inertial movement, arena clamp, damped aim, invuln/knockback) + 7 unit tests.
