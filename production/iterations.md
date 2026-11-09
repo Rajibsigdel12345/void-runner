@@ -143,3 +143,10 @@ One entry per iteration. Format:
 - Housekeeping: removed duplicate I19 line from CHANGELOG.
 - Result: DONE
 - Follow-up: SHIELD — absorb first hit (consumeShieldHit in resolveShipRocks) + shield ring visual (I22).
+
+## I22 - SHIELD absorption + ring visual (ST-022)
+- Goal: SHIELD (cyan) absorbs 1 hit per GDD ("12s or until hit") — no life lost, no knockback, combo unbroken; visible cyan ring around ship while active, expanding pop flash when it absorbs.
+- Changed: src/core/game.js (resolveShipRocks: shield branch before life damage, emits shieldPop), src/render/shieldRing.js (new: torus ring, steady-state glow + 0.3s expand/fade pop pulse that outlives the shield), src/main.js (drain hook shieldRing.pulse + sync), tests/game.test.js (+4 tests: absorb, one-hit second rock, expiry, invuln does not consume). Self-review fix: first ring draft hid itself on the sync after the absorbing hit, so the pop could never render — restructured so the pop animation owns visibility for POP_TIME.
+- Verification: npm test 101/101 pass; build exit 0; browser: shield applied -> rock on ship -> lives 3->3, shieldPop=1, shieldHits 0; steady-state ring screenshot .evidence/i22-shield.png (cyan torus around ship); console 0 errors. Pop-flash frame not capturable headless (0.66fps rAF + 0.25s dt clamp skips the 0.3s window) — logic verified by code + steady-state render.
+- Result: DONE
+- Follow-up: BOMB shatter-all + MAGNET bullet homing (I23); HUD effect indicators deferred to I44 UI/UX pass.

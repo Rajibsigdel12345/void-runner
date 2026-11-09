@@ -6,6 +6,7 @@ import { createInput } from './render/input.js';
 import { createBulletPool } from './render/bulletPool.js';
 import { createAsteroidRenderer } from './render/asteroidRenderer.js';
 import { createPowerupRenderer } from './render/powerupMesh.js';
+import { createShieldRing } from './render/shieldRing.js';
 import { createHUD } from './render/hud.js';
 import { createScreens } from './render/screens.js';
 import { STATE } from './core/state.js';
@@ -48,6 +49,7 @@ scene.add(shipMesh.group);
 const bullets = createBulletPool(scene);
 const rockRenders = createAsteroidRenderer(scene);
 const powerupRenders = createPowerupRenderer(scene);
+const shieldRing = createShieldRing(scene);
 const hud = createHUD(document.body);
 const screens = createScreens(document.body);
 let muted = false; // M key (ST-017); consumed by the audio system in I27
@@ -126,7 +128,9 @@ function tick(dt, intent) {
   world.step(dt, it);
   for (const e of world.drainEvents()) {
     eventTally[e.type] = (eventTally[e.type] || 0) + 1;
-    if (e.type === 'gameover') {
+    if (e.type === 'shieldPop') {
+      shieldRing.pulse();
+    } else if (e.type === 'gameover') {
       newBest = storage.setBest(e.data.score); // true when the stored best was raised
       bestScore = storage.getBest();
     }
@@ -142,6 +146,7 @@ function syncVisuals(dt) {
   bullets.sync(world.weapons);
   rockRenders.sync(world.field);
   powerupRenders.sync(world.powerups, dt);
+  shieldRing.sync(world, dt);
 
   const ship = world.ship;
   const f = ship.forward();

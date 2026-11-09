@@ -234,3 +234,58 @@ test('world: rapid + spread combine (2x cadence, 3-way bursts)', () => {
   assert.ok(combined >= 25, `combined ${combined} bullets/s`);
 });
 
+// --- ST-022: SHIELD absorption ---
+test('world: shield absorbs a hit - no life lost, no invuln, shieldPop emitted', () => {
+  const w = new World(new RNG(25));
+  w.begin();
+  w.powerups.apply('shield');
+  const rock = w.field.spawn('S', 1, { x: 1.5, y: 0 });
+  rock.vel = v2(0, 0);
+  w.step(DT, NOINTENT);
+  assert.equal(w.lives, CONFIG.ship.lives, 'no life lost');
+  assert.equal(w.powerups.shieldHits, 0, 'shield consumed');
+  assert.ok(!w.ship.isInvulnerable, 'no invuln from shield pop');
+  const ev = w.drainEvents().find(e => e.type === 'shieldPop');
+  assert.ok(ev, 'shieldPop event emitted');
+});
+
+test('world: shield is one-hit - second rock costs a life', () => {
+  const w = new World(new RNG(26));
+  w.begin();
+  w.powerups.apply('shield');
+  const r1 = w.field.spawn('S', 1, { x: 1.5, y: 0 });
+  r1.vel = v2(0, 0);
+  w.step(DT, NOINTENT);
+  assert.equal(w.lives, CONFIG.ship.lives, 'first hit absorbed');
+  const r2 = w.field.spawn('S', 1, { x: -1.5, y: 0 });
+  r2.vel = v2(0, 0);
+  w.step(DT, NOINTENT);
+  assert.equal(w.lives, CONFIG.ship.lives - 1, 'second hit costs a life');
+  assert.ok(w.ship.isInvulnerable, 'normal hit grants invuln');
+});
+
+test('world: shield expiry clears protection', () => {
+  const w = new World(new RNG(27));
+  w.begin();
+  w.powerups.apply('shield');
+  assert.ok(w.powerups.isShielding(), 'active after apply');
+  w.powerups.timeLeft.shield = 0.016; // runs out on the next 1/60 step
+  w.step(DT, NOINTENT);
+  assert.ok(!w.powerups.isShielding(), 'expired');
+  const r = w.field.spawn('S', 1, { x: 1.5, y: 0 });
+  r.vel = v2(0, 0);
+  w.step(DT, NOINTENT);
+  assert.equal(w.lives, CONFIG.ship.lives - 1, 'expired shield no longer protects');
+});
+
+test('world: invulnerable ship does not consume the shield', () => {
+  const w = new World(new RNG(28));
+  w.begin();
+  w.powerups.apply('shield');
+  w.ship.invuln = 1.0;
+  const r = w.field.spawn('S', 1, { x: 1.5, y: 0 });
+  r.vel = v2(0, 0);
+  w.step(DT, NOINTENT);
+  assert.equal(w.powerups.shieldHits, 1, 'shield untouched while invulnerable');
+  assert.equal(w.lives, CONFIG.ship.lives, 'no life lost either');
+});

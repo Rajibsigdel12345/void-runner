@@ -26,3 +26,4 @@
 - I19: power-up field core (drops, drift, magnet pull, timed effects, instant bomb queue) wired into World.
 - I20: power-up render meshes (pooled, per-type shape/color, hover + pulse).
 - I21: RAPID + SPREAD fire path — power-ups modify cadence (x2 for 8s) and 3-way spread burst.
+- I22: SHIELD absorption — cyan ring around ship, absorbs 1 hit with pop flash (GDD-compliant).

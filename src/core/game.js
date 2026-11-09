@@ -113,6 +113,12 @@ export class World {
     const hit = shipHitRock(this.ship.pos.x, this.ship.pos.y, this.cfg.ship.radius, this.field.rocks);
     if (!hit) return;
     this.field.destroy(hit.id);
+    // GDD: SHIELD absorbs 1 hit (12s or until hit) - rock shatters, no life
+    // lost, no knockback, no invuln, combo chain unbroken.
+    if (this.powerups.isShielding() && this.powerups.consumeShieldHit()) {
+      this.emit('shieldPop', { pos: { x: this.ship.pos.x, y: this.ship.pos.y } });
+      return;
+    }
     const livesLeft = this.livesMgr.damage();
     this.scoreKeeper.onDamage();
     this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: hit.nx, y: hit.ny }, lives: livesLeft });
