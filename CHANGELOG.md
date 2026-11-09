@@ -9,3 +9,4 @@
 - Plan extended to 100 iterations (E7: extended content, UI/UX, hardening, second QA/release cycle).
 - I05: ship core (inertial movement, arena clamp, damped aim, invuln/knockback) + 7 unit tests.
 - I06: procedural ship mesh, mouse raycast aim, follow camera with look-ahead, keyboard/mouse input state.
+- I07: weapons core (bullet pool/cap, cadence, spread, culling) + 8 unit tests.
