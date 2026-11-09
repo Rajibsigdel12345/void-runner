@@ -29,6 +29,7 @@ export class World {
     this.vortex = new VortexField(rng, cfg); // ST-059
     this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056
     this.events = [];
+    this._eventSpare = [];
     this.scoreKeeper = new ScoreKeeper(cfg);
     this.waves = new WaveDirector(rng, this.field, cfg);
     this.powerups = new PowerUpField(rng, cfg);
@@ -66,7 +67,13 @@ export class World {
   restart() { this.reset(); return this.begin(); }
 
   emit(type, data) { this.events.push({ type, data }); }
-  drainEvents() { const e = this.events; this.events = []; return e; }
+  drainEvents() {
+  const e = this.events;
+  this._eventSpare.length = 0; // stale buffer becomes the new live one: clear first
+  this.events = this._eventSpare;
+  this._eventSpare = e; // drained buffer parks here; cleared on its next cycle
+  return e;
+} // ST-074: double-buffer swap - zero steady-state allocs, returned array keeps its events
 
   /**
    * @param {number} dt seconds
@@ -385,6 +392,7 @@ export class World {
     this.game.reset(); // also clears the gameOver getter (it derives from game state)
     this.time = 0;
     this.events.length = 0;
+    this._eventSpare.length = 0; // ST-074: spare buffer too (no stale events after swap)
   }
 }
 

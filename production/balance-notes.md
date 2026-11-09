@@ -239,3 +239,15 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - Deliberately one-way automation (High -> Low only): re-enabling High is always a user choice via options (which also locks the automation for the session), avoiding an auto up/down flap loop.
 - The auto downgrade is a RUNTIME visual change: it never writes to saved settings (localStorage stays as the user set them) - verified in browser (savedFx stayed "high" after autoLow).
 - Cost: one accumulator + integer counters per frame in the rAF loop (PLAYING only); zero allocations, zero extra draw calls.
+
+## I74 - pool/memory audit (ST-074)
+
+- Audit scope: every per-frame path - core step (world/ship/weapons/asteroids/mines/enemyBullets/powerups/waves/boss/mine fields), the event system, and the render hot paths (main.js tick/frame/syncVisuals, particles, bullet/enemy/mine/powerup/rock pools, starfield, banners, HUD).
+- Findings FIXED (unconditional per-frame allocs in hot paths):
+  1. powerups.js update: `this.drops = this.drops.filter(!dead)` ran EVERY frame (new array + field reassign). Now an in-place compactDrops() guarded by some(dead) - same convention as asteroids/weapons/enemyBullets compaction; array identity is stable.
+  2. game.js drainEvents: `this.events = []` allocated a new array every tick (even with zero events). Now a two pre-allocated buffer swap (this.events / this._eventSpare, incoming buffer cleared on swap) - zero steady-state allocations, returned array keeps its events, single-consumer contract unchanged (main.js + tests drain immediately).
+  3. main.js camera: `ship.forward()` (default out = v2()) allocated a fresh {x,y} every frame. Now a module-level scratch (shipFwd) is passed in.
+- Findings verified clean (no change needed): weapons/enemyBullets/asteroids already use guarded in-place compaction; all render pools are pre-allocated (Float32Array particle pool, fixed mesh pools); hudOpts/screenOpts are reused objects; waveBanner/scorePopups allocate only on state change; bombBlast slice() is a rare event path (documented in code); storage spread-objects are event-level (user action / game over), not per-frame.
+- Cost after fixes: steady-state per-frame JS heap growth in the sim/render hot path is ~0 (event DATA objects still allocate at emit time - event-driven and bounded by action rate, by design).
+- No gameplay/scoring/pacing changes. 200/200 (4 new poolAudit regression tests pin array identity + buffer reuse).
+ - Browser smoke: PLAYING wave 1, ship/camera finite, render ok, 0 console messages (.evidence/i74-playing-smoke.png).

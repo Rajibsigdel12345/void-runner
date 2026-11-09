@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E7 (extended content/UX/hardening, I51-I100)
-- current_story: ST-074
-- current_iteration: I74
+- current_story: ST-075
+- current_iteration: I75
 - branch: main
-- notes: I73 committed (adaptive quality: rolling FPS <45 auto-drops FX, toast + log, overridable/locks; 196/196 + build + browser). Next: pool/memory audit - no per-frame allocs in hot paths (ST-074).
+- notes: I74 committed (pool/memory audit: drops in-place compact, double-buffered drainEvents, shipFwd scratch; 200/200 + build + browser). Next: WebGL context loss - overlay + restore/reload path (ST-075).

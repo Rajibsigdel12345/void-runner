@@ -113,8 +113,17 @@ export class PowerUpField {
         if (this.timeLeft[t] === 0 && t === 'shield') this.shieldHits = 0;
       }
     }
-    this.drops = this.drops.filter(d => !d.dead);
+    if (this.drops.some((d) => d.dead)) this.compactDrops(); // ST-074: no per-frame array alloc
     return pickups;
+  }
+
+  /** In-place removal of dead drops (ST-074: zero per-frame allocations; keeps array identity). */
+  compactDrops() {
+    let w = 0;
+    for (let i = 0; i < this.drops.length; i++) {
+      if (!this.drops[i].dead) this.drops[w++] = this.drops[i];
+    }
+    this.drops.length = w;
   }
 
   clear() {

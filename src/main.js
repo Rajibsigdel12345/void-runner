@@ -234,6 +234,7 @@ const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 const aimWorld = new THREE.Vector3();
 
 // follow-camera state
+const shipFwd = { x: 0, y: 0 }; // ST-074: scratch for ship.forward()
 const camPos = { x: 0, y: 9, z: 13 };
 const camLook = { x: 0, y: 0, z: 0 };
 
@@ -385,7 +386,7 @@ function syncVisuals(dt) {
   banner.sync(world.waves, dt, motionOff); // ST-028
 
   const ship = world.ship;
-  const f = ship.forward();
+  const f = ship.forward(shipFwd); // ST-074: scratch reuse (no per-frame alloc)
   camPos.x = damp(camPos.x, ship.pos.x, 5, dt);
   camPos.y = damp(camPos.y, 9, 5, dt);
   camPos.z = damp(camPos.z, ship.pos.y + 13, 5, dt);
