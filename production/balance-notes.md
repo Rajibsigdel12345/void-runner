@@ -182,3 +182,10 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - The menu (src/render/screens.js) gains: a gradient + softly glowing 'VOID RUNNER' title (.vr-title, background-clip:text + a 3.4s drop-shadow pulse), a drifting nebula backdrop (two low-alpha radial gradients panning via background-position on the menu panel, 34s loop, with the live 3D starfield showing through the semi-transparent panel), the controls wrapped in a bordered rounded card, and a credits line pinned to the bottom.
 - Reduced Motion: a .vr-reduced class on the #screens overlay (toggled from screenOpts.reducedMotion, which main.js feeds from motionOff) sets animation:none on the title glow and the backdrop drift. Verified computed animation-name is active (vrTitleGlow/vrMenuPan) with motion on and 'none' with motion off.
 - Cost: pure CSS/DOM on a panel only shown in MENU - zero three.js render-layer cost, no per-frame allocs beyond the existing class toggle.
+
+## I66 - top-5 high-score table (ST-066)
+
+- Presentation/data: no gameplay, scoring, or pacing changes. 182/182 tests (177 pre-existing + 5 new storage tests).
+- Added a persistent top-5 high-score board: localStorage key `voidrunner.scores`, payload {version, list:[{score, wave, kills}]}. Entries carry no timestamps (core determinism). Every read is guarded: corrupt JSON, non-array payloads, and malformed rows are filtered out; the board never throws (private-browsing safe).
+- `Storage.getHighScores()` returns a validated descending list capped at `storage.highScoresMax` (5, CONFIG). `Storage.recordScore(entry)` returns {list, rank, newBest}: rank 1..maxScores or 0 when off the board; score <= 0 never touches the board; a throwing store degrades to in-memory result without an exception.
+- Game over records the finished run with live wave + kills (main.js, from world state); the MENU shows the board in a two-column grid (controls | TOP 5) with a 'no scores yet' placeholder. NEW BEST! (stored best raised) is unchanged.

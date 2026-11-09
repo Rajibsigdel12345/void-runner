@@ -19,12 +19,14 @@ export const DEFAULT_SETTINGS = Object.freeze({
 export class Storage {
   /**
    * @param {{get:(k:string)=>(string|null), set:(k:string,v:string)=>void, remove:(k:string)=>void}} store
-   * @param {{bestKey?:string, settingsKey?:string}} keys
+   * @param {{bestKey?:string, settingsKey?:string, highScoresKey?:string, highScoresMax?:number}} keys
    */
   constructor(store, keys = {}) {
     this.store = store;
     this.bestKey = keys.bestKey || 'voidrunner.best';
     this.settingsKey = keys.settingsKey || 'voidrunner.settings';
+    this.highScoresKey = keys.highScoresKey || 'voidrunner.scores'; // I66
+    this.maxScores = (Number.isInteger(keys.highScoresMax) && keys.highScoresMax > 0) ? keys.highScoresMax : 5; // I66
   }
 
   _read(key) {
@@ -86,6 +88,43 @@ export class Storage {
     if (typeof merged.reducedMotion === 'boolean') clean.reducedMotion = merged.reducedMotion;
     this._write(this.settingsKey, { version: STORE_VERSION, ...clean });
     return clean;
+  }
+
+  /** @returns {Array<{score:number, wave:number, kills:number}>} top-N high scores. No timestamps: core stays deterministic (I66). */
+  getHighScores() {
+    const d = this._read(this.highScoresKey);
+    if (!d || !Array.isArray(d.list)) return [];
+    const rows = [];
+    for (const e of d.list) {
+      if (!e || typeof e !== 'object') continue;
+      const score = Number.isFinite(e.score) ? Math.floor(e.score) : NaN;
+      const wave = Number.isFinite(e.wave) ? Math.floor(e.wave) : NaN;
+      const kills = Number.isFinite(e.kills) ? Math.floor(e.kills) : NaN;
+      if (!Number.isFinite(score) || !Number.isFinite(wave) || !Number.isFinite(kills)) continue; // NaN fails < comparisons
+      if (score < 0 || wave < 1 || kills < 0) continue;
+      rows.push({ score, wave, kills });
+    }
+    rows.sort((a, b) => b.score - a.score);
+    return rows.slice(0, this.maxScores);
+  }
+
+  /**
+   * Record a finished run in the high-score board.
+   * @param {{score?:number, wave?:number, kills?:number}} entry
+   * @returns {{list:Array, rank:number, newBest:boolean}} rank is 1..maxScores, 0 when off the board.
+   */
+  recordScore(entry = {}) {
+    const score = Number.isFinite(entry.score) ? Math.floor(entry.score) : 0;
+    const wave = Number.isFinite(entry.wave) ? Math.max(1, Math.floor(entry.wave)) : 1;
+    const kills = Number.isFinite(entry.kills) ? Math.max(0, Math.floor(entry.kills)) : 0;
+    if (score <= 0) return { list: this.getHighScores(), rank: 0, newBest: false }; // don't pollute the board
+    const prev = this.getHighScores();
+    let rank = prev.filter((e) => e.score > score).length + 1;
+    if (rank > this.maxScores) rank = 0;
+    const newBest = rank === 1;
+    const list = prev.concat([{ score, wave, kills }]).sort((a, b) => b.score - a.score).slice(0, this.maxScores);
+    this._write(this.highScoresKey, { version: STORE_VERSION, list });
+    return { list, rank, newBest };
   }
 
   remove(key) {

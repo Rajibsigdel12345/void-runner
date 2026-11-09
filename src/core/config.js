@@ -179,7 +179,9 @@ export const CONFIG = {
 
   storage: {
     bestKey: 'voidrunner.best',
-    settingsKey: 'voidrunner.settings'
+    settingsKey: 'voidrunner.settings',
+    highScoresKey: 'voidrunner.scores',  // I66: top-5 table
+    highScoresMax: 5
   }
 };
 

@@ -106,3 +106,61 @@ test('storage: invalid settings values rejected, numerics clamped', () => {
   assert.equal(r.sfx, true, 'non-boolean sfx ignored');
   assert.equal(r.reducedMotion, false, 'non-boolean reducedMotion ignored');
 });
+
+// I66: top-5 high-score board
+test('storage: high scores start empty and survive corrupt payloads', () => {
+  const store = memStore();
+  const s = new Storage(store);
+  assert.deepEqual(s.getHighScores(), []);
+  store.set(s.highScoresKey, '{bad json');
+  assert.deepEqual(s.getHighScores(), []);
+  store.set(s.highScoresKey, JSON.stringify({ list: 'nope' }));
+  assert.deepEqual(s.getHighScores(), []);
+  store.set(s.highScoresKey, JSON.stringify({ list: [{ score: 50, wave: 2, kills: 3 }, { score: 'x', wave: 1, kills: 1 }, { score: 10, wave: 0, kills: 2 }, null, 42] }));
+  assert.deepEqual(s.getHighScores(), [{ score: 50, wave: 2, kills: 3 }]); // malformed entries filtered
+});
+
+test('storage: recordScore inserts, sorts desc, caps at maxScores', () => {
+  const s = new Storage(memStore());
+  let last;
+  for (const sc of [100, 300, 200, 500, 400, 150]) last = s.recordScore({ score: sc, wave: 2, kills: 4 });
+  const list = s.getHighScores();
+  assert.equal(list.length, 5); // 100 dropped by the cap
+  assert.deepEqual(list.map((e) => e.score), [500, 400, 300, 200, 150]);
+  assert.equal(last.rank, 5);
+  assert.ok(!last.newBest);
+});
+
+test('storage: recordScore ranks, flags new best, ignores zero scores', () => {
+  const s = new Storage(memStore());
+  const r1 = s.recordScore({ score: 1000, wave: 3, kills: 9 });
+  assert.equal(r1.rank, 1);
+  assert.ok(r1.newBest);
+  const r2 = s.recordScore({ score: 700, wave: 2, kills: 5 });
+  assert.equal(r2.rank, 2);
+  assert.ok(!r2.newBest);
+  const r3 = s.recordScore({ score: 900, wave: 2, kills: 5 });
+  assert.equal(r3.rank, 2); // 1000 still strictly above
+  assert.ok(!r3.newBest);
+  const r0 = s.recordScore({ score: 0, wave: 1, kills: 0 });
+  assert.equal(r0.rank, 0);
+  assert.ok(!r0.newBest);
+  assert.deepEqual(s.getHighScores().map((e) => e.score), [1000, 900, 700]);
+});
+
+test('storage: high scores honor CONFIG keys and cap', () => {
+  const store = memStore();
+  const s = new Storage(store, CONFIG.storage);
+  assert.equal(s.highScoresKey, CONFIG.storage.highScoresKey);
+  assert.equal(s.maxScores, CONFIG.storage.highScoresMax);
+  for (let i = 1; i <= 6; i++) s.recordScore({ score: i * 10, wave: 1, kills: i });
+  assert.equal(s.getHighScores().length, 5);
+});
+
+test('storage: recordScore never throws on a throwing store', () => {
+  const s = new Storage(throwingStore());
+  const r = s.recordScore({ score: 500, wave: 4, kills: 12 });
+  assert.deepEqual(r.list, [{ score: 500, wave: 4, kills: 12 }]); // computed in memory; the write failed silently
+  assert.equal(r.rank, 1);
+  assert.ok(r.newBest);
+});

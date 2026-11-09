@@ -97,6 +97,7 @@ Stacks: each has its own timer; grabbing the same type refreshes its timer.
 - Overdrive (ST-057): while OVERDRIVE is active, all points earned are x2 (applied after the combo multiplier).
 - Near-miss (ST-053): a rock skimming within 2.6u of the ship (no hit) pays a flat +15 once per approach (swish SFX, small popup, subtle cyan wisp). Fragments/splits get 0.3s immunity so a kill near the ship cannot farm graze points. Graze is not a kill: it never extends the combo chain.
 - Best score persisted to localStorage key `voidrunner.best` (int).
+- Top-5 high-score board (I66): rows {score, wave, kills} persisted to `voidrunner.scores` (versioned payload; no timestamps, keeps core deterministic). Shown on MENU in a two-column layout (controls | TOP 5). Reads are corruption-safe: bad JSON, non-array payloads, and malformed rows degrade to an empty board (placeholder text). The game-over NEW BEST! flag (stored best raised) is unchanged.
 - Game over screen shows: final score, best (NEW BEST! flag), kills, max combo, wave reached, time survived.
 
 ## Game States

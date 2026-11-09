@@ -96,6 +96,12 @@ const lsStore = {
 const storage = new Storage(lsStore, CONFIG.storage);
 let bestScore = storage.getBest();
 let newBest = false;
+let scoresText = ''; // I66: top-5 table text for the menu (refreshed at boot + on game over)
+function refreshScoresText() {
+  const rows = storage.getHighScores();
+  scoresText = rows.map((e, i) => (i + 1) + '. ' + e.score + '    W' + e.wave + '  \u00b7  ' + e.kills).join('\n');
+}
+refreshScoresText();
 
 // Juice (ST-024): pooled particle bursts, honoring saved FX tier + reduced
 // motion (the settings panel lands in I26; values are read at boot).
@@ -271,6 +277,10 @@ function tick(dt, intent) {
     } else if (e.type === 'gameover') {
       newBest = storage.setBest(e.data.score); // true when the stored best was raised
       bestScore = storage.getBest();
+      if (e.data.score > 0) { // I66: top-5 board (wave/kills from live world state)
+        storage.recordScore({ score: e.data.score, wave: Math.max(1, world.wave), kills: world.scoreKeeper.kills });
+        refreshScoresText();
+      }
       vortexFx.hide(); // ST-059
     }
   }
@@ -289,6 +299,7 @@ function syncVisuals(dt) {
   screenOpts.best = bestScore;
   screenOpts.newBest = newBest;
   screenOpts.reducedMotion = motionOff; // I65: menu polish (reduced-motion gates the new animations)
+  screenOpts.scoresText = scoresText; // I66: top-5 table
   hud.render(world, hudOpts);
   screens.update(st, world, screenOpts);
   shipMesh.sync(world.ship, simT, !motionOff, Math.min(1, Math.hypot(input.state.thrust.x, input.state.thrust.y))); // ST-063 engine flame

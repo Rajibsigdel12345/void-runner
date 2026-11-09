@@ -462,3 +462,9 @@ One entry per iteration. Format:
 - Verification: 177/177 unit tests green (render-only; core unchanged); build exit 0. Browser: MENU shows gradient title (background-clip:text), controls card, and credits; with Reduced Motion OFF the title (vrTitleGlow) and backdrop (vrMenuPan) animations run, with it ON both compute to 'none'; 0 console errors. Screenshots .evidence/i65-menu-polish.png (reduced motion) and .evidence/i65-menu-polish-motion.png (motion + bloom).
 - Result: DONE
 - Follow-up: I66 top-5 high-score table (ST-066).
+
+## I66 - top-5 high-score table + NEW BEST (ST-066)
+
+- Goal: persist a top-5 high-score board (score, wave reached, kills) to localStorage behind the existing guarded Storage, show it on the MENU in a two-column layout (controls | TOP 5), and keep the existing game-over NEW BEST! flag.
+- Changed: src/core/config.js (storage.highScoresKey/highScoresMax), src/core/storage.js (getHighScores + recordScore; NaN-safe row validation; cap), src/main.js (scoresText module var + refreshScoresText() at boot and on game over; screenOpts.scoresText), src/render/screens.js (two-column menu grid with TOP 5 card; pre-line tabular body; placeholder text), tests/storage.test.js (+5 tests: corrupt payloads, sort/cap, rank/newBest, CONFIG keys/cap, throwing store).
+- Verification: 182/182 unit tests green (177 pre-existing + 5 new); build exit 0. Browser: seeded 3 scores -> reload -> MENU TOP 5 card lists them descending (screenshot viewed); corrupted localStorage ('{bad') -> reload -> placeholder shown, 0 console errors; forced game over (rock on ship at 1 life) -> board row {score, wave, kills} written, BEST raised, NEW BEST! flag shown. Screenshots .evidence/i66-highscores.png, .evidence/i66-gameover-board.png.

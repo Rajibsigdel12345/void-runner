@@ -67,7 +67,18 @@ export function createScreens(root, settings = {}) {
     val.textContent = v;
     controls.append(key, val);
   }
-  menu.appendChild(controls);
+  const top5 = document.createElement('div'); // I66: top-5 card
+  top5.style.cssText = 'display:flex;flex-direction:column;gap:4px;font-size:13px;padding:14px 22px;min-height:150px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);';
+  const top5Head = document.createElement('div');
+  top5Head.textContent = 'TOP 5';
+  top5Head.style.cssText = 'font-weight:700;letter-spacing:3px;font-size:12px;opacity:0.9;margin-bottom:2px;';
+  const top5Body = document.createElement('div');
+  top5Body.style.cssText = 'display:flex;flex-direction:column;gap:3px;white-space:pre-line;font-variant-numeric:tabular-nums;';
+  top5.append(top5Head, top5Body);
+  const menuGrid = document.createElement('div'); // I66: two-column menu
+  menuGrid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;max-width:640px;';
+  menuGrid.append(controls, top5);
+  menu.appendChild(menuGrid);
   line(menu, 'PRESS ENTER TO START', 'font-size:18px;font-weight:700;letter-spacing:4px;margin-top:14px;animation:vrPulse 1.6s ease-in-out infinite;');
   const menuBest = line(menu, '', 'font-size:13px;opacity:0.85;'); // best score lands in I18 (I44 contrast)
   const credit = document.createElement('div'); // I65: credits
@@ -120,7 +131,7 @@ export function createScreens(root, settings = {}) {
   root.appendChild(overlay);
 
   /** @param {string} state @param {object} world @param {{muted:boolean, best:number, newBest:boolean}} opts */
-  function update(state, world, opts = { muted: false, best: 0, newBest: false, reducedMotion: false }) {
+  function update(state, world, opts = { muted: false, best: 0, newBest: false, reducedMotion: false, scoresText: '' }) {
     overlay.classList.toggle('vr-reduced', !!opts.reducedMotion); // I65: gate menu animations
     showPanel(state);
     if (state === STATE.GAME_OVER) {
@@ -134,6 +145,7 @@ export function createScreens(root, settings = {}) {
     }
     if (state === STATE.MENU) {
       set('menuBest', menuBest, opts.best > 0 ? `BEST ${opts.best}` : '');
+      set('top5', top5Body, opts.scoresText ? opts.scoresText : '\u2014 no scores yet \u2014'); // I66
     }
     if (state === STATE.PAUSED) {
       set('mute', muteLabel, `M — MUTE (${opts.muted ? 'ON' : 'OFF'})`);
