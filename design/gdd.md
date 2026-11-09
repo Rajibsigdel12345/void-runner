@@ -102,6 +102,7 @@ Stacks: each has its own timer; grabbing the same type refreshes its timer.
 ## Game States
 MENU (title + "Enter to start" + controls) -> PLAYING -> PAUSED (overlay) ->
 GAME_OVER (stats + "Enter to restart") -> PLAYING.
+- Menu presentation (I65): the MENU screen has a gradient, softly glowing "VOID RUNNER" title, a drifting nebula backdrop (the live 3D starfield shows through the semi-transparent panel), the controls in a bordered card, and a credits line. The title glow and backdrop drift are pure presentation and freeze to static under Reduced Motion; no gameplay effect.
 
 ## HUD
 Top-left: score + best. Top-center: wave. Top-right: lives (ship icons) + active

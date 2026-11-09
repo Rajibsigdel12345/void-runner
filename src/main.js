@@ -288,6 +288,7 @@ function syncVisuals(dt) {
   screenOpts.muted = muted;
   screenOpts.best = bestScore;
   screenOpts.newBest = newBest;
+  screenOpts.reducedMotion = motionOff; // I65: menu polish (reduced-motion gates the new animations)
   hud.render(world, hudOpts);
   screens.update(st, world, screenOpts);
   shipMesh.sync(world.ship, simT, !motionOff, Math.min(1, Math.hypot(input.state.thrust.x, input.state.thrust.y))); // ST-063 engine flame

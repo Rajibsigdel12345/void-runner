@@ -175,3 +175,10 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - Near-miss (I53): accepted. Flat +15, no combo effect, rearm x1.6 + 0.3s spawn immunity close the kill-near-ship farm; score texture, not a difficulty lever.
 - Golden (I52): accepted. 5% rim-spawn, wave 3+, 1.35x speed on the (capped) ramp, 5x score - a reward for rim aggression, bounded.
 - Net: one new tunable family (boss.hpFirstWave/hpStep/hpCap) + a pure function; +2 unit tests (curve incl. cap, live wave-15 boss HP). 177/177. All other new-content values accepted with rationale above; the 'fast' wave mod is the single open watch item for the I90 playtest.
+
+## I65 - menu polish (ST-065)
+
+- Presentation-only: no config tunables, no gameplay, scoring, or pacing changes. 177/177 tests unchanged.
+- The menu (src/render/screens.js) gains: a gradient + softly glowing 'VOID RUNNER' title (.vr-title, background-clip:text + a 3.4s drop-shadow pulse), a drifting nebula backdrop (two low-alpha radial gradients panning via background-position on the menu panel, 34s loop, with the live 3D starfield showing through the semi-transparent panel), the controls wrapped in a bordered rounded card, and a credits line pinned to the bottom.
+- Reduced Motion: a .vr-reduced class on the #screens overlay (toggled from screenOpts.reducedMotion, which main.js feeds from motionOff) sets animation:none on the title glow and the backdrop drift. Verified computed animation-name is active (vrTitleGlow/vrMenuPan) with motion on and 'none' with motion off.
+- Cost: pure CSS/DOM on a panel only shown in MENU - zero three.js render-layer cost, no per-frame allocs beyond the existing class toggle.

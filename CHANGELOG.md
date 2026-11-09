@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I65: menu polish (ST-065) - gradient glowing "VOID RUNNER" title, drifting nebula backdrop (starfield shows through), controls in a bordered card, credits line; all new motion freezes under Reduced Motion; presentation-only, 177/177.
 - I64: balance pass 3 (ST-064) - the Monolith's HP now climbs with the endless arc (base 40, +12 per 5 waves from wave 10, capped at 88) so it stays a real threat; speed unchanged (still always-dodgeable); full new-content pacing review documented; +2 tests (177/177).
 - I63: engine flame (ST-063) - thrust-reactive rear plume (orange + hot core) that scales with thrust and flickers over time; hidden when coasting; steady under Reduced Motion; presentation-only, 175/175.
 - I62: shield pulse (ST-062) - active shield now breathes (scale + opacity) with a repeating expanding additive ring; reduced-motion freezes to a static ring; presentation-only, 175/175.

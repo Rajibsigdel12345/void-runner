@@ -11,7 +11,15 @@ export function createScreens(root, settings = {}) {
 
   // pulse animation for the "press enter" prompts
   const style = document.createElement('style');
-  style.textContent = '@keyframes vrPulse{0%,100%{opacity:1}50%{opacity:0.35}}';
+  style.textContent = [
+    '@keyframes vrPulse{0%,100%{opacity:1}50%{opacity:0.35}}',
+    '@keyframes vrTitleGlow{0%,100%{filter:drop-shadow(0 0 10px rgba(90,180,255,0.55))}50%{filter:drop-shadow(0 0 22px rgba(130,215,255,0.9))}}',
+    '@keyframes vrMenuPan{0%{background-position:0% 0%,0% 0%}50%{background-position:100% 100%,100% 100%}100%{background-position:0% 0%,0% 0%}}',
+    '.vr-title{background:linear-gradient(180deg,#e6f4ff 0%,#8fd0ff 45%,#3f7fd8 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:vrTitleGlow 3.4s ease-in-out infinite;}',
+    '.vr-menu-anim{animation:vrMenuPan 34s ease-in-out infinite;}',
+    '.vr-reduced .vr-title,.vr-reduced .vr-menu-anim{animation:none !important;}',
+    '.vr-credit{position:absolute;bottom:16px;left:0;right:0;font-size:11px;letter-spacing:1px;opacity:0.5;}',
+  ].join('');
   overlay.appendChild(style);
 
   function panel(id, bg) {
@@ -35,11 +43,12 @@ export function createScreens(root, settings = {}) {
   }
 
   // --- MENU ---
-  const menu = panel('screen-menu', 'rgba(2,4,12,0.72)');
-  line(menu, 'VOID RUNNER', 'font-size:46px;font-weight:800;letter-spacing:10px;color:#9fd0ff;');
+  const menu = panel('screen-menu', 'radial-gradient(55% 50% at 30% 30%, rgba(60,110,200,0.22), transparent 70%), radial-gradient(50% 55% at 72% 72%, rgba(140,70,180,0.20), transparent 70%), rgba(2,4,12,0.62)');
+  menu.classList.add('vr-menu-anim'); // I65: drifting nebula bg (reduced-motion disables via .vr-reduced)
+  const titleEl = line(menu, 'VOID RUNNER', 'font-size:46px;font-weight:800;letter-spacing:10px;'); titleEl.classList.add('vr-title'); // I65: gradient + glow
   line(menu, 'survive the void, outlast the waves', 'font-size:14px;letter-spacing:2px;opacity:0.85;'); // I44 contrast
   const controls = document.createElement('div');
-  controls.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:6px 18px;font-size:14px;margin-top:8px;';
+  controls.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:8px 22px;font-size:14px;margin-top:6px;padding:16px 24px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);'; // I65: controls card
   for (const [k, v] of [
     ['WASD / ARROWS', 'thrust'],
     ['MOUSE', 'aim'],
@@ -61,6 +70,10 @@ export function createScreens(root, settings = {}) {
   menu.appendChild(controls);
   line(menu, 'PRESS ENTER TO START', 'font-size:18px;font-weight:700;letter-spacing:4px;margin-top:14px;animation:vrPulse 1.6s ease-in-out infinite;');
   const menuBest = line(menu, '', 'font-size:13px;opacity:0.85;'); // best score lands in I18 (I44 contrast)
+  const credit = document.createElement('div'); // I65: credits
+  credit.className = 'vr-credit';
+  credit.textContent = 'a three.js arcade shooter � 100% procedural, no external assets � built with the Codex Game Studio pipeline';
+  menu.appendChild(credit);
   if (settings.menu) menu.appendChild(settings.menu.el); // ST-026 settings (menu)
 
   // --- PAUSED ---
@@ -107,7 +120,8 @@ export function createScreens(root, settings = {}) {
   root.appendChild(overlay);
 
   /** @param {string} state @param {object} world @param {{muted:boolean, best:number, newBest:boolean}} opts */
-  function update(state, world, opts = { muted: false, best: 0, newBest: false }) {
+  function update(state, world, opts = { muted: false, best: 0, newBest: false, reducedMotion: false }) {
+    overlay.classList.toggle('vr-reduced', !!opts.reducedMotion); // I65: gate menu animations
     showPanel(state);
     if (state === STATE.GAME_OVER) {
       set('finalScore', finalScore, `SCORE ${world.score}`);

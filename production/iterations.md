@@ -454,3 +454,11 @@ One entry per iteration. Format:
 - Verification: 177/177 unit tests green (+2, core change); build exit 0. Browser: live world HP-by-wave probe -> wave 5/10 = 40, 15 = 52, 20 = 64, 30/60 = 88 (cap); 0 console errors. No rendering changed (boss HP bar shows hpFrac 0..1, unaffected by absolute HP).
 - Result: DONE
 - Follow-up: I65 menu polish (ST-065).
+
+## I65 - menu polish: title, controls card, animated backdrop, credits (ST-065)
+
+- Goal: presentation pass (render-only, DOM/CSS) - polish the MENU screen: a gradient glowing title, a drifting nebula backdrop (starfield shows through), the controls in a bordered card, and a credits line; all new motion freezes under Reduced Motion.
+- Changed: src/render/screens.js (gradient + glow title via .vr-title; nebula backdrop + .vr-menu-anim pan on the menu panel; controls card; .vr-credit line; .vr-reduced reduced-motion gate in the injected <style>; update() toggles .vr-reduced from opts.reducedMotion), src/main.js (pass screenOpts.reducedMotion = motionOff).
+- Verification: 177/177 unit tests green (render-only; core unchanged); build exit 0. Browser: MENU shows gradient title (background-clip:text), controls card, and credits; with Reduced Motion OFF the title (vrTitleGlow) and backdrop (vrMenuPan) animations run, with it ON both compute to 'none'; 0 console errors. Screenshots .evidence/i65-menu-polish.png (reduced motion) and .evidence/i65-menu-polish-motion.png (motion + bloom).
+- Result: DONE
+- Follow-up: I66 top-5 high-score table (ST-066).
