@@ -360,6 +360,14 @@ One entry per iteration. Format:
 - Verification: 142/142 + build 0 (was 136). Browser: 3 grazes = +15 each, re-arm after leaving the ring works, no life lost; swish scheduled on live graze (played.swish delta 1, SFX on); split-immunity probe - L killed at (3,0): 0 instant graze points on the kill frame (fragments immune 0.3s), 3 grazes only after immunity; game.test.js original 25-pt expectation holds (would have been 70 without immunity); 0 console errors/warnings. Screenshot .evidence/i53-nearmiss-graze.png.
 - Result: DONE
 - Follow-up: I54 mine drones (ST-054) - slow homing, 1 hit, explode.
+## I54 - mine drones (ST-054)
+
+- Goal: ST-054 E7A content - mine drones: a slow homing enemy that chases the ship, dies to 1 bullet, and explodes on contact (costs a life).
+- Changed: src/core/config.js (NEW mine section: firstWave 5, perWave 1, maxConcurrent 10, radius 0.9, speed 3.2, turn 1.6, score 150). src/core/mines.js (NEW MineField - rim spawn, bounded homing turn, rim bounce, 1-hit destroy). src/core/game.js (MineField wiring: spawnMinesForWave on wave start, resolveBulletMines, resolveShipMines, reset). src/render/mineMesh.js (NEW pooled spiky red mine, shared blinking emissive). src/main.js (import/create/sync mineRenders, mineExplode juice - red burst+shake+flash, SFX cue, __vr). src/render/audio.js (mine cue). tests/mines.test.js (NEW, 6 tests, seeds 53-55). design/gdd.md (new Mine Drones section). production/balance-notes.md (I54 section).
+- Verification: 148/148 + build 0 (was 142). Browser: 2 mines render (2 visible pool meshes); live bullet kill pays +150 (expected 150), mine SFX fired (delta 1), mineExplode FX, no death; director start at wave 5 spawns a mine (unit). 0 console errors/warnings. Screenshot .evidence/i54-mine-drones.png.
+- Result: DONE
+- Follow-up: I55 Monolith boss every 5 waves (ST-055) - HP 40, ring burst, splits to 4 M.
+
 
 
 

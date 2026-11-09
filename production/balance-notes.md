@@ -69,3 +69,19 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - Suppressed while invulnerable: post-hit frames are chaos - awarding grazes there reads as
   luck, and a rock that hit the ship is destroyed anyway.
 - Swish cue is low-gain (0.09) with 0.15s min gap so a busy frame never stacks more than ~7/s.
+## I54 - mine drones (ST-054)
+- 1/wave from wave 5, cap 10: by wave 14 a fully passive player is capped at 10 live mines -
+  the cap turns the threat from linear into a plateau, so late waves add pressure without
+  turning the arena into a minefield. Watch: if I90 playtest shows mines feeling like 'just
+  more rocks', consider perWave 2 from wave 12 before I92.
+- speed 3.2 vs ship 14: even a stationary ship outruns a mine 4:1; the threat is attention,
+  not speed - mines punish ignoring the edge of the screen. turn 1.6 rad/s makes their path
+  a readable slow curve (no instant 180s), which is what makes them dodgeable-feeling rather
+  than unfair.
+- score 150 (> S=100): killing the thing that hunted you is the highest single-kill reward
+  in the game (next: boss in ST-055). Feeds the combo so clearing a mine mid-chain is strictly
+  good - no penalty for the risk.
+- No split/fragment behavior: mines are atomic. No power-up drop on mine kill (they are the
+  hazard, not the loot source - drops stay rock-gated).
+- Determinism: spawn bearing + initial wobble come from the world RNG stream (like the
+  golden roll), homing is a pure state function - pinned-seed trajectory test guards it.

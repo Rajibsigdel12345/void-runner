@@ -3,6 +3,7 @@
 import { Ship } from './ship.js';
 import { Weapons } from './weapons.js';
 import { AsteroidField } from './asteroids.js';
+import { MineField } from './mines.js';
 import { bulletHitRock, shipHitRock } from './collision.js';
 import { CONFIG } from './config.js';
 import { v2 } from './math.js';
@@ -19,6 +20,7 @@ export class World {
     this.ship = new Ship(0, 0, cfg);
     this.weapons = new Weapons(cfg);
     this.field = new AsteroidField(rng, cfg);
+    this.mines = new MineField(rng, cfg); // ST-054
     this.events = [];
     this.scoreKeeper = new ScoreKeeper(cfg);
     this.waves = new WaveDirector(rng, this.field, cfg);
@@ -72,8 +74,14 @@ export class World {
     }
     this.scoreKeeper.tick(this.time);
     const wv = this.waves.step(dt, this.ship.pos);
-    if (wv.startedWave) this.emit('wave', { n: wv.startedWave, mod: this.waves.activeMod }); // ST-051
+    if (wv.startedWave) {
+      this.emit('wave', { n: wv.startedWave, mod: this.waves.activeMod }); // ST-051
+      this.spawnMinesForWave(wv.startedWave); // ST-054
+    }
     if (wv.waveCleared) this.emit('waveCleared', { n: wv.waveCleared });
+    this.mines.step(dt, this.ship.pos); // ST-054
+    this.resolveBulletMines(); // ST-054
+    this.resolveShipMines(); // ST-054
     this.resolveBulletRocks();
     this.resolveShipRocks();
     this.resolveNearMisses(); // ST-053 (after ship hits: a hit-rock is destroyed, no double award)
@@ -147,6 +155,50 @@ export class World {
     }
   }
 
+  /** ST-054: spawn the wave's mines once it is eligible (wave >= firstWave). */
+  spawnMinesForWave(wave) {
+    const m = this.cfg.mine;
+    if (wave < m.firstWave) return;
+    for (let i = 0; i < m.perWave; i++) this.mines.spawn(this.ship.pos);
+  }
+
+  /** ST-054: bullets shatter mines (1 hit). Each mine kill feeds the combo. */
+  resolveBulletMines() {
+    for (const b of this.weapons.bullets) {
+      if (b.dead) continue;
+      const hit = this.mines.mines.find(mm => !mm.dead &&
+        Math.hypot(mm.pos.x - b.pos.x, mm.pos.y - b.pos.y) < mm.radius + b.radius);
+      if (!hit) continue;
+      this.weapons.markHit(b.id);
+      this.mines.destroy(hit.id);
+      const points = this.scoreKeeper.kill(this.cfg.mine.score, this.time);
+      this.emit('kill', { pos: { x: hit.pos.x, y: hit.pos.y }, size: 'mine', points,
+        combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, mine: true });
+      this.emit('mineExplode', { pos: { x: hit.pos.x, y: hit.pos.y } });
+    }
+    this.weapons.compact();
+  }
+
+  /** ST-054: a mine touching the ship costs a life (same as a rock hit) and the mine is lost. */
+  resolveShipMines() {
+    if (this.ship.isInvulnerable || this.lives <= 0) return;
+    const hit = this.mines.mines.find(mm => !mm.dead &&
+      Math.hypot(mm.pos.x - this.ship.pos.x, mm.pos.y - this.ship.pos.y) < mm.radius + this.cfg.ship.radius);
+    if (!hit) return;
+    this.mines.destroy(hit.id);
+    this.emit('mineExplode', { pos: { x: hit.pos.x, y: hit.pos.y } });
+    const livesLeft = this.livesMgr.damage();
+    this.scoreKeeper.onDamage();
+    const nx = (this.ship.pos.x - hit.pos.x), ny = (this.ship.pos.y - hit.pos.y);
+    const n = Math.hypot(nx, ny) || 1;
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.ship.damage(v2(nx / n, ny / n));
+    if (livesLeft <= 0) {
+      this.game.to(STATE.GAME_OVER);
+      this.emit('gameover', { score: this.score });
+    }
+  }
+
   /** ST-053: near-miss bonus - flat points + swish when a rock grazes the ship.
    * One award per approach: a rock re-arms only after leaving an extended ring.
    * Skipped while invulnerable or out of lives. */
@@ -171,6 +223,7 @@ export class World {
     this.ship = new Ship(0, 0, this.cfg);
     this.weapons.clear();
     this.field.clear();
+    this.mines.clear();
     this.scoreKeeper.reset();
     this.waves.reset();
     this.powerups.clear();

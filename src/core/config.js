@@ -61,6 +61,19 @@ export const CONFIG = {
     inwardAccel: 2.0      // 'inward': u/s^2 pull of all rocks toward the arena center
   },
 
+  mine: {
+    // ST-054: mine drones - slow homing mines that chase the ship. 1 bullet kills
+    // one; touching the ship costs a life. Slower than ship.maxSpeed so they can
+    // always be dodged.
+    firstWave: 5,     // mines start appearing from this wave
+    perWave: 1,       // mines added each eligible wave
+    maxConcurrent: 10,
+    radius: 0.9,      // collision radius (same as the ship)
+    speed: 3.2,       // constant u/s (ship maxSpeed is 14 - always outmatched)
+    turn: 1.6,        // max heading change rad/s (slow, readable pursuit)
+    score: 150        // kill reward (more than an S - you chased the chaser)
+  },
+
   combo: {
     window: 4.0,        // seconds to keep a chain alive
     cap: 10,            // max combo
