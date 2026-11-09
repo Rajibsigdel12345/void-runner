@@ -51,7 +51,8 @@ multipliers, and grab power-ups. Survive as long as you can.
 
 ## The Monolith (ST-055)
 
-- Every 5th wave (5, 10, 15, ...) spawns a MONOLITH at the arena rim, in addition to the wave's normal asteroids: a huge, slow-homing boss (40 HP, 1.6 u/s - always dodgeable).
+- Every 5th wave (5, 10, 15, ...) spawns a MONOLITH at the arena rim, in addition to the wave's normal asteroids: a huge, slow-homing boss (base 40 HP, 1.6 u/s - always dodgeable).
+- Endless-arc HP (I64): from wave 10 the Monolith gains +12 HP per 5 waves, capped at 88, so it stays a real threat as the rest of the game escalates while the cap keeps every fight beatable; speed is unchanged (dodgeability preserved).
 - Bullets deal 1 damage each. On death it pays +1000 (feeds the combo) and splits into 4 M asteroids at its position.
 - Every 2s it bursts a ring of 8 S asteroids radially outward from itself (bounded by the field's concurrent cap).
 - Contact with the boss costs a life, same flow as a rock hit (knockback + invuln). The boss is not damaged by contact.

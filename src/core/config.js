@@ -79,6 +79,9 @@ export const CONFIG = {
     // ring of S rocks; on death splits into 4 M rocks and pays a big score.
     everyWave: 5,    // waves 5, 10, 15, ...
     maxHp: 40,
+    hpFirstWave: 10, // ST-064: HP scale engages at the endless-curve wave
+    hpStep: 12,      // +HP per 5-wave boss beyond the first
+    hpCap: 88,       // ceiling (88 <= 2.2x base, keeps the fight beatable)
     radius: 3.4,     // big, slow, imposing
     speed: 1.6,      // slow drift toward the ship (always dodgeable)
     turn: 0.8,       // sluggish heading change rad/s

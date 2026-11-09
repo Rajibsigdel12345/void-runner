@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I64: balance pass 3 (ST-064) - the Monolith's HP now climbs with the endless arc (base 40, +12 per 5 waves from wave 10, capped at 88) so it stays a real threat; speed unchanged (still always-dodgeable); full new-content pacing review documented; +2 tests (177/177).
 - I63: engine flame (ST-063) - thrust-reactive rear plume (orange + hot core) that scales with thrust and flickers over time; hidden when coasting; steady under Reduced Motion; presentation-only, 175/175.
 - I62: shield pulse (ST-062) - active shield now breathes (scale + opacity) with a repeating expanding additive ring; reduced-motion freezes to a static ring; presentation-only, 175/175.
 - I61: bullet trails (ST-061) - additive comet streak behind each player bullet (head-bright -> tail-fade), oriented along the shot; pooled, zero per-frame allocs; presentation-only, 175/175.

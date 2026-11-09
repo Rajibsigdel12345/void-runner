@@ -445,3 +445,12 @@ One entry per iteration. Format:
 - Verification: 175/175 unit tests green (render-only; core unchanged); build exit 0. Browser: thrust ON -> flame + core visible (scale sx=1.0, sz flickers, ~0.72 sampled); NEUTRAL (thrust 0) -> flame + core hidden; Reduced Motion -> flame steady (identical scale across two sim times, no flicker); 0 console errors; no NaN. Screenshot .evidence/i63-engine-flame.png (orange plume trailing the ship's rear).
 - Result: DONE
 - Follow-up: I64 balance pass 3 (new content pacing) + doc (ST-064).
+
+## I64 - balance pass 3: new-content pacing (ST-064)
+
+- Goal: balance iteration - review the pacing of all content added since balance pass 2 (wave mods, golden, near-miss, mines, Monolith boss, enemy bolts, overdrive, endless curve, vortex) against the ship's capabilities; make one bounded tuning where a real pacing gap exists and document the rest.
+- Changed: src/core/config.js (boss: +hpFirstWave 10 / hpStep 12 / hpCap 88), src/core/boss.js (pure bossHpForWave(cfg, wave); Monolith constructor takes an optional HP override), src/core/game.js (spawnBossForWave threads the wave into the boss HP), tests/boss.test.js (+2 tests: the wave-HP curve incl. cap, and a live wave-15 boss built at base+step), design/gdd.md (Monolith HP note), production/balance-notes.md (I64 full pacing review + closed-with-analysis).
+- Rationale: the fixed 40-HP Monolith was a trivial free +1000 by wave 15 while density/mines/vortex all ramped in endless - the 'big threat' beat was disappearing in the mode with no end. HP now climbs +12 per 5 waves from wave 10, capped at 88 (2.2x base, always beatable); speed unchanged so the boss stays always-dodgeable.
+- Verification: 177/177 unit tests green (+2, core change); build exit 0. Browser: live world HP-by-wave probe -> wave 5/10 = 40, 15 = 52, 20 = 64, 30/60 = 88 (cap); 0 console errors. No rendering changed (boss HP bar shows hpFrac 0..1, unaffected by absolute HP).
+- Result: DONE
+- Follow-up: I65 menu polish (ST-065).

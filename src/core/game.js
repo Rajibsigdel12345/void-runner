@@ -4,7 +4,7 @@ import { Ship } from './ship.js';
 import { Weapons } from './weapons.js';
 import { AsteroidField } from './asteroids.js';
 import { MineField } from './mines.js';
-import { Monolith } from './boss.js';
+import { Monolith, bossHpForWave } from './boss.js';
 import { EnemyBulletField } from './enemyBullets.js';
 import { VortexField } from './vortex.js'; // ST-059
 import { bulletHitRock, shipHitRock } from './collision.js';
@@ -249,7 +249,7 @@ export class World {
       pos = v2(Math.cos(a) * R, Math.sin(a) * R);
       tries++;
     } while (Math.hypot(pos.x - this.ship.pos.x, pos.y - this.ship.pos.y) < 10 && tries < 8);
-    this.boss = new Monolith(this.rng, this.cfg, pos);
+    this.boss = new Monolith(this.rng, this.cfg, pos, bossHpForWave(this.cfg, wave)); // ST-064: endless-arc HP
     this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056: fresh boss starts a full interval
     this.emit('bossSpawn', { pos: { x: pos.x, y: pos.y } });
   }

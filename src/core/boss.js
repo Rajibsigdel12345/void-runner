@@ -3,14 +3,22 @@
 // reports a kill - World owns the spawned rocks/score so this stays testable.
 import { v2, v2Len } from './math.js';
 
+/** ST-064: Monolith HP by wave - base for the campaign loop, climbing per boss from the
+ * endless-curve wave, capped so the fight always stays beatable. Pure + deterministic. */
+export function bossHpForWave(cfg, wave) {
+  const b = cfg.boss;
+  if (!b.hpFirstWave || wave < b.hpFirstWave) return b.maxHp;
+  const steps = Math.floor((wave - b.hpFirstWave) / b.everyWave);
+  return Math.min(b.hpCap, b.maxHp + Math.max(0, steps) * b.hpStep);
+}
+
 export class Monolith {
-  constructor(rng, cfg, pos) {
+  constructor(rng, cfg, pos, hp) {
     this.rng = rng;
     this.cfg = cfg;
     this.pos = pos;
     const b = cfg.boss;
-    this.hp = b.maxHp;
-    this.maxHp = b.maxHp;
+    this.hp = this.maxHp = (typeof hp === 'number' && hp > 0) ? hp : b.maxHp; // ST-064: scaled by wave
     this.radius = b.radius;
     this.alive = true;
     this.ringTimer = b.ringEvery; // first burst after one full interval

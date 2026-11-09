@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { World } from '../src/core/game.js';
 import { RNG } from '../src/core/rng.js';
 import { CONFIG } from '../src/core/config.js';
+import { bossHpForWave } from '../src/core/boss.js';
 
 const NEUTRAL = { thrust: { x: 0, y: 0 }, aimPoint: null, firing: false };
 const DT = 1 / 60;
@@ -103,4 +104,29 @@ test('boss: deterministic trajectory for a pinned seed (seed 58)', () => {
     return [+w.boss.pos.x.toFixed(3), +w.boss.pos.y.toFixed(3), countRocks(w, null)];
   };
   assert.deepEqual(run(), run());
+});
+
+
+// ST-064: the Monolith's HP climbs with the endless arc, capped so it stays beatable.
+test('boss: HP-by-wave curve - base, ramp, cap (config)', () => {
+  const b = CONFIG.boss;
+  assert.equal(bossHpForWave(CONFIG, 5), b.maxHp, 'wave 5 (campaign) = base');
+  assert.equal(bossHpForWave(CONFIG, 10), b.maxHp, 'wave 10 (first of the curve) = base');
+  assert.equal(bossHpForWave(CONFIG, 15), b.maxHp + b.hpStep, 'wave 15 = base + one step');
+  assert.ok(bossHpForWave(CONFIG, 20) > bossHpForWave(CONFIG, 15), 'still rising');
+  assert.equal(bossHpForWave(CONFIG, 30), b.hpCap, 'reaches the cap by wave 30');
+  assert.equal(bossHpForWave(CONFIG, 60), b.hpCap, 'stays capped far out');
+  assert.ok(bossHpForWave(CONFIG, 60) <= 2.5 * b.maxHp, 'cap keeps the fight bounded (<= 2.5x base)');
+  assert.ok(bossHpForWave(CONFIG, 100) >= b.maxHp, 'never below the base');
+});
+
+test('boss: a wave-15 Monolith is built with scaled HP (seed 59)', () => {
+  const w = new World(new RNG(59));
+  w.begin();
+  w.waves.state = 'intermission';
+  w.waves.intermission = 100;
+  w.spawnBossForWave(15);
+  assert.ok(w.boss, 'wave-15 boss spawned');
+  assert.equal(w.boss.maxHp, bossHpForWave(CONFIG, 15), 'maxHp matches the wave curve');
+  assert.equal(w.boss.maxHp, CONFIG.boss.maxHp + CONFIG.boss.hpStep, 'wave 15 = base + step');
 });
