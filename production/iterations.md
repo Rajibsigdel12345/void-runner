@@ -54,3 +54,9 @@ One entry per iteration. Format:
 - Verification: npm test 33/33 pass; build exit 0.
 - Result: DONE
 - Follow-up: I08 renders bullets + wires Space/click firing.
+## I08 - Bullet render pool + fire wiring (ST-008)
+- Goal: render bullets from weapons core via pooled shared-geo meshes; Space/click fires toward aim.
+- Changed: src/render/bulletPool.js (new), src/main.js (weapons + pool wiring, firing input)
+- Verification: npm test 33/33; build exit 0; browser: console clean, Space hold -> 5 live bullets (5.5 rps), cull to 0 after life, screenshot .evidence/i08-fire.png shows bullet trail.
+- Result: DONE
+- Follow-up: I09 asteroid field core.

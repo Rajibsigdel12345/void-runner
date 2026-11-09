@@ -3,6 +3,8 @@ import * as THREE from 'three';
 import { createStarfield } from './render/starfield.js';
 import { createShipMesh } from './render/shipMesh.js';
 import { createInput } from './render/input.js';
+import { createBulletPool } from './render/bulletPool.js';
+import { Weapons } from './core/weapons.js';
 import { Ship } from './core/ship.js';
 import { damp } from './core/math.js';
 
@@ -31,10 +33,13 @@ scene.add(grid);
 const stars = createStarfield(1337);
 scene.add(stars);
 
-// --- gameplay entities (I06: ship only) ---
+// --- gameplay entities (I08: ship + weapons) ---
 const ship = new Ship(0, 0);
+const weapons = new Weapons();
 const shipMesh = createShipMesh();
 scene.add(shipMesh.group);
+
+const bullets = createBulletPool(scene);
 
 const input = createInput();
 const raycaster = new THREE.Raycaster();
@@ -45,7 +50,7 @@ const aimWorld = new THREE.Vector3();
 const camPos = { x: 0, y: 9, z: 13 };
 const camLook = { x: 0, y: 0, z: 0 };
 
-window.__vr = { ship }; // debug/test handle (expanded in I080)
+window.__vr = { ship, weapons }; // debug/test handle (expanded in I080)
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -67,6 +72,9 @@ function frame() {
   }
 
   ship.step(dt, input.state.thrust, aimPoint);
+  if (input.state.firing) weapons.fire(ship.pos, ship.aim);
+  weapons.step(dt);
+  bullets.sync(weapons);
   shipMesh.sync(ship);
 
   const f = ship.forward();
@@ -83,3 +91,4 @@ function frame() {
   renderer.render(scene, camera);
 }
 frame();
+
