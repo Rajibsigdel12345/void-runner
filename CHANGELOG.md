@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I75: WebGL context-loss recovery (ST-075) - RENDERING INTERRUPTED overlay while the 3D context is gone (auto-paused), status that escalates to a reload prompt after 10s, and a RELOAD GAME fallback; on restore the overlay clears and the pause screen takes over (render-only, 200/200 + browser-verified lost/restore/resume).
 - I74: pool/memory audit (ST-074) - removed the last unconditional per-frame allocations: power-up drops compact in place, event drain uses a pre-allocated double buffer, camera reuses a forward-vector scratch; steady-state hot path now ~0 per-frame JS heap growth (200/200 + build + browser smoke).
 - I73: adaptive quality (ST-073) - rolling 2.0s FPS <45 for two windows auto-drops FX High -> Low (toast + console log, saved settings untouched); options FX choice overrides and locks the automation; pure core module + 9 unit tests (196/196).
 - I72: UI text pass (ST-072) - wording/caps consistency: HUD combo now "COMBO 3 ×1.4" (was "3 CHAIN 1.3x") and game-over stat now "MAX COMBO 5" (was "MAX COMBO x5"); aligns on the canonical COMBO term + the × symbol, no stray lowercase letters in UI text (render-only, 187/187).

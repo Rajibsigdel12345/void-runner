@@ -265,15 +265,45 @@ document.addEventListener('visibilitychange', () => {
 });
 // I43: WebGL context loss - three.js reinitializes its GL state on restore; we
 // pause the game, and force render-target re-allocation (composer + bloom).
+// I75: user-facing overlay while the 3D context is gone, with a reload fallback
+// if the browser never restores it.
+const ctxOverlay = document.createElement('div');
+ctxOverlay.id = 'ctx-overlay';
+ctxOverlay.style.cssText = 'position:fixed;inset:0;z-index:80;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(2,3,10,0.94);color:#c8d4ee;font:calc(14px * var(--vr-fs,1))/1.6 ui-monospace,monospace;text-align:center;padding:24px;';
+const ctxTitle = document.createElement('div');
+ctxTitle.style.cssText = 'font-size:calc(22px * var(--vr-fs,1));letter-spacing:.2em;color:#9fb4d8;';
+ctxTitle.textContent = 'RENDERING INTERRUPTED';
+const ctxStatus = document.createElement('div');
+ctxStatus.id = 'ctx-status';
+ctxStatus.textContent = 'The browser dropped the 3D rendering context. It usually comes back on its own - please wait.';
+const ctxBtn = document.createElement('button');
+ctxBtn.type = 'button';
+ctxBtn.textContent = 'RELOAD GAME';
+ctxBtn.style.cssText = 'margin-top:8px;font:calc(14px * var(--vr-fs,1))/1 ui-monospace,monospace;letter-spacing:.12em;color:#0a0f1e;background:#9fb4d8;border:0;border-radius:4px;padding:10px 22px;cursor:pointer;';
+ctxBtn.addEventListener('click', () => { location.reload(); });
+ctxOverlay.appendChild(ctxTitle);
+ctxOverlay.appendChild(ctxStatus);
+ctxOverlay.appendChild(ctxBtn);
+document.body.appendChild(ctxOverlay);
+let ctxRestoreTimer = 0;
 renderer.domElement.addEventListener('webglcontextlost', (e) => {
   e.preventDefault(); // mark the context as restorable
   if (world.game.state === STATE.PLAYING) world.pause();
+  ctxOverlay.style.display = 'flex'; // I75
+  ctxStatus.textContent = 'The browser dropped the 3D rendering context. It usually comes back on its own - please wait.';
+  clearTimeout(ctxRestoreTimer);
+  ctxRestoreTimer = setTimeout(() => { // I75: no restore yet - escalate
+    ctxStatus.textContent = 'Still no signal after 10s. If it does not come back, reload the game.';
+  }, 10000);
 });
 renderer.domElement.addEventListener('webglcontextrestored', () => {
+  clearTimeout(ctxRestoreTimer); // I75
   renderer.setSize(window.innerWidth, window.innerHeight);
   bloom.resize(window.innerWidth, window.innerHeight);
   renderer.info.reset();
+  ctxOverlay.style.display = 'none'; // I75: back to normal (pause screen takes over if the game was running)
 });
+window.__vr.ctxOverlay = ctxOverlay; // I75: expose after declaration (TDZ-safe)
 
 // Fixed-timestep simulation (60Hz) with render at display rate.
 // Substeps keep sim time tracking wall time even when rAF is throttled;

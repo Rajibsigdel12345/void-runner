@@ -251,3 +251,10 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - Cost after fixes: steady-state per-frame JS heap growth in the sim/render hot path is ~0 (event DATA objects still allocate at emit time - event-driven and bounded by action rate, by design).
 - No gameplay/scoring/pacing changes. 200/200 (4 new poolAudit regression tests pin array identity + buffer reuse).
  - Browser smoke: PLAYING wave 1, ship/camera finite, render ok, 0 console messages (.evidence/i74-playing-smoke.png).
+
+## I75 - WebGL context loss: overlay + restore/reload path (ST-075)
+
+- Resilience/UX only: no gameplay, scoring, or pacing changes. 200/200 (render-only, no new unit tests; core untouched - the sim already auto-pauses on context loss via the existing I43 handler).
+- What was added: a user-facing overlay (#ctx-overlay, z-index 80) shown while the 3D context is lost - title RENDERING INTERRUPTED, a status line, and a RELOAD GAME fallback button (location.reload) in case the browser never restores. A 10s timer escalates the status text to "still no signal - reload" if the restore never arrives; it is cleared on restore.
+- Restore path: on webglcontextrestored the overlay hides, the existing renderer.setSize + bloom.resize + info.reset re-allocation runs, and the game stays PAUSED (the pause screen takes over; the player resumes explicitly). No auto-resume - a freshly-allocated GL state should not resume mid-run silently.
+- Verified in browser by dispatching the real context events on the canvas: lost -> PAUSED + overlay visible; restored -> overlay hidden, still PAUSED; resume -> PLAYING. A clean run (no events) produces 0 console warnings/errors. Note: firing webglcontextrestored on a context that never actually lost makes three.js re-upload textures and log two benign "texImage3D FLIP_Y/PREMULTIPLY_ALPHA" INVALID_OPERATION warnings - a simulation artifact, not a code-path defect (a genuine lost context is gone, so the re-upload targets a fresh live context).
