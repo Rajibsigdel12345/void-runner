@@ -13,7 +13,7 @@ import { createPowerupRenderer } from './render/powerupMesh.js';
 import { createShieldRing } from './render/shieldRing.js';
 import { createVortexFx } from './render/vortexFx.js'; // ST-059
 import { createParticles } from './render/particles.js';
-import { createShake } from './core/fx.js';
+import { createShake, createPunch } from './core/fx.js'; // ST-081
 import { createHUD } from './render/hud.js';
 import { createReticle } from './render/reticle.js';
 import { createScreens } from './render/screens.js';
@@ -186,6 +186,8 @@ fxPreviewFn = (tier) => { // ST-067: show the new tier immediately (arena center
 // Screen shake (ST-025): core envelope, render layer applies the camera offset.
 const shake = createShake({ master: CONFIG.fx.shake, decay: CONFIG.fx.shakeDecay, amplitude: CONFIG.fx.shakeAmplitude }, new RNG(0x57ab));
 const shakeOff = { x: 0, y: 0, z: 0 };
+const punch = createPunch({ decay: CONFIG.fx.punch.decay, amplitude: CONFIG.fx.punch.amplitude }); // ST-081: directed camera jolt
+let hitStop = 0; // ST-081: sim-freeze seconds remaining (render loop; rendering keeps going)
 let simT = 0; // sim-clock for timed visuals (invuln blink)
 const flashEl = document.getElementById('flash'); // hit/bomb flash overlay (index.html)
 let flashA = 0;
@@ -254,7 +256,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, bossMesh, bossHealth, enemyBulletRenders, stars, vortexFx, fpsMeter, debugOverlay, adaptive, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, bossMesh, bossHealth, enemyBulletRenders, stars, vortexFx, fpsMeter, debugOverlay, adaptive, punch, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -351,7 +353,7 @@ function tick(dt, intent) {
       else if (e.type === 'mineExplode') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xff5a3c, speed: 10, life: 0.5 }); shake.trigger(0.4); flashA = Math.min(0.8, flashA + 0.25); } // ST-054
       else if (e.type === 'bossSpawn') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xb18cff, speed: 8, life: 0.7 }); shake.trigger(0.7); flashA = Math.min(0.8, flashA + 0.4); } // ST-055
       else if (e.type === 'bossRing') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.6), color: 0x9d7bff, speed: 7, life: 0.4 }); // ST-055
-      else if (e.type === 'bossDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount * 2, color: 0xfff0b8, speed: 14, life: 0.8 }); shake.trigger(1.0); flashA = Math.min(0.8, flashA + 0.5); } // ST-055
+      else if (e.type === 'bossDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount * 2, color: 0xfff0b8, speed: 14, life: 0.8 }); shake.trigger(1.0); flashA = Math.min(0.8, flashA + 0.5); hitStop = Math.max(hitStop, CONFIG.fx.hitStop.bossDeath); punch.trigger({ x: 0, y: 0.7, z: 0.5 }, 1.0); } // ST-055/ST-081
       else if (e.type === 'bossFire') particles.burst(e.data.pos.x, e.data.pos.y, { count: 5, color: 0xff6a4a, speed: 4, life: 0.25 }); // ST-056 muzzle
       else if (e.type === 'mineFire') particles.burst(e.data.pos.x, e.data.pos.y, { count: 4, color: 0xff5a3c, speed: 3, life: 0.2 }); // ST-056 muzzle
       else if (e.type === 'powerup' && e.data.type === 'overdrive') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xff5ad8, speed: 8, life: 0.5 }); flashA = Math.min(0.8, flashA + 0.15); } // ST-057 pickup flash
@@ -364,6 +366,7 @@ function tick(dt, intent) {
         particles.burst(0, 0, { count: fxCount * 2, color: 0xfff3b0, speed: 16, life: 0.7 });
         shake.trigger(CONFIG.fx.shakeBomb);
         flashA = Math.min(0.8, flashA + 0.35);
+        hitStop = Math.max(hitStop, CONFIG.fx.hitStop.bomb); punch.trigger({ x: 0, y: 0.7, z: 0.5 }, 0.8); // ST-081
       } else if (e.type === 'vortexTelegraph') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.4), color: 0x9d7bff, speed: 2, life: 0.8 }); // ST-059 telegraph wisp
     }
     if (e.type === 'vortexTelegraph') { vortexFx.onTelegraph(e.data.pos); } // ST-059 (state always advances; particles above are motion-gated)
@@ -390,6 +393,7 @@ function tick(dt, intent) {
   }
   simT += dt;
   shake.step(dt);
+  punch.step(dt); // ST-081: punch decays on every tick
 }
 
 const hudOpts = { best: 0 };
@@ -433,6 +437,7 @@ function syncVisuals(dt) {
   camera.position.set(camPos.x, camPos.y, camPos.z);
   camera.lookAt(camLook.x, camLook.y, camLook.z);
   shake.offset(shakeOff); // ST-025: apply shake after follow-camera (offset() writes in place)
+  punch.offset(shakeOff); // ST-081: punch composes on top of shake (offset() adds in place)
   camera.position.x += shakeOff.x;
   camera.position.y += shakeOff.y;
   camera.position.z += shakeOff.z;
@@ -454,8 +459,14 @@ function frame() {
   const cur = world.game.state;
   if (prevState === STATE.PAUSED && cur === STATE.PLAYING) clock.reset(now); // ST-078: no accumulated dt carried into resume
   const r = clock.tick(now); // ST-078: fixed-timestep clock (clamped dt, dropped backlog)
-  for (let i = 0; i < r.steps; i++) tick(STEP);
   const frameDt = r.dt;
+  if (hitStop > 0 && cur === STATE.PLAYING) { // ST-081: hit-stop - freeze the sim, keep rendering
+    hitStop = Math.max(0, hitStop - frameDt);
+    clock.reset(now); // discard accumulated sim time during the freeze (no catch-up burst)
+  } else {
+    if (hitStop > 0) hitStop = 0; // event fired but we are not PLAYING - discard the freeze
+    for (let i = 0; i < r.steps; i++) tick(STEP);
+  }
   prevState = cur;
   if (world.game.state === STATE.PLAYING) adaptive.noteFrame(frameDt); // ST-073: adaptive quality (real frame dt, PLAYING only)
   syncVisuals(frameDt); // I36: reads previous frame GPU stats

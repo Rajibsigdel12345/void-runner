@@ -1,7 +1,7 @@
 // ST-025: screen-shake envelope tests
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createShake } from '../src/core/fx.js';
+import { createShake, createPunch } from '../src/core/fx.js';
 import { RNG } from '../src/core/rng.js';
 
 const CFG = { master: 1, decay: 6, amplitude: 0.5 };
@@ -51,4 +51,60 @@ test('shake: jitter bounded by amplitude and deterministic per seed', () => {
   const horiz = Math.hypot(oa.x, oa.z);
   assert.ok(horiz > 0 && horiz <= CFG.amplitude * 1.0001);
   assert.ok(Math.abs(oa.y) <= CFG.amplitude * 0.5 * 1.0001);
+});
+
+// ST-081: camera-punch envelope tests (directed, composing)
+const PUNCH_CFG = { decay: 12, amplitude: 2.0 };
+
+test('punch: idle -> zero magnitude, offset is a no-op', () => {
+  const p = createPunch(PUNCH_CFG);
+  assert.equal(p.magnitude(), 0);
+  const out = { x: 1, y: 2, z: 3 };
+  p.offset(out);
+  assert.equal(out.x, 1); assert.equal(out.y, 2); assert.equal(out.z, 3);
+});
+
+test('punch: trigger sets magnitude, max-stacks, clamps at 1', () => {
+  const p = createPunch(PUNCH_CFG);
+  p.trigger({ x: 1, y: 0, z: 0 }, 0.4);
+  assert.ok(Math.abs(p.magnitude() - 0.4) < 1e-9);
+  p.trigger({ x: 0, y: 0, z: 1 }, 0.9);
+  assert.ok(Math.abs(p.magnitude() - 0.9) < 1e-9);
+  p.trigger(null, 2);
+  assert.equal(p.magnitude(), 1);
+});
+
+test('punch: zero/negative strength is ignored', () => {
+  const p = createPunch(PUNCH_CFG);
+  p.trigger({ x: 1, y: 0, z: 0 }, 0);
+  p.trigger({ x: 1, y: 0, z: 0 }, -1);
+  assert.equal(p.magnitude(), 0);
+});
+
+test('punch: exponential decay settles to 0', () => {
+  const p = createPunch(PUNCH_CFG);
+  p.trigger({ x: 1, y: 0, z: 0 }, 1);
+  p.step(0.5);
+  assert.ok(Math.abs(p.magnitude() - Math.exp(-6)) < 1e-6);
+  p.step(2);
+  assert.equal(p.magnitude(), 0);
+});
+
+test('punch: offset writes dir * mag * amplitude and composes with shake', () => {
+  const p = createPunch(PUNCH_CFG);
+  p.trigger({ x: 0, y: 0.7, z: 0.5 }, 1);
+  const out = p.offset({ x: 0, y: 0, z: 0 });
+  assert.ok(Math.abs(out.x) < 1e-9);
+  assert.ok(Math.abs(out.y - 0.7 * 2.0) < 1e-9);
+  assert.ok(Math.abs(out.z - 0.5 * 2.0) < 1e-9);
+  // composes (adds) after shake.offset (which overwrites) on the same target
+  const s = createShake({ master: 1, decay: 6, amplitude: 0.5 }, new RNG(42));
+  s.trigger(1);
+  const c = { x: 0, y: 0, z: 0 };
+  s.offset(c);
+  const sx = c.x, sy = c.y, sz = c.z;
+  p.offset(c);
+  assert.ok(Math.abs(c.x - sx) < 1e-9);
+  assert.ok(Math.abs(c.y - (sy + 1.4)) < 1e-9);
+  assert.ok(Math.abs(c.z - (sz + 1.0)) < 1e-9);
 });

@@ -290,3 +290,9 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 
 - No gameplay/tuning changes: developer tooling only. 223/223 (render-only). Strictly opt-in via ?dbg=1; normal/production loads are unaffected (overlay not mounted, ~0 cost).
 - Gives a live read on pool pressure (rocks/bullets/eb/mines/drops vs caps) and the draw-call/triangle budget, supporting future balance + perf iterations (esp. the I95 perf re-verification and any pool-cap tuning). Observed loaded: ~28 draw calls, ~500-700 tris at 60fps.
+
+## I81 - hit-stop (boss/bomb) + camera punch (ST-081)
+
+- Feel tuning added (no existing balance numbers changed): fx.hitStop {bossDeath 0.09s, bomb 0.07s} and fx.punch {decay 12/s, amplitude 2.0 world units, direction (0, 0.7, 0.5)}.
+- Rationale: hit-stop stays under 100ms so it reads as weight without stalling the arcade pace; the boss death gets a longer freeze than the bomb (0.09 vs 0.07) since it is the headline moment of a run. Punch decay 12/s keeps the jolt under ~0.2s; amplitude 2.0 is a visible jolt at the current camera distance without disorienting. Both ride the existing reduced-motion gate (fired inside the !motionOff FX block), and the freeze only applies while PLAYING.
+- 228/228 (5 new, pure-core punch envelope).

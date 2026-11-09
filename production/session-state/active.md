@@ -4,4 +4,4 @@
 - current_story: ST-081
 - current_iteration: I81
 - branch: main
-- notes: I80 committed (debug overlay ?dbg=1: fps/calls/tris + entity pools + state, opt-in, live-updating; 223/223 + build + browser verified present-with-flag/absent-without). Next: hit-stop (boss/bomb) + camera punch (ST-081).
+- notes: I81 committed (hit-stop + camera punch: pure-core punch envelope, bossDeath 0.09s / bomb 0.07s sim-freeze with clock reset so no catch-up, motion-gated, punch composes after shake; 228/228 + build + browser-measured plateaus 0.097/0.10s). Next: dynamic FOV kick (bomb/boss) + look-ahead tuning (ST-082).

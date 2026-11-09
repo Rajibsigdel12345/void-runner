@@ -27,3 +27,33 @@ export function createShake(cfg, rng) {
   }
   return { trigger, setMaster, step, offset, magnitude: () => mag };
 }
+
+// ST-081: camera punch. Pure core (DOM-free, three-free): a brief directed
+// camera jolt for high-impact events (boss death, bomb). Unlike shake (random
+// jitter that overwrites out), punch ADDS a directed offset so it composes on
+// top of shake when both are active.
+export function createPunch(cfg) {
+  let mag = 0; // current punch energy 0..1
+  const dir = { x: 0, y: 0, z: 0 };
+
+  function trigger(direction, strength = 1) {
+    if (strength <= 0) return;
+    if (direction) { dir.x = direction.x || 0; dir.y = direction.y || 0; dir.z = direction.z || 0; }
+    mag = Math.min(1, Math.max(mag, strength)); // max-stacking, never additive
+  }
+  function step(dt) {
+    if (mag <= 0) return;
+    mag *= Math.exp(-(cfg.decay || 10) * dt);
+    if (mag < 0.002) mag = 0; // settle
+  }
+  // Adds dir * mag * amplitude to out (composes after shake). No-op when idle.
+  function offset(out) {
+    if (mag <= 0) return out;
+    const s = mag * (cfg.amplitude || 2);
+    out.x += dir.x * s;
+    out.y += dir.y * s;
+    out.z += dir.z * s;
+    return out;
+  }
+  return { trigger, step, offset, magnitude: () => mag };
+}

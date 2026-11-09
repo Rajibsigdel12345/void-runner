@@ -173,6 +173,14 @@ export const CONFIG = {
     shakeAmplitude: 0.5,      // max camera jitter (world units) at energy 1
     shakeHit: 0.5,            // energy added on a ship hit
     shakeBomb: 1.0,           // energy added on a bomb blast
+    punch: {                  // ST-081: camera punch - brief directed jolt (boss death / bomb)
+      decay: 12,              // punch energy decay (1/s, exponential)
+      amplitude: 2.0,         // max camera displacement (world units) at energy 1
+    },
+    hitStop: {                // ST-081: sim-freeze (render loop, motion-gated) in seconds
+      bossDeath: 0.09,        // hit-stop when the boss dies
+      bomb: 0.07,             // hit-stop on a bomb blast
+    },
     particleHigh: 48,         // burst size at FX quality High
     particleLow: 16,          // burst size at FX quality Low
     bloom: {                  // I35: post-fx, High quality only (GDD: "Low disables bloom")
