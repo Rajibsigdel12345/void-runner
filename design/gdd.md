@@ -121,6 +121,9 @@ playing (teaches lead-aim; playtest rec #3, I44).
 - Settings: volume 0-100, SFX on/off, FX quality (High/Low - Low disables bloom + reduces particles).
 - Reduced-motion option cuts screen shake to near-zero.
 - Colorblind-friendly power-up icons (shape + color, not color alone).
+- Font-scale setting (NORMAL / LARGE / XL) scales all in-game UI text via a CSS variable (--vr-fs); the WebGL canvas is unaffected.
+- A single gold focus-visible ring is applied across every menu, pause, and settings control, so keyboard focus is always legible.
+- Each power-up also carries a LETTER badge (R/S/H/B/M/O) on both the in-world pickup (billboard sprite) and the HUD chip, reinforcing the colorblind-safe shape + color cue with a shape-independent channel.
 
 ## Non-goals
 No multiplayer, no leaderboards, no account/network, no external assets, no engine framework.

@@ -5,6 +5,32 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 
+// I70: colorblind-friendly letter badge - draws a letter on a small canvas,
+// used as a billboard sprite above each power-up so a pickup is identifiable
+// by letter, not just shape + color.
+function letterTexture(letter, ringHex) {
+  const c = document.createElement('canvas');
+  c.width = 128; c.height = 128;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, 128, 128);
+  ctx.beginPath();
+  ctx.arc(64, 64, 54, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(6,10,22,0.80)';
+  ctx.fill();
+  ctx.lineWidth = 7;
+  ctx.strokeStyle = ringHex;
+  ctx.stroke();
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 68px "Segoe UI", system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(letter, 64, 70);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  return tex;
+}
+
 const TYPES = {
   rapid:  { color: 0xffe066, emissive: 0x8a6d00, make: () => new THREE.OctahedronGeometry(0.45) },
   spread: { color: 0xff9f43, emissive: 0x7a4a00, make: () => new THREE.ConeGeometry(0.4, 0.75, 4) },
@@ -13,6 +39,8 @@ const TYPES = {
   magnet: { color: 0x69f0ae, emissive: 0x0f5c37, make: () => new THREE.SphereGeometry(0.42, 16, 12) },
   overdrive: { color: 0xff4dd8, emissive: 0x6d0f52, make: () => new THREE.CylinderGeometry(0.42, 0.42, 0.3, 6) },
 };
+
+const LETTERS = { rapid: 'R', spread: 'S', shield: 'H', bomb: 'B', magnet: 'M', overdrive: 'O' }; // I70
 
 export function createPowerupRenderer(scene) {
   const max = 4; // pool headroom over maxActiveDrops (I078 audits pools)
@@ -32,13 +60,32 @@ export function createPowerupRenderer(scene) {
     pool.push(m);
   }
 
+  // I70: letter badges (R/S/H/B/M/O) - one shared SpriteMaterial per type
+  // (shared canvas texture), pooled to the mesh size; depthTest off so the
+  // label always reads. Zero per-frame allocation.
+  const badgeMats = {};
+  for (const tt of Object.keys(TYPES)) {
+    const ringHex = '#' + TYPES[tt].color.toString(16).padStart(6, '0');
+    badgeMats[tt] = new THREE.SpriteMaterial({ map: letterTexture(LETTERS[tt], ringHex), transparent: true, depthTest: false });
+  }
+  const badges = [];
+  for (let i = 0; i < max; i++) {
+    const s = new THREE.Sprite(badgeMats.rapid);
+    s.scale.set(0.7, 0.7, 1);
+    s.renderOrder = 5;
+    s.visible = false;
+    scene.add(s);
+    badges.push(s);
+  }
+
   let t = 0;
   function sync(powerups, dt) {
     t += dt;
     let i = 0;
     for (const d of powerups.drops) {
       if (d.dead || i >= max) continue;
-      const m = pool[i++];
+      const idx = i++;
+      const m = pool[idx];
       m.geometry = geos[d.type];
       m.material = mats[d.type];
       m.position.set(d.pos.x, 0.45 + Math.sin(t * 2.2 + d.id) * 0.08, d.pos.y);
@@ -47,9 +94,14 @@ export function createPowerupRenderer(scene) {
       const pulse = 1 + Math.sin(t * 3.1 + d.id * 1.7) * 0.07;
       m.scale.setScalar(pulse);
       m.visible = true;
+      const b = badges[idx]; // I70: letter badge above the orb (always readable)
+      b.material = badgeMats[d.type];
+      b.position.copy(m.position);
+      b.position.y += 0.72;
+      b.visible = true;
     }
-    for (; i < max; i++) pool[i].visible = false;
+    for (; i < max; i++) { pool[i].visible = false; badges[i].visible = false; }
   }
 
-  return { sync, pool };
+  return { sync, pool, badges };
 }

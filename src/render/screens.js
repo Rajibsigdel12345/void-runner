@@ -21,11 +21,12 @@ export function createScreens(root, settings = {}) {
     '@keyframes vrBestPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 6px rgba(255,210,122,0.7))}50%{transform:scale(1.12);filter:drop-shadow(0 0 18px rgba(255,210,122,1))}}',
     '.vr-newbest{animation:vrBestPulse 1.2s ease-in-out infinite;}',
     '.vr-reduced .vr-newbest{animation:none !important;}',
-    '.vr-credit{position:absolute;bottom:16px;left:0;right:0;font-size:11px;letter-spacing:1px;opacity:0.5;}',
-    '.vr-pause-btn{pointer-events:auto;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:2px;color:#cfe4ff;background:rgba(10,18,40,0.85);border:1px solid #2b4a8a;border-radius:8px;padding:10px 18px;transition:background 0.15s,border-color 0.15s;}',
+    '.vr-credit{position:absolute;bottom:16px;left:0;right:0;font-size:calc(11px * var(--vr-fs,1));letter-spacing:1px;opacity:0.5;}',
+    '.vr-pause-btn{pointer-events:auto;cursor:pointer;font-family:inherit;font-size:calc(14px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#cfe4ff;background:rgba(10,18,40,0.85);border:1px solid #2b4a8a;border-radius:8px;padding:10px 18px;transition:background 0.15s,border-color 0.15s;}',
     '.vr-pause-btn:hover{background:rgba(30,50,100,0.95);border-color:#4a7fd8;}',
     '.vr-pause-btn:active{transform:translateY(1px);}',
     '.vr-pause-btn:focus-visible{outline:2px solid #ffe08a;outline-offset:2px;}',
+    '#screens :focus-visible{outline:2px solid #ffe08a;outline-offset:2px;border-radius:4px;}', // I70: unified focus ring across the overlay
     '.vr-pause-btn .vr-key{color:#ffe08a;}',
   ].join('');
   overlay.appendChild(style);
@@ -53,10 +54,10 @@ export function createScreens(root, settings = {}) {
   // --- MENU ---
   const menu = panel('screen-menu', 'radial-gradient(55% 50% at 30% 30%, rgba(60,110,200,0.22), transparent 70%), radial-gradient(50% 55% at 72% 72%, rgba(140,70,180,0.20), transparent 70%), rgba(2,4,12,0.62)');
   menu.classList.add('vr-menu-anim'); // I65: drifting nebula bg (reduced-motion disables via .vr-reduced)
-  const titleEl = line(menu, 'VOID RUNNER', 'font-size:46px;font-weight:800;letter-spacing:10px;'); titleEl.classList.add('vr-title'); // I65: gradient + glow
-  line(menu, 'survive the void, outlast the waves', 'font-size:14px;letter-spacing:2px;opacity:0.85;'); // I44 contrast
+  const titleEl = line(menu, 'VOID RUNNER', 'font-size:calc(46px * var(--vr-fs,1));font-weight:800;letter-spacing:10px;'); titleEl.classList.add('vr-title'); // I65: gradient + glow
+  line(menu, 'survive the void, outlast the waves', 'font-size:calc(14px * var(--vr-fs,1));letter-spacing:2px;opacity:0.85;'); // I44 contrast
   const controls = document.createElement('div');
-  controls.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:8px 22px;font-size:14px;margin-top:6px;padding:16px 24px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);'; // I65: controls card
+  controls.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:8px 22px;font-size:calc(14px * var(--vr-fs,1));margin-top:6px;padding:16px 24px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);'; // I65: controls card
   for (const [k, v] of [
     ['WASD / ARROWS', 'thrust'],
     ['MOUSE', 'aim'],
@@ -67,7 +68,7 @@ export function createScreens(root, settings = {}) {
     const key = document.createElement('div');
     key.style.cssText = 'text-align:right;';
     const kc = document.createElement('span'); // I44: keycap styling
-    kc.style.cssText = 'display:inline-block;padding:2px 8px;border:1px solid rgba(255,224,138,0.4);border-radius:5px;background:rgba(255,224,138,0.08);color:#ffe08a;font-weight:700;font-size:12px;letter-spacing:1px;';
+    kc.style.cssText = 'display:inline-block;padding:2px 8px;border:1px solid rgba(255,224,138,0.4);border-radius:5px;background:rgba(255,224,138,0.08);color:#ffe08a;font-weight:700;font-size:calc(12px * var(--vr-fs,1));letter-spacing:1px;';
     kc.textContent = k;
     key.appendChild(kc);
     const val = document.createElement('div');
@@ -76,10 +77,10 @@ export function createScreens(root, settings = {}) {
     controls.append(key, val);
   }
   const top5 = document.createElement('div'); // I66: top-5 card
-  top5.style.cssText = 'display:flex;flex-direction:column;gap:4px;font-size:13px;padding:14px 22px;min-height:150px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);';
+  top5.style.cssText = 'display:flex;flex-direction:column;gap:4px;font-size:calc(13px * var(--vr-fs,1));padding:14px 22px;min-height:150px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);';
   const top5Head = document.createElement('div');
   top5Head.textContent = 'TOP 5';
-  top5Head.style.cssText = 'font-weight:700;letter-spacing:3px;font-size:12px;opacity:0.9;margin-bottom:2px;';
+  top5Head.style.cssText = 'font-weight:700;letter-spacing:3px;font-size:calc(12px * var(--vr-fs,1));opacity:0.9;margin-bottom:2px;';
   const top5Body = document.createElement('div');
   top5Body.style.cssText = 'display:flex;flex-direction:column;gap:3px;white-space:pre-line;font-variant-numeric:tabular-nums;';
   top5.append(top5Head, top5Body);
@@ -87,8 +88,8 @@ export function createScreens(root, settings = {}) {
   menuGrid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;max-width:640px;';
   menuGrid.append(controls, top5);
   menu.appendChild(menuGrid);
-  line(menu, 'PRESS ENTER TO START', 'font-size:18px;font-weight:700;letter-spacing:4px;margin-top:14px;animation:vrPulse 1.6s ease-in-out infinite;');
-  const menuBest = line(menu, '', 'font-size:13px;opacity:0.85;'); // best score lands in I18 (I44 contrast)
+  line(menu, 'PRESS ENTER TO START', 'font-size:calc(18px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;margin-top:14px;animation:vrPulse 1.6s ease-in-out infinite;');
+  const menuBest = line(menu, '', 'font-size:calc(13px * var(--vr-fs,1));opacity:0.85;'); // best score lands in I18 (I44 contrast)
   const credit = document.createElement('div'); // I65: credits
   credit.className = 'vr-credit';
   credit.textContent = 'a three.js arcade shooter � 100% procedural, no external assets � built with the Codex Game Studio pipeline';
@@ -97,8 +98,8 @@ export function createScreens(root, settings = {}) {
 
   // --- PAUSED (I68: deeper dim + RESUME / RESTART / QUIT actions, mouse + keys) ---
   const paused = panel('screen-paused', 'radial-gradient(60% 55% at 50% 45%, rgba(30,60,140,0.16), transparent 70%), rgba(2,4,12,0.74)');
-  line(paused, 'PAUSED', 'font-size:36px;font-weight:800;letter-spacing:8px;');
-  const pauseSnap = line(paused, '', 'font-size:15px;font-weight:700;letter-spacing:2px;opacity:0.9;'); // I44: session snapshot
+  line(paused, 'PAUSED', 'font-size:calc(36px * var(--vr-fs,1));font-weight:800;letter-spacing:8px;');
+  const pauseSnap = line(paused, '', 'font-size:calc(15px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;opacity:0.9;'); // I44: session snapshot
   const pauseActions = (settings.actions && typeof settings.actions.resume === 'function') ? settings.actions : null; // I68
   if (pauseActions) {
     const actionsRow = document.createElement('div');
@@ -138,19 +139,19 @@ export function createScreens(root, settings = {}) {
       }
     });
   }
-  const muteLabel = line(paused, 'M — MUTE (OFF)', 'font-size:13px;letter-spacing:2px;opacity:0.7;');
+  const muteLabel = line(paused, 'M — MUTE (OFF)', 'font-size:calc(13px * var(--vr-fs,1));letter-spacing:2px;opacity:0.7;');
   if (settings.pause) paused.appendChild(settings.pause.el); // ST-026 settings (pause)
 
   // --- GAME OVER ---
   const gameOver = panel('screen-gameover', 'rgba(8,2,6,0.72)');
-  line(gameOver, 'GAME OVER', 'font-size:42px;font-weight:800;letter-spacing:8px;color:#ff6d8a;');
-  const finalScore = line(gameOver, 'SCORE 0', 'font-size:26px;font-weight:700;letter-spacing:2px;');
-  const overBest = line(gameOver, '', 'font-size:13px;opacity:0.7;');
-  const newBestLine = line(gameOver, '', 'font-size:16px;font-weight:800;letter-spacing:3px;color:#ffe08a;');
-  const statsLine1 = line(gameOver, '', 'font-size:15px;font-weight:700;letter-spacing:2px;color:#cfe4ff;margin-top:10px;'); // ST-031
-  const statsLine2 = line(gameOver, '', 'font-size:15px;font-weight:700;letter-spacing:2px;color:#cfe4ff;'); // ST-031
-  const rankLine = line(gameOver, '', 'font-size:14px;font-weight:700;letter-spacing:2px;color:#ffe08a;opacity:0.95;'); // I69: board rank
-  line(gameOver, 'PRESS ENTER TO RESTART', 'font-size:16px;font-weight:700;letter-spacing:4px;margin-top:10px;animation:vrPulse 1.6s ease-in-out infinite;');
+  line(gameOver, 'GAME OVER', 'font-size:calc(42px * var(--vr-fs,1));font-weight:800;letter-spacing:8px;color:#ff6d8a;');
+  const finalScore = line(gameOver, 'SCORE 0', 'font-size:calc(26px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;');
+  const overBest = line(gameOver, '', 'font-size:calc(13px * var(--vr-fs,1));opacity:0.7;');
+  const newBestLine = line(gameOver, '', 'font-size:calc(16px * var(--vr-fs,1));font-weight:800;letter-spacing:3px;color:#ffe08a;');
+  const statsLine1 = line(gameOver, '', 'font-size:calc(15px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#cfe4ff;margin-top:10px;'); // ST-031
+  const statsLine2 = line(gameOver, '', 'font-size:calc(15px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#cfe4ff;'); // ST-031
+  const rankLine = line(gameOver, '', 'font-size:calc(14px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#ffe08a;opacity:0.95;'); // I69: board rank
+  line(gameOver, 'PRESS ENTER TO RESTART', 'font-size:calc(16px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;margin-top:10px;animation:vrPulse 1.6s ease-in-out infinite;');
 
   const PANELS = {
     [STATE.MENU]: menu,

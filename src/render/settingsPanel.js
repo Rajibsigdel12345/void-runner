@@ -1,3 +1,5 @@
+import { FONT_SCALES } from '../core/storage.js'; // I70
+
 // ST-026 settings panel, polished in ST-067: grouped (AUDIO / VISUALS),
 // keyboard-operable (Tab + arrow focus moves on the plain controls, game
 // hotkeys swallowed while the panel holds focus), visible focus styles, and
@@ -30,16 +32,16 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
 
   function card(title) {
     const c = document.createElement('div');
-    c.style.cssText = 'display:grid;grid-template-columns:auto 170px;gap:8px 14px;align-items:center;justify-items:start;padding:12px 18px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);min-width:280px;';
+    c.style.cssText = 'display:grid;grid-template-columns:auto calc(170px * var(--vr-fs,1));gap:8px 14px;align-items:center;justify-items:start;padding:12px 18px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);min-width:calc(280px * var(--vr-fs,1));';
     const h = document.createElement('div');
     h.textContent = title;
-    h.style.cssText = 'grid-column:1 / -1;font-size:11px;font-weight:700;letter-spacing:3px;color:#ffe08a;opacity:0.9;border-bottom:1px solid rgba(255,224,138,0.15);padding-bottom:6px;margin-bottom:2px;';
+    h.style.cssText = 'grid-column:1 / -1;font-size:calc(11px * var(--vr-fs,1));font-weight:700;letter-spacing:3px;color:#ffe08a;opacity:0.9;border-bottom:1px solid rgba(255,224,138,0.15);padding-bottom:6px;margin-bottom:2px;';
     c.appendChild(h);
     return c;
   }
   function row(label, target) {
     const d = document.createElement('div');
-    d.style.cssText = 'text-align:right;font-weight:600;color:#ffe08a;font-size:13px;';
+    d.style.cssText = 'text-align:right;font-weight:600;color:#ffe08a;font-size:calc(13px * var(--vr-fs,1));';
     d.textContent = label;
     target.appendChild(d);
   }
@@ -54,7 +56,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   const vol = document.createElement('input');
   vol.type = 'range'; vol.min = '0'; vol.max = '1'; vol.step = '0.05';
   vol.value = String(s0.volume);
-  vol.style.width = '170px';
+  vol.style.width = 'calc(170px * var(--vr-fs,1))';
   vol.setAttribute('aria-label', 'Volume');
   vol.addEventListener('input', () => emit({ volume: Number(vol.value) }));
   audioCard.appendChild(styleCtl(vol));
@@ -87,6 +89,19 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   rm.addEventListener('change', () => emit({ reducedMotion: rm.checked }));
   visCard.appendChild(rm);
 
+  row('FONT SCALE', visCard); // I70: UI text scale (applied as --vr-fs)
+  const fontSel = document.createElement('select');
+  for (const sc of FONT_SCALES) {
+    const o = document.createElement('option');
+    o.value = String(sc);
+    o.textContent = sc === 1 ? 'NORMAL' : sc === 1.25 ? 'LARGE' : 'XL';
+    fontSel.appendChild(o);
+  }
+  fontSel.value = String(s0.fontScale);
+  fontSel.setAttribute('aria-label', 'Font scale');
+  fontSel.addEventListener('change', () => emit({ fontScale: Number(fontSel.value) }));
+  visCard.appendChild(styleCtl(fontSel));
+
   const groups = document.createElement('div');
   groups.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:14px;align-items:start;';
   groups.append(audioCard, visCard);
@@ -94,10 +109,10 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
 
   const hint = document.createElement('div'); // ST-067: key-nav hint
   hint.textContent = 'TAB NAVIGATES - ARROWS MOVE - SPACE TOGGLES';
-  hint.style.cssText = 'font-size:11px;letter-spacing:2px;opacity:0.55;';
+  hint.style.cssText = 'font-size:calc(11px * var(--vr-fs,1));letter-spacing:2px;opacity:0.55;';
   wrap.appendChild(hint);
 
-  const order = [vol, sfx, fxSel, rm];
+  const order = [vol, sfx, fxSel, rm, fontSel];
 
   function moveFocus(from, dir) {
     const i = order.indexOf(from);
@@ -112,7 +127,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
     const t = e.target;
     if (order.indexOf(t) < 0) return;
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      if (t === vol || t === fxSel) return; // native consumption
+      if (t === vol || t === fxSel || t === fontSel) return; // native consumption
       e.preventDefault();
       e.stopPropagation();
       moveFocus(t, e.key === 'ArrowDown' ? 1 : -1);
@@ -134,6 +149,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
     sfx.checked = s.sfx;
     fxSel.value = s.fx;
     rm.checked = s.reducedMotion;
+    fontSel.value = String(s.fontScale); // I70
   }
 
   return { el: wrap, sync };

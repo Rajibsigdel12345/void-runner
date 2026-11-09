@@ -125,6 +125,7 @@ function applySettings(s) {
   liveSettings = s;
   fxCount = s.fx === 'low' ? CONFIG.fx.particleLow : CONFIG.fx.particleHigh;
   motionOff = s.reducedMotion === true;
+  document.documentElement.style.setProperty('--vr-fs', String(s.fontScale || 1)); // I70: UI font scale (cascades to DOM overlays only; canvas unaffected)
   bloom.setEnabled(s.fx === 'high');
   if (audio.state() !== 'uninitialized') { audio.setVolume(s.volume); audio.setSfx(s.sfx); }
 }

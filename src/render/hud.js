@@ -7,11 +7,11 @@ import { CONFIG } from '../core/config.js';
 // Accessibility (GDD): shape + color + label - never color alone. Palette
 // matches the GDD power-up colors.
 const PU_STYLE = {
-  rapid:  { label: 'RAPID',  glyph: '\u00BB', color: '#ffe08a' },
-  spread: { label: 'SPREAD', glyph: '\u2234', color: '#ffa657' },
-  shield: { label: 'SHIELD', glyph: '\u25CF', color: '#53d8ff' },
-  magnet: { label: 'MAGNET', glyph: '\u222A', color: '#7dff9e' },
-  overdrive: { label: 'OVERDRIVE', glyph: '\u2605', color: '#ff6ae2' },
+  rapid:  { label: 'RAPID',  letter: 'R', color: '#ffe08a' },
+  spread: { label: 'SPREAD', letter: 'S', color: '#ffa657' },
+  shield: { label: 'SHIELD', letter: 'H', color: '#53d8ff' },
+  magnet: { label: 'MAGNET', letter: 'M', color: '#7dff9e' },
+  overdrive: { label: 'OVERDRIVE', letter: 'O', color: '#ff6ae2' },
 };
 
 export function createHUD(root) {
@@ -32,19 +32,19 @@ export function createHUD(root) {
 
   const scoreBox = box('top:14px;left:18px');
   const score = document.createElement('div');
-  score.style.cssText = 'font-size:26px;font-weight:700;letter-spacing:1px;';
+  score.style.cssText = 'font-size:calc(26px * var(--vr-fs,1));font-weight:700;letter-spacing:1px;';
   const best = document.createElement('div');
-  best.style.cssText = 'font-size:13px;opacity:0.9;margin-top:2px;'; // I44: 0.75 -> 0.9 contrast
+  best.style.cssText = 'font-size:calc(13px * var(--vr-fs,1));opacity:0.9;margin-top:2px;'; // I44: 0.75 -> 0.9 contrast
   scoreBox.append(score, best);
 
   const waveBox = box('top:16px;left:50%;transform:translateX(-50%);text-align:center');
   const wave = document.createElement('div');
-  wave.style.cssText = 'font-size:18px;font-weight:600;letter-spacing:4px;'; // I44: full opacity
+  wave.style.cssText = 'font-size:calc(18px * var(--vr-fs,1));font-weight:600;letter-spacing:4px;'; // I44: full opacity
   waveBox.appendChild(wave);
 
   const livesBox = box('top:14px;right:18px;text-align:right');
   const lives = document.createElement('div');
-  lives.style.cssText = 'font-size:22px;letter-spacing:3px;color:#ff6d8a;';
+  lives.style.cssText = 'font-size:calc(22px * var(--vr-fs,1));letter-spacing:3px;color:#ff6d8a;';
   livesBox.appendChild(lives);
 
   // I44: power-up chips below lives; chip appears while timer > 0.
@@ -53,13 +53,13 @@ export function createHUD(root) {
   for (const t of Object.keys(PU_STYLE)) {
     const s = PU_STYLE[t];
     const chip = document.createElement('div');
-    chip.style.cssText = 'display:none;width:96px;margin-top:6px;';
+    chip.style.cssText = 'display:none;width:calc(96px * var(--vr-fs,1));margin-top:6px;';
     const top = document.createElement('div');
-    top.style.cssText = `font-size:13px;font-weight:700;letter-spacing:1px;color:${s.color};`;
-    const icon = document.createElement('span');
-    icon.style.cssText = 'font-size:14px;margin-right:6px;';
-    icon.textContent = s.glyph;
-    top.append(icon, document.createTextNode(s.label));
+    top.style.cssText = `font-size:calc(13px * var(--vr-fs,1));font-weight:700;letter-spacing:1px;color:${s.color};white-space:nowrap;`;
+    const letter = document.createElement('span'); // I70: letter badge (R/S/H/B/M/O)
+    letter.style.cssText = `display:inline-flex;align-items:center;justify-content:center;width:1em;height:1em;margin-right:7px;font-size:calc(13px * var(--vr-fs,1));font-weight:800;line-height:1;color:#08101f;background:${s.color};border-radius:0.18em;`;
+    letter.textContent = s.letter;
+    top.append(letter, document.createTextNode(s.label));
     const track = document.createElement('div');
     track.style.cssText = 'height:3px;margin-top:2px;background:rgba(255,255,255,0.15);';
     const fill = document.createElement('div');
@@ -72,10 +72,10 @@ export function createHUD(root) {
 
   const comboWrap = box('bottom:26px;left:50%;transform:translateX(-50%);text-align:center;transition:opacity 0.15s linear');
   const combo = document.createElement('div');
-  combo.style.cssText = 'font-size:20px;font-weight:700;color:#ffe08a;';
+  combo.style.cssText = 'font-size:calc(20px * var(--vr-fs,1));font-weight:700;color:#ffe08a;';
   // I44: drain bar under the chain text - the 4s combo window becomes visible.
   const comboTrack = document.createElement('div');
-  comboTrack.style.cssText = 'width:150px;height:3px;margin:4px auto 0;background:rgba(255,255,255,0.15);';
+  comboTrack.style.cssText = 'width:calc(150px * var(--vr-fs,1));height:3px;margin:4px auto 0;background:rgba(255,255,255,0.15);';
   const comboFill = document.createElement('div');
   comboFill.style.cssText = 'height:100%;width:100%;background:#ffe08a;transform-origin:left center;transform:scaleX(1);';
   comboTrack.appendChild(comboFill);

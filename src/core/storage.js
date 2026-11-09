@@ -14,7 +14,10 @@ export const DEFAULT_SETTINGS = Object.freeze({
   sfx: true,        // sound effects on/off (I27 consumes)
   fx: 'high',       // 'high' | 'low' particle/fx tier (I26 panel, I25 particles honor)
   reducedMotion: false, // disable shake/flash (I25 honors)
+  fontScale: 1,         // UI text scale 1 | 1.25 | 1.5 (I70; applied as --vr-fs)
 });
+
+export const FONT_SCALES = Object.freeze([1, 1.25, 1.5]);
 
 export class Storage {
   /**
@@ -74,6 +77,7 @@ export class Storage {
     if (typeof d.sfx === 'boolean') out.sfx = d.sfx;
     if (d.fx === 'high' || d.fx === 'low') out.fx = d.fx;
     if (typeof d.reducedMotion === 'boolean') out.reducedMotion = d.reducedMotion;
+    if (FONT_SCALES.includes(d.fontScale)) out.fontScale = d.fontScale; // I70
     return out;
   }
 
@@ -86,6 +90,7 @@ export class Storage {
     if (typeof merged.sfx === 'boolean') clean.sfx = merged.sfx;
     if (merged.fx === 'high' || merged.fx === 'low') clean.fx = merged.fx;
     if (typeof merged.reducedMotion === 'boolean') clean.reducedMotion = merged.reducedMotion;
+    if (FONT_SCALES.includes(merged.fontScale)) clean.fontScale = merged.fontScale; // I70
     this._write(this.settingsKey, { version: STORE_VERSION, ...clean });
     return clean;
   }

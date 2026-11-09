@@ -164,3 +164,17 @@ test('storage: recordScore never throws on a throwing store', () => {
   assert.equal(r.rank, 1);
   assert.ok(r.newBest);
 });
+
+test('storage: fontScale defaults to 1, validates, and round-trips (I70)', () => {
+  const store = memStore();
+  const a = new Storage(store);
+  assert.equal(a.getSettings().fontScale, 1); // default
+  assert.equal(a.setSettings({ fontScale: 1.25 }).fontScale, 1.25);
+  assert.equal(a.getSettings().fontScale, 1.25); // round-trips
+  assert.equal(new Storage(store).getSettings().fontScale, 1.25); // persists across instances
+  assert.equal(a.setSettings({ fontScale: 2 }).fontScale, 1); // out of range -> default
+  assert.equal(a.setSettings({ fontScale: '1.25' }).fontScale, 1); // wrong type -> default
+  assert.equal(a.setSettings({ fontScale: 0.5 }).fontScale, 1); // below range -> default
+  assert.equal(a.setSettings({ fontScale: 1.5 }).fontScale, 1.5); // valid max
+  assert.equal(a.setSettings({ fontScale: 1 }).fontScale, 1); // valid min
+});

@@ -208,3 +208,10 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - The game-over stats panel (existing kills/wave/combo/time from ST-031) now also shows this run's BOARD RANK #N, derived from the persistent top-5 board via storage.recordScore().rank (I66 high-score data).
 - A NEW BEST run fires a three-colour confetti burst at the ship position - gold 0xffd27a (count = fxCount tier), cyan 0x7fd0ff and magenta 0xd87fd8 at offset corners (count = ceil(fxCount*0.6), speed 6, life ~1.0s) - and the NEW BEST! line pulses (vrBestPulse 1.2s ease-in-out infinite). Confetti count scales with the current FX tier (particleHigh/particleLow).
 - Reduced Motion: no confetti burst and the NEW BEST! pulse is disabled (static line), per the .vr-reduced overrides. The board rank line is always shown (data, not motion).
+
+## I70 - accessibility: power-up letter glyphs, focus ring, font scale (ST-070)
+
+- Accessibility/presentation only: no gameplay, scoring, or pacing changes. 187/187 tests (186 pre-existing + 1 new: storage fontScale default/validation/round-trip).
+- No config tunables added. fontScale lives in storage DEFAULT_SETTINGS (not config) and is validated against the allowed set FONT_SCALES = [1, 1.25, 1.5].
+- Power-up letter badges: each of the 6 power-up types carries a letter (rapid R, spread S, shield H, bomb B, magnet M, overdrive O) rendered two ways - (a) an in-world billboard sprite floating ~0.72 above the pickup (pooled to 4 sprites, one shared CanvasTexture per type, zero per-frame allocs) and (b) an em-sized letter badge in the HUD chip.
+- World letter sprites share 6 canvas textures (128x128) and are pooled (4) ahead of maxActiveDrops=1, so normally 0 extra draw calls and up to 4 only when 4 pickups are on screen.

@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E7 (extended content/UX/hardening, I51-I100)
-- current_story: ST-070
-- current_iteration: I70
+- current_story: ST-071
+- current_iteration: I71
 - branch: main
-- notes: I69 committed (game-over stats + new-best celebration: board rank + confetti; 186/186 + build + browser). Next: accessibility - power-up letter glyphs (R/S/H/B/M), focus styles, font scale setting (ST-070).
+- notes: I70 committed (accessibility: power-up letter glyphs + unified focus ring + font scale; 187/187 + build + browser). Next: mobile/responsive HUD + touch pass (ST-071).
