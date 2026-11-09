@@ -7,6 +7,7 @@ import { bulletHitRock, shipHitRock } from './collision.js';
 import { CONFIG } from './config.js';
 import { v2 } from './math.js';
 import { ScoreKeeper } from './score.js';
+import { WaveDirector } from './waves.js';
 
 export class World {
   constructor(rng, cfg = CONFIG) {
@@ -17,12 +18,16 @@ export class World {
     this.field = new AsteroidField(rng, cfg);
     this.events = [];
     this.scoreKeeper = new ScoreKeeper(cfg);
+    this.waves = new WaveDirector(rng, this.field, cfg);
     this.lives = cfg.ship.lives;
     this.gameOver = false;
     this.time = 0;
   }
 
   get score() { return this.scoreKeeper.score; }
+  get wave() { return this.waves.wave; }
+
+  start() { this.waves.start(); }
 
   emit(type, data) { this.events.push({ type, data }); }
   drainEvents() { const e = this.events; this.events = []; return e; }
@@ -43,6 +48,9 @@ export class World {
     this.weapons.step(dt);
     this.field.step(dt);
     this.scoreKeeper.tick(this.time);
+    const wv = this.waves.step(dt);
+    if (wv.startedWave) this.emit('wave', { n: wv.startedWave });
+    if (wv.waveCleared) this.emit('waveCleared', { n: wv.waveCleared });
     this.resolveBulletRocks();
     this.resolveShipRocks();
   }
@@ -82,10 +90,12 @@ export class World {
     this.weapons.clear();
     this.field.clear();
     this.scoreKeeper.reset();
+    this.waves.reset();
     this.lives = this.cfg.ship.lives;
     this.gameOver = false;
     this.time = 0;
     this.events.length = 0;
   }
 }
+
 

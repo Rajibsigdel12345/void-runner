@@ -16,3 +16,4 @@
 - I11: collision helpers (circles, bullet/ship vs rocks) + 6 unit tests.
 - I12: World orchestrator (full collision loop, events), fixed-timestep sim, deterministic advance() hook.
 - I13: score + combo chain (window/cap/step, damage+timeout reset) wired into World; 7 new unit tests.
+- I14: wave director (escalating ramp, trickle spawn, intermission, clear detection) + 7 unit tests.

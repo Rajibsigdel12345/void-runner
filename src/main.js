@@ -41,8 +41,7 @@ const shipMesh = createShipMesh();
 scene.add(shipMesh.group);
 const bullets = createBulletPool(scene);
 const rockRenders = createAsteroidRenderer(scene);
-// demo rocks until I14 wave logic takes over spawning
-for (let i = 0; i < 4; i++) world.field.spawn(i < 2 ? 'L' : 'M');
+world.start(); // wave director now owns spawning
 
 const input = createInput();
 const raycaster = new THREE.Raycaster();
@@ -130,6 +129,7 @@ function frame() {
   renderer.render(scene, camera);
 }
 frame();
+
 
 
 

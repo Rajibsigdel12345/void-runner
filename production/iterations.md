@@ -91,3 +91,9 @@ One entry per iteration. Format:
 - Verification: npm test 60/60 pass; build exit 0.
 - Result: DONE
 - Follow-up: combo meter in HUD (I16); waves next (I14).
+## I14 - Wave director (ST-014)
+- Goal: escalating waves (count = base+growth*n, speedMult 1+0.06n capped 1.9, concurrency 6+2n capped 24), 2.2s intermission, trickle spawn, wave-clear detection, size mix (no S before wave 3), seeded determinism.
+- Changed: src/core/waves.js (new), tests/waves.test.js (new, 7 tests), src/core/game.js (WaveDirector wired, wave/waveCleared events, start()/reset), src/main.js (demo rocks removed; world.start())
+- Verification: npm test 67/67 pass; build exit 0.
+- Result: DONE
+- Follow-up: waves banner (I29); state machine I15; HUD I16.
