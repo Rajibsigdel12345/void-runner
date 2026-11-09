@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I60: starfield twinkle + parallax and rim-lit rock material (ST-060) - per-star twinkle shader, two-depth parallax offsets (0.25/0.6 x camera), cool fresnel rim on rocks; presentation-only, 175/175.
 - I59: gravity vortex hazard (ST-059) - from wave 8 a seeded mid-arena disk telegraphs 1s then pulls rocks + ship for 4.5s (re-roll 12-20s), spiral-disk FX + rumble SFX; 6 new tests (175/175).
 - I58: endless difficulty curve (ST-058) - from wave 10 capped content (36), intermissions shrink 2.2s->1.2s floor, small-rock share 30%->45%, WAVE banner carries ENDLESS tag; 5 new tests (169/169).
 - I57: overdrive power-up (ST-057) - magenta hex drop, 2x score for 6s (kills + combo + near-miss), HUD chip + magenta popup tint + pickup sweep SFX; 5 new tests (164/164).

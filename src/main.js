@@ -182,7 +182,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, rockRenders, mineRenders, bossMesh, bossHealth, enemyBulletRenders, vortexFx, fpsMeter, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, rockRenders, mineRenders, bossMesh, bossHealth, enemyBulletRenders, stars, vortexFx, fpsMeter, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -318,6 +318,7 @@ function syncVisuals(dt) {
   camera.position.x += shakeOff.x;
   camera.position.y += shakeOff.y;
   camera.position.z += shakeOff.z;
+  stars.update(simT, camera, !motionOff); // I60: twinkle + parallax (frozen when reduced motion)
   popups.sync(dt, motionOff); // ST-030: after follow-camera + shake
   hint.sync(dt, motionOff); // ST-032
   if (flashA > 0) { // hit/bomb flash decay

@@ -413,3 +413,11 @@ One entry per iteration. Format:
 - Verification: 175/175 unit tests green; build exit 0 (169 before). Browser: deterministic full-cycle probe (event order telegraph->start->end, 270 pull steps = exactly 4.5s, avgDot 1.28 > 0 toward center, 0 telegraph-pull steps, spawn 7.06u from ship >= 6, disk inside arena), wiring probe via vr.advance (eventTally 1/1, fx group at core pos, opacity 0.55), audio cues both played with pan, 0 console. Screenshot .evidence/i59-vortex.png (active spiral, ship inside disk).
 - Result: DONE
 - Follow-up: I60 starfield twinkle + parallax, rock rim-lit material upgrade (ST-060).
+
+## I60 - starfield twinkle + parallax, rim-lit rocks (ST-060)
+
+- Goal: presentation pass (render-only) - per-star twinkle + two-depth parallax in the starfield, and a cool fresnel rim on rock materials. No gameplay logic change.
+- Changed: src/render/starfield.js (rewritten: twinkle shader + parallax group.update), src/render/asteroidRenderer.js (shared rock material onBeforeCompile rim light), src/main.js (stars.update in syncVisuals; stars exposed on __vr).
+- Verification: 175/175 unit tests green (render-only; core unchanged); build exit 0. Browser: twinkle uTime advances with motion and freezes under Reduced Motion; parallax shells exactly at cam x 0.25 / cam x 0.6 (far/near = 2.4); 6 rocks show cool periwinkle rim on silhouettes; 15 draw calls (flat vs wave-4 peak); 0 console errors; no NaN. Screenshot .evidence/i60-starfield.png.
+- Result: DONE
+- Follow-up: I61 bullet trails - additive streak (ST-061).

@@ -138,3 +138,9 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - Spawn safety: disk fully inside the arena (center <= 11u from arena center) and >= 6u from the ship at telegraph. The 1.0s telegraph is longer than the ~0.8s a top-speed ship needs to exit the disk from its center - the pull is always avoidable.
 - Interval 12-20s seeded from the world RNG: deterministic per seed, no overlap possible (single state machine).
 - No changes to lives, scoring, power-ups, or waves; no new damage sources.
+
+## I60 - presentation pass (ST-060)
+
+- Presentation-only iteration: no new tunables in src/core/config.js, no changes to damage, scoring, waves, or power-ups. 175/175 tests unchanged.
+- Starfield twinkle (per-star 0.72-1.0 brightness, 0.5-2.2 rad/s) and parallax offsets (near 0.25x / far 0.6x camera) live in src/render/starfield.js, not config - they are visual, not balance, levers.
+- Rock rim light (fresnel strength 0.5, #5f7fd8) lives in src/render/asteroidRenderer.js via a single shared material onBeforeCompile - one shader program, no per-rock draw-call cost. Golden material is untouched.

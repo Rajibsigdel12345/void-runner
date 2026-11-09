@@ -29,6 +29,20 @@ export function createAsteroidRenderer(scene) {
     ];
   }
   const mat = new THREE.MeshStandardMaterial({ color: 0x8a7f72, roughness: 0.95, metalness: 0.05, flatShading: true });
+  // I60: rim-lit upgrade - cool fresnel edge added on top of the standard lighting.
+  mat.onBeforeCompile = (shader) => {
+    shader.uniforms.uRimColor = { value: new THREE.Color(0x5f7fd8) };
+    shader.uniforms.uRimStrength = { value: 0.5 };
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vRimViewPos;')
+      .replace('#include <project_vertex>', '#include <project_vertex>\nvRimViewPos = -mvPosition.xyz;');
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vRimViewPos;\nuniform vec3 uRimColor;\nuniform float uRimStrength;')
+      .replace('#include <opaque_fragment>',
+        'float vRimF = pow(1.0 - clamp(dot(normalize(-vRimViewPos), normal), 0.0, 1.0), 3.0);\n' +
+        'outgoingLight += uRimColor * (vRimF * uRimStrength);\n' +
+        '#include <opaque_fragment>');
+  };
   // ST-052: golden rock - bright emissive so bloom (High FX) makes it glow.
   const matGold = new THREE.MeshStandardMaterial({ color: 0xffc94d, emissive: 0xffa018, emissiveIntensity: 1.6, roughness: 0.3, metalness: 0.55, flatShading: true });
   const pool = [];

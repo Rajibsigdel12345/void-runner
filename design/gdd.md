@@ -25,6 +25,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 - Entities clamp to arena bounds (no wraparound) - walls are soft: velocity damped
   at the rim so the player can never leave.
 - Camera: third-person, positioned above/behind ship, lerped follow, subtle look-ahead.
+- Starfield (I60, presentation): procedural two-depth star backdrop. Per-star twinkle (0.72-1.0 brightness, 0.5-2.2 rad/s, seeded phase/speed/size) plus two-depth parallax (near 0.25x / far 0.6x camera offset) sell the sense of flying. Both freeze under Reduced Motion. Zero gameplay effect.
 
 ## Player Ship
 - Speed model: acceleration A, max speed Vmax, damping D per second (inertial).
@@ -39,6 +40,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 - Motion: constant drift (per-size base speed) + slow tumble; no steering.
 - Spawn: outside visible area, inside arena; capped concurrent count per wave.
 - Golden variant (ST-052): from wave 3 each rim spawn has a 5% chance to be GOLDEN - a glowing gold rock that flies 35% faster and pays 5x its size score on kill (popup flashes gold, bigger burst). Splits are never golden; golden fragments are normal rocks. Rare reward for chasing a fast target.
+- Rim light (I60, presentation): the rock material carries a cool fresnel edge (strength 0.5, #5f7fd8) over its standard flat-shaded lighting so silhouettes catch a blue rim. Golden rocks are untouched. Presentation only, zero gameplay effect.
 
 ## Mine Drones (ST-054)
 - From wave 5, each wave adds one MINE DRONE: a small red spiky mine that slowly homes on the ship (constant 3.2 u/s, turn rate 1.6 rad/s - always slower than the ship, always dodgeable).
