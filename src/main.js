@@ -14,6 +14,7 @@ import { createScreens } from './render/screens.js';
 import { createSettingsPanel } from './render/settingsPanel.js';
 import { createAudio } from './render/audio.js';
 import { createWaveBanner } from './render/waveBanner.js';
+import { createScorePopups } from './render/scorePopups.js';
 import { STATE } from './core/state.js';
 import { Storage } from './core/storage.js';
 import { CONFIG } from './core/config.js';
@@ -56,6 +57,7 @@ const rockRenders = createAsteroidRenderer(scene);
 const powerupRenders = createPowerupRenderer(scene);
 const shieldRing = createShieldRing(scene);
 const banner = createWaveBanner(document.body);
+const popups = createScorePopups(document.body, camera); // ST-030
 const hud = createHUD(document.body);
 let muted = false; // M key (ST-017); consumed by audio (I27)
 
@@ -112,6 +114,7 @@ window.addEventListener('keydown', (e) => {
   const st = world.game.state;
   if (e.key === 'Enter') {
     newBest = false;
+    popups.clear(); // ST-030: no stale popups across sessions
     if (st === STATE.MENU) world.begin();
     else if (st === STATE.GAME_OVER) world.restart();
   } else if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
@@ -139,7 +142,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -174,6 +177,7 @@ function tick(dt, intent) {
     const cue = SFX_CUES[e.type]; if (cue) audio.sfx(cue, e.data && e.data.pos ? e.data.pos : null);
     if (e.type === 'wave') banner.showWave(e.data.n);
     else if (e.type === 'waveCleared') banner.showCleared(e.data.n);
+    else if (e.type === 'kill') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 }); // ST-030
     if (!motionOff) {
       if (e.type === 'kill') particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xffd27a, speed: 9, life: 0.5 });
       else if (e.type === 'hit') {
@@ -225,6 +229,7 @@ function syncVisuals(dt) {
   camera.position.x += shakeOff.x;
   camera.position.y += shakeOff.y;
   camera.position.z += shakeOff.z;
+  popups.sync(dt, motionOff); // ST-030: after follow-camera + shake
   if (flashA > 0) { // hit/bomb flash decay
     flashA = Math.max(0, flashA - dt * 2.2);
     flashEl.style.opacity = String(flashA);

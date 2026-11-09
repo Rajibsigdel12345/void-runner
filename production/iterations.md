@@ -194,3 +194,9 @@ One entry per iteration. Format:
 - Result: DONE
 - Follow-up: I30 floating score popups (+combo) at kill position.
 
+## I30 - floating score popups on kill (ST-030)
+- Goal: per-kill score feedback - a "+N" popup floating up at the kill position; combo-multiplier kills (x2+) show large in gold; reduced motion shows a fade in place instead of a float.
+- Changed: src/render/scorePopups.js (NEW: pool of 12 fixed DOM divs; add(x,y,text,{big}) starts a 0.9s popup and recycles the oldest when the pool is exhausted; sync(dt, motionOff) ages each active popup, reprojects world (x, 0.5, y) through the live camera every frame (explicit updateMatrixWorld + matrixWorldInverse so it tracks the follow-camera and shake), hides when behind the camera (z>1), floats up 40px over the life (skipped under reduced motion) and fades over the last 45%; clear() empties the pool), src/main.js (popups created with body + camera, drain loop kill event -> popups.add(pos, '+points', big = multiplier >= 2), syncVisuals calls popups.sync after follow-camera + shake, Enter start/restart clears stale popups, __vr += popups).
+- Verification: npm test 111/111 pass (render layer; core unchanged); build exit 0; browser: Enter -> PLAYING; a real bullet kill (killTally 1) produced a "+50" popup at the projected screen position (15px #cfe4ff, mult 1); manual add with big flag rendered 22px gold; .evidence/i30-score-popups.png captured both styles (opacity pinned via stylesheet probe for the still); console 0 errors.
+- Result: DONE
+- Follow-up: I31 game-over stats (kills, max combo, time survived, wave - story table ST-031 row).
