@@ -181,6 +181,12 @@ export const CONFIG = {
       bossDeath: 0.09,        // hit-stop when the boss dies
       bomb: 0.07,             // hit-stop on a bomb blast
     },
+    fovKick: {                // ST-082: dynamic FOV kick on high-impact events (degrees)
+      decay: 5,               // kick decay (1/s, exponential)
+      bomb: 6,                // kick on a bomb blast
+      bossDeath: 8,           // kick when the boss dies
+      max: 12,                // kick clamp
+    },
     particleHigh: 48,         // burst size at FX quality High
     particleLow: 16,          // burst size at FX quality Low
     bloom: {                  // I35: post-fx, High quality only (GDD: "Low disables bloom")
@@ -190,6 +196,13 @@ export const CONFIG = {
     }
   },
 
+  camera: {                // ST-082: dynamic camera feel (fovBase 60 = pre-ST-082 hardcode)
+    fovBase: 60,           // resting vertical FOV (degrees)
+    fovSpeed: 4,           // extra FOV at full ship speed (speed-line feel)
+    lookAhead: 4,          // camera look-ahead along ship facing (world units) at rest
+    lookAheadSpeed: 2,     // extra look-ahead at full speed (lean into the motion)
+    fovDamp: 8,            // FOV ease rate (1/s)
+  },
   storage: {
     bestKey: 'voidrunner.best',
     settingsKey: 'voidrunner.settings',

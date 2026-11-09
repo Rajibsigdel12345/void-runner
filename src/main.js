@@ -13,7 +13,7 @@ import { createPowerupRenderer } from './render/powerupMesh.js';
 import { createShieldRing } from './render/shieldRing.js';
 import { createVortexFx } from './render/vortexFx.js'; // ST-059
 import { createParticles } from './render/particles.js';
-import { createShake, createPunch } from './core/fx.js'; // ST-081
+import { createShake, createPunch, createFovKick } from './core/fx.js'; // ST-081/ST-082
 import { createHUD } from './render/hud.js';
 import { createReticle } from './render/reticle.js';
 import { createScreens } from './render/screens.js';
@@ -47,7 +47,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x04060f);
 scene.fog = new THREE.Fog(0x04060f, 60, 240);
 
-const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 400);
+const camera = new THREE.PerspectiveCamera(CONFIG.camera.fovBase, window.innerWidth / window.innerHeight, 0.1, 400); // ST-082: base FOV from config
 
 // I35: bloom post-fx - composer path for High quality, direct render for Low (GDD line 74).
 const bloom = createBloom(renderer, scene, camera);
@@ -188,6 +188,7 @@ const shake = createShake({ master: CONFIG.fx.shake, decay: CONFIG.fx.shakeDecay
 const shakeOff = { x: 0, y: 0, z: 0 };
 const punch = createPunch({ decay: CONFIG.fx.punch.decay, amplitude: CONFIG.fx.punch.amplitude }); // ST-081: directed camera jolt
 let hitStop = 0; // ST-081: sim-freeze seconds remaining (render loop; rendering keeps going)
+const fovKick = createFovKick({ decay: CONFIG.fx.fovKick.decay, max: CONFIG.fx.fovKick.max }); // ST-082: dynamic FOV kick
 let simT = 0; // sim-clock for timed visuals (invuln blink)
 const flashEl = document.getElementById('flash'); // hit/bomb flash overlay (index.html)
 let flashA = 0;
@@ -256,7 +257,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, bossMesh, bossHealth, enemyBulletRenders, stars, vortexFx, fpsMeter, debugOverlay, adaptive, punch, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, bossMesh, bossHealth, enemyBulletRenders, stars, vortexFx, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -353,7 +354,7 @@ function tick(dt, intent) {
       else if (e.type === 'mineExplode') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xff5a3c, speed: 10, life: 0.5 }); shake.trigger(0.4); flashA = Math.min(0.8, flashA + 0.25); } // ST-054
       else if (e.type === 'bossSpawn') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xb18cff, speed: 8, life: 0.7 }); shake.trigger(0.7); flashA = Math.min(0.8, flashA + 0.4); } // ST-055
       else if (e.type === 'bossRing') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.6), color: 0x9d7bff, speed: 7, life: 0.4 }); // ST-055
-      else if (e.type === 'bossDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount * 2, color: 0xfff0b8, speed: 14, life: 0.8 }); shake.trigger(1.0); flashA = Math.min(0.8, flashA + 0.5); hitStop = Math.max(hitStop, CONFIG.fx.hitStop.bossDeath); punch.trigger({ x: 0, y: 0.7, z: 0.5 }, 1.0); } // ST-055/ST-081
+      else if (e.type === 'bossDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount * 2, color: 0xfff0b8, speed: 14, life: 0.8 }); shake.trigger(1.0); flashA = Math.min(0.8, flashA + 0.5); hitStop = Math.max(hitStop, CONFIG.fx.hitStop.bossDeath); punch.trigger({ x: 0, y: 0.7, z: 0.5 }, 1.0); fovKick.trigger(CONFIG.fx.fovKick.bossDeath); } // ST-055/ST-081/ST-082
       else if (e.type === 'bossFire') particles.burst(e.data.pos.x, e.data.pos.y, { count: 5, color: 0xff6a4a, speed: 4, life: 0.25 }); // ST-056 muzzle
       else if (e.type === 'mineFire') particles.burst(e.data.pos.x, e.data.pos.y, { count: 4, color: 0xff5a3c, speed: 3, life: 0.2 }); // ST-056 muzzle
       else if (e.type === 'powerup' && e.data.type === 'overdrive') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xff5ad8, speed: 8, life: 0.5 }); flashA = Math.min(0.8, flashA + 0.15); } // ST-057 pickup flash
@@ -367,6 +368,7 @@ function tick(dt, intent) {
         shake.trigger(CONFIG.fx.shakeBomb);
         flashA = Math.min(0.8, flashA + 0.35);
         hitStop = Math.max(hitStop, CONFIG.fx.hitStop.bomb); punch.trigger({ x: 0, y: 0.7, z: 0.5 }, 0.8); // ST-081
+        fovKick.trigger(CONFIG.fx.fovKick.bomb); // ST-082
       } else if (e.type === 'vortexTelegraph') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.4), color: 0x9d7bff, speed: 2, life: 0.8 }); // ST-059 telegraph wisp
     }
     if (e.type === 'vortexTelegraph') { vortexFx.onTelegraph(e.data.pos); } // ST-059 (state always advances; particles above are motion-gated)
@@ -394,6 +396,7 @@ function tick(dt, intent) {
   simT += dt;
   shake.step(dt);
   punch.step(dt); // ST-081: punch decays on every tick
+  fovKick.step(dt); // ST-082: FOV kick decays on every tick
 }
 
 const hudOpts = { best: 0 };
@@ -428,14 +431,21 @@ function syncVisuals(dt) {
 
   const ship = world.ship;
   const f = ship.forward(shipFwd); // ST-074: scratch reuse (no per-frame alloc)
+  const spdFrac = Math.min(1, ship.speed / CONFIG.ship.maxSpeed); // ST-082: 0..1 speed fraction
+  const ahead = CONFIG.camera.lookAhead + CONFIG.camera.lookAheadSpeed * spdFrac; // ST-082: speed-scaled look-ahead
   camPos.x = damp(camPos.x, ship.pos.x, 5, dt);
   camPos.y = damp(camPos.y, 9, 5, dt);
   camPos.z = damp(camPos.z, ship.pos.y + 13, 5, dt);
-  camLook.x = damp(camLook.x, ship.pos.x + f.x * 4, 6, dt);
+  camLook.x = damp(camLook.x, ship.pos.x + f.x * ahead, 6, dt); // ST-082: speed-scaled look-ahead
   camLook.y = damp(camLook.y, 0, 6, dt);
-  camLook.z = damp(camLook.z, ship.pos.y + f.y * 4, 6, dt);
+  camLook.z = damp(camLook.z, ship.pos.y + f.y * ahead, 6, dt); // ST-082: speed-scaled look-ahead
   camera.position.set(camPos.x, camPos.y, camPos.z);
   camera.lookAt(camLook.x, camLook.y, camLook.z);
+  const targetFov = CONFIG.camera.fovBase + CONFIG.camera.fovSpeed * spdFrac + fovKick.value(); // ST-082: base + speed + kick
+  if (Math.abs(targetFov - camera.fov) > 0.01) { // only touch the projection when it actually moves
+    camera.fov = damp(camera.fov, targetFov, CONFIG.camera.fovDamp, dt);
+    camera.updateProjectionMatrix();
+  }
   shake.offset(shakeOff); // ST-025: apply shake after follow-camera (offset() writes in place)
   punch.offset(shakeOff); // ST-081: punch composes on top of shake (offset() adds in place)
   camera.position.x += shakeOff.x;

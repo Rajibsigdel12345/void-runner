@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E7 (extended content/UX/hardening, I51-I100)
-- current_story: ST-081
-- current_iteration: I81
+- current_story: ST-082
+- current_iteration: I82
 - branch: main
-- notes: I81 committed (hit-stop + camera punch: pure-core punch envelope, bossDeath 0.09s / bomb 0.07s sim-freeze with clock reset so no catch-up, motion-gated, punch composes after shake; 228/228 + build + browser-measured plateaus 0.097/0.10s). Next: dynamic FOV kick (bomb/boss) + look-ahead tuning (ST-082).
+- notes: I82 committed (dynamic FOV: kick 6/8 deg on bomb/boss + fovSpeed 4 at full speed; look-ahead 4 -> 6 units with speed; camera + fovKick exposed on __vr; 232/232 + build + browser-verified peaks 63.8/65.13, rest offset 4.00). Next: I83 audio - wave-clear jingle, boss stinger, near-miss swish, ambience duck (ST-083).

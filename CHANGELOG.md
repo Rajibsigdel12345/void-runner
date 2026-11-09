@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I82: dynamic FOV + speed-scaled look-ahead (ST-082) - FOV kick on bomb/boss death (6/8 deg) plus a speed-proportional FOV boost and look-ahead that leans the camera into the motion; all config-driven (232/232)
 - I81: hit-stop + camera punch (ST-081) - boss death and bomb blast briefly freeze the sim (0.09/0.07s, no catch-up) while the camera gets a directed punch on top of shake; pure-core punch envelope, 5 new unit tests, browser-measured freeze plateaus (228/228)
 - I80: debug overlay ?dbg=1 (ST-080) - developer-only live HUD (fps/frame-ms, GPU draw calls + tris, entity counts vs pool caps, game state); opt-in, ~0 cost when off (223/223)
 - I79: storage versioning + corruption guards (ST-079) - best/settings/scores read through a version-validating, migratable path; future/corrupt versions fall back to safe defaults while the legacy shape still loads (223/223)

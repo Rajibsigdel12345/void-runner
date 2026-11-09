@@ -57,3 +57,21 @@ export function createPunch(cfg) {
   }
   return { trigger, step, offset, magnitude: () => mag };
 }
+
+// ST-082: dynamic FOV kick. Pure core (DOM-free, three-free): a brief FOV
+// widening (degrees) on high-impact events (bomb, boss death). The render
+// layer adds value() to the base FOV and eases camera.fov toward it.
+export function createFovKick(cfg) {
+  let mag = 0; // current kick (degrees)
+
+  function trigger(deg) {
+    if (deg <= 0) return;
+    mag = Math.min(cfg.max, Math.max(mag, deg)); // max-stacking, clamped at max
+  }
+  function step(dt) {
+    if (mag <= 0) return;
+    mag *= Math.exp(-cfg.decay * dt);
+    if (mag < 0.05) mag = 0; // settle (0.05 deg is sub-perceptible)
+  }
+  return { trigger, step, value: () => mag };
+}

@@ -296,3 +296,9 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - Feel tuning added (no existing balance numbers changed): fx.hitStop {bossDeath 0.09s, bomb 0.07s} and fx.punch {decay 12/s, amplitude 2.0 world units, direction (0, 0.7, 0.5)}.
 - Rationale: hit-stop stays under 100ms so it reads as weight without stalling the arcade pace; the boss death gets a longer freeze than the bomb (0.09 vs 0.07) since it is the headline moment of a run. Punch decay 12/s keeps the jolt under ~0.2s; amplitude 2.0 is a visible jolt at the current camera distance without disorienting. Both ride the existing reduced-motion gate (fired inside the !motionOff FX block), and the freeze only applies while PLAYING.
 - 228/228 (5 new, pure-core punch envelope).
+
+## I82 - dynamic FOV (kick + speed) + speed-scaled look-ahead (ST-082)
+
+- Feel tuning added (no combat/economy numbers changed): camera {fovBase 60 (unchanged from hardcode), fovSpeed 4, lookAhead 4 (unchanged base), lookAheadSpeed 2, fovDamp 8} and fx.fovKick {decay 5/s, bomb 6 deg, bossDeath 8 deg, max 12 deg}.
+- Rationale: +4 deg at full speed is a modest widening that reads as velocity without distorting aim; the look-ahead grows 4 -> 6 units with speed so the camera anticipates where the ship is going rather than where it is (dodge readability at speed). Kick 6/8 deg is clearly bigger than the speed boost (4) so impacts still dominate the frame, and it decays in ~0.5s so it never masks the follow. All values are config-driven for future tuning.
+- 232/232 (4 new, pure-core fovKick envelope). Browser-verified peaks/offsets as logged in iterations I82.

@@ -1,7 +1,7 @@
 // ST-025: screen-shake envelope tests
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createShake, createPunch } from '../src/core/fx.js';
+import { createShake, createPunch, createFovKick } from '../src/core/fx.js';
 import { RNG } from '../src/core/rng.js';
 
 const CFG = { master: 1, decay: 6, amplitude: 0.5 };
@@ -107,4 +107,38 @@ test('punch: offset writes dir * mag * amplitude and composes with shake', () =>
   assert.ok(Math.abs(c.x - sx) < 1e-9);
   assert.ok(Math.abs(c.y - (sy + 1.4)) < 1e-9);
   assert.ok(Math.abs(c.z - (sz + 1.0)) < 1e-9);
+});
+
+// ST-082: dynamic FOV kick envelope tests
+const FOVKICK_CFG = { decay: 5, max: 12 };
+
+test('fovKick: idle -> zero value', () => {
+  const k = createFovKick(FOVKICK_CFG);
+  assert.equal(k.value(), 0);
+});
+
+test('fovKick: trigger sets value, max-stacks, clamps at max', () => {
+  const k = createFovKick(FOVKICK_CFG);
+  k.trigger(6);
+  assert.ok(Math.abs(k.value() - 6) < 1e-9);
+  k.trigger(4);
+  assert.ok(Math.abs(k.value() - 6) < 1e-9); // max-stacking: a lower trigger never reduces
+  k.trigger(20);
+  assert.equal(k.value(), 12); // clamped at cfg.max
+});
+
+test('fovKick: zero/negative deg is ignored', () => {
+  const k = createFovKick(FOVKICK_CFG);
+  k.trigger(0);
+  k.trigger(-3);
+  assert.equal(k.value(), 0);
+});
+
+test('fovKick: exponential decay settles to 0', () => {
+  const k = createFovKick(FOVKICK_CFG);
+  k.trigger(6);
+  k.step(0.5);
+  assert.ok(Math.abs(k.value() - 6 * Math.exp(-2.5)) < 1e-6);
+  k.step(2);
+  assert.equal(k.value(), 0);
 });
