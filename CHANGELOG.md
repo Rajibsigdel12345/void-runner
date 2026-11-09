@@ -45,3 +45,4 @@
 - I38: code review pass (full source, cgs-code-review contract) - verdict APPROVE, security clean; magnet pull acceleration moved to config as powerup.magnetAccel (behavior identical); tab-blur auto-pause + WebGL context-loss recovery deferred to I43.
 - I39: balance pass 2 - wave speed cap 1.9 -> 2.1 (ramp now runs to wave 18; counterweights the I34 sustain buffs); GDD + balance notes updated, wave cap test made config-derived.
 - I40: QA plan (production/qa-plan.md) - risk ranking, test matrix, regression suites A/B/C, slice-gate entry/exit criteria; Suite A + B executed green (critical path 8/8, combo math verified in-situ).
+- I41: playtest report (scripted self-play, 2 skill profiles) - wave-1 stall gap (F1) + hit-clustering watch (F2) flagged; no bugs found.
