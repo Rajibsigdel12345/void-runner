@@ -11,6 +11,7 @@ const PU_STYLE = {
   spread: { label: 'SPREAD', glyph: '\u2234', color: '#ffa657' },
   shield: { label: 'SHIELD', glyph: '\u25CF', color: '#53d8ff' },
   magnet: { label: 'MAGNET', glyph: '\u222A', color: '#7dff9e' },
+  overdrive: { label: 'OVERDRIVE', glyph: '\u2605', color: '#ff6ae2' },
 };
 
 export function createHUD(root) {

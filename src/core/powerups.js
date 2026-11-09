@@ -6,15 +6,15 @@
 import { CONFIG } from './config.js';
 import { v2, v2Len } from './math.js';
 
-export const POWERUP_TYPES = Object.freeze(['rapid', 'spread', 'shield', 'bomb', 'magnet']);
-const TIMED = Object.freeze(['rapid', 'spread', 'shield', 'magnet']);
+export const POWERUP_TYPES = Object.freeze(['rapid', 'spread', 'shield', 'bomb', 'magnet', 'overdrive']);
+const TIMED = Object.freeze(['rapid', 'spread', 'shield', 'magnet', 'overdrive']);
 
 export class PowerUpField {
   constructor(rng, cfg = CONFIG) {
     this.rng = rng;
     this.cfg = cfg;
     this.drops = [];
-    this.timeLeft = { rapid: 0, spread: 0, shield: 0, magnet: 0 };
+    this.timeLeft = { rapid: 0, spread: 0, shield: 0, magnet: 0, overdrive: 0 };
     this.shieldHits = 0; // hits absorbed while the shield timer is alive
     this.pendingInstant = null; // 'bomb' queued for World
     this.nextId = 1;
@@ -119,7 +119,7 @@ export class PowerUpField {
 
   clear() {
     this.drops.length = 0;
-    this.timeLeft = { rapid: 0, spread: 0, shield: 0, magnet: 0 };
+    this.timeLeft = { rapid: 0, spread: 0, shield: 0, magnet: 0, overdrive: 0 };
     this.shieldHits = 0;
     this.pendingInstant = null;
   }

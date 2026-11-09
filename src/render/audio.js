@@ -21,6 +21,8 @@ const CUES = {
   // ST-056 enemy bolts: low saw zap (boss), soft tick (mine)
   bossFire: { type: 'sawtooth', f0: 520, f1: 180, dur: 0.18, gain: 0.20, min: 0.12 },
   mineFire: { type: 'square',   f0: 340, f1: 220, dur: 0.10, gain: 0.12, min: 0.1,  noise: 0.08 },
+  // ST-057 overdrive pickup: rising boost sweep
+  overdrive: { type: 'triangle', f0: 280, f1: 920, dur: 0.28, gain: 0.22, min: 0.15 },
   bomb:      { type: 'sine',     f0: 90,  f1: 40,  dur: 0.5,  gain: 0.7,  min: 0.1,  noise: 0.4 },
   wave:      { type: 'sine',     f0: 523, f1: 659, dur: 0.25, gain: 0.16, min: 0.1 },
   // ST-029 stingers: rising arpeggio on wave clear, falling motif on game over

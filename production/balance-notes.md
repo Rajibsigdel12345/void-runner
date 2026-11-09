@@ -113,3 +113,11 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
   they fire when kited/deflected, which is intentional: the bolt threat is on sustained dodging.
 - 1 bolt = 1 life, same 1.6s invuln (F2 watch item now sharper: dense bolts + rocks + rings).
 - Bullets cannot be shot down (out of scope; note as follow-up candidate).
+## I57 - overdrive (ST-057)
+
+- Effect: 2x score for 6s (kills, combo multipliers, flat near-miss bonuses).
+- Drop rate: per-type drop prob 25% -> 16.7% (six types now); base dropChance/kill unchanged.
+- Math: overdriveMult is multiplicative AFTER the combo multiplier - kill = floor(base * comboMult * odMult); flat bonus = floor(pts * odMult).
+- Refresh: re-pickup resets the timer to a full 6s; timers never stack.
+- Boundary: a kill resolved in the same step the timer hits 0 still pays doubled (world syncs overdriveMult before powerup timers decay).
+- No new hazards; no changes to lives, waves, or other power-ups.

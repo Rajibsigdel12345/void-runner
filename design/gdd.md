@@ -78,10 +78,12 @@ multipliers, and grab power-ups. Survive as long as you can.
 - SHIELD (cyan): absorbs 1 hit; 12s or until hit
 - BOMB   (red): instantly shatters all on-screen asteroids (counts as kills, feeds combo)
 - MAGNET (green): attracts power-ups + slight bullet homing for 6s
+- OVERDRIVE (magenta): all score x2 for 6s (kills, combo multipliers, near-miss bonuses) - hex prism drop
 Stacks: each has its own timer; grabbing the same type refreshes its timer.
 
 ## Scoring & Records
 - Score = sum(kill base score x current multiplier).
+- Overdrive (ST-057): while OVERDRIVE is active, all points earned are x2 (applied after the combo multiplier).
 - Near-miss (ST-053): a rock skimming within 2.6u of the ship (no hit) pays a flat +15 once per approach (swish SFX, small popup, subtle cyan wisp). Fragments/splits get 0.3s immunity so a kill near the ship cannot farm graze points. Graze is not a kill: it never extends the combo chain.
 - Best score persisted to localStorage key `voidrunner.best` (int).
 - Game over screen shows: final score, best (NEW BEST! flag), kills, max combo, wave reached, time survived.

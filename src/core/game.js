@@ -70,6 +70,7 @@ export class World {
     if (intent.firing) this.fireWeapon();
     this.weapons.step(dt, this.powerups.active('magnet'), this.field.rocks);
     this.field.step(dt, this.waves.inwardAccel); // ST-051 inward modifier
+    this.scoreKeeper.overdriveMult = this.powerups.active('overdrive') ? this.cfg.powerup.types.overdrive.mult : 1; // ST-057
     const pickups = this.powerups.step(dt, this.ship);
     for (const pk of pickups) this.emit('powerup', { type: pk.type, pos: pk.pos });
     const inst = this.powerups.takeInstant();
@@ -133,7 +134,7 @@ export class World {
       if (!this.field.shatter(r.id)) continue;
       const base = this.cfg.asteroid.sizes[r.size].score * (r.golden ? this.cfg.asteroid.golden.scoreMult : 1); // ST-052
       const points = this.scoreKeeper.kill(base, this.time);
-      this.emit('kill', { pos: { x: r.pos.x, y: r.pos.y }, size: r.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, golden: !!r.golden });
+      this.emit('kill', { pos: { x: r.pos.x, y: r.pos.y }, size: r.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), golden: !!r.golden });
       const drop = this.powerups.maybeDrop({ x: r.pos.x, y: r.pos.y });
       if (drop) this.emit('powerupDrop', { type: drop.type, pos: { x: drop.pos.x, y: drop.pos.y } });
     }
@@ -150,7 +151,7 @@ export class World {
       const base = this.cfg.asteroid.sizes[rock.size].score * (rock.golden ? this.cfg.asteroid.golden.scoreMult : 1); // ST-052
       this.field.destroy(id);
       const points = this.scoreKeeper.kill(base, this.time);
-      this.emit('kill', { pos: { x: rock.pos.x, y: rock.pos.y }, size: rock.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, golden: !!rock.golden });
+      this.emit('kill', { pos: { x: rock.pos.x, y: rock.pos.y }, size: rock.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), golden: !!rock.golden });
       const drop = this.powerups.maybeDrop({ x: rock.pos.x, y: rock.pos.y });
       if (drop) this.emit('powerupDrop', { type: drop.type, pos: { x: drop.pos.x, y: drop.pos.y } });
     }
@@ -196,7 +197,7 @@ export class World {
       this.mines.destroy(hit.id);
       const points = this.scoreKeeper.kill(this.cfg.mine.score, this.time);
       this.emit('kill', { pos: { x: hit.pos.x, y: hit.pos.y }, size: 'mine', points,
-        combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, mine: true });
+        combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), mine: true });
       this.emit('mineExplode', { pos: { x: hit.pos.x, y: hit.pos.y } });
     }
     this.weapons.compact();
@@ -273,7 +274,7 @@ export class World {
     const px = this.boss.pos.x, py = this.boss.pos.y;
     const pts = this.scoreKeeper.kill(b.score, this.time);
     this.emit('kill', { pos: { x: px, y: py }, size: 'boss', points: pts,
-      combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, boss: true });
+      combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), boss: true });
     for (let i = 0; i < b.splitCount; i++) this.field.spawn('M', 1, { x: px, y: py });
     this.emit('bossDeath', { pos: { x: px, y: py } });
     this.boss = null;

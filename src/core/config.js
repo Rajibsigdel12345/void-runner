@@ -127,7 +127,8 @@ export const CONFIG = {
       spread: { dur: 8, count: 3, arc: 0.35 },
       shield: { dur: 12 },
       bomb:   { dur: 0 },
-      magnet: { dur: 6 }
+      magnet: { dur: 6 },
+      overdrive: { dur: 6, mult: 2 } // ST-057: 2x score for 6s
     }
   },
 

@@ -389,3 +389,11 @@ One entry per iteration. Format:
 - Verification: 159/159 + build 0 (was 154). Browser: boss bolt event + SFX on the 2.2s cadence (probe deltas), pooled orb visible; bolt contact costs a life (999->998) and grants invuln; parked mine at 6.5u fires in range (mineFire + SFX deltas) while out-of-range cadence stays silent (unit); mine bolt contact costs a life (998->997); 3 bolts in frame, clean HUD. 0 console errors/warnings. Screenshot .evidence/i56-enemy-bullets.png.
 - Result: DONE
 - Follow-up: I57 overdrive power-up (ST-057) - 2x score 6s, magenta hex drop.
+
+## I57 - overdrive power-up (ST-057)
+
+- Goal: Overdrive power-up - magenta hex prism drop; 2x all score for 6s (kills + combo multipliers + near-miss bonuses).
+- Changed: src/core/config.js, src/core/score.js, src/core/powerups.js, src/core/game.js, src/render/powerupMesh.js, src/render/hud.js, src/render/scorePopups.js, src/render/audio.js, src/main.js, tests/overdrive.test.js (new: 5 tests, seeds 62-66).
+- Verification: 164/164 unit tests green; build exit 0 (159 tests before). Browser deterministic vr.advance probes: pickup (powerup event + sweep SFX + OVERDRIVE HUD chip), 6s timer, refresh no-stack, expiry to 1x, double-kill probe (baseline +100 vs +200 with OD active), 0 console errors/warnings. Screenshot .evidence/i57-overdrive.png.
+- Result: DONE
+- Follow-up: I58 endless difficulty curve (ST-058) - waves 10+ keep scaling with capped rates + banner.

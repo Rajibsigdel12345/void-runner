@@ -1,7 +1,7 @@
 ﻿// Void Runner - power-up rendering (ST-020). Pooled meshes, shared geo/materials per type.
 // Distinct silhouette + color per type (I064 adds colorblind glyph decals):
 //   rapid = octahedron/yellow, spread = cone/orange, shield = torus/cyan,
-//   bomb = cube/red, magnet = sphere/green.
+//   bomb = cube/red, magnet = sphere/green, overdrive = hex prism/magenta (ST-057).
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 
@@ -11,6 +11,7 @@ const TYPES = {
   shield: { color: 0x53d8ff, emissive: 0x0e5a75, make: () => new THREE.TorusGeometry(0.38, 0.12, 8, 20) },
   bomb:   { color: 0xff5252, emissive: 0x751414, make: () => new THREE.BoxGeometry(0.58, 0.58, 0.58) },
   magnet: { color: 0x69f0ae, emissive: 0x0f5c37, make: () => new THREE.SphereGeometry(0.42, 16, 12) },
+  overdrive: { color: 0xff4dd8, emissive: 0x6d0f52, make: () => new THREE.CylinderGeometry(0.42, 0.42, 0.3, 6) },
 };
 
 export function createPowerupRenderer(scene) {
