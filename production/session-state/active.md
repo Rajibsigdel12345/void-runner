@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E7 (extended content/UX/hardening, I51-I100)
-- current_story: ST-097
-- current_iteration: I97
+- current_story: ST-098
+- current_iteration: I98
 - branch: main
-- notes: I97 done (E7 milestone review: ON-TRACK/substantially complete; 4/5 gate criteria met, 100th-iteration + closing regression complete at I100; no blockers; proceed to I98 release-checklist then I99/100 wrap, then Blender pass; docs-only, 233/233 + build green). Next: I98 release-checklist (ST-098).
+- notes: I98 done (release checklist v2/E7: dist verified clean - 0 console errors/warnings on the built artifact, controlled gameplay smoke no NaN, full bloom frame; ship verdict SHIP-READY for the code side; the 100th iteration + closing regression re-run complete at I100; Blender pass + human playtest tracked, non-blocking; docs + verification, 233/233 + build green). Next: I99 regression-suite closing re-run (ST-099).
