@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I63: engine flame (ST-063) - thrust-reactive rear plume (orange + hot core) that scales with thrust and flickers over time; hidden when coasting; steady under Reduced Motion; presentation-only, 175/175.
 - I62: shield pulse (ST-062) - active shield now breathes (scale + opacity) with a repeating expanding additive ring; reduced-motion freezes to a static ring; presentation-only, 175/175.
 - I61: bullet trails (ST-061) - additive comet streak behind each player bullet (head-bright -> tail-fade), oriented along the shot; pooled, zero per-frame allocs; presentation-only, 175/175.
 - I60: starfield twinkle + parallax and rim-lit rock material (ST-060) - per-star twinkle shader, two-depth parallax offsets (0.25/0.6 x camera), cool fresnel rim on rocks; presentation-only, 175/175.

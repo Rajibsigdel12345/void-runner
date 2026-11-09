@@ -32,6 +32,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 - Aim: ship Y-rotation eases toward the aim point; firing direction = aim direction.
 - Fire: base cadence 5.5 shots/s; bullet speed 34 u/s; bullet lifetime 1.1s.
 - Bullet trails (I61, presentation): each shot carries a short additive comet streak (1.15u, head-bright -> tail-fade) laid flat in the arena along the shot's velocity. Visual feedback only; no gameplay effect.
+- Engine flame (I63, presentation): a rear additive plume (orange + hot core) that appears and scales with thrust magnitude and flickers over sim time; hidden when coasting; steady (no flicker) under Reduced Motion. Visual feedback only; no gameplay effect.
 - Lives: 3. On hit: -1 life, 1.6s invulnerability (blink), knockback, screen shake.
 - Game over at 0 lives.
 

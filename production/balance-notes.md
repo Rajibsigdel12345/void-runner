@@ -156,3 +156,9 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - Presentation-only: no config tunables, no changes to shield duration, absorption, damage, or scoring. 175/175 tests unchanged.
 - Breathing period (2.1s) and pulse-ring cycle (1.6s) live in src/render/shieldRing.js, not config - visual levers, not balance.
 - Cost: one extra additive ring mesh, drawn only while the shield is active (occasional, short-lived). Verified breathing (scale/opacity oscillate over time) and a static ring under Reduced Motion (0.5 opacity, scale 1); 0 console.
+
+## I63 - engine flame (ST-063)
+
+- Presentation-only: no config tunables, no changes to acceleration, max speed, fire cadence, damage, scoring, or waves. 175/175 tests unchanged.
+- Flame geometry (1.5u outer / 1.0u core), width (0.3u outer) and the flicker sines (0.8 + 0.2*sin(t*40) + 0.1*sin(t*77)) live in src/render/shipMesh.js, not config - visual levers, not balance.
+- Cost: two extra additive cone meshes (plume + hot core), drawn only while thrusting (thrustMag > 0.05), so they are hidden when the ship coasts. Open-ended cones, depthWrite off, one material each; zero per-frame allocs.

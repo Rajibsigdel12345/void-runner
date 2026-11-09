@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E7 (extended content/UX/hardening, I51-I100)
-- current_story: ST-063
-- current_iteration: I63
+- current_story: ST-064
+- current_iteration: I64
 - branch: main
-- notes: I62 committed (shield pulse; 175/175 + build + browser). Next: ship engine flame - thrust flicker (ST-063).
+- notes: I63 committed (engine flame; 175/175 + build + browser). Next: balance pass 3 (new content pacing) + doc (ST-064).

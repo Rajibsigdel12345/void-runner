@@ -437,3 +437,11 @@ One entry per iteration. Format:
 - Verification: 175/175 unit tests green (render-only; core unchanged); build exit 0. Browser: shield active -> ring visible, scale/opacity oscillate over time (breathing), expanding pulse ring visible (two concentric cyan rings in shot); Reduced Motion -> static ring (opacity 0.5, scale 1, no breathing); 0 console errors. Screenshot .evidence/i62-shield-pulse.png.
 - Result: DONE
 - Follow-up: I63 ship engine flame - thrust flicker (ST-063).
+
+## I63 - ship engine flame (thrust flicker) (ST-063)
+
+- Goal: presentation pass (render-only) - a rear engine flame that responds to the player's thrust: it appears and scales with thrust magnitude, flickers (two incommensurate sines) over sim time, and is hidden when the ship coasts; steady (no flicker) under Reduced Motion.
+- Changed: src/render/shipMesh.js (additive rear plume + hot-core cones, apex-anchored so it only grows backward, thrust-reactive scale + flicker + motion flag; flame exposed on the mesh), src/main.js (pass clamped thrust magnitude from input.state.thrust to shipMesh.sync; shipFlame/shipFlameCore on __vr).
+- Verification: 175/175 unit tests green (render-only; core unchanged); build exit 0. Browser: thrust ON -> flame + core visible (scale sx=1.0, sz flickers, ~0.72 sampled); NEUTRAL (thrust 0) -> flame + core hidden; Reduced Motion -> flame steady (identical scale across two sim times, no flicker); 0 console errors; no NaN. Screenshot .evidence/i63-engine-flame.png (orange plume trailing the ship's rear).
+- Result: DONE
+- Follow-up: I64 balance pass 3 (new content pacing) + doc (ST-064).
