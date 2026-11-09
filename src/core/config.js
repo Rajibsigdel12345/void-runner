@@ -38,7 +38,7 @@ export const CONFIG = {
     growth: 1,
     maxConcurrentGrowth: 2,
     speedPerWave: 0.06, // speedMult = 1 + n*speedPerWave (capped)
-    speedCap: 1.9,
+    speedCap: 2.1,      // I39: 1.9 -> 2.1, ramp now runs to wave 18 (balance-notes I39)
     maxConcurrentCap: 24,
     intermission: 2.2,
     spawnMinPlayerDist: 8 // I34: rim spawn keeps at least this far from the ship

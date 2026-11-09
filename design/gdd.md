@@ -40,7 +40,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 - Spawn: outside visible area, inside arena; capped concurrent count per wave.
 
 ## Waves & Difficulty
-- Wave n: startAsteroids = 4 + n, maxConcurrent = 6 + 2n (cap 24), speedMult = 1 + 0.06n (cap 1.9).
+- Wave n: startAsteroids = 4 + n, maxConcurrent = 6 + 2n (cap 24), speedMult = 1 + 0.06n (cap 2.1).
 - Wave advances when all spawned asteroids for that wave are destroyed.
 - 2.2s intermission between waves with "WAVE n" banner.
 

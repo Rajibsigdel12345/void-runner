@@ -26,14 +26,17 @@ test('waves: wave 1 spawns base+growth rocks at ramped speed', () => {
 test('waves: speed and concurrency ramp with wave number (capped)', () => {
   const { field, dir } = setup();
   dir.step(DT); // wave 1
+  // I39: derive the first wave where the speed ramp actually hits the cap,
+  // so this probe stays correct if speedPerWave/speedCap get retuned.
+  const capWave = Math.ceil((CONFIG.wave.speedCap - 1) / CONFIG.wave.speedPerWave) + 1;
   // force-clear to advance
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 60; i++) {
     field.clear();
     const ev = dir.step(DT);
-    if (dir.wave >= 17) break;
+    if (dir.wave >= capWave) break;
     if (ev.waveCleared === 0 && field.count > 0 && dir.toSpawn === 0) field.clear();
   }
-  assert.ok(dir.wave >= 17, `reached wave ${dir.wave}`);
+  assert.ok(dir.wave >= capWave, `reached wave ${dir.wave}`);
   assert.ok(Math.abs(dir.speedMult - CONFIG.wave.speedCap) < 1e-9, 'speed capped');
   assert.equal(dir.concurrentLimit, CONFIG.wave.maxConcurrentCap, 'concurrency capped');
 });
