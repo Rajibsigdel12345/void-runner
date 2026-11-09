@@ -129,10 +129,15 @@ function applySettings(s) {
 }
 applySettings(liveSettings);
 // ST-026: settings panels (menu + pause) - after storage/applySettings (TDZ order).
-const menuSettings = createSettingsPanel(storage, applySettings);
-const pauseSettings = createSettingsPanel(storage, applySettings);
+let fxPreviewFn = null; // ST-067: live FX preview, wired once particles exist
+const menuSettings = createSettingsPanel(storage, applySettings, (tier) => { if (fxPreviewFn) fxPreviewFn(tier); });
+const pauseSettings = createSettingsPanel(storage, applySettings, (tier) => { if (fxPreviewFn) fxPreviewFn(tier); });
 const screens = createScreens(document.body, { menu: menuSettings, pause: pauseSettings });
 const particles = createParticles(scene);
+fxPreviewFn = (tier) => { // ST-067: show the new tier immediately (arena center, behind the panel)
+  const n = tier === 'high' ? CONFIG.fx.particleHigh : CONFIG.fx.particleLow;
+  particles.burst(0, 0, { count: n, color: 0x7fd0ff, speed: 6, life: 0.7 });
+};
 // Screen shake (ST-025): core envelope, render layer applies the camera offset.
 const shake = createShake({ master: CONFIG.fx.shake, decay: CONFIG.fx.shakeDecay, amplitude: CONFIG.fx.shakeAmplitude }, new RNG(0x57ab));
 const shakeOff = { x: 0, y: 0, z: 0 };

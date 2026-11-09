@@ -189,3 +189,10 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - Added a persistent top-5 high-score board: localStorage key `voidrunner.scores`, payload {version, list:[{score, wave, kills}]}. Entries carry no timestamps (core determinism). Every read is guarded: corrupt JSON, non-array payloads, and malformed rows are filtered out; the board never throws (private-browsing safe).
 - `Storage.getHighScores()` returns a validated descending list capped at `storage.highScoresMax` (5, CONFIG). `Storage.recordScore(entry)` returns {list, rank, newBest}: rank 1..maxScores or 0 when off the board; score <= 0 never touches the board; a throwing store degrades to in-memory result without an exception.
 - Game over records the finished run with live wave + kills (main.js, from world state); the MENU shows the board in a two-column grid (controls | TOP 5) with a 'no scores yet' placeholder. NEW BEST! (stored best raised) is unchanged.
+
+## I67 - options panel polish (ST-067)
+
+- Presentation/UX only: no gameplay, scoring, or pacing changes. 182/182 tests unchanged.
+- The settings panel (src/render/settingsPanel.js) is restructured into two grouped cards (AUDIO: volume + SFX; VISUALS: FX quality + reduced motion) with labeled headers, a key-nav hint line, gold :focus-visible rings, and aria-labels on all controls.
+- Keyboard operability: Tab moves through the four controls natively; ArrowUp/ArrowDown move focus between the non-native controls (volume slider and FX select keep their native arrow behavior); Space/Enter still run native checkbox/select behavior. While any panel control holds focus, game hotkeys (Enter start, P/Escape pause, M mute, Space fire) are swallowed via stopPropagation so the player can adjust settings without side effects.
+- Live FX preview: changing FX QUALITY fires a one-shot particle burst at the arena center using the NEW tier's count (low 16 / high 48), so the difference is visible immediately; applySettings (live re-derive) still runs first, so the burst already uses the new tier.

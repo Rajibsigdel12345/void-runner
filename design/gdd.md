@@ -99,6 +99,7 @@ Stacks: each has its own timer; grabbing the same type refreshes its timer.
 - Best score persisted to localStorage key `voidrunner.best` (int).
 - Top-5 high-score board (I66): rows {score, wave, kills} persisted to `voidrunner.scores` (versioned payload; no timestamps, keeps core deterministic). Shown on MENU in a two-column layout (controls | TOP 5). Reads are corruption-safe: bad JSON, non-array payloads, and malformed rows degrade to an empty board (placeholder text). The game-over NEW BEST! flag (stored best raised) is unchanged.
 - Game over screen shows: final score, best (NEW BEST! flag), kills, max combo, wave reached, time survived.
+- Options panel (ST-026, polished ST-067): AUDIO (volume, SFX) and VISUALS (FX quality, reduced motion) groups, keyboard operable (Tab + arrow focus moves; game hotkeys are swallowed while a control holds focus; visible gold focus ring), and a live particle-burst preview when the FX tier changes.
 
 ## Game States
 MENU (title + "Enter to start" + controls) -> PLAYING -> PAUSED (overlay) ->
