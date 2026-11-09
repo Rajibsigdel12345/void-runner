@@ -10,6 +10,7 @@ import { createShieldRing } from './render/shieldRing.js';
 import { createParticles } from './render/particles.js';
 import { createShake } from './core/fx.js';
 import { createHUD } from './render/hud.js';
+import { createReticle } from './render/reticle.js';
 import { createScreens } from './render/screens.js';
 import { createSettingsPanel } from './render/settingsPanel.js';
 import { createAudio } from './render/audio.js';
@@ -73,6 +74,7 @@ const banner = createWaveBanner(document.body);
 const popups = createScorePopups(document.body, camera); // ST-030
 const hint = createTutorialHint(document.body); // ST-032
 const hud = createHUD(document.body);
+const reticle = createReticle(scene); // I44: fire-line reticle
 let muted = false; // M key (ST-017); consumed by audio (I27)
 
 // Persistent best + settings (ST-018); raw store adapted from window.localStorage.
@@ -170,7 +172,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, fpsMeter, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, fpsMeter, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -265,6 +267,7 @@ function syncVisuals(dt) {
   hud.render(world, hudOpts);
   screens.update(st, world, screenOpts);
   shipMesh.sync(world.ship, simT, !motionOff);
+  reticle.sync(world.ship, st === STATE.PLAYING); // I44: only while playing
   bullets.sync(world.weapons);
   rockRenders.sync(world.field);
   powerupRenders.sync(world.powerups, dt);

@@ -113,3 +113,9 @@ test('world: reset clears powerup state', () => {
   assert.equal(w.powerups.shieldHits, 0);
 });
 
+
+test('I44: every timed power-up type has dur > 0 (HUD drain bar divides by dur); bomb is instant', () => {
+  const t = CONFIG.powerup.types;
+  for (const k of ['rapid', 'spread', 'shield', 'magnet']) assert.ok(t[k].dur > 0, k + ' dur > 0');
+  assert.equal(t.bomb.dur, 0);
+});

@@ -48,3 +48,4 @@
 - I41: playtest report (scripted self-play, 2 skill profiles) - wave-1 stall gap (F1) + hit-clustering watch (F2) flagged; no bugs found.
 - I42: bugfix B - wave stall advance (wave.stallTime 45s): an uncleared wave now advances anyway with leftover asteroids carried over; closes playtest F1 (camped wave-1 stall).
 - I43: edge cases - visibilitychange auto-pause, WebGL context-loss auto-pause + restore recovery, #flash null guard, 5-min NaN soak (closes I38 C3/C4/C5).
+- I44: UI/UX pass - HUD power-up chips (shape+color+label, drain bars), combo window drain bar, fire-line reticle (playtest rec #3), menu keycaps + pause session snapshot, contrast bumps (ST-044).

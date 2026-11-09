@@ -67,8 +67,12 @@ GAME_OVER (stats + "Enter to restart") -> PLAYING.
 
 ## HUD
 Top-left: score + best. Top-center: wave. Top-right: lives (ship icons) + active
-power-up timers. Bottom-center: combo meter (visible when combo>=2).
-All DOM/CSS overlay (crisp text, easy to style), not canvas.
+power-up indicators (shape + color + label with a drain bar - never color
+alone, per accessibility). Bottom-center: combo meter (visible when combo>=2)
+with a drain bar showing the 4s window remaining.
+All DOM/CSS overlay (crisp text, easy to style), not canvas. A subtle fire-line
+reticle extends from the ship nose along the actual fire direction while
+playing (teaches lead-aim; playtest rec #3, I44).
 
 ## Accessibility
 - Settings: volume 0-100, SFX on/off, FX quality (High/Low - Low disables bloom + reduces particles).

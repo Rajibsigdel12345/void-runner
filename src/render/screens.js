@@ -37,7 +37,7 @@ export function createScreens(root, settings = {}) {
   // --- MENU ---
   const menu = panel('screen-menu', 'rgba(2,4,12,0.72)');
   line(menu, 'VOID RUNNER', 'font-size:46px;font-weight:800;letter-spacing:10px;color:#9fd0ff;');
-  line(menu, 'survive the void, outlast the waves', 'font-size:14px;letter-spacing:2px;opacity:0.75;');
+  line(menu, 'survive the void, outlast the waves', 'font-size:14px;letter-spacing:2px;opacity:0.85;'); // I44 contrast
   const controls = document.createElement('div');
   controls.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:6px 18px;font-size:14px;margin-top:8px;';
   for (const [k, v] of [
@@ -48,8 +48,11 @@ export function createScreens(root, settings = {}) {
     ['M', 'mute'],
   ]) {
     const key = document.createElement('div');
-    key.style.cssText = 'text-align:right;font-weight:600;letter-spacing:1px;color:#ffe08a;';
-    key.textContent = k;
+    key.style.cssText = 'text-align:right;';
+    const kc = document.createElement('span'); // I44: keycap styling
+    kc.style.cssText = 'display:inline-block;padding:2px 8px;border:1px solid rgba(255,224,138,0.4);border-radius:5px;background:rgba(255,224,138,0.08);color:#ffe08a;font-weight:700;font-size:12px;letter-spacing:1px;';
+    kc.textContent = k;
+    key.appendChild(kc);
     const val = document.createElement('div');
     val.style.cssText = 'opacity:0.9;';
     val.textContent = v;
@@ -57,13 +60,14 @@ export function createScreens(root, settings = {}) {
   }
   menu.appendChild(controls);
   line(menu, 'PRESS ENTER TO START', 'font-size:18px;font-weight:700;letter-spacing:4px;margin-top:14px;animation:vrPulse 1.6s ease-in-out infinite;');
-  const menuBest = line(menu, '', 'font-size:13px;opacity:0.7;'); // best score lands in I18
+  const menuBest = line(menu, '', 'font-size:13px;opacity:0.85;'); // best score lands in I18 (I44 contrast)
   if (settings.menu) menu.appendChild(settings.menu.el); // ST-026 settings (menu)
 
   // --- PAUSED ---
   const paused = panel('screen-paused', 'rgba(2,4,12,0.55)');
   line(paused, 'PAUSED', 'font-size:36px;font-weight:800;letter-spacing:8px;');
   line(paused, 'P / ESC — RESUME', 'font-size:15px;letter-spacing:2px;opacity:0.85;');
+  const pauseSnap = line(paused, '', 'font-size:15px;font-weight:700;letter-spacing:2px;opacity:0.9;'); // I44: session snapshot
   const muteLabel = line(paused, 'M — MUTE (OFF)', 'font-size:13px;letter-spacing:2px;opacity:0.7;');
   if (settings.pause) paused.appendChild(settings.pause.el); // ST-026 settings (pause)
 
@@ -119,6 +123,7 @@ export function createScreens(root, settings = {}) {
     }
     if (state === STATE.PAUSED) {
       set('mute', muteLabel, `M — MUTE (${opts.muted ? 'ON' : 'OFF'})`);
+      set('pauseSnap', pauseSnap, `SCORE ${world.score}    WAVE ${Math.max(1, world.wave)}    KILLS ${world.scoreKeeper.kills}`); // I44
     }
   }
 
