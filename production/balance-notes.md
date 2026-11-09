@@ -144,3 +144,9 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - Presentation-only iteration: no new tunables in src/core/config.js, no changes to damage, scoring, waves, or power-ups. 175/175 tests unchanged.
 - Starfield twinkle (per-star 0.72-1.0 brightness, 0.5-2.2 rad/s) and parallax offsets (near 0.25x / far 0.6x camera) live in src/render/starfield.js, not config - they are visual, not balance, levers.
 - Rock rim light (fresnel strength 0.5, #5f7fd8) lives in src/render/asteroidRenderer.js via a single shared material onBeforeCompile - one shader program, no per-rock draw-call cost. Golden material is untouched.
+
+## I61 - bullet trails (ST-061)
+
+- Presentation-only: no config tunables, no changes to fire rate, damage, scoring, or any core rule. 175/175 tests unchanged.
+- Trail length (1.15u) and thickness (0.16) live in src/render/bulletPool.js, not config - they are visual, not balance, levers.
+- Cost: one additive ribbon per active bullet (+1 draw call each, bounded by weapon.maxBullets=64). Steady state at ~6-8 live bullets is a few calls; verified 26 total in a 6-bullet test scene vs the 15-call I60 baseline (no bullets). Shared geo + one material for all trails; zero per-frame allocs (preallocated basis + scratch vectors).

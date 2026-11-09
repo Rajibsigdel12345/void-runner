@@ -421,3 +421,11 @@ One entry per iteration. Format:
 - Verification: 175/175 unit tests green (render-only; core unchanged); build exit 0. Browser: twinkle uTime advances with motion and freezes under Reduced Motion; parallax shells exactly at cam x 0.25 / cam x 0.6 (far/near = 2.4); 6 rocks show cool periwinkle rim on silhouettes; 15 draw calls (flat vs wave-4 peak); 0 console errors; no NaN. Screenshot .evidence/i60-starfield.png.
 - Result: DONE
 - Follow-up: I61 bullet trails - additive streak (ST-061).
+
+## I61 - bullet trails (additive streak) (ST-061)
+
+- Goal: presentation pass (render-only) - each player bullet carries a short additive comet streak behind it, laid flat in the arena and oriented along its velocity (head-bright, tail-fade).
+- Changed: src/render/bulletPool.js (added pooled gradient-ribbon trail, basis-quaternion orientation, no per-frame allocs), src/main.js (exposed bullets on __vr).
+- Verification: 175/175 unit tests green (render-only; core unchanged); build exit 0. Browser: 6-bullet test row - trail head sits exactly on the bullet, tail extends opposite velocity, orientation follows shot direction; unused pool slots hidden; 26 draw calls in the 6-bullet scene; 0 console errors; no NaN. Screenshot .evidence/i61-bullet-trails.png.
+- Result: DONE
+- Follow-up: I62 shield pulse animation + ring visual (ST-062).
