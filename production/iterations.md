@@ -60,3 +60,9 @@ One entry per iteration. Format:
 - Verification: npm test 33/33; build exit 0; browser: console clean, Space hold -> 5 live bullets (5.5 rps), cull to 0 after life, screenshot .evidence/i08-fire.png shows bullet trail.
 - Result: DONE
 - Follow-up: I09 asteroid field core.
+## I09 - Asteroid field core (ST-009)
+- Goal: rim-spawn asteroids, drift + rim bounce, L->2-3 M / M->2-3 S splits with speedMult inheritance, concurrent cap 24, seeded determinism.
+- Changed: src/core/asteroids.js (new), tests/asteroids.test.js (new, 7 tests)
+- Verification: npm test 40/40 pass; build exit 0.
+- Result: DONE
+- Follow-up: I10 renders rocks (3 noise-baked icosahedron variants + tumble).

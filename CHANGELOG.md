@@ -11,3 +11,4 @@
 - I06: procedural ship mesh, mouse raycast aim, follow camera with look-ahead, keyboard/mouse input state.
 - I07: weapons core (bullet pool/cap, cadence, spread, culling) + 8 unit tests.
 - I08: pooled bullet rendering + Space/click firing wired to aim.
+- I09: asteroid field core (rim spawn, bounce, splits, caps, seeded) + 7 unit tests.
