@@ -36,15 +36,27 @@ test('wavemods: waves before waveMods.first are plain', () => {
   for (let w = 1; w < CONFIG.waveMods.first; w++) assert.equal(dir.modifierFor(w), 'none', 'wave ' + w);
 });
 
-test('wavemods: picks stay in the list and all three appear over 60 waves', () => {
+test('wavemods: picks stay in the list (or a post-boss breather) and all three appear over 60 waves', () => {
   const { dir } = dirFor(41);
+  const isBreather = (w) => w - 1 >= CONFIG.boss.everyWave && (w - 1) % CONFIG.boss.everyWave === 0;
   const seen = new Set();
   for (let w = CONFIG.waveMods.first; w < CONFIG.waveMods.first + 60; w++) {
     const mod = dir.modifierFor(w);
-    assert.ok(CONFIG.waveMods.list.includes(mod), 'wave ' + w + ' -> ' + mod);
-    seen.add(mod);
+    if (isBreather(w)) {
+      assert.equal(mod, 'none', 'wave ' + w + ' is a post-boss breather');
+    } else {
+      assert.ok(CONFIG.waveMods.list.includes(mod), 'wave ' + w + ' -> ' + mod);
+      seen.add(mod);
+    }
   }
   assert.equal(seen.size, CONFIG.waveMods.list.length, 'all modifiers appear (seed 41)');
+});
+
+test('wavemods: the wave after each boss wave is a modifier-free breather (I92/F9)', () => {
+  const { dir } = dirFor(41);
+  const ev = CONFIG.boss.everyWave;
+  for (const w of [ev + 1, ev * 2 + 1, ev * 3 + 1]) assert.equal(dir.modifierFor(w), 'none', 'breather wave ' + w);
+  for (const w of [ev, ev * 2, ev * 2 + 2, ev * 3]) assert.ok(CONFIG.waveMods.list.includes(dir.modifierFor(w)), 'non-breather wave ' + w);
 });
 
 test('wavemods: activeMod is set on wave start and the wave event carries it', () => {

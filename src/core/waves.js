@@ -35,6 +35,10 @@ export class WaveDirector {
   modifierFor(wave) {
     const m = this.cfg.waveMods;
     if (wave < m.first) return 'none';
+    // ST-092 (F9): the wave right after a boss wave is a modifier-free breather, so the
+    // boss beat is followed by a recovery wave instead of a compounding spike.
+    const b = this.cfg.boss;
+    if (b && b.everyWave && wave - 1 >= b.everyWave && (wave - 1) % b.everyWave === 0) return 'none';
     const r = new RNG((this.rng.seed ^ Math.imul(wave, 0x9e3779b9)) >>> 0);
     return m.list[Math.floor(r.next() * m.list.length) % m.list.length];
   }

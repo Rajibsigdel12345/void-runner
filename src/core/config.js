@@ -8,7 +8,7 @@ export const CONFIG = {
     damping: 1.6,     // exponential drag /s
     radius: 0.9,      // collision radius
     aimEase: 9,       // how fast nose eases toward aim (lambda)
-    invulnTime: 1.6,  // seconds of invulnerability after a hit
+    invulnTime: 1.8,  // seconds of invulnerability after a hit (I92: 1.6->1.8, reposition headroom)
     knockback: 7,     // knockback impulse on hit
     lives: 3
   },
@@ -131,8 +131,8 @@ export const CONFIG = {
 
   combo: {
     window: 4.0,        // seconds to keep a chain alive
-    cap: 10,            // max combo
-    step: 0.1           // multiplier per combo step (1.0x .. 1.9x)
+    cap: 15,            // max combo (I92: 10->15, raises the mastery ceiling)
+    step: 0.1           // multiplier per combo step (1.0x .. 2.4x at cap)
   },
 
   nearMiss: {

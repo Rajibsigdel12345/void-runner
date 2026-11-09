@@ -33,7 +33,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 - Fire: base cadence 5.5 shots/s; bullet speed 34 u/s; bullet lifetime 1.1s.
 - Bullet trails (I61, presentation): each shot carries a short additive comet streak (1.15u, head-bright -> tail-fade) laid flat in the arena along the shot's velocity. Visual feedback only; no gameplay effect.
 - Engine flame (I63, presentation): a rear additive plume (orange + hot core) that appears and scales with thrust magnitude and flickers over sim time; hidden when coasting; steady (no flicker) under Reduced Motion. Visual feedback only; no gameplay effect.
-- Lives: 3. On hit: -1 life, 1.6s invulnerability (blink), knockback, screen shake.
+- Lives: 3. On hit: -1 life, 1.8s invulnerability (blink), knockback, screen shake. (I92: 1.6->1.8 for more reposition headroom after a hit)
 - Game over at 0 lives.
 
 ## Asteroids
@@ -63,7 +63,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 - The MONOLITH fires an aimed bolt at the ship every 2.2s (speed 9 u/s).
 - A MINE fires an aimed bolt only while the ship is within 7u of it, on a 3s cadence (speed 8 u/s).
 - Bolts share one pool capped at 24 concurrent; a bolt vanishes after 4.0s or once it leaves the arena.
-- A bolt touching the ship costs one life (same flow as rock contact; the 1.6s invulnerability applies).
+- A bolt touching the ship costs one life (same flow as rock contact; the 1.8s invulnerability applies).
 - Bolts never collide with rocks and cannot be shot down.
 - Bolts render as red-orange glowing orbs, clearly distinct from the player's cyan bolts.
 
@@ -75,11 +75,11 @@ multipliers, and grab power-ups. Survive as long as you can.
 - Wave n: startAsteroids = 4 + n, maxConcurrent = 6 + 2n (cap 24), speedMult = 1 + 0.06n (cap 2.1).
 - Wave advances when all spawned asteroids for that wave are destroyed, or after 45s without a clear (stall advance): the wave increments regardless, undestroyed asteroids carry into the next wave, and the intermission is skipped (I42, closes playtest finding F1 - a camped field can no longer freeze the escalation).
 - 2.2s intermission between waves with "WAVE n" banner.
-- From wave 3, each wave rolls one modifier deterministically from (world seed, wave number) - stall-vs-clear timing cannot change the pick (ST-051): FAST ROCKS (spawns 40% faster, on top of the ramp), SMALL ROCKS (spawns roll S with 50% probability), INWARD DRIFT (all rocks pulled toward the arena center at 2.0 u/s^2). Waves 1-2 are always plain. The active modifier is announced under the WAVE banner.
+- From wave 3, each wave rolls one modifier deterministically from (world seed, wave number) - stall-vs-clear timing cannot change the pick (ST-051): FAST ROCKS (spawns 40% faster, on top of the ramp), SMALL ROCKS (spawns roll S with 50% probability), INWARD DRIFT (all rocks pulled toward the arena center at 2.0 u/s^2). Waves 1-2 are always plain. The wave immediately after a boss wave (6, 11, 16, ...) is also plain - a modifier-free breather that gives a recovery beat after the boss (ST-092/F9). The active modifier is announced under the WAVE banner.
 - Endless (ST-058): from wave 10 the game never ends - wave content caps at 36 rocks, intermissions shrink from 2.2s toward a 1.2s floor (0.08s/wave), and the small-rock share rises from 30% toward 45%; the WAVE banner carries an ENDLESS tag.
 
 ## Combo
-- Kill within 4s of last kill: combo+1 (cap 10). Multiplier = 1 + 0.1*(combo-1) ... 1.0x..1.9x.
+- Kill within 4s of last kill: combo+1 (cap 15). Multiplier = 1 + 0.1*(combo-1) ... 1.0x..2.4x. (I92: cap 10->15 so the top multiplier needs a real 15-kill chain)
 - Combo resets on timer expiry or taking damage.
 
 ## Power-ups (T2) - drop chance 25% from any kill, one at a time
