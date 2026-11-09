@@ -157,3 +157,10 @@ One entry per iteration. Format:
 - Verification: npm test 105/105 pass (1 homing test re-scoped to an S rock after M split its kill into S fragments - field never emptied); build exit 0; browser: bomb on 8 rocks -> 0 left, 8 kills, 1 bomb event, score +732; magnet homing steered an off-axis bullet onto a parked S rock in 14 steps; console 0 errors.
 - Result: DONE
 - Follow-up: juice pass begins (I24) - particle bursts on kill/hit from the kill/hit events these paths emit.
+## I24 - pooled particle bursts on kill/hit/shield-pop/bomb (ST-024)
+- Goal: first juice pass - pooled particle bursts on kill/hit/shieldPop/bomb events, honoring the saved FX tier (high=48 / low=16 per burst) and reduced-motion (no particles when set). Settings panel lands I26; values read at boot.
+- Changed: src/render/particles.js (NEW: single THREE.Points, 512-slot ring buffer, additive blending, zero per-frame allocation; burst() writes positions/velocities/base-colors, sync(dt) is the only writer of the rendered color attribute - fading by color scale since additive); src/main.js (fxCount + motionOff from saved settings, drain hooks for kill 0xffd27a / hit 0xff6b57 / shieldPop 0x53d8ff / bomb 0xfff3b0 double-count at origin, particles.sync in syncVisuals, __vr gains particles/renderer/render debug hooks for deterministic stills).
+- Verification: npm test 105/105 pass (render-layer feature; core unchanged); build exit 0; browser: kill-burst buffer probe showed 48 live particles at the killed rock (3,0) with warm amber colors, blending=2 (additive), renderer.info.render.points=1312 proving the points pass renders; i24-particles.png used a deliberate size-3.0/6s white 80-particle test burst to make the render pass visible in a still - production bursts are size 0.32 / 0.5s per-event colors, subtle by design in stills. Console 0 errors.
+- Result: DONE
+- Follow-up: I25 screen shake + hit flash + invuln blink (designated browser smoke checkpoint).
+

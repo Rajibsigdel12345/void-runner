@@ -7,6 +7,7 @@ import { createBulletPool } from './render/bulletPool.js';
 import { createAsteroidRenderer } from './render/asteroidRenderer.js';
 import { createPowerupRenderer } from './render/powerupMesh.js';
 import { createShieldRing } from './render/shieldRing.js';
+import { createParticles } from './render/particles.js';
 import { createHUD } from './render/hud.js';
 import { createScreens } from './render/screens.js';
 import { STATE } from './core/state.js';
@@ -64,6 +65,13 @@ const storage = new Storage(lsStore, CONFIG.storage);
 let bestScore = storage.getBest();
 let newBest = false;
 
+// Juice (ST-024): pooled particle bursts, honoring saved FX tier + reduced
+// motion (the settings panel lands in I26; values are read at boot).
+const startSettings = storage.getSettings();
+const fxCount = startSettings.fx === 'low' ? CONFIG.fx.particleLow : CONFIG.fx.particleHigh;
+const motionOff = startSettings.reducedMotion === true;
+const particles = createParticles(scene);
+
 const input = createInput();
 
 // Session keys (ST-017): Enter start/restart, P/Esc pause, M mute.
@@ -98,7 +106,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage }; // debug/test handle (expanded in I080)
+window.__vr = { world, eventTally, input, advance, storage, particles, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -128,6 +136,12 @@ function tick(dt, intent) {
   world.step(dt, it);
   for (const e of world.drainEvents()) {
     eventTally[e.type] = (eventTally[e.type] || 0) + 1;
+    if (!motionOff) {
+      if (e.type === 'kill') particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xffd27a, speed: 9, life: 0.5 });
+      else if (e.type === 'hit') particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xff6b57, speed: 11, life: 0.45 });
+      else if (e.type === 'shieldPop') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.75), color: 0x53d8ff, speed: 8, life: 0.5 });
+      else if (e.type === 'bomb') particles.burst(0, 0, { count: fxCount * 2, color: 0xfff3b0, speed: 16, life: 0.7 });
+    }
     if (e.type === 'shieldPop') {
       shieldRing.pulse();
     } else if (e.type === 'gameover') {
@@ -147,6 +161,7 @@ function syncVisuals(dt) {
   rockRenders.sync(world.field);
   powerupRenders.sync(world.powerups, dt);
   shieldRing.sync(world, dt);
+  particles.sync(dt);
 
   const ship = world.ship;
   const f = ship.forward();
