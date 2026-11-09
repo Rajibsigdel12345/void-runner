@@ -1,7 +1,7 @@
 ﻿# Active Session State
 
 - current_epic: E1 Foundations
-- current_story: ST-002
-- current_iteration: I02
+- current_story: ST-004
+- current_iteration: I04
 - branch: main
-- notes: toolchain proven (I01). Next: core rng+math with unit tests.
+- notes: I02 committed (5ddb2be), I03 committed (c026abd). Next: starfield + scene polish (I04).
