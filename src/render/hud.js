@@ -60,6 +60,10 @@ export function createHUD(root) {
     }
   }
 
+  let visible = true;
+  function setVisible(v) { if (visible === v) return; visible = v; el.style.display = v ? '' : 'none'; }
+
   root.appendChild(el);
-  return { el, render };
+  return { el, render, setVisible };
 }
+

@@ -37,6 +37,14 @@ export class World {
     this.waves.start();
     return true;
   }
+  /** PLAYING -> PAUSED (sim frozen via the step gate). No-op unless PLAYING. */
+  pause() { return this.game.to(STATE.PAUSED); }
+
+  /** PAUSED -> PLAYING only (begin() owns the MENU start, restart() the full reset). */
+  resume() { return this.game.in(STATE.PAUSED) && this.game.to(STATE.PLAYING); }
+
+  /** Full session restart from MENU or GAME_OVER: reset all systems, then begin. */
+  restart() { this.reset(); return this.begin(); }
 
   emit(type, data) { this.events.push({ type, data }); }
   drainEvents() { const e = this.events; this.events = []; return e; }
@@ -101,12 +109,13 @@ export class World {
     this.scoreKeeper.reset();
     this.waves.reset();
     this.livesMgr.reset();
-    this.game.reset();
-    this.gameOver = false;
+    this.game.reset(); // also clears the gameOver getter (it derives from game state)
     this.time = 0;
     this.events.length = 0;
   }
 }
+
+
 
 
 

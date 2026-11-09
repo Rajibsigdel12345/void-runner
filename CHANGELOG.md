@@ -19,3 +19,6 @@
 - I14: wave director (escalating ramp, trickle spawn, intermission, clear detection) + 7 unit tests.
 - I15: lives manager + state machine (MENU/PLAYING/PAUSED/GAME_OVER) + 8 unit tests.
 - I16: DOM HUD (score/wave/lives/combo meter, change-cached text).
+- I17: menu/pause/game-over screens, Enter/P-Esc/M session keys, no auto-start on load.
+### Fixed
+- I17: World.reset() crash (assignment to gameOver getter) caught by new tests.

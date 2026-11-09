@@ -6,6 +6,8 @@ import { createInput } from './render/input.js';
 import { createBulletPool } from './render/bulletPool.js';
 import { createAsteroidRenderer } from './render/asteroidRenderer.js';
 import { createHUD } from './render/hud.js';
+import { createScreens } from './render/screens.js';
+import { STATE } from './core/state.js';
 import { World } from './core/game.js';
 import { RNG } from './core/rng.js';
 import { damp, v2 } from './core/math.js';
@@ -43,9 +45,25 @@ scene.add(shipMesh.group);
 const bullets = createBulletPool(scene);
 const rockRenders = createAsteroidRenderer(scene);
 const hud = createHUD(document.body);
-world.begin(); // wave director now owns spawning (menu gate lands in I17)
+const screens = createScreens(document.body);
+let muted = false; // M key (ST-017); consumed by the audio system in I27
 
 const input = createInput();
+
+// Session keys (ST-017): Enter start/restart, P/Esc pause, M mute.
+window.addEventListener('keydown', (e) => {
+  if (e.repeat) return;
+  const st = world.game.state;
+  if (e.key === 'Enter') {
+    if (st === STATE.MENU) world.begin();
+    else if (st === STATE.GAME_OVER) world.restart();
+  } else if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
+    if (st === STATE.PLAYING) world.pause();
+    else if (st === STATE.PAUSED) world.resume();
+  } else if (e.key === 'm' || e.key === 'M') {
+    muted = !muted;
+  }
+});
 const raycaster = new THREE.Raycaster();
 const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 const aimWorld = new THREE.Vector3();
@@ -95,7 +113,10 @@ function tick(dt, intent) {
 }
 
 function syncVisuals(dt) {
+  const st = world.game.state;
+  hud.setVisible(st === STATE.PLAYING || st === STATE.PAUSED);
   hud.render(world);
+  screens.update(st, world, { muted });
   shipMesh.sync(world.ship);
   bullets.sync(world.weapons);
   rockRenders.sync(world.field);
@@ -132,6 +153,7 @@ function frame() {
   renderer.render(scene, camera);
 }
 frame();
+
 
 
 

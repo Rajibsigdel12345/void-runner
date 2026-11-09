@@ -109,3 +109,10 @@ One entry per iteration. Format:
 - Verification: npm test 75/75 pass; build exit 0; browser: console 0 errors, scripted kill burst -> "490 WAVE 1, 3 hearts, 5 CHAIN 1.4x", screenshot .evidence/i16-hud.png.
 - Result: DONE
 - Follow-up: menu/pause/game-over screens + key handling (I17).
+## I17 - Menu / pause / game-over screens + session keys (ST-017)
+- Goal: DOM screens for MENU (title, controls, press-enter), PAUSED (P/Esc + mute state), GAME_OVER (score + restart); Enter start/restart, P/Esc pause, M mute (flag only; audio lands I27); world no longer auto-starts on load; HUD hidden outside PLAYING/PAUSED.
+- Changed: src/render/screens.js (new), src/core/game.js (pause/resume/restart on World; resume gated to PAUSED only), src/render/hud.js (setVisible), src/main.js (screens + key handling + mute flag; removed auto begin()), tests/game.test.js (4 new)
+- Verification: npm test 79/79 pass; build exit 0; browser full-session smoke: menu -> Enter -> play 3s (score 50) -> P pause (time frozen, overlay) -> M mute (overlay shows ON) -> Escape resume -> forced gameover (screen + event) -> Enter restart (score 0, lives 3, wave 1); console 0 errors; screenshots .evidence/i17-menu.png, .evidence/i17-gameover.png.
+- Bugfix (found by new tests): World.reset() assigned to the gameOver getter (TypeError in strict mode) - removed; getter derives from game state after reset.
+- Result: DONE
+- Follow-up: persistent best score + settings storage (I18).

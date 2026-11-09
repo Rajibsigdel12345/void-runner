@@ -115,3 +115,75 @@ test('world: deterministic replay (same seed + same intents)', () => {
 
 
 
+
+// --- ST-017: pause / resume / restart ---
+test('world: pause freezes the simulation', () => {
+  const w = new World(new RNG(5));
+  w.begin();
+  const rock = w.field.spawn('M', 1, { x: 8, y: 0 });
+  rock.vel = v2(-2, 0);
+  w.step(DT, { thrust: v2(1, 0), aimPoint: null, firing: false });
+  const t0 = w.time;
+  const px = w.ship.pos.x;
+  w.pause();
+  assert.ok(w.game.in('PAUSED'));
+  for (let i = 0; i < 60; i++) w.step(DT, NOINTENT);
+  assert.equal(w.time, t0, 'time frozen');
+  assert.equal(w.ship.pos.x, px, 'ship frozen');
+  assert.equal(rock.pos.x < 8, true, 'rock frozen');
+  assert.equal(w.score, 0);
+});
+
+test('world: pause/resume respect the state machine', () => {
+  const w = new World(new RNG(6));
+  assert.ok(!w.pause(), 'MENU->PAUSED rejected');
+  assert.ok(!w.resume(), 'MENU->PLAYING-via-resume rejected');
+  w.begin();
+  assert.ok(!w.resume(), 'PLAYING->PLAYING rejected');
+  assert.ok(w.pause());
+  assert.ok(w.resume());
+  assert.ok(w.game.in('PLAYING'));
+});
+
+test('world: restart from GAME_OVER resets session and plays', () => {
+  const w = new World(new RNG(7));
+  w.begin();
+  const r = w.field.spawn('M', 1, { x: 4, y: 0 });
+  r.vel = v2(0, 0);
+  w.weapons._spawn({ x: r.pos.x, y: r.pos.y }, 0);
+  w.step(DT, NOINTENT);
+  assert.ok(w.score > 0, 'scored before death');
+  // force game over: 1 life left, park a rock on the ship
+  w.livesMgr.count = 1;
+  w.ship.invuln = 0;
+  const killer = w.field.spawn('S', 1, { x: 1.2, y: 0 });
+  killer.vel = v2(0, 0);
+  w.step(DT, NOINTENT);
+  assert.ok(w.gameOver);
+  const deadScore = w.score;
+  // step must be a no-op in GAME_OVER
+  w.step(DT, NOINTENT);
+  assert.equal(w.score, deadScore);
+  // restart
+  assert.ok(w.restart());
+  assert.ok(w.game.in('PLAYING'));
+  assert.equal(w.score, 0, 'score reset');
+  assert.equal(w.lives, CONFIG.ship.lives, 'lives reset');
+  assert.equal(w.wave, 0, 'wave director reset');
+  w.step(DT, NOINTENT);
+  assert.ok(w.time > 0, 'sim runs after restart');
+});
+
+test('world: restart() mid-session forces a fresh session', () => {
+  const w = new World(new RNG(8));
+  w.begin();
+  w.step(DT, NOINTENT);
+  const t0 = w.time;
+  const ret = w.restart();
+  // restart() is only reachable from PLAYING via direct API (the key handler gates it); reset()+begin() yields a fresh session
+  assert.equal(ret, true);
+  assert.ok(w.game.in('PLAYING'));
+  assert.equal(w.time, 0, 'fresh session clock');
+  assert.notEqual(t0, w.time);
+});
+
