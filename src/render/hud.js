@@ -114,7 +114,7 @@ export function createHUD(root) {
     const c = world.scoreKeeper.combo;
     if (c > 1) {
       comboWrap.style.opacity = '1';
-      set('combo', combo, `${c} CHAIN  ${world.scoreKeeper.multiplier.toFixed(1)}x`);
+      set('combo', combo, `COMBO ${c}  \u00d7${world.scoreKeeper.multiplier.toFixed(1)}`);
       const remain = CONFIG.combo.window - (world.time - world.scoreKeeper.lastKillTime);
       const q = Math.floor(Math.min(1, Math.max(0, remain / CONFIG.combo.window)) * 40) / 40;
       if (q !== lastComboBar) { lastComboBar = q; comboFill.style.transform = `scaleX(${q})`; }

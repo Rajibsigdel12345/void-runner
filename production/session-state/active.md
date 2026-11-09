@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E7 (extended content/UX/hardening, I51-I100)
-- current_story: ST-072
-- current_iteration: I72
+- current_story: ST-073
+- current_iteration: I73
 - branch: main
-- notes: I71 committed (mobile/responsive HUD + touch pass: viewport UI scale, tappable start/restart, on-screen pause, touch-aware menu card + in-game hint; 187/187 + build + browser). Next: UI text pass - wording/typos/caps consistency (ST-072).
+- notes: I72 committed (UI text pass: HUD combo "COMBO 3 ×1.4", game-over "MAX COMBO 5"; render-only, 187/187 + build + browser). Next: adaptive quality - rolling FPS <45 auto FX low, logged, overridable (ST-073).

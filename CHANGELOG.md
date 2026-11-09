@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I72: UI text pass (ST-072) - wording/caps consistency: HUD combo now "COMBO 3 ×1.4" (was "3 CHAIN 1.3x") and game-over stat now "MAX COMBO 5" (was "MAX COMBO x5"); aligns on the canonical COMBO term + the × symbol, no stray lowercase letters in UI text (render-only, 187/187).
 - I71: mobile/responsive HUD + touch pass (ST-071) - viewport-scaled UI overlay (fits phones; two-column menu collapses to one), tappable TAP TO START/RESTART, on-screen pause button, and touch-aware menu card + in-game hint (drag / auto-fire / two-finger pause); render-only, 187/187.
 - I70: accessibility (ST-070) - power-up letter glyphs (R/S/H/B/M/O on world pickups + HUD chips), unified gold focus-visible ring, and a FONT SCALE setting (NORMAL/LARGE/XL via --vr-fs); +1 test (187/187).
 - I69: game-over stats + new-best celebration (ST-069) - board rank line on the game-over panel + three-colour confetti burst and pulsing NEW BEST! on a new best (reduced-motion static)

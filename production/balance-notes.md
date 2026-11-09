@@ -222,3 +222,12 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - No new config tunables: the viewport UI scale is DERIVED (fontScale x innerWidth/820, floored at 0.6, full at >=820px), a render constant in main.js, not a gameplay knob.
 - Reuses I70's --vr-fs CSS var, now = fontScale x viewportScale, so every existing calc(Npx * var(--vr-fs,1)) in hud.js / screens.js / settingsPanel.js / tutorialHint.js becomes responsive with zero per-module edits.
 - On-screen pause button is one pooled-free <button>, toggled only on state change in PLAYING on coarse pointers; the touch-aware tutorial hint swaps a single text node. Zero per-frame allocations.
+
+## I72 - UI text pass: wording/typos/caps consistency (ST-072)
+
+- Presentation/wording only: no gameplay, scoring, pacing, or behavior changes. 187/187 (render-only, no new tests; core untouched).
+- Review scope: every user-facing string in the render layer (screens.js menu/paused/game-over, hud.js, settingsPanel.js, waveBanner.js, scorePopups.js, tutorialHint.js).
+- Convention confirmed: labels/headings/titles/buttons = ALL-CAPS; menu tagline + credits line + control ACTION descriptions = lower-case (intentional, kept); aria-labels stay Title Case (screen-reader channel).
+- Fix 1 (hud.js): live combo label was "3 CHAIN  1.3x" -> now "COMBO 3  x1.4". "CHAIN" was an outlier vs the canonical COMBO term (GDD Combo + game-over MAX COMBO); the multiplier now uses the multiplication sign (x) instead of a stray lowercase x, so no UI string carries a bare lowercase letter.
+- Fix 2 (screens.js): game-over stat was "MAX COMBO x5" -> now "MAX COMBO 5". The lowercase x prefix was an ambiguous multiplication on a plain count and the only non-caps char in an all-caps stat line.
+- Deliberately left: "M — MUTE (OFF)" em-dash, credit-line diamond separators, wave-banner middot, 4-space gaps between stat fields, and the touch ("fly the ship") vs keyboard ("thrust") control wording (clearer per input method).

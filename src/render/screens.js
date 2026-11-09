@@ -214,7 +214,7 @@ export function createScreens(root, settings = {}) {
       const mm = Math.floor(world.time / 60); // ST-031: session stats
       const ss = String(Math.floor(world.time) % 60).padStart(2, '0');
       set('stats1', statsLine1, "KILLS " + world.scoreKeeper.kills + "    WAVE " + Math.max(1, world.wave));
-      set('stats2', statsLine2, "MAX COMBO x" + world.scoreKeeper.maxCombo + "    TIME " + mm + ":" + ss);
+      set('stats2', statsLine2, "MAX COMBO " + world.scoreKeeper.maxCombo + "    TIME " + mm + ":" + ss);
     }
     if (state === STATE.MENU) {
       set('menuBest', menuBest, opts.best > 0 ? `BEST ${opts.best}` : '');
