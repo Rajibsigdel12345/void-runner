@@ -45,6 +45,14 @@ multipliers, and grab power-ups. Survive as long as you can.
 - 1 bullet destroys a mine (+150, feeds the combo like any kill; red pop + shake). Touching the ship costs a life like a rock (mine is destroyed, knockback + invuln apply).
 - Cap: 10 concurrent mines. They bounce off the arena rim like rocks.
 
+## The Monolith (ST-055)
+
+- Every 5th wave (5, 10, 15, ...) spawns a MONOLITH at the arena rim, in addition to the wave's normal asteroids: a huge, slow-homing boss (40 HP, 1.6 u/s - always dodgeable).
+- Bullets deal 1 damage each. On death it pays +1000 (feeds the combo) and splits into 4 M asteroids at its position.
+- Every 2s it bursts a ring of 8 S asteroids radially outward from itself (bounded by the field's concurrent cap).
+- Contact with the boss costs a life, same flow as a rock hit (knockback + invuln). The boss is not damaged by contact.
+- While alive, a MONOLITH HP bar shows at top center. Only one boss at a time.
+
 ## Waves & Difficulty
 - Wave n: startAsteroids = 4 + n, maxConcurrent = 6 + 2n (cap 24), speedMult = 1 + 0.06n (cap 2.1).
 - Wave advances when all spawned asteroids for that wave are destroyed, or after 45s without a clear (stall advance): the wave increments regardless, undestroyed asteroids carry into the next wave, and the intermission is skipped (I42, closes playtest finding F1 - a camped field can no longer freeze the escalation).

@@ -371,3 +371,10 @@ One entry per iteration. Format:
 
 
 
+## I55 - monolith boss (ST-055)
+
+- Goal: ST-055 E7A content - the Monolith: a huge slow-homing boss every 5 waves, in addition to normal wave content. HP 40, 1 dmg per bullet, ring burst of 8 S rocks every 2s, splits to 4 M rocks on death for +1000, contact costs a life (boss survives).
+- Changed: src/core/config.js (NEW boss section: everyWave 5, maxHp 40, radius 3.4, speed 1.6, turn 0.8, ringEvery 2.0, ringCount 8, splitCount 4, score 1000). src/core/boss.js (NEW Monolith - bounded homing + ring timer, 1-damage hit()). src/core/game.js (wiring: spawnBossForWave on wave start, boss step + ring burst, resolveBulletBoss, bossDeath (headline score + 4 M splits), resolveShipBoss, reset). src/render/bossMesh.js (NEW tapered obelisk mesh, pulsing emissive). src/render/bossHealth.js (NEW minimal DOM HP bar + MONOLITH label). src/main.js (import/create/sync, bossSpawn/bossRing/bossDeath SFX + juice, big boss-kill popup, __vr handles). src/render/audio.js (bossSpawn/bossRing/bossDeath cues). tests/boss.test.js (NEW, 6 tests, seeds 56-58). design/gdd.md (new The Monolith section). production/balance-notes.md (I55 section).
+- Verification: 154/154 + build 0 (was 148). Browser: boss spawns at wave 5, obelisk mesh visible + MONOLITH HP bar at 100%; ring fires at 2.0s with exactly 8 S rocks (radial-outward verified in unit test); 40-bullet kill pays +1000 (probe delta 1015 = 1000 + 15 near-miss in window), 4 M splits at the death position, bossDeath SFX fired (delta 1), mesh + HP bar hide on death; contact costs a life and the boss survives (unit). 0 console errors/warnings. Screenshot .evidence/i55-monolith-boss.png.
+- Result: DONE
+- Follow-up: I56 enemy bullets (ST-056) - separate pool, distinct look, damage the ship; boss/mines can fire them.

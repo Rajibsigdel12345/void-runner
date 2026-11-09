@@ -14,6 +14,10 @@ const CUES = {
   swish:     { type: 'sine',     f0: 240, f1: 90,  dur: 0.16, gain: 0.09, min: 0.15, noise: 0.12 },
   // ST-054 mine drone pop: a short percussive boom (noise tail + low square thump)
   mine:      { type: 'square',   f0: 180, f1: 60,  dur: 0.22, gain: 0.32, min: 0.05, noise: 0.16 },
+  // ST-055 the Monolith: low spawn drone, ring-burst crack, big death boom
+  bossSpawn: { type: 'sine',   f0: 110, f1: 55,  dur: 0.6,  gain: 0.30, min: 0.4 },
+  bossRing:  { type: 'sine',   f0: 300, f1: 120, dur: 0.25, gain: 0.18, min: 0.15, noise: 0.15 },
+  bossDeath: { type: 'square', f0: 80,  f1: 30,  dur: 0.7,  gain: 0.50, min: 0.3,  noise: 0.5 },
   bomb:      { type: 'sine',     f0: 90,  f1: 40,  dur: 0.5,  gain: 0.7,  min: 0.1,  noise: 0.4 },
   wave:      { type: 'sine',     f0: 523, f1: 659, dur: 0.25, gain: 0.16, min: 0.1 },
   // ST-029 stingers: rising arpeggio on wave clear, falling motif on game over

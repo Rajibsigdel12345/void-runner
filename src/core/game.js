@@ -4,6 +4,7 @@ import { Ship } from './ship.js';
 import { Weapons } from './weapons.js';
 import { AsteroidField } from './asteroids.js';
 import { MineField } from './mines.js';
+import { Monolith } from './boss.js';
 import { bulletHitRock, shipHitRock } from './collision.js';
 import { CONFIG } from './config.js';
 import { v2 } from './math.js';
@@ -21,6 +22,7 @@ export class World {
     this.weapons = new Weapons(cfg);
     this.field = new AsteroidField(rng, cfg);
     this.mines = new MineField(rng, cfg); // ST-054
+    this.boss = null; // ST-055
     this.events = [];
     this.scoreKeeper = new ScoreKeeper(cfg);
     this.waves = new WaveDirector(rng, this.field, cfg);
@@ -77,11 +79,15 @@ export class World {
     if (wv.startedWave) {
       this.emit('wave', { n: wv.startedWave, mod: this.waves.activeMod }); // ST-051
       this.spawnMinesForWave(wv.startedWave); // ST-054
+      this.spawnBossForWave(wv.startedWave); // ST-055
     }
     if (wv.waveCleared) this.emit('waveCleared', { n: wv.waveCleared });
     this.mines.step(dt, this.ship.pos); // ST-054
+    if (this.boss) { if (this.boss.step(dt, this.ship.pos) === 'ring') this.bossRingBurst(); } // ST-055
     this.resolveBulletMines(); // ST-054
+    this.resolveBulletBoss(); // ST-055
     this.resolveShipMines(); // ST-054
+    this.resolveShipBoss(); // ST-055
     this.resolveBulletRocks();
     this.resolveShipRocks();
     this.resolveNearMisses(); // ST-053 (after ship hits: a hit-rock is destroyed, no double award)
@@ -199,6 +205,80 @@ export class World {
     }
   }
 
+  /** ST-055: spawn the Monolith on every multiple of everyWave, in addition to wave content.
+   * No-op on other waves or while a boss is alive. Spawns at the rim, re-rolled if too close to the ship. */
+  spawnBossForWave(wave) {
+    const b = this.cfg.boss;
+    if (wave % b.everyWave !== 0 || this.boss) return;
+    const R = this.cfg.arena.radius - b.radius;
+    let pos = null, tries = 0;
+    do {
+      const a = this.rng.next() * Math.PI * 2;
+      pos = v2(Math.cos(a) * R, Math.sin(a) * R);
+      tries++;
+    } while (Math.hypot(pos.x - this.ship.pos.x, pos.y - this.ship.pos.y) < 10 && tries < 8);
+    this.boss = new Monolith(this.rng, this.cfg, pos);
+    this.emit('bossSpawn', { pos: { x: pos.x, y: pos.y } });
+  }
+
+  /** ST-055: the boss bursts a ring of S rocks fired radially outward from its position. */
+  bossRingBurst() {
+    const b = this.cfg.boss;
+    const sp = this.cfg.asteroid.sizes.S.speed[0];
+    const px = this.boss.pos.x, py = this.boss.pos.y;
+    for (let i = 0; i < b.ringCount; i++) {
+      const rock = this.field.spawn('S', 1, { x: px, y: py });
+      if (!rock) break; // field at its concurrent cap
+      const a = (i / b.ringCount) * Math.PI * 2;
+      rock.vel = v2(Math.cos(a) * sp, Math.sin(a) * sp);
+    }
+    this.emit('bossRing', { pos: { x: px, y: py } });
+  }
+
+  /** ST-055: bullets damage the boss (1 each); the killing hit pays the headline score. */
+  resolveBulletBoss() {
+    const boss = this.boss;
+    if (!boss || !boss.alive) return;
+    for (const blt of this.weapons.bullets) {
+      if (blt.dead) continue;
+      if (Math.hypot(boss.pos.x - blt.pos.x, boss.pos.y - blt.pos.y) < boss.radius + blt.radius) {
+        this.weapons.markHit(blt.id);
+        if (boss.hit()) this.bossDeath();
+      }
+    }
+    this.weapons.compact();
+  }
+
+  /** ST-055: the boss dies - headline score (feeds the combo), splits into M rocks, FX event. */
+  bossDeath() {
+    const b = this.cfg.boss;
+    const px = this.boss.pos.x, py = this.boss.pos.y;
+    const pts = this.scoreKeeper.kill(b.score, this.time);
+    this.emit('kill', { pos: { x: px, y: py }, size: 'boss', points: pts,
+      combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, boss: true });
+    for (let i = 0; i < b.splitCount; i++) this.field.spawn('M', 1, { x: px, y: py });
+    this.emit('bossDeath', { pos: { x: px, y: py } });
+    this.boss = null;
+  }
+
+  /** ST-055: the boss touching the ship costs a life (same flow as a rock hit). The boss survives. */
+  resolveShipBoss() {
+    if (this.ship.isInvulnerable || this.lives <= 0) return;
+    const boss = this.boss;
+    if (!boss || !boss.alive) return;
+    if (Math.hypot(boss.pos.x - this.ship.pos.x, boss.pos.y - this.ship.pos.y) < boss.radius + this.cfg.ship.radius) {
+      const livesLeft = this.livesMgr.damage();
+      this.scoreKeeper.onDamage();
+      const nx = (this.ship.pos.x - boss.pos.x), ny = (this.ship.pos.y - boss.pos.y);
+      const n = Math.hypot(nx, ny) || 1;
+      this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+      this.ship.damage(v2(nx / n, ny / n));
+      if (livesLeft <= 0) {
+        this.game.to(STATE.GAME_OVER);
+        this.emit('gameover', { score: this.score });
+      }
+    }
+  }
   /** ST-053: near-miss bonus - flat points + swish when a rock grazes the ship.
    * One award per approach: a rock re-arms only after leaving an extended ring.
    * Skipped while invulnerable or out of lives. */
@@ -224,6 +304,7 @@ export class World {
     this.weapons.clear();
     this.field.clear();
     this.mines.clear();
+    this.boss = null; // ST-055
     this.scoreKeeper.reset();
     this.waves.reset();
     this.powerups.clear();

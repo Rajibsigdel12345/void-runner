@@ -85,3 +85,20 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
   hazard, not the loot source - drops stay rock-gated).
 - Determinism: spawn bearing + initial wobble come from the world RNG stream (like the
   golden roll), homing is a pure state function - pinned-seed trajectory test guards it.
+## I55 - monolith boss (ST-055)
+- HP 40 = 7.3s of sustained base fire (5.5 shots/s) or 3.6s under RAPID (11 shots/s): a boss fight
+  is a 5-15s commitment, not a nuisance. 1 dmg per bullet keeps the kill purely skill/timing
+  gated (no crits, no weak points yet - enemy bullets in ST-056 add the dodge-while-firing loop).
+- Ring of 8 S every 2s: a 7.3s base-fire kill lets ~3 rings out (24 S rocks); a cautious 15s
+  fight lets ~7 out (56). The field's maxConcurrent (24) is the safety net - late rings skip
+  rocks when the field is full, so pressure plateaus instead of snowballing. Density interaction
+  (boss + ring + wave content + mines all on wave 5/10) is flagged for the I90 playtest.
+- score 1000 = the headline number, ~5-10x a wave's worth of kills: killing the thing that
+  dominated the screen must feel like a wave-clear. Feeds the combo (a 40-hit chain caps the
+  multiplier, so the last kills pay the most - risk is rewarded).
+- Contact fairness: boss contact uses the same 1.6s invuln as rocks (F2 watch item). With a
+  ring + boss + dense wave on screen, invuln-window fairness matters more here than anywhere
+  else - carried to I90/I92.
+- Determinism: spawn bearing comes from the world RNG stream (re-rolled if <10u from ship);
+  homing is a pure state function; ring geometry is deterministic (angle = i/ringCount*2pi);
+  the pinned-seed trajectory test (seed 58) guards the whole system.

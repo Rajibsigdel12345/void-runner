@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E7 (extended content/UX/hardening, I51-I100)
-- current_story: ST-055
-- current_iteration: I55
+- current_story: ST-056
+- current_iteration: I56
 - branch: main
-- notes: I54 committed (mine drones; 148/148). Next: Monolith boss (ST-055).
+- notes: I55 committed (monolith boss; 154/154). Next: enemy bullets (ST-056).

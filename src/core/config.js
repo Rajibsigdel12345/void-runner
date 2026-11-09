@@ -61,6 +61,21 @@ export const CONFIG = {
     inwardAccel: 2.0      // 'inward': u/s^2 pull of all rocks toward the arena center
   },
 
+  boss: {
+    // ST-055: the Monolith - a large slow-homing boss that appears on every
+    // multiple of everyWave. Takes 1 damage per bullet; periodically bursts a
+    // ring of S rocks; on death splits into 4 M rocks and pays a big score.
+    everyWave: 5,    // waves 5, 10, 15, ...
+    maxHp: 40,
+    radius: 3.4,     // big, slow, imposing
+    speed: 1.6,      // slow drift toward the ship (always dodgeable)
+    turn: 0.8,       // sluggish heading change rad/s
+    ringEvery: 2.0,  // seconds between ring bursts
+    ringCount: 8,    // S rocks per burst (capped by the field's maxConcurrent)
+    splitCount: 4,   // M rocks on death
+    score: 1000      // kill reward (the big one)
+  },
+
   mine: {
     // ST-054: mine drones - slow homing mines that chase the ship. 1 bullet kills
     // one; touching the ship costs a life. Slower than ship.maxSpeed so they can

@@ -6,6 +6,8 @@ import { createInput } from './render/input.js';
 import { createBulletPool } from './render/bulletPool.js';
 import { createAsteroidRenderer } from './render/asteroidRenderer.js';
 import { createMineRenderer } from './render/mineMesh.js';
+import { createBossMesh } from './render/bossMesh.js';
+import { createBossHealth } from './render/bossHealth.js';
 import { createPowerupRenderer } from './render/powerupMesh.js';
 import { createShieldRing } from './render/shieldRing.js';
 import { createParticles } from './render/particles.js';
@@ -70,6 +72,8 @@ scene.add(shipMesh.group);
 const bullets = createBulletPool(scene);
 const rockRenders = createAsteroidRenderer(scene);
 const mineRenders = createMineRenderer(scene); // ST-054
+const bossMesh = createBossMesh(scene); // ST-055
+const bossHealth = createBossHealth(document.body); // ST-055
 const powerupRenders = createPowerupRenderer(scene);
 const shieldRing = createShieldRing(scene);
 const banner = createWaveBanner(document.body);
@@ -95,7 +99,7 @@ let fxCount = 0;
 let motionOff = false;
 let liveSettings = storage.getSettings(); // ST-026: settings panel keeps this fresh (audio consumes in I27)
 // Audio (ST-027): WebAudio synth, initialized on first user gesture.
-const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', waveCleared: 'cleared', gameover: 'gameover', nearmiss: 'swish', mineExplode: 'mine' };
+const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', waveCleared: 'cleared', gameover: 'gameover', nearmiss: 'swish', mineExplode: 'mine', bossSpawn: 'bossSpawn', bossRing: 'bossRing', bossDeath: 'bossDeath' };
 const audio = createAudio();
 audio.setVolume(liveSettings.volume);
 audio.setSfx(liveSettings.sfx);
@@ -174,7 +178,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, rockRenders, mineRenders, fpsMeter, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, rockRenders, mineRenders, bossMesh, bossHealth, fpsMeter, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -231,12 +235,15 @@ function tick(dt, intent) {
     const cue = SFX_CUES[e.type]; if (cue) audio.sfx(cue, e.data && e.data.pos ? e.data.pos : null);
     if (e.type === 'wave') banner.showWave(e.data.n, e.data.mod);
     else if (e.type === 'waveCleared') banner.showCleared(e.data.n);
-    else if (e.type === 'kill') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 || e.data.golden, gold: !!e.data.golden }); // ST-030/052
+    else if (e.type === 'kill') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 || e.data.golden || e.data.boss, gold: !!e.data.golden }); // ST-030/052
     else if (e.type === 'nearmiss') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points); // ST-053 (plain small popup)
     if (!motionOff) {
       if (e.type === 'kill') particles.burst(e.data.pos.x, e.data.pos.y, { count: e.data.golden ? Math.ceil(fxCount * 1.5) : fxCount, color: e.data.golden ? 0xffe9a0 : 0xffd27a, speed: 9, life: 0.5 }); // ST-052
       else if (e.type === 'nearmiss') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.max(4, Math.ceil(fxCount * 0.25)), color: 0x7fd4ff, speed: 5, life: 0.3 }); // ST-053 subtle graze wisp
       else if (e.type === 'mineExplode') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xff5a3c, speed: 10, life: 0.5 }); shake.trigger(0.4); flashA = Math.min(0.8, flashA + 0.25); } // ST-054
+      else if (e.type === 'bossSpawn') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xb18cff, speed: 8, life: 0.7 }); shake.trigger(0.7); flashA = Math.min(0.8, flashA + 0.4); } // ST-055
+      else if (e.type === 'bossRing') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.6), color: 0x9d7bff, speed: 7, life: 0.4 }); // ST-055
+      else if (e.type === 'bossDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount * 2, color: 0xfff0b8, speed: 14, life: 0.8 }); shake.trigger(1.0); flashA = Math.min(0.8, flashA + 0.5); } // ST-055
       else if (e.type === 'hit') {
         particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xff6b57, speed: 11, life: 0.45 });
         shake.trigger(CONFIG.fx.shakeHit);
@@ -276,6 +283,8 @@ function syncVisuals(dt) {
   bullets.sync(world.weapons);
   rockRenders.sync(world.field);
   mineRenders.sync(world.mines, simT); // ST-054
+  bossMesh.sync(world.boss, simT); // ST-055
+  bossHealth.sync(world.boss); // ST-055
   powerupRenders.sync(world.powerups, dt);
   shieldRing.sync(world, dt);
   particles.sync(dt);
