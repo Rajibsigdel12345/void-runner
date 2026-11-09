@@ -1,7 +1,7 @@
 ﻿{
   "name": "void-runner",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "Void Runner - 3D arcade asteroid survival shooter (three.js, no bundler: import maps + vendored modules)",
   "scripts": {

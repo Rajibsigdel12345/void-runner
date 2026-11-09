@@ -24,3 +24,10 @@ Window: single agent (Codex) continuous loop. Cadence: 1 story == 1 iteration
 ## Risks & mitigations
 - Big iterations -> split at implementation time; each commit is independently green.
 - Browser smoke flaky -> smoke script checks console + a screenshot-free DOM assertion.
+
+## Closeout (I50)
+All sprint acceptance criteria met:
+- npm test green + npm run build green at every iteration (I01-I50, no exceptions).
+- production/iterations.md: 50 entries (I01-I50), each with goal / changed / verification / result.
+- Vertical slice gate PASS documented (I45, production/gates.md); final regression green (I46); release checklist verdict SHIP (I49); shipped as v0.2.0.
+Carryover to E7: F2/F4 watch items (I90/I92), R5 physical touch, R6 adaptive quality (ST-073+).

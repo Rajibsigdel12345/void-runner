@@ -1,6 +1,8 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+
+## [0.2.0] - 2026-11-13 (M1: vertical slice SHIP)
 ### Added
 - I01: project scaffold (Vite + three.js), renderer boot, polar grid arena, resize handling.
 - I02: seeded RNG (mulberry32) + math utils (damp, v2 helpers, angle helpers) with unit tests.
@@ -54,3 +56,4 @@
 - I47: docs - README + architecture README rewritten to current layout; CHANGELOG coverage I01-I46 confirmed (ST-047).
 - I48: milestone review + retrospective - M1 (E1-E6, I01-I48) closed: transition PASS to E7, action items logged, probe notes consolidated, AGENTS.md accuracy fix (ST-048).
 - I49: release checklist v1 - dist trimmed 22.9MB -> 1.4MB (vendor whitelist in build.mjs), preview-server smoke green (load ~0.5s, 0 console errors, bloom active), verdict SHIP (ST-049).
+- I50: final polish sweep + E6 closing - v0.2.0 (version + CHANGELOG section), timeline/sprint closeout, repo audit clean, all suites green (ST-050).

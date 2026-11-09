@@ -331,3 +331,11 @@ One entry per iteration. Format:
 - Verification: 122/122 + build 0. Preview server (serves dist/ only): menu renders (DOMContentLoaded 507ms, full load 519ms), Enter -> PLAYING, wave 1 spawned (5 rocks), no NaN over 2s live play, bloom composer path active (bloom.enabled true - EffectComposer/UnrealBloomPass resolve from the trimmed vendor), 0 console errors + 0 warnings. Screenshot .evidence/i49-preview-playing.png.
 - Result: DONE (verdict SHIP)
 - Follow-up: I50 final polish sweep + E6 closing commit (ST-050).
+
+## I50 - final polish sweep + E6 closing (ST-050)
+
+- Goal: closing sweep before E7 - release hygiene (version + changelog section), stale docs refresh, repo audit, final green verification; this is the E6/Sprint-1 closing commit.
+- Changed: package.json + package-lock.json (version 0.1.0 -> 0.2.0, the SHIP verdict from I49). CHANGELOG.md (I01-I49 entries promoted under a new "## [0.2.0] - 2026-11-13 (M1: vertical slice SHIP)" section; fresh [Unreleased] head for E7). production/timeline.md (M1 close + sprint close + E7 start entries). production/sprints/sprint-1.md (Closeout section: all acceptance criteria met).
+- Verification: repo audit - no unreferenced src modules, no TODO/FIXME/HACK in src, .gitignore covers dist/evidence/caches, all 17 test files map to modules. Suite A green: 122/122 + build 0. Browser sanity on the shipped dist (preview server): fresh load 0 console errors/warnings, start -> PLAYING, live play finite (no NaN).
+- Result: DONE (E6 + Sprint 1 closed at v0.2.0)
+- Follow-up: I51 begins E7A content (ST-051) - first content slice per production/stories.md.
