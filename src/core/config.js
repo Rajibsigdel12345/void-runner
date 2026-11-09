@@ -40,17 +40,18 @@ export const CONFIG = {
     speedPerWave: 0.06, // speedMult = 1 + n*speedPerWave (capped)
     speedCap: 1.9,
     maxConcurrentCap: 24,
-    intermission: 2.2   // seconds between waves
+    intermission: 2.2,
+    spawnMinPlayerDist: 8 // I34: rim spawn keeps at least this far from the ship
   },
 
   combo: {
-    window: 3.5,        // seconds to keep a chain alive
+    window: 4.0,        // seconds to keep a chain alive
     cap: 10,            // max combo
     step: 0.1           // multiplier per combo step (1.0x .. 1.9x)
   },
 
   powerup: {
-    dropChance: 0.22,   // chance per kill
+    dropChance: 0.25,   // chance per kill
     pickupRadius: 1.6,
     maxActiveDrops: 1,
     magnetRadius: 7,

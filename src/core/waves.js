@@ -38,7 +38,7 @@ export class WaveDirector {
   }
 
   /** @returns {{startedWave:number, waveCleared:number}} */
-  step(dt) {
+  step(dt, playerPos = null) {
     const ev = { startedWave: 0, waveCleared: 0 };
     if (this.state === 'idle') return ev;
 
@@ -57,7 +57,10 @@ export class WaveDirector {
     // active: trickle-spawn up to the concurrent limit
     let guard = 0;
     while (this.toSpawn > 0 && this.field.count < this.concurrentLimit && guard++ < 16) {
-      const rock = this.field.spawn(this.pickSize(), this.speedMult);
+      const noNear = playerPos
+        ? { x: playerPos.x, y: playerPos.y, min: this.cfg.wave.spawnMinPlayerDist }
+        : null;
+      const rock = this.field.spawn(this.pickSize(), this.speedMult, null, noNear);
       if (!rock) break; // hard cap (e.g. fragments temporarily full)
       this.toSpawn -= 1;
     }

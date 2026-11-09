@@ -8,7 +8,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 ## Core Loop (per second of play)
 1. Fly with inertia; aim with mouse; fire.
 2. Bullets shatter asteroids; big rocks split into 2-3 faster, smaller fragments.
-3. Every kill = score x combo multiplier (combo decays after 3.5s of no kills).
+3. Every kill = score x combo multiplier (combo decays after 4s of no kills).
 4. Shattered rocks sometimes drop a power-up; flying over it applies it.
 5. Hitting a rock costs a life + brief invulnerability. 0 lives = game over.
 6. Waves escalate: each wave adds density + base speed; short "WAVE N" banner.
@@ -45,10 +45,10 @@ multipliers, and grab power-ups. Survive as long as you can.
 - 2.2s intermission between waves with "WAVE n" banner.
 
 ## Combo
-- Kill within 3.5s of last kill: combo+1 (cap 10). Multiplier = 1 + 0.1*(combo-1) ... 1.0x..1.9x.
+- Kill within 4s of last kill: combo+1 (cap 10). Multiplier = 1 + 0.1*(combo-1) ... 1.0x..1.9x.
 - Combo resets on timer expiry or taking damage.
 
-## Power-ups (T2) - drop chance 22% from any kill, one at a time
+## Power-ups (T2) - drop chance 25% from any kill, one at a time
 - RAPID  (yellow): fire rate x2 for 8s
 - SPREAD (orange): 3-way shot for 8s
 - SHIELD (cyan): absorbs 1 hit; 12s or until hit

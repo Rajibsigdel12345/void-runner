@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { AsteroidField } from '../src/core/asteroids.js';
 import { RNG } from '../src/core/rng.js';
 import { CONFIG } from '../src/core/config.js';
-import { v2, v2Len } from '../src/core/math.js';
+import { v2, v2Len, v2Dist } from '../src/core/math.js';
 
 const DT = 1 / 60;
 
@@ -74,3 +74,12 @@ test('asteroids: destroyed rock is removed (no double kill)', () => {
   assert.equal(f.count, kids.length, 'count unchanged by double kill');
 });
 
+test('asteroids: spawn respects noNear player distance (I34)', () => {
+  const f = new AsteroidField(new RNG(35));
+  const player = { x: 24, y: 0 }; // hugging the +x rim
+  for (let i = 0; i < 10 && f.count < 10; i++) {
+    const r = f.spawn('L', 1, null, { x: player.x, y: player.y, min: 8 });
+    if (!r) break;
+    assert.ok(v2Dist(r.pos, player) >= 8 - 1e-9, 'rock too close: ' + v2Dist(r.pos, player).toFixed(2));
+  }
+});

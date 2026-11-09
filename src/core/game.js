@@ -71,7 +71,7 @@ export class World {
       this.emit('instant', { type: inst });
     }
     this.scoreKeeper.tick(this.time);
-    const wv = this.waves.step(dt);
+    const wv = this.waves.step(dt, this.ship.pos);
     if (wv.startedWave) this.emit('wave', { n: wv.startedWave });
     if (wv.waveCleared) this.emit('waveCleared', { n: wv.waveCleared });
     this.resolveBulletRocks();
