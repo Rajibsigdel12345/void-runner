@@ -72,3 +72,9 @@ One entry per iteration. Format:
 - Verification: npm test 40/40; build exit 0; browser: console clean, field.count=4, screenshot .evidence/i10-asteroids.png shows L/M rocks with distinct silhouettes.
 - Result: DONE
 - Follow-up: demo rocks replaced by wave logic in I14; collisions land in I11/I12.
+## I11 - Collision core (ST-011)
+- Goal: circle vs circle (touch = hit), bullet->rock first-hit, ship->rock first-hit with knock direction.
+- Changed: src/core/collision.js (new), tests/collision.test.js (new, 6 tests)
+- Verification: npm test 46/46 pass; build exit 0.
+- Result: DONE
+- Follow-up: I12 wires collisions into a World orchestrator.
