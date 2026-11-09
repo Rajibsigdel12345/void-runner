@@ -121,3 +121,11 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - Refresh: re-pickup resets the timer to a full 6s; timers never stack.
 - Boundary: a kill resolved in the same step the timer hits 0 still pays doubled (world syncs overdriveMult before powerup timers decay).
 - No new hazards; no changes to lives, waves, or other power-ups.
+
+## I58 - endless curve (ST-058)
+
+- contentCap 36: the 4+wave ramp would hit the cap at wave 32, so waves 10-31 scale exactly as pre-endless; only wave 32+ feel the ceiling.
+- intermission 2.2s -> 1.2s floor at 0.08s/wave: 1.24 at wave 22, floor reached at wave 23 - pacing pressure without ever removing the beat between waves.
+- S-share 0.30 -> 0.45 cap at 0.02/wave, capped by wave 18 (0.44 at 17, 0.45 from 18 on).
+- L:M ratio stays 3:4 inside the non-S bucket, so waves 1-9 are byte-identical in behavior to pre-I58 (existing tests pass unchanged).
+- Mines (1/wave from 5) and the boss (every 5) are already endless; the curve only adds rock-side pressure - no new hazards, no changes to lives or power-ups.

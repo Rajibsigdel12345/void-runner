@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E7 (extended content/UX/hardening, I51-I100)
-- current_story: ST-058
-- current_iteration: I58
+- current_story: ST-059
+- current_iteration: I59
 - branch: main
-- notes: I57 committed (overdrive power-up; 164/164). Next: endless difficulty curve (ST-058).
+- notes: I58 committed (endless difficulty curve; 169/169). Next: gravity vortex hazard (ST-059).

@@ -18,7 +18,7 @@ export class WaveDirector {
   start() {
     this.wave = 0;
     this.toSpawn = 0;
-    this.intermission = this.cfg.wave.intermission;
+    this.intermission = this.intermissionFor(1); // ST-058
     this.state = 'intermission';
     this.activeMod = 'none';
   }
@@ -48,6 +48,32 @@ export class WaveDirector {
     return Math.min(this.cfg.wave.maxConcurrentCap, 6 + this.cfg.wave.maxConcurrentGrowth * this.wave);
   }
 
+  /** ST-058: has the endless difficulty curve engaged for the current wave? */
+  endless() {
+    return this.wave >= this.cfg.waveEndless.first;
+  }
+
+  /** ST-058: total content for a wave - base ramp, capped once endless is on. */
+  contentFor(wave) {
+    const c = this.cfg.wave;
+    const raw = c.base + c.growth * wave;
+    return wave >= this.cfg.waveEndless.first ? Math.min(this.cfg.waveEndless.contentCap, raw) : raw;
+  }
+
+  /** ST-058: intermission before `wave` - base, shrinking toward a floor once endless. */
+  intermissionFor(wave) {
+    const c = this.cfg.waveEndless;
+    if (wave < c.first) return this.cfg.wave.intermission;
+    return Math.max(c.minIntermission, this.cfg.wave.intermission - c.intermissionStep * (wave - c.first));
+  }
+
+  /** ST-058: small-rock probability - 0.3 pre-endless, +step per wave, capped. */
+  sProb() {
+    const c = this.cfg.waveEndless;
+    if (this.wave < c.first) return 0.3;
+    return Math.min(c.sBiasCap, 0.3 + c.sBiasStep * (this.wave - c.first));
+  }
+
   pickSize() {
     const r = this.rng.next();
     if (this.activeMod === 'small') { // ST-051: S-favored wave
@@ -56,8 +82,9 @@ export class WaveDirector {
       return r2 < 0.5 ? 'L' : 'M';
     }
     if (this.wave < 3) return r < 0.5 ? 'L' : 'M'; // early waves: no S
-    if (r < 0.3) return 'L';
-    if (r < 0.7) return 'M';
+    const sP = this.sProb(); // ST-058: 0.3 pre-endless; rises per wave after
+    const rest = 1 - sP;
+    if (r < rest) return r < rest * (0.3 / 0.7) ? 'L' : 'M'; // L:M stay 3:4 within non-S
     return 'S';
   }
 
@@ -70,7 +97,7 @@ export class WaveDirector {
       this.intermission -= dt;
       if (this.intermission <= 0) {
         this.wave += 1;
-        this.toSpawn = this.cfg.wave.base + this.cfg.wave.growth * this.wave;
+        this.toSpawn = this.contentFor(this.wave); // ST-058
         this.waveElapsed = 0;
         this.state = 'active';
         this.activeMod = this.modifierFor(this.wave); // ST-051
@@ -100,14 +127,14 @@ export class WaveDirector {
 
     if (this.toSpawn === 0 && this.field.count === 0) {
       this.state = 'intermission';
-      this.intermission = this.cfg.wave.intermission;
+      this.intermission = this.intermissionFor(this.wave + 1); // ST-058
       this.waveElapsed = 0;
       ev.waveCleared = this.wave;
     } else if (this.waveElapsed >= this.cfg.wave.stallTime) {
       // I42: stall advance - the wave moves on even if rocks survive. Leftovers
       // carry into the next wave (not deleted, not sped up); no intermission.
       this.wave += 1;
-      this.toSpawn = this.cfg.wave.base + this.cfg.wave.growth * this.wave;
+      this.toSpawn = this.contentFor(this.wave); // ST-058
       this.waveElapsed = 0;
       this.activeMod = this.modifierFor(this.wave); // ST-051
       ev.stallAdvance = this.wave;

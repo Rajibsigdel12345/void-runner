@@ -397,3 +397,11 @@ One entry per iteration. Format:
 - Verification: 164/164 unit tests green; build exit 0 (159 tests before). Browser deterministic vr.advance probes: pickup (powerup event + sweep SFX + OVERDRIVE HUD chip), 6s timer, refresh no-stack, expiry to 1x, double-kill probe (baseline +100 vs +200 with OD active), 0 console errors/warnings. Screenshot .evidence/i57-overdrive.png.
 - Result: DONE
 - Follow-up: I58 endless difficulty curve (ST-058) - waves 10+ keep scaling with capped rates + banner.
+
+## I58 - endless difficulty curve (ST-058)
+
+- Goal: waves 10+ keep getting harder forever - capped content, shrinking intermissions, rising small-rock share, ENDLESS banner tag.
+- Changed: src/core/config.js, src/core/waves.js, src/core/game.js, src/render/waveBanner.js, src/main.js, tests/endless.test.js (new: 5 tests, seeds 67-70).
+- Verification: 169/169 unit tests green; build exit 0 (164 before). Browser: wave-10 boundary probe (event endless:true, 14 rocks, boss + mine spawned, intermissionFor(11)=2.12), banner DOM WAVE 10/ENDLESS at full opacity, 0 console. Screenshot .evidence/i58-endless.png.
+- Result: DONE
+- Follow-up: I59 gravity vortex hazard (ST-059) - periodic pull field that bends rocks and ship.

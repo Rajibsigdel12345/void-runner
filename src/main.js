@@ -236,7 +236,7 @@ function tick(dt, intent) {
     eventTally[e.type] = (eventTally[e.type] || 0) + 1;
     const cue = e.type === 'powerup' && e.data && e.data.type === 'overdrive' ? 'overdrive' : SFX_CUES[e.type]; // ST-057
     if (cue) audio.sfx(cue, e.data && e.data.pos ? e.data.pos : null);
-    if (e.type === 'wave') banner.showWave(e.data.n, e.data.mod);
+    if (e.type === 'wave') banner.showWave(e.data.n, e.data.mod, e.data.endless);
     else if (e.type === 'waveCleared') banner.showCleared(e.data.n);
     else if (e.type === 'kill') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 || e.data.golden || e.data.boss, gold: !!e.data.golden, od: !!e.data.overdrive }); // ST-030/052
     else if (e.type === 'nearmiss') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points); // ST-053 (plain small popup)

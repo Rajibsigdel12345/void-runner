@@ -22,7 +22,13 @@ export function createWaveBanner(root) {
   let lastCountdown = '';
   const MOD_LABELS = { fast: 'FAST ROCKS', small: 'SMALL ROCKS', inward: 'INWARD DRIFT' }; // ST-051
 
-  function startWave(n, mod) { anim = { t: 0, dur: 1.8, text: 'WAVE ' + n, subText: mod && MOD_LABELS[mod] ? MOD_LABELS[mod] : '' }; el.style.fontSize = '40px'; }
+  function startWave(n, mod, endless) {
+    const parts = []; // ST-058: ENDLESS tag, then the wave modifier label
+    if (endless) parts.push('ENDLESS');
+    if (mod && MOD_LABELS[mod]) parts.push(MOD_LABELS[mod]);
+    anim = { t: 0, dur: 1.8, text: 'WAVE ' + n, subText: parts.join(' \u00b7 ') };
+    el.style.fontSize = '40px';
+  }
   function startCleared(n) { anim = { t: 0, dur: 1.2, text: '', subText: 'WAVE ' + n + ' CLEARED' }; el.style.fontSize = '0px'; }
 
   function envelope(t, dur) {

@@ -51,6 +51,18 @@ export const CONFIG = {
     spawnMinPlayerDist: 8 // I34: rim spawn keeps at least this far from the ship
   },
 
+  waveEndless: {
+    // ST-058: endless difficulty curve from wave `first` onward. There is no
+    // final wave - pressure comes from capped content, shrinking intermissions
+    // and a rising small-rock share instead of unbounded totals.
+    first: 10,             // the curve engages from wave 10
+    contentCap: 36,        // toSpawn cap (base + growth*n would overshoot by wave 32)
+    minIntermission: 1.2,  // intermission floor (base 2.2s shrinks toward it)
+    intermissionStep: 0.08,// per-wave intermission shrinkage after `first`
+    sBiasStep: 0.02,       // per-wave small-rock probability increase
+    sBiasCap: 0.45         // small-rock probability ceiling (starts at 0.3)
+  },
+
   waveMods: {
     // ST-051: per-wave modifiers, chosen deterministically from (world seed, wave
     // number) via a derived RNG - stall-vs-clear timing cannot change the pick.

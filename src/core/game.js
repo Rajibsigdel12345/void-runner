@@ -81,7 +81,7 @@ export class World {
     this.scoreKeeper.tick(this.time);
     const wv = this.waves.step(dt, this.ship.pos);
     if (wv.startedWave) {
-      this.emit('wave', { n: wv.startedWave, mod: this.waves.activeMod }); // ST-051
+      this.emit('wave', { n: wv.startedWave, mod: this.waves.activeMod, endless: wv.startedWave >= this.cfg.waveEndless.first }); // ST-051
       this.spawnMinesForWave(wv.startedWave); // ST-054
       this.spawnBossForWave(wv.startedWave); // ST-055
     }

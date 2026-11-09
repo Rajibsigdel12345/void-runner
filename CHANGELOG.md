@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I58: endless difficulty curve (ST-058) - from wave 10 capped content (36), intermissions shrink 2.2s->1.2s floor, small-rock share 30%->45%, WAVE banner carries ENDLESS tag; 5 new tests (169/169).
 - I57: overdrive power-up (ST-057) - magenta hex drop, 2x score for 6s (kills + combo + near-miss), HUD chip + magenta popup tint + pickup sweep SFX; 5 new tests (164/164).
 - I56: enemy bullets (ST-056) - boss aimed bolts every 2.2s + in-range mine bolts (3s cadence, <7u) in a separate 24-cap pool with a distinct red glow; bolt contact costs a life; 5 new tests (159/159).
 - I55: monolith boss (ST-055) - huge slow-homing boss every 5 waves (HP 40, 1 dmg per bullet): ring of 8 S rocks every 2s, splits to 4 M rocks on death for +1000, contact costs a life; HP bar + SFX + juice; 6 new tests (154/154).
