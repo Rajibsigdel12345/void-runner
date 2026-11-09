@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I89: regression round C (ST-089) - full pre-wrap regression: node 232/232 + an extended browser run covering the Monolith boss (spawn/fire/ring/kill/split-4/score), the fast/small/inward wave modifiers (deterministic selection + applied), the full state machine (pause freeze / resume / game-over step-gate / restart), and every I81-I88 feature (audio limiter reproducing I87 at bomb 0.775 / stack 0.812, per-particle palettes + ring/radial/fountain shapes, reduced-motion gating) - no NaN, console clean, no code changes (232/232)
 - I88: UI motion pass (ST-088) - screens settle in with an eased entrance (opacity + subtle scale), score popups gain a punch-in scale pop + eased rise + lingering fade, and the wave banner eases in/out with a slide-up into place; all new movement is reduced-motion gated (opacity fades still apply) (232/232)
 - I87: sound-level pass (ST-087) - the master chain now ends in a true-peak limiter so no isolated cue or worst-case stacking can clip the device (an isolated bomb at ~1.02 pre-limiter now lands at 0.77), and cue gains are organized into three weight tiers with the loudest impact cues trimmed for headroom; clean ~4x impact-to-background dynamic range (232/232)
 - I86: per-entity particle palettes + burst shapes (ST-086) - every entity/event gets a config-driven color ramp (10 palettes) and bursts gain radial/ring/fountain shapes - ring shockwaves for boss beats/bomb/shield, an upward fountain for the overdrive pickup; backward-compatible (232/232)
