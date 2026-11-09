@@ -38,6 +38,7 @@ export function createAudio() {
   let ctx = null;
   let master = null;
   let noiseBuf = null;
+  let meterNode = null, meterBuf = null; // ST-084: master-chain level probe
   let volume = 0.7;
   let sfxOn = true;
   let muted = false;
@@ -66,7 +67,11 @@ export function createAudio() {
     comp.attack.value = 0.003;
     comp.release.value = 0.25;
     master.connect(comp);
-    comp.connect(ctx.destination);
+    const makeup = ctx.createGain(); makeup.gain.value = 1.4; // ST-084: lift level after compression (comp only takes it down)
+    comp.connect(makeup);
+    meterNode = ctx.createAnalyser(); meterNode.fftSize = 1024; meterBuf = new Float32Array(1024); // ST-084: sink (does not forward)
+    makeup.connect(meterNode);
+    makeup.connect(ctx.destination);
     applyGain();
     // one shared white-noise buffer (0.5s) for percussive tails
     noiseBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.5), ctx.sampleRate);
@@ -78,6 +83,15 @@ export function createAudio() {
   function setSfx(on) { sfxOn = on === true; }
   function setMuted(m) { muted = m === true; applyGain(); }
   function state() { return ctx ? ctx.state : 'uninitialized'; }
+
+  /** ST-084: master-chain level probe (post makeup, pre device). {peak, rms} in [-1,1]. */
+  function meter() {
+    if (!meterNode) return null;
+    meterNode.getFloatTimeDomainData(meterBuf);
+    let peak = 0, sum = 0;
+    for (let i = 0; i < meterBuf.length; i++) { const v = meterBuf[i]; const a = Math.abs(v); if (a > peak) peak = a; sum += v * v; }
+    return { peak, rms: Math.sqrt(sum / meterBuf.length) };
+  }
 
   // ST-083: ambience bed - a very quiet detuned low drone with a slow "breathing"
   // LFO, on its own gain bus under the master. sfx() sidechain-ducks it so cues
@@ -182,5 +196,5 @@ export function createAudio() {
     return true;
   }
 
-  return { init, setVolume, setSfx, setMuted, state, sfx, ambience, ambOn: () => !!ambBus, ambLevel: () => (ambBus ? ambBus.gain.value : null), played, lastPan: () => lastPan, get volume() { return volume; } };
+  return { init, setVolume, setSfx, setMuted, state, sfx, ambience, ambOn: () => !!ambBus, ambLevel: () => (ambBus ? ambBus.gain.value : null), meter, played, lastPan: () => lastPan, get volume() { return volume; } };
 }

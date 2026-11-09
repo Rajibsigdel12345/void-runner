@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I84: audio master-chain pass (ST-084) - post-compressor makeup gain (1.4x) restores loudness after limiting, plus a post-makeup master level-meter probe (peak/rms) as the base for the sound-level pass; stereo pan math verified in-browser (+0.4 / -0.4 at x=+13 / -13) (232/232)
 - I83: audio polish (ST-083) - quiet space-drone ambience bed that sidechain-ducks under every SFX, low tritone Monolith stinger, 4-note wave-clear jingle, fuller near-miss whoosh; ambience runs only in play (232/232)
 - I82: dynamic FOV + speed-scaled look-ahead (ST-082) - FOV kick on bomb/boss death (6/8 deg) plus a speed-proportional FOV boost and look-ahead that leans the camera into the motion; all config-driven (232/232)
 - I81: hit-stop + camera punch (ST-081) - boss death and bomb blast briefly freeze the sim (0.09/0.07s, no catch-up) while the camera gets a directed punch on top of shake; pure-core punch envelope, 5 new unit tests, browser-measured freeze plateaus (228/228)
