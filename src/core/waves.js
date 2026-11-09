@@ -89,7 +89,11 @@ export class WaveDirector {
       const noNear = playerPos
         ? { x: playerPos.x, y: playerPos.y, min: this.cfg.wave.spawnMinPlayerDist }
         : null;
-      const rock = this.field.spawn(this.pickSize(), this.speedMult, null, noNear);
+      const g = this.cfg.asteroid.golden; // ST-052: rare golden rock (rim spawns only)
+      const gold = this.wave >= g.minWave && this.rng.chance(g.chance);
+      let sm = this.speedMult;
+      if (gold) sm *= g.speedMult;
+      const rock = this.field.spawn(this.pickSize(), sm, null, noNear, gold);
       if (!rock) break; // hard cap (e.g. fragments temporarily full)
       this.toSpawn -= 1;
     }

@@ -29,6 +29,8 @@ export function createAsteroidRenderer(scene) {
     ];
   }
   const mat = new THREE.MeshStandardMaterial({ color: 0x8a7f72, roughness: 0.95, metalness: 0.05, flatShading: true });
+  // ST-052: golden rock - bright emissive so bloom (High FX) makes it glow.
+  const matGold = new THREE.MeshStandardMaterial({ color: 0xffc94d, emissive: 0xffa018, emissiveIntensity: 1.6, roughness: 0.3, metalness: 0.55, flatShading: true });
   const pool = [];
   for (let i = 0; i < max; i++) {
     const m = new THREE.Mesh(geos.L[0], mat);
@@ -43,6 +45,7 @@ export function createAsteroidRenderer(scene) {
       if (r.dead || i >= max) continue;
       const m = pool[i++];
       m.geometry = geos[r.size][r.variant];
+      m.material = r.golden ? matGold : mat; // ST-052
       m.position.set(r.pos.x, 0.4, r.pos.y);
       m.rotation.set(r.rot * 0.7, r.rot, r.rot * 0.31);
       m.visible = true;

@@ -41,3 +41,17 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
   bounds the displacement.
 - Selection: 1/3 each, pure function of (world seed, wave) - no RNG stream perturbation,
   so existing seeded test streams are unaffected.
+## I52 - golden asteroid (ST-052)
+- chance 0.05 per eligible rim spawn: at concurrent 12-24 with ~6-12 live spawns per wave
+  the expected goldens per wave is low (0.3-0.6); a run of 1-3 goldens per 3 waves feels
+  rare-but-regular. Watch: if playtest v2 (I90) reports "never see one", bump 0.05 -> 0.08.
+- speedMult 1.35 on top of the ramp (wave 3: 1.18x1.35 = 1.59): chaseable early, spicy late
+  (ramp 2.1 -> 2.84x at wave 18+) - intentional: goldens in dense fast waves are the risk
+  reward the GDD promises. Watch: late-game goldens may be near-unavoidable; retune down
+  to 1.2 before I92 if clustering complaints (F2) persist.
+- scoreMult 5: a golden M = 250 (plain S = 100), so one golden is worth 2.5 small rocks -
+  strong but not game-breaking vs the combo cap (1.9x); no separate drop/loot hook yet.
+- minWave 3 keeps the teaching waves (1-2) visually clean; splits are never golden so the
+  5x cannot chain through fragment storms (max 1 golden per rim spawn).
+- No new RNG draws beyond one chance() per eligible spawn (shared world stream - seeded
+  streams shift from this point; pinned tests use their own seeds). Determinism preserved.

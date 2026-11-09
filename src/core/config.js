@@ -30,7 +30,13 @@ export const CONFIG = {
       S: { radius: 0.7, speed: [3.8, 5.8], score: 100, splits: [],     child: null }
     },
     spin: [0.4, 1.8],   // rad/s tumble range
-    maxConcurrent: 24
+    maxConcurrent: 24,
+    golden: {           // ST-052: rare glowing rock - faster, worth 5x
+      chance: 0.05,     // per rim-spawn roll in eligible waves (splits are never golden)
+      speedMult: 1.35,  // extra spawn speed on top of the wave ramp
+      scoreMult: 5,     // score multiplier on kill
+      minWave: 3        // waves 1-2 stay plain (teach the base loop first)
+    }
   },
 
   wave: {

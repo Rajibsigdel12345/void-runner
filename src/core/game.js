@@ -99,9 +99,9 @@ export class World {
     const targets = this.field.rocks.slice();
     for (const r of targets) {
       if (!this.field.shatter(r.id)) continue;
-      const base = this.cfg.asteroid.sizes[r.size].score;
+      const base = this.cfg.asteroid.sizes[r.size].score * (r.golden ? this.cfg.asteroid.golden.scoreMult : 1); // ST-052
       const points = this.scoreKeeper.kill(base, this.time);
-      this.emit('kill', { pos: { x: r.pos.x, y: r.pos.y }, size: r.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier });
+      this.emit('kill', { pos: { x: r.pos.x, y: r.pos.y }, size: r.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, golden: !!r.golden });
       const drop = this.powerups.maybeDrop({ x: r.pos.x, y: r.pos.y });
       if (drop) this.emit('powerupDrop', { type: drop.type, pos: { x: drop.pos.x, y: drop.pos.y } });
     }
@@ -115,10 +115,10 @@ export class World {
       if (id == null) continue;
       const rock = this.field.rocks.find(r => r.id === id);
       this.weapons.markHit(b.id);
-      const base = this.cfg.asteroid.sizes[rock.size].score;
+      const base = this.cfg.asteroid.sizes[rock.size].score * (rock.golden ? this.cfg.asteroid.golden.scoreMult : 1); // ST-052
       this.field.destroy(id);
       const points = this.scoreKeeper.kill(base, this.time);
-      this.emit('kill', { pos: { x: rock.pos.x, y: rock.pos.y }, size: rock.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier });
+      this.emit('kill', { pos: { x: rock.pos.x, y: rock.pos.y }, size: rock.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, golden: !!rock.golden });
       const drop = this.powerups.maybeDrop({ x: rock.pos.x, y: rock.pos.y });
       if (drop) this.emit('powerupDrop', { type: drop.type, pos: { x: drop.pos.x, y: drop.pos.y } });
     }

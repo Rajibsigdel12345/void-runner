@@ -21,7 +21,7 @@ export function createScorePopups(root, camera) {
     ].join(';');
     root.appendChild(el);
     els.push(el);
-    items.push({ t: 0, x: 0, y: 0, active: false, big: false });
+    items.push({ t: 0, x: 0, y: 0, active: false, big: false, gold: false });
   }
 
   // add(x, y, text, {big}): world coords, y is the arena z axis.
@@ -32,11 +32,11 @@ export function createScorePopups(root, camera) {
       it = items[0];
       for (const o of items) if (o.t > it.t) it = o;
     }
-    it.x = x; it.y = y; it.t = 0; it.active = true; it.big = !!(opts && opts.big);
+    it.x = x; it.y = y; it.t = 0; it.active = true; it.big = !!(opts && opts.big); it.gold = !!(opts && opts.gold);
     const el = els[items.indexOf(it)];
     el.textContent = text;
     el.style.fontSize = it.big ? '22px' : '15px';
-    el.style.color = it.big ? '#ffd27a' : '#cfe4ff';
+    el.style.color = it.gold ? '#ffe27a' : it.big ? '#ffd27a' : '#cfe4ff';
   }
 
   function clear() {

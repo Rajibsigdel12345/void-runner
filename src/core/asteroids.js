@@ -11,7 +11,7 @@ export class AsteroidField {
   }
 
   /** Spawn a rock at the arena rim heading inward, or at an explicit position (splits). */
-  spawn(size, speedMult = 1, at = null, noNear = null) {
+  spawn(size, speedMult = 1, at = null, noNear = null, golden = false) {
     const a = this.cfg.asteroid;
     if (this.rocks.length >= a.maxConcurrent) return null;
     const spec = a.sizes[size];
@@ -46,6 +46,7 @@ export class AsteroidField {
       rot: this.rng.next() * Math.PI * 2,
       variant: this.rng.int(0, 2),
       speedMult,
+      golden,
       dead: false,
     };
     this.rocks.push(rock);

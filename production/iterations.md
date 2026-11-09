@@ -346,4 +346,12 @@ One entry per iteration. Format:
 - Verification: 130/130 + build 0 (was 122). Browser: modifierFor deterministic (1-2 none, 3-6 fast, 7-9 inward, 13 small); INWARD wave 7 parked rock (12,0) vel.x -0.5 + banner "INWARD DRIFT"; FAST wave 3 speedMult 1.652 (exact 1.18x1.4) + banner "FAST ROCKS"; SMALL wave 13 banner "SMALL ROCKS"; 0 console errors/warnings. Screenshot .evidence/i51-wavemods-banner.png.
 - Result: DONE
 - Follow-up: I52 golden asteroid (ST-052) - rare, 5x score, faster, glowing.
+## I52 - golden asteroid (ST-052)
+
+- Goal: ST-052 E7A content - golden asteroid: rare (5%) glowing rim-spawn rock from wave 3, 35% faster, 5x score, never from splits.
+- Changed: src/core/config.js (NEW asteroid.golden block). src/core/asteroids.js (spawn() golden flag). src/core/waves.js (per-rim-spawn roll, minWave-gated, speed boost). src/core/game.js (5x base score on both kill paths; kill event carries golden flag). src/render/asteroidRenderer.js (matGold emissive material, pool material swap in sync). src/render/scorePopups.js (gold opt, #ffe27a). src/main.js (golden kills: big+gold popup, particle burst 1.5x count / gold tint; __vr now exposes rockRenders). tests/golden.test.js (NEW, 6 tests, seeds 46-49). design/gdd.md (Asteroids section). production/balance-notes.md (I52 section).
+- Verification: 136/136 + build 0 (was 130). Browser: pool material swap verified (2 golden rocks render emissive 0xffa018); director roll rate 91/2000 = 4.55% (expected 5%, within 1 sigma); live-loop kills golden M +250 (50x5) and golden S +500 (100x5); glow visually confirmed (FX high) at .evidence/i52-golden-rock.png; 0 console errors/warnings.
+- Result: DONE
+- Follow-up: I53 near-miss bonus (ST-053) - close pass = small points + swish.
+
 

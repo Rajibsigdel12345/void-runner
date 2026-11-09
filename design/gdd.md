@@ -38,6 +38,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 - Score: S=100, M=50, L=25 (smaller = more points, reward risk).
 - Motion: constant drift (per-size base speed) + slow tumble; no steering.
 - Spawn: outside visible area, inside arena; capped concurrent count per wave.
+- Golden variant (ST-052): from wave 3 each rim spawn has a 5% chance to be GOLDEN - a glowing gold rock that flies 35% faster and pays 5x its size score on kill (popup flashes gold, bigger burst). Splits are never golden; golden fragments are normal rocks. Rare reward for chasing a fast target.
 
 ## Waves & Difficulty
 - Wave n: startAsteroids = 4 + n, maxConcurrent = 6 + 2n (cap 24), speedMult = 1 + 0.06n (cap 2.1).

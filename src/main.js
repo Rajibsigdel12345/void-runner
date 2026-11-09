@@ -172,7 +172,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, fpsMeter, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, rockRenders, fpsMeter, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -229,9 +229,9 @@ function tick(dt, intent) {
     const cue = SFX_CUES[e.type]; if (cue) audio.sfx(cue, e.data && e.data.pos ? e.data.pos : null);
     if (e.type === 'wave') banner.showWave(e.data.n, e.data.mod);
     else if (e.type === 'waveCleared') banner.showCleared(e.data.n);
-    else if (e.type === 'kill') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 }); // ST-030
+    else if (e.type === 'kill') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 || e.data.golden, gold: !!e.data.golden }); // ST-030/052
     if (!motionOff) {
-      if (e.type === 'kill') particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xffd27a, speed: 9, life: 0.5 });
+      if (e.type === 'kill') particles.burst(e.data.pos.x, e.data.pos.y, { count: e.data.golden ? Math.ceil(fxCount * 1.5) : fxCount, color: e.data.golden ? 0xffe9a0 : 0xffd27a, speed: 9, life: 0.5 }); // ST-052
       else if (e.type === 'hit') {
         particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, color: 0xff6b57, speed: 11, life: 0.45 });
         shake.trigger(CONFIG.fx.shakeHit);

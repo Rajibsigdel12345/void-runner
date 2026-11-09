@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I52: golden asteroid (ST-052) - rare 5% rim-spawn glowing rock (wave 3+), 35% faster, 5x score, gold popup + bigger burst; 6 new tests (136/136).
 - I51: wave modifiers (ST-051) - per-wave fast/small/inward picks, deterministic (seed,wave) table, banner announces each; 8 new tests (130/130).
 
 ## [0.2.0] - 2026-11-13 (M1: vertical slice SHIP)
