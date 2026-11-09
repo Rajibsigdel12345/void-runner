@@ -82,7 +82,8 @@ const shieldRing = createShieldRing(scene);
 const vortexFx = createVortexFx(scene, CONFIG.vortex); // ST-059
 const banner = createWaveBanner(document.body);
 const popups = createScorePopups(document.body, camera); // ST-030
-const hint = createTutorialHint(document.body); // ST-032
+const coarse = (window.matchMedia && window.matchMedia('(pointer:coarse)').matches) || 'ontouchstart' in window; // I71: touch detect (hint + screens)
+const hint = createTutorialHint(document.body, { touch: coarse }); // ST-032
 const hud = createHUD(document.body);
 const reticle = createReticle(scene); // I44: fire-line reticle
 let muted = false; // M key (ST-017); consumed by audio (I27)
@@ -121,11 +122,15 @@ function markAudioReady() {
   audio.init();
   audio.setMuted(muted);
 }
+// I71: responsive UI scale (fontScale x viewport -> --vr-fs); coarse detected above (I71)
+function uiVwScale() { return Math.min(1, Math.max(0.6, window.innerWidth / 820)); }
+function setUiScale() { document.documentElement.style.setProperty('--vr-fs', String((liveSettings.fontScale || 1) * uiVwScale())); }
+
 function applySettings(s) {
   liveSettings = s;
   fxCount = s.fx === 'low' ? CONFIG.fx.particleLow : CONFIG.fx.particleHigh;
   motionOff = s.reducedMotion === true;
-  document.documentElement.style.setProperty('--vr-fs', String(s.fontScale || 1)); // I70: UI font scale (cascades to DOM overlays only; canvas unaffected)
+  setUiScale(); // I70+I71: UI scale = fontScale x viewport (cascades to DOM overlays only; canvas unaffected)
   bloom.setEnabled(s.fx === 'high');
   if (audio.state() !== 'uninitialized') { audio.setVolume(s.volume); audio.setSfx(s.sfx); }
 }
@@ -135,8 +140,9 @@ let fxPreviewFn = null; // ST-067: live FX preview, wired once particles exist
 const menuSettings = createSettingsPanel(storage, applySettings, (tier) => { if (fxPreviewFn) fxPreviewFn(tier); });
 const pauseSettings = createSettingsPanel(storage, applySettings, (tier) => { if (fxPreviewFn) fxPreviewFn(tier); });
 const screens = createScreens(document.body, {
-  menu: menuSettings, pause: pauseSettings,
-  actions: { // I68: pause overlay actions
+  menu: menuSettings, pause: pauseSettings, touch: coarse, // I71: touch-aware menu
+  actions: { // I68: pause overlay actions; I71: start for touch
+    start: () => { newBest = false; popups.clear(); hint.show(); world.begin(); },
     resume: () => { world.resume(); },
     restart: () => { newBest = false; popups.clear(); hint.show(); world.restart(); },
     quit: () => { newBest = false; popups.clear(); vortexFx.hide(); world.quitToMenu(); },
@@ -159,6 +165,15 @@ function togglePause() { // ST-033: shared by keyboard and two-finger touch
   else if (st === STATE.PAUSED) world.resume();
 }
 const input = createInput({ onPause: togglePause });
+// I71: on-screen pause button (touch devices; shown during PLAYING only)
+const pauseBtn = document.createElement('button');
+pauseBtn.type = 'button';
+pauseBtn.setAttribute('aria-label', 'Pause');
+pauseBtn.textContent = '\u275A\u275A';
+pauseBtn.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:30;display:none;pointer-events:auto;cursor:pointer;box-sizing:border-box;align-items:center;justify-content:center;width:calc(46px * var(--vr-fs,1));height:calc(46px * var(--vr-fs,1));border-radius:50%;border:1px solid #2b4a8a;background:rgba(10,18,40,0.82);color:#cfe4ff;font-size:calc(14px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;padding:0;';
+pauseBtn.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
+pauseBtn.addEventListener('click', (e) => { e.stopPropagation(); togglePause(); pauseBtn.blur(); });
+document.body.appendChild(pauseBtn);
 
 // Session keys (ST-017): Enter start/restart, P/Esc pause, M mute.
 window.addEventListener('keydown', (e) => {
@@ -213,6 +228,7 @@ window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
 window.addEventListener('resize', () => {
+  setUiScale(); // I71: re-derive UI scale on viewport change
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -329,6 +345,7 @@ function syncVisuals(dt) {
   screenOpts.scoresText = scoresText; // I66: top-5 table
   screenOpts.scoreRank = scoreRank; // I69: board rank on game over
   hud.render(world, hudOpts);
+  if (coarse && st === STATE.PLAYING) { if (pauseBtn.style.display !== 'flex') pauseBtn.style.display = 'flex'; } else if (pauseBtn.style.display !== 'none') pauseBtn.style.display = 'none'; // I71: on-screen pause button (touch, PLAYING only)
   screens.update(st, world, screenOpts);
   shipMesh.sync(world.ship, simT, !motionOff, Math.min(1, Math.hypot(input.state.thrust.x, input.state.thrust.y))); // ST-063 engine flame
   reticle.sync(world.ship, st === STATE.PLAYING); // I44: only while playing

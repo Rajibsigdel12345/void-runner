@@ -124,6 +124,8 @@ playing (teaches lead-aim; playtest rec #3, I44).
 - Font-scale setting (NORMAL / LARGE / XL) scales all in-game UI text via a CSS variable (--vr-fs); the WebGL canvas is unaffected.
 - A single gold focus-visible ring is applied across every menu, pause, and settings control, so keyboard focus is always legible.
 - Each power-up also carries a LETTER badge (R/S/H/B/M/O) on both the in-world pickup (billboard sprite) and the HUD chip, reinforcing the colorblind-safe shape + color cue with a shape-independent channel.
+- Responsive layout: the UI overlay scales with viewport width (a --vr-fs viewport factor composed with the font-scale setting, floored at 0.6, full at >=820px) so the HUD and menus fit phones; the two-column menu collapses to one column below 620px.
+- Touch devices get a tappable TAP TO START / TAP TO RESTART, an on-screen pause button (PLAYING only), and touch instructions in both the menu card and the in-game hint (drag to fly / auto-fire / two-finger pause) replacing the keyboard ones.
 
 ## Non-goals
 No multiplayer, no leaderboards, no account/network, no external assets, no engine framework.

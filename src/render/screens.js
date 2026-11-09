@@ -28,6 +28,11 @@ export function createScreens(root, settings = {}) {
     '.vr-pause-btn:focus-visible{outline:2px solid #ffe08a;outline-offset:2px;}',
     '#screens :focus-visible{outline:2px solid #ffe08a;outline-offset:2px;border-radius:4px;}', // I70: unified focus ring across the overlay
     '.vr-pause-btn .vr-key{color:#ffe08a;}',
+    '.vr-start{pointer-events:auto;cursor:pointer;font-family:inherit;font-size:calc(18px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;color:#cfe4ff;background:rgba(10,18,40,0.85);border:1px solid #2b4a8a;border-radius:8px;padding:12px 26px;animation:vrPulse 1.6s ease-in-out infinite;transition:background 0.15s,border-color 0.15s;}',
+    '.vr-start:hover{background:rgba(30,50,100,0.95);border-color:#4a7fd8;animation:none;}',
+    '.vr-start:focus-visible{outline:2px solid #ffe08a;outline-offset:2px;}',
+    '.vr-reduced .vr-start{animation:none !important;}',
+    '@media (max-width:620px){.vr-menu-grid{grid-template-columns:1fr !important;max-width:100% !important;}.vr-credit{display:none !important;}#screen-menu{justify-content:flex-start !important;overflow-y:auto !important;padding:18px 0 !important;}}',
   ].join('');
   overlay.appendChild(style);
 
@@ -58,13 +63,10 @@ export function createScreens(root, settings = {}) {
   line(menu, 'survive the void, outlast the waves', 'font-size:calc(14px * var(--vr-fs,1));letter-spacing:2px;opacity:0.85;'); // I44 contrast
   const controls = document.createElement('div');
   controls.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:8px 22px;font-size:calc(14px * var(--vr-fs,1));margin-top:6px;padding:16px 24px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);'; // I65: controls card
-  for (const [k, v] of [
-    ['WASD / ARROWS', 'thrust'],
-    ['MOUSE', 'aim'],
-    ['CLICK / SPACE', 'fire'],
-    ['P / ESC', 'pause'],
-    ['M', 'mute'],
-  ]) {
+  const CONTROL_ROWS = settings.touch // I71: touch vs keyboard instructions
+    ? [['DRAG', 'fly the ship'], ['TOUCH', 'auto-fire'], ['2 FINGERS', 'pause']]
+    : [['WASD / ARROWS', 'thrust'], ['MOUSE', 'aim'], ['CLICK / SPACE', 'fire'], ['P / ESC', 'pause'], ['M', 'mute']];
+  for (const [k, v] of CONTROL_ROWS) {
     const key = document.createElement('div');
     key.style.cssText = 'text-align:right;';
     const kc = document.createElement('span'); // I44: keycap styling
@@ -86,9 +88,20 @@ export function createScreens(root, settings = {}) {
   top5.append(top5Head, top5Body);
   const menuGrid = document.createElement('div'); // I66: two-column menu
   menuGrid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;max-width:640px;';
+  menuGrid.classList.add('vr-menu-grid'); // I71: collapse to one column on narrow viewports
   menuGrid.append(controls, top5);
   menu.appendChild(menuGrid);
-  line(menu, 'PRESS ENTER TO START', 'font-size:calc(18px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;margin-top:14px;animation:vrPulse 1.6s ease-in-out infinite;');
+  if (settings.touch && settings.actions && settings.actions.start) { // I71: tappable start on touch
+    const startBtn = document.createElement('button');
+    startBtn.type = 'button';
+    startBtn.className = 'vr-start';
+    startBtn.textContent = 'TAP TO START';
+    startBtn.style.cssText = 'margin-top:14px;';
+    startBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.start(); startBtn.blur(); });
+    menu.appendChild(startBtn);
+  } else {
+    line(menu, 'PRESS ENTER TO START', 'font-size:calc(18px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;margin-top:14px;animation:vrPulse 1.6s ease-in-out infinite;');
+  }
   const menuBest = line(menu, '', 'font-size:calc(13px * var(--vr-fs,1));opacity:0.85;'); // best score lands in I18 (I44 contrast)
   const credit = document.createElement('div'); // I65: credits
   credit.className = 'vr-credit';
@@ -151,7 +164,17 @@ export function createScreens(root, settings = {}) {
   const statsLine1 = line(gameOver, '', 'font-size:calc(15px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#cfe4ff;margin-top:10px;'); // ST-031
   const statsLine2 = line(gameOver, '', 'font-size:calc(15px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#cfe4ff;'); // ST-031
   const rankLine = line(gameOver, '', 'font-size:calc(14px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#ffe08a;opacity:0.95;'); // I69: board rank
-  line(gameOver, 'PRESS ENTER TO RESTART', 'font-size:calc(16px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;margin-top:10px;animation:vrPulse 1.6s ease-in-out infinite;');
+  if (settings.touch && settings.actions && settings.actions.restart) { // I71: tappable restart on touch
+    const reBtn = document.createElement('button');
+    reBtn.type = 'button';
+    reBtn.className = 'vr-start';
+    reBtn.textContent = 'TAP TO RESTART';
+    reBtn.style.cssText = 'margin-top:10px;';
+    reBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.restart(); reBtn.blur(); });
+    gameOver.appendChild(reBtn);
+  } else {
+    line(gameOver, 'PRESS ENTER TO RESTART', 'font-size:calc(16px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;margin-top:10px;animation:vrPulse 1.6s ease-in-out infinite;');
+  }
 
   const PANELS = {
     [STATE.MENU]: menu,

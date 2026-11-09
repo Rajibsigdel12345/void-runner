@@ -215,3 +215,10 @@ Tuning changes that touch `src/core/config.js` (or GDD numbers) must be logged h
 - No config tunables added. fontScale lives in storage DEFAULT_SETTINGS (not config) and is validated against the allowed set FONT_SCALES = [1, 1.25, 1.5].
 - Power-up letter badges: each of the 6 power-up types carries a letter (rapid R, spread S, shield H, bomb B, magnet M, overdrive O) rendered two ways - (a) an in-world billboard sprite floating ~0.72 above the pickup (pooled to 4 sprites, one shared CanvasTexture per type, zero per-frame allocs) and (b) an em-sized letter badge in the HUD chip.
 - World letter sprites share 6 canvas textures (128x128) and are pooled (4) ahead of maxActiveDrops=1, so normally 0 extra draw calls and up to 4 only when 4 pickups are on screen.
+
+## I71 - mobile/responsive HUD + touch pass (ST-071)
+
+- Presentation/UX only: no gameplay, scoring, or pacing changes. 187/187 tests (render-only, no new unit tests; core untouched).
+- No new config tunables: the viewport UI scale is DERIVED (fontScale x innerWidth/820, floored at 0.6, full at >=820px), a render constant in main.js, not a gameplay knob.
+- Reuses I70's --vr-fs CSS var, now = fontScale x viewportScale, so every existing calc(Npx * var(--vr-fs,1)) in hud.js / screens.js / settingsPanel.js / tutorialHint.js becomes responsive with zero per-module edits.
+- On-screen pause button is one pooled-free <button>, toggled only on state change in PLAYING on coarse pointers; the touch-aware tutorial hint swaps a single text node. Zero per-frame allocations.
