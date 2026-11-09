@@ -5,6 +5,7 @@ import { createShipMesh } from './render/shipMesh.js';
 import { createInput } from './render/input.js';
 import { createBulletPool } from './render/bulletPool.js';
 import { createAsteroidRenderer } from './render/asteroidRenderer.js';
+import { createPowerupRenderer } from './render/powerupMesh.js';
 import { createHUD } from './render/hud.js';
 import { createScreens } from './render/screens.js';
 import { STATE } from './core/state.js';
@@ -46,6 +47,7 @@ const shipMesh = createShipMesh();
 scene.add(shipMesh.group);
 const bullets = createBulletPool(scene);
 const rockRenders = createAsteroidRenderer(scene);
+const powerupRenders = createPowerupRenderer(scene);
 const hud = createHUD(document.body);
 const screens = createScreens(document.body);
 let muted = false; // M key (ST-017); consumed by the audio system in I27
@@ -139,6 +141,7 @@ function syncVisuals(dt) {
   shipMesh.sync(world.ship);
   bullets.sync(world.weapons);
   rockRenders.sync(world.field);
+  powerupRenders.sync(world.powerups, dt);
 
   const ship = world.ship;
   const f = ship.forward();

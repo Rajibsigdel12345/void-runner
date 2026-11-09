@@ -25,3 +25,4 @@
 - I18: persistent best score + settings (injected store, guarded reads, NEW BEST flag, survives reload).
 - I19: power-up field core (drops, drift, magnet pull, timed effects, bomb queue) wired into World.
 - I19: power-up field core (drops, drift, magnet pull, timed effects, instant bomb queue) wired into World.
+- I20: power-up render meshes (pooled, per-type shape/color, hover + pulse).

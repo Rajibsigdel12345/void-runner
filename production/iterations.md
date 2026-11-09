@@ -129,3 +129,9 @@ One entry per iteration. Format:
 - Verification: npm test 94/94 pass; build exit 0; browser (no render changes): chaos loop over 50 kills -> powerupDrop 9, powerup 9, instant 2 (bombs queued); console 0 errors.
 - Result: DONE
 - Follow-up: power-up render meshes (I20), then RAPID/SPREAD gameplay wiring (I21).
+## I20 - Power-up render meshes (ST-020)
+- Goal: pooled, zero-alloc rendering for drops; distinct silhouette + emissive color per type (rapid=octahedron/yellow, spread=cone/orange, shield=torus/cyan, bomb=cube/red, magnet=sphere/green); hover bob + spin + pulse.
+- Changed: src/render/powerupMesh.js (new, pool 4, shared geo/mats), src/main.js (powerupRenders.sync in syncVisuals)
+- Verification: npm test 94/94 pass; build exit 0; browser: forced 4 drops -> all render with correct shape/color, pool caps at 4, console 0 errors, screenshot .evidence/i20-powerups.png.
+- Result: DONE
+- Follow-up: wire RAPID (rateMul) + SPREAD (fireSpread) into the World fire path (I21).
