@@ -45,9 +45,9 @@ export function createHUD(root) {
     node.textContent = text;
   }
 
-  function render(world) {
+  function render(world, opts = {}) {
     set('score', score, String(world.score));
-    set('best', best, ''); // best score lands in I18
+    set('best', best, opts.best > 0 ? `BEST ${opts.best}` : '');
     set('wave', wave, world.wave > 0 ? `WAVE ${world.wave}` : '');
     const n = world.lives;
     set('lives', lives, '♥'.repeat(n) + '♡'.repeat(Math.max(0, world.livesMgr.max - n)));
@@ -66,4 +66,5 @@ export function createHUD(root) {
   root.appendChild(el);
   return { el, render, setVisible };
 }
+
 

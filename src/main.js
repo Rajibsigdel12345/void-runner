@@ -8,6 +8,8 @@ import { createAsteroidRenderer } from './render/asteroidRenderer.js';
 import { createHUD } from './render/hud.js';
 import { createScreens } from './render/screens.js';
 import { STATE } from './core/state.js';
+import { Storage } from './core/storage.js';
+import { CONFIG } from './core/config.js';
 import { World } from './core/game.js';
 import { RNG } from './core/rng.js';
 import { damp, v2 } from './core/math.js';
@@ -48,6 +50,16 @@ const hud = createHUD(document.body);
 const screens = createScreens(document.body);
 let muted = false; // M key (ST-017); consumed by the audio system in I27
 
+// Persistent best + settings (ST-018); raw store adapted from window.localStorage.
+const lsStore = {
+  get: (k) => { try { return window.localStorage.getItem(k); } catch { return null; } },
+  set: (k, v) => { try { window.localStorage.setItem(k, v); } catch { /* private mode: session-only */ } },
+  remove: (k) => { try { window.localStorage.removeItem(k); } catch { /* ignore */ } },
+};
+const storage = new Storage(lsStore, CONFIG.storage);
+let bestScore = storage.getBest();
+let newBest = false;
+
 const input = createInput();
 
 // Session keys (ST-017): Enter start/restart, P/Esc pause, M mute.
@@ -55,6 +67,7 @@ window.addEventListener('keydown', (e) => {
   if (e.repeat) return;
   const st = world.game.state;
   if (e.key === 'Enter') {
+    newBest = false;
     if (st === STATE.MENU) world.begin();
     else if (st === STATE.GAME_OVER) world.restart();
   } else if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
@@ -81,7 +94,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance }; // debug/test handle (expanded in I080)
+window.__vr = { world, eventTally, input, advance, storage }; // debug/test handle (expanded in I080)
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -109,14 +122,20 @@ function resolveAimPoint() {
 function tick(dt, intent) {
   const it = intent || { thrust: input.state.thrust, aimPoint: resolveAimPoint(), firing: input.state.firing };
   world.step(dt, it);
-  for (const e of world.drainEvents()) eventTally[e.type] = (eventTally[e.type] || 0) + 1;
+  for (const e of world.drainEvents()) {
+    eventTally[e.type] = (eventTally[e.type] || 0) + 1;
+    if (e.type === 'gameover') {
+      newBest = storage.setBest(e.data.score); // true when the stored best was raised
+      bestScore = storage.getBest();
+    }
+  }
 }
 
 function syncVisuals(dt) {
   const st = world.game.state;
   hud.setVisible(st === STATE.PLAYING || st === STATE.PAUSED);
-  hud.render(world);
-  screens.update(st, world, { muted });
+  hud.render(world, { best: bestScore });
+  screens.update(st, world, { muted, best: bestScore, newBest });
   shipMesh.sync(world.ship);
   bullets.sync(world.weapons);
   rockRenders.sync(world.field);

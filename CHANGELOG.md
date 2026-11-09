@@ -22,3 +22,4 @@
 - I17: menu/pause/game-over screens, Enter/P-Esc/M session keys, no auto-start on load.
 ### Fixed
 - I17: World.reset() crash (assignment to gameOver getter) caught by new tests.
+- I18: persistent best score + settings (injected store, guarded reads, NEW BEST flag, survives reload).

@@ -69,7 +69,8 @@ export function createScreens(root) {
   const gameOver = panel('screen-gameover', 'rgba(8,2,6,0.72)');
   line(gameOver, 'GAME OVER', 'font-size:42px;font-weight:800;letter-spacing:8px;color:#ff6d8a;');
   const finalScore = line(gameOver, 'SCORE 0', 'font-size:26px;font-weight:700;letter-spacing:2px;');
-  const overBest = line(gameOver, '', 'font-size:13px;opacity:0.7;'); // best score lands in I18
+  const overBest = line(gameOver, '', 'font-size:13px;opacity:0.7;');
+  const newBestLine = line(gameOver, '', 'font-size:16px;font-weight:800;letter-spacing:3px;color:#ffe08a;');
   line(gameOver, 'PRESS ENTER TO RESTART', 'font-size:16px;font-weight:700;letter-spacing:4px;margin-top:10px;animation:vrPulse 1.6s ease-in-out infinite;');
 
   const PANELS = {
@@ -95,11 +96,16 @@ export function createScreens(root) {
 
   root.appendChild(overlay);
 
-  /** @param {string} state current GameState value @param {{score:number}} world @param {{muted:boolean}} opts */
-  function update(state, world, opts = { muted: false }) {
+  /** @param {string} state @param {object} world @param {{muted:boolean, best:number, newBest:boolean}} opts */
+  function update(state, world, opts = { muted: false, best: 0, newBest: false }) {
     showPanel(state);
     if (state === STATE.GAME_OVER) {
       set('finalScore', finalScore, `SCORE ${world.score}`);
+      set('overBest', overBest, opts.best > 0 ? `BEST ${opts.best}` : '');
+      set('newBest', newBestLine, opts.newBest ? 'NEW BEST!' : '');
+    }
+    if (state === STATE.MENU) {
+      set('menuBest', menuBest, opts.best > 0 ? `BEST ${opts.best}` : '');
     }
     if (state === STATE.PAUSED) {
       set('mute', muteLabel, `M — MUTE (${opts.muted ? 'ON' : 'OFF'})`);
@@ -108,3 +114,4 @@ export function createScreens(root) {
 
   return { update, overlay };
 }
+

@@ -116,3 +116,9 @@ One entry per iteration. Format:
 - Bugfix (found by new tests): World.reset() assigned to the gameOver getter (TypeError in strict mode) - removed; getter derives from game state after reset.
 - Result: DONE
 - Follow-up: persistent best score + settings storage (I18).
+## I18 - Persistent storage: best score + settings (ST-018)
+- Goal: injectable-store persistence (core never touches window.localStorage directly), guarded get/set for best + settings, versioned payloads, NEW BEST flag on game over; HUD best line + menu/game-over BEST shown; survives reload.
+- Changed: src/core/storage.js (new), tests/storage.test.js (new, 7 tests), src/main.js (lsStore adapter, bestScore/newBest, gameover hook, storage in __vr), src/render/hud.js (render(world,{best})), src/render/screens.js (BEST + NEW BEST lines)
+- Verification: npm test 86/86 pass; build exit 0; browser: clean-slate game to 570 -> GAME OVER "SCORE 570 / BEST 570 / NEW BEST!", raw localStorage {version:1,value:570}; reload -> menu "BEST 570", in-play HUD "BEST 570"; console 0 errors; screenshot .evidence/i18-best.png.
+- Result: DONE
+- Follow-up: power-ups core + rendering (I19+).
