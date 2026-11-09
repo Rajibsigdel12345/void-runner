@@ -1,6 +1,7 @@
 ﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I87: sound-level pass (ST-087) - the master chain now ends in a true-peak limiter so no isolated cue or worst-case stacking can clip the device (an isolated bomb at ~1.02 pre-limiter now lands at 0.77), and cue gains are organized into three weight tiers with the loudest impact cues trimmed for headroom; clean ~4x impact-to-background dynamic range (232/232)
 - I86: per-entity particle palettes + burst shapes (ST-086) - every entity/event gets a config-driven color ramp (10 palettes) and bursts gain radial/ring/fountain shapes - ring shockwaves for boss beats/bomb/shield, an upward fountain for the overdrive pickup; backward-compatible (232/232)
 - I85: vignette overlay (ST-085) - static cinematic frame + red danger-edge that holds on the last life and pulses on a hit; the transient hit pulse is suppressed under reduced motion (the static last-life tint still shows) (232/232)
 - I84: audio master-chain pass (ST-084) - post-compressor makeup gain (1.4x) restores loudness after limiting, plus a post-makeup master level-meter probe (peak/rms) as the base for the sound-level pass; stereo pan math verified in-browser (+0.4 / -0.4 at x=+13 / -13) (232/232)

@@ -4,6 +4,11 @@
 // overlap spam at RAPID fire rates.
 // ST-027 base cues, ST-029 polish: stingers (note arrays), per-play pitch
 // jitter, stereo pan from world x, and a compressor on the master chain.
+// ST-087 sound-level pass: cues are grouped into three weight tiers so the mix has a
+// deliberate dynamic range and real headroom (the master chain ends in a true-peak
+// limiter). Background cues (shoot/swish/mineFire) sit low so rapid fire never fatigues;
+// event cues (kill/mine/powerup/shields/boss rings/overdrive/vortex) read clearly; impact
+// cues (hit/bossDeath/bomb) are the loudest but trimmed so the limiter only tames the peak.
 const CUES = {
   shoot:     { type: 'square',   f0: 880, f1: 440, dur: 0.06, gain: 0.12, min: 0.04 },
   kill:      { type: 'triangle', f0: 320, f1: 120, dur: 0.12, gain: 0.30, min: 0.05, noise: 0.08 },
@@ -17,7 +22,7 @@ const CUES = {
   // ST-055 the Monolith: low spawn drone, ring-burst crack, big death boom
   bossSpawn: { type: 'sine',   gain: 0.30, min: 0.4, noise: 0.35, notes: [[55, 41, 0.7, 0, 0.34], [82.4, 79, 0.55, 0.12, 0.2], [164.8, 160, 0.4, 0.06, 0.1]] }, // ST-083: low tritone stinger
   bossRing:  { type: 'sine',   f0: 300, f1: 120, dur: 0.25, gain: 0.18, min: 0.15, noise: 0.15 },
-  bossDeath: { type: 'square', f0: 80,  f1: 30,  dur: 0.7,  gain: 0.50, min: 0.3,  noise: 0.5 },
+  bossDeath: { type: 'square', f0: 80,  f1: 30,  dur: 0.7,  gain: 0.45, min: 0.3,  noise: 0.5 },  // ST-087 impact tier: trimmed 0.5->0.45 for limiter headroom
   // ST-056 enemy bolts: low saw zap (boss), soft tick (mine)
   bossFire: { type: 'sawtooth', f0: 520, f1: 180, dur: 0.18, gain: 0.20, min: 0.12 },
   mineFire: { type: 'square',   f0: 340, f1: 220, dur: 0.10, gain: 0.12, min: 0.1,  noise: 0.08 },
@@ -26,7 +31,7 @@ const CUES = {
   // ST-059 gravity vortex: descending warning hum, then a deep sustained rumble
   vortexTelegraph: { type: 'sine', f0: 220, f1: 90, dur: 0.9, gain: 0.16, min: 0.6 },
   vortexStart: { type: 'sawtooth', f0: 70, f1: 38, dur: 1.4, gain: 0.28, min: 1.0, noise: 0.18 },
-  bomb:      { type: 'sine',     f0: 90,  f1: 40,  dur: 0.5,  gain: 0.7,  min: 0.1,  noise: 0.4 },
+  bomb:      { type: 'sine',     f0: 90,  f1: 40,  dur: 0.5,  gain: 0.55, min: 0.1,  noise: 0.4 },  // ST-087 impact tier: trimmed 0.7->0.55 for limiter headroom
   wave:      { type: 'sine',     f0: 523, f1: 659, dur: 0.25, gain: 0.16, min: 0.1 },
   // ST-029 stingers: rising arpeggio on wave clear, falling motif on game over
   cleared:   { type: 'sine',     gain: 0.2,  min: 0.2, notes: [[523, 523, 0.12, 0, 0.2], [659, 659, 0.12, 0.09, 0.2], [784, 784, 0.12, 0.18, 0.2], [1046, 1046, 0.3, 0.27, 0.24]] }, // ST-083: 4-note rising jingle (C5-E5-G5-C6)
@@ -70,8 +75,15 @@ export function createAudio() {
     const makeup = ctx.createGain(); makeup.gain.value = 1.4; // ST-084: lift level after compression (comp only takes it down)
     comp.connect(makeup);
     meterNode = ctx.createAnalyser(); meterNode.fftSize = 1024; meterBuf = new Float32Array(1024); // ST-084: sink (does not forward)
-    makeup.connect(meterNode);
-    makeup.connect(ctx.destination);
+    const limiter = ctx.createDynamicsCompressor(); // ST-087: true-peak limiter - holds the loudest isolated cue + worst-case stacking below the device ceiling (I84 saw the post-makeup chain reach ~1.02 on an isolated bomb)
+    limiter.threshold.value = -8;   // ~0.40 linear: starts limiting just below the impact tier so stacking is caught
+    limiter.knee.value = 3;
+    limiter.ratio.value = 20;
+    limiter.attack.value = 0.001;
+    limiter.release.value = 0.06;
+    makeup.connect(limiter);
+    limiter.connect(meterNode);
+    limiter.connect(ctx.destination);
     applyGain();
     // one shared white-noise buffer (0.5s) for percussive tails
     noiseBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.5), ctx.sampleRate);
@@ -196,5 +208,5 @@ export function createAudio() {
     return true;
   }
 
-  return { init, setVolume, setSfx, setMuted, state, sfx, ambience, ambOn: () => !!ambBus, ambLevel: () => (ambBus ? ambBus.gain.value : null), meter, played, lastPan: () => lastPan, get volume() { return volume; } };
+  return { init, setVolume, setSfx, setMuted, state, sfx, ambience, ambOn: () => !!ambBus, ambLevel: () => (ambBus ? ambBus.gain.value : null), meter, played, lastPan: () => lastPan, weights: () => Object.fromEntries(Object.entries(CUES).map(([k, s]) => [k, s.gain])), get volume() { return volume; } };
 }
