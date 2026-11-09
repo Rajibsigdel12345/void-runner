@@ -292,3 +292,10 @@ One entry per iteration. Format:
 - Verification: 122/122 + build 0. Browser: 4 chips (» RAPID / ∴ SPREAD / ● SHIELD / ∪ MAGNET) appear with drain bars, bars tick down in real time, chips vanish as timers lapse; combo bar = remaining window (forced 3.5s/4s -> ~0.87); reticle geometry matches ship.aim (aim -pi/2 -> line (0,0.35,-1) to (0,0.35,-6)); reticle PLAYING-only (hidden on pause, restored on resume); pause shows SCORE/WAVE/KILLS snapshot; menu keycaps render; 0 console errors + 0 warnings on clean load (40 INVALID_OPERATION warnings seen once mid-session = Vite HMR full-reload artifact, same documented-harmless class as I43, dev-only). Screenshots .evidence/i44-menu.png, i44-hud-powerups.png, i44-paused.png.
 - Result: DONE
 - Follow-up: I45 vertical slice gate (ST-045, cgs-gate-check -> production/gates.md; QA Suite C: perf baseline, storage round-trip, resize, touch synth).
+## I45 - vertical slice gate (ST-045)
+
+- Goal: cgs-gate-check advisory slice gate - confirm I01-I45 is a full-loop slice at representative quality; execute QA Suite C (qa-plan.md: storage round-trip, resize mid-game, touch synth, I43 robustness re-verification, perf baseline @ wave 4).
+- Changed: production/gates.md (NEW: gate artifact - criteria, evidence, concerns, verdict PASS, risks, next owner). No source changes (gate is evidence, not code - same pattern as I41).
+- Verification: Suite A green (122/122 + build 0). Suite C: storage round-trip (volume/sfx/fx/motion set in panel -> reload -> stored == panel == live); resize 800x600 -> 1600x800 mid-game (0 errors, canvas buffer 1600x800); touch tap -> 2 bullets, drag -> thrust (1,0) vel +10.5, two-finger -> PAUSED; visibility hidden -> PAUSED (stays paused, manual resume), context loss -> PAUSED -> restore -> healthy render, 0 errors; perf @ wave 4 (20 rocks + fire + bloom High, ?fps=2): 60fps / 16.6ms / 37 calls / 1626 tris - within I36 baseline (56-60fps / 40 calls / 1638 tris).
+- Result: PASS (gate) - DONE
+- Follow-up: I46 final regression (ST-046): full node suite + browser regression (Suites A+B+C re-run) + build.
