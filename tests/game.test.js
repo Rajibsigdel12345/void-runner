@@ -31,7 +31,9 @@ test('world: multiple kills accumulate score', () => {
     w.weapons._spawn({ x: r.pos.x, y: r.pos.y }, 0);
   }
   w.step(DT, NOINTENT);
-  assert.equal(w.score, CONFIG.asteroid.sizes.M.score * 3);
+  // same-frame chain: combo 1,2,3 -> 1.0x + 1.1x + 1.2x
+  const m = CONFIG.asteroid.sizes.M.score;
+  assert.equal(w.score, m + Math.floor(m * 1.1) + Math.floor(m * 1.2));
 });
 
 test('world: ship hit -> lose life, knockback, invuln, rock destroyed', () => {
@@ -103,4 +105,5 @@ test('world: deterministic replay (same seed + same intents)', () => {
   assert.equal(a.field.count, b.field.count);
   assert.ok(Math.abs(a.ship.pos.x - b.ship.pos.x) < 1e-9);
 });
+
 

@@ -6,6 +6,7 @@ import { AsteroidField } from './asteroids.js';
 import { bulletHitRock, shipHitRock } from './collision.js';
 import { CONFIG } from './config.js';
 import { v2 } from './math.js';
+import { ScoreKeeper } from './score.js';
 
 export class World {
   constructor(rng, cfg = CONFIG) {
@@ -15,11 +16,13 @@ export class World {
     this.weapons = new Weapons(cfg);
     this.field = new AsteroidField(rng, cfg);
     this.events = [];
-    this.score = 0;
+    this.scoreKeeper = new ScoreKeeper(cfg);
     this.lives = cfg.ship.lives;
     this.gameOver = false;
     this.time = 0;
   }
+
+  get score() { return this.scoreKeeper.score; }
 
   emit(type, data) { this.events.push({ type, data }); }
   drainEvents() { const e = this.events; this.events = []; return e; }
@@ -39,6 +42,7 @@ export class World {
     }
     this.weapons.step(dt);
     this.field.step(dt);
+    this.scoreKeeper.tick(this.time);
     this.resolveBulletRocks();
     this.resolveShipRocks();
   }
@@ -50,10 +54,10 @@ export class World {
       if (id == null) continue;
       const rock = this.field.rocks.find(r => r.id === id);
       this.weapons.markHit(b.id);
-      const points = this.cfg.asteroid.sizes[rock.size].score;
+      const base = this.cfg.asteroid.sizes[rock.size].score;
       this.field.destroy(id);
-      this.score += points;
-      this.emit('kill', { pos: { x: rock.pos.x, y: rock.pos.y }, size: rock.size, points });
+      const points = this.scoreKeeper.kill(base, this.time);
+      this.emit('kill', { pos: { x: rock.pos.x, y: rock.pos.y }, size: rock.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier });
     }
     this.weapons.compact();
   }
@@ -64,6 +68,7 @@ export class World {
     if (!hit) return;
     this.field.destroy(hit.id);
     this.lives -= 1;
+    this.scoreKeeper.onDamage();
     this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: hit.nx, y: hit.ny }, lives: this.lives });
     this.ship.damage(v2(hit.nx, hit.ny));
     if (this.lives <= 0) {
@@ -76,10 +81,11 @@ export class World {
     this.ship = new Ship(0, 0, this.cfg);
     this.weapons.clear();
     this.field.clear();
-    this.score = 0;
+    this.scoreKeeper.reset();
     this.lives = this.cfg.ship.lives;
     this.gameOver = false;
     this.time = 0;
     this.events.length = 0;
   }
 }
+

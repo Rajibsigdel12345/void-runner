@@ -85,3 +85,9 @@ One entry per iteration. Format:
 - Verification: npm test 53/53; build exit 0; browser: console clean, deterministic smoke via advance(): kill->score 175 + 3 kills + fragments, hit->lives 2 + invuln, gameover->event, reset->clean; screenshot .evidence/i12-fullloop.png.
 - Result: DONE
 - Follow-up: score/combo (I13), waves (I14), lives/state machine (I15), HUD (I16).
+## I13 - Score + combo (ST-013)
+- Goal: combo chain (window 3.5s, cap 10, +0.1x per step), reset on timeout/damage, maxCombo tracking; World emits combo-aware kill events.
+- Changed: src/core/score.js (new), tests/score.test.js (new, 7 tests), src/core/game.js (ScoreKeeper wired), tests/game.test.js (multi-kill combo math)
+- Verification: npm test 60/60 pass; build exit 0.
+- Result: DONE
+- Follow-up: combo meter in HUD (I16); waves next (I14).
