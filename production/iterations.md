@@ -1071,3 +1071,11 @@ One entry per iteration. Format:
 - Screenshot: .evidence/I148/I148_regression_run.png (wave 10: Splicer live + health bar, belt rock, mine M, golden + shielded rocks, COMBO 15 x2.4).
 - Findings: none. No regressions across the E8C system set over the extended soak or the death/restart cycles.
 - Result: DONE. Next I149 ST-149 fix round A findings (expected: no-findings close).
+
+## I149 - Fix round A findings: none found, ST-149 closed (ST-149)
+
+- Scope: ST-149 - fix the findings from regression round A (ST-148/I148).
+- Findings: none. The round A evidence produced zero regressions: node 20-wave invuln soak to wave 24 (900 s, per-60 s invariant checkpoints - 0 non-finite, all pool caps held, strict boss alternation, belt at cap 5/5), 300 s soak bit-identical x2, kamikaze death + verified restart; browser ~5.5 min extended soak (waves 1-11, both boss lifecycles live, belt 4/5 growing, mine + drone active, 519 kills, 0 non-finite across 15 deep-scan samples, eb peak 13/24, rocks peak 22/29), two forced death/restart cycles under load (exactly one hit + one gameover event per death, clean restart), console 0/0.
+- Action: none required - no code or test changes.
+- Tests: 459/459 fresh, build 0 (no code diff since I148).
+- Result: ST-149 closed (no-findings). Next I150 ST-150 E8C docs + changelog.
