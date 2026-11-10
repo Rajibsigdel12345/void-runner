@@ -2,11 +2,12 @@
 
 - project: Void Runner (E:\Game, three.js, no bundler)
 - epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-196 (regression round B part 2 - browser smoke + render-layer regression, next)
-- current_iteration: I195 (committed)
+- current_story: ST-197 (build size + load audit, next)
+- current_iteration: I196 (committed)
 - branch: main
 - tests: 630/630
 - build: exit 0
+- notes: I196 done (ST-196 regression round B part 2 (cgs-regression-suite)): browser smoke on dev server - state machine 6 transitions green, recording toggle + fresh runSeed green, replay view lifecycle green (rendered demo pilot ends idx 2169 / score 11334 = exact core-pin match), clean-pass console 0/0 (only expected adaptive-quality INFO), finiteness scan clean (sole non-finite = documented sentinel scoreKeeper.lastKillTime=-Infinity). One console warning traced to the probe itself (string 'demo' to __vr.startReplay), not product. Evidence .evidence/I196/ (2 screenshots). No code changes.
 - notes: I195 done (ST-195 regression round B (cgs-regression-suite)): 6 suite runs (5 in-process + 1 node-runner) all 630/630 fail=0, no count drift, no order dependency; live critical-path probe 19/19 PASS (demo pilot e2e pinned values + best/high-score/daily/replay persistence mirroring main.js:650-660). First-pass probe 'best round-trips' miss was a probe bug (setBest is separate from recordScore - main.js:653), not a product bug. No code changes. Evidence .evidence/I195/runs.txt.
 - notes: I194 done (ST-194 security audit (cgs-security-audit)): audited storage/replay/share/daily/rng codecs + DOM-sink / secret / network scans - no exploitable defects (0 secrets in 183 first-party files; 0 fetch/XHR/WebSocket/eval/innerHTML in src/; all decoders total + strict). Added tests/security.test.js: 8 totality tests (adversarial share strings 64B-1MB, 27-case malformed replay battery, __proto__ pollution probe, meta sanitization pins, migratePayload corrupt battery). 630/630, build 0.
 - notes: I193 done (ST-193 flaky check (cgs-test-flakiness)): 5 consecutive runs + 1 serial run all 622/622 (no order dependency, no count drift); static flake-source scan of tests/ + src/core/ clean (no Math.random/Date.now/performance.now/setTimeout; the one new Date hit is a fixed date). No stabilization needed - determinism structural (seeded rng.js). Audit-only, no file changes.
