@@ -18,6 +18,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 - Mouse: aim (ship + nose point at cursor on arena plane); Click or Space: fire
 - P or Esc: pause / resume
 - M: mute audio
+- F: toggle FX quality (high/low; persisted, overrides adaptive downgrade)
 - Enter: start / restart from menus
 
 ## Arena
@@ -191,5 +192,60 @@ playing (teaches lead-aim; playtest rec #3, I44).
 - Responsive layout: the UI overlay scales with viewport width (a --vr-fs viewport factor composed with the font-scale setting, floored at 0.6, full at >=820px) so the HUD and menus fit phones; the two-column menu collapses to one column below 620px.
 - Touch devices get a tappable TAP TO START / TAP TO RESTART, an on-screen pause button (PLAYING only), and touch instructions in both the menu card and the in-game hint (drag to fly / auto-fire / two-finger pause) replacing the keyboard ones.
 
+## UI & Overlays (E8D, ST-151..168)
+
+All UI is a DOM/CSS overlay (crisp text, keyboard-focusable, easy to
+localize); the WebGL canvas is reserved for the arena. Every screen was
+screenshot-verified at the G8.3 gate (I164); the intermission countdown,
+kill feed, and banner render on the same 0-mutation steady-state HUD path
+(production/perf-ui-text.md).
+
+- First-run tutorial overlay (I151): a one-time dismissible "how to play"
+  card on the player's first entry to PLAYING, mirroring the menu panel
+  style. While visible the sim is gated (world.time frozen at 0) so the
+  player can read without dying. Dismiss via the LAUNCH button or
+  Enter/Space/Esc; dismissal persists in a dedicated versioned storage key.
+  Distinct from the passive 6s tutorialHint that still shows in-run.
+- Session stats (I152): game over reports SCORE / BEST / KILLS / WAVE /
+  MAX COMBO / TIME plus "ACCURACY % SHOTS h/f" (hits counted at all five
+  player-bullet hit sites - rocks, mines, boss, warden, drones - enemy
+  bolts excluded; spread fires count n shots at the muzzle).
+- Kill feed (I153): compact fading top-right list of the last 5 kills
+  (3.0s life, 0.45s fade, slide-in): entity label (S/M/L ROCK, GOLDEN ROCK,
+  MINE, SEEKER, WARDEN, boss name) + points + inline combo; gold for
+  golden/boss kills, orange for warden; aria-hidden decorative layer.
+- Wave banner (I154): three moments - WAVE n (0.4s slide-in + 1.06->1.0
+  scale punch), CLEARED (big gold line with "WAVE n" sub), boss inbound
+  (per-variant tint + glow: Monolith purple, Splicer cyan; name + HP sub).
+  Punch/slide skipped under reduced motion.
+- Colorblind cues (I155-156): shapeCues setting (default ON) adds
+  silhouette identity that reads without color - a gold wireframe
+  icosahedron cage on golden rocks and an 8-spike collar on the WARDEN in
+  the exposed state only. Verified empirically under Machado 2009
+  deuteranopia/protanopia + tritanopia (palette dE 41-106 across every
+  critical pair); the COLORBLIND options row applies a live deuteranopia
+  preview filter to the canvas.
+- Hotkeys (I157): M mute, P pause, F FX quality (persisted; user choice
+  overrides adaptive auto-downgrade; keycaps swallow M/P/F while a settings
+  control is focused).
+- Options rows (I158): MUSIC (generative ambient pad + pentatonic pluck
+  bed, default on, own bus under master, gesture-gated), COLORBLIND
+  (deuteranopia canvas preview), SLOW-MO HINT caption, SHAPE CUES,
+  REDUCED MOTION, FONT SCALE - all persisted booleans/enums.
+- Share screen (I159): game-over COPY RESULT button copies the reproducible
+  result code (seed + score + wave + kills + FNV-1a checksum, core codec in
+  share.js) with COPIED! / COPY FAILED flash; focusable, aria-labelled.
+- A11y pass (I161): font scale reaches every in-game UI text (banner,
+  popups, boss label via calc() on --vr-fs); reduced motion gates every new
+  FX (banner punch, kill-feed slide, slow-mo hint fade, HUD multiplier pop);
+  one gold focus-visible ring across all controls.
+- i18n readiness (I166): player-facing strings inventoried with a key
+  convention and expansion/pluralization risks in design/i18n-strings.md
+  (plan doc; extraction is a future pass, not implemented).
+- UI performance posture (I167): steady-state committed DOM mutations are
+  zero - every text writer is change-guarded, all animated props are
+  opacity/transform, and the render layer has zero forced-reflow reads.
+  production/perf-ui-text.md holds the budgets and the measured tables.
+
 ## Non-goals
-No multiplayer, no leaderboards, no account/network, no external assets, no engine framework.
+No multiplayer, no leaderboards, no account/network, no third-party art assets (the five Blender GLBs in assets/ are first-party, with a procedural fallback), no engine framework.

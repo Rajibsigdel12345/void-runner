@@ -24,6 +24,17 @@ src/core/             PURE logic - no three.js, no DOM, no window (unit-testable
    waves.js           wave progression + difficulty curve + stall advance
    lives.js           lives / invulnerability
    storage.js         guarded localStorage wrapper (injectable store for tests)
+   boss.js            the Monolith: HP/phases, bolt ring, S-rock burst
+   splicer.js         the Splicer (variant 2): orbit + two-arm spiral bolts
+   warden.js          the WARDEN escort: armor state, exposed window
+   mines.js           mine drones: slow homing chasers
+   drones.js          seeker drones: fast wobble pursuit + battery
+   enemyBullets.js    enemy bolt pool (always slower than the ship)
+   vortex.js          gravity vortex: idle/telegraph/active pull field
+   daily.js           daily seeded run (pure date -> seed derivation)
+   share.js           reproducible result codec (base36 + FNV-1a checksum)
+   adaptiveQuality.js rolling-FPS hysteresis state (tier data, applied in render)
+   clock.js           fixed-timestep accumulator (clamped wall-clock -> sim steps)
    |
 src/render/           three.js + DOM layer - consumes world, never mutates rules
    input.js           keyboard/mouse/touch -> intent
@@ -43,6 +54,17 @@ src/render/           three.js + DOM layer - consumes world, never mutates rules
    screens.js         menu / pause / game-over DOM screens
    settingsPanel.js   DOM settings panel
    reticle.js         fire-line reticle (1 THREE.Line, PLAYING-only)
+   assetLoader.js     GLTFLoader: 5 Blender GLBs, fire-and-forget per-asset ready flags, procedural fallback
+   bossMesh.js        Monolith mesh (+ emissive pulse, GLB geometry swap)
+   bossHealth.js      DOM boss HP bar (tinted per variant)
+   wardenMesh.js      WARDEN mesh (+ 8-spike exposed-state collar)
+   droneMesh.js       seeker drone meshes (pooled)
+   mineMesh.js        mine drone meshes (pooled)
+   enemyBulletMesh.js enemy bolt meshes (pooled)
+   vortexFx.js        vortex pull-field visual
+   killFeed.js        DOM kill feed (top-right, last 5 kills)
+   tutorialOverlay.js DOM first-run how-to card (sim-gated while open)
+   debugOverlay.js    dev debug overlay (FPS/draw-call panel, ?debug)
    fpsMeter.js        DOM meter (enabled with ?fps=2)
 ```
 
@@ -65,7 +87,9 @@ src/render/           three.js + DOM layer - consumes world, never mutates rules
 
 ## Perf rules
 - Shared geometry + material per entity class; per-entity only transforms.
-- Pools: bullets (64), asteroids (24), particles (512), popups (12), power-ups (4).
+- Pools: bullets (64), enemy bolts (24), asteroids (24), mines (10), seekers (6), particles (512), popups (12), power-ups (4).
 - No per-frame allocations in hot paths (reuse temp vectors).
-- Draw-call budget: keep well under ~40 calls / ~1.7k tris at wave 4
-  (measured 34-40 calls / 1466-1638 tris @ 60fps across I36/I45/I46).
+- Draw-call budget: keep well under ~100 calls (I95 measured 22-59 across
+  menu -> worst realistic boss wave; steady CPU frame 5-7ms mean / p95 11-14ms,
+  see production/perf-profile.md). DOM/UI layer: zero steady committed
+  mutations, zero forced-reflow reads (production/perf-ui-text.md).

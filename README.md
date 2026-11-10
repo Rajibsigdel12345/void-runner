@@ -1,7 +1,7 @@
 # Void Runner
 
 3D arcade survival shooter (Asteroids-style) built with **three.js**.
-No external art assets: procedural geometry, canvas textures, WebAudio-synthesized SFX.
+Art: five low-poly Blender-made GLBs (ship, three asteroid sizes, boss) loaded at runtime with a procedural fallback; everything else procedural - canvas textures, WebAudio-synthesized SFX and music.
 
 ## Quick start
 
@@ -27,6 +27,7 @@ serve/build/test/vendor entry points.
 | Enter | start / restart |
 | P or Esc | pause / resume |
 | M | mute |
+| F | toggle FX quality (high/low) |
 
 Basic touch fallback: tap = fire, drag = thrust, two-finger tap = pause.
 
@@ -35,7 +36,10 @@ Basic touch fallback: tap = fire, drag = thrust, two-finger tap = pause.
 Waves of asteroids in a bounded 3D arena (rock wall reflects, nothing escapes).
 Combo-based scoring with a 4-second chain window; random power-up drops
 (rapid fire, spread shot, shield, magnet, bomb). 3 lives with post-hit
-invulnerability. Settings (volume, SFX, FX quality, reduced motion) and best
+invulnerability. Boss waves from wave 5: THE MONOLITH / THE SPLICER
+alternate with WARDEN armored escorts; mine + seeker drones and a periodic
+gravity vortex. Daily seeded runs (one shared seed per calendar day) and a
+reproducible shareable result code. Settings (volume, SFX, FX quality, reduced motion) and best
 score persist in localStorage. A fire-line reticle shows the actual firing
 direction.
 
@@ -46,6 +50,7 @@ direction.
 - `src/main.js` - boot, scene/camera, game loop, core<->render wiring, `__vr` debug handle.
 - `tests/` - `node --test` unit tests for core modules.
 - `design/` - GDD, systems map, brainstorm.
+- `assets/` - Blender-made GLB models (loaded at runtime; copied into dist/ by the build).
 - `production/` - epics, stories, iteration log, QA plan, gates, playtest report, balance notes.
 - `docs/architecture/` - architecture notes + code review.
 
@@ -56,6 +61,9 @@ direction.
 - Iteration history: `production/iterations.md` (one entry per iteration, I01+
 - QA: `production/qa-plan.md` (suites A/B/C) and `production/gates.md` (gate verdicts)
 - Balance: `production/balance-notes.md`
+- Art: `design/art-bible.md` (identity), `design/asset-spec.md` (asset rules), `design/art-direction-research.md` (improvement levers)
+- i18n plan: `design/i18n-strings.md`
+- Perf: `production/perf-profile.md` (WebGL) + `production/perf-ui-text.md` (DOM/UI)
 - Playtest: `production/playtest-report.md`
 
 ## Dev / debug

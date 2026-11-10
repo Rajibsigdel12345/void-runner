@@ -1298,5 +1298,20 @@ One entry per iteration. Format:
 - Quality bar: npm test 491/491 (render-layer fix, no core diff), node scripts/build.mjs exit 0. Browser smoke (?nocache=167c): intermission countdown renders, WAVE 1 banner correct (screenshot .evidence/I167/I167_1_wave_banner_smoke.png), console 0 errors / 0 warnings, NaN scan (ship.pos, scoreKeeper, rock pos) 0 non-finite.
 - Result: DONE. ST-167 closed. Next I168 ST-168 E8D docs + changelog (E8D closeout).
 
+## I168 - E8D docs + changelog (ST-168)
+
+- Skill: cgs-reverse-document (docs synced to the shipped code, not the reverse) + cgs-consistency-check (docs vs source cross-check).
+- Scope: the E8D closeout "docs" story - sync the three doc surfaces that had drifted behind E8/E8D, and run the changelog coverage check for I151-I167.
+- design/gdd.md:
+  - New "UI & Overlays (E8D, ST-151..168)" section: 11 shipped surfaces documented with verified behavior (tutorial overlay: sim-gate + versioned persistence; session stats: accuracy at all 5 player-bullet hit sites; kill feed 5 rows / 3.0s / 0.45s; wave banner 3 moments + per-variant tint; shape cues + Machado 2009 dE 41-106; M/P/F hotkeys + focus guards; 6 options rows; share screen + share.js codec; a11y pass; i18n plan pointer; UI perf posture pointer).
+  - Controls: F hotkey row added.
+  - Non-goals: "no external assets" corrected to "no third-party art assets (five Blender GLBs are first-party, procedural fallback)" - the stale line contradicted assets/ and AGENTS.md.
+- README.md: art line (5 Blender GLBs + procedural fallback), F hotkey, gameplay paragraph (bosses / warden / drones / vortex / daily run / share code), assets/ layout row, docs map gains art / i18n / perf pointers.
+- docs/architecture/README.md: core list +11 modules (boss, splicer, warden, mines, drones, enemyBullets, vortex, daily, share, adaptiveQuality, clock); render list +13 (assetLoader, bossMesh, bossHealth, wardenMesh, droneMesh, mineMesh, enemyBulletMesh, vortexFx, killFeed, tutorialOverlay, debugOverlay, ...); pool table updated (enemy bolts 24, mines 10, seekers 6); draw-call budget re-baselined from I95/I167 evidence (22-59 calls, steady 5-7ms; DOM 0 steady mutations).
+- CHANGELOG coverage check: I151-I167 all present (168 entries; the historical I17 duplicate is pre-existing and deliberately untouched, per I47 precedent).
+- Quality bar: 491/491 (docs only), build 0, no browser smoke (no rendering change).
+- Result: DONE. ST-168 closed - E8D (ST-151..168) complete. Next I169 ST-169 procedural music: ambient drone loop (E8E opens). Note for I169: I158 already ships a generative music bed (minor pad + pentatonic pluck) + MUSIC option, so ST-169 should be assessed against that baseline first.
+
+
 
 
