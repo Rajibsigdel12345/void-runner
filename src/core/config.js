@@ -165,14 +165,14 @@ export const CONFIG = {
     enterTime: 1.2,    // entrance seconds - no bolts until the intro plays
     arms: 2,           // spiral arms (2 = two-arm spiral)
     armSpin: 1.2,      // rad/s the arm rotates (spiral tightness)
-    spiralEvery: 0.26, // seconds between spiral shots (phase 2: x0.6)
+    spiralEvery: 0.6,  // I144: seconds between spiral shots (gap 7x0.6 = 4.2u ~ 1.9x the ship's 2.24u effective obstacle - threadable; was 0.26 = 1.82u < obstacle, an unthreadable wall; phase 2: x0.65)
     boltSpeed: 7.0,    // undestroyable bolt u/s (== radial burst speed, dodgeable)
     aimEvery: 2.6,     // seconds between aimed bolts (phase 2: x0.7)
     phase2: {          // enrage below the HP threshold (one-way)
       hpFrac: 0.5,
       orbitSpeedMult: 1.4,
       armSpinMult: 1.5,
-      spiralEveryMult: 0.6,
+      spiralEveryMult: 0.65, // I144: enrage gap 2.73u ~ 1.22x obstacle - tight but fair
       aimEveryMult: 0.7,
       spin: 1.2,
     },

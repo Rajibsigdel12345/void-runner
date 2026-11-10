@@ -1021,3 +1021,15 @@ One entry per iteration. Format:
 - Build: 0.
 - Browser smoke: dev :5173 ?nocache=143b - forced the second variant (bossSpawnCount=1, spawnBossForWave(10)): kind 'splicer', maxHp 30, entered 1, 8 live bolts all at 7.0 u/s (the spiral), teal emissive 0x2dd4bf, mesh scale 0.765, boss health label 'SPLICER', 0 real NaN (rocks are 2D; pos.z undefined by design, not NaN), console 0/0. Screenshot: .evidence/I143/I143_splicer.png (teal obelisk, red spiral bolts, SPLICER health bar).
 - Result: DONE. Next I144 ST-144 balance pass E8-2 (cgs-balance-check).
+
+## I144 - Balance pass E8-2: the boss family, Splicer spiral threadability (cgs-balance-check) (ST-144)
+
+- Design: audited the E8-2 heavyweight family (Monolith, Warden, Splicer) as one system: HP curves vs the weapon ramp, the score ladder, enemyBullets pool pressure, and the Splicer's spiral dodgeability. One finding: the Splicer's phase-1 spiral was effectively unthreadable.
+- Finding: the linear gap between consecutive bolts along an arm is boltSpeed x spiralEvery = 7 x 0.26 = 1.82u, while the ship's effective obstacle width is ship diameter + 2 x bolt radius = 1.8 + 0.44 = 2.24u. Gap < obstacle = a wall that cannot be crossed at any fixed angle (zero/negative margin). On top of that the phase-1 rate (7.7 bolts/s x 4s life = 30.8) exceeded the 24-bolt pool cap, so fire() silently dropped ~22% of the spiral - a broken pattern, not a dense one. Browser-confirmed: an idle ship standing at the arena center took 3 hits in ~10 s.
+- Balance Lever (2 values, no new tunable): splicer.spiralEvery 0.26 -> 0.6 (phase-1 gap 4.2u = 1.88x the obstacle - threadable; rate 3.3/s) and splicer.phase2.spiralEveryMult 0.6 -> 0.65 (enrage gap 2.73u = 1.22x the obstacle - tight but fair; rate 5.1/s). The 'spinning sun' read survives (the arm still turns 41 deg p1 / 37 deg p2 per shot). Monolith + Warden numbers unchanged (already tuned I133/I134/I136; in range on this audit).
+- Tests: 428/428 (was 426, +2 tests/splicer.test.js balance invariants: gap-vs-obstacle both phases (p1 >= 1.8x and p2 >= 1.1x of the 2.24u obstacle), and worst-case steady-state pool occupancy under the 24 cap both phases (p1 14.9, p2 22.7). These lock the contract so a later tune cannot silently re-close the wall.)
+- Design doc: design/balance-e8-2.md (boss family table, pool pressure table, exploit risk, pacing, telemetry, risks) per the cgs-balance-check output contract.
+- Build: 0.
+- Browser smoke: dev :5173 ?nocache=144 - forced Splicer; phase-1 live-bolt steady state 9-12 (cap 24, no drops); forced enrage (hp 30 -> 14 via hit(), verified applied, phase 2) - live bolts 15-20, still under cap; 0 NaN, console 0/0. Screenshot: .evidence/I144/I144_spiral_gap.png (threadable bolt spacing, SPLICER bar 60%).
+- Result: DONE. Next I145 ST-145 test batch E8C (25+ new tests; the two balance invariants are the template).
+

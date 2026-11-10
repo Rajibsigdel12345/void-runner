@@ -2,9 +2,9 @@
 
 - project: Void Runner (E:\Game, three.js, no bundler)
 - epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-144 (next)
-- current_iteration: I143 (committed)
+- current_story: ST-145 (next)
+- current_iteration: I144 (committed)
 - branch: main
-- tests: 426/426
+- tests: 428/428
 - build: exit 0
-- notes: I143 done (ST-143 boss variant 2 'the Splicer', core+render, cgs-dev-story). new src/core/splicer.js (DOM-free) + config.splicer; bosses alternate Monolith/Splicer by bossSpawnCount%2; the Splicer glides from the rim to holdRadius 11 and orbits, emitting a two-arm spiral of undestroyable bolts (no rock rings / no radial burst - Monolith only) + a slow aimed bolt; one-way enrage phase 2 below 50% hp; score 600; death splits 2 M rocks. Render: teal emissive 0x2dd4bf, 'SPLICER' label/bar, 'THE SPLICER' banner + 'SPLICER INBOUND' toast. 426/426 (+11 tests/splicer.test.js), build 0, browser smoke ?nocache=143b (kind 'splicer', maxHp 30, 8 spiral bolts @ 7.0 u/s, teal emissive, 'SPLICER' label, 0 NaN, console 0/0; .evidence/I143/I143_splicer.png). Next: I144 ST-144 balance pass E8-2 (cgs-balance-check) - focus on Splicer spiral density (steady state exceeds the 24-bolt enemyBullets cap; tune spiralEvery/boltSpeed) + boss HP/score curves. NOTE: Blender 5.2.3 connected - E9 Blender epic (I207-I217) after E8 closeout; use blender MCP tools there. Do NOT spawn sub-agents.
+- notes: I144 done (ST-144 balance pass E8-2, cgs-balance-check). Audited the boss family (Monolith/Warden/Splicer): found + fixed the Splicer phase-1 spiral being unthreadable (gap 1.82u < ship obstacle 2.24u; pool over-cap drops). spiralEvery 0.26 -> 0.6 (gap 4.2u, 1.88x obstacle), phase2.spiralEveryMult 0.6 -> 0.65 (enrage gap 2.73u, 1.22x). +2 invariant tests (gap-vs-obstacle, pool occupancy). design/balance-e8-2.md. 428/428, build 0, browser smoke ?nocache=144 (p1 9-12 live bolts, p2 15-20, under cap 24, 0 NaN, console 0/0; .evidence/I144/I144_spiral_gap.png). Next: I145 ST-145 test batch E8C (25+ new tests across E8-2 systems; the two balance invariants as template). NOTE: Blender 5.2.3 connected - E9 Blender epic (I207-I217) after E8 closeout; use blender MCP tools there. Do NOT spawn sub-agents.

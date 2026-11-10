@@ -152,3 +152,20 @@ test("world: killing the Splicer pays its own score and splits M rocks", () => {
   const m1 = w.field.rocks.filter((r) => !r.dead && r.size === "M").length;
   assert.equal(m1 - m0, CONFIG.splicer.splitCount, "split M rocks spawned");
 });
+
+test("balance (I144): the spiral gap stays wider than the ship's effective obstacle (both phases)", () => {
+  const s = CONFIG.splicer;
+  const obstacle = 2 * CONFIG.ship.radius + 2 * CONFIG.enemyBullets.radius; // ship diameter + bolt widths
+  const gap1 = s.boltSpeed * s.spiralEvery;
+  const gap2 = s.boltSpeed * s.spiralEvery * s.phase2.spiralEveryMult;
+  assert.ok(gap1 >= 1.8 * obstacle, "phase 1 gap is comfortably threadable (gap " + gap1.toFixed(2) + "u vs obstacle " + obstacle.toFixed(2) + "u)");
+  assert.ok(gap2 >= 1.1 * obstacle, "phase 2 (enrage) gap is tight but fair (gap " + gap2.toFixed(2) + "u)");
+});
+
+test("balance (I144): worst-case steady-state bolt count stays under the enemyBullets cap (both phases)", () => {
+  const s = CONFIG.splicer;
+  const e = CONFIG.enemyBullets;
+  const steady = (spiralEvery, aimEvery) => ((s.arms / spiralEvery) + (1 / aimEvery)) * e.life;
+  assert.ok(steady(s.spiralEvery, s.aimEvery) < e.maxConcurrent, "phase 1 steady state under cap");
+  assert.ok(steady(s.spiralEvery * s.phase2.spiralEveryMult, s.aimEvery * s.phase2.aimEveryMult) < e.maxConcurrent, "phase 2 steady state under cap");
+});
