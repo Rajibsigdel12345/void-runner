@@ -129,6 +129,7 @@ export const CONFIG = {
     ringCount: 8,    // S rocks per burst (capped by the field's maxConcurrent)
     splitCount: 4,   // M rocks on death
     fireEvery: 2.2,  // ST-056: seconds between aimed bolts
+    enterTime: 1.2,  // ST-135: entrance seconds - no attacks until the intro plays
     phase2: {        // ST-133: enrage state below the HP threshold (one-way)
       hpFrac: 0.5,      // enter phase 2 when HP < 50%
       speedMult: 1.45,  // homing speed (1.6 -> 2.32 u/s - still dodgeable)

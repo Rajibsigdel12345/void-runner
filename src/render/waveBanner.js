@@ -30,6 +30,11 @@ export function createWaveBanner(root) {
     el.style.fontSize = '40px';
   }
   function startCleared(n) { anim = { t: 0, dur: 1.2, text: '', subText: 'WAVE ' + n + ' CLEARED' }; el.style.fontSize = '0px'; }
+  function startBoss(n, maxHp) { // ST-135: boss intro banner (bigger, purple-tinted)
+    anim = { t: 0, dur: 2.2, text: 'THE MONOLITH', subText: 'WAVE ' + n + ' \u00b7 ' + maxHp + ' HP' };
+    el.style.fontSize = '52px';
+    el.style.color = '#c9a8ff';
+  }
 
   function easeOut(x) { return 1 - Math.pow(1 - x, 3); } // ST-088
   function easeIn(x) { return x * x * x; }               // ST-088
@@ -53,7 +58,7 @@ export function createWaveBanner(root) {
       el.style.opacity = String(a);
       const inP = Math.min(1, anim.t / 0.4); // ST-088: entry slide-in over 0.4s
       el.style.transform = 'translateY(' + (motionOff ? 0 : (12 * (1 - easeOut(inP))).toFixed(1)) + 'px)'; // ST-088: slide up into place
-      if (anim.t >= anim.dur) { anim = null; el.style.opacity = '0'; el.style.fontSize = '40px'; el.style.transform = 'translateY(0px)'; sub.textContent = ''; el.firstChild.nodeValue = ''; }
+      if (anim.t >= anim.dur) { anim = null; el.style.opacity = '0'; el.style.fontSize = '40px'; el.style.color = '#9fd0ff'; el.style.transform = 'translateY(0px)'; sub.textContent = ''; el.firstChild.nodeValue = ''; }
       return;
     }
     // idle: intermission countdown
@@ -75,5 +80,5 @@ export function createWaveBanner(root) {
     }
   }
 
-  return { el, showWave: startWave, showCleared: startCleared, sync };
+  return { el, showWave: startWave, showCleared: startCleared, showBoss: startBoss, sync };
 }

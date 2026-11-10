@@ -17,6 +17,7 @@ function freshWorld(seed) {
   w.spawnBossForWave(5);
   w.boss.ringTimer = 100; // suppress ring bursts
   w.bossFireTimer = 100; // suppress aimed bolts
+  w.boss.entered = 1; // ST-135: skip the entrance (mechanism tests)
   return w;
 }
 

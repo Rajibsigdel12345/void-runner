@@ -65,6 +65,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 - Contact with the boss costs a life, same flow as a rock hit (knockback + invuln). The boss is not damaged by contact.
 - While alive, a MONOLITH HP bar shows at top center. Only one boss at a time.
 - Phase 2 enrage (I133): when the Monolith drops below 50% HP it enrages one-way (config.boss.phase2) - homing 45% faster (2.32 u/s, still dodgeable), 40% faster turning, a visible 1.6 rad/s tumble, and both the ring and the aimed-bolt cadences 40% faster (ring 2.0 -> 1.2 s, bolt 2.2 -> 1.32 s). A single bossPhase2 event announces the transition for FX; the HP bar keeps showing.
+- Entrance (I135): the Monolith enters over 1.2 s (config.boss.enterTime) with no attacks - a purple "THE MONOLITH" banner (wave + HP) plays while the obelisk scales in (easeOutCubic), and the ring / aimed-bolt / radial-burst timers are held until the entrance completes (a held ring fires immediately afterwards).
 
 ## Enemy Bullets (ST-056)
 

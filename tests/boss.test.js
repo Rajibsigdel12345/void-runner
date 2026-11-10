@@ -16,6 +16,7 @@ function worldWithBoss(seed) {
   w.waves.state = 'intermission';
   w.waves.intermission = 100;
   w.spawnBossForWave(5);
+  w.boss.entered = 1; // ST-135: skip the entrance (mechanism tests)
   assert.ok(w.boss, 'boss spawned');
   return w;
 }

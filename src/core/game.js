@@ -148,16 +148,18 @@ export class World {
     this.enemyBullets.step(edt); // ST-056 (ST-115: scaled under slow-mo)
     if (this.boss) { // ST-055/056
       if (this.boss.step(edt, this.ship.pos) === 'ring') this.bossRingBurst(); // ST-115: scaled under slow-mo
-      this.bossFireTimer -= edt; // ST-115: boss fire cadence slows under slow-mo
-      if (this.bossFireTimer <= 0) {
-        this.bossFireTimer += this.cfg.boss.fireEvery * (this.boss.phase === 2 ? this.cfg.boss.phase2.ringEveryMult : 1); // ST-133: enraged cadence
-        const b = this.fireAimedBolt(this.boss.pos, this.cfg.enemyBullets.speed);
-        if (b) this.emit('bossFire', { pos: { x: this.boss.pos.x, y: this.boss.pos.y } });
-      }
-      this.bossBurstTimer -= edt; // ST-134/ST-115: burst cadence slows under slow-mo
-      if (this.bossBurstTimer <= 0) {
-        this.bossBurstTimer += this.cfg.boss.burst.every * (this.boss.phase === 2 ? this.cfg.boss.burst.everyMult : 1); // ST-134: enraged cadence
-        this.bossBurst();
+      if (this.boss.entered >= 1) { // ST-135: entrance window - no aimed bolts or bursts
+        this.bossFireTimer -= edt; // ST-115: boss fire cadence slows under slow-mo
+        if (this.bossFireTimer <= 0) {
+          this.bossFireTimer += this.cfg.boss.fireEvery * (this.boss.phase === 2 ? this.cfg.boss.phase2.ringEveryMult : 1); // ST-133: enraged cadence
+          const b = this.fireAimedBolt(this.boss.pos, this.cfg.enemyBullets.speed);
+          if (b) this.emit('bossFire', { pos: { x: this.boss.pos.x, y: this.boss.pos.y } });
+        }
+        this.bossBurstTimer -= edt; // ST-134/ST-115: burst cadence slows under slow-mo
+        if (this.bossBurstTimer <= 0) {
+          this.bossBurstTimer += this.cfg.boss.burst.every * (this.boss.phase === 2 ? this.cfg.boss.burst.everyMult : 1); // ST-134: enraged cadence
+          this.bossBurst();
+        }
       }
     }
     this.resolveBulletMines(); // ST-054
@@ -323,7 +325,7 @@ export class World {
     this._bossPhaseEmitted = false; // ST-133: fresh boss, enrage not yet announced
     this.bossBurstTimer = this.cfg.boss.burst.every; // ST-134
     this.bossBursts = 0; // ST-134
-    this.emit('bossSpawn', { pos: { x: pos.x, y: pos.y } });
+    this.emit('bossSpawn', { pos: { x: pos.x, y: pos.y }, wave, hp: this.boss.maxHp }); // ST-135: banner shows wave + HP
   }
 
   /** ST-055: the boss bursts a ring of S rocks fired radially outward from its position. */

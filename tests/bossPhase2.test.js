@@ -76,6 +76,7 @@ test("phase 2 step: turn rate scales (capped branch)", () => {
 
 test("phase 2 step: ring interval scales", () => {
   const b = new Monolith(new RNG(1), CONFIG, P);
+  b.entered = 1; // ST-135: entrance complete
   b.ringTimer = 0.005;
   assert.equal(b.step(0.016, P), "ring");
   assert.ok(Math.abs(b.ringTimer - (0.005 - 0.016 + CONFIG.boss.ringEvery)) < 1e-12);

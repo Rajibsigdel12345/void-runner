@@ -37,11 +37,12 @@ export function createBossMesh(scene) {
 
   /** sync(boss, t): place the obelisk (tall body, base near the plane), pulse the glow. */
   function sync(boss, t) {
-    if (!boss || !boss.alive) { mesh.visible = false; return; }
+    if (!boss || !boss.alive) { mesh.visible = false; mesh.scale.setScalar(1); return; }
     const r = CONFIG.boss.radius;
     mesh.position.set(boss.pos.x, r * 1.3 + 0.3, boss.pos.y);
     mesh.rotation.y = boss.rot;
     mat.emissiveIntensity = 0.18 + 0.18 * (0.5 + 0.5 * Math.sin(t * 2.4)); // subtle pulse
+    mesh.scale.setScalar(Math.max(0.001, 1 - Math.pow(1 - boss.entered, 3))); // ST-135: easeOutCubic scale-in during entrance
     mesh.visible = true;
   }
 
