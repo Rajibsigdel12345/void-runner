@@ -25,6 +25,7 @@ import { createAudio } from './render/audio.js';
 import { createWaveBanner } from './render/waveBanner.js';
 import { createScorePopups } from './render/scorePopups.js';
 import { createTutorialHint } from './render/tutorialHint.js';
+import { createTutorialOverlay } from './render/tutorialOverlay.js'; // I151: first-run tutorial
 import { createBloom } from './render/bloom.js';
 import { createFpsMeter } from './render/fpsMeter.js';
 import { createDebugOverlay } from './render/debugOverlay.js'; // ST-080
@@ -122,6 +123,17 @@ const lsStore = {
 };
 const storage = new Storage(lsStore, CONFIG.storage);
 let bestScore = storage.getBest();
+// I151: first-run tutorial overlay - a one-time, dismissible "how to play" card shown on the
+// player's first entry to PLAYING. While active it gates the sim (tick early-returns) so the
+// player can read without dying; dismissal is persisted via storage and never re-shown.
+const tutorial = createTutorialOverlay(document.body, {
+  touch: coarse,
+  onDismiss: () => dismissTutorial(),
+});
+let tutorialActive = false;
+function dismissTutorial() {
+  if (tutorialActive) { storage.setTutorialSeen(); tutorial.hide(); tutorialActive = false; }
+}
 let newBest = false;
 let scoresText = ''; // I66: top-5 table text for the menu (refreshed at boot + on game over)
 let scoreRank = 0; // I69: this run's board rank (shown on game over)
@@ -208,7 +220,10 @@ function refreshDailyMenu() {
 }
 refreshDailyMenu();
 function startRun(mode) {
-  newBest = false; popups.clear(); hint.show(); dailyNewBest = false;
+  newBest = false; popups.clear(); dailyNewBest = false;
+  const firstRun = !storage.getTutorialSeen(); // I151: first entry to PLAYING
+  if (firstRun) { tutorialActive = true; tutorial.show(); } // gate the sim while reading
+  else hint.show(); // passive 6s hint on subsequent runs
   if (mode === 'daily') { const d = dailyForDate(new Date(), CONFIG.daily.salt); dailyMode = true; dailyKey = d.key; dailySeedVal = d.seed; world.reseed(d.seed); }
   else { dailyMode = false; dailyKey = null; dailySeedVal = 0; }
   world.begin();
@@ -248,6 +263,7 @@ let flashA = 0;
 let dangerA = 0;
 let slowmoT = 0; // I116: slow-mo tint ramp 0..1 // I85: transient danger spike on hit (gated by !motionOff like the flash)
 function togglePause() { // ST-033: shared by keyboard and two-finger touch
+  if (tutorialActive) return; // I151: can't pause while reading the first-run tutorial
   const st = world.game.state;
   if (st === STATE.PLAYING) world.pause();
   else if (st === STATE.PAUSED) world.resume();
@@ -266,6 +282,10 @@ document.body.appendChild(pauseBtn);
 // Session keys (ST-017): Enter start/restart, P/Esc pause, M mute.
 window.addEventListener('keydown', (e) => {
   if (e.repeat) return;
+  if (tutorialActive) { // I151: the first-run tutorial owns the keys while it is visible
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape' || e.key === 'p' || e.key === 'P') { e.preventDefault(); dismissTutorial(); }
+    return;
+  }
   const st = world.game.state;
   if (e.key === 'Enter') {
     // I37: side effects only on the transitions that use them - stray Enter
@@ -306,7 +326,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -386,6 +406,7 @@ function resolveAimPoint() {
 }
 
 function tick(dt, intent) {
+  if (tutorialActive) return; // I151: freeze the sim while the first-run tutorial is up (render keeps going)
   if (!intent) input.tick(dt); // ST-033: decay touch fire-tail / pause cooldown
   const it = intent || { thrust: input.state.thrust, aimPoint: resolveAimPoint(), firing: input.state.firing };
   world.step(dt, it);
@@ -532,6 +553,7 @@ function syncVisuals(dt) {
   stars.update(simT, camera, !motionOff); // I60: twinkle + parallax (frozen when reduced motion)
   popups.sync(dt, motionOff); // ST-030: after follow-camera + shake
   hint.sync(dt, motionOff); // ST-032
+  tutorial.sync(motionOff); // I151: reduced-motion gates the overlay animations
   if (flashA > 0) { // hit/bomb flash decay
     flashA = Math.max(0, flashA - dt * 2.2);
     if (flashEl) flashEl.style.opacity = String(flashA); // I43: #flash is optional in the DOM

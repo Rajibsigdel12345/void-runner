@@ -297,3 +297,37 @@ test('storage: daily best persists across instances and survives a corrupt paylo
   store.set(b.dailyBestKey, JSON.stringify({ version: 2, key: 'x', value: 1 })); // unknown future version
   assert.equal(b.getDailyBest(), null); // degrades to null, no throw
 });
+
+test('storage: tutorial seen flag starts false, persists, and round-trips (I151)', () => {
+  const store = memStore();
+  const a = new Storage(store);
+  assert.equal(a.getTutorialSeen(), false); // absent -> false
+  assert.ok(a.setTutorialSeen());
+  assert.equal(a.getTutorialSeen(), true);
+  const b = new Storage(store); // new instance, same backing store
+  assert.equal(b.getTutorialSeen(), true);
+  const raw = JSON.parse(store.get(a.tutorialKey));
+  assert.equal(raw.version, STORE_VERSION);
+  assert.equal(raw.seen, true);
+});
+
+test('storage: setTutorialSeen is idempotent and survives corrupt/unknown payloads (I151)', () => {
+  const store = memStore();
+  const a = new Storage(store);
+  a.setTutorialSeen();
+  a.setTutorialSeen(); // second write: still true, no throw
+  assert.equal(a.getTutorialSeen(), true);
+  store.set(a.tutorialKey, '{not json'); // corrupt -> degrades to false, no throw
+  assert.equal(a.getTutorialSeen(), false);
+  store.set(a.tutorialKey, JSON.stringify({ version: 2, seen: true })); // unknown future version
+  assert.equal(a.getTutorialSeen(), false);
+});
+
+test('storage: uses the injected tutorialKey when provided (I151)', () => {
+  const store = memStore();
+  const a = new Storage(store, { tutorialKey: 'custom.tutorial' });
+  assert.equal(a.tutorialKey, 'custom.tutorial');
+  a.setTutorialSeen();
+  assert.ok(store._map.has('custom.tutorial'));
+  assert.equal(new Storage(store, { tutorialKey: 'custom.tutorial' }).getTutorialSeen(), true);
+});

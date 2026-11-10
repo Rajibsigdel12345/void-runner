@@ -1089,3 +1089,14 @@ One entry per iteration. Format:
 - Verification: 459/459 tests (docs-only - no code or test diff), build exit 0.
 - Browser: not applicable (docs-only, no rendering changes).
 - Result: DONE. ST-150 closed; epic E8C closed (ST-133..150). Next I151 ST-151 first-run tutorial overlay (dismiss + persist) - E8D UI/UX epic begins.
+
+## I151 - First-run tutorial overlay: dismiss + persist (ST-151)
+
+- Story: ST-151 | Goal: a one-time, richer, dismissible "how to play" card shown on the player's first entry to PLAYING (distinct from the passive 6s tutorialHint); gate the sim while visible so they read without dying; dismiss via button + Enter/Space/Esc; persist the dismissal so it never re-shows. Opens E8D (UI/UX).
+- Design: dedicated storage key (Storage.getTutorialSeen/setTutorialSeen, versioned payload, mirrors the daily pattern; no config.js change - the constructor defaults the key to 'voidrunner.tutorial'). New src/render/tutorialOverlay.js (createTutorialOverlay, mirrors the screens.js panel/line/keycap style, reduced-motion aware via the vr-reduced class toggled from syncVisuals). startRun branches on !getTutorialSeen(): first run shows the overlay + sets the gate, otherwise shows the passive hint. tick() early-returns while tutorialActive (sim frozen, render keeps going). keydown guard owns Enter/Space/Esc/p/P while active (preventDefault + dismiss); togglePause no-ops while active so touch two-finger pause cannot slip in.
+- Changed: src/core/storage.js (tutorialKey + getTutorialSeen/setTutorialSeen), src/render/tutorialOverlay.js (new), src/main.js (import, overlay + tutorialActive + dismissTutorial after storage, startRun branch, togglePause guard, keydown guard, tick gate, tutorial.sync in syncVisuals, __vr tutorial handles), tests/storage.test.js (+3 tests), docs.
+- Tests: 462/462 (was 459, +3), build 0.
+- Browser: Playwright ?nocache=151. Fresh first run: centered "HOW TO PLAY" card (keycap controls grid + LAUNCH ENTER button) appears over a frozen arena - world.time stays 0 and __vr.advance(5) leaves time at 0 while the overlay is up (gate proven), rendering continues. Dismiss verified via BOTH the Enter key and the LAUNCH button click; each sets localStorage 'voidrunner.tutorial' = {"version":1,"seen":true}. Reload -> overlay does NOT re-appear (tutorialActive=false, display:none), the passive hint shows instead (opacity 1), and the sim runs immediately (world.time advancing). Reduced-motion: tutorial.sync(true) toggles vr-reduced on the overlay (animations gated). Deep NaN scan: 0 real non-finite (only the intentional scoreKeeper.lastKillTime=-Infinity sentinel).
+- Console: 0 errors / 0 warnings on a clean fresh boot + playthrough.
+- Screenshot: .evidence/I151/I151_tutorial_shown.png (first-run overlay).
+- Result: DONE. ST-151 closed. Next I152 ST-152 session stats (accuracy, best combo, kills, waves).

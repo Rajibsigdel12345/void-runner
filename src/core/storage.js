@@ -54,7 +54,7 @@ export function migratePayload(version, data, migrations = MIGRATIONS, targetVer
 export class Storage {
   /**
    * @param {{get:(k:string)=>(string|null), set:(k:string,v:string)=>void, remove:(k:string)=>void}} store
-   * @param {{bestKey?:string, settingsKey?:string, highScoresKey?:string, highScoresMax?:number}} keys
+   * @param {{bestKey?:string, settingsKey?:string, highScoresKey?:string, highScoresMax?:number, tutorialKey?:string}} keys
    */
   constructor(store, keys = {}) {
     this.store = store;
@@ -62,6 +62,7 @@ export class Storage {
     this.settingsKey = keys.settingsKey || 'voidrunner.settings';
     this.highScoresKey = keys.highScoresKey || 'voidrunner.scores'; // I66
     this.dailyBestKey = keys.dailyBestKey || 'voidrunner.daily'; // ST-141: daily best (per calendar day)
+    this.tutorialKey = keys.tutorialKey || 'voidrunner.tutorial'; // I151: first-run tutorial seen flag
     this.maxScores = (Number.isInteger(keys.highScoresMax) && keys.highScoresMax > 0) ? keys.highScoresMax : 5; // I66
   }
 
@@ -200,6 +201,17 @@ export class Storage {
     const newBest = !sameDay || s > cur.value;
     if (newBest) this._write(this.dailyBestKey, { version: STORE_VERSION, key, value: s });
     return { newBest, value: newBest ? s : (cur ? cur.value : 0) };
+  }
+
+  /** I151: has the player dismissed the first-run tutorial? (dedicated key, mirrors the daily pattern). */
+  getTutorialSeen() {
+    const d = this._readVersioned(this.tutorialKey);
+    return !!(d && d.seen === true);
+  }
+
+  /** I151: persist that the first-run tutorial has been dismissed (idempotent; returns the store write result). */
+  setTutorialSeen() {
+    return this._write(this.tutorialKey, { version: STORE_VERSION, seen: true });
   }
 
   remove(key) {
