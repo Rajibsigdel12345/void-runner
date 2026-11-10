@@ -847,3 +847,10 @@ One entry per iteration. Format:
 - Verified: 283/283 (was 279, +4) - bomb gen-1 M = 62, bomb gen-2 S = 150, bomb/bullet parity for a gen-2 S, bomb on a gen-1 shielded rock = flat 400. build 0. Doc + node (no render change -> no browser smoke per quality bar).
 - Decision: no other E8-1 config change is warranted (DPS, values, and pacing are all within range); the balance stays as tuned.
 - Next: I125 ST-125 determinism re-verify (node) - replay bit-identical with the new systems + this fix.
+## I125 - determinism re-verify: E8B new systems bit-identical replay (ST-125)
+
+- Goal: ST-125 acceptance is 'Determinism re-verify (harness incl. new systems) | replay bit-identical | node' - extend the ST-076 replay harness to cover the E8B systems (drones, rock shielded/armor/gen, weapon level) and prove replays stay bit-identical.
+- Record correction (evidence before tuning): a core-wide scan found NO unseeded randomness (no Math.random/Date.now/performance.now anywhere in src/core) - the drone field uses a seeded RNG + a time-based wobble phase, so no runtime fix was needed. The gap was purely harness coverage: the ST-076 snapshot omitted drones, rock shielded/armor/gen, and weapon level, so a divergence in those systems would have gone undetected.
+- Changed: tests/determinism.test.js - (1) snapshot gains rock shielded/armor/gen, wlevel (weapon level), and live drone pos/vel; (2) new runE8B coverage replay: deterministic fixed-step injections (shielded M every 400 steps, gen-2 S fragment at i=100, drone every 350 steps, wave jump to 10 for an L3 weapon at i=50), then asserts checkpoints + final snapshot are bit-identical across two same-seed runs AND that every injected system actually occurred (L3 reached, >=1 drone, shielded rock present, gen-2 fragment present).
+- Verified: 284/284 (was 283, +1) - the E8B replay is bit-identical over 40 simulated seconds with checkpoints every 300 steps, with all four injected systems present. Build 0. Node-only (no render change -> no browser smoke per quality bar).
+- Next: I126 ST-126 test batch E8B - 30+ new unit tests covering combo/bomb/slow-mo/drone/splitter/shielded/weapon.

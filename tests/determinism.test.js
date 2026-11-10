@@ -4,6 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { World } from '../src/core/game.js';
 import { RNG } from '../src/core/rng.js';
+import { v2 } from '../src/core/math.js';
 
 const DT = 1 / 60;
 
@@ -16,7 +17,9 @@ function snapshot(w) {
     sk: { score: w.scoreKeeper.score, kills: w.scoreKeeper.kills, combo: w.scoreKeeper.combo, maxCombo: w.scoreKeeper.maxCombo },
     lives: w.livesMgr.count,
     wave: w.wave,
-    rocks: w.field.rocks.map((r) => ({ id: r.id, size: r.size, x: r.pos.x, y: r.pos.y, vx: r.vel.x, vy: r.vel.y, spin: r.spin, rot: r.rot, golden: r.golden })),
+    wlevel: w.weaponLevel(), // ST-125: weapon progression is part of the deterministic state
+    rocks: w.field.rocks.map((r) => ({ id: r.id, size: r.size, x: r.pos.x, y: r.pos.y, vx: r.vel.x, vy: r.vel.y, spin: r.spin, rot: r.rot, golden: r.golden, shielded: !!r.shielded, armor: r.armor, gen: r.gen || 0 })), // ST-125
+    drones: w.drones.drones.filter((d) => !d.dead).map((d) => ({ id: d.id, x: d.pos.x, y: d.pos.y, vx: d.vel.x, vy: d.vel.y })), // ST-125
     bullets: w.weapons.bullets.filter((b) => !b.dead).map((b) => ({ id: b.id, x: b.pos.x, y: b.pos.y })),
     mines: w.mines.mines.filter((m) => !m.dead).map((m) => ({ id: m.id, x: m.pos.x, y: m.pos.y })),
     eb: w.enemyBullets.bullets.filter((b) => !b.dead).map((b) => ({ id: b.id, x: b.pos.x, y: b.pos.y })),
@@ -89,4 +92,38 @@ test('determinism: pause/resume mid-replay keeps both runs identical (ST-076)', 
     return [shots[0], snapshot(w)];
   }
   assert.deepEqual(runWithPause(777), runWithPause(777));
+
+// ST-125: E8B new-system coverage - deterministically inject shielded rocks, drones, a
+// gen-2 fragment, and an L3 weapon (wave 10) at FIXED steps so the replay exercises them
+// without depending on organic wave timing. Identical script both runs => bit-identical.
+function runE8B(seed, steps, checkpointEvery) {
+  const w = new World(new RNG(seed));
+  w.begin();
+  const checkpoints = [];
+  let maxDrones = 0, sawShielded = false, maxWl = 0, maxGen = 0;
+  for (let i = 0; i < steps; i++) {
+    if (i === 50) w.waves.wave = 10; // L3 weapon for the run (deterministic, identical both runs)
+    if (i === 100) { const s = w.field.spawn('S', 1, { x: -8, y: 4 }, null, false, null, 2); if (s) s.vel = v2(0.2, 0.2); } // gen-2 fragment
+    if (i % 400 === 0) { const r = w.field.spawn('M', 1, { x: 8, y: 0 }, null, false, null, 0, true); if (r) r.vel = v2(0.5, 0.3); } // shielded
+    if (i % 350 === 0) w.drones.spawn(w.ship.pos); // drone
+    w.step(DT, intentFor(w, i));
+    maxDrones = Math.max(maxDrones, w.drones.count);
+    for (const r of w.field.rocks) { if (r.shielded) sawShielded = true; maxGen = Math.max(maxGen, r.gen || 0); }
+    maxWl = Math.max(maxWl, w.weaponLevel());
+    if (checkpointEvery && (i + 1) % checkpointEvery === 0) checkpoints.push(snapshot(w));
+  }
+  checkpoints.push(snapshot(w));
+  return { w, checkpoints, coverage: { maxDrones, sawShielded, maxWl, maxGen } };
+}
+
+test('determinism: E8B new systems replay bit-identical (ST-125)', () => {
+  const steps = 2400; // 40 simulated seconds
+  const a = runE8B(2024, steps, 300);
+  const b = runE8B(2024, steps, 300);
+  assert.deepEqual(a.checkpoints, b.checkpoints, 'new-system checkpoints + final snapshot must be bit-identical');
+  assert.ok(a.coverage.maxWl >= 3, 'weapon reached L3');
+  assert.ok(a.coverage.maxDrones >= 1, 'a drone spawned + stepped');
+  assert.ok(a.coverage.sawShielded, 'a shielded rock was present');
+  assert.ok(a.coverage.maxGen >= 2, 'gen-2 fragments present');
+});
 });
