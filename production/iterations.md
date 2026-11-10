@@ -1692,3 +1692,19 @@ One entry per iteration. Format:
 - Playtest prep: NEW production/playtest-checklist.md - 3-run protocol (fresh-profile first run, power-up run, replay run), note fields, post-session verification box, triage buckets for I203 (BUG/BALANCE/UX/ART-AUDIO), deterministic reference values (demo pilot t=36.15s / 11334 / 57 kills / wave 2 / x15).
 - Concerns: the first M-mute read in the sweep was a mid-ramp sample (setTargetAtTime decay) - re-measured with settle windows: 0.142 unmuted / 0.000 muted / 0.190 unmuted. The speed probe initially pressed '4' (not a mapped key - keys are 1/2/3 per code + UI hint); '3' -> x4 verified. best.read-back 999999 was this session's own earlier probe write, restored to 123456. The daily 777000 entry remains as test data in the Playwright profile (recordDaily rejects score<=0 so it cannot be cleared through the public API) - labeled.
 - Result: DONE. ST-199 closed. Next I200 ST-200 docs sweep.
+
+## I200 - Docs sweep (cgs-consistency-check) (ST-200)
+- Summary: consistency check across design/ + README.md + AGENTS.md against the live code (main.js keydown handlers, config.js, core/visibilityPause.js, core/storage.js, stories.md). 9 contradictions fixed in 3 files; systems-map.md left as-is deliberately (historical MVP planning artifact - labeled, not a live spec).
+- Contradictions (canonical source -> fix):
+  1. gdd.md Controls (stale): T implied as a key (SLOWMO is a pickup-applied power-up - no 'T' handler exists; main.js + ST-115 story) and N (I171) / O (ST-191) / 1/2/3 (ST-190) / R/Q (ST-068) missing -> full key map replaced, plus the tutorial-owns-keys note.
+  2. gdd.md SLOWMO line '- SLOWMO (T, ST-115)' read as a key binding -> '(light blue; auto-applied on pickup, ST-115)' (matches config.js:396 pickup tint 0x9fe8ff).
+  3. gdd.md Game States missing the REPLAY branch (ST-190) and the I189 visibility pause -> both documented.
+  4. gdd.md had NO section for the replay/recording feature -> new 'Replay & Recording (ST-190/191)' section (quant 1000, 700 KB / 72,000 substep caps, cap-2 store, WATCH THIS RUN, demo pilot pin, read-only replays, one-stop recorder).
+  5. README.md controls table stale -> R/Q, N, O, 1/2/3 rows added with session/persisted markers.
+  6. README.md gameplay paragraph silent on replays -> one sentence added.
+  7. AGENTS.md test-runner line claimed `node --test tests/` is the runner - it fails in this environment (module-not-found on the directory); the real runner is npm test = scripts/run-tests.mjs -> runner line fixed.
+  8. AGENTS.md commands line '(node --test)' -> '(in-process node:test via scripts/run-tests.mjs)'.
+  9. AGENTS.md state-machine line missing the REPLAY branch -> fixed (matches gdd.md + code).
+- Verification: every patch anchor uniqueness-enforced by the patcher (no double hits); patched sections read back and reviewed (Controls, Replay & Recording, Game States, README table); docs-only change (no src/ diff) so no test/build/browser step per the quality bar; GDD + AGENTS.md state machines now agree with each other and with main.js.
+- Risks: none gameplay-impacting (docs only). systems-map.md remains an MVP-era plan (no E8 systems listed) - intentionally unchanged.
+- Result: DONE. ST-200 closed. Next I201 ST-201 QA plan (cgs-qa-plan).

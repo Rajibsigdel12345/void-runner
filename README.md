@@ -26,8 +26,12 @@ serve/build/test/vendor entry points.
 | Left mouse button / Space | fire |
 | Enter | start / restart |
 | P or Esc | pause / resume |
-| M | mute |
-| F | toggle FX quality (high/low) |
+| R / Q | restart / quit (from pause) |
+| M | mute (session) |
+| F | toggle FX quality (high/low; persisted) |
+| N | toggle music bed (persisted) |
+| O | record this run (watch it back at game over) |
+| 1 / 2 / 3 | replay speed x1 / x2 / x4 (during a replay) |
 
 Basic touch fallback: tap = fire, drag = thrust, two-finger tap = pause.
 
@@ -39,7 +43,7 @@ Combo-based scoring with a 4-second chain window; random power-up drops
 invulnerability. Boss waves from wave 5: THE MONOLITH / THE SPLICER
 alternate with WARDEN armored escorts; mine + seeker drones and a periodic
 gravity vortex. Daily seeded runs (one shared seed per calendar day) and a
-reproducible shareable result code. Settings (volume, SFX, FX quality, reduced motion) and best
+reproducible shareable result code. Record any run with O and watch it back at game over - a deterministic replay of the input tape - at 1/2/3 speeds. Settings (volume, SFX, FX quality, reduced motion) and best
 score persist in localStorage. A fire-line reticle shows the actual firing
 direction.
 

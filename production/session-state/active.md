@@ -2,11 +2,12 @@
 
 - project: Void Runner (E:\Game, three.js, no bundler)
 - epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-200 (docs sweep, next)
-- current_iteration: I199 (committed)
+- current_story: ST-201 (QA plan, next)
+- current_iteration: I200 (committed)
 - branch: main
 - tests: 630/630
 - build: exit 0
+- notes: I200 done (ST-200 docs sweep (cgs-consistency-check)): 9 contradictions fixed across design/gdd.md (controls list, SLOWMO pickup-not-key, new Replay & Recording section, Game States REPLAY + visibility branches), README.md (controls table + replay sentence), AGENTS.md (test runner = npm test, state machine REPLAY branch). Docs only, no code changes. systems-map.md labeled historical, unchanged. Next I201 QA plan (cgs-qa-plan).
 - notes: I199 done (ST-199 regression round C + playtest prep (cgs-regression-suite)): 3/3 suite matrix 630/630 (incl. cross-process over 66 files); first-run tutorial flow green (sim frozen while card up, dismiss once); full hotkey sweep green (M meter 0.142->0->0.190, N/F persist, O record, P/R/Q, replay speed 1/2/3 = x1/x2/x4 matching the UI hint); persistence battery green; finiteness clean (sentinel only); NEW production/playtest-checklist.md for I202; console 0/0, no code changes. Next I200 docs sweep.
 - notes: I198 done (ST-198 gate G8.5 E8F robustness (cgs-gate-check)): PASS - this-iteration browser: simVisibility('hidden')->PAUSED with sim frozen across advance(2.0), 'p'->PLAYING resume +0.3 exact; demoReplay->startReplay->idx 2169/2220 exact core pin; baseline 630/630 + build 0 + console 0/0; C4 cited I197 (src unchanged since). One probe artifact labeled (double 'p' dispatch = double toggle). No code changes. Next I199 regression round C + playtest prep.
 - notes: I197 done (ST-197 build size + load audit (cgs-perf-profile)): dist 1,864 KB raw / 449.6 KB gzip (vendor 290.3 / src 131.4 / assets 27.1 KB gz) - within adopted budget (<=2MB/<=550KB); 86 resources (81 scripts + 5 GLB) fully parallel, done 622 ms, domReady 890 ms headless; bottleneck = three.module.js 1,243 KB (irreducible under conventions); 3 LOW/INFO advisories, no changes. New artifact production/build-size-audit.md.

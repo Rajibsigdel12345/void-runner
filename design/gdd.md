@@ -16,10 +16,15 @@ multipliers, and grab power-ups. Survive as long as you can.
 ## Controls
 - WASD / Arrow keys: thrust (inertial)
 - Mouse: aim (ship + nose point at cursor on arena plane); Click or Space: fire
-- P or Esc: pause / resume
-- M: mute audio
+- Enter: start / restart from menus; resume from pause; quit a finished replay
+- P or Esc: pause / resume (also pauses a watched replay)
+- R / Q: restart / quit to menu (from pause; Q also exits a replay)
+- M: mute audio (session only; F and N persist)
 - F: toggle FX quality (high/low; persisted, overrides adaptive downgrade)
-- Enter: start / restart from menus
+- N: toggle the music bed (persisted; default on)
+- O: record this run (REC chip; a recorded run saves as a replay at game over)
+- 1 / 2 / 3: replay speed x1 / x2 / x4 (REPLAY state only)
+- While the first-run tutorial is up only Enter/Space/Esc work (they dismiss it).
 
 ## Arena
 - Horizontal plane, radius R = 26 units, centered origin, y = 0.
@@ -133,7 +138,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 - BOMB   (red): instantly shatters all on-screen asteroids (counts as kills, feeds combo)
 - MAGNET (green): attracts power-ups + slight bullet homing for 6s
 - OVERDRIVE (magenta): all score x2 for 6s (kills, combo multipliers, near-miss bonuses) - hex prism drop
-- SLOWMO (T, ST-115): enemy time scale 0.4 for 5s - rocks, bullets, mines and drones slow down, the ship keeps full speed
+- SLOWMO (light blue; auto-applied on pickup, ST-115): enemy time scale 0.4 for 5s - rocks, bullets, mines and drones slow down, the ship keeps full speed
 Stacks: each has its own timer; grabbing the same type refreshes its timer.
 - Drop economy (ST-130): 25% roll on any kill; at most ONE drop at a time (pickup radius 1.6u; the magnet power-up pulls drops in from 7u). Abandoned drops expire after 20s and free the pool; the last 2.5s of life read as a shrink-out so an expiring drop telegraphs itself (presentation only). The drop type is weighted, not uniform - RAPID 20, SPREAD 20, SHIELD 15, MAGNET 15, BOMB 10, OVERDRIVE 10, SLOWMO 10 (sums to 100): utility is common, screen-clearers and multipliers are rare.
 - Shield visual (I62, presentation): while SHIELD is live, a cyan ring breathes (subtle scale + opacity) and a second additive ring repeatedly expands outward and fades. An absorbed hit flashes a quick expanding pop. All frozen to a static ring under Reduced Motion. Visual only; no gameplay effect.
@@ -165,9 +170,31 @@ Stacks: each has its own timer; grabbing the same type refreshes its timer.
 - The seed is INCLUDED in the string, so a shared result is REPRODUCIBLE: reseed the World to the decoded seed to replay the identical run and verify the claimed score (I147: a decoded-seed replay reproduced the claimed score end-to-end).
 - Example: vr1.592577.l0x.5.3c.6g decodes to seed 317547475 / score 27249 / wave 5 / 120 kills (the 2026-11-10 daily run's result); re-encoding those values reproduces the exact string.
 
+## Replay & Recording (ST-190/191)
+
+- Recording: O during a run arms a recorder (REC chip + toast); the tape captures the
+  exact per-substep player intents at quant 1000 (1/1000 world-unit resolution - the I191
+  measurement kept a recorded-run replay outcome-identical, ship distance 0.0007 vs the
+  original over the demo run). Tapes are RLE-compressed and hard-capped (700 KB / 72,000
+  substeps; a truncated tape flags itself).
+- Save: a recorded run saves on game over (newest-first, cap 2 in `voidrunner.replays`);
+  the game-over screen shows WATCH THIS RUN only for recorded runs. Each run gets a fresh
+  seed, so a saved replay reproduces that exact run (deterministic core + seeded RNG).
+- Viewer: REPLAY state with a slim HUD bar (progress + speed + hints); 1/2/3 switch speed
+  x1/x2/x4; P pauses; R restarts the replay; Q exits, and Enter at the end exits to MENU.
+  A built-in DEMO PILOT (seed 1909, 2,220 substeps) plays from the menu flow; its outcome
+  is pinned in the test suite (dies at step 2169, t=36.15 s, score 11334, 57 kills,
+  wave 2, max combo x15) and was re-verified in-browser at the G8.5 gate (I198).
+- Watched replays never record or save (read-only), and the recorder is one-stop: a
+  stopped run cannot re-arm mid-run.
+
 ## Game States
 MENU (title + "Enter to start" + controls) -> PLAYING -> PAUSED (overlay) ->
 GAME_OVER (stats + "Enter to restart") -> PLAYING.
+Plus the replay branch (ST-190): MENU -> REPLAY (watch a saved or demo run) ->
+GAME_OVER (replay end) -> MENU, and exitReplay -> MENU from REPLAY.
+Tab hidden auto-pauses PLAYING to PAUSED via the visibility handler (I189, pure
+decision in core/visibilityPause.js); the player resumes manually (P/Esc/Enter).
 - Menu presentation (I65): the MENU screen has a gradient, softly glowing "VOID RUNNER" title, a drifting nebula backdrop (the live 3D starfield shows through the semi-transparent panel), the controls in a bordered card, and a credits line. The title glow and backdrop drift are pure presentation and freeze to static under Reduced Motion; no gameplay effect.
 
 ## HUD

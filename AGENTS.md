@@ -7,7 +7,7 @@ Void Runner is a 3D arcade space-asteroid shooter built with **three.js** (no bu
 - Genre: arcade survival / asteroids-style, 3D arena
 - Platform: desktop web (keyboard), touch-friendly fallback later
 - Engine: three.js (r160+), no bundler (import maps + vendored modules; scripts/serve.mjs + scripts/build.mjs)
-- Test runner: `node --test tests/` (pure-logic modules are DOM-free and unit-testable)
+- Test runner: `npm test` (scripts/run-tests.mjs, in-process node:test over tests/*.test.js; pure-logic modules are DOM-free and unit-testable. A bare `node --test tests/` directory run is NOT the runner in this environment)
 - Art assets: five Blender-made low-poly GLBs in assets/ (ship, asteroid L/M/S, boss) loaded at runtime via GLTFLoader (src/render/assetLoader.js) with procedural fallback; everything else stays procedural: canvas textures, WebAudio-synthesized SFX
 
 ## Commands
@@ -15,7 +15,7 @@ Void Runner is a 3D arcade space-asteroid shooter built with **three.js** (no bu
 - `npm run dev` - start the static dev server (http://localhost:5173)
 - `npm run build` - production build to dist/ (static import-map bundle)
 - `npm run preview` - serve the production build (http://localhost:4173)
-- `npm test` - run unit tests (node --test)
+- `npm test` - run unit tests (in-process node:test via scripts/run-tests.mjs)
 
 ## Layout
 
@@ -35,7 +35,7 @@ Void Runner is a 3D arcade space-asteroid shooter built with **three.js** (no bu
 - Core modules must not import three or touch the DOM (keeps tests fast + portable).
 - All tunables live in `src/core/config.js` (one file, commented, data-driven).
 - Determinism: all randomness flows through `src/core/rng.js` (seeded) so tests can pin seeds.
-- Game state machine: `MENU -> PLAYING -> PAUSED -> GAME_OVER -> PLAYING`.
+- Game state machine: `MENU -> PLAYING -> PAUSED -> GAME_OVER -> PLAYING`, plus the replay branch `MENU -> REPLAY -> GAME_OVER` (ST-190) and exitReplay -> MENU.
 - ST-190: `MENU -> REPLAY -> (PAUSED <-> REPLAY) / REPLAY -> GAME_OVER / GAME_OVER -> MENU` (replay viewer; watched runs never write scoreboards).
 - Iteration log: every meaningful change gets an entry in `production/iterations.md` (iter #, goal, changed files, test result).
 - Keep draw calls low: reuse geometries/materials, pool bullets and particles.
