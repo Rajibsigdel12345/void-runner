@@ -248,3 +248,43 @@ None. (The 8 HUMAN-PENDING perception items are a non-blocking evidence gap; par
 
 ## Next owner / decision
 - I219: E10 scope check + stories (cgs-scope-check + cgs-create-stories).
+
+## E10 CLOSED - Post-E9 Polish, final closeout (I222, G10.0 PASS)
+
+## Summary
+E10 (Post-E9 Polish) closed: 3/3 stories ST-218..220 complete across 4 iterations (I219..I222) - the Warden (last procedural enemy) is now a Blender GLB, the final art-research lever (camera/feel) landed, and the regression round + gate close the epic with no core changes.
+
+## Milestone Goal
+Small polish milestone after E9: finish the last procedural enemy model in Blender (Warden), land the last unowned art-research lever (camera/feel, lever 6), then regression + gate. No new content, no new dependencies, no core determinism changes (camera is render-layer).
+
+## Metrics
+- Tests: 677/677 (net +0 this milestone: asset audits extended 15->16 assets; camera lever render-only)
+- Build: exit 0; dist 1954.9 KB raw / 506.2 KB gzip (budget <=2048/<=550, ~43.8 KB headroom; was 1940.6/501.9 at E9 close - the delta is warden.glb 11.5 KB + test code)
+- Assets: 16 GLBs + skybox (was 15 + skybox); warden.glb 11,772 B / 180 tris / 2 materials
+- Iterations: 4 (I219 scope open, I220 ST-218, I221 ST-219, I222 ST-220 + gate + closeout)
+- Performance: frame probe delta ~0 (I221 16.57 ms avg -> I222 16.93 ms avg, 60 fps locked both)
+
+## Evidence (per story)
+- ST-218 (I220): Warden Blender GLB - assets/warden.glb 180 tris / 11.5 KB / 2 materials (VR_Warden_Hull 60 tris jittered dodecahedron + 4 capped spikes; VR_Warden_Armor 120 tris = 6 trapezoid plates + hex rim band); separate armor node so the wardenMesh.js armor-state animation carries over unchanged; procedural fallback preserved; 16th asset in assetLoader; assetGlbs + assetPerf audits extended (677/677); smoke: GLB swap proven (124/240 GLB verts vs 108/56 procedural), armored + spent screenshots, kill +400/+1/hidden, pilot finite, console 0/0.
+- ST-219 (I221): camera/feel (art research lever 6) - 2-5% aim-lead on the LOOK target only (min(ship->aim * 0.03, 1.2 u); camera position stays = dodge-read rule), boss-approach +2.5 deg FOV zoom-out (dist < 14, eased 3/s), MENU orbit drift 0.06 rad/s (motion-gated, phase 0 = legacy view); view FIXED during normal play; 6 new camera tunables in config. Smoke: orbit A/B + lead in/cap/out exact (+0.223/+0.334, cap EXACTLY 1.2) + boss zoom 60 -> 62.134 -> 60.01 + pilot 18 s / 14 kills finite + frames 16.57 ms avg (delta ~0) + console 0/0.
+- ST-220 (I222): regression round + G10.0 gate + closeout - node matrix 3/3 677/677; build 0; dist 1954.9/506.2; state machine 6/6; persistence intact; demo pin EXACT via real UI path (idx 2169/2220, score 11334, t=36.15); Warden same-frame A/B (.evidence/I222/02 vs 03); fresh pilot 1080 ticks PLAYING t=31.47 s / 7449 pts / 35 kills all finite; frames 16.93 ms avg (60 fps locked); console 0/0; log audit 1..222 sequential.
+
+## Blocker
+None.
+
+## Transition Verdict
+**CLOSED - E10 complete: 3/3 stories, 4 iterations (I219..I222).** No core changes this milestone (camera is render-layer); the demo pin (seed 1909) is structurally untouched and re-verified exact in-browser at I222.
+
+## Risks
+- Carried (8 HUMAN-PENDING): perception items in production/bug-triage.md (2 ART/AUDIO) - non-blocking, need a human session.
+- Carried: low-end physical device / GPU validation (adaptive quality I73 mitigates).
+- New: none opened this milestone; R-E10-1..3 all CLOSED at G10.0.
+
+## Changed files
+- production/gates.md (+G10.0 block), production/milestone-review.md (this section), production/epics.md (E10 header + Result CLOSED), production/timeline.md (+E10 closed line), production/stories.md (ST-218..220 DONE + E10 CLOSED line), CHANGELOG.md (+I222), production/iterations.md (+I222), production/session-state/active.md. No src changes (closeout iteration).
+
+## Verification evidence
+- I222 fresh: npm test 677/677 (x2 in-process) + node --test "tests/*.test.js" 677/677 cross-process (.evidence/I222/matrix.txt + run3.txt); node scripts/build.mjs exit 0; dist 1954.9/506.2 KB; log audit 221 entries 1..221 (+I222 = 1..222, sequential, .evidence/I222/log-audit.txt); browser smokes ?nocache=222a (regression), ?nocache=222b (Warden A/B staging), ?nocache=222c (pilot + frames + console).
+
+## Next owner / decision
+- I223: open E11 - scope check via cgs-scope-check + cgs-create-stories. Candidate directions: (a) new content arc, (b) HUMAN-PENDING-informed polish (human session), (c) low-end device validation plan, (d) carried deferrals (combo cap balance, 512x256 skybox).

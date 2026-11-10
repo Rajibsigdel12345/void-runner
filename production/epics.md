@@ -162,12 +162,13 @@ recorded in production/gates.md.
 - R-E9-3 (low) Blender 5.2 exporter quirks (Y-up flip, COLOR_0 needs Color Attribute node, from_pydata face tuples, img.pixels 4ch) -> captured in I208-I212 notes; audits re-verify exports.
 - R-E9-4 (low) scope creep into new content -> design/art-direction-research.md is the cap; ST-217 is the only queued art story.
 
-## E10 Post-E9 Polish (ST-218..220)
+## E10 Post-E9 Polish (ST-218..220) - CLOSED (I222)
 - Context: E9 closed at I218 (G9.1 PASS). E10 is a SMALL polish milestone: finish the last procedural enemy model in Blender (Warden), land the last unowned art-research lever (camera/feel, lever 6), then regression + gate. No new content, no new dependencies, no core determinism changes (camera is render-layer).
 - Stories: ST-218 Warden Blender model (jagged armored sentinel, separate armor-plate mesh so the armor-state animation carries over; 2 draw calls; budgets <=200 tris / <=40 KB / <=3 mats; procedural fallback preserved); ST-219 camera/feel (2-5% aim-lead eased + capped, boss-approach zoom-out a few degrees, slow menu orbit drift, view fixed during normal play, motion-gated); ST-220 E10 regression round + G10.0 gate + closeout docs.
 - Depends on: E9 closed (I218); GLB pipeline + assetPerf test pattern (E9).
 - Gate G10.0: 16 GLBs load (15 + Warden), Warden armor-state animation intact (screenshot-compare armored/spent), camera deltas subtle + stable-view verified (scripted pilot parity), fresh tests + build + dist in budget, log audit sequential, regression round green.
 - Scope check: production/scope-check-E10.md (I219, APPROVED with cuts/deferrals/risks R-E10-1..3).
+- Result (I222): CLOSED (G10.0 PASS). 3/3 stories ST-218..220 (I219..I222). Warden GLB (16th asset, 180 tris / 11.5 KB / 2 mats, separate armor node + procedural fallback), camera/feel (aim-lead capped 1.2 u, boss zoom 2.5 deg, menu orbit 0.06 rad/s, all motion-gated; view fixed in normal play), tests 677/677 (x3 matrix), dist 1954.9/506.2 KB (in budget), demo pin re-verified exact. R-E10-1..3 CLOSED. Carried: 8 HUMAN-PENDING + low-end device. Next: E11 (scope check).
 
 ## E10 Risk Register
 - R-E10-1 (low) Warden GLB breaks the armor-state visual -> armor plate as separate node driven by the existing wardenMesh.js animation; screenshot-compare both states in smoke.

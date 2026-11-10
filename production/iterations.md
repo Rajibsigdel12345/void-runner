@@ -2225,3 +2225,26 @@ No test changes (render-layer only - scope-check-E10 notes ST-219 as "the only r
 - Demo pin structurally untouched (no core changes; the replay.test.js core pin is green in the suite).
 
 - Result: DONE. ST-219 complete. Next I222: ST-220 (regression + G10.0 gate + E10 closeout).
+
+## I222 - ST-220 - E10 regression round + G10.0 gate + E10 closeout
+
+- Goal: run the E10 regression round (cgs-regression-suite), pass the G10.0 closeout gate (cgs-gate-check), and write the E10 closeout docs (cgs-milestone-review). No src changes (closeout iteration).
+
+- Evidence:
+- Node matrix 3/3 -> .evidence/I222/matrix.txt + run3.txt: run1 + run2 npm test = 677/677 (in-process, scripts/run-tests.mjs); run3 cross-process node --test "tests/*.test.js" = 677/677. GOTCHA recorded: bare node --test tests/ (directory form) FAILS on Node v26.7.0 ("Cannot find module E:\Game\tests") - always use the quoted glob form.
+- Build: node scripts/build.mjs exit 0; dist 1954.9 KB raw / 506.2 KB gzip (budget <=2048/<=550, ~43.8 KB headroom).
+- Log audit: 221 entries 1..221 sequential, 0 dupes, 0 missing (.evidence/I222/log-audit.txt); I222 appended -> 1..222.
+- Browser ?nocache=222a (regression): 16/16 assets + skybox ready; state machine 6/6 (MENU -> PLAYING -> PAUSED sim-frozen -> PLAYING -> MENU via Q); persistence intact (best 36426, settings object).
+- Demo pin via REAL UI path (menu REPLAYS button -> DEMO PILOT button -> key 3 x4): GAME_OVER idx 2169/2220, score 11334, t=36.15 - EXACT.
+- Warden armored screenshot: .evidence/I222/01-warden-armored.png (spawnWardenForWave(5), ship (0,0), warden (0,3.13), armor = maxArmor 6).
+- Warden spent screenshot: .evidence/I222/02-warden-spent.png - re-staged on a fresh page (?nocache=222b) because the 222a page drifted to wave 6 with an active vortex while unattended (~4 min of live sim between sessions): ship (0,0), warden (0,3.13), armor 0. Same-frame A/B also captured: .evidence/I222/03-warden-armored-sameframe.png (camera (0,9,13) in both) - armored = teal hull + full plate ring; spent = orange exposed core (emissive 0xff7a3c), 8 spike silhouette cues (I155), armor ring retracted (scale 0.62). G10.0 criterion 2 (armored + spent compare): SATISFIED (02 vs 03).
+- Fresh pilot parity ?nocache=222c: 1080-tick scripted pilot (291.9 ms loop, 0.27 ms/tick) -> PLAYING at sim t=31.47 s, 7449 pts / 35 kills, ship + 6 live rocks all finite (no warden/boss live). G10.0 criterion 3: SATISFIED (I221 lever measurements carry: aim-lead exact + cap 1.2 + boss zoom + orbit).
+- Frame probe (same page, 400 rAF deltas, 370 after 30 warm-up): avg 16.93 / p50 16.7 / p95 20.5 ms, one 59.5 ms outlier (single frame, no pattern), 60 fps locked, delta ~0 vs I221 (16.57).
+- Console: 0 errors / 0 warnings (?nocache=222c fresh page; no probe artifacts this round - the 222a string-arg startReplay warning from the prior session is a probe artifact, not product, and was avoided here).
+- 600 s soak decision: NOT WARRANTED - E10 changes are render-layer only: no new per-frame allocation path beyond the pre-existing intent path, no new long-lived state, memory-growth pattern identical to pre-E10 (I185 soak precedent).
+
+- Docs: production/gates.md (+G10.0 block), production/milestone-review.md (+E10 CLOSED final section), production/epics.md (E10 header CLOSED + Result line), production/timeline.md (+E10 closed line), production/stories.md (ST-218..220 DONE + E10 CLOSED line), CHANGELOG.md (+I222), production/session-state/active.md.
+
+- Risk disposition: R-E10-1 CLOSED (armored + spent screenshots, I220 + I222 same-frame A/B), R-E10-2 CLOSED (lead exact + 1.2 cap + pilot parity + frames delta ~0), R-E10-3 CLOSED (dist 1954.9/506.2 in budget, assetPerf pinned at 16 assets). Carried: 8 HUMAN-PENDING perception items + low-end physical device validation.
+
+- Result: GATE G10.0 PASS - E10 CLOSED (3/3 stories ST-218..220, 4 iterations I219..I222). Next I223: open E11 (scope check + stories, cgs-scope-check + cgs-create-stories).

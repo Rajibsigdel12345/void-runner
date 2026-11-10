@@ -614,3 +614,47 @@ Closeout gate for the E9 Blender graphics & assets milestone (ST-207..217) per c
 
 ### Next owner / decision
 - I219: open E10 (post-E9 polish) - scope check + stories (cgs-scope-check + cgs-create-stories). First candidate: art research lever 6 (camera/feel: 2-5% aim-lead, boss-approach zoom-out, menu orbit drift - the only unowned lever). 8 HUMAN-PENDING items parked for a human session.
+
+## G10.0 - E10 closeout gate (I222)
+
+### Summary
+Closeout gate for the E10 Post-E9 Polish milestone (ST-218..220) per cgs-gate-check. ST-218 (I220) closed the Warden Blender model; ST-219 (I221) closed the camera/feel lever; this iteration runs the E10 regression round and closes the epic. Advisory gate.
+
+### Gate Criteria
+1. All E10 stories complete: ST-218..220 (3 stories), each with iteration evidence in production/iterations.md.
+2. Warden GLB (16th asset) loads and the armor-state visual is intact: screenshot-compare armored vs spent.
+3. Camera/feel deltas subtle + stable-view verified: scripted-pilot parity (no core change), frame-time delta ~0 vs pre-lever.
+4. Quality: fresh test matrix green (in-process + cross-process), fresh build green, dist within budget.
+5. Regression: state machine, persistence, demo pin (seed 1909 / step 2169 / 2220 / score 11334 / t=36.15), finiteness, console clean.
+6. Documentation: milestone review final + epics CLOSED + timeline + changelog + stories + log audit sequential (no gaps/dups).
+7. Risk register disposition: R-E10-1..3 closed or explicitly carried.
+
+### Evidence
+- (1) Stories: ST-218 (I220), ST-219 (I221), ST-220 (I222) - 3/3 closed across 4 iterations (I219..I222).
+- (2) I222 Warden A/B (criterion 2): .evidence/I222/03-warden-armored-sameframe.png (teal hull + full plate ring) vs .evidence/I222/02-warden-spent.png (orange exposed core, 8 spike silhouette cues, armor ring retracted to scale 0.62) - same staging (ship (0,0), warden (0,3.13), camera (0,9,13)); the I155/ST-137 armor-state animation drives the GLB nodes unchanged; .evidence/I222/01-warden-armored.png (earlier 222a far view) supplementary.
+- (3) I222 fresh pilot parity (criterion 3) ?nocache=222c: 1080-tick scripted pilot (291.9 ms loop) -> PLAYING at sim t=31.47 s, 7449 pts / 35 kills, ship + 6 live rocks all finite; frame probe 400 f (370 after 30 warm-up) avg 16.93 / p50 16.7 / p95 20.5 ms (one 59.5 ms outlier, no pattern; 60 fps locked, delta ~0 vs I221 16.57). I221 lever measurements carry: aim-lead in/cap/out exact (+0.223/+0.334, cap EXACTLY 1.2), boss zoom 60 -> 62.134 -> 60.01, menu orbit 0.06 rad/s.
+- (4) I222 node matrix 3/3 (.evidence/I222/matrix.txt + run3.txt): npm test 677/677 x2 (in-process) + cross-process node --test "tests/*.test.js" 677/677. Build exit 0; dist 1954.9 KB raw / 506.2 KB gzip (budget <=2048/<=550, ~43.8 KB headroom).
+- (5) I222 regression ?nocache=222a: 16/16 assets + skybox; state machine 6/6 (MENU -> PLAYING -> PAUSED sim-frozen -> PLAYING -> MENU via Q); persistence intact (best 36426 + settings object); demo pin via REAL UI path (menu REPLAYS -> DEMO PILOT -> key 3 x4) EXACT: GAME_OVER idx 2169/2220, score 11334, t=36.15.
+- (6) I222 log audit: 221 entries 1..221 sequential, 0 dupes, 0 missing (.evidence/I222/log-audit.txt); I222 appended -> 1..222.
+- (7) Risks: R-E10-1 CLOSED (armored + spent screenshots, I220 + I222 same-frame A/B), R-E10-2 CLOSED (lead exact + 1.2 cap + pilot parity + frames delta ~0; view fixed during normal play by construction), R-E10-3 CLOSED (dist in budget; assetPerf pinned at 16 assets).
+- (8) 600 s soak decision: NOT WARRANTED - E10 changes are render-layer only (no new per-frame allocation path beyond the pre-existing intent path, no new long-lived state; memory-growth pattern identical to pre-E10; I185 soak precedent).
+
+### Concerns
+- Low-end physical device / GPU validation untested (adaptive quality I73 mitigates; carried).
+- 8 HUMAN-PENDING perception items remain the player-experience evidence gap (non-blocking).
+- One 59.5 ms frame outlier in the I222c frame probe (single frame, no pattern; average still 16.93 ms = 60 fps locked).
+
+### Verdict
+**PASS - E10 CLOSED.** 3/3 stories (ST-218..220) complete with per-iteration evidence; fresh matrix/build/dist green; regression + demo pin + pilot parity + same-frame Warden A/B clean; log 1..222 sequential; risk register closed.
+
+### Risks
+- Carried: 8 HUMAN-PENDING perception items (production/bug-triage.md), low-end physical device / GPU validation.
+
+### Changed files
+- production/gates.md (this block), production/milestone-review.md (E10 CLOSED section), production/epics.md (E10 header + Result CLOSED), production/timeline.md, production/stories.md (ST-218..220 DONE + E10 CLOSED line), CHANGELOG.md (+I222), production/iterations.md (+I222), production/session-state/active.md. No src changes (closeout iteration).
+
+### Verification evidence
+- npm test 677/677 x2 in-process + node --test "tests/*.test.js" 677/677 cross-process (this iteration, .evidence/I222/); node scripts/build.mjs exit 0 (this iteration); dist 1954.9/506.2 KB (this iteration); log audit 1..222 sequential (this iteration); browser smokes ?nocache=222a/222b/222c (this iteration).
+
+### Next owner / decision
+- I223: open E11 - scope check + stories (cgs-scope-check + cgs-create-stories). Candidates: carried polish (8 HUMAN-PENDING-informed items), new content arc, or low-end device validation plan. 8 HUMAN-PENDING items parked for a human session.
