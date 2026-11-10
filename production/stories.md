@@ -236,3 +236,9 @@ Format: ID | story | acceptance criteria | verification
 - ST-216 | G9.0 gate (cgs-gate-check) + E9 docs + changelog + log audit 1..216 | gate PASS, docs | doc + node
 - ST-217 | Post-processing polish pass (art research 2026-11-10): half-res bloom + additive particle trails + boss-kill flash / phase-2 hit-stop, FX-tier + adaptive-gated, frame-time before/after | browser: measure + screenshot | browser - DONE at I217
 - CLOSED (I218): 11/11 stories ST-207..217 done (I207..I217); G9.1 closeout gate PASS (fresh 676/676, build 0, dist 1940.6/501.9 KB, log audit 1..218 sequential).
+
+## E10 Post-E9 Polish (I219+)
+- E9 closed at I218 (G9.1 PASS). E10 = 3 stories, gate G10.0 (scope: production/scope-check-E10.md, I219).
+- ST-218 | Blender Warden model: armored sentinel (jagged hull + SEPARATE armor-plate mesh), silhouette-first, flat-shaded, emissive core accent, 2 draw calls, budgets <=200 tris / <=40 KB / <=3 mats, VR_ names, armor-state animation (retract + cyan->orange glow) unchanged, procedural fallback preserved | asset audit + browser screenshots (armored + spent) | blender + browser
+- ST-219 | Camera/feel (art research lever 6): 2-5% camera lead toward aim (eased, capped), boss-approach zoom-out a few degrees (eased in/out), slow menu orbit drift; view FIXED during normal play (dodge-read rule); motion-gated + FX-tier aware; frame-time delta ~0 | browser: A/B screenshots + pilot parity | browser
+- ST-220 | E10 regression round + G10.0 gate (cgs-regression-suite + cgs-gate-check) + closeout docs (milestone review + timeline + changelog + log audit) | gate PASS, docs | node + browser

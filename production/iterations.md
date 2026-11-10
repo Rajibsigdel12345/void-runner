@@ -2147,3 +2147,22 @@ One entry per iteration. Format:
 **Changed:** production/gates.md (+G9.1), production/milestone-review.md (+E9 CLOSED section), production/epics.md (E9 header + Result CLOSED), production/timeline.md (+line), production/stories.md (ST-217 DONE + E9 CLOSED), CHANGELOG.md (+I218), production/session-state/active.md, this entry.
 
 - Result: DONE. E9 CLOSED (G9.1 PASS). Next I219: E10 (post-E9 polish) scope check + stories (cgs-scope-check + cgs-create-stories); first candidate = art research lever 6 (camera/feel).
+
+## I219 - E10 scope check + YouTube grounding + epic/stories opening (cgs-scope-check + cgs-create-stories)
+
+**Summary:** E10 (Post-E9 Polish) opened. Scope check APPROVED as 3 stories + gate G10.0: ST-218 Warden Blender model (last procedural enemy), ST-219 camera/feel (the only unowned art-research lever), ST-220 regression + G10.0 gate + closeout. Grounded with a targeted YouTube pass (6 queries / 41 results): GMTK camera essay (cameras serve gameplay; dynamic = state-driven; no one-size-fits-all) + genre comps (Disasteroids 3D / Solaroids keep near-fixed arena views) => camera deltas stay subtle + state-tied, view fixed during normal play. Warden model language carried from the existing grounding (silhouette-first, flat-shaded, emissive accent); no direct mini-boss tutorial hit this pass (noted, not over-researched). No src changes.
+
+**Story Goal:** Bound E10 scope and open it with owner-sized stories before implementation.
+
+**Owner + Dependencies:** main agent; depends on E9 closeout (I218).
+
+**Acceptance:** scope-check artifact with fit/cuts/deferrals/risks; E10 in epics.md + stories.md with budgets and acceptance; log sequential.
+
+**Verification:**
+- Scope fit baseline re-used from I218 (fresh 676/676, build 0, dist 1940.6/501.9 KB, log 1..218).
+- Cuts: ST-219 first if E10 must shrink. Deferrals: 8 HUMAN-PENDING, low-end device, KTX2 (no textures), 512x256 skybox (not needed), new content (out of E10).
+- Risks: R-E10-1 (Warden armor-state visual), R-E10-2 (camera lead vs dodge read), R-E10-3 (dist headroom ~48.1 KB vs +1 GLB).
+
+**Changed:** production/scope-check-E10.md (new), production/epics.md (+E10 section + risk register), production/stories.md (+E10 section), production/iterations.md, CHANGELOG.md, production/session-state/active.md.
+
+- Result: DONE. E10 opened. Next I220: ST-218 (Blender Warden model).

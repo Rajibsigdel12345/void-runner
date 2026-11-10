@@ -161,3 +161,15 @@ recorded in production/gates.md.
 - R-E9-2 (low) GLB parse/axis failures break visuals -> procedural fallback proven (I207); assetGlbs/assetPerf tests gate naming, budgets, required attributes.
 - R-E9-3 (low) Blender 5.2 exporter quirks (Y-up flip, COLOR_0 needs Color Attribute node, from_pydata face tuples, img.pixels 4ch) -> captured in I208-I212 notes; audits re-verify exports.
 - R-E9-4 (low) scope creep into new content -> design/art-direction-research.md is the cap; ST-217 is the only queued art story.
+
+## E10 Post-E9 Polish (ST-218..220)
+- Context: E9 closed at I218 (G9.1 PASS). E10 is a SMALL polish milestone: finish the last procedural enemy model in Blender (Warden), land the last unowned art-research lever (camera/feel, lever 6), then regression + gate. No new content, no new dependencies, no core determinism changes (camera is render-layer).
+- Stories: ST-218 Warden Blender model (jagged armored sentinel, separate armor-plate mesh so the armor-state animation carries over; 2 draw calls; budgets <=200 tris / <=40 KB / <=3 mats; procedural fallback preserved); ST-219 camera/feel (2-5% aim-lead eased + capped, boss-approach zoom-out a few degrees, slow menu orbit drift, view fixed during normal play, motion-gated); ST-220 E10 regression round + G10.0 gate + closeout docs.
+- Depends on: E9 closed (I218); GLB pipeline + assetPerf test pattern (E9).
+- Gate G10.0: 16 GLBs load (15 + Warden), Warden armor-state animation intact (screenshot-compare armored/spent), camera deltas subtle + stable-view verified (scripted pilot parity), fresh tests + build + dist in budget, log audit sequential, regression round green.
+- Scope check: production/scope-check-E10.md (I219, APPROVED with cuts/deferrals/risks R-E10-1..3).
+
+## E10 Risk Register
+- R-E10-1 (low) Warden GLB breaks the armor-state visual -> armor plate as separate node driven by the existing wardenMesh.js animation; screenshot-compare both states in smoke.
+- R-E10-2 (low) camera lead hurts dodge read -> cap 2-5%, eased both ways, A/B screenshots + scripted-pilot parity (no core change).
+- R-E10-3 (low) dist creep (+1 GLB vs ~48.1 KB gzip headroom) -> per-file budget pattern extended to 16 assets in assetPerf.test.js.
