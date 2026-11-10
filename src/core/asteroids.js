@@ -14,7 +14,7 @@ export class AsteroidField {
    *  dirHint (ST-119): a direction the fragment inherits momentum from - the fragment angle is
    *  atan2(dirHint) +/- cfg.asteroid.split.spread instead of fully random. gen (ST-119): split
    *  generation (rim spawn = 0, each split +1) for lineage-aware tuning/scoring. */
-  spawn(size, speedMult = 1, at = null, noNear = null, golden = false, dirHint = null, gen = 0) {
+  spawn(size, speedMult = 1, at = null, noNear = null, golden = false, dirHint = null, gen = 0, shielded = false) {
     const a = this.cfg.asteroid;
     if (this.rocks.length >= a.maxConcurrent) return null;
     const spec = a.sizes[size];
@@ -59,6 +59,8 @@ export class AsteroidField {
       golden,
       nearImmune: this.cfg.nearMiss.spawnImmunity, // ST-053: no instant graze from spawn/split
       dead: false,
+      shielded,               // ST-121: shielded rock (absorbs armor hits, never splits)
+      armor: shielded ? this.cfg.asteroid.shielded.armor : 0, // ST-121: hits left before shatter
     };
     this.rocks.push(rock);
     return rock;
@@ -102,7 +104,7 @@ export class AsteroidField {
     rock.dead = true;
     const children = [];
     const spec = this.cfg.asteroid.sizes[rock.size];
-    if (spec.splits.length) {
+    if (spec.splits.length && !rock.shielded) { // ST-121: shielded rocks never split (shatter total)
       const n = this.rng.int(spec.splits[0], spec.splits[1]);
       const heading = v2Norm(rock.vel);
       const childGen = (rock.gen || 0) + 1;
@@ -113,6 +115,22 @@ export class AsteroidField {
     }
     this.compact();
     return children;
+  }
+
+  /** ST-121: one bullet hit on a rock - armor-aware. A shielded rock absorbs a hit
+   *  (armor -= 1) until its armor reaches 0, then it shatters (never splits). A normal
+   *  rock is destroyed on the first hit exactly as the old destroy() path. Returns
+   *  { destroyed, shielded, armorLeft, rock, children } or null if no live rock has the id. */
+  hit(id) {
+    const rock = this.rocks.find(r => r.id === id && !r.dead);
+    if (!rock) return null;
+    if (rock.shielded) {
+      rock.armor -= 1;
+      if (rock.armor > 0) return { destroyed: false, shielded: true, armorLeft: rock.armor, rock };
+      rock.armor = 0;
+    }
+    const children = this.destroy(id); // shielded rocks never split (see destroy guard)
+    return { destroyed: true, shielded: !!rock.shielded, armorLeft: 0, rock, children };
   }
 
   /** Bomb path (ST-023): shatter a rock with no fragments - total shatter. */

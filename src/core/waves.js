@@ -121,10 +121,12 @@ export class WaveDirector {
         ? { x: playerPos.x, y: playerPos.y, min: this.cfg.wave.spawnMinPlayerDist }
         : null;
       const g = this.cfg.asteroid.golden; // ST-052: rare golden rock (rim spawns only)
-      const gold = this.wave >= g.minWave && this.rng.chance(g.chance);
+      const sh = this.cfg.asteroid.shielded; // ST-121: rare shielded rock (rim spawns only)
+      const shielded = this.wave >= sh.minWave && this.rng.chance(sh.chance);
+      const gold = !shielded && this.wave >= g.minWave && this.rng.chance(g.chance); // shielded takes precedence
       let sm = this.speedMult;
       if (gold) sm *= g.speedMult;
-      const rock = this.field.spawn(this.pickSize(), sm, null, noNear, gold);
+      const rock = this.field.spawn(shielded ? sh.size : this.pickSize(), sm, null, noNear, gold, null, 0, shielded);
       if (!rock) break; // hard cap (e.g. fragments temporarily full)
       this.toSpawn -= 1;
     }

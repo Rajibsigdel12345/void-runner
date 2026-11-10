@@ -178,7 +178,7 @@ export class World {
     const targets = this.field.rocks.slice();
     for (const r of targets) {
       if (!this.field.shatter(r.id)) continue;
-      const base = this.cfg.asteroid.sizes[r.size].score * (r.golden ? this.cfg.asteroid.golden.scoreMult : 1); // ST-052
+      const base = r.shielded ? this.cfg.asteroid.shielded.score : this.cfg.asteroid.sizes[r.size].score * (r.golden ? this.cfg.asteroid.golden.scoreMult : 1); // ST-052/ST-121
       const points = this.scoreKeeper.kill(base, this.time);
       this.emit('kill', { pos: { x: r.pos.x, y: r.pos.y }, size: r.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), golden: !!r.golden });
       const drop = this.powerups.maybeDrop({ x: r.pos.x, y: r.pos.y });
@@ -194,12 +194,18 @@ export class World {
       if (id == null) continue;
       const rock = this.field.rocks.find(r => r.id === id);
       this.weapons.markHit(b.id);
+      const res = this.field.hit(id); // ST-121: armor-aware single hit (shielded rocks absorb until exhausted)
+      if (!res || !res.destroyed) { // ST-121: shield absorbed the shot - no score, no combo, no split
+        if (res) this.emit('rockShieldHit', { pos: { x: rock.pos.x, y: rock.pos.y }, shielded: true, armorLeft: res.armorLeft });
+        continue;
+      }
       const gb = this.cfg.asteroid.split.genBonus;
       const genBonus = gb[Math.min(rock.gen || 0, gb.length - 1)] || 0; // ST-120: deeper fragments are worth more (clamps beyond the table)
-      const base = this.cfg.asteroid.sizes[rock.size].score * (rock.golden ? this.cfg.asteroid.golden.scoreMult : 1) * (1 + genBonus); // ST-052/ST-120
-      this.field.destroy(id);
+      const base = res.shielded
+        ? this.cfg.asteroid.shielded.score // ST-121: shielded shatter pays a flat, higher reward
+        : this.cfg.asteroid.sizes[rock.size].score * (rock.golden ? this.cfg.asteroid.golden.scoreMult : 1) * (1 + genBonus); // ST-052/ST-120
       const points = this.scoreKeeper.kill(base, this.time);
-      this.emit('kill', { pos: { x: rock.pos.x, y: rock.pos.y }, size: rock.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), golden: !!rock.golden, gen: rock.gen || 0 });
+      this.emit('kill', { pos: { x: rock.pos.x, y: rock.pos.y }, size: rock.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), golden: !!rock.golden, gen: rock.gen || 0, shielded: res.shielded });
       const drop = this.powerups.maybeDrop({ x: rock.pos.x, y: rock.pos.y });
       if (drop) this.emit('powerupDrop', { type: drop.type, pos: { x: drop.pos.x, y: drop.pos.y } });
     }

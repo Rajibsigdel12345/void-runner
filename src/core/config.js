@@ -40,6 +40,13 @@ export const CONFIG = {
       speedMult: 1.35,  // extra spawn speed on top of the wave ramp
       scoreMult: 5,     // score multiplier on kill
       minWave: 3        // waves 1-2 stay plain (teach the base loop first)
+    },
+    shielded: {         // ST-121: shielded rock - absorbs N bullet hits, then shatters (NEVER splits), worth more
+      minWave: 4,       // waves 1-3 stay plain (base loop + golden teach first)
+      chance: 0.10,     // per rim-spawn roll (takes precedence over golden on the same roll)
+      armor: 3,         // bullet hits to exhaust the shield before it shatters
+      size: 'M',        // footprint/speed from sizes.M (render adds a shield shell later)
+      score: 400        // shatter reward - higher than any single rock; costs armor shots
     }
   },
 
