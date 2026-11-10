@@ -131,3 +131,52 @@ None. No steady-state performance problem on the desktop-web target. The first-f
 ### Next owner or decision
 - Next: I185 ST-185 memory audit (new entity pooling) - the deep heap/leak audit this profile left to the shallow pass (cgs-perf-profile).
 - Decision (carried from I95, unchanged): implement the offscreen warm-up render in the final wrap (E8F) if the budget allows, or ship with the documented one-time startup hitch. Owner: producer / technical_director.
+
+## I214 - Asset perf + memory audit (ST-214, cgs-perf-profile)
+
+### Summary
+The 16 runtime assets (15 GLBs + the 1024x512 skybox PNG) are tiny: 111.3 KB on disk, 92.9 KB parsed geometry, 1021 unique triangles, 17 materials. The scene runs 280 pooled meshes over 26 unique geometries (116.3 KB unique - pools share geometry correctly). GPU texture memory is ~5.5 MB dominated by the I212 skybox (2.0 MB equirect + ~3 MB PMREM). All assets are fully fetched by ~540 ms after navigation start. No bottleneck found; budgets are now pinned by tests so a future asset pass can't silently regress the profile.
+
+### Metric
+| Asset | File | Parsed geo | Tris | Materials | Attributes |
+|---|---:|---:|---:|---:|---|
+| ship.glb | 4.9 KB | 2.1 KB | 40 | 3 | POS+NORMAL+idx |
+| asteroid_L.glb | 36.8 KB | 35.6 KB | 320 | 1 | POS+NORMAL+COLOR_0+idx |
+| asteroid_M.glb | 11.9 KB | 10.7 KB | 104 | 1 | POS+NORMAL+COLOR_0+idx |
+| asteroid_S.glb | 10.1 KB | 8.9 KB | 80 | 1 | POS+NORMAL+COLOR_0+idx |
+| boss.glb | 11.4 KB | 10.2 KB | 96 | 1 | POS+NORMAL+COLOR_0+idx |
+| shield.glb | 7.2 KB | 6.1 KB | 80 | 1 | POS+NORMAL+idx |
+| arena_ring.glb | 4.7 KB | 3.7 KB | 48 | 1 | POS+NORMAL+idx |
+| drone.glb | 4.3 KB | 3.1 KB | 52 | 1 | POS+NORMAL+idx |
+| powerup_bomb/shield/magnet/overdrive/rapid/slowmo/spread | 2.1-3.8 KB each | 1.0-2.7 KB | 13-48 | 1 each | POS+NORMAL+idx |
+| skybox_equirect.png | 41.2 KB | - (2.0 MB decoded RGBA) | - | - | 1024x512 |
+| **Totals** | **111.3 KB** | **92.9 KB** | **1021** | **17** | |
+
+Runtime (live Playwright probe, mid-run paused frame): 280 meshes / 26 unique geometries / 116.3 KB unique geometry; textures in use 1024x512 (skybox bg), 768x1024 (PMREM env), 256x256, 128x128, 64x8 (~5.5 MB GPU total); 43 draw calls / 962 tris / 36 programs; 15 GLBs fetched, latest response end 537 ms after navigation start (sum of fetch durations 248 ms); skybox PNG fetched at 471 ms (+5 ms); DOM ready 727 ms.
+
+### Budget
+- Dist budget: <=2048 KB raw / <=550 KB gzip - assets occupy 152.5 KB of the 1939.2 KB raw dist (8%).
+- New pinned budgets (tests/assetPerf.test.js, measured baselines in brackets): total GLB files <=160 KB [111.3], total parsed geometry <=130 KB [92.9], per-asset file <=60 KB [36.8], total tris <=1500 [1021], materials per GLB <=3 [3], zero TEXCOORD_1, COLOR_0 restricted to the four mottled assets, POSITION+NORMAL on every GLB.
+- GPU: ~5.5 MB textures + 0.12 MB unique geometry - an order of magnitude under any realistic mobile/desktop ceiling.
+
+### Bottleneck
+None. Largest single items: asteroid_L.glb (36.8 KB - deliberate: it is the L rock and the budget's heaviest at 24% of the total), the skybox PNG (41.2 KB file / 2.0 MB decoded + ~3 MB PMREM - the largest GPU memory holder, accepted in I212 for the background), and 280 mesh objects (draw-call side, not memory). CPU/GPU steady state was already profiled clean in I184; this audit changes nothing there.
+
+### Optimization
+No code change warranted: geometry sharing is already maximal (26 unique geos across 280 meshes), no unused UV2 or stray attribute channels exist, and all assets are indexed with FLOAT32 (the natural export; 16-bit quantization would save ~30 KB total for zero visible benefit). The one candidate for a future art pass is asteroid_L's COLOR_0 (320 verts - fine) and a possible 512x256 skybox if GPU texture memory ever matters (would halve the 2.0 MB decode at some band detail cost) - deferred, not needed at this budget.
+
+### Blocking issues
+None.
+
+### Changed files or proposed files
+- production/perf-profile.md (this section).
+- tests/assetPerf.test.js (NEW: 9 budget-pinning tests over all 15 GLBs).
+
+### Verification evidence
+- Node GLB audit script (per-asset file/geometry bytes, tris, materials, attribute sets, TEXCOORD_1 count) - numbers in the Metric table; totals 111.3 KB / 92.9 KB / 1021 tris / 17 materials / 0 TEXCOORD_1.
+- Live browser probe (Playwright, ?nocache=213c session): per-asset three.js parsed bytes match the static audit (e.g. ship 2136 B / 40 tris, rockL 36480 B / 320 tris); 280 meshes / 26 unique geometries / 116.3 KB unique; texture list + dims; mid-run 43 calls / 962 tris / 36 programs; resource-timing: 15 GLBs latest end 537 ms, PNG 471 ms.
+- 652/652 (was 643; +9 assetPerf budget tests, all green); build exit 0 (dist unchanged: 1939.2 KB raw / 501.3 KB gzip).
+
+### Next owner or decision
+- Next: I215 ST-215 (test batch E9: 15+ tests across under-covered core systems).
+- Decision: the 512x256 skybox option is documented for a future pass but not scheduled; owner: producer if E9 art scope ever adds GPU-heavy assets (assetPerf budgets will trip first).
