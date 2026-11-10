@@ -134,7 +134,7 @@ let fxCount = 0;
 let motionOff = false;
 let liveSettings = storage.getSettings(); // ST-026: settings panel keeps this fresh (audio consumes in I27)
 // Audio (ST-027): WebAudio synth, initialized on first user gesture.
-const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', waveCleared: 'cleared', gameover: 'gameover', nearmiss: 'swish', mineExplode: 'mine', bossSpawn: 'bossSpawn', bossRing: 'bossRing', bossDeath: 'bossDeath', bossFire: 'bossFire', mineFire: 'mineFire', vortexTelegraph: 'vortexTelegraph', vortexStart: 'vortexStart', droneExplode: 'drone', weaponLevelUp: 'levelUp' }; // ST-059/ST-117/ST-123
+const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', waveCleared: 'cleared', gameover: 'gameover', nearmiss: 'swish', mineExplode: 'mine', bossSpawn: 'bossSpawn', bossRing: 'bossRing', bossDeath: 'bossDeath', bossFire: 'bossFire', mineFire: 'mineFire', vortexTelegraph: 'vortexTelegraph', vortexStart: 'vortexStart', droneExplode: 'drone', weaponLevelUp: 'levelUp', rockShieldHit: 'shieldHit' }; // ST-059/ST-117/ST-123/ST-127
 const audio = createAudio();
 audio.setVolume(liveSettings.volume);
 audio.setSfx(liveSettings.sfx);
@@ -385,6 +385,7 @@ function tick(dt, intent) {
         flashA = Math.min(0.8, flashA + 0.5);
         dangerA = Math.min(1, dangerA + (e.data.lives <= 1 ? 1 : 0.6)); // I85: last-life hit reads harder
       } else if (e.type === 'shieldPop') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.75), palette: CONFIG.fx.palette.shield, speed: 8, life: 0.5, shape: 'ring' });
+      else if (e.type === 'rockShieldHit') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.max(6, Math.ceil(fxCount * 0.4)), palette: CONFIG.fx.palette.shield, speed: 6, life: 0.3 }); // ST-127 armor-absorb sparks (cyan, subtle)
       else if (e.type === 'bomb') {
         // I114: nova scales with the rocks cleared (small clear = tight, big clear = huge); anchored so the ~3-rock bomb keeps the old fxCount*2 intensity.
         const cleared = e.data.count || 0;

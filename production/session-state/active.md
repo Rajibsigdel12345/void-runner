@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-127 (next)
-- current_iteration: I126
+- current_story: ST-128 (next)
+- current_iteration: I127
 - branch: main
-- notes: I126 done (ST-126 test batch E8B, node). 40 new unit tests in tests/e8bBatch.test.js closing the E8B gaps (weapon 9 / combo-score 5 / bomb 4 / slow-mo 6 / drone 5 / split 6 / shielded 5). Two test bugs fixed during assembly (source unchanged): slow-mo bolt fired at the ship's spawn point (absorbed step 1) -> now from (5,0); M-split gen test parent now gen 1 (children gen 2); drone rim-ring test clears between spawns (cap 6). 324/324 (was 284, +40) + build 0 + seq 1..126. Next: I127 ST-127 browser verify E8B (console 0/0, no NaN, screenshot). NOTE: Blender 5.2.3 connected - the E9 Blender Graphics & Assets epic (ST-207..216) runs after the E8 closeout; keep re-reading CGS skills (cgs-dev-story for builds, cgs-gate-check for gates, cgs-balance-check for balance).
+- notes: I127 done (ST-127 browser verify E8B + shield fix). Browser sweep of the whole E8B set passed (weapons L2/L3 toasts+tints ffd27a, natural shielded M at wave 4, rockShieldHit x2 + kill x1, drone mesh==sim pos, slow-mo 0.4->1, bomb 23->0, split gen chain, NaN clean, console 0/0). Found + fixed 2 real ST-121 gaps (render-only): shielded rocks now have an additive cyan energy-shell child that DIMS per absorbed hit (3 tiers: 0.50/0.36/0.22, shared materials), rockShieldHit now has a cyan spark burst + new shieldHit SFX cue (880->220 Hz square, rate-limited). Caught an off-by-one armor->material index during the browser probe (armor 2/1 rendered bright tier) - fixed + re-verified 3->2->1. Screenshot .evidence/I127_shield_verify.png. 324/324 + build 0 + seq 1..127. Next: I128 ST-128 G8.1 gate check (re-read cgs-gate-check skill first). NOTE: Blender 5.2.3 connected - the E9 Blender Graphics & Assets epic (ST-207..216) runs after the E8 closeout; keep re-reading CGS skills (cgs-dev-story for builds, cgs-gate-check for gates, cgs-balance-check for balance).

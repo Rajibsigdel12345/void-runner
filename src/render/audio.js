@@ -15,6 +15,9 @@ const CUES = {
   hit:       { type: 'sawtooth', f0: 110, f1: 55,  dur: 0.25, gain: 0.45, min: 0.05, noise: 0.2 },
   powerup:   { type: 'sine',     f0: 660, f1: 990, dur: 0.18, gain: 0.25, min: 0.05 },
   shieldPop: { type: 'sine',     f0: 1320, f1: 1320, dur: 0.15, gain: 0.22, min: 0.05 },
+  // ST-127: shielded rock armor hit - short metallic tick (bright square falling into a low thump + noise clank).
+  // Background tier: it can be spammed by holding fire on armor, so keep it quiet + rate-limited.
+  shieldHit: { type: 'square',   f0: 880, f1: 220, dur: 0.09, gain: 0.16, min: 0.08, noise: 0.1 },
   // ST-053 near-miss swish: soft low noise puff under a quick descending sine
   swish:     { type: 'sine',     f0: 300, f1: 100, dur: 0.18, gain: 0.09, min: 0.12, noise: 0.28 }, // ST-083: fuller near-miss whoosh (wider sweep, heavier noise)
   // ST-054 mine drone pop: a short percussive boom (noise tail + low square thump)

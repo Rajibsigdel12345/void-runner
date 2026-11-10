@@ -48,9 +48,21 @@ export function createAsteroidRenderer(scene) {
   };
   // ST-052: golden rock - bright emissive so bloom (High FX) makes it glow.
   const matGold = new THREE.MeshStandardMaterial({ color: 0xffc94d, emissive: 0xffa018, emissiveIntensity: 1.6, roughness: 0.3, metalness: 0.55, flatShading: true });
+  // ST-127: shielded rock - additive energy shell rendered as a CHILD of the rock mesh (hidden by
+  // default; the rock's visible=false hides it with the parent). Three shared materials keyed by
+  // armor level: the shell DIMS on every absorbed hit so the player can read hits-left at a glance.
+  const shellGeo = new THREE.IcosahedronGeometry(1, 1);
+  const shellMats = [
+    new THREE.MeshBasicMaterial({ color: 0x7fe0ff, transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending, depthWrite: false }), // armor 1: faint
+    new THREE.MeshBasicMaterial({ color: 0x66d9ff, transparent: true, opacity: 0.36, blending: THREE.AdditiveBlending, depthWrite: false }), // armor 2
+    new THREE.MeshBasicMaterial({ color: 0x8ff2ff, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false })  // armor 3: bright
+  ];
   const pool = [];
   for (let i = 0; i < max; i++) {
     const m = new THREE.Mesh(geos.L[0], mat);
+    const shell = new THREE.Mesh(shellGeo, shellMats[2]); // ST-127 (unit sphere; scaled per rock in sync)
+    shell.visible = false;
+    m.add(shell);
     m.visible = false;
     scene.add(m);
     pool.push(m);
@@ -63,6 +75,14 @@ export function createAsteroidRenderer(scene) {
       const m = pool[i++];
       m.geometry = glbGeo[r.size] || geos[r.size][r.variant]; // I104: GLB when loaded
       m.material = r.golden ? matGold : mat; // ST-052
+      const shell = m.children[0]; // ST-127: shield shell tracks armor (dim = 1 hit away)
+      if (r.shielded) {
+        shell.material = shellMats[Math.max(0, Math.min(2, r.armor - 1))]; // armor 3/2/1 -> bright/mid/faint
+        shell.scale.setScalar(r.radius * 1.3);
+        shell.visible = true;
+      } else {
+        shell.visible = false;
+      }
       m.position.set(r.pos.x, 0.4, r.pos.y);
       m.rotation.set(r.rot * 0.7, r.rot, r.rot * 0.31);
       m.visible = true;
