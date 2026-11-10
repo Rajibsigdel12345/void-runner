@@ -159,6 +159,15 @@ export const CONFIG = {
     splitCount: 2,  // S rocks on death
     score: 400      // kill reward (seeker 200, Monolith 1000)
   },
+  belt: {
+    // ST-138: the ASTEROID BELT - from wave 8, one drifting INDESTRUCTIBLE rock joins
+    // per wave start (up to max). Separate persistent layer: exempt from the normal
+    // rock cap, never splits, bomb-proof, survives ship contact (costs a life).
+    fromWave: 8,       // first wave that adds a belt rock
+    max: 5,            // belt rocks on screen at once
+    size: 'M',         // rock size spec
+    speed: [0.5, 1.1], // slow ambient drift u/s (random heading)
+  },
 
   mine: {
     // ST-054: mine drones - slow homing mines that chase the ship. 1 bullet kills

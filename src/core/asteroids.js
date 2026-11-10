@@ -14,9 +14,9 @@ export class AsteroidField {
    *  dirHint (ST-119): a direction the fragment inherits momentum from - the fragment angle is
    *  atan2(dirHint) +/- cfg.asteroid.split.spread instead of fully random. gen (ST-119): split
    *  generation (rim spawn = 0, each split +1) for lineage-aware tuning/scoring. */
-  spawn(size, speedMult = 1, at = null, noNear = null, golden = false, dirHint = null, gen = 0, shielded = false) {
+  spawn(size, speedMult = 1, at = null, noNear = null, golden = false, dirHint = null, gen = 0, shielded = false, belt = false) {
     const a = this.cfg.asteroid;
-    if (this.rocks.length >= a.maxConcurrent) return null;
+    if (!belt && this.rocks.length >= a.maxConcurrent) return null; // ST-138: belt rocks are a separate persistent layer
     const spec = a.sizes[size];
     let pos, ang;
     if (at) {
@@ -61,6 +61,7 @@ export class AsteroidField {
       dead: false,
       shielded,               // ST-121: shielded rock (absorbs armor hits, never splits)
       armor: shielded ? this.cfg.asteroid.shielded.armor : 0, // ST-121: hits left before shatter
+      belt,                 // ST-138: indestructible belt rock (never splits, bomb-proof, survives contact)
     };
     this.rocks.push(rock);
     return rock;
@@ -104,7 +105,7 @@ export class AsteroidField {
     rock.dead = true;
     const children = [];
     const spec = this.cfg.asteroid.sizes[rock.size];
-    if (spec.splits.length && !rock.shielded) { // ST-121: shielded rocks never split (shatter total)
+    if (spec.splits.length && !rock.shielded && !rock.belt) { // ST-121/ST-138: shielded + belt rocks never split (shatter total)
       const n = this.rng.int(spec.splits[0], spec.splits[1]);
       const heading = v2Norm(rock.vel);
       const childGen = (rock.gen || 0) + 1;
@@ -124,6 +125,7 @@ export class AsteroidField {
   hit(id) {
     const rock = this.rocks.find(r => r.id === id && !r.dead);
     if (!rock) return null;
+    if (rock.belt) return { destroyed: false, belt: true, rock }; // ST-138: indestructible
     if (rock.shielded) {
       rock.armor -= 1;
       if (rock.armor > 0) return { destroyed: false, shielded: true, armorLeft: rock.armor, rock };
@@ -137,6 +139,7 @@ export class AsteroidField {
   shatter(id) {
     const rock = this.rocks.find(r => r.id === id && !r.dead);
     if (!rock) return false;
+    if (rock.belt) return false; // ST-138: bombs leave belt rocks alone
     rock.dead = true;
     this.compact();
     return true;

@@ -2,9 +2,9 @@
 
 - project: Void Runner (E:\Game, three.js, no bundler)
 - epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-138 (next)
-- current_iteration: I137 (committed)
+- current_story: ST-139 (next)
+- current_iteration: I138 (committed)
 - branch: main
-- tests: 378/378
+- tests: 389/389
 - build: exit 0
-- notes: I137 done (ST-137 WARDEN render + death burst, cgs-dev-story). New src/render/wardenMesh.js: dodecahedron hull + hex armor plate; cyan armored / orange exposed emissive states (plate retracts to 0.62 when spent); useGLB hook for ST-211 (E9). main.js: SFX reuse (bossSpawn/shieldHit/bossDeath cues), "WARDEN INBOUND" toast, FX (spawn burst, armor sparks, death ring burst + 60% hit-stop/punch/fov-kick), wardenMesh.sync in loop after bossMesh, __vr.wardenMesh. 378/378 (unchanged, render-only), build 0, browser smoke ?nocache=137 (286-frame capture: exactly 6 armor pings then kill, armor break t=1.76s, death t=4.99s, 0 NaN, console 0/0; .evidence/I137_warden_{cyan,orange,death}.png). Next: I138 ST-138 asteroid belt (core). NOTE: Blender 5.2.3 connected - E9 Blender epic (ST-207..217) after E8 closeout (ST-211: warden/drone GLB via wardenMesh.useGLB); use blender MCP tools there. Do NOT spawn sub-agents.
+- notes: I138 done (ST-138 asteroid belt core, cgs-dev-story). From wave 8 one drifting INDESTRUCTIBLE belt rock per wave start (max 5, config.belt {fromWave 8, max 5, size M, speed 0.5-1.1 u/s}): separate persistent layer (exempt from rock cap), field.hit -> {destroyed:false, belt:true}, bullet consumed + beltHit event, bomb-proof (shatter refuses), never splits (destroy guard), survives ship contact (1 life, normal shield/invuln). World: spawnBeltForWave after the warden hook; resolveBulletRocks belt branch; resolveShipRocks skip-destroy. 389/389 (+11 tests/belt.test.js), build 0, playtest scenario 15 clean. Next: I139 ST-139 belt tuning + perf (browser) - belt rock visual distinction in rockRenders, beltHit spark FX, perf check, playtest A/B. NOTE: Blender 5.2.3 connected - E9 Blender epic (ST-207..217) after E8 closeout; use blender MCP tools there. Do NOT spawn sub-agents.

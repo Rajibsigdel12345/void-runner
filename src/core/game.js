@@ -134,6 +134,7 @@ export class World {
       this.spawnMinesForWave(wv.startedWave); // ST-054
       this.spawnBossForWave(wv.startedWave); // ST-055
       this.spawnWardenForWave(wv.startedWave); // ST-136 (only on 5th waves without a live Monolith)
+      this.spawnBeltForWave(wv.startedWave); // ST-138 (one drifting indestructible per wave from wave 8, up to the cap)
       this.spawnDronesForWave(wv.startedWave); // ST-117
     }
     const wl = this.weaponLevel(); // ST-122: weapon progression by wave
@@ -232,6 +233,10 @@ export class World {
       const rock = this.field.rocks.find(r => r.id === id);
       this.weapons.markHit(b.id);
       const res = this.field.hit(id); // ST-121: armor-aware single hit (shielded rocks absorb until exhausted)
+      if (res && res.belt) { // ST-138: indestructible belt rock - bullet consumed, no score or split
+        this.emit('beltHit', { pos: { x: rock.pos.x, y: rock.pos.y } });
+        continue;
+      }
       if (!res || !res.destroyed) { // ST-121: shield absorbed the shot - no score, no combo, no split
         if (res) this.emit('rockShieldHit', { pos: { x: rock.pos.x, y: rock.pos.y }, shielded: true, armorLeft: res.armorLeft });
         continue;
@@ -253,7 +258,8 @@ export class World {
     if (this.ship.isInvulnerable || this.lives <= 0) return;
     const hit = shipHitRock(this.ship.pos.x, this.ship.pos.y, this.cfg.ship.radius, this.field.rocks);
     if (!hit) return;
-    this.field.destroy(hit.id);
+    const hitRock = this.field.rocks.find(r => r.id === hit.id);
+    if (!(hitRock && hitRock.belt)) this.field.destroy(hit.id); // ST-138: belt rocks survive ship contact
     // GDD: SHIELD absorbs 1 hit (12s or until hit) - rock shatters, no life
     // lost, no knockback, no invuln, combo chain unbroken.
     if (this.powerups.isShielding() && this.powerups.consumeShieldHit()) {
@@ -268,6 +274,22 @@ export class World {
       this.game.to(STATE.GAME_OVER);
       this.emit('gameover', { score: this.score });
     }
+  }
+
+  /** ST-138: from cfg.belt.fromWave, add ONE drifting indestructible belt rock per
+   *  wave start (up to cfg.belt.max on screen). Rim spawn kept 10 u from the ship,
+   *  slow random-heading drift. Belt rocks persist for the rest of the run. */
+  spawnBeltForWave(wave) {
+    const b = this.cfg.belt;
+    if (wave < b.fromWave) return;
+    let n = 0;
+    for (const r of this.field.rocks) if (r.belt) n++;
+    if (n >= b.max) return;
+    const r = this.field.spawn(b.size, 1, null, { x: this.ship.pos.x, y: this.ship.pos.y, min: 10 }, false, null, 0, false, true);
+    if (!r) return;
+    const ang = this.rng.next() * Math.PI * 2;
+    const sp = this.rng.range(b.speed[0], b.speed[1]);
+    r.vel = v2(Math.cos(ang) * sp, Math.sin(ang) * sp);
   }
 
   /** ST-054: spawn the wave's mines once it is eligible (wave >= firstWave). */

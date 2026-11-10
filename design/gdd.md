@@ -75,6 +75,12 @@ multipliers, and grab power-ups. Survive as long as you can.
 - Contact costs 1 ship life and the WARDEN survives the hit (mirrors boss contact).
 - Readability (I137): the WARDEN glows cyan while its armor holds and shifts to a hot orange pulse once the armor is spent (the hex armor plate retracts), so armor state reads at a glance; a "WARDEN INBOUND" toast announces the spawn and the death plays a mini-boss burst with the score popup.
 
+## Asteroid Belt (ST-138)
+
+- From wave 8, each wave start adds one DRIFTING belt rock at the arena rim (kept 10 u from the ship), up to 5 concurrent (config.belt): a slow ambient hazard (0.5-1.1 u/s, random heading) that persists for the rest of the run.
+- Belt rocks are INDESTRUCTIBLE: bullets spark off them (the bullet is consumed, no score or split - beltHit event), bombs ignore them, and ship contact costs a life but the rock survives (normal shield and invulnerability rules apply).
+- Belt rocks sit outside the normal rock cap, so wave rocks keep flowing; they can still award near-miss points like any rock.
+
 ## Enemy Bullets (ST-056)
 
 - The MONOLITH fires an aimed bolt at the ship every 2.2s (speed 9 u/s).
