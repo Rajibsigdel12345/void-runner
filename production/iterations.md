@@ -1285,4 +1285,18 @@ One entry per iteration. Format:
 - Verification: docs-only - no rendering change, no browser smoke required. Quality bar rerun: npm test 491/491 (unchanged), node scripts/build.mjs exit 0.
 - Result: DONE. ST-166 closed (CUTTABLE story delivered as plan doc). Next I167 ST-167 UI perf check (text drawing).
 
+## I167 - UI perf check (text drawing) (ST-167)
+
+- Skill: cgs-perf-profile (contract: Summary / Metric / Budget / Bottleneck / Optimization / Blocking issues / Changed or proposed files / Verification evidence / Next owner).
+- Method: live Chromium (Playwright) on the dev build; deterministic 60Hz drive (frozen rAF stub + __vr.advance(1/60) xN with per-tick microtask yields to flush MutationObserver per tick; the tab's rAF was environmentally throttled to ~1Hz, so real-time sampling was unusable); MutationObserver on document.body {subtree, childList, attributes, characterData}; static audit for forced-reflow reads across src/render/*.js.
+- Finding: waveBanner.js sync() wrote the banner big-line nodeValue + sub textContent every frame of the 1.8-2.2s animations, committing 3 DOM mutations/frame during the hold phase (402 / 479 / 294 per wave / boss / cleared animation). This was the only recurring non-essential writer in the whole HUD tree - everything else (hud.js set() caches, kill feed quantized steps, display/classList toggles) was measured at 0 committed mutations or already change-guarded.
+- Fix: lastBig / lastSub write-on-change caches in sync() (matching the existing HUD set() pattern), reset in the end-reset branch. Measured: wave 402->84 (-79%), boss 479->204 (-57%), hold 3/tick -> 0/tick; definitive 60-tick log shows the only mutation target is #wave-banner style, all inside the first 24 ticks (one-time text writes + opacity/transform entry punch).
+- Budgets: steady UI text 0 mutations/tick; worst burst tick 54 (6-rock kill: 5 feed rows + popups + score + HUD, ~10 small nodes, ~0.5ms main-thread); all animated props opacity/transform (compositor-friendly); zero layout-triggering reads (static audit); will-change:auto (no permanent promotion of burst-animated banners).
+- Not changed (measured no-ops, documented why): kill feed hold opacity writes (browser short-circuits same-value style writes), HUD (already set()-cached), display/classList toggles.
+- Residual note: one early pre-fix run showed a mislabeled attributes@DIV target at ~1.4/tick; the definitive clean-state full log proves no other attribute target exists - probe label artifact, not a real source.
+- Doc: production/perf-ui-text.md. Changed: src/render/waveBanner.js + doc.
+- Quality bar: npm test 491/491 (render-layer fix, no core diff), node scripts/build.mjs exit 0. Browser smoke (?nocache=167c): intermission countdown renders, WAVE 1 banner correct (screenshot .evidence/I167/I167_1_wave_banner_smoke.png), console 0 errors / 0 warnings, NaN scan (ship.pos, scoreKeeper, rock pos) 0 non-finite.
+- Result: DONE. ST-167 closed. Next I168 ST-168 E8D docs + changelog (E8D closeout).
+
+
 

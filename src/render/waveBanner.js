@@ -22,6 +22,8 @@ export function createWaveBanner(root) {
 
   let anim = null; // { t, dur, text, subText }
   let lastCountdown = '';
+  let lastBig = null; // I167: per-frame same-value text writes committed 3 DOM mutations/frame during banner holds
+  let lastSub = null; // I167
   const MOD_LABELS = { fast: 'FAST ROCKS', small: 'SMALL ROCKS', inward: 'INWARD DRIFT' }; // ST-051
 
   function startWave(n, mod, endless) {
@@ -60,8 +62,8 @@ export function createWaveBanner(root) {
       anim.t += dt;
       const big = anim.text ? anim.text : '';
       const s = anim.subText ? anim.subText : '';
-      el.firstChild.nodeValue = big;
-      sub.textContent = s;
+      if (lastBig !== big) { lastBig = big; el.firstChild.nodeValue = big; } // I167: write only on change (was: 3 committed mutations/frame)
+      if (lastSub !== s) { lastSub = s; sub.textContent = s; } // I167
       const a = motionOff ? (anim.t < anim.dur ? 1 : 0) : envelope(anim.t, anim.dur);
       el.style.opacity = String(a);
       if (anim.tint) el.style.color = anim.tint; // I154: per-type tint
@@ -69,7 +71,7 @@ export function createWaveBanner(root) {
       const inP = Math.min(1, anim.t / 0.4); // ST-088: entry slide-in over 0.4s
       const punch = motionOff ? 1 : 1 + 0.06 * (1 - easeOut(inP)); // I154: scale punch 1.06 -> 1.0
       el.style.transform = 'translateY(' + (motionOff ? 0 : (12 * (1 - easeOut(inP))).toFixed(1)) + 'px) scale(' + punch.toFixed(3) + ')'; // ST-088 + I154
-      if (anim.t >= anim.dur) { anim = null; el.style.opacity = '0'; el.style.fontSize = 'calc(40px * var(--vr-fs,1))'; el.style.color = '#9fd0ff'; el.style.textShadow = '0 2px 14px rgba(0,0,0,0.9)'; el.style.transform = 'translateY(0px) scale(1)'; sub.textContent = ''; el.firstChild.nodeValue = ''; } // I154: reset glow + scale; I161: font-scale
+      if (anim.t >= anim.dur) { anim = null; el.style.opacity = '0'; el.style.fontSize = 'calc(40px * var(--vr-fs,1))'; el.style.color = '#9fd0ff'; el.style.textShadow = '0 2px 14px rgba(0,0,0,0.9)'; el.style.transform = 'translateY(0px) scale(1)'; sub.textContent = ''; lastSub = ''; el.firstChild.nodeValue = ''; lastBig = ''; } // I154: reset glow + scale; I161: font-scale; I167: text cache reset
       return;
     }
     // idle: intermission countdown
