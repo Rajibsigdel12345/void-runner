@@ -106,6 +106,21 @@ export const CONFIG = {
     fireEvery: 3.0,   // ST-056: per-mine cadence (seconds) while in range
     score: 150        // kill reward (more than an S - you chased the chaser)
   },
+
+  drone: {
+    // ST-117: homing drones - fast seekers that wobble around the line to the ship.
+    // 1 bullet kills one; touching the ship costs a life. No bolts (chasers, not
+    // shooters). Faster than mines but always slower than ship.maxSpeed (dodgeable).
+    firstWave: 8,       // drones start appearing from this wave (after mines at 5)
+    perWave: 1,         // drones added each eligible wave
+    maxConcurrent: 6,
+    radius: 0.7,        // slightly smaller than a mine
+    speed: 4.4,         // u/s - agile seeker, faster than mines (3.2), < ship.maxSpeed (14)
+    turn: 3.2,          // max heading change rad/s (tighter pursuit than a mine)
+    wobbleAmp: 0.55,    // rad: peak strafe offset around the direct aim line
+    wobbleFreq: 2.2,    // rad/s: wobble oscillation rate
+    score: 200          // kill reward (more than a mine - faster and meaner)
+  },
   enemyBullets: {     // ST-056: enemy bolts - separate pool, always slower than the ship
     maxConcurrent: 24,
     radius: 0.22,

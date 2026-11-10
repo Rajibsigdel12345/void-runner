@@ -4,6 +4,7 @@ import { Ship } from './ship.js';
 import { Weapons } from './weapons.js';
 import { AsteroidField } from './asteroids.js';
 import { MineField } from './mines.js';
+import { DroneField } from './drones.js'; // ST-117
 import { Monolith, bossHpForWave } from './boss.js';
 import { EnemyBulletField } from './enemyBullets.js';
 import { VortexField } from './vortex.js'; // ST-059
@@ -24,6 +25,7 @@ export class World {
     this.weapons = new Weapons(cfg);
     this.field = new AsteroidField(rng, cfg);
     this.mines = new MineField(rng, cfg); // ST-054
+    this.drones = new DroneField(rng, cfg); // ST-117
     this.boss = null; // ST-055
     this.enemyBullets = new EnemyBulletField(cfg); // ST-056
     this.vortex = new VortexField(rng, cfg); // ST-059
@@ -116,9 +118,11 @@ export class World {
       this.emit('wave', { n: wv.startedWave, mod: this.waves.activeMod, endless: wv.startedWave >= this.cfg.waveEndless.first }); // ST-051
       this.spawnMinesForWave(wv.startedWave); // ST-054
       this.spawnBossForWave(wv.startedWave); // ST-055
+      this.spawnDronesForWave(wv.startedWave); // ST-117
     }
     if (wv.waveCleared) this.emit('waveCleared', { n: wv.waveCleared });
     this.mines.step(edt, this.ship.pos); // ST-054 (ST-115: scaled under slow-mo)
+    this.drones.step(edt, this.ship.pos); // ST-117 (ST-115: scaled under slow-mo)
     for (const f of this.mines.takeFires()) { // ST-056
       const b = this.fireAimedBolt(f, this.cfg.enemyBullets.mineSpeed);
       if (b) this.emit('mineFire', { pos: { x: f.x, y: f.y } });
@@ -136,6 +140,8 @@ export class World {
     this.resolveBulletMines(); // ST-054
     this.resolveBulletBoss(); // ST-055
     this.resolveShipMines(); // ST-054
+    this.resolveBulletDrones(); // ST-117
+    this.resolveShipDrones(); // ST-117
     this.resolveShipBoss(); // ST-055
     this.resolveShipEnemyBullets(); // ST-056
     this.resolveBulletRocks();
@@ -387,11 +393,56 @@ export class World {
     }
   }
 
+  /** ST-117: spawn the wave's homing drones once eligible (wave >= firstWave). */
+  spawnDronesForWave(wave) {
+    const d = this.cfg.drone;
+    if (wave < d.firstWave) return;
+    for (let i = 0; i < d.perWave; i++) this.drones.spawn(this.ship.pos);
+  }
+
+  /** ST-117: bullets destroy drones (1 hit). Each drone kill feeds the combo. */
+  resolveBulletDrones() {
+    for (const b of this.weapons.bullets) {
+      if (b.dead) continue;
+      const hit = this.drones.drones.find(dm => !dm.dead &&
+        Math.hypot(dm.pos.x - b.pos.x, dm.pos.y - b.pos.y) < dm.radius + b.radius);
+      if (!hit) continue;
+      this.weapons.markHit(b.id);
+      this.drones.destroy(hit.id);
+      const points = this.scoreKeeper.kill(this.cfg.drone.score, this.time);
+      this.emit('kill', { pos: { x: hit.pos.x, y: hit.pos.y }, size: 'drone', points,
+        combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), drone: true });
+      this.emit('droneExplode', { pos: { x: hit.pos.x, y: hit.pos.y } });
+    }
+    this.weapons.compact();
+  }
+
+  /** ST-117: a drone touching the ship costs a life (same as a mine hit) and is lost. */
+  resolveShipDrones() {
+    if (this.ship.isInvulnerable || this.lives <= 0) return;
+    const hit = this.drones.drones.find(dm => !dm.dead &&
+      Math.hypot(dm.pos.x - this.ship.pos.x, dm.pos.y - this.ship.pos.y) < dm.radius + this.cfg.ship.radius);
+    if (!hit) return;
+    this.drones.destroy(hit.id);
+    this.emit('droneExplode', { pos: { x: hit.pos.x, y: hit.pos.y } });
+    const livesLeft = this.livesMgr.damage();
+    this.scoreKeeper.onDamage();
+    const nx = (this.ship.pos.x - hit.pos.x), ny = (this.ship.pos.y - hit.pos.y);
+    const n = Math.hypot(nx, ny) || 1;
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.ship.damage(v2(nx / n, ny / n));
+    if (livesLeft <= 0) {
+      this.game.to(STATE.GAME_OVER);
+      this.emit('gameover', { score: this.score });
+    }
+  }
+
   reset() {
     this.ship = new Ship(0, 0, this.cfg);
     this.weapons.clear();
     this.field.clear();
     this.mines.clear();
+    this.drones.clear(); // ST-117
     this.boss = null; // ST-055
     this.enemyBullets.clear(); // ST-056
     this.vortex.reset(); // ST-059
