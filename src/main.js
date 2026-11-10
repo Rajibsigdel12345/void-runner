@@ -303,6 +303,7 @@ const slowmoTintEl = document.getElementById('slowmo-tint'); // I116: cold-edge 
 let flashA = 0;
 let dangerA = 0;
 let _rmHitT = -1; // ST-176: seconds elapsed since the last reduced-motion hit (-1 = none)
+let _weaponFanfareN = 0; // ST-178: weapon level-up fanfires fired (probe; motion-gated branch)
 let _rmHitSev = 0; // ST-176: severity of the pending reduced-motion vignette (0..1)
 let _lastDangerOp = 0; // ST-176: last computed danger-vignette opacity (probe)
 let slowmoT = 0; // I116: slow-mo tint ramp 0..1 // I85: transient danger spike on hit (gated by !motionOff like the flash)
@@ -462,6 +463,7 @@ window.__vr.shakeMag = () => shake.magnitude(); // ST-175: probe (current shake 
 window.__vr.dangerOp = () => _lastDangerOp; // ST-176: probe (current danger-vignette opacity 0..1)
 window.__vr.particleLive = () => particles.live; // ST-177: probe (live particle count)
 window.__vr.magnetPullCount = () => world.powerups.drops.filter((d) => !d.dead && d.magnetPull).length; // ST-177: probe (orbs currently magnet-pulled)
+window.__vr.weaponFanfareN = () => _weaponFanfareN; // ST-178: probe (fanfires fired; increments only in the motion-ON branch)
 window.__vr.lastShare = () => screens.lastShare(); // I159: probe
 
 // Fixed-timestep simulation (60Hz) with render at display rate (ST-078: the
@@ -517,6 +519,7 @@ else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, 
       else if (e.type === 'mineFire') particles.burst(e.data.pos.x, e.data.pos.y, { count: 4, palette: CONFIG.fx.palette.mine, speed: 3, life: 0.2 }); // ST-056 muzzle
       else if (e.type === 'powerup' && e.data.type === 'overdrive') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.power, speed: 8, life: 0.5, shape: 'fountain' }); flashA = Math.min(0.8, flashA + 0.15); } // ST-057 pickup flash
       else if (e.type === 'powerup') { const puColor = CONFIG.fx.palette.pickup[e.data.type]; if (puColor) particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.max(8, Math.ceil(fxCount * 0.5)), color: puColor, speed: 7, life: 0.5, shape: 'radial' }); } // ST-177: per-type collect sparkle (overdrive keeps its fountain above)
+      else if (e.type === 'weaponLevelUp') { const wl = Math.max(1, e.data.level || 1); const tier = CONFIG.fx.palette.bulletLevel[Math.max(0, Math.min(CONFIG.fx.palette.bulletLevel.length - 1, wl - 1))]; const sx = world.ship.pos.x, sy = world.ship.pos.y; particles.burst(sx, sy, { count: fxCount, color: tier, speed: 11, life: 0.6, shape: 'ring' }); particles.burst(sx, sy, { count: Math.ceil(fxCount * 0.7), color: tier, speed: 9, life: 0.7, shape: 'fountain' }); flashA = Math.min(0.8, flashA + CONFIG.fx.weaponFanfare.flash); punch.trigger({ x: 0, y: 0.7, z: 0.5 }, CONFIG.fx.weaponFanfare.punch); _weaponFanfareN++; } // ST-178: weapon level-up fanfare (tier-colored ring + fountain at the ship)
       else if (e.type === 'hit') {
         particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.hit, speed: 11, life: 0.45 });
         shake.trigger(shakeEnergy('hit', CONFIG.fx.shakeTable)); // ST-175

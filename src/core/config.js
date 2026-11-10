@@ -346,6 +346,10 @@ export const CONFIG = {
       hold: 0.5,             // seconds held at full severity after a hit
       fade: 0.5              // seconds of linear fade back to 0
     },
+    weaponFanfare: {         // ST-178: weapon level-up fanfare (tier-colored ring + fountain at the ship)
+      flash: 0.2,            // white flash bump (clamped to 0.8)
+      punch: 0.45            // camera punch energy (boss death 1.0, bomb 0.8; upgrade is lighter)
+    },
     punch: {                  // ST-081: camera punch - brief directed jolt (boss death / bomb)
       decay: 12,              // punch energy decay (1/s, exponential)
       amplitude: 2.0,         // max camera displacement (world units) at energy 1

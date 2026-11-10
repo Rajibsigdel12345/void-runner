@@ -215,5 +215,75 @@ Both effects are motion-gated, consistent with the rest of the juice.
   Both effects are motion-gated (the part-2 smoke proves zero reduced-motion
   change). Pool headroom is ample (512 vs ~26 peak: 24 burst + ~2/frame).
 
+## ST-178 weapon level-up fanfare (I178)
+
+### Combat Goal
+A weapon level-up is a permanent (for the run) power gain and should read as
+a clear, rewarding "power surge" the moment it lands. Before ST-178 the
+level-up already had its audio half (the levelUp SFX, ST-123) and its verbal
+half (the "WEAPON LEVEL n" toast, ST-123) but NO visual: the if (!motionOff)
+particle chain had no weaponLevelUp branch, so the run's clearest "you just
+got more power" beat was invisible. ST-178 adds that visual half - an
+expanding shockwave ring + an upward power plume, both in the NEW weapon
+tier's color (the same cyan/mint/amber the HUD pips and bullets already use),
+plus a brief white flash and a light camera punch. Grounded in the standard
+game-feel convention (GMTK "Secrets of Game Feel and Juice": a significant
+player moment gets a flash + expanding shockwave + particle plume + impact,
+kept subtle and tied to the moment). Motion-gated like the rest of the juice.
+
+### Tuning
+- CONFIG.fx.weaponFanfare = { flash: 0.2, punch: 0.45 } (src/core/config.js) -
+  the two feel knobs. flash is a white-flash bump (clamped to the shared 0.8
+  cap); punch is the camera-punch energy (boss death 1.0, bomb 0.8 - a weapon
+  upgrade is lighter, 0.45, a forward jolt not a damage shake; no shakeTable
+  entry by design - shake reads as "something hit you", a reward is not that).
+- Fanfare bursts (main.js juice, at the ship): a ring shockwave (shape ring,
+  count fxCount = 48 at FX high, speed 11, life 0.6) and an upward fountain
+  plume (shape fountain, count ceil(fxCount * 0.7) = 34, speed 9, life 0.7),
+  both in palette.bulletLevel[min(level-1, 2)] (L1 0xbff4ff / L2 0x8affc0 /
+  L3 0xffd27a) so the fanfare is the color of the tier just reached. 82
+  particles total per level-up - trivial against the 512 pool.
+- No core change: the fanfare reads world.ship.pos (the event carries only
+  { level }) and the existing palette; no physics, no new persistent state.
+
+### Feedback
+- Event-driven, in the if (!motionOff) juice chain - a new
+  else-if (e.type === 'weaponLevelUp') branch (after the ST-177 powerup
+  branch) fires the ring + fountain, bumps flashA, and punches the camera.
+  The existing motion-independent toast and the levelUp SFX cue are unchanged -
+  they are the audio/verbal halves that still play under reduced motion.
+- Probe: __vr.weaponFanfareN() (fanfires fired) - increments ONLY inside the
+  motion-gated branch, so it doubles as the reduced-motion negative gate.
+
+### QA Scenario
+- Unit: none new (render/wiring change; the tier-color clamp is a one-liner
+  mirroring bulletPool.js / hud.js - no core logic to pin). Test count holds
+  538/538.
+- Browser smoke part 1 ?nocache=178a (motion ON, real Enter -> PLAYING, ship
+  invulnerable): baseline fan/live/tally 0; emit weaponLevelUp(L2) + advance
+  -> fan 1, live 82 (ring 48 + fountain ceil(48*0.7)=34), tally 1; emit
+  weaponLevelUp(L3) + advance -> fan 2, live 164, tally 2. Console 0/0.
+- Browser smoke part 2 ?nocache=178b (reducedMotion: true seeded, reload,
+  Enter): baseline 0; emit weaponLevelUp(L2) + advance -> fan stays 0 and live
+  stays 0 (the visual fanfare is motion-gated) but tally +1 (the toast +
+  levelUp SFX still fire - the motion-independent halves). Console 0/0.
+- NaN scan (ship pos/vel + drops): 0 both parts.
+- Screenshot .evidence/I178/I178_1_weapon_upgrade_fanfare.png (PLAYING, WAVE
+  1, "WEAPON LEVEL 3" toast; the transient ring/plume had faded by capture -
+  the numeric smoke above is the authoritative proof it fired).
+
+### Changed files
+- src/core/config.js - +CONFIG.fx.weaponFanfare { flash, punch }
+- src/main.js - weaponLevelUp fanfare branch (ring + fountain + flash +
+  punch), _weaponFanfareN counter, __vr.weaponFanfareN() probe
+- design/feel.md - this section
+
+### Risks
+- None material: purely additive, motion-gated juice. No core/physics change
+  (reads ship.pos + existing palette; the event already fires). The
+  motion-independent toast + SFX are untouched. Pool headroom is ample (512
+  vs 82 per level-up, and level-ups are rare). The part-2 smoke proves zero
+  reduced-motion change.
+
 ## Next
-ST-178 (I178): Weapon-upgrade fanfare + visual.
+ST-179 (I179): Balance pass E8-3 (feel params).
