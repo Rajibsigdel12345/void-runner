@@ -1620,3 +1620,14 @@ One entry per iteration. Format:
 - Fix (smallest safe): 2 new tests in tests/config.test.js - (1) 'config: replay section is decoder-compatible' pins quant inside the decoder range 4..1000, maxSteps/maxTapeBytes/demoLen positive ints, demoSeed 32-bit, and runs a config->codec end-to-end (createRecorder with the live config -> finish -> decodeReplay ok), so any out-of-range quant now fails the suite; (2) 'config: storage caps and keys are sane' pins highScoresMax/replaysMax positive ints and the four storage keys non-empty + distinct.
 - Verification: npm test 622/622 (620 + 2 new); npm run build exit 0. No rendering change -> no browser smoke per quality bar.
 - Result: DONE. ST-192 closed. Next I193 ST-193 flaky check (repeated-suite + seeded determinism audit, cgs-test-flakiness).
+## I193 - Flaky check: repeated suite + order-dependence + flake-source audit (cgs-test-flakiness) (ST-193)
+
+- Summary: prove the 622-test suite is deterministic and not flaky before the regression rounds (I195-196) build on it.
+- Failure Pattern: none observed - 5 consecutive full runs and 1 serial run all green with identical counts (no intermittent failures, no count drift).
+- Isolation: (1) 5x `node scripts/run-tests.mjs` back-to-back: 622/622 each (dur 2644/3457/2769/3387/3062 ms - variance is machine load only, no time-based assertions affected); (2) 1x with --test-concurrency=1 (fully serial): 622/622 - no order dependency between the 65 test files; (3) static flake-source scan of tests/ + src/core/ for Math.random / Date.now / performance.now / setTimeout / new Date: all clean.
+- Root Cause: n/a (nothing to stabilize). The single `new Date(` hit (tests/daily.test.js:58) is a FIXED date `new Date(2026, 10, 10)` exercising the local-calendar path of dailyForDate - not wall-clock, so no date-rollover flake.
+- Stabilization: none required. Determinism is structural: all randomness flows through src/core/rng.js (seeded), the codec/daily/pilot paths take explicit seeds, and no test touches wall-clock, timers, or the unseeded RNG.
+- Risks: (low) the audit is a point-in-time proof; future iterations must keep the invariant "no Math.random/Date.now in tests or core" - the static scan is cheap enough to re-run as part of the I194 security audit. (info) duration variance 2.6-3.5 s is environmental, not flake.
+- Changed files: none (audit-only iteration; no violations found).
+- Verification evidence: _flaky.txt run log (5 repeats + 1 serial, all 622/622 fail=0); scan output above.
+- Next owner or decision: I194 ST-194 security audit of storage/seed codecs (cgs-security-audit).
