@@ -361,6 +361,13 @@ export const CONFIG = {
       flash: 0.2,            // white flash bump (clamped to 0.8)
       punch: 0.45            // camera punch energy (boss death 1.0, bomb 0.8; upgrade is lighter)
     },
+    killPunch: {              // ST-221 (I224): class-scaled directed kill punch (T4) - bottom juice rung
+      s: 0.08,                // small rock / mine (max displacement 0.16 u at the 2.0 u amplitude)
+      m: 0.12,                // medium rock (0.24 u)
+      l: 0.18,                // large rock (0.36 u; below the 0.45 weapon fanfare)
+      overdriveBoost: 0.5,    // combo-heat: x1.5 while overdrive is active
+      max: 0.3                // hard cap (L + overdrive 0.27 stays under the fanfare rung)
+    },
     punch: {                  // ST-081: camera punch - brief directed jolt (boss death / bomb)
       decay: 12,              // punch energy decay (1/s, exponential)
       amplitude: 2.0,         // max camera displacement (world units) at energy 1
