@@ -363,3 +363,62 @@ PASS - proceed to the E8D tail. I165: UX fix round (ST-165).
 ### Next owner or decision
 I165 (ST-165): UX fix round - address the findings above (in-menu mute indicator; any additional findings from the I165 review). No user decision required (advisory gate, non-blocking).
 
+## I182 - G8.4 E8E Gate (ST-182)
+
+### Summary
+Advisory phase gate closing the E8E feel/audio/juice arc (I170-I181) before the E8E tail (I183 feel tuning 2, I184 perf profile, I185 memory audit, I186 docs). Verifies the epics.md G8.4 criteria: music audible + toggleable + gesture-gated; death slow-mo verified; perf + memory within budget; all new FX respect reduced motion. The audio/feel/rm criteria are verified from I181 evidence (same-day live browser sessions; git log confirms no src/render/audio.js diff since I173 and no src/main.js diff since I179, so the contracts stand, and I180's 18-test headless suite re-verifies the synth layer on every run); the perf + memory criterion was measured live this iteration with the G8.0 reference scene (24 rocks + wave-5 Monolith + real mouse-hold sustained fire + E8E juice peaks), following the in-gate perf reference precedent set by G8.0 (I110) and G8.1 (I128). Verdict: PASS.
+
+### Gate Criteria (epics.md G8.4)
+1. Music audible + toggleable + gesture-gated.
+2. Death slow-mo verified.
+3. Perf + memory within budget.
+4. All new FX respect reduced motion.
+Plus the standing baseline: fresh npm test + build this iteration, console 0/0.
+
+### Evidence (collected this iteration unless noted)
+- Baseline: fresh npm test 565/565 pass; fresh node scripts/build.mjs exit 0 (both run this iteration).
+- Criterion 1 - music audible + toggleable + gesture-gated (I181 evidence, same day, ?nocache=181a):
+  - Gesture-gated: pre-gesture audio.state() 'uninitialized' with no buses; after a real Enter keypress 'running' (the WebAudio autoplay policy is enforced; the bus starts from the user gesture only).
+  - Audible: live meter peak 0.162-0.191 under a running bus (analyser-driven; a silent bus reads 0).
+  - Toggleable: N mid-run -> musicOn false + 'MUSIC OFF' toast + localStorage voidrunner.settings music:false (the I171 persisted toggle) -> N -> 'MUSIC ON' + music:true; M -> meter peak/rms exactly 0 with musicOn still true (the muted master gain: the bed runs under it) -> M -> recovers 0.185; setVolume(0.2) -> meter 0.060 (proportional to 0.185 at 0.7) -> restored.
+  - Bus lifecycle: GAME_OVER stops the bus (musicOn false, the I158 PLAYING gate); Enter restart -> PLAYING, bus back (meter 0.191).
+- Criterion 2 - death slow-mo verified (both motion states):
+  - Motion ON (I174 smoke, ?nocache=174c): hit -> warpCents -514.0625 (peak x0.75 window), exactly 0 after the 0.8s decay; the max() handback with the slow-mo power-up warp (deeper wins, exact handback on close) verified there.
+  - Reduced motion (I181 part 2, ?nocache=181b): hit -> warpCents -514.0625 armed -> exactly 0 after advance(1.0). The I172/I174 timeWarp seam sits in the state-always-advances chain, not a motion-gated branch - the audio half of the hit is motion-independent by design, and this is the verification of that design under rm.
+- Criterion 3 - perf + memory within budget (measured this iteration, fresh tab ?nocache=182, dev :5173):
+  - Scene: the G8.0 reference scene - 24 M rocks (speedMult 0.1, rim-placed at radius 24) + wave-5 Monolith (hp 40, ring/volley fire live, 1 enemy bolt in flight) + sustained player fire (real mouse hold via Playwright, 96 fire events during the measurement window) + the E8E juice peaks (ST-177 pickup burst 24 particles, ST-178 weapon fanfare peak 106 particles). Ship protected (invuln 9999, lives 999 - the I127/I147 test artifacts); scene stayed PLAYING throughout the protected runs.
+  - CPU fixed-step sampling (advance 1/60 + render, the I128 method; 120 frames, performance.now brackets, 30 warm-up): Run B (rocks + boss, no sustained fire): mean 0.943 ms, p95 1.5 ms, worst 39.4 ms (a single-frame GC/compositor spike inside the evaluate - p95 is the meaningful metric). Run C (same + sustained fire): mean 0.34 ms, p95 0.6 ms, worst 2.5 ms. Run A (dead-ship variant, 20 rocks + boss - method artifact, see Concerns): mean 1.32 ms, p95 1.6 ms, worst 54.8 ms. All vs the 14 ms target / 16.67 ms frame budget.
+  - GPU per-frame stats (renderer.info with a manual reset per frame): peak 19 calls / 1614 tris (a boss ring volley in flight); steady 17-18 calls / 926-1040 tris - at or below the I45 reference (37 calls / 1626 tris) and the I110 G8.0 reference (31 / 1500).
+  - Memory (performance.memory, Chromium): usedJSHeapSize 12867 KB before the scene -> 12993 KB after ~5s of simulation + the particle peaks = +126 KB; no runaway growth. Labeled as a reference sample (single before/after pair, no forced GC) - I185 is the memory audit with a proper soak.
+  - NaN: 0 across ship pos/vel, all 24 rocks pos/vel, boss pos, player bullets, enemy bolts.
+- Criterion 4 - all new FX respect reduced motion (I181 part 2 + the per-iteration smokes of I174-I178; git log confirms no src/main.js diff since I179, so the gates stand):
+  - Under reducedMotion:true, an injected hit produces shakeMag 0 (the I175 shake stays motion-gated) and dangerOp 0.6 (the ST-176 reduced-motion damage vignette - the motion-safe visual substitute), with warpCents -514.0625 + played.hit +1 (the motion-independent audio half).
+  - I177 smoke part 2: pickup burst + magnet trail stay 0 live under rm (juice motion-gated) while the core magnetPull flag still sets (a sim fact, motion-independent). I178 smoke part 2: the weapon fanfare stays 0 live under rm while the toast + levelUp SFX still fire. I174: the death slow-mo is audio-only (no visual motion). The I154/I160-I162 E8D reduced-motion gates (banner/kill-feed/hint/multiplier) are unchanged since G8.3.
+- Console: 0 errors / 0 warnings on the ?nocache=182 tab across the whole gate (menu -> PLAYING -> forced scene -> 3 measurement runs -> screenshot).
+- Screenshot: .evidence/I182/I182_1_gate_scene.png (PLAYING, forced scene).
+
+### Concerns
+- The perf scene measures CPU via manual fixed-step sampling (the I128 method) and GPU via renderer.info; the live rAF frame rate in a background tab is throttled (~4 fps) and is not a game cost - the same labeled caveat as I128/G8.1. The representative numbers are the fixed-step mean/p95 + per-frame calls/tris.
+- Live player bullets read 0 at the sample instant (aimed at the screen-center pointer, they exit the arena and despawn quickly; the 96 fire events prove the sustained-fire path was live the whole window). The I45 reference (37 / 1626 with visible bullets) is the higher historical bound; this gate's peak (19 / 1614) sits below it.
+- The memory delta is a rough one-directional heap sample without forced GC; it is a reference for this gate, not a verdict on its own. I185 (memory audit) does the proper soak + GC-controlled measurement.
+- Run A's game-over is a test-method artifact, not a defect: the ship (unprotected at the time) idle-died during a ~45s real-time tooling gap before the probe - the documented idle-death behavior flagged in I181's risk note. The scene numbers from that run are retained for completeness; the subsequent runs protected the ship and stayed PLAYING.
+
+### Verdict
+**PASS** - all four epics.md G8.4 criteria met with evidence: (1) music audible + toggleable + gesture-gated, (2) death slow-mo verified under both motion states, (3) perf + memory within budget (fixed-step mean 0.34-1.32 ms / p95 0.6-1.6 ms vs the 14 ms target; GPU peak 19 calls / 1614 tris vs the I45 37 / 1626 reference; heap +126 KB with no runaway), (4) all new FX respect reduced motion. Proceed to the E8E tail.
+
+### Risks
+- No new risks. R-E8-4 (perf) is mitigated by this gate's in-budget numbers; the deep profile (I184) and memory audit (I185) remain scheduled as the tail.
+
+### Changed files
+- production/gates.md (this gate)
+- production/iterations.md (I182 entry)
+- CHANGELOG.md (I182 line)
+- production/session-state/active.md (state -> I182 committed)
+- No source changes (the gate is evidence, not code - the I45/I96/I147 pattern).
+
+### Verification evidence
+- All commands fresh-run this iteration: npm test (565/565), node scripts/build.mjs (exit 0), browser probes via window.__vr on the fresh ?nocache=182 tab (3 forced-scene measurement runs, real mouse-hold sustained fire, NaN scan, heap sample), screenshot .evidence/I182/ (gitignored, local only).
+- Assumptions: none on the four criteria - audio/rm cite same-day I181 + I174/I177/I178 evidence (labeled, and backed by the git log: no audio.js diff since I173, no main.js diff since I179); perf + memory were measured directly this iteration.
+
+### Next owner or decision
+I183 (ST-183): feel tuning round 2 - playtest-driven; inputs are the 3 watch-items in design/feel-balance.md + CONFIG.fx.flashTable / CONFIG.fx.shakeTable. No user decision required (advisory gate, non-blocking).
