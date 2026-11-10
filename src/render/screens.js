@@ -241,6 +241,17 @@ export function createScreens(root, settings = {}) {
   shareBtn.addEventListener('click', (e) => { e.stopPropagation(); if (goShare) copyShare(); shareBtn.blur(); });
   gameOver.appendChild(shareBtn);
   line(gameOver, 'copies a reproducible result code', 'font-size:calc(11px * var(--vr-fs,1));opacity:0.6;letter-spacing:1px;margin-top:-8px;');
+  let watchRunBtn = null; // ST-191: WATCH THIS RUN (only for the just-saved run)
+  if (settings.actions && settings.actions.watchRun) {
+    watchRunBtn = document.createElement('button');
+    watchRunBtn.type = 'button';
+    watchRunBtn.className = 'vr-pause-btn';
+    watchRunBtn.textContent = 'WATCH THIS RUN';
+    watchRunBtn.style.cssText = 'display:none;margin-top:10px;letter-spacing:3px;';
+    watchRunBtn.setAttribute('aria-label', 'Watch this run as a replay');
+    watchRunBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.watchRun(); watchRunBtn.blur(); });
+    gameOver.appendChild(watchRunBtn);
+  }
   // --- REPLAYS (ST-190: demo pilot + saved runs; a row starts a watched run) ---
   const replaysPanel = panel('screen-replays', 'radial-gradient(55% 50% at 30% 30%, rgba(60,110,200,0.22), transparent 70%), radial-gradient(50% 55% at 72% 72%, rgba(140,70,180,0.20), transparent 70%), rgba(2,4,12,0.62)');
   line(replaysPanel, 'REPLAYS', 'font-size:calc(30px * var(--vr-fs,1));font-weight:800;letter-spacing:8px;');
@@ -319,6 +330,7 @@ export function createScreens(root, settings = {}) {
     if (state === STATE.GAME_OVER) {
       set('finalScore', finalScore, `SCORE ${world.score}`);
       if (goPrompt) set('goPrompt', goPrompt, opts.replayMode ? 'PRESS Q TO QUIT TO MENU' : 'PRESS ENTER TO RESTART'); // ST-190: a finished replay quits to the menu
+      if (watchRunBtn) watchRunBtn.style.display = opts.watchRun ? 'block' : 'none'; // ST-191: only for the just-saved run
       set('overBest', overBest, opts.best > 0 ? `BEST ${opts.best}` : '');
       set('newBest', newBestLine, opts.newBest ? 'NEW BEST!' : '');
       newBestLine.classList.toggle('vr-newbest', !!opts.newBest); // I69: celebration pulse

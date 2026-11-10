@@ -416,7 +416,7 @@ export const CONFIG = {
     replaysMax: 2  // ST-190: keep the two most recent replays
   },
   replay: {  // ST-190: replay viewer (quantized RLE tape + built-in demo pilot)
-    quant: 25,          // 1/quant world-unit resolution for the tape
+    quant: 1000,        // 1/quant world-unit resolution for the tape (I191: 1/1000 is the empirically faithful resolution - recorded-run replays stay outcome-identical; the decoder caps q at 4..1000)
     maxSteps: 72000,    // cap replay length in substeps (2 h at 60 Hz)
     maxTapeBytes: 700000, // hard cap on the RLE tape size (truncation trigger)
     demoLen: 2220,      // substeps for the built-in DEMO PILOT (37 s; pilot dies at step 2169 -> GAME_OVER, small tail)

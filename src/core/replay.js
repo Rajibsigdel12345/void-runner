@@ -4,8 +4,8 @@
 //   kind 'tape'  - a quantized, RLE-compressed recording of the player's intent per substep
 //   kind 'demo'  - the built-in DEMO PILOT: the canonical I076 deterministic script, run live
 //
-// Quantization: world positions are stored in 1/quant units (quant = 25 -> 1/25 resolution)
-// clamped to +/-40*quant so a tampered tape can never carry a runaway coordinate into the sim.
+// Quantization: world positions are stored in 1/quant units (quant = 1000 -> 1/1000 resolution),
+// clamped to +/-40 world units so a tampered tape can never carry a runaway coordinate into the sim.
 //
 // RLE tape entry = [n, tx, ty, a, ax, ay, f]:
 //   n    - how many consecutive substeps share the same quantized intent
@@ -20,7 +20,7 @@
 
 export const REPLAY_VERSION = 1;
 
-const Q_DEFAULT = 25;     // 1/quant world-unit resolution
+const Q_DEFAULT = 1000;    // 1/quant world-unit resolution (I191: production-faithful default; q=25 replayed diverges in this chaotic sim, q=1000 stays outcome-identical)
 const CLAMP = 40;         // clamp quantized coords to +/-40*quant world units
 const ENTRY_LEN = 7;      // [n, tx, ty, a, ax, ay, f]
 

@@ -31,8 +31,10 @@ import { createScorePopups } from './render/scorePopups.js';
 import { createTutorialHint } from './render/tutorialHint.js';
 import { createTutorialOverlay } from './render/tutorialOverlay.js'; // I151: first-run tutorial
 import { createKillFeed } from './render/killFeed.js'; // I153: kill feed
-import { decodeReplay, demoReplay, createPlayer } from './core/replay.js'; // ST-190: replay codec + demo pilot
+import { decodeReplay, demoReplay, createPlayer, createRecorder } from './core/replay.js'; // ST-190: replay codec + demo pilot; ST-191: recorder
 import { createReplayHud } from './render/replayHud.js'; // ST-190: replay HUD bar
+import { createRecIndicator } from './render/recIndicator.js'; // ST-191: REC chip
+import { recordingAction, shouldSaveOnGameOver } from './core/recording.js'; // ST-191: recording decisions (pure core)
 import { createBloom } from './render/bloom.js';
 import { createFpsMeter } from './render/fpsMeter.js';
 import { createDebugOverlay } from './render/debugOverlay.js'; // ST-080
@@ -124,6 +126,7 @@ const coarse = (window.matchMedia && window.matchMedia('(pointer:coarse)').match
 const hint = createTutorialHint(document.body, { touch: coarse }); // ST-032
 const killFeed = createKillFeed(document.body); // I153: kill feed (top-right, PLAYING only)
 const replayHud = createReplayHud(document.body); // ST-190: slim bar during a watched replay
+const recChip = createRecIndicator(document.body); // ST-191: REC chip while a run is being recorded
 const hud = createHUD(document.body);
 const reticle = createReticle(scene); // I44: fire-line reticle
 let muted = false; // M key (ST-017); consumed by audio (I27)
@@ -149,6 +152,10 @@ function dismissTutorial() {
 }
 let newBest = false;
 let replayView = null; // ST-190: { player, data, speed, idx } while a replay is watched, else null
+let recorder = null; // ST-191: createRecorder for the current live run (null = not recording)
+let recStopped = false; // ST-191: user pressed O to stop (tape frozen; still saved on game over)
+let runSeed = 0; // ST-191: the seed the current run started with (the replay reseed must match it)
+let watchSavedRun = false; // ST-191: the just-ended run was recorded + saved -> WATCH RUN button
 let scoresText = ''; // I66: top-5 table text for the menu (refreshed at boot + on game over)
 let scoreRank = 0; // I69: this run's board rank (shown on game over)
 function refreshScoresText() {
@@ -267,20 +274,35 @@ function refreshDailyMenu() {
   _dailyDirty = false;
 }
 refreshDailyMenu();
+function freshRunSeed() { return (Math.floor(Math.random() * 0x7fffffff) ^ (Date.now() & 0xffff)) >>> 0; } // ST-191: per-run seed (a recorded run replays with this seed)
+
+function toggleRecording() { // ST-191: O key + __vr.toggleRecording drive this named handler
+  const st = world.game.state;
+  if (st !== STATE.PLAYING || tutorialActive) return;
+  const act = recordingAction(st, !!recorder, recStopped);
+  if (act === 'start') {
+    recorder = createRecorder(runSeed, { quant: CONFIG.replay.quant, maxSteps: CONFIG.replay.maxSteps, maxTapeBytes: CONFIG.replay.maxTapeBytes });
+    recStopped = false; recChip.show(); toast('RECORDING - O TO STOP');
+  } else if (act === 'stop') { recStopped = true; recChip.hide(); toast('RECORDING STOPPED'); }
+}
+
 function startRun(mode) {
   replayView = null; // ST-190
+  recorder = null; recStopped = false; watchSavedRun = false; recChip.hide(); // ST-191: a new run has no recording
   newBest = false; popups.clear(); killFeed.clear(); dailyNewBest = false; juiceTally.reset(); // ST-183
   const firstRun = !storage.getTutorialSeen(); // I151: first entry to PLAYING
   if (firstRun) { tutorialActive = true; tutorial.show(); } // gate the sim while reading
   else hint.show(); // passive 6s hint on subsequent runs
-  if (mode === 'daily') { const d = dailyForDate(new Date(), CONFIG.daily.salt); dailyMode = true; dailyKey = d.key; dailySeedVal = d.seed; world.reseed(d.seed); }
-  else { dailyMode = false; dailyKey = null; dailySeedVal = 0; }
+  if (mode === 'daily') { const d = dailyForDate(new Date(), CONFIG.daily.salt); dailyMode = true; dailyKey = d.key; dailySeedVal = d.seed; runSeed = d.seed; world.reseed(d.seed); }
+  else { dailyMode = false; dailyKey = null; dailySeedVal = 0; runSeed = freshRunSeed(); world.reseed(runSeed); } // ST-191: fresh, reproducible layout per run
   world.begin();
 }
 function restartRun() {
   replayView = null; // ST-190
+  recorder = null; recStopped = false; watchSavedRun = false; recChip.hide(); // ST-191: a restart has no recording
   newBest = false; popups.clear(); killFeed.clear(); hint.show(); dailyNewBest = false; juiceTally.reset(); // ST-183
-  if (dailyMode) world.reseed(dailySeedVal); // ST-141: same seed -> reproduce today's run
+  if (dailyMode) { runSeed = dailySeedVal; world.reseed(dailySeedVal); } // ST-141: same seed -> reproduce today's run; ST-191
+  else { runSeed = freshRunSeed(); world.reseed(runSeed); } // ST-191: fresh, reproducible layout per run
   world.restart();
 }
 
@@ -291,10 +313,11 @@ function startReplayView(data) { // ST-190: watch a replay (demo pilot or saved 
   world.reseed(r.data.seed); // deterministic RNG for the watched run
   replayView = { player: createPlayer(r.data), data: r.data, speed: 1, idx: 0 };
   world.replayBegin(); // MENU -> REPLAY (replayMode=true + waves.start())
+  recorder = null; recStopped = false; watchSavedRun = false; recChip.hide(); // ST-191: a watched run never records
   newBest = false; popups.clear(); killFeed.clear(); vortexFx.hide(); juiceTally.reset();
 }
 function exitReplayView() { // ST-190: leave the watched run, back to a clean menu
-  replayView = null; newBest = false; popups.clear(); killFeed.clear(); vortexFx.hide();
+  replayView = null; newBest = false; popups.clear(); killFeed.clear(); vortexFx.hide(); recorder = null; recStopped = false; watchSavedRun = false; recChip.hide(); // ST-191
   world.reset(); // -> MENU
 }
 function restartReplay() { // ST-190: replay the same tape from step 0
@@ -316,10 +339,11 @@ const screens = createScreens(document.body, {
     startDaily: () => startRun('daily'),
     resume: () => { world.resume(); },
     restart: () => { if (replayView) restartReplay(); else restartRun(); }, // ST-190: restart the watched replay
-    quit: () => { if (replayView) exitReplayView(); else { newBest = false; popups.clear(); vortexFx.hide(); world.quitToMenu(); } }, // ST-190
+    quit: () => { if (replayView) exitReplayView(); else { newBest = false; popups.clear(); vortexFx.hide(); recorder = null; recStopped = false; watchSavedRun = false; recChip.hide(); world.quitToMenu(); } }, // ST-190/ST-191
     showReplays: () => { const saved = storage.getReplays(); const list = [{ key: 'demo', label: 'DEMO PILOT', score: 0, wave: 0, kills: 0, time: 0, isDemo: true }]; saved.forEach((r2, i) => list.push({ key: i, label: 'SAVED RUN', score: r2.data.meta.score, wave: r2.data.meta.wave, kills: r2.data.meta.kills, time: r2.data.meta.time })); screens.openReplays(list); }, // ST-190
     startReplay: (k) => { if (k === 'demo') { startReplayView(demoReplay(CONFIG.replay.demoSeed, CONFIG.replay.demoLen)); return; } const saved = storage.getReplays(); if (saved[k]) startReplayView(saved[k].data); }, // ST-190
     closeReplays: () => screens.closeReplays(), // ST-190
+    watchRun: () => { const saved = storage.getReplays(); if (saved.length > 0) startReplayView(saved[0].data); }, // ST-191: watch the just-saved run (always index 0 - newest first)
   },
 });
 const particles = createParticles(scene);
@@ -388,9 +412,10 @@ window.addEventListener('keydown', (e) => {
   } else if (e.key === 'r' || e.key === 'R') { // I68: restart from pause
     if (st === STATE.PAUSED) { if (replayView) restartReplay(); else restartRun(); } // ST-190: restart the replay; ST-141: reseed when daily
   } else if (e.key === 'q' || e.key === 'Q') { // I68: quit from pause
-    if (st === STATE.PAUSED) { if (replayView) exitReplayView(); else { newBest = false; popups.clear(); vortexFx.hide(); world.quitToMenu(); } } else if (st === STATE.GAME_OVER && replayView) exitReplayView(); // ST-190
+    if (st === STATE.PAUSED) { if (replayView) exitReplayView(); else { newBest = false; popups.clear(); vortexFx.hide(); recorder = null; recStopped = false; watchSavedRun = false; recChip.hide(); world.quitToMenu(); } } else if (st === STATE.GAME_OVER && replayView) exitReplayView(); // ST-190/ST-191
   } else if (e.key === '1' || e.key === '2' || e.key === '3') { // ST-190: replay speed x1/x2/x4
     if (replayView && st === STATE.REPLAY) replayView.speed = e.key === '1' ? 1 : e.key === '2' ? 2 : 4;
+  } else if (e.key === 'o' || e.key === 'O') { toggleRecording(); // ST-191: toggle run recording
   } else if (e.key === 'm' || e.key === 'M') {
     muted = !muted;
     audio.setMuted(muted);
@@ -535,6 +560,8 @@ window.__vr.startReplay = (d) => startReplayView(d); // ST-190: probe
 window.__vr.exitReplay = () => exitReplayView(); // ST-190: probe
 window.__vr.demoReplay = () => demoReplay(CONFIG.replay.demoSeed, CONFIG.replay.demoLen); // ST-190: probe
 window.__vr.replayHud = replayHud; // ST-190: probe
+window.__vr.recording = () => ({ active: !!(recorder && !recStopped), stopped: recStopped, steps: recorder ? recorder.length : 0, truncated: recorder ? recorder.truncated : false, runSeed }); // ST-191: probe
+window.__vr.toggleRecording = toggleRecording; // ST-191: probe (drives the same rules as the O key)
 
 // Fixed-timestep simulation (60Hz) with render at display rate (ST-078: the
 // accumulator + dt clamp live in the pure core clock; huge gaps are clamped to
@@ -561,6 +588,7 @@ function tick(dt, intent) {
   if (tutorialActive) return; // I151: freeze the sim while the first-run tutorial is up (render keeps going)
   if (!intent) input.tick(dt); // ST-033: decay touch fire-tail / pause cooldown
   const it = intent || { thrust: input.state.thrust, aimPoint: resolveAimPoint(), firing: input.state.firing };
+  if (recorder && !recStopped && world.simActive) recorder.record(it); // ST-191: record exactly the intent the sim receives (one per substep; freezes at stop/death/tutorial)
   world.step(dt, it);
   for (const e of world.drainEvents()) {
     eventTally[e.type] = (eventTally[e.type] || 0) + 1;
@@ -633,6 +661,11 @@ else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, 
           dailyNewBest = !!dr.newBest;
           _dailyDirty = true; // refresh the menu daily line when we return to the menu
         }
+        if (shouldSaveOnGameOver(!!recorder, recorder ? recorder.length : 0, !!replayView)) { // ST-191: save the recorded run (a watched replay never saves)
+          const meta = { score: e.data.score, wave: Math.max(1, world.wave), kills: world.scoreKeeper.kills, time: Math.round(world.time), mode: dailyMode ? 'daily' : 'normal', dailyKey: dailyMode ? dailyKey : '' };
+          if (storage.saveReplay(recorder.finish(meta)).saved) { watchSavedRun = true; toast('RUN SAVED TO REPLAYS'); }
+        }
+        recorder = null; recStopped = false; recChip.hide(); // ST-191: end-of-run cleanup (no-op when never recording)
       }
       if (newBest && !motionOff && fxCount > 0) { // I69: new-best confetti (reduced motion: static)
         const sx = world.ship.pos.x, sy = world.ship.pos.y;
@@ -680,6 +713,7 @@ function syncVisuals(dt) {
   screenOpts.dailyKey = dailyKey; // ST-141
   screenOpts.dailyNewBest = dailyNewBest; // ST-141
   screenOpts.replayMode = !!replayView; // ST-190: game-over prompt text for finished replays
+  screenOpts.watchRun = watchSavedRun; // ST-191: WATCH RUN button on the just-saved run's game over
   replayHud.update({ visible: st === STATE.REPLAY, meta: replayView ? replayView.data.meta : null, idx: replayView ? replayView.idx : 0, length: replayView ? replayView.player.length : 0, speed: replayView ? replayView.speed : 1, reducedMotion: motionOff }); // ST-190
   hud.render(world, hudOpts);
   if (coarse && st === STATE.PLAYING) { if (pauseBtn.style.display !== 'flex') pauseBtn.style.display = 'flex'; } else if (pauseBtn.style.display !== 'none') pauseBtn.style.display = 'none'; // I71: on-screen pause button (touch, PLAYING only)
