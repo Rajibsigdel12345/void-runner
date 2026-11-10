@@ -1042,3 +1042,12 @@ One entry per iteration. Format:
 - Build: 0.
 - Browser smoke: not applicable (tests-only, no rendering changes).
 - Result: DONE. Next I146 ST-146 browser verify E8C (console 0/0, no NaN).
+
+## I146 - Browser verify E8C: full system soup, console + NaN audit (ST-146)
+
+- Method: dev :5173 ?nocache=146, headless Playwright. Forced the entire E8-2/E8C system soup into one live run via window.__vr.world: begin() -> spawnBeltForWave(8..12) (5/5 belt rocks), bossSpawnCount=1 + spawnBossForWave(10) (Splicer, 30 hp, enters and fires), spawnMinesForWave(12) (1 mine), drones.spawn() (1 drone), vortex.activateAt(6,-4), powerups.maybeDrop (1 drop); ship.invuln=999 for observation. Two independent fresh tabs ran it; 30 s live soak per tab with a deep NaN scan (ship, boss, warden, vortex, waves, scoreKeeper, livesMgr + every rock/bullet/bolt/mine/drone/drop pos and vel).
+- NaN scan: 0 real NaN at t=0 and t=30 s in both tabs. The only non-finite value is scoreKeeper.lastKillTime = -Infinity, which is an intentional sentinel (score.js reset value, re-set on damage). Rocks are 2D by design (pos.z undefined, not NaN).
+- Systems observed during the soaks: Splicer phase 1 with steady-state 12-15 live bolts (cap 24, no drops); belt stable at 5/5; mine + drone live then resolved/decayed; vortex lifecycle verified live - activateAt -> phase 'active', timer decays 4.5 -> 0 over exactly 4.5 s sim time (100 ms sampling), then idle + rearm.
+- Console: the fresh tab that ran the full soup = 0 errors / 0 warnings (adaptive-quality INFO only in the long-running heavy tab, expected at headless 4-6 fps). One "missing ) after argument list" console error appeared in the FIRST tab of the session only; it did not reproduce on two fresh tabs (one idle 23 s, one running the full 90 s+ soup) and the codebase has no eval / new Function / string timers (no runtime SyntaxError path), so it is classified as a transient tooling artifact, not a game bug.
+- Screenshot: .evidence/I146/I146_e8c_soup.png (teal Splicer + SPLICER health bar, 5 belt rocks, mine, drone, ship center).
+- Result: E8C browser verify PASS. Next I147 ST-147 G8.2 gate (cgs-gate-check).
