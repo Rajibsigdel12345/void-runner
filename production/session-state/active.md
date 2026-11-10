@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-115 (next)
-- current_iteration: I114
+- current_story: ST-116 (next)
+- current_iteration: I115
 - branch: main
-- notes: I114 done (ST-114 bomb render + SFX - record correction: nova ring + flash + shake + punch + FOV kick + SFX all pre-existed (ST-024/081/082), so I114 = verify + nova scaling). main.js bomb handler: nova count = Math.ceil(fxCount*(2+(min(cleared,10)-3)*0.15)), anchored so the ~3-rock bomb keeps the old fxCount*2 (fxCount=16). Browser smoke: forced 3-rock bomb -> nova ring 32 (anchor); forced 10-rock bomb -> nova ring 49 (1.53x scaled), peak live 80->209, fields fully cleared; SFX 'bomb' cue verified wired; console 0/0, 0 NaN, screenshot .evidence/I114_bomb_nova.png. 242/242 + build 0 + sequence 1..114. Next: I115 ST-115 slow-mo (core: time scale enemies/bullets, ship keeps speed | unit) - first grep src/core for existing slow-mo/timeScale (verify pre-existence before building).
+- notes: I115 done (ST-115 slow-mo power-up core - no pre-existing implementation found, genuine build). config powerup.types.slowmo {dur:5, scale:0.4}; 'slowmo' is the 7th droppable type (TIMED, timeLeft in ctor+reset); game.js enemyScale() + all enemy-side steps on dt*scale (field/enemyBullets/mines/boss+vortex), ship/weapons/drops/wave pacing keep full speed; powerupMesh.js safety entry (ice-blue icosahedron + 'T'); +7 unit tests; overdrive test count 6->7. 249/249 + build 0 + seq 1..115; browser: enemyScale 1->0.4 on apply, rock displacement 2.400u per 1.000s sim (== 6*0.4 expected), drop renders as icosahedron + 'T', console 0/0, 0 NaN, screenshot .evidence/I115_slowmo_drop.png. Next: I116 ST-116 slow-mo render tint + verify (browser: tint + behavior) - add world tint while slow-mo active + HUD chip (PU_STYLE slowmo entry) + browser verification.

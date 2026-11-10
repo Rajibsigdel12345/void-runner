@@ -24,7 +24,7 @@ test('overdrive: config sanity (seed 62)', () => {
   assert.equal(t.dur, 6, 'lasts 6s');
   assert.equal(t.mult, 2, 'doubles score');
   assert.ok(POWERUP_TYPES.includes('overdrive'), 'in the drop table');
-  assert.equal(POWERUP_TYPES.length, 6, 'six drop types');
+  assert.equal(POWERUP_TYPES.length, 7, 'seven drop types (ST-115 added slow-mo as the 7th)');
 });
 
 test('overdrive: pickup activates, refreshes (no stack), expires (seed 63)', () => {

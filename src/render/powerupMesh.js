@@ -38,9 +38,10 @@ const TYPES = {
   bomb:   { color: 0xff5252, emissive: 0x751414, make: () => new THREE.BoxGeometry(0.58, 0.58, 0.58) },
   magnet: { color: 0x69f0ae, emissive: 0x0f5c37, make: () => new THREE.SphereGeometry(0.42, 16, 12) },
   overdrive: { color: 0xff4dd8, emissive: 0x6d0f52, make: () => new THREE.CylinderGeometry(0.42, 0.42, 0.3, 6) },
+  slowmo: { color: 0x9fe8ff, emissive: 0x1a5a7a, make: () => new THREE.IcosahedronGeometry(0.45) }, // ST-115: ice-blue icosahedron (safety entry; tint lands in I116)
 };
 
-const LETTERS = { rapid: 'R', spread: 'S', shield: 'H', bomb: 'B', magnet: 'M', overdrive: 'O' }; // I70
+const LETTERS = { rapid: 'R', spread: 'S', shield: 'H', bomb: 'B', magnet: 'M', overdrive: 'O', slowmo: 'T' }; // I70 (+ST-115 slow-mo)
 
 export function createPowerupRenderer(scene) {
   const max = 4; // pool headroom over maxActiveDrops (I078 audits pools)

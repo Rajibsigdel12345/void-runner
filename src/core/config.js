@@ -159,7 +159,8 @@ export const CONFIG = {
       shield: { dur: 12 },
       bomb:   { dur: 0, invuln: 1.0 },  // ST-113: brief ship invulnerability on use
       magnet: { dur: 6 },
-      overdrive: { dur: 6, mult: 2 } // ST-057: 2x score for 6s
+      overdrive: { dur: 6, mult: 2 }, // ST-057: 2x score for 6s
+      slowmo: { dur: 5, scale: 0.4 } // ST-115: enemy/bullet time scale while active (ship keeps full speed)
     }
   },
 

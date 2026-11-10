@@ -82,8 +82,11 @@ export class World {
   step(dt, intent = { thrust: v2(), aimPoint: null, firing: false }) {
     if (!this.game.in(STATE.PLAYING)) return;
     this.time += dt;
+    // ST-115: slow-mo power-up - enemy-side systems (rocks, enemy bullets, mines, boss, vortex) run on a scaled dt; the ship (and its weapons) keep full speed.
+    const es = this.enemyScale();
+    const edt = dt * es;
 
-    const vt = this.vortex.step(dt, { wave: this.waves.wave, shipPos: this.ship.pos, rocks: this.field.rocks }); // ST-059
+    const vt = this.vortex.step(edt, { wave: this.waves.wave, shipPos: this.ship.pos, rocks: this.field.rocks }); // ST-059
     for (const ev of vt.events) this.emit(ev.type, ev.data); // ST-059
     if (vt.pull) { // ST-059: vortex pull on the ship (clamped at maxSpeed)
       this.ship.vel.x += vt.pull.x * dt;
@@ -98,7 +101,7 @@ export class World {
     this.ship.step(dt, intent.thrust, intent.aimPoint);
     if (intent.firing) this.fireWeapon();
     this.weapons.step(dt, this.powerups.active('magnet'), this.field.rocks);
-    this.field.step(dt, this.waves.inwardAccel); // ST-051 inward modifier
+    this.field.step(edt, this.waves.inwardAccel); // ST-051 inward modifier (ST-115: scaled under slow-mo)
     this.scoreKeeper.overdriveMult = this.powerups.active('overdrive') ? this.cfg.powerup.types.overdrive.mult : 1; // ST-057
     const pickups = this.powerups.step(dt, this.ship);
     for (const pk of pickups) this.emit('powerup', { type: pk.type, pos: pk.pos });
@@ -115,15 +118,15 @@ export class World {
       this.spawnBossForWave(wv.startedWave); // ST-055
     }
     if (wv.waveCleared) this.emit('waveCleared', { n: wv.waveCleared });
-    this.mines.step(dt, this.ship.pos); // ST-054
+    this.mines.step(edt, this.ship.pos); // ST-054 (ST-115: scaled under slow-mo)
     for (const f of this.mines.takeFires()) { // ST-056
       const b = this.fireAimedBolt(f, this.cfg.enemyBullets.mineSpeed);
       if (b) this.emit('mineFire', { pos: { x: f.x, y: f.y } });
     }
-    this.enemyBullets.step(dt); // ST-056
+    this.enemyBullets.step(edt); // ST-056 (ST-115: scaled under slow-mo)
     if (this.boss) { // ST-055/056
-      if (this.boss.step(dt, this.ship.pos) === 'ring') this.bossRingBurst();
-      this.bossFireTimer -= dt;
+      if (this.boss.step(edt, this.ship.pos) === 'ring') this.bossRingBurst(); // ST-115: scaled under slow-mo
+      this.bossFireTimer -= edt; // ST-115: boss fire cadence slows under slow-mo
       if (this.bossFireTimer <= 0) {
         this.bossFireTimer += this.cfg.boss.fireEvery;
         const b = this.fireAimedBolt(this.boss.pos, this.cfg.enemyBullets.speed);
@@ -157,6 +160,11 @@ export class World {
   /** GDD: BOMB shatters all on-screen asteroids; each counts as a kill feeding the
    * combo chain (and can roll a power-up drop like any kill).
    * Event path (rare), so the slice() copy is acceptable. */
+  /** ST-115: time scale applied to enemy-side systems while the slow-mo power-up is active. 1 = normal. */
+  enemyScale() {
+    return this.powerups.active('slowmo') ? this.cfg.powerup.types.slowmo.scale : 1;
+  }
+
   bombBlast() {
     // ST-113: brief invulnerability on bomb use (granted even when the screen is clear).
     const inv = this.cfg.powerup.types.bomb.invuln || 0;
