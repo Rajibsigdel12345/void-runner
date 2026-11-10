@@ -2,11 +2,12 @@
 
 - project: Void Runner (E:\Game, three.js, no bundler)
 - epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-198 (gate G8.5, next)
-- current_iteration: I197 (committed)
+- current_story: ST-199 (regression round C + playtest prep, next)
+- current_iteration: I198 (committed)
 - branch: main
 - tests: 630/630
 - build: exit 0
+- notes: I198 done (ST-198 gate G8.5 E8F robustness (cgs-gate-check)): PASS - this-iteration browser: simVisibility('hidden')->PAUSED with sim frozen across advance(2.0), 'p'->PLAYING resume +0.3 exact; demoReplay->startReplay->idx 2169/2220 exact core pin; baseline 630/630 + build 0 + console 0/0; C4 cited I197 (src unchanged since). One probe artifact labeled (double 'p' dispatch = double toggle). No code changes. Next I199 regression round C + playtest prep.
 - notes: I197 done (ST-197 build size + load audit (cgs-perf-profile)): dist 1,864 KB raw / 449.6 KB gzip (vendor 290.3 / src 131.4 / assets 27.1 KB gz) - within adopted budget (<=2MB/<=550KB); 86 resources (81 scripts + 5 GLB) fully parallel, done 622 ms, domReady 890 ms headless; bottleneck = three.module.js 1,243 KB (irreducible under conventions); 3 LOW/INFO advisories, no changes. New artifact production/build-size-audit.md.
 - notes: I196 done (ST-196 regression round B part 2 (cgs-regression-suite)): browser smoke on dev server - state machine 6 transitions green, recording toggle + fresh runSeed green, replay view lifecycle green (rendered demo pilot ends idx 2169 / score 11334 = exact core-pin match), clean-pass console 0/0 (only expected adaptive-quality INFO), finiteness scan clean (sole non-finite = documented sentinel scoreKeeper.lastKillTime=-Infinity). One console warning traced to the probe itself (string 'demo' to __vr.startReplay), not product. Evidence .evidence/I196/ (2 screenshots). No code changes.
 - notes: I195 done (ST-195 regression round B (cgs-regression-suite)): 6 suite runs (5 in-process + 1 node-runner) all 630/630 fail=0, no count drift, no order dependency; live critical-path probe 19/19 PASS (demo pilot e2e pinned values + best/high-score/daily/replay persistence mirroring main.js:650-660). First-pass probe 'best round-trips' miss was a probe bug (setBest is separate from recordScore - main.js:653), not a product bug. No code changes. Evidence .evidence/I195/runs.txt.

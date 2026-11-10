@@ -422,3 +422,57 @@ Plus the standing baseline: fresh npm test + build this iteration, console 0/0.
 
 ### Next owner or decision
 I183 (ST-183): feel tuning round 2 - playtest-driven; inputs are the 3 watch-items in design/feel-balance.md + CONFIG.fx.flashTable / CONFIG.fx.shakeTable. No user decision required (advisory gate, non-blocking).
+
+## I198 - G8.5 E8F Robustness Gate (ST-198)
+
+### Summary
+Advisory phase gate closing the E8F robustness arc (I187-I197) before the tail (I199 regression round C + playtest prep, I200 docs, I201 QA plan, I202 human playtest, I203 triage, I204 release checklist, I205 final sweep, I206 E8 closeout). Scope: context-loss hardening (I187-188), visibility pause (I189), replay viewer + capture (I190-191), test growth 300+ (I192), flaky check (I193), security audit (I194), regression round B (I195-196), build size + load audit (I197). Verdict: PASS.
+
+### Gate Criteria (advisory, G8.5)
+1. Context-loss hardening: tab hidden pauses the sim through the real handler; resume restores it (I187-188/189).
+2. Replay pipeline deterministic end-to-end: viewer round-trips the demo pilot to the exact core-pinned death index; capture UI contract stands (I190-191).
+3. Test suite: 300+ green, deterministic (no flake), security-hardened with totality tests (I192-194).
+4. Delivery: first payload within the adopted budget and load profile clean (I197).
+5. Standing baseline: fresh npm test + build this iteration, console 0/0.
+
+### Evidence (collected this iteration unless noted)
+- Baseline (this iteration): fresh npm test 630/630 pass / 0 fail; fresh node scripts/build.mjs exit 0.
+- C1 - visibility pause (measured this iteration, fresh tab ?nocache=198, dev :5173):
+  - MENU -> Enter -> PLAYING (real keydown on window).
+  - __vr.simVisibility('hidden') drives the REAL handler (main.js:475-478, the I189 named handler with the pure core decision from visibilityPause.js) -> state PAUSED.
+  - advance(2.0) while PAUSED: world.time frozen (0.4999... unchanged) - the sim does not tick while the tab is hidden.
+  - __vr.simVisibility('visible') -> state unchanged (the handler pauses only, by design); 'p' -> PLAYING (togglePause, main.js:410); advance(0.3) -> time +0.3 exactly.
+  - I187-188 context-loss hardening: __vr.clockState probe live (I188: reset discards the stall); __vr.simCtxLost/simCtxRestore probes live (I187 WebGL context-loss path); no main.js diff since I191 (git log), so the I188-189 contracts stand.
+- C2 - replay determinism (measured this iteration, same tab):
+  - __vr.demoReplay() -> {v:1, kind:'demo', seed:1909, len:2220}; __vr.startReplay(payload) -> REPLAY; driven to completion -> idx 2169 / len 2220 = EXACT core pin (tests/replay.test.js:246; I196 browser smoke pinned score 11334 on the same run).
+  - Capture UI (I191): O toggle + save-on-game-over + cap-2 eviction + per-run fresh seed verified in I191's own smoke; no recording.js/main.js diff since I191 (git log) and the 5 recording tests re-ran green in this iteration's 630.
+  - Exit: exitReplay() -> MENU.
+- C3 - test suite (this iteration + I192-194 records): 630/630 (target was 300+, now 2.1x); I193 flaky check: 5 consecutive + 1 serial run, no count drift, no order dependency, static flake-source scan clean (determinism structural - seeded rng.js); I194: tests/security.test.js (8 totality tests: adversarial share strings 64B-1MB, 27-case malformed replay battery, __proto__ pollution probe, meta-sanitization pins, migratePayload corrupt battery) is part of the green suite.
+- C4 - delivery (I197 record, one iteration back; src/ unchanged since - git log): dist/ = 1,864 KB raw / 449.6 KB gzip vs the adopted budget <= 2 MB / <= 550 KB (18% gzip headroom); 86 resources fully parallel, all done 622 ms, domReady 890 ms headless; three.module.js 1,243 KB = 65% of dist (accepted, irreducible under the no-bundler/vendored convention); 5 GLB assets total 88.1 KB raw / 27.1 KB gz.
+- Console: 0 errors / 0 warnings on the ?nocache=198 tab across the whole gate.
+- Screenshot: .evidence/I198/01-gate-g85-playing.png (PLAYING after resume).
+
+### Concerns
+- The first resume probe attempt read PAUSED after the 'p' press - traced to the probe itself: dispatching keydown to BOTH window and document delivers two events (double toggle: PAUSED->PLAYING->PAUSED). A single dispatch resumes correctly (evidence above). Labeled probe artifact, not a product issue.
+- C4 evidence is cited from I197 (one iteration old; src/ unchanged since - verified by git log). A fresh payload re-measure is not warranted at this gate.
+- The replay score (11334) is pinned by the test suite (re-run this iteration) and by I196's browser smoke; this gate re-verified the death index (2169) live and did not re-read the score readout.
+- Visibility resume is manual (P/Enter) by design - the handler pauses only. A returning player sees the pause overlay; matches the I189 contract.
+
+### Verdict
+**PASS** - all five G8.5 criteria met: (1) visibility pause freezes the sim through the real handler and resumes cleanly, (2) the replay pipeline round-trips to the exact core-pinned death index, (3) 630/630 green and deterministic with the security totality battery, (4) payload 449.6 KB gzip within budget with a clean parallel load, (5) fresh baseline + console 0/0. Proceed to the E8F tail (I199 regression round C + playtest prep).
+
+### Risks
+- No new risks. R-E8-2 (determinism) re-verified by this gate's live replay pin + the I193 flaky check. R-E8-3 (context loss) directly mitigated by the I187-189 hardening re-verified here.
+
+### Changed files
+- production/gates.md (this gate)
+- production/iterations.md (I198 entry)
+- CHANGELOG.md (I198 line)
+- production/session-state/active.md (state -> I198 committed)
+- No source changes (the gate is evidence, not code - the I45/I96/I147/I182 pattern).
+
+### Verification evidence
+- All commands fresh-run this iteration: npm test (630/630), node scripts/build.mjs (exit 0), browser probes via window.__vr on the fresh ?nocache=198 tab (Enter->PLAYING, simVisibility hidden->PAUSED freeze, p->PLAYING resume, demoReplay->startReplay->idx 2169 pin, exitReplay->MENU), console 0/0, screenshot .evidence/I198/ (gitignored, local only).
+
+### Next owner or decision
+I199 (ST-199): regression round C + playtest prep - full suite re-run matrix, browser state-machine + critical-path probe sweep, then prepare the human-playtest instrument (the cgs-qa-plan territory lands at I201). No user decision required (advisory gate, non-blocking).

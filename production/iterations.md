@@ -1675,3 +1675,11 @@ One entry per iteration. Format:
 - Verification evidence: build.mjs exit 0 immediately before measurement; recursive dist/ walk (file-level sizes in this entry); zlib gzip per file over the whole tree (raw 1,864.3 KB -> 449.6 KB; vendor 290.3 / src 131.4 / assets 27.1 KB); Playwright load profile on clean navigation (86 resources, parallel, 622 ms max end, 890 ms domReady); the 5 fetch-initiated resources are exactly the five assets/*.glb (assetLoader.js).
 - Next owner or decision: I198 ST-198 gate G8.5 (cgs-gate-check): advisory phase gate over the I187-I196 arc.
 - Result: DONE. ST-197 closed. Next I198 ST-198 (gate G8.5).
+
+## I198 - Gate G8.5 E8F robustness gate (cgs-gate-check) (ST-198)
+- Summary: advisory phase gate over the E8F robustness arc (I187-I197): context-loss hardening, visibility pause, replay viewer + capture, test growth, flaky check, security audit, regression round B, build size + load audit. Verdict: PASS. No code changes (evidence-only gate, the I45/I96/I147/I182 pattern).
+- Gate Criteria: 1) visibility pause freezes the sim through the real handler + clean resume; 2) replay pipeline deterministic end-to-end (demo pilot to the exact core-pinned death index); 3) test suite 300+ green, deterministic, security-hardened; 4) first payload within the adopted budget + clean load profile; 5) standing baseline fresh test+build, console 0/0.
+- Evidence: fresh npm test 630/630 fail 0; fresh build exit 0; this-iteration browser (?nocache=198): MENU->Enter->PLAYING, simVisibility('hidden') -> PAUSED with world.time frozen across advance(2.0), 'p' -> PLAYING resume with advance(0.3) = +0.3 exactly; demoReplay {v:1,kind:'demo',seed:1909,len:2220} -> startReplay -> driven to completion idx 2169/2220 = exact core pin (tests/replay.test.js:246; score 11334 per I196 + suite); C4 cited from I197 (src unchanged since): 1,864 KB raw / 449.6 KB gzip vs <=2MB/<=550KB budget; console 0/0; screenshot .evidence/I198/01-gate-g85-playing.png.
+- Concerns: first resume probe read PAUSED - probe artifact (double dispatch of 'p' to window+document = double toggle); single dispatch resumes correctly. C4 one iteration old (labeled; src/ unchanged). Visibility resume is manual by design (I189).
+- Verdict: PASS.
+- Result: DONE. ST-198 closed. Next I199 ST-199 regression round C + playtest prep.
