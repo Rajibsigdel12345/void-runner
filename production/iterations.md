@@ -902,3 +902,11 @@ One entry per iteration. Format:
 - Tests: 345/345 (+8 in tests/spawnMix.test.js: table invariants, mixRow boundaries, per-band 20k distributions, determinism, RNG draw-width, small-mod; 2 endless.test.js tests updated to the table contract).
 - Build: 0. Browser: n/a (no render change).
 - Docs: balance-notes.md ## I131 (contract inline), CHANGELOG line, active.md (next = I132 ST-132 E8B GDD addendum: drone section + I130 drop table + I131 spawnMix table).
+
+## I132 - E8B GDD addendum: seeker drones + SLOWMO + drop economy + spawn mix (ST-132)
+
+- Goal: ST-132 acceptance is "E8B docs + changelog (GDD addendum: new systems) | docs | doc" - the GDD had no seeker-drone section (ST-117/118), no SLOWMO type (ST-115), no drop-economy numbers (ST-130), and no spawn-mix table (ST-131); config carried authority for all four pending this addendum.
+- Change (design/gdd.md only): new "Seeker Drones (ST-117)" section (wave 8+, 4.4 u/s / 3.2 rad/s + wobble, max 6, +200, 30 s battery self-destruct per I129 - fizzle honors FX tier, no shake/score/drop); Power-ups section gains the SLOWMO (T) line (time scale 0.4, 5 s, ship keeps speed) and a drop-economy bullet (25% roll, 1 active, 1.6u pickup, magnet 7u, 20 s expiry + 2.5 s shrink-out, weights 20/20/15/15/10/10/10); Waves & Difficulty gains the spawn-mix bullet (4-row table + lFloor 0.28 + S cap 0.40 + SMALL-mod override).
+- Consistency check (cgs-consistency-check): every number cross-checked against src/core/config.js - drone {firstWave 8, speed 4.4, turn 3.2, wobble, maxConcurrent 6, score 200, maxAge 30}, powerup {dropChance .25, maxActiveDrops 1, pickupRadius 1.6, magnetRadius 7, dropLife 20, fadeTime 2.5, weights sum 100, slowmo {dur 5, scale .4}}, spawnMix.rows + lFloor, waveMods.smallSBias 0.5. All match; no drift found.
+- Tests: 345/345 (docs-only, unchanged). Build: 0. Browser: n/a.
+- Docs: CHANGELOG line, active.md (next = I133 ST-133 boss phase 2).

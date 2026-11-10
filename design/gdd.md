@@ -49,6 +49,13 @@ multipliers, and grab power-ups. Survive as long as you can.
 - 1 bullet destroys a mine (+150, feeds the combo like any kill; red pop + shake). Touching the ship costs a life like a rock (mine is destroyed, knockback + invuln apply).
 - Cap: 10 concurrent mines. They bounce off the arena rim like rocks.
 
+## Seeker Drones (ST-117)
+- From wave 8, each wave adds one SEEKER DRONE: a small cyan seeker that homes on the ship (4.4 u/s, 3.2 rad/s turn, plus a wobble waltz - always dodgeable; faster and less predictable than the red mine drones, but rarer).
+- Max 6 live at once; one is added per wave from wave 8 up to the cap.
+- 1 bullet destroys one (+200, feeds the combo like any kill; cyan burst + seeker-zap SFX). Contact costs a life, same flow as a rock hit (knockback + invuln).
+- Seeker battery (I129): each drone runs a 30 s game-time battery (scales with slow-mo). When it empties the drone self-destructs in place - small cyan fizzle, no shake, no score, no drop. This bounds the live pool to the last ~1-2 waves: a drone that outlives its wave expires before it can pile onto later (boss) waves. The fizzle honors the FX tier (no particles with FX off).
+- Distinct silhouette from the mine drone (ST-118): cyan, spiky, tumbles while wobbling.
+
 ## The Monolith (ST-055)
 
 - Every 5th wave (5, 10, 15, ...) spawns a MONOLITH at the arena rim, in addition to the wave's normal asteroids: a huge, slow-homing boss (base 40 HP, 1.6 u/s - always dodgeable).
@@ -73,6 +80,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 
 ## Waves & Difficulty
 - Wave n: startAsteroids = 4 + n, maxConcurrent = 6 + 2n (cap 24), speedMult = 1 + 0.06n (cap 2.1).
+- Spawn mix (ST-131): the L/M/S spawn ratio is a data-driven table (config spawnMix, first matching row wins): waves 1-2 L50/M50/S0 (teach: big targets, no S), waves 3-9 L30/M40/S30, waves 10-14 L28/M32/S40, wave 15+ L30/M30/S40. Two invariants: no row may drop L below 28% (lFloor - the "break the big rock" core loop stays present into the endless), and S is capped at 40% (split fragments already supply most on-screen S, so the spawn ramp is a weak lever there - I131 playtest data). The SMALL modifier overrides per wave: 50% S, remainder L:M 50/50.
 - Wave advances when all spawned asteroids for that wave are destroyed, or after 45s without a clear (stall advance): the wave increments regardless, undestroyed asteroids carry into the next wave, and the intermission is skipped (I42, closes playtest finding F1 - a camped field can no longer freeze the escalation).
 - 2.2s intermission between waves with "WAVE n" banner.
 - From wave 3, each wave rolls one modifier deterministically from (world seed, wave number) - stall-vs-clear timing cannot change the pick (ST-051): FAST ROCKS (spawns 40% faster, on top of the ramp), SMALL ROCKS (spawns roll S with 50% probability), INWARD DRIFT (all rocks pulled toward the arena center at 2.0 u/s^2). Waves 1-2 are always plain. The wave immediately after a boss wave (6, 11, 16, ...) is also plain - a modifier-free breather that gives a recovery beat after the boss (ST-092/F9). The active modifier is announced under the WAVE banner.
@@ -89,7 +97,9 @@ multipliers, and grab power-ups. Survive as long as you can.
 - BOMB   (red): instantly shatters all on-screen asteroids (counts as kills, feeds combo)
 - MAGNET (green): attracts power-ups + slight bullet homing for 6s
 - OVERDRIVE (magenta): all score x2 for 6s (kills, combo multipliers, near-miss bonuses) - hex prism drop
+- SLOWMO (T, ST-115): enemy time scale 0.4 for 5s - rocks, bullets, mines and drones slow down, the ship keeps full speed
 Stacks: each has its own timer; grabbing the same type refreshes its timer.
+- Drop economy (ST-130): 25% roll on any kill; at most ONE drop at a time (pickup radius 1.6u; the magnet power-up pulls drops in from 7u). Abandoned drops expire after 20s and free the pool; the last 2.5s of life read as a shrink-out so an expiring drop telegraphs itself (presentation only). The drop type is weighted, not uniform - RAPID 20, SPREAD 20, SHIELD 15, MAGNET 15, BOMB 10, OVERDRIVE 10, SLOWMO 10 (sums to 100): utility is common, screen-clearers and multipliers are rare.
 - Shield visual (I62, presentation): while SHIELD is live, a cyan ring breathes (subtle scale + opacity) and a second additive ring repeatedly expands outward and fades. An absorbed hit flashes a quick expanding pop. All frozen to a static ring under Reduced Motion. Visual only; no gameplay effect.
 
 ## Scoring & Records
