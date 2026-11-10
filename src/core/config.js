@@ -174,6 +174,10 @@ export const CONFIG = {
     // (comparable daily leaderboard). Salt namespaces the scheme (future-proofing).
     salt: 'daily',     // mixed into the FNV-1a hash before seeding the RNG
   },
+  share: {
+    // ST-142: shareable result string magic prefix (namespaces the codec; versioned).
+    magic: 'vr1',
+  },
 
   mine: {
     // ST-054: mine drones - slow homing mines that chase the ship. 1 bullet kills

@@ -1000,3 +1000,12 @@ One entry per iteration. Format:
 - Browser smoke: dev :5173 ?nocache=141 - menu shows the DAILY RUN button + 'DAILY 2026-11-10  -  NO BEST YET'; clicking DAILY -> state PLAYING and world.rng.seed == today's daily seed (FNV-1a('daily:2026-11-10') = 317547475) -> reseed confirmed; forced GAME_OVER -> the 'DAILY RUN  -  2026-11-10' badge renders; 0 NaN, console 0/0. Screenshots: .evidence/I141/{menu,gameover}.png.
 - Result: DONE. Next I142 ST-142 shareable result string (score+seed+wave, encode/decode, unit: codec round-trip).
 
+## I142 - Shareable result codec (core) (ST-142)
+
+- Design: a compact, URL-safe string that encodes a run result (score, wave, seed, kills) so a player can share a result and others can replay the identical board (the seed) and see the score. The codec is pure core (DOM-free) so it is unit-testable; the UI surface (copy-to-clipboard on the game-over screen) is a later E8D iteration.
+- Core: src/core/share.js (new, DOM-free) - encodeResult(result, magic?) -> 'vr1.<b36 seed>.<b36 score>.<b36 wave>.<b36 kills>.<2-char ck>' where ck = (fnv1a(body) % 1296).toString(36).padStart(2,'0') (reuses daily.js fnv1a); decodeResult(str, magic?) -> {ok:true,seed,score,wave,kills} | {ok:false}. Validation: must be a string, exactly 6 dot-parts, matching magic, base36+dot charset, valid checksum, and sane ranges (seed <= 0xffffffff, score >= 0, wave >= 1, kills >= 0).
+- Config: config.share {magic 'vr1'} - namespacing/versioning the codec family.
+- Tests: 415/415 (was 405, +10 in tests/share.test.js: config shape; round-trip; determinism; different-input-differs; compact/URL-safe (6 parts, magic, 2-char ck, base36 charset); rejects invalid (null/number/empty/garbage/wrong-magic/corrupted-checksum); rejects uppercase+space; edge zero; edge large (32-bit seed, big score); wrong-magic).
+- Build: 0. (Core-only - no rendering changed, no browser smoke.)
+- Result: DONE. Next I143 ST-143 boss variant 2 [CUTTABLE] (core+render).
+
