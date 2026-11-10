@@ -137,5 +137,83 @@ flash stay as they were; the new path is simply not armed).
   by the part-2 smoke), opacity-only (no motion, no strobe), no new
   elements/nodes/timers.
 
+## ST-177 pickup burst + magnet trails (I177)
+
+### Combat Goal
+Every power-up pickup should reward the player with a short, color-coded
+sparkle that matches the orb just collected, and an active MAGNET should
+read as a pull - the orb streaking toward the ship with a comet wisp
+behind it. Before ST-177 only the overdrive pickup produced particles (a
+magenta fountain); the other six (rapid / spread / shield / bomb / magnet
+/ slowmo) gave an SFX ding with no visual burst, and a magnet-pulled orb
+had no trail so the pull was only felt, not seen. This is the standard
+arcade convention (a collectible pops a small burst in its own color; an
+active attract/magnet shows the item visibly streaking toward the player).
+Both effects are motion-gated, consistent with the rest of the juice.
+
+### Tuning
+- CONFIG.fx.palette.pickup = { rapid: 0xffe066, spread: 0xff9f43,
+  shield: 0x53d8ff, bomb: 0xff5252, magnet: 0x69f0ae, overdrive: 0xff4dd8,
+  slowmo: 0x9fe8ff } - one hex per type, matching the orb colors in
+  render/powerupMesh.js so the sparkle is the color of the thing picked up.
+- Pickup burst (main.js juice): count max(8, ceil(fxCount * 0.5)) (24 at FX
+  high), radial, speed 7, life 0.5 - a soft collect sparkle. Overdrive keeps
+  its existing fountain (count fxCount, speed 8, life 0.5) + flash,
+  byte-identical.
+- Magnet trail (main.js per-frame sync): 2 particles, magnet green
+  (palette.pickup.magnet), speed 1.5, life 0.35 - a low-energy wisp emitted
+  at the orb each frame while it is pulled; the orb accelerates ahead of the
+  (dragged, non-accelerated) particles, so they lag into a short tail. Cost
+  is tiny: maxActiveDrops = 1, so at most one orb trails.
+- src/core/powerups.js: drop.magnetPull (per-step boolean, single source of
+  truth) = magnet active && dist < magnetRadius && dist > 0.001. The physics
+  is unchanged (the same condition now also gates the pull).
+
+### Feedback
+- Pickup: event-driven, in the if (!motionOff) juice chain - a new
+  else-if (e.type === 'powerup') branch (after the overdrive branch) reads
+  palette.pickup[type] and fires the sparkle. The SFX cue (I173 per-type)
+  is unchanged.
+- Magnet trail: per-frame, in syncVisuals after powerupRenders.sync - gated
+  by !motionOff && state === PLAYING, bursts at each drop with magnetPull.
+  Because advance() runs tick (sets the flag) then syncVisuals (fires the
+  trail), a single advance both arms and plays it.
+- Probes: __vr.particleLive() (live particle count) and
+  __vr.magnetPullCount() (orbs currently pulled).
+
+### QA Scenario
+- Unit (tests/powerups.test.js, +1): magnetPull false with no magnet; true
+  only when magnet active AND in-radius (in-radius 3<7 true, out-of-radius
+  9>7 false).
+- Browser smoke part 1 ?nocache=177a (motion ON, real Enter -> PLAYING, ship
+  invulnerable, particles settled to 0): baseline live 0; emit
+  powerup(rapid) + advance -> live 24 (max(8, ceil(48*0.5))); emit
+  powerup(overdrive) + advance -> live 72 (+48 fountain - overdrive keeps
+  its bigger burst); eventTally.powerup delta 2 (both dispatched);
+  magnetPullCount 0 -> apply(magnet) + in-radius drop + advance -> 1 (flag
+  set); trail live 74 (+2 - the trail fired). Console 0/0.
+- Browser smoke part 2 ?nocache=177b (reducedMotion: true seeded, reload,
+  Enter): baseline 0; powerup(rapid) + advance -> live stays 0 (juice
+  motion-gated); magnet + in-radius drop + advance -> magnetPullCount 1 (the
+  core flag is a sim fact, motion-independent) but trail live stays 0 (the
+  trail loop is motion-gated). Console 0/0.
+- NaN scan (ship + rocks + drops): 0 both parts.
+- Screenshot .evidence/I177/I177_1_pickup_burst_magnet_trail.png (PLAYING,
+  SHIELD + MAGNET chips active).
+
+### Changed files
+- src/core/powerups.js - drop.magnetPull flag (physics unchanged)
+- src/core/config.js - +CONFIG.fx.palette.pickup (7 orb colors)
+- src/main.js - pickup sparkle branch, magnet-trail loop, 2 probes
+- tests/powerups.test.js - +1 magnetPull test
+- design/feel.md - this section
+
+### Risks
+- None material: purely additive juice. The overdrive path is byte-identical
+  (only the other six types gained a branch). The magnetPull flag reuses the
+  existing pull condition (no new branch, no behavior change to the pull).
+  Both effects are motion-gated (the part-2 smoke proves zero reduced-motion
+  change). Pool headroom is ample (512 vs ~26 peak: 24 burst + ~2/frame).
+
 ## Next
-ST-177 (I177): Particles: pickup burst + magnet trails.
+ST-178 (I178): Weapon-upgrade fanfare + visual.

@@ -99,7 +99,8 @@ export class PowerUpField {
       const dx = ship.pos.x - d.pos.x;
       const dy = ship.pos.y - d.pos.y;
       const dist = v2Len(v2(dx, dy));
-      if (this.active('magnet') && dist < p.magnetRadius && dist > 0.001) {
+      d.magnetPull = this.active('magnet') && dist < p.magnetRadius && dist > 0.001; // ST-177: render reads this for the pull trail
+      if (d.magnetPull) {
         const acc = p.magnetAccel; // strong pull inside the magnet ring (I38: now a config tunable)
         d.vel.x += (dx / dist) * acc * dt;
         d.vel.y += (dy / dist) * acc * dt;

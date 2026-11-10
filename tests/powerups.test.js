@@ -13,6 +13,20 @@ function cfgWith(dropChance, extra = {}) {
   return { ...CONFIG, powerup: { ...CONFIG.powerup, dropChance, ...extra } };
 }
 
+test('powerups: magnetPull flag true only while magnet active + drop in radius (ST-177)', () => {
+  const f = new PowerUpField(new RNG(3), CONFIG);
+  const ship = { pos: v2(0, 0) };
+  f.drops.push({ id: 900, type: 'rapid', pos: v2(3, 0), vel: v2(0, 0), life: 20, dead: false });
+  f.drops.push({ id: 901, type: 'spread', pos: v2(9, 0), vel: v2(0, 0), life: 20, dead: false });
+  f.step(DT, ship);
+  assert.equal(f.drops[0].magnetPull, false, 'no magnet -> not pulled');
+  assert.equal(f.drops[1].magnetPull, false, 'no magnet -> not pulled');
+  f.apply('magnet');
+  f.step(DT, ship);
+  assert.equal(f.drops[0].magnetPull, true, 'magnet active + in radius (3<7) -> pulled');
+  assert.equal(f.drops[1].magnetPull, false, 'magnet active + out of radius (9>7) -> not pulled');
+});
+
 test('powerups: dropChance gates and caps drops', () => {
   const never = new PowerUpField(new RNG(1), cfgWith(0));
   assert.equal(never.maybeDrop({ x: 3, y: 3 }), null);
