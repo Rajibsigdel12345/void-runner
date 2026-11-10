@@ -19,6 +19,7 @@ const CUES = {
   swish:     { type: 'sine',     f0: 300, f1: 100, dur: 0.18, gain: 0.09, min: 0.12, noise: 0.28 }, // ST-083: fuller near-miss whoosh (wider sweep, heavier noise)
   // ST-054 mine drone pop: a short percussive boom (noise tail + low square thump)
   mine:      { type: 'square',   f0: 180, f1: 60,  dur: 0.22, gain: 0.32, min: 0.05, noise: 0.16 },
+  drone:     { type: 'sawtooth', f0: 520, f1: 110, dur: 0.26, gain: 0.28, min: 0.05, noise: 0.22 },  // ST-117 seeker zap (brighter + noisier than the mine pop)
   // ST-055 the Monolith: low spawn drone, ring-burst crack, big death boom
   bossSpawn: { type: 'sine',   gain: 0.30, min: 0.4, noise: 0.35, notes: [[55, 41, 0.7, 0, 0.34], [82.4, 79, 0.55, 0.12, 0.2], [164.8, 160, 0.4, 0.06, 0.1]] }, // ST-083: low tritone stinger
   bossRing:  { type: 'sine',   f0: 300, f1: 120, dur: 0.25, gain: 0.18, min: 0.15, noise: 0.15 },

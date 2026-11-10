@@ -216,6 +216,7 @@ export const CONFIG = {
       golden:   [0xfff0a0, 0xffe070, 0xfff8dc],  // gold
       graze:    [0x7fd4ff, 0x9fe0ff, 0x54b4ff],  // cool cyan near-miss
       mine:     [0xff5a3c, 0xff8a5a, 0xffc4a0],  // hot red-orange
+      drone:    [0x6fe8ff, 0x9fe8ff, 0x3cc4ff],  // ST-117 cold cyan seeker
       boss:     [0xb18cff, 0x8a5cff, 0xe0ccff],  // purple
       bossKill: [0xfff0b8, 0xfff6e0, 0xd8c8ff],  // bright boss death
       shield:   [0x53d8ff, 0x7fe8ff, 0x33c4ff],  // cyan shield
