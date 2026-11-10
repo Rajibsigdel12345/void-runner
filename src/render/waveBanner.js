@@ -1,4 +1,6 @@
 // ST-028: WAVE n banner + intermission countdown. DOM overlay, no assets.
+// I154: polish - scale punch on entry, per-variant boss tint + glow (Monolith purple,
+// Splicer cyan), gold "CLEARED" big line. API unchanged (showWave/showCleared/showBoss/sync).
 // showWave/showCleared start a timed fade envelope; sync() advances it and,
 // while idle, renders the intermission countdown from the wave director.
 export function createWaveBanner(root) {
@@ -29,11 +31,17 @@ export function createWaveBanner(root) {
     anim = { t: 0, dur: 1.8, text: 'WAVE ' + n, subText: parts.join(' \u00b7 ') };
     el.style.fontSize = '40px';
   }
-  function startCleared(n) { anim = { t: 0, dur: 1.2, text: '', subText: 'WAVE ' + n + ' CLEARED' }; el.style.fontSize = '0px'; }
-  function startBoss(n, maxHp, name) { // ST-135/143: boss intro banner (bigger, variant-tinted)
-    anim = { t: 0, dur: 2.2, text: name || 'THE MONOLITH', subText: 'WAVE ' + n + ' \u00b7 ' + maxHp + ' HP' };
+  function startCleared(n) { // I154: gold big "CLEARED" + wave sub
+    anim = { t: 0, dur: 1.2, text: 'CLEARED', subText: 'WAVE ' + n, tint: '#ffe08a', glow: '0 0 22px rgba(255,224,138,0.35), 0 2px 14px rgba(0,0,0,0.9)' };
+    el.style.fontSize = '40px';
+  }
+  function startBoss(n, maxHp, name, kind) { // ST-135/143: boss intro (bigger, variant-tinted); I154: per-variant glow
+    const splicer = kind === 'splicer';
+    anim = { t: 0, dur: 2.2, text: name || 'THE MONOLITH', subText: 'WAVE ' + n + ' \u00b7 ' + maxHp + ' HP',
+      tint: splicer ? '#7ff0e0' : '#c9a8ff',
+      glow: splicer ? '0 0 26px rgba(127,240,224,0.5), 0 2px 14px rgba(0,0,0,0.9)' : '0 0 26px rgba(201,168,255,0.55), 0 2px 14px rgba(0,0,0,0.9)' };
     el.style.fontSize = '52px';
-    el.style.color = '#c9a8ff';
+    el.style.color = splicer ? '#7ff0e0' : '#c9a8ff';
   }
 
   function easeOut(x) { return 1 - Math.pow(1 - x, 3); } // ST-088
@@ -56,9 +64,12 @@ export function createWaveBanner(root) {
       sub.textContent = s;
       const a = motionOff ? (anim.t < anim.dur ? 1 : 0) : envelope(anim.t, anim.dur);
       el.style.opacity = String(a);
+      if (anim.tint) el.style.color = anim.tint; // I154: per-type tint
+      el.style.textShadow = anim.glow || '0 2px 14px rgba(0,0,0,0.9)'; // I154: boss/cleared glow, base otherwise
       const inP = Math.min(1, anim.t / 0.4); // ST-088: entry slide-in over 0.4s
-      el.style.transform = 'translateY(' + (motionOff ? 0 : (12 * (1 - easeOut(inP))).toFixed(1)) + 'px)'; // ST-088: slide up into place
-      if (anim.t >= anim.dur) { anim = null; el.style.opacity = '0'; el.style.fontSize = '40px'; el.style.color = '#9fd0ff'; el.style.transform = 'translateY(0px)'; sub.textContent = ''; el.firstChild.nodeValue = ''; }
+      const punch = motionOff ? 1 : 1 + 0.06 * (1 - easeOut(inP)); // I154: scale punch 1.06 -> 1.0
+      el.style.transform = 'translateY(' + (motionOff ? 0 : (12 * (1 - easeOut(inP))).toFixed(1)) + 'px) scale(' + punch.toFixed(3) + ')'; // ST-088 + I154
+      if (anim.t >= anim.dur) { anim = null; el.style.opacity = '0'; el.style.fontSize = '40px'; el.style.color = '#9fd0ff'; el.style.textShadow = '0 2px 14px rgba(0,0,0,0.9)'; el.style.transform = 'translateY(0px) scale(1)'; sub.textContent = ''; el.firstChild.nodeValue = ''; } // I154: reset glow + scale
       return;
     }
     // idle: intermission countdown

@@ -1122,3 +1122,15 @@ One entry per iteration. Format:
 - Console: 0 errors / 0 warnings.
 - Screenshot: .evidence/I153/I153_kill_feed.png (feed live during PLAYING).
 - Result: DONE. ST-153 closed. Next I154 ST-154 wave banner polish.
+
+## I154 - Wave banner polish: scale punch, per-variant boss tint + glow, gold CLEARED (ST-154)
+
+- Story: ST-154 | Goal: make the three banner moments (wave start, wave cleared, boss intro) feel more polished and give the two boss variants distinct identities. Pure render - no core diff. API unchanged (showWave/showCleared/showBoss/sync).
+- Design (cgs-ux-design): (1) scale punch 1.06 -> 1.0 over the entry (combined with the existing translateY slide; skipped under reduced motion). (2) Per-variant boss tint + glow: Monolith stays purple (#c9a8ff, purple glow), Splicer new cyan (#7ff0e0, cyan glow) - kind now passed from main.js (showBoss 4th arg). (3) CLEARED is now a big gold line (#ffe08a) with a gold glow + "WAVE n" sub (was a faint small line). Base text-shadow restored on anim end.
+- Regression found + fixed this iter: my first main.js edit appended an I154 comment immediately after the showBoss() call INSIDE the bossSpawn else-if, commenting out the following "SPLICER INBOUND" toast and leaving a dangling else -> "Unexpected token 'else'" (caught by the node ESM parse check + browser console, NOT by npm test/build which do not parse main.js). Fixed by moving the comment to the end of the statement. All 7 render modules now parse-verified with node --input-type=module before browser smoke.
+- Changed: src/render/waveBanner.js (header note, startCleared gold, startBoss kind + glow, sync tint/glow/scale-punch, anim-end reset), src/main.js (showBoss passes e.data.kind), docs.
+- Tests: 466/466 (render-only, no core diff - unchanged count).
+- Browser: Playwright ?nocache=154b. Driven all banner states via __vr.banner: WAVE (base blue, scale 1.04 at t=0.05), CLEARED (gold rgb(255,224,138) + gold glow), boss monolith (purple rgb(201,168,255) + purple glow), boss splicer (cyan rgb(127,240,224) + cyan glow); anim-end reset to base (opacity 0, base shadow, scale 1); reduced motion -> no punch (scale(1), no slide). Screenshot of the frozen Splicer intro over the arena (cyan + glow, "WAVE 10 ? 38 HP"). Deep NaN scan (114 objects): 0 non-finite.
+- Console: 0 errors / 0 warnings (after the else fix; first ?nocache=154 load logged 1 error = that regression).
+- Screenshots: .evidence/I154/I154_boss_splicer_arena.png (Splicer intro over arena), .evidence/I154/I154_boss_splicer.png (behind menu).
+- Result: DONE. ST-154 closed. Next I155 ST-155 colorblind shape cue + toggle.

@@ -418,7 +418,7 @@ function tick(dt, intent) {
     if (cue) audio.sfx(cue, e.data && e.data.pos ? e.data.pos : null);
     if (e.type === 'wave') banner.showWave(e.data.n, e.data.mod, e.data.endless);
     else if (e.type === 'waveCleared') banner.showCleared(e.data.n);
-    else if (e.type === 'bossSpawn') { banner.showBoss(e.data.wave, e.data.hp, e.data.kind === 'splicer' ? 'THE SPLICER' : 'THE MONOLITH'); if (e.data.kind === 'splicer') toast('SPLICER INBOUND'); } // ST-135/143: boss intro (+ Splicer callout)
+    else if (e.type === 'bossSpawn') { banner.showBoss(e.data.wave, e.data.hp, e.data.kind === 'splicer' ? 'THE SPLICER' : 'THE MONOLITH', e.data.kind); if (e.data.kind === 'splicer') toast('SPLICER INBOUND'); } // I154: kind for variant glow // ST-135/143: boss intro (+ Splicer callout)
     else if (e.type === 'wardenSpawn') toast('WARDEN INBOUND'); // ST-137: mini-boss callout
     else if (e.type === 'kill') { popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 || e.data.golden || e.data.boss, gold: !!e.data.golden, od: !!e.data.overdrive }); killFeed.add(e.data); } // ST-030/052, I153
     else if (e.type === 'nearmiss') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points); // ST-053 (plain small popup)

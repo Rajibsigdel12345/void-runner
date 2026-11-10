@@ -2,8 +2,8 @@
 
 - project: Void Runner (E:\Game, three.js, no bundler)
 - epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-154 (next)
-- current_iteration: I153 (committed)
+- current_story: ST-155 (next)
+- current_iteration: I154 (committed)
 - branch: main
 - tests: 466/466 (render-only I153, no core diff)
 - build: exit 0
