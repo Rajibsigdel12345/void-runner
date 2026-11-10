@@ -166,10 +166,26 @@ export function createAudio() {
   // I158: generative ambient music bed - soft sustained minor pad + sparse pentatonic
   // pluck, own gain bus under master (independent of ST-083 drone ambience). Procedural.
   // main.js drives music(on) exactly like ambience(on): PLAYING + the music setting.
-  let musicBus = null, musicNodes = [], musicFilter = null, musicLfo = null, musicLfoGain = null, musicTimer = 0;
+  // I169: the bed becomes an EVOLVING ambient drone loop (design/audio-music.md):
+  // 4-chord progression (Am-Fmaj7-Cmaj7-G, 18s each = 72s loop) via setTargetAtTime
+  // frequency glides (no node churn, no clicks), a sine sub-drone at chord-root/2 with
+  // 0.1Hz breathing tremolo, a looped-noise "air" layer through a slowly wandering
+  // bandpass, and the pluck re-tuned to A-minor pentatonic (the old C-major set clashed
+  // with the A-minor pad). Research grounding: design/audio-music.md. musicIntensity(x)
+  // is the ST-170 escalation seam (not wired to gameplay yet).
+  let musicBus = null, musicNodes = [], musicFilter = null, musicLfo = null, musicLfoGain = null;
+  let musicTimers = [], musicPad = [], musicSub = null, musicChordIdx = 0, musicIntensityVal = 0;
   const MUSIC_BASE = 0.13;
-  const PAD = [110.0, 130.81, 164.81, 220.0];
-  const PLUCK = [220.0, 261.63, 329.63, 392.0, 440.0, 523.25];
+  const MUSIC_CHORDS = [ // I169: 4 voices each, same register as the I158 pad
+    [110.00, 164.81, 220.00, 329.63], // Am:   A2 E3 A3 E4 (open root-fifth)
+    [ 87.31, 174.61, 220.00, 261.63], // Fmaj7: F2 F3 A3 C4
+    [130.81, 164.81, 196.00, 261.63], // Cmaj7: C3 E3 G3 C4
+    [ 98.00, 196.00, 246.94, 293.66], // G:    G2 G3 B3 D4
+  ];
+  const MUSIC_ROOTS = [55.00, 43.65, 65.41, 49.00]; // I169: sub drone = chord root / 2
+  const MUSIC_CHORD_SEC = 18;
+  const MUSIC_GLIDE = 2.5; // setTargetAtTime tau (s) for the chord morph (~3.5s audible glide)
+  const PLUCK = [220.0, 246.94, 261.63, 293.66, 329.63, 440.0]; // I169: A-minor pentatonic
   function startMusic() {
     if (!ctx || musicBus) return;
     musicBus = ctx.createGain(); musicBus.gain.value = 0.0001;
@@ -177,13 +193,38 @@ export function createAudio() {
     musicBus.connect(musicFilter); musicFilter.connect(master);
     const t = ctx.currentTime;
     musicBus.gain.setTargetAtTime(MUSIC_BASE, t, 1.4);
-    for (const f of PAD) { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = (Math.random() * 8) - 4; const g = ctx.createGain(); g.gain.value = 0.15; o.connect(g); g.connect(musicBus); o.start(); musicNodes.push(o, g); }
+    musicChordIdx = 0; musicIntensityVal = 0;
+    for (const f of MUSIC_CHORDS[0]) { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = (Math.random() * 8) - 4; const g = ctx.createGain(); g.gain.value = 0.15; o.connect(g); g.connect(musicBus); o.start(); musicNodes.push(o, g); musicPad.push(o); }
+    { // I169: sub drone - sine at chord root/2 with a 0.1Hz breathing tremolo
+      musicSub = ctx.createOscillator(); musicSub.type = 'sine'; musicSub.frequency.value = MUSIC_ROOTS[0];
+      const sg = ctx.createGain(); sg.gain.value = 0.08;
+      const trem = ctx.createOscillator(); trem.type = 'sine'; trem.frequency.value = 0.1;
+      const tg = ctx.createGain(); tg.gain.value = 0.02;
+      trem.connect(tg); tg.connect(sg.gain);
+      musicSub.connect(sg); sg.connect(musicBus);
+      musicSub.start(); trem.start();
+      musicNodes.push(musicSub, sg, trem, tg);
+    }
+    { // I169: noise-air layer - looped white noise through a slowly wandering bandpass
+      const noise = ctx.createBufferSource(); noise.buffer = noiseBuf; noise.loop = true;
+      const nf = ctx.createBiquadFilter(); nf.type = 'bandpass'; nf.frequency.value = 400; nf.Q.value = 0.5;
+      const ng = ctx.createGain(); ng.gain.value = 0.02;
+      noise.connect(nf); nf.connect(ng); ng.connect(musicBus);
+      noise.start();
+      musicNodes.push(noise, nf, ng);
+      const nlfo = ctx.createOscillator(); nlfo.type = 'sine'; nlfo.frequency.value = 0.03;
+      const nlfoG = ctx.createGain(); nlfoG.gain.value = 150;
+      nlfo.connect(nlfoG); nlfoG.connect(nf.frequency); nlfo.start();
+      musicNodes.push(nlfo, nlfoG);
+    }
     musicLfo = ctx.createOscillator(); musicLfo.type = 'sine'; musicLfo.frequency.value = 0.05;
     musicLfoGain = ctx.createGain(); musicLfoGain.gain.value = 320;
     musicLfo.connect(musicLfoGain); musicLfoGain.connect(musicFilter.frequency); musicLfo.start();
     musicNodes.push(musicLfo, musicLfoGain);
-    const tick = () => { if (!musicBus) return; if (ctx.state === 'running') playPluck(); musicTimer = setTimeout(tick, 950 + Math.random() * 1500); };
-    musicTimer = setTimeout(tick, 600);
+    const chordTick = () => { if (!musicBus) return; musicChordIdx = (musicChordIdx + 1) % MUSIC_CHORDS.length; const ct = ctx.currentTime; for (let i = 0; i < musicPad.length; i++) musicPad[i].frequency.setTargetAtTime(MUSIC_CHORDS[musicChordIdx][i], ct, MUSIC_GLIDE); musicSub.frequency.setTargetAtTime(MUSIC_ROOTS[musicChordIdx], ct, MUSIC_GLIDE * 1.5); musicTimers.push(setTimeout(chordTick, MUSIC_CHORD_SEC * 1000)); };
+    musicTimers.push(setTimeout(chordTick, MUSIC_CHORD_SEC * 1000));
+    const tick = () => { if (!musicBus) return; if (ctx.state === 'running') playPluck(); musicTimers.push(setTimeout(tick, 950 + Math.random() * 1500)); };
+    musicTimers.push(setTimeout(tick, 600));
   }
   function playPluck() {
     if (!musicBus || ctx.state !== 'running') return;
@@ -195,7 +236,7 @@ export function createAudio() {
   }
   function stopMusic() {
     if (!musicBus) return;
-    if (musicTimer) { clearTimeout(musicTimer); musicTimer = 0; }
+    for (const tm of musicTimers) clearTimeout(tm); musicTimers = []; musicPad = []; musicSub = null;
     const t = ctx.currentTime;
     musicBus.gain.cancelScheduledValues(t); musicBus.gain.setTargetAtTime(0.0001, t, 0.3);
     const bus = musicBus, nodes = musicNodes, flt = musicFilter, lfo = musicLfo, lfoGain = musicLfoGain;
@@ -204,6 +245,13 @@ export function createAudio() {
   }
   function music(on) { if (on) startMusic(); else stopMusic(); }
   function setMusic(on) { musicOn = on === true; }
+  function musicIntensity(x) { // I169: ST-170 escalation seam - 0 (calm) .. 1 (escalated). Smooth retargets; call anytime.
+    musicIntensityVal = Math.max(0, Math.min(1, x || 0));
+    if (!musicBus) return;
+    const it = ctx.currentTime;
+    musicFilter.frequency.setTargetAtTime(1200 + 1400 * musicIntensityVal, it, 1.0); // open the filter as tension rises
+    musicBus.gain.setTargetAtTime(MUSIC_BASE + 0.05 * musicIntensityVal, it, 0.8); // +~38% headroom at full intensity
+  }
 
 
   function scheduleNote(type, f0, f1, dur, gain, t, out) {
@@ -257,5 +305,5 @@ export function createAudio() {
     return true;
   }
 
-  return { init, setVolume, setSfx, setMuted, state, sfx, ambience, ambOn: () => !!ambBus, music, setMusic, musicOn: () => !!musicBus, ambLevel: () => (ambBus ? ambBus.gain.value : null), meter, played, lastPan: () => lastPan, weights: () => Object.fromEntries(Object.entries(CUES).map(([k, s]) => [k, s.gain])), get volume() { return volume; } };
+  return { init, setVolume, setSfx, setMuted, state, sfx, ambience, ambOn: () => !!ambBus, music, setMusic, musicOn: () => !!musicBus, musicChord: () => ({ i: musicChordIdx, f: MUSIC_CHORDS[musicChordIdx], sub: MUSIC_ROOTS[musicChordIdx] }), musicIntensity, musicIntensityVal: () => musicIntensityVal, ambLevel: () => (ambBus ? ambBus.gain.value : null), meter, played, lastPan: () => lastPan, weights: () => Object.fromEntries(Object.entries(CUES).map(([k, s]) => [k, s.gain])), get volume() { return volume; } };
 }

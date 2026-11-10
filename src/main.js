@@ -437,6 +437,8 @@ window.__vr.ctxOverlay = ctxOverlay; // I75: expose after declaration (TDZ-safe)
 window.__vr.applyColorblindPreview = (on) => applyColorblindPreview(on); // I158: probe
 window.__vr.slowmoHintEl = slowmoHintEl; // I158: probe
 window.__vr.musicOn = () => audio.musicOn(); // I158: probe
+window.__vr.musicChord = () => audio.musicChord(); // I169: probe
+window.__vr.musicIntensity = (x) => audio.musicIntensity(x); // I169: probe
 window.__vr.lastShare = () => screens.lastShare(); // I159: probe
 
 // Fixed-timestep simulation (60Hz) with render at display rate (ST-078: the

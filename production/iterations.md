@@ -1312,6 +1312,10 @@ One entry per iteration. Format:
 - Quality bar: 491/491 (docs only), build 0, no browser smoke (no rendering change).
 - Result: DONE. ST-168 closed - E8D (ST-151..168) complete. Next I169 ST-169 procedural music: ambient drone loop (E8E opens). Note for I169: I158 already ships a generative music bed (minor pad + pentatonic pluck) + MUSIC option, so ST-169 should be assessed against that baseline first.
 
-
-
-
+## I169 - Procedural music: ambient drone loop (ST-169)
+- Story: ST-169 | Goal: turn I158's static generative music bed into an evolving ambient drone loop (E8E opens), re-ground the pluck in-key, leave a clean ST-170 escalation seam.
+- Research: YouTube (metadata + chapters verified; transcripts rate-limited - see design/audio-music.md Coverage note): Marshall McGee 'How To Create Beautiful Ambient Sounds For A Game' (ambient sound design); The Ground Noise 'Making a DARK AMBIENT DRONE in Vital Synth' (drone recipe - white-noise-based drone, everything filtered, LFOs + randomizers for movement); Simon Hutchinson 'Procedural Audio in Games' (avoid weariness of repetitive sound; system-driven ambience). Tension-layer + generative refs for ST-170 (Dead Space 151/152, State Azure, Pierre).
+- Changed: src/render/audio.js (static Am pad + C-major pluck -> 4-chord Am-Fmaj7-Cmaj7-G evolving loop via setTargetAtTime glides + sine sub-drone root/2 w/ 0.1Hz trem + looped-noise air layer bandpass 400Hz w/ 0.03Hz LFO + pluck re-tuned A-minor pentatonic; new musicIntensity(x) escalation seam; export +musicChord/musicIntensity/musicIntensityVal; musicTimers[] tracks + clears all timers on stop). src/main.js (+2 __vr probes: musicChord, musicIntensity). design/audio-music.md (new: research table + baseline + drone-loop design + ST-170 seam + CPU cost + transcript-coverage gap).
+- Verification: parse node --check clean (ESM) for audio.js + main.js (import() -> 'document is not defined' = executed past parse, expected for browser boot file); 491/491 (audio browser-only, core tests unchanged); build 0; browser smoke ?nocache=169 Enter: PLAYING + __vr.musicOn() true, __vr.musicChord() i:0 f:[110,164.81,220,329.63] sub:55 -> after ~20s (past 18s first chordTick) i:1 f:[87.31,174.61,220,261.63] sub:43.65 (loop advanced); ship self-died -> GAME_OVER -> musicOn() false (confirms PLAYING-gate); console 0/0, 0 NaN; screenshot .evidence/I169/I169_1_playing.png.
+- Result: DONE. ST-169 closed.
+- Risk/follow-up: musicIntensity UNWIRED to gameplay - ST-170 (I170) wires it from world state (wave / boss active). Transcript coverage gap documented in design/audio-music.md (chapter-level, not verbatim).
