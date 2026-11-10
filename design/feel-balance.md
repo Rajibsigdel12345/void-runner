@@ -33,7 +33,7 @@ as playtest watch-items for I183.
 | bossSpawn     | 0.7   | 0.4   | -     | -        | -       |
 | bossDeath     | 1.0   | 0.5   | 1.0   | 0.09     | 8       |
 | wardenSpawn   | 0.5   | 0.25  | -     | -        | -       |
-| wardenDeath   | 0.8   | 0.4   | 0.8   | 0.054    | 4.8     |
+| wardenDeath   | 0.8   | 0.4   | 0.7   | 0.054    | 4.8     |
 | overdrive     | -     | 0.15  | -     | -        | -       |
 | weaponLevelUp | -     | 0.2*  | 0.45  | -        | -       |
 
@@ -52,7 +52,7 @@ The channels are decoupled by meaning, and each value is matched to that meaning
   damage" is the highest-urgency beat (reinforced by the ST-176 damage vignette);
   bossDeath (0.5) is the biggest spectacle; bomb (0.35) is lower because you caused it
   (less alarm); pickups are subtle (overdrive 0.15).
-- punch = weight / mass. bossDeath 1.0 > bomb 0.8 = wardenDeath 0.8 > weaponLevelUp 0.45.
+- punch = weight / mass. bossDeath 1.0 > bomb 0.8 > wardenDeath 0.7 (ST-183) > weaponLevelUp 0.45.
   Punch only fires on mass events, never on spawns or pickups.
 - hit-stop / fov = impact scale, big beats only. bossDeath > bomb > wardenDeath, all below
   0.1s (a hit-stop longer than that reads as a glitch). Spawns and pickups never freeze
@@ -142,3 +142,138 @@ Hand to I183 (feel tuning 2, playtest-driven) with the three watch-items above a
 candidate levers. Owner decision for I183: gather the Telemetry Need (juice-event counter
 + a feel signal) first, then tune only what the data flags - otherwise keep the current
 values.
+
+## ST-183 - Feel tuning round 2 (I183)
+
+Balance-check of the three ST-179 watch-items, plus the Telemetry Need this doc itself called
+for. Contract: cgs-balance-check.
+
+### Summary
+
+I183 did what the ST-179 audit instructed: gather the Telemetry Need (a juice-event counter
++ a feel signal) first, then tune only what the data flags - otherwise keep the current
+values. It built the counter (src/core/juiceTally.js + the __vr.juiceTally() probe), collected
+a first data sample (a scripted representative run in BOTH motion states), and rendered one
+verdict per watch-item. Outcome: ONE value changed (wardenDeath punch 0.8 -> 0.7), two
+documented holds (bomb flash 0.35, pickup/overdrive flash 0.15).
+
+### Telemetry (built this iteration)
+
+- src/core/juiceTally.js (NEW, pure, DOM-free): createJuiceTally() with record(type, channels),
+  snapshot(), reset(), total(type, channel). Fixed 5-channel schema (flash, shake, punch,
+  hitStop, fovKick); unknown keys ignored; an event with no fired channel creates no row;
+  snapshot is a deep copy.
+- src/main.js: created once, reset in startRun + restartRun (the per-run boundary), probed as
+  __vr.juiceTally(). record() is called ONLY inside the branches that actually trigger a
+  channel, and only inside the !motionOff gate - the tally records what FIRED, not what was
+  eligible. Under reduced motion the tally stays empty by construction (verified in the
+  smoke, part 2).
+- This is the "per-run juice-event counter" from the Telemetry Need, riding the __vr probe
+  infrastructure. The second half (a subjective feel signal) is delegated to the I202 human
+  playtest: the counter is now the baseline a playtester's comment can be checked against.
+
+### Data sample (I183, scripted representative run)
+
+?nocache=183a (motion ON, real Enter -> PLAYING, ship protected): the full event ladder fired
+one event at a time (hit, bomb, wardenSpawn, wardenDeath, mineExplode, droneExplode,
+bossSpawn, bossDeath, powerup(overdrive), powerup(rapid), weaponLevelUp), each with
+advance(0.05) and a per-event tally delta. Every event fired exactly the channels the ladder
+prescribes; per-run totals flash 10 / shake 8 / punch 4 / hitStop 3 / fovKick 3; the rapid
+pickup creates no row (particles are not one of the five channels). ?nocache=183b
+(reducedMotion true, same 11 events): eventTally identical (all events fired) while
+juiceTally stayed {} and shakeMag 0 - the negative gate holds and the "what actually fired"
+semantics are confirmed. Console 0/0 both parts; ship finite; state PLAYING throughout.
+Live punch check: bomb 0.8*exp(-12*0.05) = 0.4390493088752211, warden
+0.7*exp(-12*0.05) = 0.38416814526581844 - both exact, ratio exactly 0.875 = 0.7/0.8. Before
+this change the ratio was 1.0 (the tie the watch-item named).
+
+### Verdicts (per watch-item)
+
+1. bomb flash (0.35) vs hit flash (0.5) - HOLD at 0.35. Flash means personal urgency; the
+   bomb is player-caused, so it is deliberately subordinated on that channel. The data sample
+   confirms the bomb already tops every impact channel (shake 1.0, hitStop 0.07, fovKick 6 -
+   all firing in the live run), so its weight is fully expressed elsewhere. Nudging the flash
+   would break the "you got hit > you fired" urgency ordering.
+2. wardenDeath punch (0.8) = bomb punch (0.8) - CHANGE to 0.7. The warden is a sub-boss scaled
+   0.6x on hitStop/fovKick, and it is already below the bomb on shake (0.8 < 1.0), hitStop
+   (0.054 < 0.07) and fovKick (4.8 < 6) - punch was the ONE channel where the intended
+   bossDeath > bomb > wardenDeath ordering was violated (the tie). Dropping it to 0.7 (the
+   value the watch-item proposed) restores the ordering on all four impact channels while
+   keeping the warden's death clearly above the reward punch (weaponLevelUp 0.45). Labeled as
+   a calibration/hierarchy-consistency call, not a playtest measurement (the I202 playtest
+   re-checks it with the counter).
+3. pickup/overdrive flash (0.15) - HOLD. Pickup visibility already rides on the ST-177
+   per-type sparkle (max(8, ceil(fxCount*0.5)) = 24 particles at FX high, the event's own
+   color) + the collect SFX + the magnet trail; the data sample shows the rapid pickup firing
+   that sparkle with no channel flash by design. The ST-179 guidance stands: if pickups ever
+   read as invisible, raise the sparkle COUNT, not the flash - a reward stays subtle on the
+   alarm channel.
+
+### Balance Lever
+
+One lever moved, per channel (not a uniform scale - the I179 risk this doc warned about):
+wardenDeath punch 0.8 -> 0.7 in src/main.js (the wardenDeath juice branch). Nothing else
+touched.
+
+### Exploit Risk
+
+None. The punch energy is a fixed render-layer constant; juiceTally is a debug probe (a
+read-only snapshot), reset per run, and no gameplay path reads it.
+
+### Pacing
+
+Unchanged. The run's event mix (per the sample: 10 flash / 8 shake / 4 punch / 3 hitStop /
+3 fovKick across the full ladder) is identical before and after - only the warden's punch
+magnitude is 12.5% lower.
+
+### Telemetry Need
+
+Half 1 (the counter) fulfilled - see Telemetry above. Half 2 (a subjective feel signal) is
+explicitly delegated to the I202 human playtest: with __vr.juiceTally() live, a playtester's
+"that hit felt flat" comment can now be checked against what actually fired.
+
+### Risks
+
+- The item-2 change is a hierarchy-consistency + grounding call made from the counter data +
+  the existing ladder, NOT a human feel measurement. The I202 playtest is the confirmation
+  pass; if a playtester reads the warden's death as too light, the lever goes back to 0.8
+  with one line (the value is recorded in the ladder table above).
+- The scripted sample is a controlled event fire, not emergent play: real runs have
+  timing/overlap (max-stacking of shake/punch under firefights). The counter is the tool for
+  measuring that; the I184/I185 perf + memory tail and the I202 playtest cover the rest.
+
+### Changed files
+
+- src/core/juiceTally.js (NEW) - pure per-run juice-channel tally.
+- src/main.js - import + create + 2 resets + __vr.juiceTally() probe + 10 record() call sites
+  (one per channel-firing branch) + wardenDeath punch 0.8 -> 0.7.
+- tests/juiceTally.test.js (NEW) - 10 tests (schema, empty, per-call count, accumulation,
+  no-row-without-channels, unknown-key ignore, invalid args, reset, total, snapshot deep-copy).
+- design/feel-balance.md (this file) - ladder row + lever bullet updated, this section appended.
+- CHANGELOG.md, production/iterations.md, production/session-state/active.md.
+
+### Verification evidence
+
+- Parse node --check clean: juiceTally.js, juiceTally.test.js, main.js (via .mjs).
+- 575/575 unit tests (+10); build 0.
+- Browser smoke part 1 (?nocache=183a, motion ON, real Enter -> PLAYING, ship protected):
+  per-event deltas exactly match the ladder for all 11 events; per-run totals flash 10 /
+  shake 8 / punch 4 / hitStop 3 / fovKick 3; punch magnitudes 0.4390493088752211 (bomb =
+  0.8*exp(-0.6)) and 0.38416814526581844 (warden = 0.7*exp(-0.6)), ratio exactly 0.875.
+  Console 0/0; ship finite; state PLAYING.
+- Browser smoke part 2 (?nocache=183b, reducedMotion true seeded, real Enter): same 11
+  events -> eventTally identical, juiceTally {} (the negative gate), shakeMag 0. Console 0/0.
+  Screenshot .evidence/I183/I183_2_rm_negative_gate.png.
+
+### Research (Coverage note)
+
+No new research this iteration: the verdicts ride the ST-179 grounding ("match the juice to
+the hit", Vlambeer's per-channel shake doctrine, GDevelop's separate hit-flash / screen-shake
+channels). YouTube metadata only; transcripts remain rate-limited - Coverage note.
+
+### Next owner or decision
+
+Next I184 ST-184 perf profile (cgs-perf-profile): update production/perf-profile.md with the
+E8E deep profile (I182's in-gate numbers are the reference; multi-scene soak + first-frame
+hitch check). The __vr.juiceTally() probe is available as the per-run feel baseline for the
+I202 human playtest.

@@ -17,6 +17,7 @@ import { createShieldRing } from './render/shieldRing.js';
 import { createVortexFx } from './render/vortexFx.js'; // ST-059
 import { createParticles } from './render/particles.js';
 import { createShake, createPunch, createFovKick } from './core/fx.js'; // ST-081/ST-082
+import { createJuiceTally } from './core/juiceTally.js'; // ST-183: per-run juice-channel tally (feel telemetry)
 import { shakeEnergy } from './core/shakeTable.js'; // ST-175: unified screen-shake table lookup
 import { flashEnergy } from './core/flashTable.js'; // ST-179: unified white-flash bump table lookup
 import { dangerVignetteX } from './core/dangerVignette.js'; // ST-176: reduced-motion damage vignette envelope
@@ -262,7 +263,7 @@ function refreshDailyMenu() {
 }
 refreshDailyMenu();
 function startRun(mode) {
-  newBest = false; popups.clear(); killFeed.clear(); dailyNewBest = false;
+  newBest = false; popups.clear(); killFeed.clear(); dailyNewBest = false; juiceTally.reset(); // ST-183
   const firstRun = !storage.getTutorialSeen(); // I151: first entry to PLAYING
   if (firstRun) { tutorialActive = true; tutorial.show(); } // gate the sim while reading
   else hint.show(); // passive 6s hint on subsequent runs
@@ -271,7 +272,7 @@ function startRun(mode) {
   world.begin();
 }
 function restartRun() {
-  newBest = false; popups.clear(); killFeed.clear(); hint.show(); dailyNewBest = false;
+  newBest = false; popups.clear(); killFeed.clear(); hint.show(); dailyNewBest = false; juiceTally.reset(); // ST-183
   if (dailyMode) world.reseed(dailySeedVal); // ST-141: same seed -> reproduce today's run
   world.restart();
 }
@@ -383,7 +384,7 @@ const camPos = { x: 0, y: 9, z: 13 };
 const camLook = { x: 0, y: 0, z: 0 };
 
 // event drain sink (I16 HUD / I24 fx / I27 audio hook in here)
-const eventTally = {};
+const eventTally = {}; const juiceTally = createJuiceTally(); // ST-183: per-run feel-channel tally (probe: __vr.juiceTally())
 // Deterministic advance for smoke tests + the I076 harness: runs N fixed substeps
 // (world.step + event drain + visual sync) independent of display rate.
 function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing: false }) {
@@ -391,7 +392,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -508,25 +509,26 @@ function tick(dt, intent) {
     if (!motionOff) {
       if (e.type === 'kill') particles.burst(e.data.pos.x, e.data.pos.y, { count: e.data.golden ? Math.ceil(fxCount * 1.5) : fxCount, palette: e.data.golden ? CONFIG.fx.palette.golden : CONFIG.fx.palette.rock, speed: 9, life: 0.5 }); // ST-052
       else if (e.type === 'nearmiss') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.max(4, Math.ceil(fxCount * 0.25)), palette: CONFIG.fx.palette.graze, speed: 5, life: 0.3 }); // ST-053 subtle graze wisp
-      else if (e.type === 'mineExplode') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.mine, speed: 10, life: 0.5 }); shake.trigger(shakeEnergy('mineExplode', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('mineExplode', CONFIG.fx.flashTable)); } // ST-054/ST-175
-      else if (e.type === 'droneExplode') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.drone, speed: 9, life: 0.45 }); shake.trigger(shakeEnergy('droneExplode', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('droneExplode', CONFIG.fx.flashTable)); } // ST-117/ST-175 seeker burst
+      else if (e.type === 'mineExplode') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.mine, speed: 10, life: 0.5 }); shake.trigger(shakeEnergy('mineExplode', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('mineExplode', CONFIG.fx.flashTable)); juiceTally.record('mineExplode', { shake: 1, flash: 1 }); } // ST-054/ST-175
+      else if (e.type === 'droneExplode') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.drone, speed: 9, life: 0.45 }); shake.trigger(shakeEnergy('droneExplode', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('droneExplode', CONFIG.fx.flashTable)); juiceTally.record('droneExplode', { shake: 1, flash: 1 }); } // ST-117/ST-175 seeker burst
 else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount ? Math.max(4, fxCount >> 1) : 0, palette: CONFIG.fx.palette.drone, speed: 5, life: 0.6 }); } // I129: seeker battery self-destruct - small cyan fizzle, no shake, honors FX tier off
-      else if (e.type === 'bossSpawn') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.boss, speed: 8, life: 0.7 }); shake.trigger(shakeEnergy('bossSpawn', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('bossSpawn', CONFIG.fx.flashTable)); } // ST-055/ST-175
+      else if (e.type === 'bossSpawn') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.boss, speed: 8, life: 0.7 }); shake.trigger(shakeEnergy('bossSpawn', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('bossSpawn', CONFIG.fx.flashTable)); juiceTally.record('bossSpawn', { shake: 1, flash: 1 }); } // ST-055/ST-175
       else if (e.type === 'bossRing') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.6), palette: CONFIG.fx.palette.boss, speed: 7, life: 0.4, shape: 'ring' }); // ST-055
-      else if (e.type === 'bossDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount * 2, palette: CONFIG.fx.palette.bossKill, speed: 14, life: 0.8, shape: 'ring' }); shake.trigger(shakeEnergy('bossDeath', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('bossDeath', CONFIG.fx.flashTable)); hitStop = Math.max(hitStop, CONFIG.fx.hitStop.bossDeath); punch.trigger({ x: 0, y: 0.7, z: 0.5 }, 1.0); fovKick.trigger(CONFIG.fx.fovKick.bossDeath); } // ST-055/ST-081/ST-082
-      else if (e.type === 'wardenSpawn') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.boss, speed: 8, life: 0.6 }); shake.trigger(shakeEnergy('wardenSpawn', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('wardenSpawn', CONFIG.fx.flashTable)); } // ST-137/ST-175: mini-boss arrival
+      else if (e.type === 'bossDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount * 2, palette: CONFIG.fx.palette.bossKill, speed: 14, life: 0.8, shape: 'ring' }); shake.trigger(shakeEnergy('bossDeath', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('bossDeath', CONFIG.fx.flashTable)); hitStop = Math.max(hitStop, CONFIG.fx.hitStop.bossDeath); punch.trigger({ x: 0, y: 0.7, z: 0.5 }, 1.0); fovKick.trigger(CONFIG.fx.fovKick.bossDeath); juiceTally.record('bossDeath', { shake: 1, flash: 1, hitStop: 1, punch: 1, fovKick: 1 }); } // ST-055/ST-081/ST-082
+      else if (e.type === 'wardenSpawn') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.boss, speed: 8, life: 0.6 }); shake.trigger(shakeEnergy('wardenSpawn', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('wardenSpawn', CONFIG.fx.flashTable)); juiceTally.record('wardenSpawn', { shake: 1, flash: 1 }); } // ST-137/ST-175: mini-boss arrival
       else if (e.type === 'wardenArmor') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.max(6, Math.ceil(fxCount * 0.4)), palette: CONFIG.fx.palette.shield, speed: 6, life: 0.3 }); // ST-137: armor ping (mirrors rockShieldHit)
-      else if (e.type === 'wardenDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount * 2, palette: CONFIG.fx.palette.bossKill, speed: 12, life: 0.7, shape: 'ring' }); shake.trigger(shakeEnergy('wardenDeath', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('wardenDeath', CONFIG.fx.flashTable)); hitStop = Math.max(hitStop, CONFIG.fx.hitStop.bossDeath * 0.6); punch.trigger({ x: 0, y: 0.7, z: 0.5 }, 0.8); fovKick.trigger(CONFIG.fx.fovKick.bossDeath * 0.6); } // ST-137
+      else if (e.type === 'wardenDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount * 2, palette: CONFIG.fx.palette.bossKill, speed: 12, life: 0.7, shape: 'ring' }); shake.trigger(shakeEnergy('wardenDeath', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('wardenDeath', CONFIG.fx.flashTable)); hitStop = Math.max(hitStop, CONFIG.fx.hitStop.bossDeath * 0.6); punch.trigger({ x: 0, y: 0.7, z: 0.5 }, 0.7); fovKick.trigger(CONFIG.fx.fovKick.bossDeath * 0.6); juiceTally.record('wardenDeath', { shake: 1, flash: 1, hitStop: 1, punch: 1, fovKick: 1 }); } // ST-137
       else if (e.type === 'bossFire') particles.burst(e.data.pos.x, e.data.pos.y, { count: 5, palette: CONFIG.fx.palette.mine, speed: 4, life: 0.25 }); // ST-056 muzzle
       else if (e.type === 'mineFire') particles.burst(e.data.pos.x, e.data.pos.y, { count: 4, palette: CONFIG.fx.palette.mine, speed: 3, life: 0.2 }); // ST-056 muzzle
-      else if (e.type === 'powerup' && e.data.type === 'overdrive') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.power, speed: 8, life: 0.5, shape: 'fountain' }); flashA = Math.min(0.8, flashA + flashEnergy('overdrive', CONFIG.fx.flashTable)); } // ST-057 pickup flash
+      else if (e.type === 'powerup' && e.data.type === 'overdrive') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.power, speed: 8, life: 0.5, shape: 'fountain' }); flashA = Math.min(0.8, flashA + flashEnergy('overdrive', CONFIG.fx.flashTable)); juiceTally.record('overdrive', { flash: 1 }); } // ST-057 pickup flash
       else if (e.type === 'powerup') { const puColor = CONFIG.fx.palette.pickup[e.data.type]; if (puColor) particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.max(8, Math.ceil(fxCount * 0.5)), color: puColor, speed: 7, life: 0.5, shape: 'radial' }); } // ST-177: per-type collect sparkle (overdrive keeps its fountain above)
-      else if (e.type === 'weaponLevelUp') { const wl = Math.max(1, e.data.level || 1); const tier = CONFIG.fx.palette.bulletLevel[Math.max(0, Math.min(CONFIG.fx.palette.bulletLevel.length - 1, wl - 1))]; const sx = world.ship.pos.x, sy = world.ship.pos.y; particles.burst(sx, sy, { count: fxCount, color: tier, speed: 11, life: 0.6, shape: 'ring' }); particles.burst(sx, sy, { count: Math.ceil(fxCount * 0.7), color: tier, speed: 9, life: 0.7, shape: 'fountain' }); flashA = Math.min(0.8, flashA + CONFIG.fx.weaponFanfare.flash); punch.trigger({ x: 0, y: 0.7, z: 0.5 }, CONFIG.fx.weaponFanfare.punch); _weaponFanfareN++; } // ST-178: weapon level-up fanfare (tier-colored ring + fountain at the ship)
+      else if (e.type === 'weaponLevelUp') { const wl = Math.max(1, e.data.level || 1); const tier = CONFIG.fx.palette.bulletLevel[Math.max(0, Math.min(CONFIG.fx.palette.bulletLevel.length - 1, wl - 1))]; const sx = world.ship.pos.x, sy = world.ship.pos.y; particles.burst(sx, sy, { count: fxCount, color: tier, speed: 11, life: 0.6, shape: 'ring' }); particles.burst(sx, sy, { count: Math.ceil(fxCount * 0.7), color: tier, speed: 9, life: 0.7, shape: 'fountain' }); flashA = Math.min(0.8, flashA + CONFIG.fx.weaponFanfare.flash); punch.trigger({ x: 0, y: 0.7, z: 0.5 }, CONFIG.fx.weaponFanfare.punch); _weaponFanfareN++; juiceTally.record('weaponLevelUp', { flash: 1, punch: 1 }); } // ST-178: weapon level-up fanfare (tier-colored ring + fountain at the ship)
       else if (e.type === 'hit') {
         particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.hit, speed: 11, life: 0.45 });
         shake.trigger(shakeEnergy('hit', CONFIG.fx.shakeTable)); // ST-175
         flashA = Math.min(0.8, flashA + flashEnergy('hit', CONFIG.fx.flashTable));
         dangerA = Math.min(1, dangerA + (e.data.lives <= 1 ? 1 : 0.6)); // I85: last-life hit reads harder
+        juiceTally.record('hit', { shake: 1, flash: 1 }); // ST-183
       } else if (e.type === 'shieldPop') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.75), palette: CONFIG.fx.palette.shield, speed: 8, life: 0.5, shape: 'ring' });
       else if (e.type === 'rockShieldHit') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.max(6, Math.ceil(fxCount * 0.4)), palette: CONFIG.fx.palette.shield, speed: 6, life: 0.3 }); // ST-127 armor-absorb sparks (cyan, subtle)
       else if (e.type === 'beltHit') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.max(4, Math.ceil(fxCount * 0.2)), palette: CONFIG.fx.palette.belt, speed: 4, life: 0.28 }); // ST-139 indestructible clink (cool steel, subtle, no shake)
@@ -539,6 +541,7 @@ else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, 
         flashA = Math.min(0.8, flashA + flashEnergy('bomb', CONFIG.fx.flashTable));
         hitStop = Math.max(hitStop, CONFIG.fx.hitStop.bomb); punch.trigger({ x: 0, y: 0.7, z: 0.5 }, 0.8); // ST-081
         fovKick.trigger(CONFIG.fx.fovKick.bomb); // ST-082
+        juiceTally.record('bomb', { shake: 1, flash: 1, hitStop: 1, punch: 1, fovKick: 1 }); // ST-183
       } else if (e.type === 'vortexTelegraph') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.4), palette: CONFIG.fx.palette.boss, speed: 2, life: 0.8 }); // ST-059 telegraph wisp
     }
     if (e.type === 'vortexTelegraph') { vortexFx.onTelegraph(e.data.pos); } // ST-059 (state always advances; particles above are motion-gated)
