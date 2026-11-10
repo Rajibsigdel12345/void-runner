@@ -38,11 +38,15 @@ export function createBossMesh(scene) {
   /** sync(boss, t): place the obelisk (tall body, base near the plane), pulse the glow. */
   function sync(boss, t) {
     if (!boss || !boss.alive) { mesh.visible = false; mesh.scale.setScalar(1); return; }
-    const r = CONFIG.boss.radius;
+    const isSplicer = boss.kind === 'splicer'; // ST-143: variant 2 - teal identity
+    const r = isSplicer ? CONFIG.splicer.radius : CONFIG.boss.radius;
+    const sizeScale = r / CONFIG.boss.radius; // geometry is baked at the Monolith radius
     mesh.position.set(boss.pos.x, r * 1.3 + 0.3, boss.pos.y);
     mesh.rotation.y = boss.rot;
-    mat.emissiveIntensity = 0.18 + 0.18 * (0.5 + 0.5 * Math.sin(t * 2.4)); // subtle pulse
-    mesh.scale.setScalar(Math.max(0.001, 1 - Math.pow(1 - boss.entered, 3))); // ST-135: easeOutCubic scale-in during entrance
+    const ePulse = isSplicer ? 0.30 + 0.30 * (0.5 + 0.5 * Math.sin(t * 4.2)) : 0.18 + 0.18 * (0.5 + 0.5 * Math.sin(t * 2.4));
+    mat.emissiveIntensity = ePulse; // ST-143: the Splicer pulses faster and brighter
+    mat.emissive.setHex(isSplicer ? 0x2dd4bf : 0x7a4dff); // ST-143: teal vs the Monolith purple
+    mesh.scale.setScalar(Math.max(0.001, (1 - Math.pow(1 - boss.entered, 3))) * sizeScale); // ST-135/143: entrance scale-in + variant size
     mesh.visible = true;
   }
 

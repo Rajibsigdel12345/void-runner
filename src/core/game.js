@@ -6,6 +6,7 @@ import { AsteroidField } from './asteroids.js';
 import { MineField } from './mines.js';
 import { DroneField } from './drones.js'; // ST-117
 import { Monolith, bossHpForWave, bossBurstVectors } from './boss.js';
+import { Splicer, splicerHpForWave } from './splicer.js';
 import { Warden } from './warden.js'; // ST-136
 import { EnemyBulletField } from './enemyBullets.js';
 import { VortexField } from './vortex.js'; // ST-059
@@ -35,6 +36,7 @@ export class World {
     this.bossBurstTimer = this.cfg.boss.burst.every; // ST-134
     this.warden = null; // ST-136
     this.bossBursts = 0; // ST-134: volley count (spiral offset)
+    this.bossSpawnCount = 0; // ST-143: alternates the Monolith / Splicer variant
     this.events = [];
     this._eventSpare = [];
     this.scoreKeeper = new ScoreKeeper(cfg);
@@ -155,17 +157,23 @@ export class World {
     this.enemyBullets.step(edt); // ST-056 (ST-115: scaled under slow-mo)
     if (this.boss) { // ST-055/056
       if (this.boss.step(edt, this.ship.pos) === 'ring') this.bossRingBurst(); // ST-115: scaled under slow-mo
+      if (typeof this.boss.drainBolts === 'function') { // ST-143: Splicer spiral bolts
+        const bolts = this.boss.drainBolts();
+        if (bolts) this.bossSpiralBolts(bolts);
+      }
       if (this.boss.entered >= 1) { // ST-135: entrance window - no aimed bolts or bursts
         this.bossFireTimer -= edt; // ST-115: boss fire cadence slows under slow-mo
         if (this.bossFireTimer <= 0) {
-          this.bossFireTimer += this.cfg.boss.fireEvery * (this.boss.phase === 2 ? this.cfg.boss.phase2.ringEveryMult : 1); // ST-133: enraged cadence
+          this.bossFireTimer += this.bossAimEvery(); // ST-133/143: enraged + per-variant cadence
           const b = this.fireAimedBolt(this.boss.pos, this.cfg.enemyBullets.speed);
           if (b) this.emit('bossFire', { pos: { x: this.boss.pos.x, y: this.boss.pos.y } });
         }
-        this.bossBurstTimer -= edt; // ST-134/ST-115: burst cadence slows under slow-mo
-        if (this.bossBurstTimer <= 0) {
-          this.bossBurstTimer += this.cfg.boss.burst.every * (this.boss.phase === 2 ? this.cfg.boss.burst.everyMult : 1); // ST-134: enraged cadence
-          this.bossBurst();
+        if (this.boss.kind === 'monolith') { // ST-143: radial burst is Monolith-only (Splicer uses the spiral)
+          this.bossBurstTimer -= edt; // ST-134/ST-115: burst cadence slows under slow-mo
+          if (this.bossBurstTimer <= 0) {
+            this.bossBurstTimer += this.cfg.boss.burst.every * (this.boss.phase === 2 ? this.cfg.boss.burst.everyMult : 1); // ST-134: enraged cadence
+            this.bossBurst();
+          }
         }
       }
     }
@@ -343,19 +351,28 @@ export class World {
   spawnBossForWave(wave) {
     const b = this.cfg.boss;
     if (wave % b.everyWave !== 0 || this.boss) return;
-    const R = this.cfg.arena.radius - b.radius;
+    // ST-143: alternate the variant by boss-spawn count (0 = Monolith, 1 = Splicer, ...)
+    const useSplicer = this.bossSpawnCount % 2 === 1;
+    const rad = useSplicer ? this.cfg.splicer.radius : b.radius;
+    const R = this.cfg.arena.radius - rad;
     let pos = null, tries = 0;
     do {
       const a = this.rng.next() * Math.PI * 2;
       pos = v2(Math.cos(a) * R, Math.sin(a) * R);
       tries++;
     } while (Math.hypot(pos.x - this.ship.pos.x, pos.y - this.ship.pos.y) < 10 && tries < 8);
-    this.boss = new Monolith(this.rng, this.cfg, pos, bossHpForWave(this.cfg, wave)); // ST-064: endless-arc HP
-    this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056: fresh boss starts a full interval
+    if (useSplicer) {
+      this.boss = new Splicer(this.rng, this.cfg, pos, splicerHpForWave(this.cfg, wave)); // ST-143: variant 2
+      this.bossFireTimer = this.cfg.splicer.aimEvery; // ST-143: fresh Splicer starts a full aimed interval
+    } else {
+      this.boss = new Monolith(this.rng, this.cfg, pos, bossHpForWave(this.cfg, wave)); // ST-064: endless-arc HP
+      this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056: fresh boss starts a full interval
+    }
     this._bossPhaseEmitted = false; // ST-133: fresh boss, enrage not yet announced
     this.bossBurstTimer = this.cfg.boss.burst.every; // ST-134
     this.bossBursts = 0; // ST-134
-    this.emit('bossSpawn', { pos: { x: pos.x, y: pos.y }, wave, hp: this.boss.maxHp }); // ST-135: banner shows wave + HP
+    this.bossSpawnCount++; // ST-143
+    this.emit('bossSpawn', { pos: { x: pos.x, y: pos.y }, wave, hp: this.boss.maxHp, kind: this.boss.kind }); // ST-135/143
   }
 
   /** ST-055: the boss bursts a ring of S rocks fired radially outward from its position. */
@@ -392,13 +409,16 @@ export class World {
 
   /** ST-055: the boss dies - headline score (feeds the combo), splits into M rocks, FX event. */
   bossDeath() {
-    const b = this.cfg.boss;
-    const px = this.boss.pos.x, py = this.boss.pos.y;
-    const pts = this.scoreKeeper.kill(b.score, this.time);
+    const boss = this.boss;
+    const px = boss.pos.x, py = boss.pos.y;
+    const score = (typeof boss.score === 'number') ? boss.score : this.cfg.boss.score; // ST-143: per-variant
+    const split = (typeof boss.splitCount === 'number') ? boss.splitCount : this.cfg.boss.splitCount; // ST-143
+    const splitSize = boss.splitSize || 'M'; // ST-143
+    const pts = this.scoreKeeper.kill(score, this.time);
     this.emit('kill', { pos: { x: px, y: py }, size: 'boss', points: pts,
-      combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), boss: true });
-    for (let i = 0; i < b.splitCount; i++) this.field.spawn('M', 1, { x: px, y: py });
-    this.emit('bossDeath', { pos: { x: px, y: py } });
+      combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), boss: true, kind: boss.kind }); // ST-143: variant tag
+    for (let i = 0; i < split; i++) this.field.spawn(splitSize, 1, { x: px, y: py });
+    this.emit('bossDeath', { pos: { x: px, y: py }, kind: boss.kind }); // ST-143: variant tag
     this.boss = null;
   }
 
@@ -438,6 +458,26 @@ export class World {
     }
     this.bossBursts++;
     this.emit('bossBurst', { pos: { x: this.boss.pos.x, y: this.boss.pos.y }, fired });
+  }
+
+  /** ST-143: the Splicer's spiral bolts - undestroyable, fired from the boss pos along
+   * each queued unit direction (the pool cap may trim a shot). No FX event per shot:
+   * it is a continuous stream and the bolts render on their own. */
+  bossSpiralBolts(bolts) {
+    const s = this.cfg.splicer;
+    for (const d of bolts) {
+      this.enemyBullets.fire(this.boss.pos, { x: d.x, y: d.y }, s.boltSpeed);
+    }
+  }
+
+  /** ST-133/143: aimed-bolt cadence - per-variant, with the enrage multiplier. */
+  bossAimEvery() {
+    if (this.boss.kind === 'splicer') {
+      const s = this.cfg.splicer;
+      return s.aimEvery * (this.boss.phase === 2 ? s.phase2.aimEveryMult : 1);
+    }
+    const b = this.cfg.boss;
+    return b.fireEvery * (this.boss.phase === 2 ? b.phase2.ringEveryMult : 1);
   }
 
   /** ST-136: the WARDEN spawns on 5th waves where the Monolith did not (a
@@ -605,6 +645,7 @@ export class World {
     this._bossPhaseEmitted = false; // ST-133
     this.bossBurstTimer = this.cfg.boss.burst.every; // ST-134
     this.bossBursts = 0; // ST-134
+    this.bossSpawnCount = 0; // ST-143
     this.scoreKeeper.reset();
     this.waves.reset();
     this.powerups.clear();

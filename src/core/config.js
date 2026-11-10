@@ -146,6 +146,37 @@ export const CONFIG = {
     },
     score: 1000      // kill reward (the big one)
   },
+  splicer: {
+    // ST-143: boss variant 2 - an alternate pattern to the Monolith. Holds a slow
+    // orbit around the arena center and emits a continuous two-arm spiral of
+    // undestroyable bolts (a spinning sun the ship weaves through) + an aimed
+    // bolt. No rock rings, no radial burst. Spawned in alternation with the Monolith.
+    maxHp: 30,         // base HP (Monolith 40); scaled up by wave
+    hpFirstWave: 15,   // HP scale engages at this endless-curve wave
+    hpStep: 8,         // +HP per boss wave beyond hpFirstWave
+    hpCap: 72,         // ceiling (keeps the fight beatable)
+    radius: 2.6,       // between the Warden (1.7) and the Monolith (3.4)
+    score: 600,        // kill reward (Warden 400, Monolith 1000)
+    splitCount: 2,     // M rocks on death
+    splitSize: 'M',
+    holdRadius: 11,    // orbits the arena center at this radius
+    orbitSpeed: 0.5,   // rad/s around the center
+    spin: 0.4,         // body tumble rad/s (visual)
+    enterTime: 1.2,    // entrance seconds - no bolts until the intro plays
+    arms: 2,           // spiral arms (2 = two-arm spiral)
+    armSpin: 1.2,      // rad/s the arm rotates (spiral tightness)
+    spiralEvery: 0.26, // seconds between spiral shots (phase 2: x0.6)
+    boltSpeed: 7.0,    // undestroyable bolt u/s (== radial burst speed, dodgeable)
+    aimEvery: 2.6,     // seconds between aimed bolts (phase 2: x0.7)
+    phase2: {          // enrage below the HP threshold (one-way)
+      hpFrac: 0.5,
+      orbitSpeedMult: 1.4,
+      armSpinMult: 1.5,
+      spiralEveryMult: 0.6,
+      aimEveryMult: 0.7,
+      spin: 1.2,
+    },
+  },
   warden: {
     // ST-136: the WARDEN - armored drone mini-boss. Spawns on 5th waves where
     // the Monolith did not spawn (a previous Monolith is still alive): that

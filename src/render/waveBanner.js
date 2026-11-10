@@ -30,8 +30,8 @@ export function createWaveBanner(root) {
     el.style.fontSize = '40px';
   }
   function startCleared(n) { anim = { t: 0, dur: 1.2, text: '', subText: 'WAVE ' + n + ' CLEARED' }; el.style.fontSize = '0px'; }
-  function startBoss(n, maxHp) { // ST-135: boss intro banner (bigger, purple-tinted)
-    anim = { t: 0, dur: 2.2, text: 'THE MONOLITH', subText: 'WAVE ' + n + ' \u00b7 ' + maxHp + ' HP' };
+  function startBoss(n, maxHp, name) { // ST-135/143: boss intro banner (bigger, variant-tinted)
+    anim = { t: 0, dur: 2.2, text: name || 'THE MONOLITH', subText: 'WAVE ' + n + ' \u00b7 ' + maxHp + ' HP' };
     el.style.fontSize = '52px';
     el.style.color = '#c9a8ff';
   }

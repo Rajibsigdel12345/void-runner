@@ -37,6 +37,10 @@ export class Monolith {
     this.ringTimer = b.ringEvery; // first burst after one full interval
     this.rot = this.rng.next() * Math.PI * 2;
     this.phase = 1; // ST-133: 1 normal, 2 enrage (one-way)
+    this.kind = 'monolith'; // ST-143: variant tag (render + World.bossDeath)
+    this.score = b.score; // ST-143: headline kill score (World.bossDeath reads it)
+    this.splitCount = b.splitCount;
+    this.splitSize = 'M';
     this.entered = 0; // ST-135: entrance progress 0..1 (attacks gate on it)
   }
 

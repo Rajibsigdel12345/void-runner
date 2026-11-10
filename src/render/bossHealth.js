@@ -14,11 +14,20 @@ export function createBossHealth(root) {
   wrap.appendChild(bar);
   root.appendChild(wrap);
 
-  /** sync(boss): visible while the boss is alive; fill width = hpFrac. */
+  let _kind = ''; // ST-143: last-synced boss kind (avoids rewriting styles every frame)
+  /** sync(boss): visible while the boss is alive; fill width = hpFrac; label + tint per variant (ST-143). */
   function sync(boss) {
     if (!boss || !boss.alive) { wrap.style.opacity = '0'; return; }
     wrap.style.opacity = '1';
     fill.style.width = (Math.max(0, Math.min(1, boss.hpFrac)) * 100) + '%';
+    if (_kind !== boss.kind) {
+      _kind = boss.kind;
+      const sp = boss.kind === 'splicer';
+      label.textContent = sp ? 'SPLICER' : 'MONOLITH';
+      label.style.color = sp ? 'rgba(120,235,220,0.9)' : 'rgba(190,160,255,0.9)';
+      bar.style.borderColor = sp ? 'rgba(45,212,191,0.5)' : 'rgba(150,110,255,0.5)';
+      fill.style.background = sp ? 'linear-gradient(90deg,#14b8a6,#5eead4)' : 'linear-gradient(90deg,#8b5cf6,#c084fc)';
+    }
   }
 
   return { sync, wrap };
