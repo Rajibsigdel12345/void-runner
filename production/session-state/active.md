@@ -1,7 +1,7 @@
 # Active Session State
 
-- current_epic: Blender graphics pass (post-I100, I101+)
-- current_story: ST-106
-- current_iteration: I106
+- current_epic: E8 - Expansion Milestone (I107-I206)
+- current_story: ST-107
+- current_iteration: I107
 - branch: main
-- notes: Blender graphics pass COMPLETE (I101 art-bible -> I102 asset-spec -> I103 modeling -> I104 integration -> I105 verification -> I106 asset audit). I106: design/asset-audit.md authored (all 5 GLBs PASS: budgets, VR_ naming, hitbox parity maxR exactly 2.2/1.3/0.7, ~88 KB total, original bpy-modeled content, fetch-fail -> procedural fallback proven in browser); I104 record correction applied (ship group direct children stay 3 across the swap: ship_body -> 'Scene' root, not 6 -> 3). Non-blocking flags: no repo LICENSE (add before release), ship material-name override (cosmetic degrade only), corrupt-GLB parse branch untested. Next: user-directed (suggested: cgs-milestone-review or new scope).
+- notes: I107 done (cgs-scope-check: production/scope-check-E8.md - E8 approved as six phases P0-P6 = exactly 100 iterations; cut order: replay viewer -> string extraction -> boss variant 2; deferrals: i18n translations, online, gamepad, extra Blender assets, recorded audio). Baseline: 233/233, build 0, sequence 1..107, HEAD clean. Next: I108 cgs-create-epics (re-read skill) -> E8A-E8F sub-epics with outcomes/dependencies/gates in production/epics.md. House rules unchanged: core DOM-free, tunables in config.js, rng.js for all randomness, pooling, iteration log + CHANGELOG + active.md + commit every iteration, browser smoke where rendering changes.
