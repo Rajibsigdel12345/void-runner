@@ -1824,3 +1824,36 @@ One entry per iteration. Format:
 - Verification: npm test 630/630 (fresh); build exit 0 (fresh); sequence audit clean.
 - Result: DONE. ST-206 closed. E8 COMPLETE (100/100). Next E9 ST-207 (Blender GLTF pipeline
   refresh).
+## I207 - E9 opens: asset audit + GLB pipeline verification (cgs-asset-audit) (ST-207)
+- Skill: cgs-asset-audit (producer). E9 iteration 1 (ST-207 pipeline refresh).
+- Node structural audit (NEW tests/assetGlbs.test.js, 3 tests): all five GLBs
+  valid glTF 2.0 binaries (magic/version/declared-length, JSON+BIN chunks),
+  VR_ node + material names per asset-spec, poly budgets met (ship 254/300,
+  L 320/320, M 80/120, S 80/80, boss 192/250), rock max vertex radii EXACTLY
+  2.2/1.3/0.7 = CONFIG.asteroid.sizes, ship span 2.5 / length 1.9, boss
+  cross 4.36 (+6%) / height 9.0 (+2%), all files < 100 KB.
+- Browser pipeline verify (dev :5173, two scripted runs): 5/5 assets
+  ready:true; ship swap confirmed (procedural ship_body removed, GLB Scene
+  added, 2 flame meshes kept); wave-5 boss on the 384-vert GLB obelisk with
+  in-code material 0x3a3252 / emissive 0x7a4dff (GLB material correctly
+  non-authoritative); rock pool 10/10 on GLB geometry (2xL -> 960 verts,
+  8xM/S -> 240, matching live sizes SSMMLMLMSM); golden variant renders on
+  GLB geometry; 0 non-finite; combat frame steady 19 calls / 1566 tris
+  (within I45/I110 budgets); console 0/0 (1 expected adaptive INFO).
+- Fallback proof: all five GLB fetches aborted -> 5/5 ready:false, procedural
+  ship_body intact, clean MENU boot, exactly 5 designed loader warns
+  (+5 net errors from the intentional abort).
+- Research grounding (YouTube MCP; frames + metadata + chapters - transcripts
+  rate-limited at fetch time, queued, block not extended): Imphenzia
+  spaceship series (recessed faceted canopy, angular delta hull, 2-material
+  accent) -> ST-208; Sleep Fight Games asteroid method (icosphere + seeded
+  jitter + crater insets) -> ST-209; genre comps (Solaroids, Rocket!,
+  Disasteroids 3D, VOID ECHO) confirm REFINE-DO-NOT-RESTYLE. Appended to
+  design/art-direction-research.md.
+- Changed files: tests/assetGlbs.test.js (NEW), production/asset-audit.md
+  (NEW - E9 audit home), design/art-direction-research.md (+I207 section),
+  CHANGELOG.md, production/iterations.md, production/session-state/active.md.
+- Verification: npm test 633/633 (+3); node scripts/build.mjs exit 0;
+  browser smoke console 0/0; screenshots .evidence/I207/ (02-combat-glb,
+  03-boss-combat).
+- Result: DONE. ST-207 closed. Next I208 ST-208 (Blender ship model refresh).

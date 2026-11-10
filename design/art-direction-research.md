@@ -29,3 +29,51 @@ technical-art references, shmup game-feel write-ups (2025-2026).
 ## Proposed new story (added to E9 list)
 ST-217 | Post-processing polish pass: half-res bloom + additive particle trails + boss-kill flash / phase-2 hit-stop, all gated by the FX tier + adaptive quality; frame-time before/after evidence (browser: measure, screenshot) | browser.
 Runs AFTER ST-216 (assets + perf audit) so bloom has real emissive materials to work with and the perf audit baseline is clean.
+
+
+## I207 video grounding (ST-208+ prep, YouTube MCP 2026-11-10)
+Metadata + frames + chapters (transcripts rate-limited at fetch time; queued
+for re-fetch - do not extend the block). Sources:
+
+1. Imphenzia, "Let's Model a SPACESHIP in 10 MINUTES in Blender 2.81"
+   (335K views; youtu.be/IVXuPJuAMJ4). Frames 3:23 / 6:47 / 10:11. Method:
+   box-model an angular delta - extrude the hull from a cube, cut the cockpit
+   RECESSED into the hull (never a dome sitting on top), wide flat swept
+   wings as separate plates, 2-material scheme (hull + accent stripes).
+   Takeaway for ST-208: our current ship's 224-tri UV-sphere cockpit is the
+   antithesis of this language - replace with a recessed faceted canopy;
+   the 6-tri cone hull is too thin - a proper extruded delta reads at 2x the
+   silhouette presence with fewer tris.
+2. Imphenzia, "Low Poly Modular Spaceships in Blender 2.8" (125K views;
+   youtu.be/vZe00W_WDq0). Frames 4:57 / 9:54 / 14:51. Method: build from
+   flat plates + blocks (hull block, wing plates, engine modules), each part
+   a simple extrusion; assemble for a readable game-ready ship. Supports the
+   ST-208 merge target (hull+fin+wings as one delta mesh + canopy = 2 draw
+   calls).
+3. Sleep Fight Games, "How to model Low Poly Asteroids in Blender 2.8"
+   (youtu.be/tdmcq2wLetQ). Frames 2:39 / 5:19. Method: icosphere -> subdivide
+   -> seeded random vertex jitter -> flat shade; crater = select a face,
+   inset, push in. Validates our icosphere-base rocks; the ST-209 upgrade
+   lever is crater insets + more asymmetric jitter, not a new base shape.
+   Thumbnail shows the target read: large faceted asymmetry, gray, a few
+   dark facets.
+4. Curious Archive, "The Greatest Creature Design Ever" (1.1M views;
+   youtu.be/KotQ48nrteg). Chapters 9:29 Shape Language / 11:33 The Power of
+   Silhouette. Principle for all E9 models: silhouette-first - every model
+   must read at gameplay scale with color/emissive removed.
+5. Ansimuz, "Visual Legibility through contrast" (youtu.be/erqhG8MdnMw).
+   Supports the existing readability rule in this doc: shape + value +
+   motion carry threat; emissive is an accent, never the separator.
+6. Genre comps (closest similar games): Solaroids Prologue (classic
+   asteroids-style, youtu.be/_EKkVkrn260), Rocket! (arcade asteroid-style,
+   youtu.be/L7HqxlgskMg), Disasteroids 3D (OpenGL, youtu.be/Aq2dI5O6s3I),
+   2177Studios VOID ECHO (2026 Godot shmup WIP, youtu.be/qElaABSE2x8).
+   Common language: flat-shaded low-poly rocks, angular player craft,
+   high-contrast emissive accents on dark space - exactly Void Runner's
+   current art direction (confirms: refine, don't restyle).
+
+Verdict: the E9 pass is a REFINEMENT of the shipped art direction (same
+palette, same flat-shaded low-poly language), targeting: (a) ship silhouette
++ recessed canopy (ST-208), (b) rock crater/asymmetry variety (ST-209),
+(c) no restyle of the world. Do not over-engineer: no textures, no rigs,
+no morphs (asset-spec.md stands).

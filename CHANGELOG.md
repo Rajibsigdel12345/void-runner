@@ -1,6 +1,7 @@
 ﻿﻿﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I207: E9 opens: asset audit + GLB pipeline verification (cgs-asset-audit) - 5/5 GLBs valid, in-budget, radii exact; fallback proven; 3 new tests (ST-207)
 - I206: E8 closeout + gate G8.6 (cgs-milestone-review) - PASS, E8 CLOSED: sequence 1..206 complete (100/100 E8), 630/630 tests, build exit 0, regression B+C+D clean, playtest triaged (0 BUGs), release checklist SHIP-READY (code side); milestone review: tests 233->630, demo pin identical on dev+dist; transition verdict: proceed to E9 (Blender asset/art pass, ST-207+)
 - I205: Regression round D / E8 final sweep (cgs-regression-suite) - PASS: 3/3 matrix 630/630 (2 in-process + cross-process over 66 files), production-dist browser sweep 6/6 scenarios (full lifecycle, pause semantics, demo pin exact, persistence 4/4 after harness-assertion fix, finiteness sentinel-only), prior-bug re-checks green (F4/I151/replay/I79), console 0/0 - no code changes (ST-205)
 - I204: Release checklist E8 v3 (cgs-release-checklist) - production-dist smoke green (fresh-profile first-run tutorial on dist, critical path, pause/resume/quit, demo replay pin EXACT 2169/2220 + score 11334, console 0/0); build exit 0 (88 files, 1.82 MB raw, 449.6 KB gzip in budget); verdict SHIP-READY (code side); open items post-E8: 8 HUMAN-PENDING items + E9 Blender art pass (ST-204)
