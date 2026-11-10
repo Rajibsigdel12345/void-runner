@@ -3,6 +3,19 @@
 // reports a kill - World owns the spawned rocks/score so this stays testable.
 import { v2, v2Len } from './math.js';
 
+/** ST-134: radial burst geometry - pure, no rng, no DOM. `count` unit directions evenly
+ * around the circle, rotated by `offset`; each vector already scaled to burst speed.
+ * Exported so World and tests share one source of truth for the volley layout. */
+export function bossBurstVectors(cfg, offset) {
+  const b = cfg.boss.burst;
+  const out = [];
+  for (let i = 0; i < b.count; i++) {
+    const a = offset + (i / b.count) * Math.PI * 2;
+    out.push({ x: Math.cos(a) * b.speed, y: Math.sin(a) * b.speed });
+  }
+  return out;
+}
+
 /** ST-064: Monolith HP by wave - base for the campaign loop, climbing per boss from the
  * endless-curve wave, capped so the fight always stays beatable. Pure + deterministic. */
 export function bossHpForWave(cfg, wave) {

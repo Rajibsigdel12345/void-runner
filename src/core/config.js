@@ -136,6 +136,13 @@ export const CONFIG = {
       spin: 1.6,        // tumble rad/s in phase 2 (phase 1 is 0.3)
       ringEveryMult: 0.6 // ring + aimed-bolt cadence multiplier (2.0 -> 1.2 s)
     },
+    burst: {          // ST-134: radial bolt burst - fast, undestroyable (forces dodging)
+      every: 4.0,        // seconds between volleys (phase 2: x0.65)
+      count: 12,         // bolts per volley, evenly spaced around the circle
+      speed: 7.0,        // u/s (slower than the aimed bolt's 9 - reaction time)
+      offsetSpin: 0.45,  // rad of circle rotation added per volley (spiral drift)
+      everyMult: 0.65    // phase-2 cadence multiplier (4.0 -> 2.6 s)
+    },
     score: 1000      // kill reward (the big one)
   },
 

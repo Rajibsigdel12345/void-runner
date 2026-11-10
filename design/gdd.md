@@ -69,6 +69,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 ## Enemy Bullets (ST-056)
 
 - The MONOLITH fires an aimed bolt at the ship every 2.2s (speed 9 u/s).
+- The MONOLITH also fires a radial bolt burst (ST-134): every 4.0 s (2.6 s while enraged) 12 undestroyable bolts at 7 u/s, evenly around the boss and rotated 0.45 rad per volley (spiral drift); shares the 24-bolt pool, so a volley may be trimmed.
 - A MINE fires an aimed bolt only while the ship is within 7u of it, on a 3s cadence (speed 8 u/s).
 - Bolts share one pool capped at 24 concurrent; a bolt vanishes after 4.0s or once it leaves the arena.
 - A bolt touching the ship costs one life (same flow as rock contact; the 1.8s invulnerability applies).

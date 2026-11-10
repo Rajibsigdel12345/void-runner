@@ -5,7 +5,7 @@ import { Weapons } from './weapons.js';
 import { AsteroidField } from './asteroids.js';
 import { MineField } from './mines.js';
 import { DroneField } from './drones.js'; // ST-117
-import { Monolith, bossHpForWave } from './boss.js';
+import { Monolith, bossHpForWave, bossBurstVectors } from './boss.js';
 import { EnemyBulletField } from './enemyBullets.js';
 import { VortexField } from './vortex.js'; // ST-059
 import { bulletHitRock, shipHitRock } from './collision.js';
@@ -31,6 +31,8 @@ export class World {
     this.vortex = new VortexField(rng, cfg); // ST-059
     this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056
     this._bossPhaseEmitted = false; // ST-133: enrage event fires once per boss
+    this.bossBurstTimer = this.cfg.boss.burst.every; // ST-134
+    this.bossBursts = 0; // ST-134: volley count (spiral offset)
     this.events = [];
     this._eventSpare = [];
     this.scoreKeeper = new ScoreKeeper(cfg);
@@ -151,6 +153,11 @@ export class World {
         this.bossFireTimer += this.cfg.boss.fireEvery * (this.boss.phase === 2 ? this.cfg.boss.phase2.ringEveryMult : 1); // ST-133: enraged cadence
         const b = this.fireAimedBolt(this.boss.pos, this.cfg.enemyBullets.speed);
         if (b) this.emit('bossFire', { pos: { x: this.boss.pos.x, y: this.boss.pos.y } });
+      }
+      this.bossBurstTimer -= edt; // ST-134/ST-115: burst cadence slows under slow-mo
+      if (this.bossBurstTimer <= 0) {
+        this.bossBurstTimer += this.cfg.boss.burst.every * (this.boss.phase === 2 ? this.cfg.boss.burst.everyMult : 1); // ST-134: enraged cadence
+        this.bossBurst();
       }
     }
     this.resolveBulletMines(); // ST-054
@@ -314,6 +321,8 @@ export class World {
     this.boss = new Monolith(this.rng, this.cfg, pos, bossHpForWave(this.cfg, wave)); // ST-064: endless-arc HP
     this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056: fresh boss starts a full interval
     this._bossPhaseEmitted = false; // ST-133: fresh boss, enrage not yet announced
+    this.bossBurstTimer = this.cfg.boss.burst.every; // ST-134
+    this.bossBursts = 0; // ST-134
     this.emit('bossSpawn', { pos: { x: pos.x, y: pos.y } });
   }
 
@@ -384,6 +393,19 @@ export class World {
     const dx = this.ship.pos.x - fromPos.x, dy = this.ship.pos.y - fromPos.y;
     const d = Math.hypot(dx, dy) || 1;
     return this.enemyBullets.fire(fromPos, { x: dx / d, y: dy / d }, speed);
+  }
+
+  /** ST-134: radial bolt burst - `count` undestroyable bolts evenly on a circle,
+   * rotated by offsetSpin per volley (spiral drift); the pool cap may trim a volley. */
+  bossBurst() {
+    const b = this.cfg.boss.burst;
+    const vecs = bossBurstVectors(this.cfg, this.bossBursts * b.offsetSpin);
+    let fired = 0;
+    for (const v of vecs) {
+      if (this.enemyBullets.fire(this.boss.pos, { x: v.x / b.speed, y: v.y / b.speed }, b.speed)) fired++;
+    }
+    this.bossBursts++;
+    this.emit('bossBurst', { pos: { x: this.boss.pos.x, y: this.boss.pos.y }, fired });
   }
 
   /** ST-056: a bolt touching the ship costs a life (same flow as rock contact). */
@@ -483,6 +505,8 @@ export class World {
     this.vortex.reset(); // ST-059
     this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056
     this._bossPhaseEmitted = false; // ST-133
+    this.bossBurstTimer = this.cfg.boss.burst.every; // ST-134
+    this.bossBursts = 0; // ST-134
     this.scoreKeeper.reset();
     this.waves.reset();
     this.powerups.clear();

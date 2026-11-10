@@ -2,9 +2,9 @@
 
 - project: Void Runner (E:\Game, three.js, no bundler)
 - epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-134 (next)
-- current_iteration: I133 (committed)
+- current_story: ST-135 (next)
+- current_iteration: I134 (committed)
 - branch: main
-- tests: 353/353
+- tests: 360/360
 - build: exit 0
-- notes: I133 done (ST-133 boss phase 2, cgs-dev-story). Monolith enrages one-way below 50% HP: config.boss.phase2 {hpFrac .5, speedMult 1.45, turnMult 1.4, spin 1.6, ringEveryMult .6}; Monolith.phase + step() multipliers; World aimed-bolt cadence x0.6 + single 'bossPhase2' event (per-boss flag, reset at spawn + both reset paths). 353/353 (+8 tests/bossPhase2.test.js), build 0, A/B phase1 arm (w5 + seed 11 bit-identical; enrage windows double ring/fire tallies; hits flat at 3), browser smoke ?nocache=133 (phase 2 at 19/40, bossPhase2 === 1 per boss, 0 NaN, console 0/0, .evidence/I133_boss_phase2.png). Also committed: design/art-direction-research.md (E9 prep) + ST-217 in production/stories.md (post-processing polish, after ST-216). Next: I134 ST-134 boss radial burst pattern (core) - unit: burst geometry. NOTE: Blender 5.2.3 connected - E9 Blender Graphics & Assets epic (ST-207..216 + ST-217) runs after E8 closeout; use blender MCP tools there. Do NOT spawn sub-agents.
+- notes: I134 done (ST-134 boss radial bolt burst, cgs-dev-story). config.boss.burst {every 4.0, count 12, speed 7.0, offsetSpin 0.45, everyMult 0.65}; pure bossBurstVectors() in boss.js (no rng); World.bossBurst() via the 24-bolt pool + 'bossBurst' event; bossBurstTimer/bossBursts reset with boss state (3 places). 360/360 (+7 tests/bossBurst.test.js - note: timer refills are subtract-then-add, keep the overshoot in assertions; geometry asserts must be wrap-safe cos/sin, not raw atan2), build 0, playtest scenario sanity (4/6/5 volleys, hits flat 3), browser smoke ?nocache=134 (12 bolts live, tally 1, 0 NaN, console 0/0, .evidence/I134_boss_burst.png). Next: I135 ST-135 boss intro banner + entrance polish (browser). NOTE: Blender 5.2.3 connected - E9 Blender Graphics & Assets epic (ST-207..216 + ST-217) runs after E8 closeout; use blender MCP tools there. Do NOT spawn sub-agents.
