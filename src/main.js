@@ -33,7 +33,7 @@ import { createDebugOverlay } from './render/debugOverlay.js'; // ST-080
 import { createAdaptiveQuality } from './core/adaptiveQuality.js'; // ST-073
 import { createClock } from './core/clock.js'; // ST-078
 import { STATE } from './core/state.js';
-import { Storage } from './core/storage.js';
+import { Storage, toggleFxQuality } from './core/storage.js';
 import { CONFIG } from './core/config.js';
 import { World } from './core/game.js';
 import { dailyForDate } from './core/daily.js'; // ST-141
@@ -310,6 +310,15 @@ window.addEventListener('keydown', (e) => {
   } else if (e.key === 'm' || e.key === 'M') {
     muted = !muted;
     audio.setMuted(muted);
+  } else if (e.key === 'f' || e.key === 'F') { // I157: FX quality hotkey (HIGH <-> LOW)
+    const next = toggleFxQuality(storage.getSettings().fx);
+    const merged = storage.setSettings({ fx: next });
+    applySettings(merged);
+    adaptive.userSet(next); // I157: user choice overrides adaptive automation
+    if (fxPreviewFn) fxPreviewFn(next); // ST-067: live particle preview
+    menuSettings.sync();
+    pauseSettings.sync();
+    toast('FX ' + next.toUpperCase());
   }
 });
 const raycaster = new THREE.Raycaster();
@@ -503,6 +512,7 @@ function syncVisuals(dt) {
   // I36: reuse opts objects instead of allocating per frame
   hudOpts.best = bestScore;
   screenOpts.muted = muted;
+  screenOpts.fx = liveSettings.fx; // I157: pause screen F row
   screenOpts.best = bestScore;
   screenOpts.newBest = newBest;
   screenOpts.reducedMotion = motionOff; // I65: menu polish (reduced-motion gates the new animations)

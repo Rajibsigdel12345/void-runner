@@ -1,7 +1,7 @@
 ﻿// ST-018: persistent storage tests
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Storage, DEFAULT_SETTINGS, STORE_VERSION, migratePayload } from '../src/core/storage.js';
+import { Storage, DEFAULT_SETTINGS, STORE_VERSION, migratePayload, toggleFxQuality } from '../src/core/storage.js';
 import { CONFIG } from '../src/core/config.js';
 
 function memStore() {
@@ -342,4 +342,12 @@ test('storage: shapeCues defaults on, round-trips, and rejects bad types (I155)'
   assert.equal(a.setSettings({ shapeCues: 'no' }).shapeCues, true); // non-boolean -> default
   store.set(a.settingsKey, '{bad json');
   assert.equal(a.getSettings().shapeCues, true); // corrupt -> default, no throw
+});
+
+test('storage: toggleFxQuality flips tiers and treats unknown as high (I157)', () => {
+  assert.equal(toggleFxQuality('high'), 'low');
+  assert.equal(toggleFxQuality('low'), 'high');
+  assert.equal(toggleFxQuality(undefined), 'low'); // missing -> treated as high -> flips to low
+  assert.equal(toggleFxQuality('garbage'), 'low');
+  assert.equal(toggleFxQuality(toggleFxQuality('high')), 'high'); // double flip = identity
 });

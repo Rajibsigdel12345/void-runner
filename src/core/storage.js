@@ -22,6 +22,11 @@ export const DEFAULT_SETTINGS = Object.freeze({
 
 export const FONT_SCALES = Object.freeze([1, 1.25, 1.5]);
 
+/** I157: F hotkey - flip the FX quality tier. Anything that is not exactly 'low' is treated as 'high' (defensive; mirrors applySettings). */
+export function toggleFxQuality(fx) {
+  return fx === 'low' ? 'high' : 'low';
+}
+
 // Migration registry: key = the "from" version, value = (data) => next-version data.
 // Steps run in order from the stored version up to STORE_VERSION. v1 is the initial
 // shape so there is no live step yet; when the schema grows, add a step (e.g.

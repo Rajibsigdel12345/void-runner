@@ -69,7 +69,7 @@ export function createScreens(root, settings = {}) {
   controls.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:8px 22px;font-size:calc(14px * var(--vr-fs,1));margin-top:6px;padding:16px 24px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);'; // I65: controls card
   const CONTROL_ROWS = settings.touch // I71: touch vs keyboard instructions
     ? [['DRAG', 'fly the ship'], ['TOUCH', 'auto-fire'], ['2 FINGERS', 'pause']]
-    : [['WASD / ARROWS', 'thrust'], ['MOUSE', 'aim'], ['CLICK / SPACE', 'fire'], ['P / ESC', 'pause'], ['M', 'mute']];
+    : [['WASD / ARROWS', 'thrust'], ['MOUSE', 'aim'], ['CLICK / SPACE', 'fire'], ['P / ESC', 'pause'], ['M', 'mute'], ['F', 'fx']];
   for (const [k, v] of CONTROL_ROWS) {
     const key = document.createElement('div');
     key.style.cssText = 'text-align:right;';
@@ -162,12 +162,13 @@ export function createScreens(root, settings = {}) {
       } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
         e.preventDefault(); e.stopPropagation();
         actionButtons[(i - 1 + actionButtons.length) % actionButtons.length].focus();
-      } else if (e.key === ' ' || e.key === 'Enter' || e.key === 'Escape' || e.key === 'p' || e.key === 'P' || e.key === 'm' || e.key === 'M' || e.key === 'r' || e.key === 'R' || e.key === 'q' || e.key === 'Q') {
+      } else if (e.key === ' ' || e.key === 'Enter' || e.key === 'Escape' || e.key === 'p' || e.key === 'P' || e.key === 'm' || e.key === 'M' || e.key === 'r' || e.key === 'R' || e.key === 'q' || e.key === 'Q' || e.key === 'f' || e.key === 'F') {
         e.stopPropagation();
       }
     });
   }
   const muteLabel = line(paused, 'M — MUTE (OFF)', 'font-size:calc(13px * var(--vr-fs,1));letter-spacing:2px;opacity:0.7;');
+    const fxLabel = line(paused, 'F \u2014 FX (HIGH)', 'font-size:calc(13px * var(--vr-fs,1));letter-spacing:2px;opacity:0.7;'); // I157
   if (settings.pause) paused.appendChild(settings.pause.el); // ST-026 settings (pause)
 
   // --- GAME OVER ---
@@ -221,7 +222,7 @@ export function createScreens(root, settings = {}) {
   root.appendChild(overlay);
 
   /** @param {string} state @param {object} world @param {{muted:boolean, best:number, newBest:boolean}} opts */
-  function update(state, world, opts = { muted: false, best: 0, newBest: false, reducedMotion: false, scoresText: '' }) {
+  function update(state, world, opts = { muted: false, best: 0, newBest: false, reducedMotion: false, scoresText: '', fx: 'high' }) {
     overlay.classList.toggle('vr-reduced', !!opts.reducedMotion); // I65: gate menu animations
     showPanel(state);
     if (state === STATE.GAME_OVER) {
@@ -245,6 +246,7 @@ export function createScreens(root, settings = {}) {
     }
     if (state === STATE.PAUSED) {
       set('mute', muteLabel, `M — MUTE (${opts.muted ? 'ON' : 'OFF'})`);
+      set('fx', fxLabel, 'F \u2014 FX (' + (opts.fx === 'low' ? 'LOW' : 'HIGH') + ')'); // I157
       set('pauseSnap', pauseSnap, `SCORE ${world.score}    WAVE ${Math.max(1, world.wave)}    KILLS ${world.scoreKeeper.kills}`); // I44
     }
   }

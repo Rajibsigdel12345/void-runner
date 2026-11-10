@@ -138,7 +138,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
       e.preventDefault();
       e.stopPropagation();
       moveFocus(t, e.key === 'ArrowDown' ? 1 : -1);
-    } else if (e.key === ' ' || e.key === 'Enter' || e.key === 'Escape' || e.key === 'p' || e.key === 'P' || e.key === 'm' || e.key === 'M') {
+    } else if (e.key === ' ' || e.key === 'Enter' || e.key === 'Escape' || e.key === 'p' || e.key === 'P' || e.key === 'm' || e.key === 'M' || e.key === 'f' || e.key === 'F') {
       e.stopPropagation(); // native checkbox/select behavior still runs (no preventDefault)
     }
   });
