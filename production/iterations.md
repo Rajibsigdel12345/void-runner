@@ -725,3 +725,9 @@ One entry per iteration. Format:
 - Goal: break E8 into owner-sized stories per cgs-create-stories (story, acceptance criteria, verification kind) so every remaining iteration has a concrete contract.
 - Changed: production/stories.md (E8 section: 100 story rows ST-107..ST-206, one per iteration, each with an acceptance criterion and node/browser/doc verification kind; cuttable items ST-143/166/190/191 marked); CHANGELOG.md + active.md updated. No code changes.
 - Verification: story count 100 = iteration span; ST IDs map 1:1 onto I107-I206; every row has a testable acceptance clause; docs-only (233/233 + build exit 0, sequence 1..109); next I110 cgs-gate-check -> G8.0 entry gate (fresh baseline evidence + gate record in production/gates.md).
+
+## I110 - G8.0 entry gate: E8 expansion baseline verified (ST-110)
+
+- Goal: advisory entry gate for E8 (cgs-gate-check): confirm the baseline the 100-iteration expansion builds on before any gameplay code.
+- Changed: production/gates.md (G8.0 record: criteria, fresh evidence, concerns, verdict PASS, next owner); CHANGELOG.md + active.md updated. No code changes.
+- Verification: fresh runs this iteration - npm test 233/233; build exit 0; sequence 1..109 -> 1..110; E8A artifacts verified (scope-check + epics E8A-E8F + 100 story rows ST-107..206); browser dev :5173 boots MENU with __vr live; forced 20-rock + boss scene: 31 calls / 1500 tris, 0 NaN, PLAYING (menu ref 22 / 268); git clean at commit. Verdict: PASS -> I111 combo/score multiplier.

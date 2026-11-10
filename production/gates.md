@@ -99,3 +99,54 @@ Advisory gate on the E7 content/polish/hardening arc (I51-I95): is the code side
 
 ### Next owner or decision
 User-controlled next decision (advisory gate, non-blocking): proceed to I97 (milestone review + retrospective), then I98 (release-checklist), I99/I100 (regression + final wrap), then the Blender graphics pass (cgs-art-bible / cgs-asset-spec / cgs-asset-audit) as the final user-requested step. Owner for the outstanding human playtest: the user / a human QA session (out of bot scope).
+
+## I110 - G8.0 E8 Entry Gate (ST-110)
+
+- Date: 2026-11-10
+- Skill: cgs-gate-check (advisory entry gate for E8 Expansion Milestone)
+
+### Summary
+Entry gate before the first E8B gameplay iteration (I111). Verifies the
+baseline the 100-iteration expansion builds on: tests, build, iteration
+log discipline, browser health, and a fresh perf reference. All E8A
+planning artifacts (scope-check, epics, stories) must be in place.
+
+### Gate Criteria
+1. npm test green (baseline 233/233; E8 grows this to 300+ by I192).
+2. npm run build exit 0.
+3. Iteration sequence PASS 1..110 (no gaps/dupes); CHANGELOG + active.md current.
+4. E8A artifacts present: production/scope-check-E8.md, epics.md E8 (E8A-E8F + gates), stories.md ST-107..206 (100 rows).
+5. Browser healthy on dev :5173: boots to MENU, __vr live, forced 20-rock + boss scene renders with 0 NaN; fresh perf reference recorded.
+6. git working tree clean at the gate commit.
+
+### Evidence (collected this iteration)
+- node --test: 233/233 pass, 0 fail (fresh run).
+- node scripts/build.mjs: exit 0, "dist/ assembled (static, import-map modules)".
+- Sequence: PASS 1..109 pre-commit -> 1..110 post-commit (verified by script).
+- Artifacts: scope-check-E8.md (I107), epics.md E8 section with E8A-E8F + G8.0-G8.6 (I108), stories.md 100 E8 rows ST-107..206 verified by script (count 100, range 107..206).
+- Browser (dev :5173): boots MENU, window.__vr live; forced scene (restart + 20 spawned rocks + boss via spawnBossForWave(5), rendered through the live rAF loop): 31 draw calls / 1500 tris, 20 rocks + boss present, 0 NaN across ship + rocks, state PLAYING; menu ref 22 calls / 268 tris. (Reference scene has no bullets/particles; later phase gates measure under the same conditions for comparability.)
+- git: tree clean after this gate commit (4 doc files).
+
+### Concerns
+- Perf reference scene differs from the I105 forced scene (24 rocks + boss + live bullets/particles: 51 calls / 4052 tris); G8.0 records 20 rocks + boss quiescent (31 / 1500). Phase gates re-baseline under their own scenes; no regression implied.
+- E8 adds ~8 entity/system types; R-E8-4 (perf) and R-E8-1 (balance) are the tracked mitigations (per-gate perf checks, three balance passes).
+
+### Verdict
+PASS - proceed to E8B. I111: combo/score multiplier (core).
+
+### Risks
+- None new; R-E8-1..6 tracked in production/epics.md (E8 Risk Register).
+
+### Changed files
+- production/gates.md (this gate)
+- production/iterations.md (I110 entry)
+- CHANGELOG.md (I110 line)
+- production/session-state/active.md (state -> I110)
+
+### Verification evidence
+- All commands fresh-run this iteration (npm test, build, sequence script, browser probes via window.__vr).
+- Assumptions: none - every criterion verified directly.
+
+### Next owner or decision
+I111 (ST-111): score combo/multiplier in src/core (new module + config block, rng.js for any randomness, DOM-free, unit-tested). No user decision required (advisory gate, non-blocking).
+
