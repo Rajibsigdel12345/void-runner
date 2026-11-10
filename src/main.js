@@ -41,6 +41,7 @@ import { RNG } from './core/rng.js';
 import { damp, v2 } from './core/math.js';
 import { musicIntensityX } from './core/musicIntensity.js'; // I170
 import { timeWarpX } from './core/timeWarp.js'; // I172
+import { deathWarpX } from './core/deathWarp.js'; // I174
 
 const app = document.getElementById('app');
 
@@ -450,6 +451,7 @@ window.__vr.musicChord = () => audio.musicChord(); // I169: probe
 window.__vr.musicIntensity = (x) => audio.musicIntensity(x); // I169: probe
 window.__vr.musicIntensityVal = () => audio.musicIntensityVal(); // I170: probe
 window.__vr.timeWarp = (x, o) => audio.timeWarp(x, o); window.__vr.warpCents = () => audio.warpCents(); // I172: probes
+window.__vr.deathWarpT = () => _deathWarpT; // I174: probe (seconds left of the death-slow-mo window)
 window.__vr.lastShare = () => screens.lastShare(); // I159: probe
 
 // Fixed-timestep simulation (60Hz) with render at display rate (ST-078: the
@@ -526,6 +528,7 @@ else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, 
     if (e.type === 'vortexTelegraph') { vortexFx.onTelegraph(e.data.pos); } // ST-059 (state always advances; particles above are motion-gated)
     else if (e.type === 'vortexStart') { vortexFx.onStart(e.data.pos); }
     else if (e.type === 'vortexEnd') { vortexFx.onEnd(); }
+    else if (e.type === 'hit') _deathWarpT = CONFIG.music.warp.death.dur; // I174: death-slow-mo audio window (state-agnostic like the vortex chain - it is audio, not motion)
     if (e.type === 'shieldPop') {
       shieldRing.pulse();
     } else if (e.type === 'gameover') {
@@ -561,12 +564,15 @@ const hudOpts = { best: 0 };
 const screenOpts = { muted: false, best: 0, newBest: false };
 let _musicIntensity = 0; // I170 (ST-170): last applied music-intensity x (change-cached)
 let _timeWarp = 0; // I172 (ST-172): last applied time-warp x (change-cached)
+let _deathWarpT = 0; // I174 (ST-174): seconds left of the death-slow-mo audio window
 function syncVisuals(dt) {
   const st = world.game.state;
+  let _deathClosed = false; // I174: the death-slow-mo window just ended this frame (forces one exact push)
+  if (_deathWarpT > 0) { _deathWarpT = Math.max(0, _deathWarpT - dt); if (_deathWarpT === 0) _deathClosed = true; } // I174: decay the death-slow-mo window (state-agnostic so the tail settles even on the GAME_OVER frame)
   audio.ambience(st === STATE.PLAYING); // ST-083: ambience bed only while playing
   audio.music(st === STATE.PLAYING && liveSettings.music !== false); // I158: music bed (PLAYING + setting); idempotent start/stop
   if (st === STATE.PLAYING) { const mx = musicIntensityX(world, CONFIG.music.intensity); if (Math.abs(mx - _musicIntensity) > 0.02) { _musicIntensity = mx; audio.musicIntensity(mx); } } else { _musicIntensity = 0; } // I170: escalate drone intensity from wave + boss (change-cached; reset off-PLAYING so a (re)start re-applies)
-  if (st === STATE.PLAYING) { const wx = timeWarpX(world.enemyScale()); if (Math.abs(wx - _timeWarp) > 0.02) { _timeWarp = wx; audio.timeWarp(wx, CONFIG.music.warp); } } else { _timeWarp = 0; } // I172: bullet-time audio from the slow-mo power-up (change-cached; reset off-PLAYING so a (re)start re-applies)
+  if (st === STATE.PLAYING) { const wx = Math.max(timeWarpX(world.enemyScale()), _deathWarpT > 0 ? deathWarpX(_deathWarpT, CONFIG.music.warp.death.dur, CONFIG.music.warp.death.scale) : 0); if (_deathClosed || Math.abs(wx - _timeWarp) > 0.02) { _timeWarp = wx; audio.timeWarp(wx, CONFIG.music.warp); } } else { _timeWarp = 0; } // I172: bullet-time audio from the slow-mo power-up; I174: max() with the death-slow-mo window (deeper dilation wins; change-cached; forced exact push on window close - no stale sub-hysteresis tail; reset off-PLAYING)
   hud.setVisible(st === STATE.PLAYING || st === STATE.PAUSED);
   killFeed.setVisible(st === STATE.PLAYING); // I153: feed only while playing
   // I36: reuse opts objects instead of allocating per frame

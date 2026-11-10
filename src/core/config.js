@@ -14,7 +14,11 @@ export const CONFIG = {
     },
     warp: {           // I172 (ST-172): bullet-time (slow-mo) audio
       centsMax: 700,  // max pitch drop in cents at full warp (a tritone; slow-mo 0.4x lands at -420)
-      filterKeep: 0.3 // fraction of the intensity-opened filter kept at full warp (darken)
+      filterKeep: 0.3, // fraction of the intensity-opened filter kept at full warp (darken)
+      death: {            // I174 (ST-174): death slow-mo - the bed dilates briefly on a ship hit
+        scale: 0.25, // implied enemy scale at the moment of the hit (x = 1 - scale = 0.75 -> -525 cents)
+        dur: 0.8    // window (s) over which the dilation glides linearly back to 0
+      }
     }
   },
 

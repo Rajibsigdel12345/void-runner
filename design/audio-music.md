@@ -400,5 +400,99 @@ research time; no quotes used.
   6 rocks) 0; screenshot .evidence/I173/I173_1_playing_after_sfx_pass.png
   (WAVE 1 arena, HUD, rocks, grid).
 
+## ST-174 implementation (I174)
+
+### Audio Goal
+Death slow-mo (ST-174): every ship hit dilates the audio for 0.8s -
+a bullet-time death beat that sells the near-death moment. A
+world-wide time dilation was scoped out (it would touch the core
+sim, not just the audio seam), so the dilation is audio-only and
+reuses the I172 timeWarp seam: peak scale 0.25 (x0.75 speed, -525
+cents) at the hit frame, linear decay to 0 over 0.8s, composed with
+the slow-mo power-up warp via max() so the deeper dilation wins.
+
+### Mapping
+| Event | Before | After |
+|---|---|---|
+| hit (every hit, any life left) | none | 0.8s death window: peak x0.75 (-525 cents) at the hit frame, linear to 0; audio detune only, sim untouched |
+| hit while slow-mo power-up active | power-up warp only (x0.6, -420 cents) | max(power-up, death): death deepens it while open; forced exact push on close hands back to -420 |
+| final death (GAME_OVER) | bed stops + 3-note gameover stinger | unchanged - state leaves PLAYING, the stinger owns that moment |
+
+### Tunables
+- CONFIG.music.warp.death = { scale: 0.25, dur: 0.8 } (inside the
+  existing warp block). scale = peak time compression (x0.75 speed),
+  dur = window length in seconds. No new nodes or timers: the
+  existing detune path carries it.
+
+### Wiring
+- src/core/deathWarp.js (new, pure, DOM-free): deathWarpX(remain,
+  dur, deathScale) = (1-deathScale)*clamp(remain/dur, 0, 1) - the
+  exact composition of timeWarpX (proven by test).
+- src/main.js: _deathWarpT (seconds left); armed on hit in the
+  state-always-advances chain (state-agnostic like the vortex chain
+  - it is audio, not motion, so it also works with reduced motion);
+  decayed in syncVisuals; warp line is wx = max(timeWarpX(
+  enemyScale), death window) with the 0.02 hysteresis plus a forced
+  exact push on window close (see Fix below).
+- Probe: __vr.deathWarpT() (seconds left of the window).
+
+### Mix Target
+- Peak -525 cents (x0.75) sits between the slow-mo power-up (-420,
+  x0.6) and a full stop: a dramatic dip, not a freeze.
+- max() means a shallow hit window never masks the power-up warp, and
+  a hit on top of the power-up always deepens it (death > pickup).
+- On the final death the bed stops and the gameover stinger takes
+  over - the window only matters while PLAYING.
+
+### QA
+- 8 unit tests (tests/deathWarp.test.js): peak value, explicit 0 via
+  Object.is at remain 0, linear mid-values, monotonicity, clamps
+  (remain > dur, remain < 0), degenerate dur <= 0 and deathScale 1,
+  custom deathScale (float tolerance < 1e-12 - 1-0.9 is not
+  binary-exact), exact composition vs timeWarpX.
+- Browser smoke covers the full lifecycle including the stale-tail
+  regression (see Fix below).
+
+### Fix: stale sub-hysteresis tail (found in the first smoke)
+- Symptom: after the window ended, warpCents() sat stale at
+  -10.9375 (should be 0) and -426.56 (should be -420 with the
+  power-up active).
+- Root cause: the 0.02 hysteresis change-cache never pushes the
+  final sub-threshold step of a linearly decaying target - the last
+  decay increment is below 0.02, so the detune never snaps to the
+  exact final value.
+- Fix: track the window close this frame (_deathClosed) and force one
+  exact push, so the tail always lands on the exact max() value.
+- Lesson: any change-cached retarget of a decaying value needs a
+  forced exact push at the end.
+
+### Research (YouTube; metadata/chapters verified, transcripts
+rate-limited - see Coverage note)
+| Source | What it grounded |
+|---|---|
+| Rockstar Games - Max Payne 3 Design and Technology Series: 'Bullet Time' (youtu.be/td7Y6ISS3nk, 312K views, 3:08) | Dilation exists to even the odds / dramatize danger - grounds an audio dilation on hits. |
+| HeavynSent - The Influence Of Bullet Time In Gaming (youtu.be/gbhuqM098Yk, 6.5K views, 21:35) | Slow-mo as the dramatic 'death beat' - grounds a per-hit window, not a persistent state. |
+| HoumanRaps - Sandevistan in Real Time (youtu.be/Hn1UpCKrepo, 1.4M views) | Short, self-terminating dilation windows with their own aural identity - grounds the 0.8s auto-decay. |
+| 1up Indie - Freeze/bullet time effect [GameMaker Studio 2] (youtu.be/BSzl5aFMddo, 2.4K views; chapters 0:00 preview / 0:37 desaturate + fx layer) | The visual freeze recipe (desaturate + fx layer) - deferred to ST-176 (damage vignette), the visual half of this same beat. |
+
+Coverage note: titles/snippets/chapters only; transcripts rate-limited
+at research time; no quotes used.
+
+### Verification
+- Parse: node --check clean (main.js via .mjs copy).
+- npm test: 518/518 (+8 new deathWarp tests).
+- Build: node scripts/build.mjs exit 0.
+- Browser smoke ?nocache=174c (real Enter keypress -> PLAYING, audio
+  ctx running; ship invulnerable + settle loop): baseline
+  warpCents() exactly 0; A: emit hit + advance(0.05) -> deathWarpT
+  exactly 0.783333, cents -514.0625; B: 55 advances -> window 0 and
+  cents exactly 0 (stale tail gone); C1: slow-mo power-up -> -420;
+  C2: hit on top -> -514.0625 (deeper wins); D1: 12 advances ->
+  -426.56 (quantized handoff, within 10 of -420); D2: 35 advances to
+  close -> exactly -420 with slow-mo still active (forced close
+  push); E: 52 advances until slow-mo expires -> cents 0 (zero
+  drift at idle). Console 0 errors / 0 warnings; NaN scan (ship +
+  6 rocks) 0; screenshot .evidence/I174/I174_1_death_slowmo.png.
+
 ## Next
-ST-174 (I174): death slow-mo (reuse the timeWarp seam with a death scale ~0.8s).
+ST-175 (I175): shake table.
