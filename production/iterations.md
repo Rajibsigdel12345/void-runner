@@ -979,3 +979,12 @@ One entry per iteration. Format:
 - Browser smoke: dev :5173 ?nocache=140 - forced 4 normal + 5 belt rocks; in-scene material breakdown = exactly 5 meshes at metalness 0.9 (matBelt) and 4 at metalness 0.05 (normal brown 0x8a7f72) -> visual distinction confirmed in the scene; fired at a belt rock ~1.6 s -> beltHit delta 6, belt rock still alive (indestructible), 0 NaN, console 0/0. Perf at max load (24 normal + 5 belt = 29 rocks): 60 FPS. Screenshots: .evidence/I139/{belt_vs_normal,belt_hit_spark}.png, .evidence/I139b/{belt_vs_normal,belt_glow}.png (cold-glow peak).
 - Result: DONE. Next I140 ST-140 daily seeded run (core: date->seed, DAILY badge, unit: seed derivation + reproducibility).
 
+## I140 - Daily seeded run (core) (ST-140)
+
+- Design: a DAILY run is one canonical seeded run per calendar day. The seed is derived purely from the date (FNV-1a 32-bit over 'salt:YYYY-MM-DD'), so every player who starts the daily on the same day gets an identical run - a fair, comparable daily leaderboard. The seed is just a 32-bit int fed to the existing RNG/World; no core gameplay logic changes. The menu button + DAILY badge are I141 (browser).
+- Core: src/core/daily.js (new, DOM-free) - fnv1a(str) -> unsigned 32-bit; dailyKey(y,m,d) -> zero-padded 'YYYY-MM-DD'; dailySeed(y,m,d,salt='daily') -> fnv1a(salt + ':' + key); dailyRng(y,m,d,salt) -> new RNG(dailySeed(...)); dailyForDate(date,salt) -> {key,seed} for the local calendar day (1-based month; UI path, not the deterministic test path).
+- Config: config.daily {salt 'daily'} - namespaces the daily seed family (future-proofing; tests reference CONFIG.daily.salt).
+- Tests: 399/399 (was 389, +10 in tests/daily.test.js: config shape; fnv1a unsigned+deterministic+input-sensitive; dailyKey zero-padding; dailySeed 32-bit range; determinism (5 repeated calls); 7 spread dates -> 7 distinct seeds; salt namespacing (different salt differs, config salt == default); dailyForDate 1-based-month parity with the pure path; identical RNG stream from the same day; bit-identical 400-step World run (rock pos/vel snapshots at t=1s/3s/6.6s) from the same daily seed).
+- Build: 0. (Core-only - no rendering changed, no browser smoke.)
+- Result: DONE. Next I141 ST-141 daily UI (browser): DAILY button in the menu seeds the run from today + a DAILY badge on the score screen.
+

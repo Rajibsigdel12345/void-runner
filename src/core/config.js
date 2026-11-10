@@ -168,6 +168,12 @@ export const CONFIG = {
     size: 'M',         // rock size spec
     speed: [0.5, 1.1], // slow ambient drift u/s (random heading)
   },
+  daily: {
+    // ST-140: the DAILY run - one canonical seeded run per calendar day. The seed is
+    // derived from the date so every player on the same day shares an identical run
+    // (comparable daily leaderboard). Salt namespaces the scheme (future-proofing).
+    salt: 'daily',     // mixed into the FNV-1a hash before seeding the RNG
+  },
 
   mine: {
     // ST-054: mine drones - slow homing mines that chase the ship. 1 bullet kills
