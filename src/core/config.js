@@ -368,6 +368,7 @@ export const CONFIG = {
     hitStop: {                // ST-081: sim-freeze (render loop, motion-gated) in seconds
       bossDeath: 0.09,        // hit-stop when the boss dies
       bomb: 0.07,             // hit-stop on a bomb blast
+      bossPhase2: 0.04,       // ST-217: hit-stop on boss enrage (phase 2) entry (30-50 ms research window)
     },
     fovKick: {                // ST-082: dynamic FOV kick on high-impact events (degrees)
       decay: 5,               // kick decay (1/s, exponential)

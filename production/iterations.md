@@ -2088,3 +2088,34 @@ One entry per iteration. Format:
 - Changed: production/gates.md (+G9.0 block), production/epics.md (+E9 section + risk register), production/milestone-review.md (+E9 section), production/timeline.md (+E9 line), CHANGELOG.md, production/iterations.md, production/session-state/active.md. No src changes.
 - Verification: 670/670 fresh (this iteration); build exit 0 fresh (this iteration); log audit 1..216 (this iteration); .evidence/I216/01-gate-smoke.png; console 0/0.
 - Result: DONE. ST-216 closed. Next I217 ST-217 (post-processing polish: half-res bloom + boss-kill flash / phase-2 hit-stop, FX-tier + adaptive-gated, frame-time before/after).
+
+## I217 - Post-processing polish: half-res bloom + boss phase-2 hit-stop (cgs-dev-story) (ST-217)
+
+**Summary:** Closed ST-217 (art-direction research 2026-11-10, levers 1/2/3/4). (1) Half-res bloom: on every resize the bloom pass's internal bright pass + 5-mip chain is forced to half the composer resolution - the vendor pass downsamples its input 2x again, so the chain runs at 1/4 of the full frame and the pass composites the auto-upscaled glow at full res (visually unchanged). (2) Boss phase-2 (enrage) hit-stop: 40 ms sim-freeze, the only new juice of the spec - hit-stop only, no shake/flash (phase < death in the juice hierarchy). Levers 2 and 3 verified already-done: particle trails are already THREE.AdditiveBlending (particles.js line 23) and the boss-kill flash is already the ST-179 flashTable bossDeath entry (main.js juice branch) - documented, no code.
+
+**Story Goal:** Cut post-processing frame cost with no visible loss; add an impact beat on boss enrage.
+
+**Owner + Dependencies:** main agent; depends on I179 flashTable + I133 bossPhase2 core emit (both reused, unchanged).
+
+**Acceptance:**
+1. Bloom internal targets at half composer res on every resize - code + measured (see Verification).
+2. CONFIG.fx.hitStop.bossPhase2 inside the 30-50 ms research window, below bomb (0.07) and bossDeath (0.09) - unit-pinned.
+3. main.js juice branch on bossPhase2 (hit-stop + tally) inside the motion-gated chain - code-verified; core emit unit-tested for BOTH boss variants through full World steps.
+4. 676/676 tests, build 0, browser smoke green (rendering changed).
+
+**Build notes:**
+- src/render/bloom.js: resize(w,h) now also sets bloomPass.resolution.set(hw,hh) + bloomPass.setSize(hw,hh) (hw/hh = floor(w*0.5), min 1); ST-217 comment block documents the effective 1/4 (vendor setSize halves again).
+- src/core/config.js: fx.hitStop.bossPhase2: 0.04.
+- src/main.js: else if (e.type === 'bossPhase2') branch after bossSpawn - hitStop = max(hitStop, 0.04) + juiceTally.record; motion-gated like the rest of the chain.
+- tests/bossPhase2.test.js REPAIRED + EXTENDED: the prior ST-217 draft had CLOBBERED the 8 I133 tests in this same file (root cause of the 668-instead-of-676 count anomaly). The 8 I133 tests are restored verbatim; 6 new ST-217 tests appended: config window; enrage emits exactly once with finite pos + exact hpFrac (seed 61); no re-emit across 60 re-hits kept at 40% HP (seed 62); full-HP hits never emit (seed 63); fresh boss re-arms the flag (seed 64, one bullet per step kill + respawn); Splicer variant single emit (seed 65 - needs a warm-up step: forcing entered = 1 snaps the orbit to the hold radius on the next step, so a pre-placed bullet misses by ~12 u).
+
+**Changed:** src/render/bloom.js, src/core/config.js, src/main.js, tests/bossPhase2.test.js, docs.
+
+**Verification:**
+- npm test: 676/676 (was 670 = 652 base + ... net +6 after restoring the 8 clobbered I133 tests; no test lost).
+- node scripts/build.mjs: exit 0. dist 1940.6 KB raw (was 1939.2; +1.4 KB code-only), gzip re-measured this iteration (see active.md).
+- Bloom cost, same scripted pilot + same probe as the BEFORE run: BEFORE (full-res) 170 frames, raw avg 3.183 ms, max 51.7 (cold compile); AFTER steady (66 frames after 30-frame warm-up; no cold frame in window - max 5.2): avg 2.586 ms, p50 2.3, p95 4.3, max 5.2. The whole post chain (RenderPass + bloom + OutputPass) is ~11% cheaper in steady state; the bloom chain itself runs at 1/4 internal res.
+- Smoke ?nocache=217a (browser closed first): 15/15 assets + skybox ready, PLAYING through a 13.1 s pilot then continued to t=73.05 s (9099 pts / 52 kills), ship/rocks all finite, 40 calls / 866 tris / 25 programs, console 0/0 (errors + warnings). Screenshot .evidence/I217/01-halfres-bloom.png - glow clearly visible on engine trail, bullets and rocks.
+- bossPhase2 e2e juice probe: SKIPPED (a ~138 s scripted boss drive is flaky; the handoff allows the skip) - branch verified by code inspection (one line in the motion-gated juice chain) + the core emit is unit-covered for Monolith AND Splicer through full World steps.
+
+- Result: DONE. ST-217 closed. Next I218: E9 final closeout (milestone review final + gate + timeline) - ST-217 was the last queued art story.
