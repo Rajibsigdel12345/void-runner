@@ -188,3 +188,22 @@ gate, E9).
   L <= ~320, M <= ~120, S <= ~80), then begin model work (ship first).
 - Human playtest (when available): the 8-item HUMAN-PENDING checklist (production/bug-triage.md
   Triage v2).
+
+## E9 - Blender Graphics & Assets (I207..I216) - G9.0 PASS (I216)
+
+### Summary
+E9 delivered the user-requested Blender art pass: 15 low-poly GLBs + an equirect nebula skybox replace/augment the procedural visuals (ship delta w/ canopy gem, vertex-color mottled asteroid L/M/S, jagged-obelisk boss + plate armor shell, 7 powerup emblems, dart drone, arena ring, skybox), plus PBR-lite IBL environment lighting and an emissive engine trail. All within existing budgets: 15 GLBs = 111.3 KB / 1021 tris, dist 1939.2/501.3 KB (<=2048/550), no perf bottleneck (I214), procedural fallback intact, determinism untouched (assets are render-layer only).
+
+### Metrics
+- Tests: 630 -> 670 (+40: assetGlbs, skybox/ring audits, engineTrail, assetPerf, e9Batch 18).
+- Iterations: I207..I216, 10 logged, sequential (audit I216).
+- Assets: 15 GLBs + 1 skybox PNG (16 runtime assets); runtime 280 pooled meshes over 26 unique geometries.
+- Gate: G9.0 PASS (I216).
+
+### Concerns
+- 8 HUMAN-PENDING perception items from the E8 playtest (2 ART/AUDIO: kill-juice sparsity P2, boss music spike mix) remain the player-experience evidence gap.
+- ST-217 (post-processing polish) queued per the 2026-11-10 art research; E9 art direction continues through it, then E9 closeout.
+- Low-end physical device / GPU validation untested (adaptive quality I73 mitigates).
+
+### Verdict
+**PASS - E9 asset phase (ST-207..216) closed at I216.** Next: I217 ST-217 post-processing polish, then E9 closeout.

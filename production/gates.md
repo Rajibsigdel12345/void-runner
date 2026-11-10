@@ -537,3 +537,42 @@ E8 Expansion Milestone (I107-I206) is CLOSED.
   refresh (ST-207), ship model (ST-208), asteroid L/M/S models (ST-209-210), boss model
   (ST-211), skybox/arena ring (ST-212) - plus the 8 HUMAN-PENDING items when a human is
   available.
+
+## G9.0 - E9 Blender asset milestone gate (I216)
+
+### Summary
+Gate check for the E9 Blender graphics & assets milestone (ST-207..216) per cgs-gate-check. Advisory gate; verdict PASS with carry-overs (8 HUMAN-PENDING perception items, 2 of them ART/AUDIO; ST-217 post-processing polish queued).
+
+### Gate Criteria
+1. Pipeline: Blender->GLB->GLTFLoader runtime path works, with procedural fallback when a GLB fails.
+2. Assets: all 15 GLBs + skybox PNG load at runtime; per-asset poly/tri/file/attribute budgets met.
+3. Performance: asset profile within budget, no bottleneck (draw calls / tris / VRAM).
+4. Quality: fresh test suite green, fresh build green, dist within budget, fresh browser smoke clean (console 0/0, finite).
+5. Documentation: asset audit + perf report + iteration log 1..216 sequential (no gaps/dups).
+
+### Evidence
+- (1) I207: pipeline live + fallback proven (5/5 aborted loads -> procedural boot, exactly 5 warns, 0 errors).
+- (2) I216 fresh smoke (?nocache=216a): 15/15 ready + skybox; per-story smokes I208-I213 (ship 40 tris; rocks 320/104/80; boss 96 + shield 80; 7 emblems 16..48 + drone 52; skybox 1024x512 + ring 48 tris; 88/88 standard mats @ envMapIntensity 0.55). Budgets pinned by tests/assetGlbs.test.js + tests/assetPerf.test.js (green in the fresh 670/670).
+- (3) I214: 15 GLBs = 111.3 KB files / 92.9 KB parsed geo / 1021 tris / 17 materials / 0 UV2; runtime 280 pooled meshes over 26 unique geometries; ~5.5 MB GPU textures; 43 calls / 962 tris / 36 programs mid-run; NO bottleneck (largest asteroid_L 36.8 KB deliberate; 512x256 skybox option documented, deferred).
+- (4) I216 fresh: npm test 670/670; node scripts/build.mjs exit 0; dist 1939.2 KB raw / 501.3 KB gzip (budget <=2048/<=550); fresh smoke ?nocache=216a: 15/15, 8 s pilot -> PLAYING 15 kills / 2668 pts, all finite, 25 calls / 162 tris / 20 programs, console 0/0. Screenshot .evidence/I216/01-gate-smoke.png.
+- (5) production/perf-profile.md ## I214 + production/asset-audit.md; I216 log audit: 215 entries 1..215 sequential (no gaps/dups), I216 appended -> 1..216.
+
+### Concerns
+- The 8 HUMAN-PENDING perception items remain the player-experience evidence gap; 2 are ART/AUDIO (kill-juice sparsity P2, boss music spike mix).
+- ST-217 (post-processing polish: half-res bloom, boss-kill flash / phase-2 hit-stop) is queued per the 2026-11-10 art research; the E9 art direction continues through it.
+- Low-end physical device / GPU validation untested (adaptive quality I73 mitigates).
+
+### Verdict
+**PASS - E9 asset phase (ST-207..216) gate-verified.** 15/15 Blender assets + skybox within budgets, fallback proven, no perf bottleneck, fresh suite/build/smoke green, log 1..216 sequential.
+
+### Risks
+- R-E9-1..4 carried (epics.md E9 risk register); 8 HUMAN-PENDING items; dist gzip headroom ~49 KB (ST-217 needs a size review).
+
+### Changed files
+- production/gates.md (this block), production/epics.md (+E9 section), production/milestone-review.md (+E9 section), production/timeline.md, CHANGELOG.md, production/iterations.md, production/session-state/active.md.
+
+### Verification evidence
+- npm test 670/670 (fresh, this iteration); node scripts/build.mjs exit 0 (fresh, this iteration); log audit 1..216 sequential (this iteration); .evidence/I216/01-gate-smoke.png.
+
+### Next owner / decision
+- I217 ST-217: post-processing polish pass (half-res bloom + boss-kill flash / phase-2 hit-stop, FX-tier + adaptive-gated, frame-time before/after) per design/art-direction-research.md; then E9 closeout.
