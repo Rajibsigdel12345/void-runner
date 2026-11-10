@@ -1059,3 +1059,15 @@ One entry per iteration. Format:
 - Concern: the bossPhase2 announce did not appear in the live event tally (synchronous hit() probe skips the step tick); once-only emission is locked by tests/bossPhase2.test.js:89. No defect implied.
 - Verdict: PASS. Full gate doc per the cgs-gate-check output contract: production/gates.md.
 - Result: DONE. Next I148 ST-148 regression round A (extended browser).
+
+## I148 - Regression round A: extended soak, node + browser (ST-148)
+
+- Scope: ST-148 per the I147 gate Next owner - longer real-time runs across the E8C systems (waves 1-20+ with boss + Warden + belt + mines + drones + vortex) and game-over/restart cycles under load.
+- Recon: waves advance by clear or the 45 s stall (cfg.wave.stallTime, I42); belt rocks are persistent (never destroyed) and count in field.count, so waves 8+ always stall-advance - the soak therefore holds every system live for the full run.
+- Node: new tests/regressionA.test.js (3 tests). (1) 20-wave invuln auto-fire soak with a 900 s hard cap and invariant checkpoints every 60 s (no non-finite values, enemyBullets <= 24, belt <= 5, rocks <= 29, mines <= 10, drones <= 6, state PLAYING) - reached wave 24 in 900 s with strict boss alternation monolith@5 -> splicer@10 -> monolith@15 -> splicer@20, zero Warden (bosses outlived every 5th wave), belt at cap 5, weapon level 3. (2) 300 s soak bit-identical across two fresh runs (deepEqual over every 60 s checkpoint + the heavyweight events). (3) kamikaze-ship run: 3 hit events, exactly one gameover, then restart() verified (PLAYING, score 0, lives 3, boss/warden null, rocks/ebolts/mines empty) + 10 s healthy post-restart play.
+- Tests: 459/459 (was 456, +3), build 0.
+- Browser: dev :5173 ?nocache=148, one fresh tab, ~5.5 min wall extended soak (sim t=0 -> 441, waves 1-11) driven at ~2x via __vr.advance(1s, pilot) alongside the rAF loop. Both boss lifecycles completed live: Monolith w5 spawn -> phase 2 -> death and Splicer w10 spawn -> phase 2 -> death (bossBurst x5 rendered); belt grew to 4; mine + drone active; 519 kills; eb peak 13 (cap 24); rocks peak 22 (cap 29); deep NaN scan across 15 samples: 0 non-finite. Two forced death/restart cycles under load (died mid-wave 11 at score 133854, then wave 1 of the fresh run at score 4088): exactly one hit + one gameover event per death, 0 non-finite on the death frame, restart fully reset (PLAYING / score 0 / lives 3 / boss+warden null / empty pools).
+- Console: 0 errors / 0 warnings across the session (adaptive-quality INFO only).
+- Screenshot: .evidence/I148/I148_regression_run.png (wave 10: Splicer live + health bar, belt rock, mine M, golden + shielded rocks, COMBO 15 x2.4).
+- Findings: none. No regressions across the E8C system set over the extended soak or the death/restart cycles.
+- Result: DONE. Next I149 ST-149 fix round A findings (expected: no-findings close).
