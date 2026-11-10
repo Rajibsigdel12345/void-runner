@@ -1197,4 +1197,14 @@ One entry per iteration. Format:
 - Console: 0 errors / 0 warnings.
 - Screenshot: .evidence/I160/I160_hud_combo_active.png.
 - Result: DONE. ST-160 closed. Next I161 ST-161 a11y pass.
+## I161 - A11y pass: font scale, reduced-motion, focus (ST-161)
+- Goal: audit the three GDD accessibility pillars (focus ring, font scale, reduced motion) against everything E8D added (I152-I160) and close the gaps.
+- Review (cgs-ux-review): Accessibility - (a) FONT SCALE: killFeed/tutorialOverlay/screens/hud/toast/slow-mo hint all use --vr-fs already; gaps = waveBanner (40/52/15/0px hardcoded), scorePopups (15/22px), bossHealth label (10px) - these three never scaled with the NORMAL/LARGE/XL setting; (b) REDUCED MOTION: banner/popups/killFeed/tutorial/screens/hud-pop all gated; gap = slow-mo hint caption (I158) kept a 0.2s opacity fade under reduced motion; (c) FOCUS: unified gold ring covered #screens + .vr-settings + tutorial; gaps = the two standalone <button>s created in main.js (in-game touch pause, context-loss reload) had no ring rule. Friction/Comprehension - no changes needed (this pass is purely a11y).
+- Changed files: src/main.js (applySettings gates slow-mo hint transition on motionOff; pauseBtn.id/ctxBtn.id + one injected <style> with the unified gold :focus-visible rule for both), src/render/waveBanner.js (all 7 font-size writes -> calc(Npx * var(--vr-fs,1)); 0px hide -> 0), src/render/scorePopups.js (base + big/small -> calc()), src/render/bossHealth.js (label font -> calc()). GDD unchanged (it already promised all three behaviors; the implementation now matches).
+- Tests: 470/470 (unchanged - render-layer only; acceptance is browser).
+- Browser: Playwright (?nocache=161). (1) Font scale: forced showWave -> banner computed 40px at --vr-fs 1; set fontScale 1.5 via storage + applySettings -> --vr-fs 1.5, banner 60px, HUD score 24 -> 36px; restored 1. (2) Reduced motion: reducedMotion true -> #slowmo-hint transition 'none'; false -> 'opacity .2s' restored. (3) Focus: '#vr-pause-btn:focus-visible' rule found in document.styleSheets; the touch-gated pause button (display:none on desktop fine-pointer - line 568) forced visible + focus() -> :focus-visible true, outline solid rgb(255,224,138) (#ffe08a). Settings restored to defaults afterwards.
+- Console: 0 errors / 0 warnings.
+- Screenshot: .evidence/I161/I161_font_scale_xl.png (in-game at XL: WAVE 3 banner + scaled HUD).
+- Note: first patch run left an unterminated line in waveBanner.js (a global 40px replace embedded a '// comment' mid-line in the sync-reset one-liner, swallowing the rest of the line -> 'Unexpected end of input' at EOF). Caught by the parse-check gate before any browser run; fixed with a targeted repair and re-verified (node --check + import + full suite).
+- Result: DONE. ST-161 closed. Next I162 ST-162 test batch E8D (15+ new tests).
 

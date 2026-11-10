@@ -15,7 +15,7 @@ export function createScorePopups(root, camera) {
     el.style.cssText = [
       'position:fixed', 'z-index:9', 'pointer-events:none', 'user-select:none',
       'font-family:"Segoe UI",system-ui,sans-serif', 'font-weight:800',
-      'font-size:15px', 'letter-spacing:1px', 'color:#cfe4ff',
+      'font-size:calc(15px * var(--vr-fs,1))', 'letter-spacing:1px', 'color:#cfe4ff', // I161: font-scale
       'text-shadow:0 2px 8px rgba(0,0,0,0.9)',
       'transform:translate(-50%,-50%)', 'opacity:0', 'white-space:nowrap',
     ].join(';');
@@ -35,7 +35,7 @@ export function createScorePopups(root, camera) {
     it.x = x; it.y = y; it.t = 0; it.active = true; it.big = !!(opts && opts.big); it.gold = !!(opts && opts.gold); it.od = !!(opts && opts.od); // ST-057
     const el = els[items.indexOf(it)];
     el.textContent = text;
-    el.style.fontSize = it.big ? '22px' : '15px';
+    el.style.fontSize = it.big ? 'calc(22px * var(--vr-fs,1))' : 'calc(15px * var(--vr-fs,1))'; // I161: font-scale
     el.style.color = it.gold ? '#ffe27a' : it.od ? '#ff7ae8' : it.big ? '#ffd27a' : '#cfe4ff';
   }
 

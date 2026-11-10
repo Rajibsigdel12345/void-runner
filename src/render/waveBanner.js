@@ -11,11 +11,11 @@ export function createWaveBanner(root) {
     'pointer-events:none', 'text-align:center',
     'font-family:"Segoe UI",system-ui,sans-serif', 'color:#9fd0ff',
     'text-shadow:0 2px 14px rgba(0,0,0,0.9)',
-    'letter-spacing:8px', 'font-weight:800', 'font-size:40px',
+    'letter-spacing:8px', 'font-weight:800', 'font-size:calc(40px * var(--vr-fs,1))', // I161: font-scale
     'opacity:0', 'user-select:none',
   ].join(';');
   const sub = document.createElement('div');
-  sub.style.cssText = 'font-size:15px;letter-spacing:3px;font-weight:600;margin-top:8px;opacity:0.85;color:#cfe4ff;';
+  sub.style.cssText = 'font-size:calc(15px * var(--vr-fs,1));letter-spacing:3px;font-weight:600;margin-top:8px;opacity:0.85;color:#cfe4ff;'; // I161: font-scale
   el.appendChild(document.createTextNode(''));
   el.appendChild(sub);
   root.appendChild(el);
@@ -29,18 +29,18 @@ export function createWaveBanner(root) {
     if (endless) parts.push('ENDLESS');
     if (mod && MOD_LABELS[mod]) parts.push(MOD_LABELS[mod]);
     anim = { t: 0, dur: 1.8, text: 'WAVE ' + n, subText: parts.join(' \u00b7 ') };
-    el.style.fontSize = '40px';
+    el.style.fontSize = 'calc(40px * var(--vr-fs,1))'; // I161: font-scale
   }
   function startCleared(n) { // I154: gold big "CLEARED" + wave sub
     anim = { t: 0, dur: 1.2, text: 'CLEARED', subText: 'WAVE ' + n, tint: '#ffe08a', glow: '0 0 22px rgba(255,224,138,0.35), 0 2px 14px rgba(0,0,0,0.9)' };
-    el.style.fontSize = '40px';
+    el.style.fontSize = 'calc(40px * var(--vr-fs,1))'; // I161: font-scale
   }
   function startBoss(n, maxHp, name, kind) { // ST-135/143: boss intro (bigger, variant-tinted); I154: per-variant glow
     const splicer = kind === 'splicer';
     anim = { t: 0, dur: 2.2, text: name || 'THE MONOLITH', subText: 'WAVE ' + n + ' \u00b7 ' + maxHp + ' HP',
       tint: splicer ? '#7ff0e0' : '#c9a8ff',
       glow: splicer ? '0 0 26px rgba(127,240,224,0.5), 0 2px 14px rgba(0,0,0,0.9)' : '0 0 26px rgba(201,168,255,0.55), 0 2px 14px rgba(0,0,0,0.9)' };
-    el.style.fontSize = '52px';
+    el.style.fontSize = 'calc(52px * var(--vr-fs,1))'; // I161: font-scale
     el.style.color = splicer ? '#7ff0e0' : '#c9a8ff';
   }
 
@@ -69,7 +69,7 @@ export function createWaveBanner(root) {
       const inP = Math.min(1, anim.t / 0.4); // ST-088: entry slide-in over 0.4s
       const punch = motionOff ? 1 : 1 + 0.06 * (1 - easeOut(inP)); // I154: scale punch 1.06 -> 1.0
       el.style.transform = 'translateY(' + (motionOff ? 0 : (12 * (1 - easeOut(inP))).toFixed(1)) + 'px) scale(' + punch.toFixed(3) + ')'; // ST-088 + I154
-      if (anim.t >= anim.dur) { anim = null; el.style.opacity = '0'; el.style.fontSize = '40px'; el.style.color = '#9fd0ff'; el.style.textShadow = '0 2px 14px rgba(0,0,0,0.9)'; el.style.transform = 'translateY(0px) scale(1)'; sub.textContent = ''; el.firstChild.nodeValue = ''; } // I154: reset glow + scale
+      if (anim.t >= anim.dur) { anim = null; el.style.opacity = '0'; el.style.fontSize = 'calc(40px * var(--vr-fs,1))'; el.style.color = '#9fd0ff'; el.style.textShadow = '0 2px 14px rgba(0,0,0,0.9)'; el.style.transform = 'translateY(0px) scale(1)'; sub.textContent = ''; el.firstChild.nodeValue = ''; } // I154: reset glow + scale; I161: font-scale
       return;
     }
     // idle: intermission countdown
@@ -79,13 +79,13 @@ export function createWaveBanner(root) {
         lastCountdown = txt;
         el.firstChild.nodeValue = '';
         sub.textContent = txt;
-        el.style.fontSize = '0px'; // hide the empty big line
+        el.style.fontSize = '0'; // hide the empty big line (I161: 0 stays 0 at any scale)
       }
       el.style.opacity = '0.6';
     } else if (el.style.opacity !== '0') {
       lastCountdown = '';
       el.style.opacity = '0';
-      el.style.fontSize = '40px';
+      el.style.fontSize = 'calc(40px * var(--vr-fs,1))'; // I161: font-scale
       el.firstChild.nodeValue = '';
       sub.textContent = '';
     }

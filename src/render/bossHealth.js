@@ -4,7 +4,7 @@ export function createBossHealth(root) {
   wrap.style.cssText = 'position:fixed;top:54px;left:50%;transform:translateX(-50%);width:340px;max-width:60vw;opacity:0;pointer-events:none;transition:opacity 0.25s;z-index:30;text-align:center;';
   const label = document.createElement('div');
   label.textContent = 'MONOLITH';
-  label.style.cssText = 'font:600 10px/1 system-ui,sans-serif;letter-spacing:0.25em;color:rgba(190,160,255,0.9);margin-bottom:4px;';
+  label.style.cssText = 'font:600 calc(10px * var(--vr-fs,1))/1 system-ui,sans-serif;letter-spacing:0.25em;color:rgba(190,160,255,0.9);margin-bottom:4px;'; // I161: font-scale
   const bar = document.createElement('div');
   bar.style.cssText = 'height:10px;background:rgba(10,8,20,0.65);border:1px solid rgba(150,110,255,0.5);border-radius:5px;overflow:hidden;';
   const fill = document.createElement('div');

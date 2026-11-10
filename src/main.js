@@ -200,6 +200,7 @@ function applySettings(s) {
   liveSettings = s;
   fxCount = s.fx === 'low' ? CONFIG.fx.particleLow : CONFIG.fx.particleHigh;
   motionOff = s.reducedMotion === true;
+  slowmoHintEl.style.transition = motionOff ? 'none' : 'opacity .2s'; // I161: no fade under reduced motion
   setUiScale(); // I70+I71: UI scale = fontScale x viewport (cascades to DOM overlays only; canvas unaffected)
   bloom.setEnabled(s.fx === 'high');
   if (audio.state() !== 'uninitialized') { audio.setVolume(s.volume); audio.setSfx(s.sfx); }
@@ -307,6 +308,7 @@ const input = createInput({ onPause: togglePause });
 // I71: on-screen pause button (touch devices; shown during PLAYING only)
 const pauseBtn = document.createElement('button');
 pauseBtn.type = 'button';
+pauseBtn.id = 'vr-pause-btn'; // I161: focus-ring selector
 pauseBtn.setAttribute('aria-label', 'Pause');
 pauseBtn.textContent = '\u275A\u275A';
 pauseBtn.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:30;display:none;pointer-events:auto;cursor:pointer;box-sizing:border-box;align-items:center;justify-content:center;width:calc(46px * var(--vr-fs,1));height:calc(46px * var(--vr-fs,1));border-radius:50%;border:1px solid #2b4a8a;background:rgba(10,18,40,0.82);color:#cfe4ff;font-size:calc(14px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;padding:0;';
@@ -401,12 +403,15 @@ ctxStatus.id = 'ctx-status';
 ctxStatus.textContent = 'The browser dropped the 3D rendering context. It usually comes back on its own - please wait.';
 const ctxBtn = document.createElement('button');
 ctxBtn.type = 'button';
+ctxBtn.id = 'vr-ctx-btn'; // I161: focus-ring selector
 ctxBtn.textContent = 'RELOAD GAME';
 ctxBtn.style.cssText = 'margin-top:8px;font:calc(14px * var(--vr-fs,1))/1 ui-monospace,monospace;letter-spacing:.12em;color:#0a0f1e;background:#9fb4d8;border:0;border-radius:4px;padding:10px 22px;cursor:pointer;';
 ctxBtn.addEventListener('click', () => { location.reload(); });
 ctxOverlay.appendChild(ctxTitle);
 ctxOverlay.appendChild(ctxStatus);
 ctxOverlay.appendChild(ctxBtn);
+// I161: the gold focus ring also covers the two standalone <button>s (in-game pause + context-loss reload).
+document.head.appendChild(Object.assign(document.createElement('style'), { textContent: '#vr-pause-btn:focus-visible,#vr-ctx-btn:focus-visible{outline:2px solid #ffe08a;outline-offset:2px;}' }));
 document.body.appendChild(ctxOverlay);
 let ctxRestoreTimer = 0;
 renderer.domElement.addEventListener('webglcontextlost', (e) => {
