@@ -73,6 +73,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 - Armor 6 absorbs player hits first (one wardenArmor ping event per absorbed hit); then 12 HP chip away - 18 hits total to kill.
 - 1.7 radius, bounded homing 2.4 u/s - faster and smaller than the Monolith. +400 points (between seeker 200 and Monolith 1000). On death it splits into 2 small rocks (wardenDeath event).
 - Contact costs 1 ship life and the WARDEN survives the hit (mirrors boss contact).
+- Readability (I137): the WARDEN glows cyan while its armor holds and shifts to a hot orange pulse once the armor is spent (the hex armor plate retracts), so armor state reads at a glance; a "WARDEN INBOUND" toast announces the spawn and the death plays a mini-boss burst with the score popup.
 
 ## Enemy Bullets (ST-056)
 

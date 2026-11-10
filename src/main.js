@@ -9,6 +9,7 @@ import { createAssetLoader } from './render/assetLoader.js'; // I104
 import { createMineRenderer } from './render/mineMesh.js';
 import { createDroneRenderer } from './render/droneMesh.js'; // ST-117
 import { createBossMesh } from './render/bossMesh.js';
+import { createWardenMesh } from './render/wardenMesh.js'; // ST-137
 import { createBossHealth } from './render/bossHealth.js';
 import { createEnemyBulletRenderer } from './render/enemyBulletMesh.js';
 import { createPowerupRenderer } from './render/powerupMesh.js';
@@ -86,6 +87,7 @@ const rockRenders = createAsteroidRenderer(scene);
 const mineRenders = createMineRenderer(scene); // ST-054
 const droneRenders = createDroneRenderer(scene); // ST-117
 const bossMesh = createBossMesh(scene); // ST-055
+const wardenMesh = createWardenMesh(scene); // ST-137
 // I104: GLB assets (Blender pass) - fire-and-forget load with procedural
 // fallback: renderers start procedural and each asset swaps in as it loads.
 const assetLoader = createAssetLoader();
@@ -134,7 +136,7 @@ let fxCount = 0;
 let motionOff = false;
 let liveSettings = storage.getSettings(); // ST-026: settings panel keeps this fresh (audio consumes in I27)
 // Audio (ST-027): WebAudio synth, initialized on first user gesture.
-const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', waveCleared: 'cleared', gameover: 'gameover', nearmiss: 'swish', mineExplode: 'mine', bossSpawn: 'bossSpawn', bossRing: 'bossRing', bossDeath: 'bossDeath', bossFire: 'bossFire', mineFire: 'mineFire', vortexTelegraph: 'vortexTelegraph', vortexStart: 'vortexStart', droneExplode: 'drone', weaponLevelUp: 'levelUp', rockShieldHit: 'shieldHit', droneDecay: 'drone' }; // ST-059/ST-117/ST-123/ST-127/ST-129 (decay reuses the seeker zap cue)
+const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', waveCleared: 'cleared', gameover: 'gameover', nearmiss: 'swish', mineExplode: 'mine', bossSpawn: 'bossSpawn', bossRing: 'bossRing', bossDeath: 'bossDeath', bossFire: 'bossFire', mineFire: 'mineFire', vortexTelegraph: 'vortexTelegraph', vortexStart: 'vortexStart', droneExplode: 'drone', weaponLevelUp: 'levelUp', rockShieldHit: 'shieldHit', droneDecay: 'drone', wardenSpawn: 'bossSpawn', wardenArmor: 'shieldHit', wardenDeath: 'bossDeath' }; // ST-059/ST-117/ST-123/ST-127/ST-129/ST-137 (decay reuses the seeker zap cue; the warden reuses boss/shield cues)
 
 const audio = createAudio();
 audio.setVolume(liveSettings.volume);
@@ -277,7 +279,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, bossMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -367,6 +369,7 @@ function tick(dt, intent) {
     if (e.type === 'wave') banner.showWave(e.data.n, e.data.mod, e.data.endless);
     else if (e.type === 'waveCleared') banner.showCleared(e.data.n);
     else if (e.type === 'bossSpawn') banner.showBoss(e.data.wave, e.data.hp); // ST-135: boss intro
+    else if (e.type === 'wardenSpawn') toast('WARDEN INBOUND'); // ST-137: mini-boss callout
     else if (e.type === 'kill') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 || e.data.golden || e.data.boss, gold: !!e.data.golden, od: !!e.data.overdrive }); // ST-030/052
     else if (e.type === 'nearmiss') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points); // ST-053 (plain small popup)
     else if (e.type === 'weaponLevelUp') toast('WEAPON LEVEL ' + e.data.level); // ST-123
@@ -379,6 +382,9 @@ else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, 
       else if (e.type === 'bossSpawn') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.boss, speed: 8, life: 0.7 }); shake.trigger(0.7); flashA = Math.min(0.8, flashA + 0.4); } // ST-055
       else if (e.type === 'bossRing') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.6), palette: CONFIG.fx.palette.boss, speed: 7, life: 0.4, shape: 'ring' }); // ST-055
       else if (e.type === 'bossDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount * 2, palette: CONFIG.fx.palette.bossKill, speed: 14, life: 0.8, shape: 'ring' }); shake.trigger(1.0); flashA = Math.min(0.8, flashA + 0.5); hitStop = Math.max(hitStop, CONFIG.fx.hitStop.bossDeath); punch.trigger({ x: 0, y: 0.7, z: 0.5 }, 1.0); fovKick.trigger(CONFIG.fx.fovKick.bossDeath); } // ST-055/ST-081/ST-082
+      else if (e.type === 'wardenSpawn') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.boss, speed: 8, life: 0.6 }); shake.trigger(0.5); flashA = Math.min(0.8, flashA + 0.25); } // ST-137: mini-boss arrival
+      else if (e.type === 'wardenArmor') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.max(6, Math.ceil(fxCount * 0.4)), palette: CONFIG.fx.palette.shield, speed: 6, life: 0.3 }); // ST-137: armor ping (mirrors rockShieldHit)
+      else if (e.type === 'wardenDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount * 2, palette: CONFIG.fx.palette.bossKill, speed: 12, life: 0.7, shape: 'ring' }); shake.trigger(0.8); flashA = Math.min(0.8, flashA + 0.4); hitStop = Math.max(hitStop, CONFIG.fx.hitStop.bossDeath * 0.6); punch.trigger({ x: 0, y: 0.7, z: 0.5 }, 0.8); fovKick.trigger(CONFIG.fx.fovKick.bossDeath * 0.6); } // ST-137
       else if (e.type === 'bossFire') particles.burst(e.data.pos.x, e.data.pos.y, { count: 5, palette: CONFIG.fx.palette.mine, speed: 4, life: 0.25 }); // ST-056 muzzle
       else if (e.type === 'mineFire') particles.burst(e.data.pos.x, e.data.pos.y, { count: 4, palette: CONFIG.fx.palette.mine, speed: 3, life: 0.2 }); // ST-056 muzzle
       else if (e.type === 'powerup' && e.data.type === 'overdrive') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.power, speed: 8, life: 0.5, shape: 'fountain' }); flashA = Math.min(0.8, flashA + 0.15); } // ST-057 pickup flash
@@ -453,6 +459,7 @@ function syncVisuals(dt) {
   mineRenders.sync(world.mines, simT); // ST-054
   droneRenders.sync(world.drones, simT); // ST-117
   bossMesh.sync(world.boss, simT); // ST-055
+  wardenMesh.sync(world.warden, simT); // ST-137
   bossHealth.sync(world.boss); // ST-055
   enemyBulletRenders.sync(world.enemyBullets, simT); // ST-056
   powerupRenders.sync(world.powerups, dt);
