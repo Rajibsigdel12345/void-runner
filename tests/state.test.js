@@ -33,7 +33,7 @@ test('state: illegal transitions are no-ops', () => {
   assert.ok(!g.to(STATE.MENU), 'PLAYING->MENU illegal');
   g.to(STATE.GAME_OVER);
   assert.ok(!g.to(STATE.PAUSED), 'GAME_OVER->PAUSED illegal');
-  assert.ok(!g.to(STATE.MENU), 'GAME_OVER->MENU illegal');
+  assert.ok(g.to(STATE.MENU), 'GAME_OVER->MENU legal (ST-190)');
 });
 
 test('state: unknown state rejected', () => {
@@ -68,4 +68,23 @@ test('state: quit transition does not open other back-edges', () => {
   g.to(STATE.PAUSED);
   g.to(STATE.MENU);
   assert.ok(!g.to(STATE.PAUSED), 'MENU->PAUSED still illegal');
+});
+
+// ST-190: replay viewer states
+test('state: replay session sequence (ST-190)', () => {
+  const g = new GameState();
+  assert.ok(g.to(STATE.REPLAY), 'MENU->REPLAY legal');
+  assert.ok(g.to(STATE.PAUSED), 'REPLAY->PAUSED legal');
+  assert.ok(g.to(STATE.REPLAY), 'PAUSED->REPLAY resume legal');
+  assert.ok(g.to(STATE.GAME_OVER), 'REPLAY->GAME_OVER (pilot dies) legal');
+  assert.ok(g.to(STATE.MENU), 'GAME_OVER->MENU legal');
+  assert.ok(g.in(STATE.MENU));
+});
+
+test('state: REPLAY->MENU direct is illegal (quit only via PAUSED or GAME_OVER) (ST-190)', () => {
+  const g = new GameState();
+  g.to(STATE.REPLAY);
+  assert.ok(!g.to(STATE.MENU), 'REPLAY->MENU illegal');
+  g.to(STATE.PAUSED);
+  assert.ok(g.to(STATE.MENU), 'PAUSED->MENU quit legal');
 });

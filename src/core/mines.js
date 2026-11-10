@@ -110,5 +110,5 @@ export class MineField {
   }
 
   get count() { return this.mines.length; }
-  clear() { this.mines.length = 0; this.pendingFires.length = 0; }
+  clear() { this.mines.length = 0; this.pendingFires.length = 0; this.nextId = 1; } // I190: fresh ID space per run
 }

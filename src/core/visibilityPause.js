@@ -11,7 +11,7 @@
 // - NO auto-resume on visible: a surprise resume across a tab switch can kill the
 //   ship while the player is looking away. The player resumes deliberately (P/Enter).
 //   This is the same "restore does not auto-resume" policy as the I187 ctx-restore path.
-// - Only PLAYING pauses: MENU has no sim to protect; PAUSED and GAME_OVER are
+// - Only PLAYING/REPLAY pause: MENU has no sim to protect; PAUSED and GAME_OVER are
 //   already safe (the transition is guarded in GameState anyway - the rule keeps
 //   the call site clean and transition records tidy).
 
@@ -24,6 +24,6 @@ export const VISIBILITY = Object.freeze({ HIDDEN: 'hidden', VISIBLE: 'visible' }
  * @returns {'pause'|'none'} the single action the handler must take
  */
 export function visibilityAction(visibility, state) {
-  if (visibility === VISIBILITY.HIDDEN && state === 'PLAYING') return 'pause';
+  if (visibility === VISIBILITY.HIDDEN && (state === 'PLAYING' || state === 'REPLAY')) return 'pause'; // ST-190: a replay has a sim to protect too
   return 'none';
 }

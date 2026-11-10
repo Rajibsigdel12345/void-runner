@@ -31,6 +31,8 @@ import { createScorePopups } from './render/scorePopups.js';
 import { createTutorialHint } from './render/tutorialHint.js';
 import { createTutorialOverlay } from './render/tutorialOverlay.js'; // I151: first-run tutorial
 import { createKillFeed } from './render/killFeed.js'; // I153: kill feed
+import { decodeReplay, demoReplay, createPlayer } from './core/replay.js'; // ST-190: replay codec + demo pilot
+import { createReplayHud } from './render/replayHud.js'; // ST-190: replay HUD bar
 import { createBloom } from './render/bloom.js';
 import { createFpsMeter } from './render/fpsMeter.js';
 import { createDebugOverlay } from './render/debugOverlay.js'; // ST-080
@@ -121,6 +123,7 @@ const popups = createScorePopups(document.body, camera); // ST-030
 const coarse = (window.matchMedia && window.matchMedia('(pointer:coarse)').matches) || 'ontouchstart' in window; // I71: touch detect (hint + screens)
 const hint = createTutorialHint(document.body, { touch: coarse }); // ST-032
 const killFeed = createKillFeed(document.body); // I153: kill feed (top-right, PLAYING only)
+const replayHud = createReplayHud(document.body); // ST-190: slim bar during a watched replay
 const hud = createHUD(document.body);
 const reticle = createReticle(scene); // I44: fire-line reticle
 let muted = false; // M key (ST-017); consumed by audio (I27)
@@ -145,6 +148,7 @@ function dismissTutorial() {
   if (tutorialActive) { storage.setTutorialSeen(); tutorial.hide(); tutorialActive = false; }
 }
 let newBest = false;
+let replayView = null; // ST-190: { player, data, speed, idx } while a replay is watched, else null
 let scoresText = ''; // I66: top-5 table text for the menu (refreshed at boot + on game over)
 let scoreRank = 0; // I69: this run's board rank (shown on game over)
 function refreshScoresText() {
@@ -264,6 +268,7 @@ function refreshDailyMenu() {
 }
 refreshDailyMenu();
 function startRun(mode) {
+  replayView = null; // ST-190
   newBest = false; popups.clear(); killFeed.clear(); dailyNewBest = false; juiceTally.reset(); // ST-183
   const firstRun = !storage.getTutorialSeen(); // I151: first entry to PLAYING
   if (firstRun) { tutorialActive = true; tutorial.show(); } // gate the sim while reading
@@ -273,9 +278,35 @@ function startRun(mode) {
   world.begin();
 }
 function restartRun() {
+  replayView = null; // ST-190
   newBest = false; popups.clear(); killFeed.clear(); hint.show(); dailyNewBest = false; juiceTally.reset(); // ST-183
   if (dailyMode) world.reseed(dailySeedVal); // ST-141: same seed -> reproduce today's run
   world.restart();
+}
+
+function startReplayView(data) { // ST-190: watch a replay (demo pilot or saved run) - deterministic playback
+  const r = decodeReplay(data, { maxLen: CONFIG.replay.maxSteps });
+  if (!r.ok) { console.warn('[replay] rejected:', r.error); return; }
+  world.reset(); // -> MENU: clean systems + replayMode=false
+  world.reseed(r.data.seed); // deterministic RNG for the watched run
+  replayView = { player: createPlayer(r.data), data: r.data, speed: 1, idx: 0 };
+  world.replayBegin(); // MENU -> REPLAY (replayMode=true + waves.start())
+  newBest = false; popups.clear(); killFeed.clear(); vortexFx.hide(); juiceTally.reset();
+}
+function exitReplayView() { // ST-190: leave the watched run, back to a clean menu
+  replayView = null; newBest = false; popups.clear(); killFeed.clear(); vortexFx.hide();
+  world.reset(); // -> MENU
+}
+function restartReplay() { // ST-190: replay the same tape from step 0
+  if (!replayView) return;
+  const d = replayView.data;
+  replayView = null;
+  startReplayView(d);
+}
+function replayIntent() { // ST-190: next recorded intent (neutral past the end)
+  const rv = replayView; if (!rv) return undefined;
+  if (rv.idx >= rv.player.length) return { thrust: v2(0, 0), aimPoint: null, firing: false };
+  return rv.player.intent(world, rv.idx++);
 }
 
 const screens = createScreens(document.body, {
@@ -284,8 +315,11 @@ const screens = createScreens(document.body, {
     start: () => startRun('normal'),
     startDaily: () => startRun('daily'),
     resume: () => { world.resume(); },
-    restart: () => restartRun(),
-    quit: () => { newBest = false; popups.clear(); vortexFx.hide(); world.quitToMenu(); },
+    restart: () => { if (replayView) restartReplay(); else restartRun(); }, // ST-190: restart the watched replay
+    quit: () => { if (replayView) exitReplayView(); else { newBest = false; popups.clear(); vortexFx.hide(); world.quitToMenu(); } }, // ST-190
+    showReplays: () => { const saved = storage.getReplays(); const list = [{ key: 'demo', label: 'DEMO PILOT', score: 0, wave: 0, kills: 0, time: 0, isDemo: true }]; saved.forEach((r2, i) => list.push({ key: i, label: 'SAVED RUN', score: r2.data.meta.score, wave: r2.data.meta.wave, kills: r2.data.meta.kills, time: r2.data.meta.time })); screens.openReplays(list); }, // ST-190
+    startReplay: (k) => { if (k === 'demo') { startReplayView(demoReplay(CONFIG.replay.demoSeed, CONFIG.replay.demoLen)); return; } const saved = storage.getReplays(); if (saved[k]) startReplayView(saved[k].data); }, // ST-190
+    closeReplays: () => screens.closeReplays(), // ST-190
   },
 });
 const particles = createParticles(scene);
@@ -314,6 +348,7 @@ function togglePause() { // ST-033: shared by keyboard and two-finger touch
   if (tutorialActive) return; // I151: can't pause while reading the first-run tutorial
   const st = world.game.state;
   if (st === STATE.PLAYING) world.pause();
+  else if (st === STATE.REPLAY) world.pause(); // ST-190: P pauses a watched replay too
   else if (st === STATE.PAUSED) world.resume();
 }
 const input = createInput({ onPause: togglePause });
@@ -344,16 +379,18 @@ window.addEventListener('keydown', (e) => {
     if (!onButton && st === STATE.MENU) {
       startRun('normal'); // ST-141: Enter starts a normal run (DAILY button for the daily run)
     } else if (!onButton && st === STATE.GAME_OVER) {
-      restartRun(); // ST-141: reseed when daily so Enter reproduces today's run
+      if (replayView) exitReplayView(); else restartRun(); // ST-190: a finished replay quits to the menu; ST-141: reseed when daily so Enter reproduces today's run
     } else if (!onButton && st === STATE.PAUSED) { // I68: Enter resumes
       world.resume();
     }
   } else if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
     togglePause();
   } else if (e.key === 'r' || e.key === 'R') { // I68: restart from pause
-    if (st === STATE.PAUSED) restartRun(); // ST-141: reseed when daily
+    if (st === STATE.PAUSED) { if (replayView) restartReplay(); else restartRun(); } // ST-190: restart the replay; ST-141: reseed when daily
   } else if (e.key === 'q' || e.key === 'Q') { // I68: quit from pause
-    if (st === STATE.PAUSED) { newBest = false; popups.clear(); vortexFx.hide(); world.quitToMenu(); }
+    if (st === STATE.PAUSED) { if (replayView) exitReplayView(); else { newBest = false; popups.clear(); vortexFx.hide(); world.quitToMenu(); } } else if (st === STATE.GAME_OVER && replayView) exitReplayView(); // ST-190
+  } else if (e.key === '1' || e.key === '2' || e.key === '3') { // ST-190: replay speed x1/x2/x4
+    if (replayView && st === STATE.REPLAY) replayView.speed = e.key === '1' ? 1 : e.key === '2' ? 2 : 4;
   } else if (e.key === 'm' || e.key === 'M') {
     muted = !muted;
     audio.setMuted(muted);
@@ -390,7 +427,7 @@ const eventTally = {}; const juiceTally = createJuiceTally(); // ST-183: per-run
 // (world.step + event drain + visual sync) independent of display rate.
 function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing: false }) {
   const n = Math.max(1, Math.round(simSeconds / STEP));
-  for (let i = 0; i < n; i++) tick(STEP, intent);
+  for (let i = 0; i < n; i++) tick(STEP, (replayView && world.game.in(STATE.REPLAY)) ? replayIntent() : intent);
   syncVisuals(STEP);
 }
 window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
@@ -493,6 +530,11 @@ window.__vr.particleLive = () => particles.live; // ST-177: probe (live particle
 window.__vr.magnetPullCount = () => world.powerups.drops.filter((d) => !d.dead && d.magnetPull).length; // ST-177: probe (orbs currently magnet-pulled)
 window.__vr.weaponFanfareN = () => _weaponFanfareN; // ST-178: probe (fanfires fired; increments only in the motion-ON branch)
 window.__vr.lastShare = () => screens.lastShare(); // I159: probe
+window.__vr.replayView = () => replayView && { idx: replayView.idx, length: replayView.player.length, speed: replayView.speed, meta: replayView.data.meta }; // ST-190: probe
+window.__vr.startReplay = (d) => startReplayView(d); // ST-190: probe
+window.__vr.exitReplay = () => exitReplayView(); // ST-190: probe
+window.__vr.demoReplay = () => demoReplay(CONFIG.replay.demoSeed, CONFIG.replay.demoLen); // ST-190: probe
+window.__vr.replayHud = replayHud; // ST-190: probe
 
 // Fixed-timestep simulation (60Hz) with render at display rate (ST-078: the
 // accumulator + dt clamp live in the pure core clock; huge gaps are clamped to
@@ -576,18 +618,21 @@ else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, 
     if (e.type === 'shieldPop') {
       shieldRing.pulse();
     } else if (e.type === 'gameover') {
-      newBest = storage.setBest(e.data.score); // true when the stored best was raised
+      newBest = false; // ST-190: default; a live run raises it below (a watched replay must not touch the scoreboards)
       bestScore = storage.getBest();
       dailyNewBest = false; // ST-141
-      if (e.data.score > 0) { // I66: top-5 board (wave/kills from live world state)
-        const rec = storage.recordScore({ score: e.data.score, wave: Math.max(1, world.wave), kills: world.scoreKeeper.kills });
-        scoreRank = rec.rank; // I69
-        refreshScoresText();
-      }
-      if (e.data.score > 0 && dailyMode) { // ST-141: daily best (same board today)
-        const dr = storage.recordDaily(dailyKey, e.data.score);
-        dailyNewBest = !!dr.newBest;
-        _dailyDirty = true; // refresh the menu daily line when we return to the menu
+      if (!replayView) {
+        newBest = storage.setBest(e.data.score); // true when the stored best was raised
+        if (e.data.score > 0) { // I66: top-5 board (wave/kills from live world state)
+          const rec = storage.recordScore({ score: e.data.score, wave: Math.max(1, world.wave), kills: world.scoreKeeper.kills });
+          scoreRank = rec.rank; // I69
+          refreshScoresText();
+        }
+        if (e.data.score > 0 && dailyMode) { // ST-141: daily best (same board today)
+          const dr = storage.recordDaily(dailyKey, e.data.score);
+          dailyNewBest = !!dr.newBest;
+          _dailyDirty = true; // refresh the menu daily line when we return to the menu
+        }
       }
       if (newBest && !motionOff && fxCount > 0) { // I69: new-best confetti (reduced motion: static)
         const sx = world.ship.pos.x, sy = world.ship.pos.y;
@@ -613,12 +658,12 @@ function syncVisuals(dt) {
   const st = world.game.state;
   let _deathClosed = false; // I174: the death-slow-mo window just ended this frame (forces one exact push)
   if (_deathWarpT > 0) { _deathWarpT = Math.max(0, _deathWarpT - dt); if (_deathWarpT === 0) _deathClosed = true; } // I174: decay the death-slow-mo window (state-agnostic so the tail settles even on the GAME_OVER frame)
-  audio.ambience(st === STATE.PLAYING); // ST-083: ambience bed only while playing
-  audio.music(st === STATE.PLAYING && liveSettings.music !== false); // I158: music bed (PLAYING + setting); idempotent start/stop
-  if (st === STATE.PLAYING) { const mx = musicIntensityX(world, CONFIG.music.intensity); if (Math.abs(mx - _musicIntensity) > 0.02) { _musicIntensity = mx; audio.musicIntensity(mx); } } else { _musicIntensity = 0; } // I170: escalate drone intensity from wave + boss (change-cached; reset off-PLAYING so a (re)start re-applies)
-  if (st === STATE.PLAYING) { const wx = Math.max(timeWarpX(world.enemyScale()), _deathWarpT > 0 ? deathWarpX(_deathWarpT, CONFIG.music.warp.death.dur, CONFIG.music.warp.death.scale) : 0); if (_deathClosed || Math.abs(wx - _timeWarp) > 0.02) { _timeWarp = wx; audio.timeWarp(wx, CONFIG.music.warp); } } else { _timeWarp = 0; } // I172: bullet-time audio from the slow-mo power-up; I174: max() with the death-slow-mo window (deeper dilation wins; change-cached; forced exact push on window close - no stale sub-hysteresis tail; reset off-PLAYING)
-  hud.setVisible(st === STATE.PLAYING || st === STATE.PAUSED);
-  killFeed.setVisible(st === STATE.PLAYING); // I153: feed only while playing
+  audio.ambience(st === STATE.PLAYING || st === STATE.REPLAY); // ST-083: ambience bed while playing; ST-190: + replay
+  audio.music((st === STATE.PLAYING || st === STATE.REPLAY) && liveSettings.music !== false); // I158: music bed (PLAYING/REPLAY + setting); idempotent start/stop
+  if (st === STATE.PLAYING || st === STATE.REPLAY) { const mx = musicIntensityX(world, CONFIG.music.intensity); if (Math.abs(mx - _musicIntensity) > 0.02) { _musicIntensity = mx; audio.musicIntensity(mx); } } else { _musicIntensity = 0; } // I170: escalate drone intensity from wave + boss (change-cached; reset off-PLAYING so a (re)start re-applies)
+  if (st === STATE.PLAYING || st === STATE.REPLAY) { const wx = Math.max(timeWarpX(world.enemyScale()), _deathWarpT > 0 ? deathWarpX(_deathWarpT, CONFIG.music.warp.death.dur, CONFIG.music.warp.death.scale) : 0); if (_deathClosed || Math.abs(wx - _timeWarp) > 0.02) { _timeWarp = wx; audio.timeWarp(wx, CONFIG.music.warp); } } else { _timeWarp = 0; } // I172: bullet-time audio from the slow-mo power-up; I174: max() with the death-slow-mo window (deeper dilation wins; change-cached; forced exact push on window close - no stale sub-hysteresis tail; reset off-PLAYING)
+  hud.setVisible(st === STATE.PLAYING || st === STATE.PAUSED || st === STATE.REPLAY);
+  killFeed.setVisible(st === STATE.PLAYING || st === STATE.REPLAY); // I153: feed while playing; ST-190: + replay
   // I36: reuse opts objects instead of allocating per frame
   hudOpts.best = bestScore;
   screenOpts.muted = muted;
@@ -634,6 +679,8 @@ function syncVisuals(dt) {
   screenOpts.dailyMode = dailyMode; // ST-141
   screenOpts.dailyKey = dailyKey; // ST-141
   screenOpts.dailyNewBest = dailyNewBest; // ST-141
+  screenOpts.replayMode = !!replayView; // ST-190: game-over prompt text for finished replays
+  replayHud.update({ visible: st === STATE.REPLAY, meta: replayView ? replayView.data.meta : null, idx: replayView ? replayView.idx : 0, length: replayView ? replayView.player.length : 0, speed: replayView ? replayView.speed : 1, reducedMotion: motionOff }); // ST-190
   hud.render(world, hudOpts);
   if (coarse && st === STATE.PLAYING) { if (pauseBtn.style.display !== 'flex') pauseBtn.style.display = 'flex'; } else if (pauseBtn.style.display !== 'none') pauseBtn.style.display = 'none'; // I71: on-screen pause button (touch, PLAYING only)
   screens.update(st, world, screenOpts);
@@ -716,7 +763,7 @@ function frame() {
   if (ctxLost) return; // I187: context lost - stop sim + render (three.js render() is a no-op while lost anyway; this also skips tick/sync/info/adaptive overhead). onCtxRestored resets the clock, so no dt spike on the first restored frame.
   const now = performance.now();
   const cur = world.game.state;
-  if (prevState === STATE.PAUSED && cur === STATE.PLAYING) clock.reset(now); // ST-078: no accumulated dt carried into resume
+  if (prevState === STATE.PAUSED && (cur === STATE.PLAYING || cur === STATE.REPLAY)) clock.reset(now); // ST-078: no accumulated dt carried into resume; ST-190: + replay resume
   const r = clock.tick(now); // ST-078: fixed-timestep clock (clamped dt, dropped backlog)
   const frameDt = r.dt;
   if (hitStop > 0 && cur === STATE.PLAYING) { // ST-081: hit-stop - freeze the sim, keep rendering
@@ -724,10 +771,12 @@ function frame() {
     clock.reset(now); // discard accumulated sim time during the freeze (no catch-up burst)
   } else {
     if (hitStop > 0) hitStop = 0; // event fired but we are not PLAYING - discard the freeze
-    for (let i = 0; i < r.steps; i++) tick(STEP);
+    const isReplay = replayView && cur === STATE.REPLAY; // ST-190
+    const nSteps = isReplay ? r.steps * replayView.speed : r.steps;
+    for (let i = 0; i < nSteps; i++) tick(STEP, (replayView && world.game.in(STATE.REPLAY)) ? replayIntent() : undefined);
   }
   prevState = cur;
-  if (world.game.state === STATE.PLAYING) adaptive.noteFrame(frameDt); // ST-073: adaptive quality (real frame dt, PLAYING only)
+  if (world.game.state === STATE.PLAYING || world.game.state === STATE.REPLAY) adaptive.noteFrame(frameDt); // ST-073: adaptive quality (real frame dt, PLAYING/REPLAY)
   syncVisuals(frameDt); // I36: reads previous frame GPU stats
   renderer.info.reset(); // I36: clear before this frame accumulates (autoReset off)
   bloom.render();

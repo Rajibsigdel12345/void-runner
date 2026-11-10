@@ -144,7 +144,7 @@ export class PowerUpField {
   }
 
   clear() {
-    this.drops.length = 0;
+    this.drops.length = 0; this.nextId = 1; // I190: fresh ID space per run
     this.timeLeft = { rapid: 0, spread: 0, shield: 0, magnet: 0, overdrive: 0, slowmo: 0 };
     this.shieldHits = 0;
     this.pendingInstant = null;

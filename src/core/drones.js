@@ -107,5 +107,5 @@ export class DroneField {
   }
 
   get count() { return this.drones.length; }
-  clear() { this.drones.length = 0; this.decayed.length = 0; } // I129
+  clear() { this.drones.length = 0; this.decayed.length = 0; this.nextId = 1; } // I190: fresh ID space per run // I129
 }

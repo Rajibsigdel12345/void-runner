@@ -9,6 +9,9 @@
 // and migrate older known versions up to STORE_VERSION (an unknown future version, or a
 // corrupt/non-integer version, falls back to defaults). migratePayload is pure + tested.
 
+import { CONFIG } from './config.js'; // ST-190: replay tape length cap
+import { decodeReplay } from './replay.js'; // ST-190: strict replay validation
+
 export const STORE_VERSION = 1;
 
 export const DEFAULT_SETTINGS = Object.freeze({
@@ -73,6 +76,8 @@ export class Storage {
     this.dailyBestKey = keys.dailyBestKey || 'voidrunner.daily'; // ST-141: daily best (per calendar day)
     this.tutorialKey = keys.tutorialKey || 'voidrunner.tutorial'; // I151: first-run tutorial seen flag
     this.maxScores = (Number.isInteger(keys.highScoresMax) && keys.highScoresMax > 0) ? keys.highScoresMax : 5; // I66
+    this.replaysKey = keys.replaysKey || 'voidrunner.replays'; // ST-190: saved replays (newest-first, capped)
+    this.maxReplays = (Number.isInteger(keys.replaysMax) && keys.replaysMax > 0) ? keys.replaysMax : 2; // ST-190
   }
 
   _read(key) {
@@ -229,6 +234,27 @@ export class Storage {
   /** I151: persist that the first-run tutorial has been dismissed (idempotent; returns the store write result). */
   setTutorialSeen() {
     return this._write(this.tutorialKey, { version: STORE_VERSION, seen: true });
+  }
+
+  /** ST-190: list saved replays, newest-first. Entries that fail strict decode are dropped (defensive). */
+  getReplays() {
+    const arr = this._read(this.replaysKey);
+    if (!Array.isArray(arr)) return [];
+    const out = [];
+    for (const entry of arr) {
+      if (entry && entry.data) {
+        const d = decodeReplay(entry.data, { maxLen: CONFIG.replay.maxSteps });
+        if (d.ok) out.push({ data: d.data });
+      }
+    }
+    return out;
+  }
+  /** ST-190: save a (validated) replay, newest-first, capped at maxReplays. Returns {saved:bool}. */
+  saveReplay(replay) {
+    const d = decodeReplay(replay, { maxLen: CONFIG.replay.maxSteps });
+    if (!d.ok) return { saved: false };
+    const list = [{ data: d.data }, ...this.getReplays()].slice(0, this.maxReplays);
+    return { saved: this._write(this.replaysKey, list) };
   }
 
   remove(key) {

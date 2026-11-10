@@ -45,12 +45,15 @@ export class World {
     this.livesMgr = new Lives(cfg.ship.lives);
     this.game = new GameState();
     this.time = 0;
+    this.replayMode = false; // ST-190: watch a saved replay (REPLAY state)
     this._wlevel = 1; // ST-122: current weapon level (drives weaponLevelUp events)
   }
 
   get score() { return this.scoreKeeper.score; }
   get wave() { return this.waves.wave; }
   get lives() { return this.livesMgr.count; }
+  /** ST-190: the sim advances while PLAYING or REPLAY (both are "live" sim states). */
+  get simActive() { return this.game.in(STATE.PLAYING) || this.game.in(STATE.REPLAY); }
 
   /** I152: full session stats snapshot (score, kills, wave, best combo, accuracy, time). */
   sessionStats() {
@@ -83,6 +86,14 @@ export class World {
   /** MENU -> PLAYING and start the wave director. No-op unless in MENU. */
   begin() {
     if (!this.game.to(STATE.PLAYING)) return false;
+    this.replayMode = false; // ST-190: begin() always starts a live run
+    this.waves.start();
+    return true;
+  }
+  /** ST-190: start watching a replay - MENU -> REPLAY (same wave start as begin()). */
+  replayBegin() {
+    if (!this.game.to(STATE.REPLAY)) return false;
+    this.replayMode = true;
     this.waves.start();
     return true;
   }
@@ -90,7 +101,7 @@ export class World {
   pause() { return this.game.to(STATE.PAUSED); }
 
   /** PAUSED -> PLAYING only (begin() owns the MENU start, restart() the full reset). */
-  resume() { return this.game.in(STATE.PAUSED) && this.game.to(STATE.PLAYING); }
+  resume() { return this.game.in(STATE.PAUSED) && this.game.to(this.replayMode ? STATE.REPLAY : STATE.PLAYING); }
 
   /** PAUSED -> MENU (ST-068): abandon the run - full system reset, back to the menu. */
   quitToMenu() {
@@ -119,7 +130,7 @@ export class World {
    * @param {{thrust:{x:number,y:number}, aimPoint:{x:number,y:number}|null, firing:boolean}} intent
    */
   step(dt, intent = { thrust: v2(), aimPoint: null, firing: false }) {
-    if (!this.game.in(STATE.PLAYING)) return;
+    if (!this.simActive) return; // ST-190: PLAYING or REPLAY
     this.time += dt;
     // ST-115: slow-mo power-up - enemy-side systems (rocks, enemy bullets, mines, boss, vortex) run on a scaled dt; the ship (and its weapons) keep full speed.
     const es = this.enemyScale();
@@ -671,6 +682,7 @@ export class World {
     this.livesMgr.reset();
     this.game.reset(); // also clears the gameOver getter (it derives from game state)
     this.time = 0;
+    this.replayMode = false; // ST-190
     this._wlevel = 1; // ST-122: weapon level resets with the run
     this.events.length = 0;
     this._eventSpare.length = 0; // ST-074: spare buffer too (no stale events after swap)

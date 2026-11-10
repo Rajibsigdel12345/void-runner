@@ -154,5 +154,5 @@ export class AsteroidField {
   }
 
   get count() { return this.rocks.length; }
-  clear() { this.rocks.length = 0; }
+  clear() { this.rocks.length = 0; this.nextId = 1; } // I190: fresh ID space per run
 }

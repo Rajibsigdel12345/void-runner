@@ -36,6 +36,7 @@ Void Runner is a 3D arcade space-asteroid shooter built with **three.js** (no bu
 - All tunables live in `src/core/config.js` (one file, commented, data-driven).
 - Determinism: all randomness flows through `src/core/rng.js` (seeded) so tests can pin seeds.
 - Game state machine: `MENU -> PLAYING -> PAUSED -> GAME_OVER -> PLAYING`.
+- ST-190: `MENU -> REPLAY -> (PAUSED <-> REPLAY) / REPLAY -> GAME_OVER / GAME_OVER -> MENU` (replay viewer; watched runs never write scoreboards).
 - Iteration log: every meaningful change gets an entry in `production/iterations.md` (iter #, goal, changed files, test result).
 - Keep draw calls low: reuse geometries/materials, pool bullets and particles.
 

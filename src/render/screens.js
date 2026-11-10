@@ -118,6 +118,16 @@ export function createScreens(root, settings = {}) {
     dailyBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.startDaily(); dailyBtn.blur(); });
     menu.appendChild(dailyBtn);
   }
+  if (settings.actions && typeof settings.actions.showReplays === 'function') { // ST-190: REPLAYS button (demo pilot + saved runs)
+    const replaysBtn = document.createElement('button');
+    replaysBtn.type = 'button';
+    replaysBtn.className = 'vr-pause-btn';
+    replaysBtn.textContent = 'REPLAYS';
+    replaysBtn.style.cssText = 'margin-top:10px;letter-spacing:3px;';
+    replaysBtn.setAttribute('aria-label', 'Watch a saved replay');
+    replaysBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.showReplays(); replaysBtn.blur(); });
+    menu.appendChild(replaysBtn);
+  }
   const menuBest = line(menu, '', 'font-size:calc(13px * var(--vr-fs,1));opacity:0.85;'); // best score lands in I18 (I44 contrast)
   const menuDaily = line(menu, '', 'font-size:calc(13px * var(--vr-fs,1));opacity:0.85;letter-spacing:1px;color:#9fd8ff;'); // ST-141: daily board line
   const credit = document.createElement('div'); // I65: credits
@@ -186,6 +196,7 @@ export function createScreens(root, settings = {}) {
   const dailyBadge = document.createElement('div'); // ST-141: DAILY RUN badge (only for daily runs)
   dailyBadge.style.cssText = 'display:none;font-size:calc(12px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#9fd8ff;border:1px solid rgba(159,216,255,0.4);border-radius:20px;padding:4px 14px;background:rgba(60,120,220,0.16);';
   gameOver.appendChild(dailyBadge);
+  let goPrompt = null; // ST-190: restart prompt element (keyboard path); its text is set in update()
   if (settings.touch && settings.actions && settings.actions.restart) { // I71: tappable restart on touch
     const reBtn = document.createElement('button');
     reBtn.type = 'button';
@@ -195,7 +206,7 @@ export function createScreens(root, settings = {}) {
     reBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.restart(); reBtn.blur(); });
     gameOver.appendChild(reBtn);
   } else {
-    line(gameOver, 'PRESS ENTER TO RESTART', 'font-size:calc(16px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;margin-top:10px;animation:vrPulse 1.6s ease-in-out infinite;');
+    goPrompt = line(gameOver, 'PRESS ENTER TO RESTART', 'font-size:calc(16px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;margin-top:10px;animation:vrPulse 1.6s ease-in-out infinite;'); // ST-190
   }
 
   // ST-159: shareable result - copy the reproducible result code (ST-142 codec) to the clipboard.
@@ -230,11 +241,57 @@ export function createScreens(root, settings = {}) {
   shareBtn.addEventListener('click', (e) => { e.stopPropagation(); if (goShare) copyShare(); shareBtn.blur(); });
   gameOver.appendChild(shareBtn);
   line(gameOver, 'copies a reproducible result code', 'font-size:calc(11px * var(--vr-fs,1));opacity:0.6;letter-spacing:1px;margin-top:-8px;');
+  // --- REPLAYS (ST-190: demo pilot + saved runs; a row starts a watched run) ---
+  const replaysPanel = panel('screen-replays', 'radial-gradient(55% 50% at 30% 30%, rgba(60,110,200,0.22), transparent 70%), radial-gradient(50% 55% at 72% 72%, rgba(140,70,180,0.20), transparent 70%), rgba(2,4,12,0.62)');
+  line(replaysPanel, 'REPLAYS', 'font-size:calc(30px * var(--vr-fs,1));font-weight:800;letter-spacing:8px;');
+  line(replaysPanel, 'watch the demo pilot or a saved run', 'font-size:calc(13px * var(--vr-fs,1));letter-spacing:2px;opacity:0.85;');
+  const replaysList = document.createElement('div');
+  replaysList.style.cssText = 'display:flex;flex-direction:column;gap:8px;width:min(560px,86vw);max-height:52vh;overflow-y:auto;padding:6px 2px;';
+  replaysPanel.appendChild(replaysList);
+  const replaysEmpty = document.createElement('div');
+  replaysEmpty.style.cssText = 'font-size:calc(13px * var(--vr-fs,1));opacity:0.7;letter-spacing:1px;';
+  replaysList.appendChild(replaysEmpty);
+  let replaysOpenFlag = false;
+  let replaysRows = [];
+  function renderReplays() {
+    while (replaysList.children.length > 1) replaysList.removeChild(replaysList.lastChild);
+    const hasSaved = replaysRows.some((r) => r.isDemo !== true);
+    replaysEmpty.style.display = hasSaved ? 'none' : 'block';
+    replaysEmpty.textContent = hasSaved ? '' : '\u2014 no saved replays yet \u2014';
+    for (const row of replaysRows) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'vr-pause-btn';
+      b.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;letter-spacing:1px;text-align:left;padding:10px 16px;';
+      const lbl = document.createElement('span');
+      lbl.style.cssText = 'font-weight:700;';
+      lbl.textContent = row.label;
+      const t = row.time || 0;
+      const stat = document.createElement('span');
+      stat.style.cssText = 'opacity:0.75;white-space:pre;font-variant-numeric:tabular-nums;';
+      stat.textContent = 'SCORE ' + row.score + '    WAVE ' + row.wave + '    ' + row.kills + ' KILLS    ' + Math.floor(t / 60) + ':' + String(Math.floor(t) % 60).padStart(2, '0');
+      b.append(lbl, stat);
+      b.setAttribute('aria-label', row.label + ', score ' + row.score);
+      b.addEventListener('click', (e) => { e.stopPropagation(); if (settings.actions && settings.actions.startReplay) settings.actions.startReplay(row.key); b.blur(); });
+      replaysList.appendChild(b);
+    }
+  }
+  if (settings.actions && typeof settings.actions.closeReplays === 'function') {
+    const backBtn = document.createElement('button');
+    backBtn.type = 'button';
+    backBtn.className = 'vr-pause-btn';
+    backBtn.textContent = 'BACK';
+    backBtn.style.cssText = 'margin-top:10px;letter-spacing:3px;';
+    backBtn.setAttribute('aria-label', 'Back to the menu');
+    backBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.closeReplays(); backBtn.blur(); });
+    replaysPanel.appendChild(backBtn);
+  }
   const PANELS = {
     [STATE.MENU]: menu,
     [STATE.PAUSED]: paused,
     [STATE.GAME_OVER]: gameOver,
     [STATE.PLAYING]: null,
+    [STATE.REPLAY]: null, // ST-190: no full-screen panel; the in-game HUD + replay bar carry the state
   };
 
   const cache = {};
@@ -261,6 +318,7 @@ export function createScreens(root, settings = {}) {
     showPanel(state);
     if (state === STATE.GAME_OVER) {
       set('finalScore', finalScore, `SCORE ${world.score}`);
+      if (goPrompt) set('goPrompt', goPrompt, opts.replayMode ? 'PRESS Q TO QUIT TO MENU' : 'PRESS ENTER TO RESTART'); // ST-190: a finished replay quits to the menu
       set('overBest', overBest, opts.best > 0 ? `BEST ${opts.best}` : '');
       set('newBest', newBestLine, opts.newBest ? 'NEW BEST!' : '');
       newBestLine.classList.toggle('vr-newbest', !!opts.newBest); // I69: celebration pulse
@@ -285,8 +343,17 @@ export function createScreens(root, settings = {}) {
       set('fx', fxLabel, 'F \u2014 FX (' + (opts.fx === 'low' ? 'LOW' : 'HIGH') + ')'); // I157
       set('pauseSnap', pauseSnap, `SCORE ${world.score}    WAVE ${Math.max(1, world.wave)}    KILLS ${world.scoreKeeper.kills}`); // I44
     }
+    if (state !== STATE.MENU) replaysOpenFlag = false; // ST-190: leaving the menu closes the list
+    const rp = state === STATE.MENU && replaysOpenFlag;
+    replaysPanel.style.display = rp ? 'flex' : 'none';
+    if (state === STATE.MENU) menu.style.display = rp ? 'none' : 'flex';
+    if (rp) renderReplays();
   }
 
-  return { update, overlay, lastShare: () => goShare, shareButton: shareBtn }; // ST-159
+  return { update, overlay, lastShare: () => goShare, shareButton: shareBtn,
+    openReplays: (rows) => { replaysRows = rows || []; replaysOpenFlag = true; renderReplays(); replaysPanel.style.display = 'flex'; }, // ST-190
+    closeReplays: () => { replaysOpenFlag = false; replaysPanel.style.display = 'none'; }, // ST-190
+    replaysOpen: () => replaysOpenFlag // ST-190
+  }; // ST-159 + ST-190
 }
 

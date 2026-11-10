@@ -103,6 +103,6 @@ export class Weapons {
     if (b) b.dead = true;
   }
 
-  clear() { this.bullets.length = 0; this.cooldown = 0; }
+  clear() { this.bullets.length = 0; this.cooldown = 0; this.nextId = 1; } // I190: fresh ID space per run
   get count() { return this.bullets.length; }
 }
