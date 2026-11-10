@@ -324,5 +324,81 @@ descriptions and chapter metadata only. No quotes are used.
   velocity) 0; screenshot .evidence/I172/I172_1_slowmo_active.png
   (SLOW-MO HUD chip + tint + hint visible).
 
+## ST-173 implementation (I173)
+
+### Audio Goal
+E8E SFX pass for new content: the drone, the Warden mini-boss and the
+pickups were silently re-using cues from older content (seeker zap for
+decay, the full 3-note boss stinger for a mini-boss spawn, the impact-tier
+boss boom for a mini-boss death, one generic ding for all seven pickup
+types). Each class now has its own voice, sized to its tier, so the mix
+stays legible when drones, Wardens and the full boss share a wave.
+
+### Mapping
+| Event | Before | After |
+|---|---|---|
+| droneDecay (I129 seeker battery self-destruct) | drone (saw 520->110, 0.26s, g0.28, noise 0.22) | droneDecay: sine 340->140, 0.18s, g0.14, no noise - a smaller descending blip |
+| wardenSpawn (ST-136/137) | bossSpawn (3-note tritone stinger, g0.30) | wardenSpawn: compact 2-note low sting [[55,41,0.5,0,0.26],[82.4,79,0.4,0.1,0.18]], g0.22, noise 0.25 |
+| wardenDeath (ST-136/137) | bossDeath (square 80->30, 0.7s, g0.45, noise 0.5 - impact tier) | wardenDeath: square 70->32, 0.45s, g0.34, noise 0.3 - mid boom, below impact tier |
+| powerup type slowmo (ST-115, ice-blue T drop) | powerup (sine 660->990, g0.25) | slowmo: sine 880->1320, 0.2s, g0.18 - cold shimmer; rapid/spread/shield/magnet/bomb keep the plain ding, overdrive keeps its own override |
+| player bomb (verify only) | bomb (sine 90->40, 0.5s, g0.55, noise 0.4) | unchanged - already impact-tier with its own cue |
+
+### Tunables
+None new: all four specs live inline in the CUES table (house style -
+one-shot cue shapes are mix values, not CONFIG data).
+
+### Wiring
+- src/render/audio.js: +4 CUES entries (droneDecay, wardenSpawn,
+  wardenDeath, slowmo) with tier comments.
+- src/main.js SFX_CUES: droneDecay 'drone'->'droneDecay', wardenSpawn
+  'bossSpawn'->'wardenSpawn', wardenDeath 'bossDeath'->'wardenDeath'
+  (wardenArmor + beltHit keep shieldHit).
+- src/main.js dispatch: powerup events resolve slowmo -> 'slowmo',
+  overdrive -> 'overdrive' (unchanged), everything else -> 'powerup'
+  (unchanged).
+
+### Mix Target
+- droneDecay sits under the seeker zap it replaces: a quiet battery
+  fizzle, background tier, rate-limited (min 0.1s) for rapid decays.
+- wardenSpawn is 0.08 lower gain than bossSpawn and 2 notes vs 3 - a
+  Warden reads as a smaller Monolith, not a second boss.
+- wardenDeath is 0.11 lower gain and 0.25s shorter than bossDeath - mid
+  boom; only the full boss reaches the limiter's impact tier.
+- slowmo is 0.07 lower gain and brighter (880->1320 vs 660->990) - the
+  ice-blue pickup gets a cold shimmer without stealing overdrive's
+  rising sweep.
+
+### QA
+- All four cues pass through the existing rate-limit (min), stereo pan
+  and sidechain-duck chain - no new nodes, timers or state.
+- weights() now exposes all four gains for the I180 headless-audio test
+  seam.
+
+### Research (YouTube; metadata/chapters verified, transcripts
+rate-limited - see Coverage note)
+| Source | What it grounded |
+|---|---|
+| Tender Rondo - Special Infected Spawn Cues (Valve, youtu.be/pUn8HNpiR3w, 2.7M views; chapters: countdown / respawn / end stingers) | Spawn cues are distinct PER enemy class - grounds separate wardenSpawn vs bossSpawn instead of reuse. |
+| Sound Around - Dramatic Dun Dun Dun... Classic Suspense Audio Stinger (youtu.be/W6DEnw-h1pw, 25K views) | Stinger = short low tension hit for spawns - grounds the compact low 2-note wardenSpawn over a bright arpeggio. |
+| Free Video Sound Effects HD - Epic Retro Game Power-Up Sound (youtu.be/08UkjjAq7Rg); Creator Assets - 8-Bit Powerup Sound Effects (youtu.be/SoZhpnTuQBo, 590K views); Nyonyxx - How to Make: 8bit Power up sound (youtu.be/1kVkyN5ybdQ, 3:33) | Pickup cues are short rising bright dings/arpeggios - grounds slowmo as a brighter, shorter variant of the plain powerup ding. |
+
+Coverage note: titles/snippets/chapters only; transcripts rate-limited at
+research time; no quotes used.
+
+### Verification
+- Parse: node --check clean (audio.js + main.js via .mjs copies).
+- npm test: 510/510 unchanged (no core changes).
+- Build: node scripts/build.mjs exit 0.
+- Browser smoke ?nocache=173 (real Enter keypress: PLAYING via the menu,
+  audio ctx 'running', ship invulnerable): snapshot played{} then
+  world.emit x6 (droneDecay, wardenSpawn, wardenDeath, bomb, powerup
+  type slowmo, powerup type rapid) -> advance(1s): every new-cue delta
+  exactly +1 (rapid -> powerup +1, NOT slowmo) and the old reuse paths
+  (drone, bossSpawn, bossDeath, overdrive) all delta 0 - no leakage.
+  weights() exposes droneDecay 0.14 / wardenSpawn 0.22 / wardenDeath
+  0.34 / slowmo 0.18. Console 0 errors / 0 warnings; NaN scan (ship +
+  6 rocks) 0; screenshot .evidence/I173/I173_1_playing_after_sfx_pass.png
+  (WAVE 1 arena, HUD, rocks, grid).
+
 ## Next
-ST-173 (I173): SFX pass for new content (bomb, drone, mini-boss, pickup).
+ST-174 (I174): death slow-mo (reuse the timeWarp seam with a death scale ~0.8s).

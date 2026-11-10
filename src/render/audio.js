@@ -14,6 +14,8 @@ const CUES = {
   kill:      { type: 'triangle', f0: 320, f1: 120, dur: 0.12, gain: 0.30, min: 0.05, noise: 0.08 },
   hit:       { type: 'sawtooth', f0: 110, f1: 55,  dur: 0.25, gain: 0.45, min: 0.05, noise: 0.2 },
   powerup:   { type: 'sine',     f0: 660, f1: 990, dur: 0.18, gain: 0.25, min: 0.05 },
+  // I173 (ST-173): cold shimmer for the slow-mo pickup (ST-115); all other pickups keep the plain powerup ding
+  slowmo:    { type: 'sine',     f0: 880, f1: 1320, dur: 0.2,  gain: 0.18, min: 0.05 },
   shieldPop: { type: 'sine',     f0: 1320, f1: 1320, dur: 0.15, gain: 0.22, min: 0.05 },
   // ST-127: shielded rock armor hit - short metallic tick (bright square falling into a low thump + noise clank).
   // Background tier: it can be spammed by holding fire on armor, so keep it quiet + rate-limited.
@@ -23,10 +25,16 @@ const CUES = {
   // ST-054 mine drone pop: a short percussive boom (noise tail + low square thump)
   mine:      { type: 'square',   f0: 180, f1: 60,  dur: 0.22, gain: 0.32, min: 0.05, noise: 0.16 },
   drone:     { type: 'sawtooth', f0: 520, f1: 110, dur: 0.26, gain: 0.28, min: 0.05, noise: 0.22 },  // ST-117 seeker zap (brighter + noisier than the mine pop)
+  // I173 (ST-173): seeker battery decay (I129) - a smaller descending blip, not the full zap
+  droneDecay:{ type: 'sine',     f0: 340, f1: 140, dur: 0.18, gain: 0.14, min: 0.1 },
   // ST-055 the Monolith: low spawn drone, ring-burst crack, big death boom
   bossSpawn: { type: 'sine',   gain: 0.30, min: 0.4, noise: 0.35, notes: [[55, 41, 0.7, 0, 0.34], [82.4, 79, 0.55, 0.12, 0.2], [164.8, 160, 0.4, 0.06, 0.1]] }, // ST-083: low tritone stinger
+  // I173 (ST-173): Warden (ST-136/137) spawn sting - compact 2-note low variant of bossSpawn (full boss stays 3-note)
+  wardenSpawn: { type: 'sine',  gain: 0.22, min: 0.4, noise: 0.25, notes: [[55, 41, 0.5, 0, 0.26], [82.4, 79, 0.4, 0.1, 0.18]] },
   bossRing:  { type: 'sine',   f0: 300, f1: 120, dur: 0.25, gain: 0.18, min: 0.15, noise: 0.15 },
   bossDeath: { type: 'square', f0: 80,  f1: 30,  dur: 0.7,  gain: 0.45, min: 0.3,  noise: 0.5 },  // ST-087 impact tier: trimmed 0.5->0.45 for limiter headroom
+  // I173 (ST-173): Warden death - mid boom, below the full-boss impact tier
+  wardenDeath: { type: 'square', f0: 70, f1: 32, dur: 0.45, gain: 0.34, min: 0.2, noise: 0.3 },
   // ST-056 enemy bolts: low saw zap (boss), soft tick (mine)
   bossFire: { type: 'sawtooth', f0: 520, f1: 180, dur: 0.18, gain: 0.20, min: 0.12 },
   mineFire: { type: 'square',   f0: 340, f1: 220, dur: 0.10, gain: 0.12, min: 0.1,  noise: 0.08 },
