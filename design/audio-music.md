@@ -121,6 +121,92 @@ well-established ambient-drone recipe: filtered drone + noise air + LFO movement
 avoid paraphrase-as-quote. Re-pull transcripts (small batch) if a precise quote
 is ever needed.
 
+## ST-170 implementation (I170)
+
+The seam above is now WIRED to world state. Tension x in [0,1] = f(wave) with
+a boss floor, pushed to musicIntensity(x) from syncVisuals() (src/main.js),
+change-cached. The pure mapping lives in src/core/musicIntensity.js (DOM-free,
+unit-tested); tunables live in config.js.
+
+Audio Goal
+- Escalate the drone bed through a run: at rest at wave 1, tense by the time
+  asteroid speed caps, maxed under a boss. Tension is carried by the two
+  existing retargets (filter opening + bus lift) - no new elements are added,
+  per the ambient-drone recipe (movement, not novelty, signals danger).
+
+Mapping (musicIntensityX(world, opts))
+    t = 1 - exp(-max(0, wave-1) / waveK)
+    x = waveCeil * t
+    if (world.boss && world.boss.alive) x = max(x, bossFloor)
+    x = clamp(x, 0, 1)
+Grounded in the shipped difficulty curve (config.js):
+- boss.everyWave = 5: a boss owns every 5th wave until killed, so the
+  bossFloor (0.9) covers every boss window regardless of wave.
+- speedMult = min(2.1, 1 + 0.06*wave) caps at wave 19 (2.08 at wave 18);
+  the waveK = 12 ramp reaches 0.568 by wave 18 and 0.583 by wave 19, so the
+  "arena is maxed" moment of the endless curve lands at ~57-58% intensity,
+  then plateaus toward waveCeil (0.75) - leaving headroom so the boss floor
+  reads as a STEP up (0.9 > 0.75), not a continuation.
+- wave 1 = exactly 0 (a fresh run starts at rest); wave 2 = 0.060 (first
+  nudge after the first clear).
+
+Tunables (CONFIG.music.intensity)
+- waveK: 12       - exp time-constant in waves (lower = faster build)
+- waveCeil: 0.75  - max intensity from wave alone (headroom below 1.0)
+- bossFloor: 0.9  - min intensity while a boss is alive
+
+Wiring (syncVisuals in src/main.js)
+- mx = musicIntensityX(world, CONFIG.music.intensity); pushed only while
+  PLAYING.
+- CHANGE-CACHE (same discipline as the I167 write-on-change caches): pushed
+  only when |mx - lastApplied| > 0.02. A per-frame setTargetAtTime on an
+  unchanged value is a wasted AudioParam automation event; the 0.02 hysteresis
+  makes the push rate ~once per wave transition (the smooth ramp takes many
+  seconds to accrue 0.02).
+- lastApplied resets to 0 off-PLAYING, so a (re)start re-applies from rest
+  even if the params already sit where a fresh wave 1 wants them.
+
+Mix Target
+- x only retargets the two existing params (filter 1200->2600 Hz, bus gain
+  0.13->0.18 via setTargetAtTime). Zero new nodes, zero per-frame allocations.
+  The I84 limiter (-8 dB) still catches the +38% bus-gain headroom; nothing
+  else in the chain moves.
+
+QA Note
+- Unit: tests/musicIntensity.test.js, 8 tests - wave 1 = 0; monotonic
+  non-decreasing; asymptotes < 1 and > 0.7 by wave 200; clamps [0,1] across
+  waves 1..300 in both boss states; live boss >= bossFloor; low-wave boss
+  override; degenerate worlds (null/zero/empty) -> 0; custom tunables (faster
+  build, higher floor) take effect.
+- Browser: see Verification (wave 1 -> 0.0, wave 2 -> 0.059967 exact).
+- No visual change; the only observable is the drone bed getting brighter and
+  louder as waves advance and under a boss.
+
+Risks
+- If waveK is later tuned low, the ramp hits waveCeil early and mid-run waves
+  feel flat; the boss floor still guarantees the boss step.
+- Waves only ever advance (no mid-run reset), so the 0.02 hysteresis can never
+  hide a needed push; it only coalesces them.
+
+Changed files (I170)
+- src/core/config.js            CONFIG.music.intensity tunables
+- src/core/musicIntensity.js    NEW pure mapping (DOM-free)
+- tests/musicIntensity.test.js  NEW 8 unit tests
+- src/main.js                   wiring + change-cache + __vr.musicIntensityVal probe
+- design/audio-music.md         this section
+- CHANGELOG.md, production/iterations.md, production/session-state/active.md
+
+Verification (I170)
+- Parse: src/main.js node --check clean (via .mjs copy); src/core/config.js
+  imports OK, CONFIG.music.intensity = {waveK:12, waveCeil:0.75, bossFloor:0.9}.
+- Tests: 499/499 (491 prior + 8 new).
+- Build: 0.
+- Browser (?nocache=170, Enter): baseline state PLAYING, wave 1,
+  __vr.musicIntensityVal() = 0; after __vr.advance(50) wave 2 and
+  musicIntensityVal() = 0.059967 (= 0.75*(1-e^(-1/12)) exact) - the stored
+  target ROSE from 0, proving the world->audio wiring is live. Console 0
+  errors / 0 warnings; NaN scan of ship + 10 rocks + warden + boss refs: 0
+  NaN. Screenshot .evidence/I170/I170_1_playing.png.
+
 ## Next
-ST-170 (I170): wire musicIntensity(x) from world state (wave / boss active) in
-src/main.js so tension rises through the run.
+ST-171 (I171): music toggle for the drone bed (hotkey + options row).

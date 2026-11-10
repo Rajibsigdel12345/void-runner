@@ -2,6 +2,18 @@
 export const CONFIG = {
   arena: { radius: 26 },
 
+  // I170 (ST-170): procedural-music intensity escalation, driven from world state.
+  // x in [0,1] is fed to audio.musicIntensity(x) (opens the drone filter + lifts the
+  // bus as tension rises). Tension climbs with the wave via a smooth asymptote
+  // scaled to waveCeil (headroom below 1); a live boss lifts it to at least bossFloor.
+  music: {
+    intensity: {
+      waveK: 12,      // exp time-constant in waves (larger = slower build)
+      waveCeil: 0.75, // max intensity from wave alone (headroom below 1 for the boss)
+      bossFloor: 0.9  // min intensity while a boss is alive (peak-tension moment)
+    }
+  },
+
   ship: {
     accel: 26,        // units/s^2
     maxSpeed: 14,     // units/s
