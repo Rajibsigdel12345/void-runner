@@ -2,9 +2,9 @@
 
 - project: Void Runner (E:\Game, three.js, no bundler)
 - epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-164 (next)
-- current_iteration: I163 (committed)
+- current_story: ST-165 (next)
+- current_iteration: I164 (committed)
 - branch: main
 - tests: 491/491
 - build: exit 0
-- notes: I163 done (ST-163 browser verify E8D all screens): 6 screens verified in Playwright (?nocache=163c) + 6 screenshots .evidence/I163/ (gitignored), console 0/0, NaN scan clean (only the intentional -Infinity sentinel), no production diff, 491/491, build 0. Next: I164 ST-164 G8.3 gate (cgs-gate-check, advisory gate doc in production/gates.md), then I165 UX fix round, I166 string extraction [CUTTABLE], I167 UI perf, I168 E8D docs+changelog, then the E9 Blender epic (Blender 5.2.3 via MCP; GLB hooks: shipMesh/wardenMesh/bossMesh.useGLB, rockRenders.setGLB, assetLoader; blender/Untitled.blend untracked). Art-direction improvement = accepted research item. Do NOT spawn sub-agents.
+- notes: I164 done (ST-164 G8.3 E8D gate, cgs-gate-check): PASS on all four criteria - screens/overlays (6 screenshots .evidence/I164/ incl. full real-flow tutorial), colorblind cues (3 golden cages live under CVD preview; warden cited I155/I156), hotkeys (M/P/F round trips), reduced motion (banner/killfeed/hint/multiplier all gated). No production diff; 491/491, build 0, console 0/0. Gate doc in production/gates.md. Finding for I165: no live mute indicator in MENU (cosmetic). Next: I165 ST-165 UX fix round (address the finding + review pass), I166 string extraction [CUTTABLE], I167 UI perf, I168 E8D docs+changelog, then E9 Blender epic (Blender 5.2.3 via MCP; GLB hooks: shipMesh/wardenMesh/bossMesh.useGLB, rockRenders.setGLB, assetLoader; blender/Untitled.blend untracked). Art-direction improvement = accepted research item. Do NOT spawn sub-agents.

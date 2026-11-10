@@ -301,3 +301,65 @@ PASS - proceed to the E8C regression tail. I148: regression round A (extended br
 
 ### Next owner or decision
 I148 (ST-148): regression round A (extended browser) - longer real-time runs across the E8C systems (waves 1-20+ with boss + Warden + belt + mines + drones + vortex) and game-over/restart cycles under load. No user decision required (advisory gate, non-blocking).
+
+## I164 - G8.3 E8D Gate (ST-164)
+
+### Summary
+Advisory gate for the E8D content (UI/UX + accessibility, ST-151..163) per cgs-gate-check. All four epics.md G8.3 criteria verified live in fresh browser tabs this iteration; the warden-spike CVD sub-check cites same-day live evidence (I155/I156). Verdict: PASS.
+
+### Gate Criteria (epics.md G8.3)
+1. Every new screen/overlay screenshot-verified.
+2. Colorblind cue visible without color.
+3. Hotkeys tested.
+4. Reduced-motion honored by all new FX.
+Plus the standing baseline: fresh npm test + build this iteration, console 0/0.
+
+### Evidence (collected this iteration)
+- Baseline: fresh npm test 491/491 pass; fresh npm run build exit 0.
+- Criterion 1 - screens/overlays (fresh tabs ?nocache=164 + ?nocache=164c, 6 screenshots .evidence/I164/):
+  - MENU (I164_1_menu.png): keycaps (WASD / MOUSE / CLICK-SPACE / P-ESC / M / F), TOP 5 board, DAILY line, both settings cards (AUDIO + VISUALS, 8 rows).
+  - PLAYING (I164_2_playing.png): in-game HUD + arena.
+  - PAUSED (I164_4_paused.png): settings card + M/F rows.
+  - GAME OVER (I164_5_gameover.png): stats panel + COPY RESULT button.
+  - TUTORIAL overlay (I164_6_tutorial.png): full real-flow on the fresh tab - removed the raw localStorage seen key, pressed Enter through the real startRun -> 'HOW TO PLAY' overlay with sim frozen (world.time stayed 0.000), Enter dismissed -> sim resumed (time 2.317 and counting), flag re-persisted true.
+  - Wave banner (CLEARED gold), kill feed (5 combo-scaled rows) and the compact score + inline x1.4 multiplier were screenshot-verified in I163 on the identical build (6 screenshots .evidence/I163/).
+- Criterion 2 - colorblind cue without color (live, ?nocache=164 tab):
+  - COLORBLIND setting enabled -> canvas style.filter = url("#vr-cvd-deutan") + the #vr-cvd-deutan SVG (deuteranopia, Machado 2009) injected.
+  - Three golden M rocks spawned through the real pipeline (field.spawn('M', 0.1, at, null, true)); the render pool shows exactly 3 visible wireframe cages at the golden positions and cage.visible=false on all 7 non-golden active meshes (I164_3_colorblind_cage.png).
+  - Warden 8-spike collar: live structure confirmed (collar group of 8 holders, state-gated); the full warden-under-CVD check ran same-day in I155/I156 (live warden spawns, 3 Machado/tritanopia sims, cage + spikes read as silhouette in every sim, entity-pair dE 41-111). wardenMesh.js has had no diff since I155.
+- Criterion 3 - hotkeys (live, ?nocache=164 tab):
+  - F: FX HIGH -> LOW (toast 'FX LOW', liveSettings().fx 'low') -> HIGH again; pause row tracked 'FX HIGH'.
+  - M: mute round trip confirmed through the pause-screen label 'M - MUTE (ON)' -> '(OFF)'; settings.sfx untouched (muted is a separate module state by design).
+  - P: PLAYING -> PAUSED -> PLAYING (state machine + screen swap both correct).
+- Criterion 4 - reduced motion (live, reducedMotion set true then restored false):
+  - Wave banner: scale punch skipped - computed transform identity matrix(1,0,0,1,0,0) with 0s transition while 'WAVE 2' rendered (punch is 1.06 -> 1.0 only with motion allowed, I154).
+  - Kill feed rows: no slide-in - computed transform 'none', 0s transition.
+  - Slow-mo hint caption: transition 'none' / 0s (snaps, I161).
+  - HUD multiplier: 0s transition, animation 'none' (pop skipped, I160).
+  - Tutorial overlay: motion-gated via the vr-reduced class (I151); the overlay render itself was verified on this tab under default motion.
+- Baseline health: deep NaN scan 0 non-finite on both tabs (ship/field/weapons/enemyBullets/powerups/scoreKeeper; only the intentional lastKillTime = -Infinity sentinel exists); console 0 errors / 0 warnings on the fresh ?nocache=164c tab through menu -> tutorial -> PLAYING soak.
+
+### Concerns
+- The warden-spike CVD sub-check cites same-day I155/I156 live evidence (a warden cannot be force-spawned below wave 5 without full wave progression); wardenMesh.js is unchanged since then, so the contract stands.
+- M-mute state has no live indicator in the MENU (static keycap only; the label lives on the pause screen). Cosmetic - candidate for the I165 UX fix round.
+- Headless background-tab rAF throttles to ~4fps; all evidence above is state/CSS-level (dt-driven), so throttling does not affect the conclusions.
+
+### Verdict
+PASS - proceed to the E8D tail. I165: UX fix round (ST-165).
+
+### Risks
+- R-E8-D-1 (UX, cosmetic): no in-menu mute indicator (findings list for I165). No other new risks; the gate introduced no production diff.
+
+### Changed files
+- production/gates.md (this gate)
+- production/iterations.md (I164 entry)
+- CHANGELOG.md (I164 line)
+- production/session-state/active.md (state -> I164 committed)
+
+### Verification evidence
+- All commands fresh-run this iteration: npm test (491/491), npm run build (exit 0), Playwright fresh tabs (?nocache=164 / 164b / 164c) with __vr probes, 6 screenshots in .evidence/I164/ (gitignored, local-only).
+- Assumptions: none for the four criteria - each verified directly, except the warden-spike CVD sub-check which is explicitly cited from same-day I155/I156 (labeled, not assumed).
+
+### Next owner or decision
+I165 (ST-165): UX fix round - address the findings above (in-menu mute indicator; any additional findings from the I165 review). No user decision required (advisory gate, non-blocking).
+

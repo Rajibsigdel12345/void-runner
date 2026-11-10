@@ -1232,3 +1232,17 @@ One entry per iteration. Format:
 - Note (probe-induced, NOT production bugs): (1) calling applySettings() with no arg set liveSettings=undefined -> 'reading fx' in syncVisuals per frame; always pass the setSettings() return. (2) hand-placed bullets without vel -> 'reading x' in Weapons.step; use _spawn(). Production paths (settings panel -> applySettings(merged), _spawn() bullets) unaffected. Q-quit is pause-gated by design (main.js:341).
 - Tests: 491/491 (unchanged - verify-only). Build: exit 0 (no production diff).
 - Result: DONE. ST-163 closed. Next I164 ST-164 G8.3 gate (cgs-gate-check).
+
+## I164 - G8.3 E8D gate (ST-164)
+- Goal: ST-164 acceptance - gate PASS on the epics.md G8.3 criteria. Skill: cgs-gate-check.
+- Gate criteria: (1) every new screen/overlay screenshot-verified; (2) colorblind cue visible without color; (3) hotkeys tested; (4) reduced-motion honored by all new FX; plus baseline (fresh tests + build, console 0/0).
+- Method: fresh tabs ?nocache=164 / 164b / 164c in Playwright; __vr probes; settings exercised through the real storage + applySettings(merged) path.
+- Criterion 1: MENU / PLAYING / PAUSED / GAME OVER screenshots (I164_1/2/4/5); tutorial full real flow on the fresh tab - raw localStorage key removed, Enter through startRun, overlay + frozen sim (time 0.000), Enter dismiss, sim resumed (2.317s), flag persisted true (I164_6). Banner / kill feed / multiplier from I163 (identical build).
+- Criterion 2: CVD preview filter + SVG applied; 3 golden M rocks via field.spawn('M',0.1,at,null,true) -> exactly 3 visible cages (7 non-golden off) (I164_3). Warden collar structure live; full CVD sim evidence cited from same-day I155/I156 (labeled, not assumed; wardenMesh.js unchanged since).
+- Criterion 3: F round trip (toast 'FX LOW', liveSettings fx, pause row), M round trip via pause label MUTE (ON) -> (OFF) (muted is module state, settings.sfx untouched by design), P PAUSED/PLAYING.
+- Criterion 4 (reducedMotion true, then restored): banner identity transform + 0s (punch skipped), kill feed transform none + 0s, slow-mo hint none/0s, HUD multiplier 0s + no animation, tutorial vr-reduced gated (I151).
+- Baseline: fresh npm test 491/491, build 0, console 0/0 (?nocache=164c), NaN scan 0 non-finite both tabs.
+- Finding (for I165): no live mute indicator in the MENU (pause-screen label only) - cosmetic UX gap.
+- Deliverable: production/gates.md G8.3 section (PASS). Verdict: PASS - proceed to I165.
+- Result: DONE. ST-164 closed. Next I165 ST-165 UX fix round.
+
