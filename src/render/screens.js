@@ -178,6 +178,7 @@ export function createScreens(root, settings = {}) {
   const newBestLine = line(gameOver, '', 'font-size:calc(16px * var(--vr-fs,1));font-weight:800;letter-spacing:3px;color:#ffe08a;');
   const statsLine1 = line(gameOver, '', 'font-size:calc(15px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#cfe4ff;margin-top:10px;'); // ST-031
   const statsLine2 = line(gameOver, '', 'font-size:calc(15px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#cfe4ff;'); // ST-031
+  const statsLine3 = line(gameOver, '', 'font-size:calc(15px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#9fd8ff;'); // I152
   const rankLine = line(gameOver, '', 'font-size:calc(14px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#ffe08a;opacity:0.95;'); // I69: board rank
   const dailyBadge = document.createElement('div'); // ST-141: DAILY RUN badge (only for daily runs)
   dailyBadge.style.cssText = 'display:none;font-size:calc(12px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#9fd8ff;border:1px solid rgba(159,216,255,0.4);border-radius:20px;padding:4px 14px;background:rgba(60,120,220,0.16);';
@@ -233,6 +234,7 @@ export function createScreens(root, settings = {}) {
       const ss = String(Math.floor(world.time) % 60).padStart(2, '0');
       set('stats1', statsLine1, "KILLS " + world.scoreKeeper.kills + "    WAVE " + Math.max(1, world.wave));
       set('stats2', statsLine2, "MAX COMBO " + world.scoreKeeper.maxCombo + "    TIME " + mm + ":" + ss);
+      const st = world.sessionStats(); set('stats3', statsLine3, "ACCURACY " + Math.round(st.accuracy * 100) + "%    SHOTS " + st.shotsHit + "/" + st.shotsFired); // I152
       if (opts.dailyMode) { dailyBadge.style.display = 'inline-block'; set('dailyBadge', dailyBadge, 'DAILY RUN' + (opts.dailyKey ? '  \u00b7  ' + opts.dailyKey : '') + (opts.dailyNewBest ? '   NEW DAILY BEST' : '')); } // ST-141
       else dailyBadge.style.display = 'none';
     }

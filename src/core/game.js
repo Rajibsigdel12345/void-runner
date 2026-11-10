@@ -51,6 +51,24 @@ export class World {
   get score() { return this.scoreKeeper.score; }
   get wave() { return this.waves.wave; }
   get lives() { return this.livesMgr.count; }
+
+  /** I152: full session stats snapshot (score, kills, wave, best combo, accuracy, time). */
+  sessionStats() {
+    const sk = this.scoreKeeper;
+    return {
+      score: sk.score,
+      kills: sk.kills,
+      wave: this.wave,
+      maxCombo: sk.maxCombo,
+      shotsFired: sk.shotsFired,
+      shotsHit: sk.shotsHit,
+      accuracy: sk.accuracy(),
+      time: this.time,
+    };
+  }
+
+  /** I152: player bullet connected - mark it dead and count the hit for accuracy. */
+  onPlayerBulletHit(bulletId) { this.weapons.markHit(bulletId); this.scoreKeeper.onShotHit(); }
   get gameOver() { return this.game.in(STATE.GAME_OVER); }
 
   /** ST-122: current weapon level (1-based) from the wave - highest level whose minWave <= wave. */
@@ -207,6 +225,7 @@ export class World {
       shots = b ? [b] : [];
     }
     for (const b of shots) this.emit('fire', { pos: b.pos, level: this.weaponLevel() }); // ST-122: level for render
+    if (shots.length) this.scoreKeeper.onShotFired(shots.length); // I152: accuracy denominator
   }
 
   /** GDD: BOMB shatters all on-screen asteroids; each counts as a kill feeding the
@@ -241,7 +260,7 @@ export class World {
       const id = bulletHitRock(b.pos.x, b.pos.y, b.radius, this.field.rocks);
       if (id == null) continue;
       const rock = this.field.rocks.find(r => r.id === id);
-      this.weapons.markHit(b.id);
+      this.onPlayerBulletHit(b.id);
       const res = this.field.hit(id); // ST-121: armor-aware single hit (shielded rocks absorb until exhausted)
       if (res && res.belt) { // ST-138: indestructible belt rock - bullet consumed, no score or split
         this.emit('beltHit', { pos: { x: rock.pos.x, y: rock.pos.y } });
@@ -316,7 +335,7 @@ export class World {
       const hit = this.mines.mines.find(mm => !mm.dead &&
         Math.hypot(mm.pos.x - b.pos.x, mm.pos.y - b.pos.y) < mm.radius + b.radius);
       if (!hit) continue;
-      this.weapons.markHit(b.id);
+      this.onPlayerBulletHit(b.id);
       this.mines.destroy(hit.id);
       const points = this.scoreKeeper.kill(this.cfg.mine.score, this.time);
       this.emit('kill', { pos: { x: hit.pos.x, y: hit.pos.y }, size: 'mine', points,
@@ -396,7 +415,7 @@ export class World {
     for (const blt of this.weapons.bullets) {
       if (blt.dead) continue;
       if (Math.hypot(boss.pos.x - blt.pos.x, boss.pos.y - blt.pos.y) < boss.radius + blt.radius) {
-        this.weapons.markHit(blt.id);
+        this.onPlayerBulletHit(blt.id);
         if (boss.hit()) this.bossDeath();
         else if (boss.phase === 2 && !this._bossPhaseEmitted) { // ST-133: announce the enrage once
           this._bossPhaseEmitted = true;
@@ -505,7 +524,7 @@ export class World {
     for (const blt of this.weapons.bullets) {
       if (blt.dead) continue;
       if (Math.hypot(wd.pos.x - blt.pos.x, wd.pos.y - blt.pos.y) < wd.radius + blt.radius) {
-        this.weapons.markHit(blt.id);
+        this.onPlayerBulletHit(blt.id);
         const r = wd.hit();
         if (r.killed) this.wardenDeath();
         else if (r.absorbed) this.emit('wardenArmor', { pos: { x: wd.pos.x, y: wd.pos.y }, armor: wd.armor });
@@ -601,7 +620,7 @@ export class World {
       const hit = this.drones.drones.find(dm => !dm.dead &&
         Math.hypot(dm.pos.x - b.pos.x, dm.pos.y - b.pos.y) < dm.radius + b.radius);
       if (!hit) continue;
-      this.weapons.markHit(b.id);
+      this.onPlayerBulletHit(b.id);
       this.drones.destroy(hit.id);
       const points = this.scoreKeeper.kill(this.cfg.drone.score, this.time);
       this.emit('kill', { pos: { x: hit.pos.x, y: hit.pos.y }, size: 'drone', points,

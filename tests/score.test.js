@@ -130,3 +130,44 @@ test('score: damage zeroes tier and heat immediately', () => {
   assert.equal(s.tier, 0);
   assert.equal(s.heatAt(0.3), 0);
 });
+test('score: accuracy is 0 before any shot', () => {
+  const s = new ScoreKeeper();
+  assert.equal(s.shotsFired, 0);
+  assert.equal(s.shotsHit, 0);
+  assert.equal(s.accuracy(), 0);
+});
+
+test('score: accuracy rises with hits and caps at 1', () => {
+  const s = new ScoreKeeper();
+  s.onShotFired(4);
+  s.onShotHit();
+  assert.equal(s.accuracy(), 0.25);
+  s.onShotHit();
+  s.onShotHit();
+  s.onShotHit();
+  assert.equal(s.accuracy(), 1);
+  s.onShotHit(); // overkill cannot push past 1
+  assert.equal(s.accuracy(), 1);
+});
+
+test('score: onShotFired floors, clamps and ignores bad input', () => {
+  const s = new ScoreKeeper();
+  s.onShotFired(2.9);
+  s.onShotFired(-5);
+  s.onShotFired(NaN);
+  s.onShotFired('x');
+  assert.equal(s.shotsFired, 2);
+});
+
+test('score: reset clears accuracy counters and it restarts fresh', () => {
+  const s = new ScoreKeeper();
+  s.onShotFired(2);
+  s.onShotHit();
+  assert.equal(s.accuracy(), 0.5);
+  s.reset();
+  assert.equal(s.shotsFired, 0);
+  assert.equal(s.shotsHit, 0);
+  assert.equal(s.accuracy(), 0);
+  s.onShotFired(1);
+  assert.equal(s.accuracy(), 0);
+});

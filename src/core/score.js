@@ -8,6 +8,8 @@ export class ScoreKeeper {
     this.combo = 0;
     this.maxCombo = 0;
     this.kills = 0;
+    this.shotsFired = 0; // I152: accuracy denominator
+    this.shotsHit = 0; // I152: accuracy numerator
     this.lastKillTime = -Infinity;
     this.overdriveMult = 1; // ST-057: World sets this to the OVERDRIVE mult while active
   }
@@ -56,6 +58,15 @@ export class ScoreKeeper {
   /** Damage breaks the chain (next kill restarts at combo 1). */
   onDamage() { this.combo = 0; this.lastKillTime = -Infinity; }
 
+  /** I152: n player bullet(s) left the muzzle (spread fires count n at once). */
+  onShotFired(n = 1) { this.shotsFired += Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0; }
+
+  /** I152: one player bullet connected with a target. */
+  onShotHit() { this.shotsHit++; }
+
+  /** I152: hits / fired, clamped to 0..1 (0 when nothing fired yet). */
+  accuracy() { if (this.shotsFired <= 0) return 0; return Math.min(1, this.shotsHit / this.shotsFired); }
+
   /** Expire the combo when the window lapses (call each step; drives HUD). */
   tick(t) {
     if (this.combo > 0 && t - this.lastKillTime > this.cfg.combo.window) this.combo = 0;
@@ -66,6 +77,8 @@ export class ScoreKeeper {
     this.combo = 0;
     this.maxCombo = 0;
     this.kills = 0;
+    this.shotsFired = 0;
+    this.shotsHit = 0;
     this.lastKillTime = -Infinity;
     this.overdriveMult = 1;
   }

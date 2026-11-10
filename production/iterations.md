@@ -1100,3 +1100,14 @@ One entry per iteration. Format:
 - Console: 0 errors / 0 warnings on a clean fresh boot + playthrough.
 - Screenshot: .evidence/I151/I151_tutorial_shown.png (first-run overlay).
 - Result: DONE. ST-151 closed. Next I152 ST-152 session stats (accuracy, best combo, kills, waves).
+
+## I152 - Session stats: accuracy + sessionStats API (ST-152)
+
+- Story: ST-152 | Goal: add the one genuinely new stat - accuracy (hits / shots fired) - and expose a clean, testable session-stats snapshot for the UI. Kills, max combo, wave and time already render at game over; accuracy is the new number.
+- Design: ScoreKeeper tracks shotsFired/shotsHit: onShotFired(n) floors + clamps (ignores non-finite/negative), onShotHit(), accuracy() = min(1, hits/fired) with 0 before the first shot, reset() clears both. World.onPlayerBulletHit(bulletId) wraps weapons.markHit + scoreKeeper.onShotHit so every player-bullet hit counts in one place - all 5 raw markHit sites (rocks, mines, boss, warden, drones) now route through it; enemy bolts (fireAimedBolt / enemyBullets.fire) are deliberately NOT counted. World counts onShotFired(shots.length) at the muzzle (spread fires count n at once). World.sessionStats() returns { score, kills, wave, maxCombo, shotsFired, shotsHit, accuracy, time }. The game-over screen gains a third stats line: "ACCURACY % SHOTS h/f" (cyan, same panel style, --vr-fs scaled).
+- Changed: src/core/score.js (2 fields + 3 methods + reset), src/core/game.js (sessionStats, onPlayerBulletHit, fire-site onShotFired, 5 call-site swaps: 3x b.id + 2x blt.id), src/render/screens.js (statsLine3 + set call), tests/score.test.js (+4), docs.
+- Tests: 466/466 (was 462, +4: accuracy 0 before any shot; rises with hits and caps at 1; onShotFired floors/clamps/ignores bad input; reset clears counters).
+- Browser: Playwright ?nocache=152b. Firing run: 77 shots, 22 hits, accuracy 0.28571... = exactly 22/77, in [0,1]; ship pos/vel finite throughout (the one NaN seen mid-smoke was a smoke-input bug - scalar thrust where advance() wants a {x,y} vector; with the vector the ship holds its position exactly). Forced death through the real resolveShipRocks kamikaze path (exactly one hit + one gameover event): the game-over screen shows "ACCURACY 29%    SHOTS 22/77" under the KILLS / MAX COMBO lines (screenshot). Deep NaN scan (151 objects): 0 real non-finite (only the intentional scoreKeeper.lastKillTime=-Infinity sentinel).
+- Console: 0 errors / 0 warnings.
+- Screenshot: .evidence/I152/I152_session_stats.png (game-over with the accuracy line).
+- Result: DONE. ST-152 closed. Next I153 ST-153 kill feed.
