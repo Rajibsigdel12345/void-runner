@@ -75,3 +75,59 @@ None. No steady-state performance problem on the desktop-web target. The first-f
 
 - Next: I96 cgs-gate-check (advisory pre-wrap gate).
 - Decision needed: implement the offscreen warm-up render (medium effort, removes the one-time game-start hitch) or defer it (documented, non-blocking). Owner: producer / technical_director. Recommendation: implement during the final wrap (I99/I100) if the budget allows; otherwise ship with the documented one-time startup hitch.
+
+## I184 - E8E deep profile (ST-184, cgs-perf-profile)
+
+Re-baseline of the E8E build (the full I170-I183 feel/audio/juice arc shipped on top of I95's E7 baseline) against the I95 profile above. Same method as I95/I128: live Chromium via Playwright (1280x720 logical, dpr 1.25) on the dev build, driving the fixed-step loop (advance(1/60) = tick + syncVisuals) and sampling renderer.info per frame (manual reset, autoReset off). Two render paths measured per frame: the direct path (advance + renderer.render, the I128/I182 gate method) and the real path (advance + bloom.render, the composer-with-UnrealBloomPass path the loop actually calls at high FX, matching I95). CPU times are on the test machine and are indicative of relative cost, not an absolute cross-machine guarantee. p95 is the meaningful steady-state metric (single-frame worst spikes are GC/compositor artifacts inside the evaluate, per I182).
+
+### Summary
+Comfortably inside the 60fps budget at every realistic load on both render paths: MENU idle ~0.6 ms, organic early play ~1-2 ms, and the forced worst case (24 M rocks + a live wave-5 Monolith + up to 14 enemy bullets + sustained player fire) at GPU peak 49 draw calls / 2542 triangles with p95 ~3 ms. No steady-state CPU or GPU bottleneck. The one standing finding is unchanged from I95: a one-time cold first-gameplay-frame initialization cost of ~129-586 ms (3 fresh loads this session; I95's range was 90-600 ms) from lazy WebGL resource setup plus transition-tick main-thread work. Memory is flat over a 6-second worst-case soak (no per-frame leak). Docs-only iteration - zero source changes.
+
+### Metric
+| Scene | Path | Draw calls (peak) | Triangles (peak) | Geoms | Textures | Frame ms (mean / p95 / worst) |
+|-------|------|------------------:|-----------------:|------:|---------:|------------------------------|
+| MENU (resting, 120 frames) | bloom/real | 22 | 268 | 9 | 14 | 0.58 / 1.9 / 2.4 |
+| Organic early (wave 1, ~10 rocks, no fire) | direct | 18 | 1934 | 12 | 14 | 1.52 / 1.3 / 65.6 (GC) |
+| Organic early (wave 1, ~10 rocks, no fire) | bloom/real | 31 | 1628 | 12 | 14 | 1.15 / 2.2 / 6.3 |
+| Worst case (24 M rocks + live Monolith + <=14 eb + sustained fire, 3x120 soak) | bloom/real | 49 | 2542 | 19 | 16 | 1.6-1.8 / 2.9-3.5 / 3.3-6.3 (one GC window 4.6 / 11.6 / 19.4) |
+| Cold first gameplay frame (3 fresh loads) | n/a | n/a | n/a | - | - | 129-586 (one-time; next frames 1-4 ms) |
+
+Peak live-object counts in the worst case: rocks 24 (cap 24), player bullets 5-6 (cap 64), enemy bullets 14 (cap 24 - the Monolith's attack produced eb this session), Monolith alive (hp protected for the soak). Heap over the 360-frame soak: 15890 -> 15826 KB (-64 KB, flat).
+
+### Budget
+Target: 60fps on desktop web = 16.67 ms/frame (aim <14 ms steady-state).
+- Frame time (steady-state, both paths): PASS - p95 1.3 ms (organic direct) to 3.5 ms (worst-case bloom); the lone 11.6 ms p95 window is a GC/compositor artifact (mean there 4.6 ms, worst 19.4 ms - the artifact class I182 documented). No scene approaches the 14 ms target or the 16.67 ms budget on any p95.
+- Draw calls: PASS - 22 (menu) to 49 (worst case, composer path). The composer multiplies per-object calls across RenderPass + bloom mips + OutputPass, so the bloom-path call count is higher than the direct path (18-30) at the same load; both are far under a ~100-call ceiling. Per-object shared geometry/material keeps the scaling ~1:1 with live objects.
+- Triangles: PASS - 268 (menu) to 2542 (worst case). Trivial for WebGL; low-poly shared geometry. The worst-case tris (2542) exceed I95's worst (1980) only because this session's scene carried 14 enemy bullets that I95's worst-case composition did not emphasize - still a fraction of any realistic WebGL budget.
+- GPU memory (geometries / textures): PASS - 9-19 geometries, 14-16 textures, bounded. (Programs not reported: renderer.info.memory.programs is undefined in this three.js build.)
+- JS heap: PASS (shallow) - flat over the worst-case soak (-64 KB). The deep entity-pooling audit is ST-185 / I185.
+
+### Bottleneck
+Not CPU-bound (p95 ~3 ms worst case) and not GPU-bound (2542 tris / 49 calls). The single meaningful cost is unchanged from I95: lazy WebGL initialization on the first render of each object type (shader program compilation + GPU buffer/texture upload, deferred until a geometry/material first renders) compounded by transition-tick main-thread work (the WebAudio graph build + 0.5 s noise-buffer generation on the Enter gesture, and wave-1 scene setup).
+- This session the cost splits variably between a pre-render main-thread gap and an elevated first render call:
+  - nocache=184c: 575.7 ms gap + 10.2 ms first render (~586 ms)
+  - nocache=184d: 121.0 ms gap + 39.4 ms first render (~160 ms)
+  - nocache=184e: 77.0 ms gap + 52.2 ms first render (~129 ms)
+- The user-perceived cost is the sum (~129-586 ms), one-time per session; frames 1-3 after are 1-4 ms (verified per load). This is consistent with the I95 range (90-600 ms) and reconfirms the root cause is the one-time lazy init, not a steady-state problem.
+
+### Optimization
+- Standing decision (re-confirmed, not changed): the I95 offscreen warm-up render remains the proposed fix - populate one of each pooled entity (1 rock, 1 player bullet, 1 enemy bullet, 1 mine) + activate each one-shot effect once, render once to a tiny (2x2) offscreen WebGLRenderTarget, then tear down cleanly. Expected to drop the first gameplay frame toward ~5 ms. A bare renderer.compile() is already proven insufficient (I95: shader-only, no buffer/texture upload; reverted). Effort ~30-40 lines + a clean-boot test.
+- No code changed this iteration (the profile is evidence, not code). Defer is acceptable: the cost is one-time per session and the game otherwise holds 60fps.
+
+### Blocking issues
+None. No steady-state performance problem on the desktop-web target. The first-frame initialization cost is a one-time startup hitch (warning, not a blocker).
+
+### Changed files or proposed files
+- production/perf-profile.md (this "## I184" section). No src/ or tests/ changes.
+
+### Verification evidence
+- npm test 575/575 green; node scripts/build.mjs exit 0 (baseline confirmed at iteration start).
+- All metrics measured live via Playwright against the dev build; frame percentiles over 100-120 sampled frames per scene/path; renderer.info sampled with manual reset (autoReset off).
+- First-frame hitch reproduced on 3 independent fresh cold loads (184c/d/e) with a timestamped + state-tagged render hook (4000-entry buffer); the one-time nature confirmed (subsequent frame-buckets 1-4 ms on each load).
+- Worst-case soak: 3 windows x 120 frames of advance + bloom.render with the Monolith hp-protected (99999) so it stayed alive across all windows; per-window frame stats + GPU peak + heap at each boundary; NaN scan over ship/24 rocks/player bullets = 0; boss finite.
+- Console 0 errors / 0 warnings across the full session (menu -> PLAYING -> forced scene -> soak -> screenshot, all=).
+- Screenshot .evidence/I184/I184_1_worst_scene.png (WAVE 4, SMALL ROCKS modifier, ship firing, live green Monolith, M-rocks at rim, red enemy bullets, bloom glow).
+
+### Next owner or decision
+- Next: I185 ST-185 memory audit (new entity pooling) - the deep heap/leak audit this profile left to the shallow pass (cgs-perf-profile).
+- Decision (carried from I95, unchanged): implement the offscreen warm-up render in the final wrap (E8F) if the budget allows, or ship with the documented one-time startup hitch. Owner: producer / technical_director.
