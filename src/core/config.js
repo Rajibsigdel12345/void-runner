@@ -184,8 +184,13 @@ export const CONFIG = {
 
   powerup: {
     dropChance: 0.25,   // chance per kill
+    dropLife: 20,       // I130: drop lifetime (s) - abandoned drops expire and free the pool (pre-I130: they persisted forever, clogging the pool)
+    fadeTime: 2.5,      // I130: visual shrink-out window before expiry (render reads it; no core FX)
     pickupRadius: 1.6,
     maxActiveDrops: 1,
+    weights: {          // I130: weighted drop table (replaces the uniform 1/7 roll) - offense common, bomb/overdrive/slowmo rarer
+      rapid: 20, spread: 20, shield: 15, magnet: 15, bomb: 10, overdrive: 10, slowmo: 10,
+    },
     magnetRadius: 7,
     drift: 1.2,
     magnetAccel: 40,   // I38: pull acceleration (u/s^2) inside the magnet ring

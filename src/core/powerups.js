@@ -24,6 +24,19 @@ export class PowerUpField {
   active(type) { return this.timeLeft[type] > 0; }
   isShielding() { return this.shieldHits > 0; }
 
+  /** I130: weighted drop-table roll - ONE RNG draw; weights rescale over their sum; zero-weight types never roll. */
+  pickType() {
+    const ws = this.cfg.powerup.weights;
+    let total = 0;
+    for (const t of POWERUP_TYPES) total += ws[t] || 0;
+    let r = this.rng.next() * (total || POWERUP_TYPES.length);
+    for (const t of POWERUP_TYPES) {
+      r -= ws[t] || 0;
+      if (r < 0) return t;
+    }
+    return POWERUP_TYPES[POWERUP_TYPES.length - 1]; // float-edge guard
+  }
+
   /** @returns {boolean} true when a shield hit was absorbed this call. */
   consumeShieldHit() {
     if (this.shieldHits <= 0) return false;
@@ -36,13 +49,14 @@ export class PowerUpField {
     const p = this.cfg.powerup;
     if (this.drops.length >= p.maxActiveDrops) return null;
     if (!this.rng.chance(p.dropChance)) return null;
-    const type = POWERUP_TYPES[this.rng.int(0, POWERUP_TYPES.length - 1)];
+    const type = this.pickType(); // I130: weighted table (was uniform 1/7)
     const a = this.rng.next() * Math.PI * 2;
     const drop = {
       id: this.nextId++,
       type,
       pos: v2(pos.x, pos.y),
       vel: v2(Math.cos(a) * p.drift, Math.sin(a) * p.drift),
+      life: p.dropLife, // I130: counts down with the (full, unscaled) dt passed to step()
       dead: false,
     };
     this.drops.push(drop);
@@ -80,6 +94,8 @@ export class PowerUpField {
     const pickups = [];
     for (const d of this.drops) {
       if (d.dead) continue;
+      d.life -= dt; // I130: drop lifetime (game-time; player-side, so NOT slow-mo scaled)
+      if (d.life <= 0) { d.dead = true; continue; } // I130: expired - frees the pool (compactDrops below)
       const dx = ship.pos.x - d.pos.x;
       const dy = ship.pos.y - d.pos.y;
       const dist = v2Len(v2(dx, dy));

@@ -332,3 +332,18 @@ From the post-gate playtest battery (design/balance-e8b.md "Post-gate playtest (
   - forced w10 (boss + 3 drones): pre-fix 2 hits on w10, run dies at w13; post-fix 1 hit on w10, run survives to w15.
   - fresh-drone forced scenarios are unchanged, as expected: maxAge (30 s) cannot fire inside a 14-32 s wave window.
 - Watch: if a later balance pass extends drone pressure (perWave > 1, firstWave < 8), revisit maxAge. The droneDecays tally in the playtest harness is the tracking metric. GDD addendum for the homing drone lands in I132; until then the config comment + this note carry the authority.
+## I130 - power-up drop rebalance: weighted table + drop lifetime (ST-130)
+
+From the I129 playtest battery data (all 18 saved runs analyzed): the realized drop rate was 1.0% of kills vs the nominal 25% roll - a 25x gap. Root cause: maxActiveDrops=1 and NO drop lifetime - one uncollected drop drifted at the rim forever and made every later roll return null (pool saturated). The GDD specifies no drop weights, so config + this note carry authority (same treatment as the E8B drone before its I132 GDD addendum).
+
+- Lever 1 (config, powerups.js): dropLife = 20 s. Abandoned drops expire (pure dt countdown on the full, unscaled dt - player-side, like magnet) and free the pool; render reads fadeTime = 2.5 s and shrink-outs the orb + letter badge over the last 2.5 s (scale-based fade so the shared per-type materials stay pooled - zero extra materials/allocations).
+- Lever 2 (config, powerups.js): weighted 7-type table replaces the uniform 1/7 roll - rapid 20, spread 20, shield 15, magnet 15, bomb 10, overdrive 10, slowmo 10 (sum 100). Offense common (the core loop is shooting), bomb/overdrive/slowmo rarer (they are the high-impact tools). pickType() uses ONE rng.next() draw (same stream width as the old rng.int roll); zero-weight types never roll and the rest rescale over the sum.
+- Exploit risk: none new. Expiry gives nothing (same as absence); the player cannot extend, stack, or reroll a drop; deterministic (6 tests pin seeds).
+- Pacing: more drops flow (see data) - early waves become slightly more forgiving via shield/rapid; the bot run on seed 33 went from 157 to 621 kills (it now actually uses drops: 2 -> 7 pickups). No spawn/pacing values changed.
+- Data (scripts/playtest.mjs full runs, same seeds pre/post; behavior diverges after the first extra pickup, standard emergent A/B):
+  - seed 11: rate 0.017 -> 0.035 (kills 292 -> 172; died at wave 5 boss - Finding 4, drops cannot save a ring-prediction failure)
+  - seed 22: rate 0.012 -> 0.024 (161 -> 207 kills)
+  - seed 33: rate 0.019 -> 0.024, pickups 2 -> 7, 157 -> 621 kills, 6 of 7 types sampled (pre-fix runs sampled 2-4 types per run; post-fix spread across the table)
+  - realized rate 2.4-3.5% is still below the 25% roll by design - the clog is gone, the residual gap is the 20 s lifetime + 1-drop cap physics (about 1 collectible drop every 5-10 s of active combat, which reads well).
+- Telemetry: dropsSpawned/dropsTaken per wave already tallied by the harness; the per-type distribution now lets E8E (feel) or post-launch playtest check whether a type is under/over-rewarded.
+- Risks: a 20 s drop may feel short to a player deep in a firefight (lever: dropLife 25-30 s, not a new mechanic). The shrink-out is a scale fade, not an opacity fade (shared materials) - acceptable at 2.5 s; revisit only if it reads as "the pickup is broken".

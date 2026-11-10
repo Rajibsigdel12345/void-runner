@@ -92,14 +92,16 @@ export function createPowerupRenderer(scene) {
       m.position.set(d.pos.x, 0.45 + Math.sin(t * 2.2 + d.id) * 0.08, d.pos.y);
       m.rotation.y = t * 1.4 + d.id;
       m.rotation.x = d.type === 'shield' ? Math.PI / 2.6 : 0;
-      const pulse = 1 + Math.sin(t * 3.1 + d.id * 1.7) * 0.07;
-      m.scale.setScalar(pulse);
+      const fade = Math.max(0, Math.min(1, d.life / CONFIG.powerup.fadeTime)); // I130: 1 -> 0 over the last fadeTime seconds
+      const pulse = (1 + Math.sin(t * 3.1 + d.id * 1.7) * 0.07) * fade; // I130: shrink-out before expiry (keeps the shared per-type materials intact)
+      m.scale.setScalar(Math.max(0.001, pulse));
       m.visible = true;
       const b = badges[idx]; // I70: letter badge above the orb (always readable)
       b.material = badgeMats[d.type];
       b.position.copy(m.position);
       b.position.y += 0.72;
-      b.visible = true;
+      b.scale.set(0.7 * fade, 0.7 * fade, 1); // I130: badge shrinks with the orb
+      b.visible = fade > 0.02;
     }
     for (; i < max; i++) { pool[i].visible = false; badges[i].visible = false; }
   }
