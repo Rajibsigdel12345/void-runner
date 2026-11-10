@@ -69,7 +69,7 @@ app.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x04060f);
 scene.fog = new THREE.Fog(0x04060f, 60, 240);
-const skybox = createSkybox(scene, 'assets/skybox_equirect.png', (tex) => { // I212: equirect sky - fire-and-forget, flat-color fallback
+const skybox = createSkybox(scene, 'assets/skybox_equirect.jpg', (tex) => { // I212 (I230: 1024x512 JPEG, Blender node-bake v5): equirect sky - fire-and-forget, flat-color fallback
   // I213: PBR-lite IBL - bake the sky into a PMREM env map so the MeshStandard rocks/ship/belt pick up nebula
   // reflections (they previously only had hemisphere+ambient+directional). envMapIntensity is kept low so
   // hull speculars stay under the bloom threshold (0.72) - only intended glows bloom.
