@@ -26,6 +26,7 @@ import { createWaveBanner } from './render/waveBanner.js';
 import { createScorePopups } from './render/scorePopups.js';
 import { createTutorialHint } from './render/tutorialHint.js';
 import { createTutorialOverlay } from './render/tutorialOverlay.js'; // I151: first-run tutorial
+import { createKillFeed } from './render/killFeed.js'; // I153: kill feed
 import { createBloom } from './render/bloom.js';
 import { createFpsMeter } from './render/fpsMeter.js';
 import { createDebugOverlay } from './render/debugOverlay.js'; // ST-080
@@ -111,6 +112,7 @@ const banner = createWaveBanner(document.body);
 const popups = createScorePopups(document.body, camera); // ST-030
 const coarse = (window.matchMedia && window.matchMedia('(pointer:coarse)').matches) || 'ontouchstart' in window; // I71: touch detect (hint + screens)
 const hint = createTutorialHint(document.body, { touch: coarse }); // ST-032
+const killFeed = createKillFeed(document.body); // I153: kill feed (top-right, PLAYING only)
 const hud = createHUD(document.body);
 const reticle = createReticle(scene); // I44: fire-line reticle
 let muted = false; // M key (ST-017); consumed by audio (I27)
@@ -220,7 +222,7 @@ function refreshDailyMenu() {
 }
 refreshDailyMenu();
 function startRun(mode) {
-  newBest = false; popups.clear(); dailyNewBest = false;
+  newBest = false; popups.clear(); killFeed.clear(); dailyNewBest = false;
   const firstRun = !storage.getTutorialSeen(); // I151: first entry to PLAYING
   if (firstRun) { tutorialActive = true; tutorial.show(); } // gate the sim while reading
   else hint.show(); // passive 6s hint on subsequent runs
@@ -229,7 +231,7 @@ function startRun(mode) {
   world.begin();
 }
 function restartRun() {
-  newBest = false; popups.clear(); hint.show(); dailyNewBest = false;
+  newBest = false; popups.clear(); killFeed.clear(); hint.show(); dailyNewBest = false;
   if (dailyMode) world.reseed(dailySeedVal); // ST-141: same seed -> reproduce today's run
   world.restart();
 }
@@ -326,7 +328,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+window.__vr = { world, eventTally, input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -418,7 +420,7 @@ function tick(dt, intent) {
     else if (e.type === 'waveCleared') banner.showCleared(e.data.n);
     else if (e.type === 'bossSpawn') { banner.showBoss(e.data.wave, e.data.hp, e.data.kind === 'splicer' ? 'THE SPLICER' : 'THE MONOLITH'); if (e.data.kind === 'splicer') toast('SPLICER INBOUND'); } // ST-135/143: boss intro (+ Splicer callout)
     else if (e.type === 'wardenSpawn') toast('WARDEN INBOUND'); // ST-137: mini-boss callout
-    else if (e.type === 'kill') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 || e.data.golden || e.data.boss, gold: !!e.data.golden, od: !!e.data.overdrive }); // ST-030/052
+    else if (e.type === 'kill') { popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 || e.data.golden || e.data.boss, gold: !!e.data.golden, od: !!e.data.overdrive }); killFeed.add(e.data); } // ST-030/052, I153
     else if (e.type === 'nearmiss') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points); // ST-053 (plain small popup)
     else if (e.type === 'weaponLevelUp') toast('WEAPON LEVEL ' + e.data.level); // ST-123
     if (!motionOff) {
@@ -495,6 +497,7 @@ function syncVisuals(dt) {
   const st = world.game.state;
   audio.ambience(st === STATE.PLAYING); // ST-083: ambience bed only while playing
   hud.setVisible(st === STATE.PLAYING || st === STATE.PAUSED);
+  killFeed.setVisible(st === STATE.PLAYING); // I153: feed only while playing
   // I36: reuse opts objects instead of allocating per frame
   hudOpts.best = bestScore;
   screenOpts.muted = muted;
@@ -552,6 +555,7 @@ function syncVisuals(dt) {
   camera.position.z += shakeOff.z;
   stars.update(simT, camera, !motionOff); // I60: twinkle + parallax (frozen when reduced motion)
   popups.sync(dt, motionOff); // ST-030: after follow-camera + shake
+  killFeed.sync(dt, motionOff); // I153
   hint.sync(dt, motionOff); // ST-032
   tutorial.sync(motionOff); // I151: reduced-motion gates the overlay animations
   if (flashA > 0) { // hit/bomb flash decay

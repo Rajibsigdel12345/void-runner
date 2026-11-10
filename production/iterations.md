@@ -1111,3 +1111,14 @@ One entry per iteration. Format:
 - Console: 0 errors / 0 warnings.
 - Screenshot: .evidence/I152/I152_session_stats.png (game-over with the accuracy line).
 - Result: DONE. ST-152 closed. Next I153 ST-153 kill feed.
+
+## I153 - Kill feed: fading top-right list of recent kills (ST-153)
+
+- Story: ST-153 | Goal: a compact, glanceable record of the last few kills (what + points + combo), so the player tracks what they are destroying without relying only on score popups. Pure render feature - no core logic change (driven by the existing 'kill' events).
+- Design (cgs-ux-design): HUD state - hidden off-PLAYING (setVisible), 5 rows max (newest top), 3.0 s life with a 0.45 s fade, slide-in from the right. Labels: S/M/L ROCK, GOLDEN ROCK (gold), MINE, SEEKER, WARDEN (orange, big), THE MONOLITH / THE SPLICER (gold, big, from the boss kind tag). Points always; "xN" combo (rounded to 1 dp - the 0.1 combo step produces float noise like 2.4000000000000004 without rounding) and "OD" when overdrive is active. Accessibility: aria-hidden (decorative HUD; popups + game-over stats already carry the data), reduced-motion aware (vr-reduced: no slide-in, no fade), --vr-fs font scaling, mobile media query.
+- Changed: src/render/killFeed.js (new, createKillFeed -> { add, sync, setVisible, clear }), src/main.js (import, create, drain-branch killFeed.add, startRun clear x2, syncVisuals setVisible + sync, __vr.killFeed handle), docs.
+- Tests: 466/466 (render-only feature, no core diff - unchanged count).
+- Browser: Playwright ?nocache=153b. 18 kills -> feed capped at exactly 5 rows with correct labels/points (L ROCK +60, M ROCK +150, ...); multiplier shown rounded (x2.3 / x2.4, floatNoise=false after the display-rounding fix); lifecycle proven by forced sync(3.5 s) expiring all rows (5 -> 0); reduced-motion: sync(dt, true) toggles vr-reduced on the feed; game over (real kamikaze path) -> feed display:none (PLAYING-only visibility); deep NaN scan (141 objects): 0 non-finite.
+- Console: 0 errors / 0 warnings.
+- Screenshot: .evidence/I153/I153_kill_feed.png (feed live during PLAYING).
+- Result: DONE. ST-153 closed. Next I154 ST-154 wave banner polish.
