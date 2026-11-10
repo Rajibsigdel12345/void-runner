@@ -286,4 +286,7 @@ kept subtle and tied to the moment). Motion-gated like the rest of the juice.
   reduced-motion change.
 
 ## Next
-ST-179 (I179): Balance pass E8-3 (feel params).
+E8E arc (I169-I186) closed at I186. Feel tuning is frozen for the E8
+milestone: the I202 human playtest (E8F) is the confirmation pass, with
+__vr.juiceTally() as the per-run baseline (the design/feel-balance.md
+ST-183 handoff). Any resulting change goes to the post-E8 backlog.

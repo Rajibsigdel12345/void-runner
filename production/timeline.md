@@ -6,3 +6,7 @@
 - 2026-11-13  M1 (E1-E6, I01-I48) closed: slice gate PASS (I45), final regression (I46), docs (I47),
                 milestone review + retrospective (I48), release checklist SHIP (I49, dist 22.9MB -> 1.4MB).
 - 2026-11-13  Sprint 1 closes at I50 (v0.2.0). E7 (ST-051..100) begins I51.
+- 2026-11-10  (I186 consolidation, recorded late) E7 (ST-051..100) closed at I100: final gate closed, 100 iterations complete (production/iterations.md I99-I100).
+- 2026-11-10  (I186 consolidation, recorded late) Blender asset arc I101-I106: art bible (design/art-bible.md) + asset spec (design/asset-spec.md) + five first-party GLBs (ship, asteroid L/M/S, boss) exported via Blender, GLTFLoader integration with procedural fallback, browser verification + asset audit; AGENTS.md assets/ convention.
+- 2026-11-10  (I186 consolidation, recorded late) E8 (ST-107..206) opened at I107: six arcs - E8A planning (I107-110), E8B core gameplay (I111-132, docs I132), E8C content variety (I133-150, docs I150), E8D UI/UX (I151-168, docs I168), E8E audio + feel (I169-186, docs I186), E8F robustness + QA (I187-206, docs I200).
+- 2026-11-10  E8E closed at I186: G8.4 gate PASS (I182), 581/581 tests, E8E deep perf profile (I184) + 600 s memory soak (I185) clean. Next: E8F - context-loss hardening (ST-187, I187).

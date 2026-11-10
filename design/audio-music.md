@@ -494,5 +494,36 @@ at research time; no quotes used.
   drift at idle). Console 0 errors / 0 warnings; NaN scan (ship +
   6 rocks) 0; screenshot .evidence/I174/I174_1_death_slowmo.png.
 
+## ST-180 headless test suite (I180)
+
+The synth layer got its first automated coverage: 18 headless tests in
+tests/audio.test.js over a stub AudioContext (tests/helpers/webaudio.js,
+installAudioStub()). Covered: init + master-chain construction
+(gain -> comp -> makeup -> limiter -> analyser/dest), idempotent init +
+suspended-resume, cue scheduling + counts, per-cue rate limiting (shoot
+min 0.04 s), unknown-cue no-op, weights() all-cues finite positive,
+setVolume clamp [0,1], setMuted master-gain routing, setSfx gating,
+stereo pan from world x (clamped to +-ARENA_R, scaled 0.8, non-finite ->
+center), meter peak/rms math (analyser stub returns a flat 0.25 frame, so
+peak = rms = 0.25 exact), and the no-bus seams (timeWarp detune-cent
+mapping, musicIntensity clamp, musicChord Am start).
+
+Deliberate boundary: the tests NEVER call music(true)/ambience(true) -
+those schedule recurring setTimeouts (chord tick 18 s, pluck ~1 s) plus
+1.2-1.3 s disconnect tails that would keep the in-process runner alive.
+The bus seams are exercised in their no-bus state, which is the same state
+main.js starts them in. Fully deterministic: the stub clock starts at 0
+and the tests advance ctx.currentTime manually; no real audio, no timers,
+no network (~80 ms standalone). Test-only: the runner only loads
+tests/*.test.js and the build only bundles src/ + assets/, so the stub is
+never shipped or executed.
+
+Re-runs on every npm test (565/565 at I180; re-verified on every
+iteration since - the G8.4 gate cites it as the standing synth-layer
+re-verification).
+
 ## Next
-ST-175 (I175): shake table.
+E8E arc (ST-169..186) closed at I186. Audio design is frozen for the E8
+milestone: E8F (I187-I206) carries no audio story (robustness / QA only).
+The I202 human playtest can surface mix feedback, but any resulting change
+goes to the post-E8 backlog.
