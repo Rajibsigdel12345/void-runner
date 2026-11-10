@@ -2,9 +2,9 @@
 
 - project: Void Runner (E:\Game, three.js, no bundler)
 - epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-156 (next)
-- current_iteration: I155 (committed)
+- current_story: ST-157 (next)
+- current_iteration: I156 (committed)
 - branch: main
 - tests: 467/467
 - build: exit 0
-- notes: I155 done (ST-155 colorblind shape cues + toggle): setting shapeCues (default true, storage boolean-validated); golden rocks get a gold wireframe icosahedron cage (asteroidRenderer, pool child[1], visible = cuesOn && golden && !belt, scale r*1.5); Warden gets an 8-spike collar that extends only when exposed / armor spent (wardenMesh, visible = cuesOn && !armored, hidden on death); boss/mine excluded (already strong non-color cues); SHAPE CUES checkbox in settings VISUALS card (menu + pause in sync); applySettings pushes to both renderers (s.shapeCues !== false). +1 test (467/467), build 0, browser verified in fresh session (cage on/off, gold #ffc94d scale 1.95, console 0/0, NaN clean). Screenshots .evidence/I155/. Next: I156 ST-156 colorblind verification pass (simulate colorblind palettes over gameplay screenshots, confirm cues survive). NOTE: Blender 5.2.3 connected - E9 Blender epic after E8 closeout; use blender MCP tools there. Do NOT spawn sub-agents.
+- notes: I156 done (ST-156 colorblind verification + palette check, verification-only, no src diff): staged a live scene with every entity type, applied Machado 2009 deuteranopia/protanopia + standard tritanopia matrices in linear light to full frames and a 21-color palette scored by CIE76 dE (new dev-only tool tools/colorblind.cjs + pngjs, tools/node_modules gitignored). PASS: warden state 49-106, golden vs normal rock 41-66, bolt vs player bullet 63-111, cage vs ship 69-99 - all distinct in all 3 sims; cage + spikes read as silhouette; cues-OFF control proves the cue works. Confusable-by-color pairs (bolt/mine, bolt/warden, mine/bomb pickup, shield pickup/ship, warden teal vs cyan family, rapid/spread) all mitigated by shape/motion/size/team - documented, no palette change. 467/467, build 0, console 0/0, 12 screenshots .evidence/I156/. Next: I157 ST-157 hotkeys (M mute, P pause, F fx toggle). NOTE: Blender 5.2.3 connected - E9 Blender epic after E8 closeout; use blender MCP tools there. Do NOT spawn sub-agents.
