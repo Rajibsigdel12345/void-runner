@@ -1808,3 +1808,19 @@ One entry per iteration. Format:
   production/iterations.md, production/session-state/active.md. Evidence: .evidence/I205/matrix.txt.
 - Result: DONE. ST-205 closed. Next I206 ST-206 E8 closeout (cgs-milestone-review) + G8.6 gate.
 
+## I206 - E8 closeout + gate G8.6: PASS, milestone CLOSED (cgs-milestone-review) (ST-206)
+
+- Skill: cgs-milestone-review (producer). Final E8 iteration (100th of I107-I206).
+- Gate G8.6: PASS - C1 sequence 1..206 complete (audited: 1..205 pre-commit, no gaps/dups,
+  this commit adds I206); C2 630/630 (fresh); C3 build exit 0 (fresh, 88 files / 1.82 MB raw /
+  449.6 KB gzip in budget); C4 regression B+C+D clean (D at I205: 3/3 matrix + 6/6 dist
+  scenarios, console 0/0); C5 playtest v3 + triage v2 (0 BUGs, 8 HUMAN-PENDING carried); C6
+  release checklist v3 SHIP-READY (code side).
+- Milestone review: E8 CLOSED - all six sub-arcs delivered and gate-verified (G8.0-G8.6);
+  tests 233 -> 630 (+397); demo pin identical on dev server and production dist.
+- Transition verdict: proceed to E9 (Blender asset/art pass, ST-207+, user-requested).
+- Changed files: production/milestone-review.md (+E8), production/gates.md (+G8.6),
+  CHANGELOG.md, production/iterations.md, production/session-state/active.md.
+- Verification: npm test 630/630 (fresh); build exit 0 (fresh); sequence audit clean.
+- Result: DONE. ST-206 closed. E8 COMPLETE (100/100). Next E9 ST-207 (Blender GLTF pipeline
+  refresh).

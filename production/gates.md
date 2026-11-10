@@ -476,3 +476,64 @@ Advisory phase gate closing the E8F robustness arc (I187-I197) before the tail (
 
 ### Next owner or decision
 I199 (ST-199): regression round C + playtest prep - full suite re-run matrix, browser state-machine + critical-path probe sweep, then prepare the human-playtest instrument (the cgs-qa-plan territory lands at I201). No user decision required (advisory gate, non-blocking).
+
+## I206 - G8.6 E8 Closeout Gate (ST-206)
+
+### Summary
+Final E8 gate. All six criteria met with fresh or freshly-cited evidence. **PASS** - the
+E8 Expansion Milestone (I107-I206) is CLOSED.
+
+### Gate Criteria (qa-plan E8, I201)
+1. 100/100 E8 iterations logged sequential (107..206).
+2. 300+ tests green.
+3. Build green.
+4. Extended regression clean (rounds B + C + D).
+5. Playtest triaged.
+6. Release checklist done.
+
+### Evidence (collected this iteration unless noted)
+- C1 sequence: iterations.md headers audited by script - 1..205 present pre-commit, no gaps,
+  no dups; this commit adds I206 -> 1..206 complete, E8 = 100/100 (I107-I206).
+- C2 tests: 630/630 (fresh run this iteration, per-iteration gate). 300+ target exceeded 2x.
+- C3 build: node scripts/build.mjs exit 0 (fresh, this iteration); dist 88 files / 1,909,058 B
+  raw; I197 gzip audit 449.6 KB - within the adopted budget.
+- C4 regression: round B (I195/196), C (I199), D (I205) all clean; D = 3/3 matrix 630/630
+  (.evidence/I205/matrix.txt) + 6/6 production-dist browser scenarios + console 0/0. No source
+  changes I199-I206, so earlier results carry intact.
+- C5 playtest: v3 (I202, 3 runs per the I199 checklist) + triage v2 (I203): 0 BUG findings;
+  3 BALANCE dispositions, 2 ART/AUDIO routed to E9, 3 labeled non-defects; 8 HUMAN-PENDING
+  items carried.
+- C6 release checklist: v3 / E8 (I204) - SHIP-READY (code side); production-dist smoke green
+  with the demo pin EXACT (t=36.15 s, score 11334, idx 2169/2220) = dev/dist determinism
+  confirmed.
+
+### Concerns
+- The 8 HUMAN-PENDING perception items remain the player-experience evidence gap (non-blocking
+  by milestone plan; the bot covered everything bot-verifiable quantitatively).
+- The E9 Blender art pass is the next user-requested workstream; visuals are
+  procedural + 5 low-poly GLBs until it runs.
+- Low-end physical device / GPU validation untested (adaptive quality I73 mitigates).
+
+### Verdict
+**PASS - E8 CLOSED.** All phase gates G8.0-G8.6 recorded (I110/I128/I147/I164/I182/I198/I206).
+
+### Risks
+- Carry to E9: combo-cap flatness (T1, human data point needed), boss-lethality feel (T2),
+  kill juice sparsity (T4), boss music spike mix (T5), tutorial/REC/overdrive/vortex/breather
+  feel items (HUMAN-PENDING list).
+
+### Changed files
+- production/milestone-review.md (+E8 section), production/gates.md (this block), CHANGELOG.md,
+  production/iterations.md, production/session-state/active.md.
+
+### Verification evidence
+- npm test 630/630 (fresh, this iteration); node scripts/build.mjs exit 0 (fresh, this
+  iteration).
+- Sequence audit (this iteration): 1..205 pre-commit, no gaps/dups.
+- .evidence/I205/matrix.txt, .evidence/I204/01-dist-gameplay.png, .evidence/I202/ (3 shots).
+
+### Next owner / decision
+- E9 (ST-207+): Blender asset/art pass per design/art-direction-research.md - GLTF pipeline
+  refresh (ST-207), ship model (ST-208), asteroid L/M/S models (ST-209-210), boss model
+  (ST-211), skybox/arena ring (ST-212) - plus the 8 HUMAN-PENDING items when a human is
+  available.

@@ -2,11 +2,12 @@
 
 - project: Void Runner (E:\Game, three.js, no bundler)
 - epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-206 (E8 closeout + G8.6 gate, next)
-- current_iteration: I205 (committed)
+- current_story: ST-207 (E9: Blender GLTF pipeline refresh, next)
+- current_iteration: I206 (committed)
 - branch: main
 - tests: 630/630
 - build: exit 0
+- notes: I206 done (ST-206 E8 closeout + G8.6 (cgs-milestone-review)): GATE G8.6 PASS - sequence 1..206 complete (E8 100/100), 630/630 (fresh), build 0 (fresh), regression B+C+D clean, playtest triaged (0 BUGs), release checklist SHIP-READY (code side); MILESTONE E8 CLOSED (all six sub-arcs gate-verified, tests 233->630, demo pin identical dev+dist); transition verdict: proceed to E9 (Blender asset/art pass, ST-207+); no code changes.
 - notes: I205 done (ST-205 regression round D / E8 final sweep (cgs-regression-suite)): PASS - 3/3 matrix 630/630 (2 in-process + cross-process, 66 files, .evidence/I205/matrix.txt); production-dist browser sweep 6/6 (full lifecycle with game-over auto-record, pause freeze/resume/quit, demo pin exact, persistence 4/4 after fixing two harness assertion bugs - getBest is a number + board is rank-sorted desc, finiteness sentinel-only); bonus robustness data: invalid setBest(undefined) rejected by I79 guard; prior-bug re-checks green (F4/I151/replay/I79); console 0/0; no code changes.
 - notes: I204 done (ST-204 release checklist E8 v3 (cgs-release-checklist)): production-dist smoke green - fresh-profile first-run tutorial verified ON dist, critical path, pause/resume/quit, demo replay pin EXACT (2169/2220, score 11334) = dev/dist determinism confirmed, console 0/0; build exit 0 (88 files, 1.82 MB raw, 449.6 KB gzip in budget); verdict SHIP-READY (code side); open items post-E8: 8 HUMAN-PENDING + E9 Blender art pass; no code changes.
 - notes: I203 done (ST-203 triage v2 (cgs-bug-triage)): 0 new BUGs; T1-T8 triaged - 3 BALANCE dispositions (combo cap DEFER to E9, boss lethality ACCEPT, pickup rarity HOLD), 2 ART/AUDIO -> E9 (kill juice P2, music spike), 3 labeled non-defects; 8 HUMAN-PENDING items carried; G8.6 playtest-triaged met; no code changes (630/630, build 0).

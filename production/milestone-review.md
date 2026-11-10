@@ -108,3 +108,83 @@ The final E7 gate criterion (100+ iterations logged) is met at I100. All 5 crite
 (sequence 1..100), 233/233 tests, build 0 (dist 1.44MB self-contained), extended regression clean (round C I89 + round D
 I99), playtested twice (I41 + I90). The E7 code side is COMPLETE. Next: the user-requested Blender graphics pass
 (cgs-art-bible -> cgs-asset-spec -> cgs-asset-audit); a human playtest is recommended before a final release call.
+
+# Milestone Review - Void Runner E8 (Expansion Milestone, I107-I206)
+
+Skill: cgs-milestone-review | Iteration: I206 (ST-206) | Date: 2026-11-11
+
+## Summary
+E8 delivered the planned "visibly deeper game" across six sub-arcs (E8A planning, E8B core
+gameplay, E8C content variety, E8D UI/UX + accessibility, E8E music/audio + feel, E8F
+replay/recording + robustness), closed with a full QA/release cycle: 630/630 tests, build
+green, regression rounds B+C+D clean, playtest v3 + triage (0 BUGs), release checklist
+SHIP-READY (code side), gate G8.6 PASS. **Transition verdict: E8 CLOSED; E9 (Blender
+asset/art pass) authorized to start.**
+
+## Milestone Goal (from epics.md)
+A visibly deeper game - scoring combo + weapon progression, 2 new power-ups (bomb, slow-mo),
+3 new enemy behaviors (homing drone, chain-splitter, shielded rock), boss phase 2 + mini-boss
++ asteroid belt, daily seeded runs with shareable results, first-run tutorial + session stats
++ kill feed, colorblind shape cue, procedural music, death slow-mo + feel pass, replay viewer,
+300+ tests, and a full QA/release cycle closing at I206.
+
+## Evidence (per sub-arc, gate-verified)
+- E8A planning: scope check + epics + 100 stories (ST-107..206) + gate G8.0 (I110).
+- E8B core gameplay: combo/multiplier, bomb + slow-mo, homing drone, chain-splitter,
+  shielded rock, weapon lvl 1-3, 3 balance passes, determinism re-verify - gate G8.1 (I128).
+- E8C content: boss phase 2 + radial pattern + intro banner, mini-boss every 5 waves,
+  asteroid belt, daily seeded runs, shareable result codec, boss variant 2 - gate G8.2 (I147)
+  + regression round A (I148/149).
+- E8D UI/UX + a11y: first-run tutorial, session stats, kill feed, wave banner polish,
+  colorblind shape cue, hotkeys, options rows, share screen, HUD rework, a11y pass - gate
+  G8.3 (I164) + UX fix round (I165).
+- E8E audio + feel: procedural music bed (intensity-ramped, verified 0 -> 0.06 -> 0.12 ->
+  0.17 -> 0.90 boss in the I202 playtest), ambience/ducking, death slow-mo warp, feel pass
+  (hit-stop, camera punch, FOV kick, shake/flash tables) - gate G8.4 (I182).
+- E8F replay + robustness: replay viewer + O-key recording + save-on-game-over (q1000
+  fidelity-proven), WebGL context-loss recovery, adaptive quality hardening, security audit
+  (I194, 8 totality tests), build-size audit (I197, 449.6 KB gzip in budget) - gate G8.5
+  (I198).
+- Closeout: playtest v3 (I202), triage v2 (I203), release checklist v3 (I204), regression
+  round D (I205), gate G8.6 (I206).
+- Tests: 233 at E7 close -> 630 at E8 close (+397 across the milestone; 66 test files).
+- Determinism: the demo pilot pin (seed 1909, dies step 2169/2220, t=36.15 s, score 11334,
+  57 kills, wave 2, maxCombo 15) verified in-browser on the dev server (I196/I198/I199/I202)
+  AND the production dist (I204/I205) - identical outcomes.
+
+## Blocker
+None. (No P0/P1 open at close; 0 BUG findings in the I202 playtest.)
+
+## Transition Verdict
+**E8 CLOSED. Proceed to E9.** E9 scope per design/art-direction-research.md: the Blender
+asset/art pass (user-requested) - GLTF pipeline refresh (ST-207), ship (ST-208), asteroid
+L/M/S (ST-209-210), boss (ST-211), skybox/arena ring (ST-212) - with the 8 HUMAN-PENDING
+perception items to be confirmed whenever a human playtest happens (they inform, but do not
+gate, E9).
+
+## Risks (carry to E9)
+- Combo-cap flatness (I203 T1): cap reached in ~12 s for an active pilot; a fix would touch
+  config.combo + the demo pin (tests/replay.test.js:246) - blast radius documented.
+- Wave-5 boss lethality (T2) + pickup rarity (T3): accepted/hold pending human data.
+- Kill juice sparsity (T4, P2) + boss music spike mix (T5): E9 feel/mix targets.
+- Visuals are placeholder-grade (procedural + 5 low-poly GLBs) until E9 runs.
+- Low-end device validation still untested (adaptive quality mitigates).
+- First-frame init cost (~90-600 ms) deferred (I95 proposal stands).
+
+## Changed files or proposed files
+- production/milestone-review.md (this section), production/gates.md (+G8.6), CHANGELOG.md,
+  production/iterations.md, production/session-state/active.md.
+
+## Verification evidence
+- npm test 630/630 + node scripts/build.mjs exit 0 (fresh, this iteration).
+- Sequence audit: iterations 1..206 complete, no gaps/dups (E8 = 100/100).
+- .evidence/I205/matrix.txt (3/3), .evidence/I204/01-dist-gameplay.png, .evidence/I202/ (3
+  playtest shots), production/gates.md G8.0-G8.6, production/release-checklist.md v3,
+  production/bug-triage.md Triage v2, production/regression-report.md Round D (I205).
+
+## Next owner / decision
+- E9 ST-207 (cgs-dev-story / Blender): GLTF pipeline refresh - verify the 5 GLBs load with
+  correct scale/origin/facing, poly budgets per design/asset-spec.md (ship <= ~300 tris,
+  L <= ~320, M <= ~120, S <= ~80), then begin model work (ship first).
+- Human playtest (when available): the 8-item HUMAN-PENDING checklist (production/bug-triage.md
+  Triage v2).
