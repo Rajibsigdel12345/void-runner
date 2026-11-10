@@ -320,3 +320,15 @@ From the I90 playtest v2 + I91 triage, three levers. All are seed-deterministic 
 - Exploit risk: none. Breathers are pure functions of (seed, wave) and grant no score advantage (a plain wave is simply one wave of fewer hazards). The combo-cap raise only affects the top of the chain, which needs sustained kills - no new exploit path.
 - Telemetry need: in the next A/B self-play, watch whether the skilled bot clears wave 6 (the former cliff) more often than the I90 wave-6 death @23,080.
 - Verification: 233/233 (new dedicated breather test + the 'picks stay in the list' test is now breather-aware). Build exit 0. GDD synced (combo cap 15 / 2.4x, 1.8s invuln x2, breather rule). Browser smoke: console clean (0 err / 0 warn), no NaN across 3 self-play runs; loaded bundle reads comboCap=15 / invulnTime=1.8; runtime modifierFor(6/11/16)='none'; combo cap 15 reached (maxCombo=15 in a self-play run). Screenshot .evidence/i92-smoke-playing.png.
+
+## I129 - drone.maxAge: seeker battery self-destruct (ST-129)
+
+From the post-gate playtest battery (design/balance-e8b.md "Post-gate playtest (I129)"): homing drones accumulate unboundedly (1/wave from 8, cap 6, no despawn) and spike onto boss waves - forced-wave data showed wave 15 (boss + 6 cumulative drones) was the only forced wave the bot died on.
+
+- Lever: drone.maxAge = 30 (game-time seconds). Each drone self-destructs when its battery runs down (droneDecay event, cyan fizzle FX + seeker-zap cue). 30 s is about 1-2 waves (forced-wave clears 14-32 s), so the live pool is bounded to the drones of the last 1-2 waves.
+- Semantics decision: the battery accumulates the dt passed to DroneField.step - i.e. game-time, scaled under slow-mo - consistent with drone motion (under slow-mo pursuit and battery drain both slow 2.5x in real time).
+- Data (scripts/playtest.mjs before/after arms; pre-fix arm = cfg with maxAge=Infinity; cumulative drones pre-aged 18 s per prior wave, i.e. realistic accumulation):
+  - forced w15 (boss wave, 6 cumulative drones): pre-fix 3 hits / 17.9 s / 6 drone kills / 0 decays (died on the wave); post-fix 3 hits / 15.8 s / 2 drone kills / 4 decays on wave entry. The 4 aged drones self-destruct at wave start, so the boss wave loads like boss + 2 young drones (the pre-fix w10 experience: 2 hits, survived). The residual 3 hits are boss-ring hits (harness limitation, not drone pressure).
+  - forced w10 (boss + 3 drones): pre-fix 2 hits on w10, run dies at w13; post-fix 1 hit on w10, run survives to w15.
+  - fresh-drone forced scenarios are unchanged, as expected: maxAge (30 s) cannot fire inside a 14-32 s wave window.
+- Watch: if a later balance pass extends drone pressure (perWave > 1, firstWave < 8), revisit maxAge. The droneDecays tally in the playtest harness is the tracking metric. GDD addendum for the homing drone lands in I132; until then the config comment + this note carry the authority.

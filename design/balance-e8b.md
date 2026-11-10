@@ -85,3 +85,55 @@ difficulty curve rather than outrunning it.
 - I125 (ST-125) determinism re-verify: replay bit-identical with the new systems + this fix.
   No further E8-1 config change is warranted by this audit (DPS, values, and pacing are all
   within range); the balance stays as tuned.
+
+## Post-gate playtest (I129)
+
+A deterministic headless bot (scripts/playtest.mjs, DOM-free: World + RNG + math.js only; leads targets with bullet-flight-time prediction, flees any threat under 3.0 s time-to-impact, strafes the boss, chases drops with a 3 s timeout) ran against the G8.1-closed build: 8 forced-wave scenarios (w8-w16; boss waves 10/15 + cumulative drone pressure, 150 s cap) and 3 full 22-33 minute runs (seeds 11/22/33).
+
+### Summary
+
+- Finding 1 (fixed in I129): drone accumulation spikes onto boss waves. Drones spawn 1/wave from 8 (cap 6, no despawn), so by wave 15 up to 6 seekers stack on top of the Monolith. w15 (boss + 6 drones) was the only forced wave the bot died on (3 hits / 18 s); w10 (boss + 3) survived (2 hits). Fix: drone.maxAge = 30 s seeker battery; before/after arm data below.
+- Finding 2 (verified, no change): shielded rocks price correctly. Armor absorbs per shielded kill ~2.0 (shH/shK in every run), i.e. 4 shots/kill x 400 pts = 100 pts/shot = 2x a plain M (50/shot). Intended risk-reward is working.
+- Finding 3 (verified, no change): the L3 weapon ramp is healthy. Forced-wave clears drop from 18.9-32.2 s (L1/L2 waves 8-9) to 14-17.7 s at L3 (55-101 kills/wave, waves 11-16) while the speed ramp hits its 2.1 cap at wave 13 - progression is rewarded and pressure is maintained.
+- Finding 4 (harness limitation, labeled not a balance finding): the bot dies at the wave-5 boss in 2/3 full runs (it cannot predict the bullet ring; a human can). Full runs rarely reach the drone phase, so the forced-wave scenarios are the valid probe.
+
+### Balance Lever (I129)
+
+drone.maxAge = 30 (game-time s; slow-mo scaled, consistent with drone motion). Before/after arms of scripts/playtest.mjs (pre-fix arm = cfg override maxAge=Infinity; cumulative drones pre-aged 18 s per prior wave):
+
+| scenario | arm | w10 hits | outcome |
+|---|---|---|---|
+| forced w15 (boss + 6 cumulative) | pre-fix | - | 3 hits / 17.9 s, died on w15, 6 drone kills, 0 decays |
+| forced w15 | post-fix | - | 3 hits / 15.8 s, 2 drone kills, 4 decays on wave entry |
+| forced w10 (boss + 3) | pre-fix | 2 | died at w13 |
+| forced w10 | post-fix | 1 | survived to w15 |
+
+Post-fix worst-case boss wave = boss + 2 young drones = the survivable pre-fix w10 experience. The residual w15 hits are boss rings (Finding 4), not drone pressure.
+
+### Exploit Risk
+
+- None new. A decayed drone gives no score and no drop (same as its absence); the player cannot extend or reset the battery. The decay is a pure dt comparison - no RNG draws, determinism preserved (tests/droneMaxAge.test.js).
+
+### Pacing
+
+- No wave-pacing change: drones only leave, never arrive, and fresh-drone scenarios are unchanged (14-32 s wave window < 30 s battery). In full runs, drone pressure peaks at ~2-3 seekers during boss waves instead of 6.
+
+### Telemetry Need
+
+- droneDecays per run is now tallied by the playtest harness (and the browser eventTally). If a later playtest still shows boss-wave spikes, that metric is the one to watch.
+
+### Risks
+
+- A drone that self-destructs without a kill is a small loss for a player tracking it; the cyan fizzle + seeker-zap cue make it readable. If it reads as cheap, the lever is maxAge up (35-45 s), not removing the mechanic.
+- GDD: the homing drone (E8B) still has no GDD section (I132 addendum); config comment + this doc carry authority until then.
+
+### Verification evidence
+
+- 330/330 (was 324; +6 in tests/droneMaxAge.test.js): decay exactly at maxAge and not before, slot freed on decay, no double-decay for bullet kills, battery ticks with the passed dt (slow-mo semantics), world-level droneDecay event at the pre-step position, deterministic decay step per seed.
+- npm run build exit 0. Before/after arm data: .evidence/I129_s10_prefix.json, I129_s10_postfix.json, I129_s15_prefix.json, I129_s15_postfix.json.
+- Browser smoke (render change - droneDecay FX): dev :5173 ?nocache=129, forced drones aged out via __vr.advance, cyan fizzle + seeker-zap cue on droneDecay, console 0/0, 0 NaN, screenshot .evidence/I129_drone_decay.png.
+
+### Next owner / decision
+
+- I130 (ST-130) power-up drop rebalance (7 types) | unit: drop table | node.
+- I132: E8B GDD addendum (homing-drone section incl. maxAge).

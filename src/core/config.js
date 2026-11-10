@@ -139,7 +139,8 @@ export const CONFIG = {
     turn: 3.2,          // max heading change rad/s (tighter pursuit than a mine)
     wobbleAmp: 0.55,    // rad: peak strafe offset around the direct aim line
     wobbleFreq: 2.2,    // rad/s: wobble oscillation rate
-    score: 200          // kill reward (more than a mine - faster and meaner)
+    score: 200,         // kill reward (more than a mine - faster and meaner)
+    maxAge: 30          // I129: seeker battery - drone self-destructs after this many (game-time) seconds, bounding the accumulation that stacks onto boss waves
   },
   enemyBullets: {     // ST-056: enemy bolts - separate pool, always slower than the ship
     maxConcurrent: 24,

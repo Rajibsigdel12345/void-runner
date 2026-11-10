@@ -10,6 +10,7 @@ export class DroneField {
     this.rng = rng;
     this.cfg = cfg;
     this.drones = [];
+    this.decayed = []; // I129: transient list of drones that expired this step (game.js drains it)
     this.nextId = 1;
   }
 
@@ -33,6 +34,7 @@ export class DroneField {
       radius: d.radius,
       wobblePhase: this.rng.next() * Math.PI * 2, // per-drone wobble phase (deterministic)
       rot: this.rng.next() * Math.PI * 2,
+      age: 0,          // I129: seeker battery - accumulates the dt passed to step() (game-time: scaled under slow-mo, like drone motion)
       dead: false,
     });
     return this.drones[this.drones.length - 1];
@@ -45,8 +47,15 @@ export class DroneField {
   step(dt, shipPos) {
     const d = this.cfg.drone;
     const R = this.cfg.arena.radius;
+    this.decayed.length = 0; // I129: fresh per-step list
     for (const dr of this.drones) {
       if (dr.dead) continue;
+      dr.age += dt; // I129: battery ticks with the passed dt
+      if (dr.age >= d.maxAge) { // I129: seeker battery expired - self-destruct (frees its slot)
+        dr.dead = true;
+        this.decayed.push({ id: dr.id, pos: v2(dr.pos.x, dr.pos.y) });
+        continue;
+      }
       const sp = v2Len(dr.vel) || d.speed;
       const cur = Math.atan2(dr.vel.y, dr.vel.x);
       dr.wobblePhase += d.wobbleFreq * dt;
@@ -98,5 +107,5 @@ export class DroneField {
   }
 
   get count() { return this.drones.length; }
-  clear() { this.drones.length = 0; }
+  clear() { this.drones.length = 0; this.decayed.length = 0; } // I129
 }

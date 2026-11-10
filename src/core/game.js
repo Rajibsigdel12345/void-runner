@@ -135,6 +135,9 @@ export class World {
     if (wv.waveCleared) this.emit('waveCleared', { n: wv.waveCleared });
     this.mines.step(edt, this.ship.pos); // ST-054 (ST-115: scaled under slow-mo)
     this.drones.step(edt, this.ship.pos); // ST-117 (ST-115: scaled under slow-mo)
+    for (const dc of this.drones.decayed) { // I129: seeker battery expired -> self-destruct event (render FX in main.js)
+      this.emit('droneDecay', { pos: { x: dc.pos.x, y: dc.pos.y } });
+    }
     for (const f of this.mines.takeFires()) { // ST-056
       const b = this.fireAimedBolt(f, this.cfg.enemyBullets.mineSpeed);
       if (b) this.emit('mineFire', { pos: { x: f.x, y: f.y } });
