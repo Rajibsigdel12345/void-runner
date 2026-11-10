@@ -2,11 +2,12 @@
 
 - project: Void Runner (E:\Game, three.js, no bundler)
 - epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-194 (security audit - storage/seed codecs, next)
-- current_iteration: I193 (committed)
+- current_story: ST-195 (regression round B, next)
+- current_iteration: I194 (committed)
 - branch: main
-- tests: 622/622
+- tests: 630/630
 - build: exit 0
+- notes: I194 done (ST-194 security audit (cgs-security-audit)): audited storage/replay/share/daily/rng codecs + DOM-sink / secret / network scans - no exploitable defects (0 secrets in 183 first-party files; 0 fetch/XHR/WebSocket/eval/innerHTML in src/; all decoders total + strict). Added tests/security.test.js: 8 totality tests (adversarial share strings 64B-1MB, 27-case malformed replay battery, __proto__ pollution probe, meta sanitization pins, migratePayload corrupt battery). 630/630, build 0.
 - notes: I193 done (ST-193 flaky check (cgs-test-flakiness)): 5 consecutive runs + 1 serial run all 622/622 (no order dependency, no count drift); static flake-source scan of tests/ + src/core/ clean (no Math.random/Date.now/performance.now/setTimeout; the one new Date hit is a fixed date). No stabilization needed - determinism structural (seeded rng.js). Audit-only, no file changes.
 - notes: I192 done (ST-192 test growth (cgs-standards-tests)): coverage audit - 36/36 core modules have direct test files, 65 test files, 620 tests (300+ target already met); real gap = config.test.js never validated the I190/I191 replay/storage sections; added 2 pin tests (config->codec end-to-end: live CONFIG.replay tape must decode, quant 4..1000; storage caps + distinct keys). 622/622, build 0, no render change (no browser smoke).
 - notes: I191 done (ST-191 replay capture UI - O-key record + save-on-game-over (cgs-dev-story)): O records a live run (REC chip + toast), tape = exact per-substep intents at quant 1000 (raised from 25; measured: q25 replay of the same run dies t=32.9 vs original 60s, q1000 outcome-identical shipDist 0.0007), save-on-game-over (toast, newest-first cap 2 eviction verified in-browser), WATCH THIS RUN button only for recorded runs (negative case verified), per-run fresh seed (saved run reproduces exactly; daily unchanged), one-stop O (stopped cannot re-arm; stopped-but-started still saves), watched replays never record/save. New src/core/recording.js + src/render/recIndicator.js + 5 tests (incl. record->decode->replay fidelity: two replays bit-identical, replay matches original aliveness/wave/kills/score/time). 620/620, build 0, console 0/0, screenshots .evidence/I191/.
