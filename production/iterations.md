@@ -1216,3 +1216,19 @@ One entry per iteration. Format:
 - Hotkey contract (F, ST-157): toggleFxQuality parity over 9 flips + defensive non-'low' -> 'low'; setSettings({fx:'low'}) persists to the raw store, survives a simulated reload, and leaves volume/sfx/reducedMotion untouched.
 - Tests: 491/491 (was 470; 21 new, 0 failures). Build: exit 0. No rendering change - no browser smoke (pure core, node --test only).
 - Result: DONE. ST-162 closed. Next I163 ST-163 browser verify E8D (all screens + screenshots + console clean).
+
+## I163 - Browser verification E8D: all screens (ST-163)
+- Goal: ST-163 acceptance - browser verification of every E8D screen (menu / playing / wave banner / game over / paused / tutorial) + screenshots + console clean. Skill: cgs-test-evidence-review (verification only; zero production diff).
+- Method: Playwright against the dev server (?nocache=163c), __vr probes, explicit waits (background-tab rAF throttles to ~4fps).
+- Screens verified (6 screenshots in .evidence/I163/, gitignored local-only):
+  1. MENU (I163_1_menu.png): F/fx + M/mute keycaps, TOP 5 (133854 W12), DAILY 2026-11-10 · 42240, both settings cards with all 8 rows (VOLUME/SFX/MUSIC + FX QUALITY/REDUCED MOTION/FONT SCALE/SHAPE CUES/COLORBLIND/SLOW-MO HINT). Live sync: persisted colorblindPreview:true -> canvas filter url(#vr-cvd-deutan) + SVG at boot; music:false -> musicOn() false; reset-to-defaults persisted across reload.
+  2. PLAYING (I163_2_playing_hud.png): real kills via the real bullet pipeline at rock centers (score 120 -> 360, combo 5); kill feed rows M ROCK +55/+60/+65 (combo-scaled, cap 5); inline x1.4 tier-2 gold rgb(255,240,176) by the score; COMBO heat label + bar, then heatAt() drained to 0 and the wrap hidden.
+  3. WAVE BANNER (I163_3_wave_cleared.png): showCleared(1) -> gold rgb(255,224,138), 40px, 'CLEARED' + 'WAVE 1'.
+  4. GAME OVER (I163_4_gameover.png): SCORE 450 / BEST 133854 / KILLS 10 WAVE 2 / MAX COMBO 5 / TIME 1:34; COPY RESULT button (aria 'Copy result code'); lastShare() = vr1.jmv.ci.2.a.0y (decodes score 450 / wave 2 / kills 10).
+  5. PAUSED (I163_5_paused.png): state PAUSED, screen flex, world time frozen, 'F - FX (HIGH)' row + settings card.
+  6. TUTORIAL (I163_6_tutorial.png): removed the seen flag -> 'HOW TO PLAY' overlay on restart, sim frozen, Enter dismissed, flag persisted true.
+- NaN scan (ship/field/weapons/enemyBullets/powerups/scoreKeeper): only scoreKeeper.lastKillTime = -Infinity = the intentional no-kill sentinel.
+- Console: 0 errors / 0 warnings on clean load ?nocache=163c through menu + 8s PLAYING.
+- Note (probe-induced, NOT production bugs): (1) calling applySettings() with no arg set liveSettings=undefined -> 'reading fx' in syncVisuals per frame; always pass the setSettings() return. (2) hand-placed bullets without vel -> 'reading x' in Weapons.step; use _spawn(). Production paths (settings panel -> applySettings(merged), _spawn() bullets) unaffected. Q-quit is pause-gated by design (main.js:341).
+- Tests: 491/491 (unchanged - verify-only). Build: exit 0 (no production diff).
+- Result: DONE. ST-163 closed. Next I164 ST-164 G8.3 gate (cgs-gate-check).
