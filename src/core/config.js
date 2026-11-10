@@ -157,7 +157,7 @@ export const CONFIG = {
       rapid:  { dur: 8, rate: 2 },
       spread: { dur: 8, count: 3, arc: 0.35 },
       shield: { dur: 12 },
-      bomb:   { dur: 0 },
+      bomb:   { dur: 0, invuln: 1.0 },  // ST-113: brief ship invulnerability on use
       magnet: { dur: 6 },
       overdrive: { dur: 6, mult: 2 } // ST-057: 2x score for 6s
     }

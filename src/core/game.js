@@ -158,6 +158,9 @@ export class World {
    * combo chain (and can roll a power-up drop like any kill).
    * Event path (rare), so the slice() copy is acceptable. */
   bombBlast() {
+    // ST-113: brief invulnerability on bomb use (granted even when the screen is clear).
+    const inv = this.cfg.powerup.types.bomb.invuln || 0;
+    if (inv > 0) this.ship.invuln = Math.max(this.ship.invuln, inv);
     const targets = this.field.rocks.slice();
     for (const r of targets) {
       if (!this.field.shatter(r.id)) continue;

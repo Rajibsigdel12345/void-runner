@@ -388,3 +388,38 @@ test('world: quitToMenu is a no-op outside PAUSED', () => {
   w.begin();
   assert.ok(!w.quitToMenu(), 'illegal from PLAYING');
 });
+// --- ST-113: BOMB brief invulnerability ---
+test('world: bomb grants brief invulnerability on use', () => {
+  const w = new World(new RNG(310));
+  w.begin();
+  w.ship.invuln = 0; // clear any spawn protection
+  assert.equal(w.ship.isInvulnerable, false);
+  const r = w.field.spawn('S', 1, { x: 0, y: -6 }); r.vel = v2(0, 0);
+  w.powerups.apply('bomb');
+  w.step(DT, NOINTENT);
+  assert.equal(w.ship.isInvulnerable, true, 'invulnerable right after the bomb');
+  assert.ok(w.ship.invuln > 0 && w.ship.invuln <= CONFIG.powerup.types.bomb.invuln + 1e-9, 'invuln within the configured duration');
+});
+
+test('world: bomb grants invulnerability even when the screen is clear', () => {
+  const w = new World(new RNG(311));
+  w.begin();
+  w.ship.invuln = 0;
+  w.powerups.apply('bomb');
+  w.step(DT, NOINTENT);
+  assert.equal(w.ship.isInvulnerable, true, 'invulnerability granted with no rocks present');
+});
+
+test('world: bomb invuln does not shorten a longer existing invuln', () => {
+  const w = new World(new RNG(312));
+  w.begin();
+  w.ship.invuln = 1.8; // e.g. from a hit (invulnTime)
+  w.powerups.apply('bomb');
+  w.step(DT, NOINTENT);
+  assert.ok(w.ship.invuln >= 1.8 - DT - 1e-9, 'existing longer invuln preserved (max, not overwrite)');
+});
+
+test('config: bomb power-up is instant (dur 0) with a positive brief invuln', () => {
+  assert.equal(CONFIG.powerup.types.bomb.dur, 0, 'bomb is an instant power-up (no active timer)');
+  assert.ok(CONFIG.powerup.types.bomb.invuln > 0, 'bomb invuln duration positive');
+});
