@@ -167,6 +167,35 @@ function markAudioReady() {
 function uiVwScale() { return Math.min(1, Math.max(0.6, window.innerWidth / 820)); }
 function setUiScale() { document.documentElement.style.setProperty('--vr-fs', String((liveSettings.fontScale || 1) * uiVwScale())); }
 
+// I158: colorblind preview - simulate deuteranopia (Machado 2009) on the canvas via an
+// inline SVG feColorMatrix (same matrix as tools/colorblind.cjs, applied in sRGB for a close preview).
+function ensureCvdFilter() {
+  if (document.getElementById('vr-cvd-svg')) return;
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('id', 'vr-cvd-svg'); svg.setAttribute('aria-hidden', 'true');
+  svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;';
+  const defs = document.createElementNS(ns, 'defs');
+  const filter = document.createElementNS(ns, 'filter');
+  filter.setAttribute('id', 'vr-cvd-deutan'); filter.setAttribute('color-interpolation-filters', 'sRGB');
+  const cm = document.createElementNS(ns, 'feColorMatrix');
+  cm.setAttribute('type', 'matrix');
+  cm.setAttribute('values', '0.4942 0.5058 0 0 0  0.2464 0.7536 0 0 0  0 0.0040 0.9960 0 0  0 0 0 1 0');
+  filter.appendChild(cm); defs.appendChild(filter); svg.appendChild(defs);
+  document.body.appendChild(svg);
+}
+function applyColorblindPreview(on) {
+  if (on) ensureCvdFilter();
+  renderer.domElement.style.filter = on ? 'url(#vr-cvd-deutan)' : 'none';
+}
+// I158: slow-mo hint caption (gated by the setting, PLAYING only).
+const slowmoHintEl = document.createElement('div');
+slowmoHintEl.id = 'slowmo-hint';
+slowmoHintEl.setAttribute('aria-hidden', 'true');
+slowmoHintEl.textContent = 'SLOWMO \u00b7 enemies slow to 40% \u2014 you stay at full speed';
+slowmoHintEl.style.cssText = 'position:fixed;left:50%;bottom:104px;transform:translateX(-50%);z-index:40;pointer-events:none;font:calc(12px * var(--vr-fs,1))/1.4 ui-monospace,monospace;letter-spacing:.06em;color:#9fe8ff;background:rgba(6,20,30,0.66);padding:5px 12px;border-radius:5px;border:1px solid rgba(159,232,255,0.35);opacity:0;transition:opacity .2s;';
+document.body.appendChild(slowmoHintEl);
+
 function applySettings(s) {
   liveSettings = s;
   fxCount = s.fx === 'low' ? CONFIG.fx.particleLow : CONFIG.fx.particleHigh;
@@ -174,6 +203,8 @@ function applySettings(s) {
   setUiScale(); // I70+I71: UI scale = fontScale x viewport (cascades to DOM overlays only; canvas unaffected)
   bloom.setEnabled(s.fx === 'high');
   if (audio.state() !== 'uninitialized') { audio.setVolume(s.volume); audio.setSfx(s.sfx); }
+  audio.setMusic(s.music !== false); // I158: music bed toggle (ctx-free; bed driven in syncVisuals)
+  applyColorblindPreview(s.colorblindPreview); // I158: deuteranopia canvas preview
   rockRenders.setShapeCues(s.shapeCues !== false); // I155: colorblind-friendly silhouette cues
   wardenMesh.setShapeCues(s.shapeCues !== false);
 }
@@ -396,6 +427,9 @@ renderer.domElement.addEventListener('webglcontextrestored', () => {
   ctxOverlay.style.display = 'none'; // I75: back to normal (pause screen takes over if the game was running)
 });
 window.__vr.ctxOverlay = ctxOverlay; // I75: expose after declaration (TDZ-safe)
+window.__vr.applyColorblindPreview = (on) => applyColorblindPreview(on); // I158: probe
+window.__vr.slowmoHintEl = slowmoHintEl; // I158: probe
+window.__vr.musicOn = () => audio.musicOn(); // I158: probe
 
 // Fixed-timestep simulation (60Hz) with render at display rate (ST-078: the
 // accumulator + dt clamp live in the pure core clock; huge gaps are clamped to
@@ -507,6 +541,7 @@ const screenOpts = { muted: false, best: 0, newBest: false };
 function syncVisuals(dt) {
   const st = world.game.state;
   audio.ambience(st === STATE.PLAYING); // ST-083: ambience bed only while playing
+  audio.music(st === STATE.PLAYING && liveSettings.music !== false); // I158: music bed (PLAYING + setting); idempotent start/stop
   hud.setVisible(st === STATE.PLAYING || st === STATE.PAUSED);
   killFeed.setVisible(st === STATE.PLAYING); // I153: feed only while playing
   // I36: reuse opts objects instead of allocating per frame
@@ -584,6 +619,12 @@ function syncVisuals(dt) {
     slowmoT = smTarget > slowmoT ? Math.min(1, slowmoT + dt * 5) : Math.max(0, slowmoT - dt * 5);
     const so = (slowmoT * 0.55).toFixed(3);
     if (slowmoTintEl.style.opacity !== so) slowmoTintEl.style.opacity = so;
+  }
+  // I158: slow-mo hint caption (setting-gated, PLAYING only)
+  if (slowmoHintEl) {
+    const smShow = st === STATE.PLAYING && liveSettings.slowmoHint !== false && (world.powerups.active('slowmo') || world.powerups.drops.some((d) => d.type === 'slowmo' && !d.dead));
+    const ho = smShow ? '1' : '0';
+    if (slowmoHintEl.style.opacity !== ho) slowmoHintEl.style.opacity = ho;
   }
 
   stars.rotation.y += dt * 0.004;

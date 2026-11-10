@@ -18,6 +18,9 @@ export const DEFAULT_SETTINGS = Object.freeze({
   reducedMotion: false, // disable shake/flash (I25 honors)
   fontScale: 1,         // UI text scale 1 | 1.25 | 1.5 (I70; applied as --vr-fs)
   shapeCues: true,      // colorblind-friendly silhouette cues (I155; asteroidRenderer/wardenMesh honor)
+  music: true,          // generative ambient music bed on/off (I158; audio.js bed)
+  colorblindPreview: false, // simulate deuteranopia (Machado 2009) on the canvas (I158; a11y preview)
+  slowmoHint: true,     // short slow-mo power-up caption when on screen / active (I158; HUD hint)
 });
 
 export const FONT_SCALES = Object.freeze([1, 1.25, 1.5]);
@@ -120,7 +123,7 @@ export class Storage {
     return this._write(this.bestKey, { version: STORE_VERSION, value: s });
   }
 
-  /** @returns {{volume:number, sfx:boolean, fx:string, reducedMotion:boolean, fontScale:number, shapeCues:boolean}} saved settings merged over defaults. */
+  /** @returns {{volume:number, sfx:boolean, fx:string, reducedMotion:boolean, fontScale:number, shapeCues:boolean, music:boolean, colorblindPreview:boolean, slowmoHint:boolean}} saved settings merged over defaults. */
   getSettings() {
     const d = this._readVersioned(this.settingsKey);
     const out = { ...DEFAULT_SETTINGS };
@@ -131,6 +134,9 @@ export class Storage {
     if (typeof d.reducedMotion === 'boolean') out.reducedMotion = d.reducedMotion;
     if (FONT_SCALES.includes(d.fontScale)) out.fontScale = d.fontScale; // I70
     if (typeof d.shapeCues === "boolean") out.shapeCues = d.shapeCues; // I155
+    if (typeof d.music === "boolean") out.music = d.music; // I158
+    if (typeof d.colorblindPreview === "boolean") out.colorblindPreview = d.colorblindPreview; // I158
+    if (typeof d.slowmoHint === "boolean") out.slowmoHint = d.slowmoHint; // I158
     return out;
   }
 
@@ -145,6 +151,9 @@ export class Storage {
     if (typeof merged.reducedMotion === 'boolean') clean.reducedMotion = merged.reducedMotion;
     if (FONT_SCALES.includes(merged.fontScale)) clean.fontScale = merged.fontScale; // I70
     if (typeof merged.shapeCues === "boolean") clean.shapeCues = merged.shapeCues; // I155
+    if (typeof merged.music === "boolean") clean.music = merged.music; // I158
+    if (typeof merged.colorblindPreview === "boolean") clean.colorblindPreview = merged.colorblindPreview; // I158
+    if (typeof merged.slowmoHint === "boolean") clean.slowmoHint = merged.slowmoHint; // I158
     this._write(this.settingsKey, { version: STORE_VERSION, ...clean });
     return clean;
   }

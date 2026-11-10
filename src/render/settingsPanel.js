@@ -68,6 +68,13 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   sfx.addEventListener('change', () => emit({ sfx: sfx.checked }));
   audioCard.appendChild(sfx);
 
+  row('MUSIC', audioCard); // I158: generative ambient music bed (on by default)
+  const music = document.createElement('input');
+  music.type = 'checkbox'; music.checked = s0.music;
+  music.setAttribute('aria-label', 'Music');
+  music.addEventListener('change', () => emit({ music: music.checked }));
+  audioCard.appendChild(music);
+
   // VISUALS group
   const visCard = card('VISUALS');
   row('FX QUALITY', visCard);
@@ -109,6 +116,20 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   cues.addEventListener('change', () => emit({ shapeCues: cues.checked }));
   visCard.appendChild(cues);
 
+  row('COLORBLIND', visCard); // I158: deuteranopia (Machado 2009) preview on the canvas
+  const cbPreview = document.createElement('input');
+  cbPreview.type = 'checkbox'; cbPreview.checked = s0.colorblindPreview;
+  cbPreview.setAttribute('aria-label', 'Colorblind preview');
+  cbPreview.addEventListener('change', () => emit({ colorblindPreview: cbPreview.checked }));
+  visCard.appendChild(cbPreview);
+
+  row('SLOW-MO HINT', visCard); // I158: short caption when the slow-mo pickup is on screen / active
+  const smHint = document.createElement('input');
+  smHint.type = 'checkbox'; smHint.checked = s0.slowmoHint;
+  smHint.setAttribute('aria-label', 'Slow-mo hint');
+  smHint.addEventListener('change', () => emit({ slowmoHint: smHint.checked }));
+  visCard.appendChild(smHint);
+
   const groups = document.createElement('div');
   groups.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:14px;align-items:start;';
   groups.append(audioCard, visCard);
@@ -119,7 +140,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   hint.style.cssText = 'font-size:calc(11px * var(--vr-fs,1));letter-spacing:2px;opacity:0.55;';
   wrap.appendChild(hint);
 
-  const order = [vol, sfx, fxSel, rm, fontSel, cues]; // I155
+  const order = [vol, sfx, music, fxSel, rm, fontSel, cues, cbPreview, smHint]; // I158
 
   function moveFocus(from, dir) {
     const i = order.indexOf(from);
@@ -158,6 +179,9 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
     rm.checked = s.reducedMotion;
     fontSel.value = String(s.fontScale); // I70
     cues.checked = s.shapeCues; // I155
+    music.checked = s.music; // I158
+    cbPreview.checked = s.colorblindPreview; // I158
+    smHint.checked = s.slowmoHint; // I158
   }
 
   return { el: wrap, sync };

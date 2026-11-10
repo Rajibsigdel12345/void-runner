@@ -351,3 +351,29 @@ test('storage: toggleFxQuality flips tiers and treats unknown as high (I157)', (
   assert.equal(toggleFxQuality('garbage'), 'low');
   assert.equal(toggleFxQuality(toggleFxQuality('high')), 'high'); // double flip = identity
 });
+
+test('storage: I158 options (music / colorblindPreview / slowmoHint) defaults, round-trip, reject, corrupt', () => {
+  const store = memStore();
+  const a = new Storage(store);
+  const g = a.getSettings();
+  assert.equal(g.music, true);            // default on
+  assert.equal(g.colorblindPreview, false); // default off
+  assert.equal(g.slowmoHint, true);       // default on
+  const m = a.setSettings({ music: false, colorblindPreview: true, slowmoHint: false });
+  assert.equal(m.music, false);
+  assert.equal(m.colorblindPreview, true);
+  assert.equal(m.slowmoHint, false);
+  const b = new Storage(store); // persists across instances
+  assert.equal(b.getSettings().music, false);
+  assert.equal(b.getSettings().colorblindPreview, true);
+  assert.equal(b.getSettings().slowmoHint, false);
+  const bad = a.setSettings({ music: 'yes', colorblindPreview: 1, slowmoHint: 'no' }); // non-boolean -> default
+  assert.equal(bad.music, true);
+  assert.equal(bad.colorblindPreview, false);
+  assert.equal(bad.slowmoHint, true);
+  store.set(a.settingsKey, '{bad json');
+  const c = a.getSettings(); // corrupt -> defaults, no throw
+  assert.equal(c.music, true);
+  assert.equal(c.colorblindPreview, false);
+  assert.equal(c.slowmoHint, true);
+});

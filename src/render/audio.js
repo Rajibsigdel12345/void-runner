@@ -53,6 +53,7 @@ export function createAudio() {
   let volume = 0.7;
   let sfxOn = true;
   let muted = false;
+  let musicOn = true; // I158: music bed user toggle (main also gates the bed on PLAYING)
   const lastPlay = {};
   const played = {}; // probe counter: { cueName: timesScheduled }
   let lastPan = 0;    // probe: last pan applied (-1..1)
@@ -162,6 +163,48 @@ export function createAudio() {
     g.setTargetAtTime(ambBase, t + 0.12, 0.45);   // slow release back
   }
 
+  // I158: generative ambient music bed - soft sustained minor pad + sparse pentatonic
+  // pluck, own gain bus under master (independent of ST-083 drone ambience). Procedural.
+  // main.js drives music(on) exactly like ambience(on): PLAYING + the music setting.
+  let musicBus = null, musicNodes = [], musicFilter = null, musicLfo = null, musicLfoGain = null, musicTimer = 0;
+  const MUSIC_BASE = 0.13;
+  const PAD = [110.0, 130.81, 164.81, 220.0];
+  const PLUCK = [220.0, 261.63, 329.63, 392.0, 440.0, 523.25];
+  function startMusic() {
+    if (!ctx || musicBus) return;
+    musicBus = ctx.createGain(); musicBus.gain.value = 0.0001;
+    musicFilter = ctx.createBiquadFilter(); musicFilter.type = 'lowpass'; musicFilter.frequency.value = 1200; musicFilter.Q.value = 0.6;
+    musicBus.connect(musicFilter); musicFilter.connect(master);
+    const t = ctx.currentTime;
+    musicBus.gain.setTargetAtTime(MUSIC_BASE, t, 1.4);
+    for (const f of PAD) { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = (Math.random() * 8) - 4; const g = ctx.createGain(); g.gain.value = 0.15; o.connect(g); g.connect(musicBus); o.start(); musicNodes.push(o, g); }
+    musicLfo = ctx.createOscillator(); musicLfo.type = 'sine'; musicLfo.frequency.value = 0.05;
+    musicLfoGain = ctx.createGain(); musicLfoGain.gain.value = 320;
+    musicLfo.connect(musicLfoGain); musicLfoGain.connect(musicFilter.frequency); musicLfo.start();
+    musicNodes.push(musicLfo, musicLfoGain);
+    const tick = () => { if (!musicBus) return; if (ctx.state === 'running') playPluck(); musicTimer = setTimeout(tick, 950 + Math.random() * 1500); };
+    musicTimer = setTimeout(tick, 600);
+  }
+  function playPluck() {
+    if (!musicBus || ctx.state !== 'running') return;
+    const f = PLUCK[(Math.random() * PLUCK.length) | 0];
+    const t = ctx.currentTime;
+    const o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = f;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.11, t + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
+    o.connect(g); g.connect(musicFilter); o.start(t); o.stop(t + 1.2);
+  }
+  function stopMusic() {
+    if (!musicBus) return;
+    if (musicTimer) { clearTimeout(musicTimer); musicTimer = 0; }
+    const t = ctx.currentTime;
+    musicBus.gain.cancelScheduledValues(t); musicBus.gain.setTargetAtTime(0.0001, t, 0.3);
+    const bus = musicBus, nodes = musicNodes, flt = musicFilter, lfo = musicLfo, lfoGain = musicLfoGain;
+    musicBus = null; musicNodes = []; musicFilter = null; musicLfo = null; musicLfoGain = null;
+    setTimeout(() => { for (const n of nodes) { try { n.stop && n.stop(); } catch (e) {} try { n.disconnect(); } catch (e) {} } try { if (lfo) lfo.disconnect(); } catch (e) {} try { if (lfoGain) lfoGain.disconnect(); } catch (e) {} try { if (flt) flt.disconnect(); } catch (e) {} try { bus.disconnect(); } catch (e) {} }, 1300);
+  }
+  function music(on) { if (on) startMusic(); else stopMusic(); }
+  function setMusic(on) { musicOn = on === true; }
+
 
   function scheduleNote(type, f0, f1, dur, gain, t, out) {
     const osc = ctx.createOscillator();
@@ -214,5 +257,5 @@ export function createAudio() {
     return true;
   }
 
-  return { init, setVolume, setSfx, setMuted, state, sfx, ambience, ambOn: () => !!ambBus, ambLevel: () => (ambBus ? ambBus.gain.value : null), meter, played, lastPan: () => lastPan, weights: () => Object.fromEntries(Object.entries(CUES).map(([k, s]) => [k, s.gain])), get volume() { return volume; } };
+  return { init, setVolume, setSfx, setMuted, state, sfx, ambience, ambOn: () => !!ambBus, music, setMusic, musicOn: () => !!musicBus, ambLevel: () => (ambBus ? ambBus.gain.value : null), meter, played, lastPan: () => lastPan, weights: () => Object.fromEntries(Object.entries(CUES).map(([k, s]) => [k, s.gain])), get volume() { return volume; } };
 }
