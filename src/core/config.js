@@ -74,13 +74,33 @@ export const CONFIG = {
   waveEndless: {
     // ST-058: endless difficulty curve from wave `first` onward. There is no
     // final wave - pressure comes from capped content, shrinking intermissions
-    // and a rising small-rock share instead of unbounded totals.
+    // and a rising small-rock share (spawnMix table, ST-131) instead of unbounded totals.
     first: 10,             // the curve engages from wave 10
     contentCap: 36,        // toSpawn cap (base + growth*n would overshoot by wave 32)
     minIntermission: 1.2,  // intermission floor (base 2.2s shrinks toward it)
-    intermissionStep: 0.08,// per-wave intermission shrinkage after `first`
-    sBiasStep: 0.02,       // per-wave small-rock probability increase
-    sBiasCap: 0.45         // small-rock probability ceiling (starts at 0.3)
+    intermissionStep: 0.08 // per-wave intermission shrinkage after `first`
+    // ST-131: the S ramp (former sBiasStep/sBiasCap) moved into the spawnMix table
+  },
+
+  spawnMix: {
+    // ST-131: data-driven asteroid spawn size mix (I131 rebalance). The GDD
+    // fixes split rules and per-wave content volume but not the L/M/S spawn
+    // ratios - this table (with production/balance-notes.md ## I131) carries
+    // authority, like powerup.weights (ST-130). Rows are scanned in order;
+    // the first row with wave <= toWave wins (toWave -1 = unbounded last row).
+    // Shares within a row sum to 1. Waves 1-9 are byte-identical to the
+    // pre-I131 logic (same 1-draw width, same 0.3/0.4/0.3 base); only the
+    // wave 10+ shape changed: the old 0.02/wave S ramp to a 0.45 cap kept
+    // eroding L (50% at w1 -> 24% at w17) while adding little S pressure -
+    // playtest data shows S kills are split-supplied (72% of kills vs 49% of
+    // spawns at w14) - so the S cap drops to 0.40 and L gets a 0.28-0.30 floor.
+    rows: [
+      { toWave: 2,  L: 0.50, M: 0.50, S: 0.00 }, // teach: big targets, no S
+      { toWave: 9,  L: 0.30, M: 0.40, S: 0.30 }, // base (unchanged pre-I131)
+      { toWave: 14, L: 0.28, M: 0.32, S: 0.40 }, // endless ramp band
+      { toWave: -1, L: 0.30, M: 0.30, S: 0.40 }  // late: L floor, S cap 0.40
+    ],
+    lFloor: 0.28 // invariant: no row may drop L below this (see spawnMix test)
   },
 
   waveMods: {

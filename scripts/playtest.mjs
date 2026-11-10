@@ -1,7 +1,7 @@
 // Void Runner - deterministic bot playtest harness (I129, ST-129)
 // Headless (DOM-free): runs the full World with a simple competent bot and
 // reports per-wave + per-run balance data. Usage:
-//   node scripts/playtest.mjs <seed> <minutes>
+//   node scripts/playtest.mjs <seed> <minutes> [oldmix]   (I131 A/B arm: pre-I131 mix formula)
 // The bot: leads its target (bullet-flight-time prediction), flees from ANY
 // threat inside 4.5s time-to-impact, kills nearby drones (cheap, fast),
 // strafes around the boss, collects drops when safe, otherwise drifts center.
@@ -9,6 +9,23 @@ import { World } from '../src/core/game.js';
 import { RNG } from '../src/core/rng.js';
 import { v2, v2Len, v2Dist, v2Norm } from '../src/core/math.js';
 import { CONFIG } from '../src/core/config.js';
+
+// I131: oldmix arm - exact emulation of the pre-I131 pickSize formula as
+// per-wave rows: w1-2 L:M 50/50 no S; w3+ S = 0.3 (ramping +0.02/wave from
+// wave 10 to the 0.45 cap); L:M = 3:4 within non-S.
+function oldMixRows() {
+  const rows = [
+    { toWave: 2, L: 0.5, M: 0.5, S: 0 },
+    { toWave: 9, L: 0.3, M: 0.4, S: 0.3 },
+  ];
+  for (let w = 10; w <= 16; w++) {
+    const sP = Math.min(0.45, 0.3 + 0.02 * (w - 10));
+    rows.push({ toWave: w, L: (1 - sP) * (3 / 7), M: (1 - sP) * (4 / 7), S: sP });
+  }
+  rows.push({ toWave: -1, L: 0.55 * (3 / 7), M: 0.55 * (4 / 7), S: 0.45 });
+  return rows;
+}
+const OLD_MIX = { ...CONFIG, spawnMix: { rows: oldMixRows(), lFloor: 0 } };
 
 const DT = 1 / 60;
 const seed = Number(process.argv[2] || 11);
@@ -46,7 +63,11 @@ function botIntent(w, simT) {
     const aimable = threats.filter(t => t.kind === 'rock' || t.kind === 'drone');
     const nearDrone = aimable.find(t => t.kind === 'drone' && t.d < 14);
     const primary = nearDrone || aimable[0];
-    if (!primary) { return { thrust, aimPoint: aim, firing: !!aim }; }
+    if (!primary) {
+      // I131: only eb/mine threats in range -> center drift, never a null thrust
+      const t0 = v2(-s.x, -s.y);
+      return { thrust: v2Len(t0) > 0.5 ? v2Norm(t0) : v2(0, 0), aimPoint: aim, firing: !!aim };
+    }
     const t = v2Dist(s, primary.pos) / BULLET_SPEED;
     const px = primary.pos.x + (primary.vel ? primary.vel.x * t : 0);
     const py = primary.pos.y + (primary.vel ? primary.vel.y * t : 0);
@@ -74,7 +95,7 @@ function botIntent(w, simT) {
 }
 
 function newWaveRow(wave, t0, score0) {
-  return { wave, t0, score0, hits: 0, kills: 0, shieldedKills: 0, shieldedHits: 0, droneKills: 0, droneDeaths: 0, droneDecays: 0, bossKills: 0, nearmiss: 0, bombs: 0, goldenKills: 0, dropsTaken: {}, dropsSpawned: {}, shots: { 1: 0, 2: 0, 3: 0 } };
+  return { wave, t0, score0, hits: 0, kills: 0, shieldedKills: 0, shieldedHits: 0, droneKills: 0, droneDeaths: 0, droneDecays: 0, bossKills: 0, nearmiss: 0, bombs: 0, goldenKills: 0, spawns: { L: 0, M: 0, S: 0 }, killSizes: { L: 0, M: 0, S: 0 }, dropsTaken: {}, dropsSpawned: {}, shots: { 1: 0, 2: 0, 3: 0 } };
 }
 function closeRow(waves, cur, w, simT) {
   if (cur.wave < 1) return;
@@ -82,7 +103,7 @@ function closeRow(waves, cur, w, simT) {
     wave: cur.wave, clearSec: +(simT - cur.t0).toFixed(1), hits: cur.hits, kills: cur.kills,
     shieldedKills: cur.shieldedKills, shieldedHits: cur.shieldedHits, droneKills: cur.droneKills,
     droneDeaths: cur.droneDeaths, droneDecays: cur.droneDecays, bossKills: cur.bossKills, nearmiss: cur.nearmiss, bombs: cur.bombs,
-    goldenKills: cur.goldenKills, dropsTaken: { ...cur.dropsTaken }, dropsSpawned: { ...cur.dropsSpawned },
+    goldenKills: cur.goldenKills, spawns: { ...cur.spawns }, killSizes: { ...cur.killSizes }, dropsTaken: { ...cur.dropsTaken }, dropsSpawned: { ...cur.dropsSpawned },
     shots: { ...cur.shots },
     scoreDelta: w.score - cur.score0,
     shieldedAliveAtEnd: w.field.rocks.filter(r => r.shielded).length,
@@ -94,6 +115,12 @@ function runPlaytest(seed, maxSteps, setup = null, startWave = 0, cfg = null) {
   w.begin();
   if (setup) setup(w);
   const waves = [];
+  const pickSizeOrig = w.waves.pickSize.bind(w.waves); // I131: tally spawn mix
+  w.waves.pickSize = function() {
+    const sz = pickSizeOrig();
+    if (cur && cur.spawns) cur.spawns[sz]++;
+    return sz;
+  };
   let cur = newWaveRow(startWave, 0, 0);
   let simT = 0, endReason = 'time';
   for (let i = 0; i < maxSteps; i++) {
@@ -107,6 +134,7 @@ function runPlaytest(seed, maxSteps, setup = null, startWave = 0, cfg = null) {
       else if (e.type === 'rockShieldHit') cur.shieldedHits++;
       else if (e.type === 'kill') {
         cur.kills++;
+        if (e.data.size) cur.killSizes[e.data.size] = (cur.killSizes[e.data.size] || 0) + 1;
         if (e.data.shielded) cur.shieldedKills++;
         if (e.data.drone) cur.droneKills++;
         if (e.data.boss) cur.bossKills++;
@@ -126,6 +154,7 @@ function runPlaytest(seed, maxSteps, setup = null, startWave = 0, cfg = null) {
   if (waves.length && waves[waves.length - 1].wave === 0) waves.pop();
   const sum = (k) => waves.reduce((a, x) => a + (x[k] || 0), 0);
   const sumShots = (k) => waves.reduce((a, x) => a + ((x.shots && x.shots[k]) || 0), 0);
+  const sumSizes = (k) => ({ L: waves.reduce((a, x) => a + ((x[k] && x[k].L) || 0), 0), M: waves.reduce((a, x) => a + ((x[k] && x[k].M) || 0), 0), S: waves.reduce((a, x) => a + ((x[k] && x[k].S) || 0), 0) });
   return {
     seed, endState: w.game.state, endReason, wave: w.wave, score: w.score, lives: w.lives,
     simMinutes: +(simT / 60).toFixed(1),
@@ -136,6 +165,7 @@ function runPlaytest(seed, maxSteps, setup = null, startWave = 0, cfg = null) {
       hits: sum('hits'), nearmiss: sum('nearmiss'), bombs: sum('bombs'),
       shotsL1: sumShots(1), shotsL2: sumShots(2), shotsL3: sumShots(3),
       stallAdvances: waves.filter(x => x.clearSec >= 44).length,
+      spawnMix: sumSizes('spawns'), killSizes: sumSizes('killSizes'),
     },
   };
 }
@@ -147,7 +177,8 @@ let r;
 if (args[0] === 'scenario') {
   const N = Number(args[1] || 8);
   const preFix = args[2] === 'infinite'; // I129 pre-fix arm: no seeker battery (maxAge Infinity)
-  const cfg = preFix ? { ...CONFIG, drone: { ...CONFIG.drone, maxAge: Infinity } } : null;
+  const oldMix = args[2] === 'oldmix'; // I131 A/B arm: pre-I131 mix formula
+  const cfg = preFix ? { ...CONFIG, drone: { ...CONFIG.drone, maxAge: Infinity } } : oldMix ? OLD_MIX : null;
   r = runPlaytest(100 + N, 150 * 60, (w) => {
     w.waves.state = 'active';
     w.waves.wave = N;
@@ -163,7 +194,10 @@ if (args[0] === 'scenario') {
   }, N, cfg);
   r.scenario = N;
   if (preFix) r.arm = 'pre-fix (maxAge Infinity)';
+  if (oldMix) r.arm = 'oldmix (pre-I131 formula)';
 } else {
-  r = runPlaytest(seed, maxSteps);
+  const oldMix = args[2] === 'oldmix';
+  r = runPlaytest(seed, maxSteps, null, 0, oldMix ? OLD_MIX : null);
+  if (oldMix) r.arm = 'oldmix (pre-I131 formula)';
 }
 console.log(JSON.stringify(r, null, 1));

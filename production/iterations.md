@@ -893,3 +893,12 @@ One entry per iteration. Format:
 - Verified: 337/337 (was 330, +7). build 0. Browser smoke (render change - fade): dev :5173 ?nocache=130, forced drop life=20 on spawn, mid-fade at life 1.2 (orb in the 2.5 s window), expiry 0.2 -> -0.3 across one advance (count 1 -> 0), pool freed (fresh drop life 20), weighted types observed (magnet/overdrive/spread), console 0/0, 0 NaN, screenshot .evidence/I130_drop_fade.png.
 - Docs: production/balance-notes.md ## I130 (contract sections inline: lever, exploit, pacing, data, telemetry, risks).
 - Next: I131 ST-131 enemy spawn-mix rebalance | unit: mix table | node (cgs-balance-check + cgs-dev-story).
+
+## I131 - enemy spawn-mix rebalance: data-driven table + late-game L floor (ST-131)
+
+- Goal: ST-131 acceptance is "Enemy spawn-mix rebalance (rocks/mines/drones) | unit: spawn mix | node" - make the spawn size mix data-driven and rebalance it on playtest data. Premise: mix was hardcoded in pickSize(); GDD fixes splits, not spawn ratios -> config table + balance note carry authority (like I130). Mines/drones are deterministic ramps already in config.
+- Change: config.js spawnMix.rows (4 rows: w1-2 50/50/0 teach; w3-9 0.30/0.40/0.30 = pre-I131 exactly; w10-14 0.28/0.32/0.40; w15+ 0.30/0.30/0.40) + lFloor 0.28 invariant; waveEndless.sBiasStep/sBiasCap deleted. waves.js: mixRow() + table-driven pickSize(), sProb() deleted; draw widths unchanged (w1-9 seeded behavior bit-identical). playtest.mjs: per-size spawn/kill tallies + oldmix A/B arm (pre-I131 formula as per-wave rows) + FIX bot null-thrust crash (only eb/mine threats in range -> now center-drifts; pre-existing bug surfaced by the A/B arms).
+- Data: S kills split-supplied (w14: 72% of kills vs 49% of spawns) -> old S ramp was a weak lever; L share eroded 50% -> 24% by w17+ -> late L floor added. A/B: 10 full-run seeds bit-identical (all die w5-w8, known bot boss-ring limit), seed 33 identical through w10 / diverges w11; forced w10-16 scenario: 21/21 hits identical across arms; realized late mix L 28.4 -> 33.5 pp, S flat ~38.9.
+- Tests: 345/345 (+8 in tests/spawnMix.test.js: table invariants, mixRow boundaries, per-band 20k distributions, determinism, RNG draw-width, small-mod; 2 endless.test.js tests updated to the table contract).
+- Build: 0. Browser: n/a (no render change).
+- Docs: balance-notes.md ## I131 (contract inline), CHANGELOG line, active.md (next = I132 ST-132 E8B GDD addendum: drone section + I130 drop table + I131 spawnMix table).

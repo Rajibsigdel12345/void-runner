@@ -347,3 +347,30 @@ From the I129 playtest battery data (all 18 saved runs analyzed): the realized d
   - realized rate 2.4-3.5% is still below the 25% roll by design - the clog is gone, the residual gap is the 20 s lifetime + 1-drop cap physics (about 1 collectible drop every 5-10 s of active combat, which reads well).
 - Telemetry: dropsSpawned/dropsTaken per wave already tallied by the harness; the per-type distribution now lets E8E (feel) or post-launch playtest check whether a type is under/over-rewarded.
 - Risks: a 20 s drop may feel short to a player deep in a firefight (lever: dropLife 25-30 s, not a new mechanic). The shrink-out is a scale fade, not an opacity fade (shared materials) - acceptable at 2.5 s; revisit only if it reads as "the pickup is broken".
+
+## I131 - enemy spawn-mix rebalance: data-driven table + late-game L floor (ST-131)
+
+Premise check: the spawn size mix was hardcoded in pickSize() (S base 0.3, +0.02/wave from w10 to a 0.45 cap, L:M 3:4 within non-S). The GDD fixes split rules and per-wave content volume but NOT the L/M/S spawn ratios - so config + this note carry authority, exactly like powerup.weights (ST-130). Mines (w5+, 1/wave) and drones (w8+, 1/wave) are deterministic ramps already in config - the only probabilistic mix is the rock size table.
+
+Data (scripts/playtest.mjs - now tallies per-wave spawn/kill sizes; full runs + 8-seed A/B batch + forced waves w10-16):
+- S kills are split-supplied: at w14 S was 72% of kills vs 49% of spawns (seed 33). The old S spawn ramp (0.3 -> 0.45) was a WEAK lever on real S pressure.
+- The L share eroded 50% (w1) -> 24% (w17+): the GDD core-loop anchor ("big rocks split into 2-3 faster fragments") faded out of late waves.
+- Early game is clean: w1 clears 11-16 s with 0 hits; w3-9 clears 12-22 s, 0-2 hits -> preserved exactly.
+
+Balance levers:
+- Lever 1 (config.js spawnMix.rows): 4-row table - w1-2 {L 0.50, M 0.50, S 0.00} (teach), w3-9 {0.30/0.40/0.30} (= pre-I131 exactly), w10-14 {0.28/0.32/0.40}, w15+ {0.30/0.30/0.40}; lFloor 0.28 invariant (unit-tested). waveEndless.sBiasStep/sBiasCap deleted - the table replaces them.
+- Lever 2 (waves.js): mixRow() + table-driven pickSize(). Draw widths unchanged (non-mod 1 draw; small mod 1 draw when S wins else 2) so w1-9 seeded behavior is bit-identical.
+
+Exploit risk: none found. The L floor is a SHARE floor, not a spawn-rate floor - Ls still split into M -> S and the field concurrent cap (24) is untouched; the S cap 0.40 leaves split-supplied S dominant, as before.
+
+Pacing: unchanged where it matters. Full runs: 10 seeds bit-identical pre/post (seeds 11/22 die w5/w6, batch 44-111 die w5/w8 - the known bot boss-ring limitation, Finding 4). Forced w10-16 scenario battery: 21/21 hits IDENTICAL across arms (zero survival shift from the w10-14 S bump 0.32 -> 0.40 and the late cap drop 0.45 -> 0.40). Realized late-game mix: L 28.4 -> 33.5 pp, M 32.8 -> 27.6 pp, S flat 38.8 -> 38.9 (n = 500 vs 355 director spawns).
+
+Telemetry need: the harness now records totals.spawnMix / totals.killSizes per wave - enough for the E8E feel pass to judge whether the 0.30 L floor reads as "big rocks are back" in late waves.
+
+Risks: (1) the w10-14 S bump is the only pressure increase in this change; bot data shows no survival impact, humans may feel it - lever if too spicy: w10-14 row S 0.40 -> 0.36 (L 0.28 -> 0.32, M unchanged). (2) Chaos: one seed (33) ran one wave shorter post-change (died w13 vs w14) - a 1-hit cascade, not a mix signal; the 7-wave scenario battery shows no hit delta. (3) I132's E8B GDD addendum MUST document the spawnMix table (rows + lFloor) alongside the homing-drone and I130 drop-table sections - config carries authority until then.
+
+Changed files: src/core/config.js (spawnMix block; waveEndless sBias keys removed), src/core/waves.js (mixRow + table pickSize; sProb deleted), scripts/playtest.mjs (per-size spawn/kill tallies; oldmix A/B arm emulating the pre-I131 formula as per-wave rows, full-run + scenario; FIX: bot returned null thrust when only enemy-bullet/mine threats were in range - crashed scenario w10/w11 oldmix arms, now center-drifts), tests/spawnMix.test.js (new, 8 tests), tests/endless.test.js (2 tests updated to the table contract: config sanity + mixRow bands).
+
+Verification: 345/345 tests (+8 new: table shape/order/lFloor/S-cap, mixRow band boundaries + unbounded fallback, 20k-draw distributions per band incl. exact pre-I131 w1-9 match, determinism, RNG draw-width preservation, small-mod preservation), build 0. A/B: full runs seeds 11/22/44/55/66/77/88/99/101/111 bit-identical, seed 33 identical through w10, diverges w11 (as designed); forced w10-16: 21/21 hits, realized L +5.1 pp. No render change - no browser smoke.
+
+Next owner: I132 (E8B GDD addendum - spawnMix table joins the drone-section and I130 drop-table documentation).

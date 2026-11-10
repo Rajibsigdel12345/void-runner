@@ -71,11 +71,11 @@ export class WaveDirector {
     return Math.max(c.minIntermission, this.cfg.wave.intermission - c.intermissionStep * (wave - c.first));
   }
 
-  /** ST-058: small-rock probability - 0.3 pre-endless, +step per wave, capped. */
-  sProb() {
-    const c = this.cfg.waveEndless;
-    if (this.wave < c.first) return 0.3;
-    return Math.min(c.sBiasCap, 0.3 + c.sBiasStep * (this.wave - c.first));
+  /** ST-131: spawn-mix row for the current wave (config.spawnMix.rows). */
+  mixRow() {
+    const rows = this.cfg.spawnMix.rows;
+    for (const row of rows) if (this.wave <= row.toWave) return row;
+    return rows[rows.length - 1];
   }
 
   pickSize() {
@@ -85,10 +85,9 @@ export class WaveDirector {
       const r2 = this.rng.next();
       return r2 < 0.5 ? 'L' : 'M';
     }
-    if (this.wave < 3) return r < 0.5 ? 'L' : 'M'; // early waves: no S
-    const sP = this.sProb(); // ST-058: 0.3 pre-endless; rises per wave after
-    const rest = 1 - sP;
-    if (r < rest) return r < rest * (0.3 / 0.7) ? 'L' : 'M'; // L:M stay 3:4 within non-S
+    const row = this.mixRow(); // ST-131: data-driven L/M/S mix (1 draw, pre-I131 width)
+    if (r < row.L) return 'L';
+    if (r < row.L + row.M) return 'M';
     return 'S';
   }
 

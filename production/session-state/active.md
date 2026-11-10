@@ -1,7 +1,10 @@
-# Active Session State
+# Active session state - Void Runner (E8)
 
-- current_epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-131 (next)
-- current_iteration: I130
+- project: Void Runner (E:\Game, three.js, no bundler)
+- epic: E8 - Expansion Milestone (I107-I206)
+- current_story: ST-132 (next)
+- current_iteration: I131 (committed)
 - branch: main
-- notes: I130 done (ST-130 power-up drop rebalance, cgs-balance-check + cgs-dev-story). Data: realized drop rate was 1.0% vs nominal 25% roll - one uncollected drop clogged the maxActiveDrops=1 pool forever (no lifetime existed). Fixes: powerup.dropLife = 20 s (expiry frees the pool; scale-based shrink-out over fadeTime 2.5 s in powerupMesh.js, shared materials kept) + powerup.weights {rapid 20, spread 20, shield 15, magnet 15, bomb 10, overdrive 10, slowmo 10} replacing the uniform 1/7 roll (pickType(), one rng draw, zero-weight rescale). A/B (same seeds): rate 0.012-0.019 -> 0.024-0.035; seed 33 pickups 2 -> 7, 157 -> 621 kills, 5-6 of 7 types sampled per run vs 2-4. 337/337 (was 330, +7 tests/dropTable.test.js), build 0, browser smoke (spawn life=20, mid-fade 1.2, expiry 0.2->-0.3, pool freed, weighted types magnet/overdrive/spread) console 0/0 + 0 NaN, screenshot .evidence/I130_drop_fade.png. Docs: balance-notes.md ## I130 (contract inline). Next: I131 ST-131 enemy spawn-mix rebalance | unit: mix table | node (cgs-balance-check + cgs-dev-story). NOTE: Blender 5.2.3 connected - the E9 Blender Graphics & Assets epic (ST-207..216) runs after the E8 closeout; keep re-reading CGS skills (cgs-dev-story for builds, cgs-gate-check for gates, cgs-balance-check for balance).
+- tests: 345/345 (was 337 at I130, +8 I131 spawnMix.test.js)
+- build: exit 0
+- notes: I131 done (ST-131 enemy spawn-mix rebalance, cgs-balance-check + cgs-dev-story). Premise: mix was hardcoded in pickSize(); GDD fixes splits not spawn ratios -> config.spawnMix.rows (4 rows + lFloor 0.28) now carries authority (like I130 powerup.weights). w1-9 byte-identical (same values + same RNG draw width); w10-14 S 0.32->0.40, w15+ L floor 0.30 / S cap 0.40 (was 0.45). A/B: 10 full-run seeds bit-identical (bot dies w5-w8 - known boss-ring limitation), forced w10-16: 21/21 hits identical (no survival shift), realized late mix L 28.4->33.5 pp, S flat ~38.9. playtest.mjs gained per-size spawn/kill tallies + oldmix arm; fixed pre-existing bot null-thrust crash (only eb/mine threats in range). Docs: balance-notes.md ## I131 (contract inline). Next: I132 ST-132 E8B GDD addendum - homing-drone section (maxAge) + I130 drop table (weights + dropLife) + I131 spawnMix table (rows + lFloor). NOTE: Blender 5.2.3 connected - the E9 Blender Graphics & Assets epic (ST-207..216) runs after the E8 closeout; use blender MCP tools there. Do NOT spawn sub-agents.

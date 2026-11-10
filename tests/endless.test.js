@@ -24,7 +24,12 @@ test('endless: config sanity (seed 67)', () => {
   assert.ok(e.contentCap >= CONFIG.wave.base + CONFIG.wave.growth * e.first, 'cap above wave-10 content');
   assert.ok(e.minIntermission > 0 && e.minIntermission < CONFIG.wave.intermission, 'floor below base');
   assert.ok(e.intermissionStep > 0, 'per-wave shrinkage');
-  assert.ok(e.sBiasStep > 0 && e.sBiasCap > 0.3 && e.sBiasCap < 0.6, 'S-bias band sane');
+  const m = CONFIG.spawnMix; // ST-131: mix moved to a row table
+  assert.ok(m.rows.length >= 2, 'at least two mix rows');
+  assert.equal(m.rows[m.rows.length - 1].toWave, -1, 'last row unbounded');
+  assert.ok(Math.max(...m.rows.map((r) => r.S)) < 0.6, 'S share sane (<0.6)');
+  assert.ok(m.lFloor > 0 && m.lFloor < 0.5, 'L floor sane');
+  for (const r of m.rows) assert.ok(Math.abs(r.L + r.M + r.S - 1) < 1e-9, 'row sums to 1');
 });
 
 test('endless: content capped from wave 10, plain ramp before (seed 67)', () => {
@@ -63,18 +68,20 @@ test('endless: small-rock share rises per wave, capped (seed 69)', () => {
   const dir = new WaveDirector(new RNG(69), field);
   dir.start();
   const e = CONFIG.waveEndless;
-  assert.equal(dir.sProb(), 0.3);
+  const m = CONFIG.spawnMix; // ST-131: row table replaces the sProb ramp
+  assert.equal(dir.mixRow(), m.rows[0], 'wave 0-2 teach band');
+  dir.wave = 3;
+  assert.equal(dir.mixRow(), m.rows[1], 'base band from wave 3 (pre-I131 values)');
+  assert.equal(m.rows[1].S, 0.3, 'base S share unchanged');
   dir.wave = e.first;
-  assert.ok(Math.abs(dir.sProb() - 0.3) < 1e-9, 'wave 10 = base');
-  dir.wave = e.first + 3;
-  assert.ok(Math.abs(dir.sProb() - (0.3 + 3 * e.sBiasStep)) < 1e-9, 'wave 13 rising, uncapped');
+  assert.ok(dir.mixRow().S > m.rows[1].S, 'wave 10 band raises S above base');
   dir.wave = e.first + 10;
-  assert.equal(dir.sProb(), e.sBiasCap, 'wave 20 already at the cap');
+  assert.equal(dir.mixRow(), m.rows[m.rows.length - 1], 'wave 20 in the late band');
   dir.wave = e.first + 100;
-  assert.equal(dir.sProb(), e.sBiasCap, 'deep endless stays capped');
+  assert.equal(dir.mixRow(), m.rows[m.rows.length - 1], 'deep endless stays in the last row');
   let s = 0; const N = 2000;
   for (let i = 0; i < N; i++) if (dir.pickSize() === 'S') s++;
-  assert.ok(s / N > 0.42 && s / N < 0.48, 'S fraction near cap (got ' + (s / N).toFixed(3) + ')');
+  assert.ok(s / N > 0.37 && s / N < 0.43, 'S fraction at the table cap 0.40 (got ' + (s / N).toFixed(3) + ')');
   dir.wave = 5;
   s = 0;
   for (let i = 0; i < N; i++) if (dir.pickSize() === 'S') s++;
