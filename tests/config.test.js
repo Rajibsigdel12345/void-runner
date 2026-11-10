@@ -68,3 +68,31 @@ test('config: fx.bloom values are sane (I35)', () => {
   assert.ok(Number.isFinite(b.radius) && b.radius > 0, 'radius positive finite');
   assert.ok(b.threshold >= 0 && b.threshold <= 1, 'threshold in [0,1]');
 });
+import { createRecorder, decodeReplay } from '../src/core/replay.js';
+
+test('config: replay section is decoder-compatible (I191/ST-192)', () => {
+  const r = CONFIG.replay;
+  assert.ok(Number.isInteger(r.quant) && r.quant >= 4 && r.quant <= 1000, 'replay.quant ' + r.quant + ' must stay inside the decoder range 4..1000');
+  assert.ok(Number.isInteger(r.maxSteps) && r.maxSteps > 0, 'replay.maxSteps positive int');
+  assert.ok(Number.isInteger(r.maxTapeBytes) && r.maxTapeBytes > 0, 'replay.maxTapeBytes positive int');
+  assert.ok(Number.isInteger(r.demoLen) && r.demoLen > 0, 'replay.demoLen positive int');
+  assert.ok(Number.isInteger(r.demoSeed) && r.demoSeed >= 0 && r.demoSeed <= 0xffffffff, 'replay.demoSeed is a 32-bit seed');
+  // config->codec end-to-end: a tape recorded with the live config must decode.
+  // If someone sets quant outside the decoder range, this fails even though the
+  // codec tests (which pass their own quants) would still pass.
+  const rec = createRecorder(r.demoSeed, { quant: r.quant, maxSteps: r.maxSteps, maxTapeBytes: r.maxTapeBytes });
+  rec.record({ thrust: { x: 1, y: 0 }, aimPoint: { x: 0.5, y: 0.25 }, firing: true });
+  rec.record({ thrust: { x: -1, y: 1 }, aimPoint: null, firing: false });
+  const payload = rec.finish({ score: 5, wave: 1, kills: 0, time: 1, mode: 'normal', dailyKey: '' });
+  const d = decodeReplay(payload, { maxLen: r.maxSteps });
+  assert.ok(d.ok, 'config-driven tape must decode: ' + (d.error || ''));
+});
+
+test('config: storage caps and keys are sane (ST-192)', () => {
+  const st = CONFIG.storage;
+  assert.ok(Number.isInteger(st.highScoresMax) && st.highScoresMax >= 1, 'highScoresMax positive int');
+  assert.ok(Number.isInteger(st.replaysMax) && st.replaysMax >= 1, 'replaysMax positive int');
+  const keys = [st.bestKey, st.settingsKey, st.highScoresKey, st.replaysKey];
+  for (const k of keys) assert.ok(typeof k === 'string' && k.length > 0, 'key non-empty: ' + k);
+  assert.equal(new Set(keys).size, keys.length, 'storage keys are distinct');
+});
