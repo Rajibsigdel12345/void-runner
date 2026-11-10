@@ -194,7 +194,9 @@ export class World {
     const targets = this.field.rocks.slice();
     for (const r of targets) {
       if (!this.field.shatter(r.id)) continue;
-      const base = r.shielded ? this.cfg.asteroid.shielded.score : this.cfg.asteroid.sizes[r.size].score * (r.golden ? this.cfg.asteroid.golden.scoreMult : 1); // ST-052/ST-121
+      const gbf = this.cfg.asteroid.split.genBonus; // ST-124: bomb honors the split per-gen fragment bonus (parity with the bullet path)
+      const gbMul = 1 + (gbf[Math.min(r.gen || 0, gbf.length - 1)] || 0);
+      const base = r.shielded ? this.cfg.asteroid.shielded.score : this.cfg.asteroid.sizes[r.size].score * (r.golden ? this.cfg.asteroid.golden.scoreMult : 1) * gbMul; // ST-052/ST-121/ST-124
       const points = this.scoreKeeper.kill(base, this.time);
       this.emit('kill', { pos: { x: r.pos.x, y: r.pos.y }, size: r.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), golden: !!r.golden });
       const drop = this.powerups.maybeDrop({ x: r.pos.x, y: r.pos.y });
