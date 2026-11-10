@@ -180,3 +180,67 @@ None.
 ### Next owner or decision
 - Next: I215 ST-215 (test batch E9: 15+ tests across under-covered core systems).
 - Decision: the 512x256 skybox option is documented for a future pass but not scheduled; owner: producer if E9 art scope ever adds GPU-heavy assets (assetPerf budgets will trip first).
+
+## I225 - E11 low-end device validation, bot-verifiable half (ST-222, cgs-perf-profile)
+
+Method: live Chromium via Playwright on the dev build, fresh loads (?nocache=225a/b/c), 1046x714 logical, dpr 1.25. Display note: this session's display ran at 60 Hz (rAF quantum 16.65 ms, adaptive-measured fps 59.0-60.05) - the I184 machine was ~120 Hz, so frame deltas here are vsync-quantized and the CPU/GPU cost sits under the 16.67 ms floor; I184's CPU-side numbers (1.6-3.5 ms) remain the fine-grained reference. Dense worst case per tier (I182 reference scene): 24 M rocks staged via field.spawn (ring r 13-23.5) + live wave-5 Monolith (hp-protected per frame, 40 hp) + sustained player fire (input.state.firing, cleared after each soak) + ship.invuln 999 (keeps the scene staged; test rig, not a game state). 3.5 s real-rAF soaks per tier, 30 warm-up frames excluded; renderer.info sampled per frame (calls/triangles from info.render, geometries/textures from info.memory). The Monolith's first aimed bolt lands at enterTime 1.2 s + fireEvery 2.2 s = ~3.4 s, at the edge of the 3.5 s window - an 8 s follow-up soak (wave 4, FX low) measured 19 live enemy bolts at peak.
+
+### Summary
+No sustained bottleneck at either FX tier on the 60 Hz display: dense p95 16.8 ms at both tiers (at the vsync floor, not over it), sporadic single-frame drops only (HIGH 1/167, LOW 4/170) in the GC/compositor/evaluate-boundary artifact class per I182/I184. The bloom composer costs 12-14 draw calls (MENU 24->10, dense peak 53->41). The adaptive-quality ladder verified end-to-end headlessly: 20 fps synthetic x 2 windows fires the downgrade (tier low + autoLow + bloom off + toast + exact console line), 6 s of 120 fps holds low (hysteresis, no auto-upgrade), userSet('high') locks (2 bad windows under lock stay high), reset() returns to high/unlocked. The F hotkey path re-applies settings before userSet, so user changes restore bloom/fxCount correctly. DPR cap min(dpr, 2) code-verified (main.js L62) and runtime 1.25 -> 1.25 (cap not engaged below 2; a dpr 2-3 device is on the hardware checklist). The reduced-motion + FX-low combo is playable: 600-tick pilot, NaN 0, stable frames (16.66/17.0/17.1), and 2 kills under reduced motion produced zero kill punch (juiceTally kill channel unchanged, magnitude 0) - the I224 gate re-confirmed inside the combo. Three scope-vs-code flags: the FX 'off' tier does not exist (only high/low), load-reactive DPR 1.5 does not exist (single boot-time setPixelRatio), and auto-downgrade does not update the stored settings tier (panel shows the stored 'high' while rendering low - minor UX divergence, no perf impact). Evidence-only iteration: zero source changes.
+
+### Metric
+| Scene | FX tier | Path | Draw calls (peak) | Triangles (peak) | Geoms | Textures | Frame ms (mean / p95 / worst) | Drops >17.5 ms | Doubles >30 ms |
+|-------|---------|------|------------------:|-----------------:|------:|---------:|------------------------------|---------------:|---------------:|
+| MENU idle (1.6 s) | high | bloom/real | 24 | 162 | 10 | 17 | 16.65 / 16.8 / 19.2 | 1 | 0 |
+| MENU idle (1.6 s) | low | direct | 10 | 148 | 10 | 17 | 16.65 / 16.9 / 17.1 | 0 | 0 |
+| MENU idle | off | - | N/A: tier does not exist (flag 1) | - | - | - | - | - | - |
+| Dense (24 M + Monolith + barrage, 3.5 s) | high | bloom/real | 53 | 1898 | 15 | 18 | 16.75 / 16.8 / 33.3 | 1 | 1 |
+| Dense (same, 3.5 s) | low | direct | 41 | 2092 | 14 | 18 | 16.85 / 16.8 / 39.0 | 4 | 2 |
+| Dense + 19 live eb (8 s, wave 4) | low | direct | 32 | 2100 | - | - | 16.65 / 16.8 / 17.3 | 0 | 0 |
+| Dense, rm + fx-low combo (600-tick pilot + 2 s soak) | low + rm | direct | - | - | - | - | 16.66 / 17.0 / 17.1 | 0 | 0 |
+
+Cross-reference vs I184 (120 Hz machine, CPU-side cost): I184 worst case GPU peak 49 calls / 2542 tris with <=14 eb and bloom p95 2.9-3.5 ms; I225 HIGH dense 53 calls / 1898 tris with ~0-1 eb in window. Same order; the call-count rise is the I184->I224 content arc (engine trail, pickup/magnet particles, kill feed) at eb-lighter scene composition. Cold first gameplay frame (warm-up max): 149.7 ms (high run) / 116.5 ms (low run) - inside the standing one-time lazy-WebGL-init range (I95 90-600 ms, I184 129-586 ms).
+
+### Budget
+- 16.67 ms (60 fps) at the measured display: dense p95 16.8 ms at both tiers = PASS (at the vsync floor; CPU-side headroom is I184's ~10 ms/frame on 120 Hz).
+- 14 ms aim (I184): met on the 120 Hz machine (I184 p95 2.9-3.5 ms); not measurable as headroom at 60 Hz (vsync floor dominates) - PASS by inference, flagged.
+- Drop rate: HIGH 0.6% (1/167), LOW 2.4% (4/170), follow-up 0% (0/451) - sporadic single frames, artifact class, no sustained degradation = PASS with note.
+- Adaptive ladder: downgrade at 2 confirmed windows (design: 4 s of <45 fps), hysteresis honored, user lock honored, reset clean = PASS.
+- DPR: cap 2 code-verified + runtime 1.25 -> 1.25 = PASS (engaged-cap case = hardware checklist); '1.5 under load' = N/A (flag 2, does not exist).
+- rm + fx-low combo: NaN 0, frames stable, kill punch 0 under rm (2 kills) = PASS.
+
+### Bottleneck
+None sustained on this machine. The 60 Hz vsync quantum is the floor; real GPU/CPU cost (I184: 1.6-3.5 ms CPU-side, 49-53 draw calls, ~2k tris) leaves large headroom at 120 Hz and adequate at 60 Hz. The bloom composer is the single largest discretionary cost (12-14 draw calls, half-res per I217) and is already auto-disabled by the adaptive ladder. Sporadic 33-50 ms single frames = GC/compositor/evaluate-boundary artifacts (I182/I184 taxonomy), not a scene bottleneck.
+
+### Optimization
+No action required (evidence-only). If a HARDWARE device shows sustained >17 ms: (1) the adaptive ladder already drops bloom + particle count 48 -> 16; (2) DPR 1.5 under load (flag 2) is the largest untapped lever on dpr 2-3 phones; (3) the 512x256 skybox option documented at I214 for GPU texture memory; (4) the FX 'off' tier (flag 1) would extend the ladder's floor.
+
+### Blocking issues
+None for E11 closeout. The physical-device remainder is HARDWARE-pending below (non-blocking, labeled per the story).
+
+### Scope-vs-code flags (3)
+1. FX 'off' tier does not exist: settings expose only 'high'/'low' (particleHigh 48 / particleLow 16; F toggles high<->low). The story's 'off' row is N/A; a true off tier (0 particles + no bloom) would be a small E12 story candidate.
+2. Load-reactive DPR 1.5 does not exist: the single renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)) at boot (main.js L62); the adaptive ladder only touches fxCount + bloom. Row = cap-2 verified / load-reactive N/A.
+3. Auto-downgrade does not persist to the stored settings tier: the onTier callback sets fxCount + bloom + toast + console only; liveSettings().fx stays 'high' during an auto-low period, so the settings panel shows HIGH while rendering low, and pressing F then toggles stored high -> low (the already-effective tier) and locks low. Minor UX divergence, no measured perf defect; the F path itself is correct (applySettings runs before adaptive.userSet, so user changes restore bloom/fxCount).
+
+### HARDWARE-pending checklist (physical-device remainder, labeled)
+- [ ] Real low-spec phone (2019-2021 mid-range, integrated GPU): frame p95 at FX high/low in the dense scene; verify the adaptive downgrade fires naturally on real <45 fps and stabilizes.
+- [ ] dpr 2-3 device: verify the cap-2 path at runtime (renderer ratio 2, not 3), texture memory, and whether DPR 1.5 under load (flag 2) is worth a story.
+- [ ] Sustained 10-minute dense play: thermal throttle and battery behavior under continuous worst case.
+- [ ] Real 60 Hz cap compliance on a low-refresh display plus touch/coarse-pointer input under low-end conditions.
+- [ ] 60 fps compliance on the reference scenes is currently inferred from frame cost vs vsync (this session 60 Hz; I184 ~120 Hz) - a slow device is the only place compliance can actually fail.
+
+### Changed files or proposed files
+- production/perf-profile.md (this section). No source changes.
+
+### Verification evidence
+- Live Chromium via Playwright (dev server http://localhost:5173, ?nocache=225a/225b/225c fresh loads; 1046x714 logical, dpr 1.25, 60 Hz display): per-tier staging per the Method above; 3.5 s real-rAF soaks (bodies 163-170 frames) + an 8 s follow-up (451 frames, wave 4, 19 live eb peak, 0 drops); MENU idle 1.6 s per tier.
+- Adaptive ladder (synchronous synthetic noteFrame feed in PLAYING, no real-rAF interleave): 90 x 0.05 s (20 fps, 2 windows) -> tier low / autoLow / belowStreak 2 + bloom off + toast 'FX AUTO-SET TO LOW (LOW FPS)' + console line exact '[voidrunner] adaptive quality: FX high -> low (rolling 2s avg 20 fps < 45)'; 720 x (1/120) s (6 s) -> stays low (hysteresis); userSet('high') -> high + userLocked; 90 x 0.05 s under lock -> stays high (belowStreak 2 recorded, blocked); reset() -> high/unlocked/streak 0.
+- rm + fx-low combo: applySettings({reducedMotion: true, fx: 'low'}) + proven 600-tick pilot (CPU 48 ms, PLAYING, sim t 77.22 s) + NaN sweep 0 (rocks/ship/score/boss) + 2 kills under rm with juiceTally kill channel unchanged (punch 1 -> 1, pre-combo baseline from the LOW-tier soak) and punch.magnitude() 0 (I224 gate) + 2 s real-frame soak 16.66/17.0/17.1 ms.
+- DPR: window.devicePixelRatio 1.25 -> renderer.getPixelRatio() 1.25 (cap min(dpr,2) at main.js L62, not engaged below 2; code-verified).
+- Console: 1 message total across the session (the adaptive info line), 0 errors / 0 warnings.
+- 689/689 (unchanged - no source changes); build 0; dist 1958.4 KB raw / 507.8 KB gzip unchanged.
+
+### Next owner or decision
+- Next: I226 = ST-223 (E11 regression round + G11.0 gate + closeout; cgs-regression-suite + cgs-gate-check + cgs-milestone-review).
+- Decision: the 3 flags are E12 story candidates (FX-off tier; load-reactive DPR 1.5; settings-tier sync on auto-downgrade). HARDWARE-pending checklist owner: human/QA when a physical device is available; does not block E11 close.
