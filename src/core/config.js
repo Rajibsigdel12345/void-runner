@@ -29,7 +29,10 @@ export const CONFIG = {
       M: { radius: 1.3, speed: [3.0, 4.6], score: 50,  splits: [2, 3], child: 'S' },
       S: { radius: 0.7, speed: [3.8, 5.8], score: 100, splits: [],     child: null }
     },
-    split: { spread: 0.9 },  // ST-119: split fragment angle = parent heading +/- this (rad)
+    split: {
+      spread: 0.9,            // ST-119: split fragment angle = parent heading +/- this (rad)
+      genBonus: [0, 0.25, 0.5]  // ST-120: per-generation score bonus (gen0 +0%, gen1 +25%, gen2 +50%; deeper clamps to last)
+    },
     spin: [0.4, 1.8],   // rad/s tumble range
     maxConcurrent: 24,
     golden: {           // ST-052: rare glowing rock - faster, worth 5x

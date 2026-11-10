@@ -194,10 +194,12 @@ export class World {
       if (id == null) continue;
       const rock = this.field.rocks.find(r => r.id === id);
       this.weapons.markHit(b.id);
-      const base = this.cfg.asteroid.sizes[rock.size].score * (rock.golden ? this.cfg.asteroid.golden.scoreMult : 1); // ST-052
+      const gb = this.cfg.asteroid.split.genBonus;
+      const genBonus = gb[Math.min(rock.gen || 0, gb.length - 1)] || 0; // ST-120: deeper fragments are worth more (clamps beyond the table)
+      const base = this.cfg.asteroid.sizes[rock.size].score * (rock.golden ? this.cfg.asteroid.golden.scoreMult : 1) * (1 + genBonus); // ST-052/ST-120
       this.field.destroy(id);
       const points = this.scoreKeeper.kill(base, this.time);
-      this.emit('kill', { pos: { x: rock.pos.x, y: rock.pos.y }, size: rock.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), golden: !!rock.golden });
+      this.emit('kill', { pos: { x: rock.pos.x, y: rock.pos.y }, size: rock.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), golden: !!rock.golden, gen: rock.gen || 0 });
       const drop = this.powerups.maybeDrop({ x: rock.pos.x, y: rock.pos.y });
       if (drop) this.emit('powerupDrop', { type: drop.type, pos: { x: drop.pos.x, y: drop.pos.y } });
     }
