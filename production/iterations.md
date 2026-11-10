@@ -1769,3 +1769,21 @@ One entry per iteration. Format:
   CHANGELOG.md, production/iterations.md, production/session-state/active.md.
 - Verification: npm test 630/630; node scripts/build.mjs exit 0; no code changes.
 - Result: DONE. ST-203 closed. Next I204 ST-204 release checklist (cgs-release-checklist).
+
+## I204 - Release checklist (E8, v3): production-dist smoke green, SHIP-READY code side (cgs-release-checklist) (ST-204)
+
+- Skill: cgs-release-checklist (producer). Evidence + verdict, no code changes.
+- Build: exit 0; dist 88 files / 1,909,058 B raw; I197 gzip audit 449.6 KB (in budget); 5 GLB
+  assets present.
+- Production-dist smoke (Playwright, :4174 serving dist/): fresh-profile first-run tutorial
+  verified ON DIST (frozen sim, I151 key ownership, seen persisted, no re-appear); critical
+  path MENU->PLAYING; wave-1 gameplay; pause/resume/quit; demo replay pin EXACT (t=36.15 s,
+  score 11334, 57 kills, idx 2169/2220) - dev/dist determinism confirmed; console 0 errors /
+  0 warnings.
+- Verdict: SHIP-READY (code side). Open items post-E8 by design: 8 HUMAN-PENDING perception
+  items (I203), E9 Blender art pass (ST-207+), low-end device, first-frame init.
+- Changed files: production/release-checklist.md (+v3), CHANGELOG.md, production/iterations.md,
+  production/session-state/active.md. Evidence: .evidence/I204/01-dist-gameplay.png.
+- Verification: build exit 0 (fresh); 630/630 (I203 baseline, src unchanged); console 0/0 on
+  dist.
+- Result: DONE. ST-204 closed. Next I205 ST-205 final sweep / regression round D (cgs-regression-suite).

@@ -107,3 +107,92 @@ None on the code side. The two outstanding E7-gate items (the 100th iteration + 
 - I99 (ST-099): cgs-regression-suite - closing extended regression re-run on this build.
 - I100 (ST-100): cgs-qa-plan closeout + final wrap + the 100th iteration.
 - Then the Blender graphics pass: cgs-art-bible -> cgs-asset-spec -> cgs-asset-audit (update graphics/geometry/textures using Blender).
+
+# Release Checklist - Void Runner (v3 / E8 build)
+
+Skill: cgs-release-checklist | Iteration: I204 (ST-204) | Date: 2026-11-11
+
+## Summary
+E8 (100-iteration expansion, I107-I206) release-readiness pass over the production build.
+No code changes this iteration - evidence + verdict. Verdict: **SHIP-READY (code side)**, same
+standard as the E7 v2 verdict (I98): build green, tests green (630/630), production-dist smoke
+green with an exact determinism pin, console clean. Open items are post-milestone by design:
+the 8 HUMAN-PENDING perception items (I203) and the E9 Blender art pass (user-requested,
+ST-207+).
+
+## Build Evidence
+- node scripts/build.mjs: exit 0 (fresh run this iteration) - "build: dist/ assembled (static,
+  import-map modules)".
+- dist/: 88 files, 1,909,058 bytes raw (~1.82 MB) - self-contained (import maps over vendored
+  modules, no bundler). I197 audit: 449.6 KB gzip total (vendor 290.3 / src 131.4 / assets
+  27.1 KB gz) - within the adopted budget (<=2 MB raw / <=550 KB gzip). No change since I197
+  (src/ unchanged I199-I204).
+- Assets in dist/: ship.glb 22.2 KB, boss.glb 14.4 KB, asteroid_L 33.1 KB, asteroid_M 9.2 KB,
+  asteroid_S 9.2 KB (Blender-made, loaded via GLTFLoader with procedural fallback).
+- Unit tests: 630/630 (re-run at I203; no source changes since - baseline carries).
+- Production-dist smoke (this iteration, Playwright on :4174 serving dist/):
+  - Fresh-profile first-run tutorial VERIFIED ON DIST: Enter starts the run with the card up,
+    sim frozen while up (advance() no-ops), the tutorial owns the keys (first p dismisses,
+    second p pauses) per I151, {seen:true} persisted, no re-appear.
+  - Critical path: MENU -> Enter -> PLAYING; wave-1 gameplay live (t=11 s, 6 rocks, 27 kills).
+  - Pause/resume/quit: p -> PAUSED (sim frozen), p -> PLAYING, p + q -> MENU.
+  - Demo replay pin EXACT on dist: dies t=36.15 s, score 11334, 57 kills, wave 2, maxCombo 15,
+    replay idx 2169/2220 (matches tests/replay.test.js:246 and the dev-server runs I196-I202 -
+    dev/dist determinism confirmed).
+  - Console: 0 errors / 0 warnings (the one expected line is the adaptive-quality INFO at
+    headless ~4 fps rAF, I73).
+  - Screenshot: .evidence/I204/01-dist-gameplay.png (production dist, WAVE 1, ship + rocks +
+    HUD + kill feed, healthy render).
+
+## QA / Accessibility / Localization
+- Regression rounds: B (I195/196, 6 suite runs + live critical-path probe 19/19) and C (I199,
+  3/3 matrix 630/630 incl. cross-process) both clean; no code changes since.
+- Playtest v3 (I202) complete; triage v2 (I203): 0 BUG findings, 8 HUMAN-PENDING perception
+  items carried (production/bug-triage.md).
+- Accessibility (E7 carry): colorblind preview (I158), focus ring + font scale (I70), reduced
+  motion, touch fallback (I71), pause button - unchanged, covered by tests + I98 checks.
+- Localization: single-language (EN) by scope; UI strings centralized in src/render (I72
+  wording pass) - no new strings since.
+
+## Rollback
+- Static site, no backend, no migrations: republish the previous dist/ (or any git tag) to
+  roll back. Git history is the artifact registry; the last known-good full state is this
+  commit chain (I204). No user data lives outside browser localStorage (versioned,
+  corruption-guarded since I79).
+
+## Blocking Issues
+None.
+
+## Warnings (non-blocking)
+- 8 HUMAN-PENDING perception items (post-boss breather feel, vortex dodgeability, overdrive
+  feel, wave-modifier legibility, music quality, death slow-mo feel, tutorial content clarity,
+  REC chip clarity) - the player-experience evidence gap; bot-verified everything bot-
+  verifiable (I202/I203).
+- E9 Blender art/graphics pass unstarted (user-requested, scheduled ST-207+): the game is
+  fully playable with placeholder-grade visuals (procedural + 5 low-poly GLBs) until it runs.
+- Low-end physical device / GPU validation untested (dev-machine baselines only; adaptive
+  quality I73 mitigates).
+- First-frame init cost (~90-600 ms) deferred (offscreen warm-up proposed, I95); low risk.
+- Probe residue can sit in a dev profile's localStorage (best=999999 at I202 Run B) - labeled
+  T6; a fresh profile shows a clean board.
+
+## Ship Verdict
+**SHIP-READY (code side)** - E8 meets its gate criteria: 100 iterations (I107-I206 sequence,
+this is I204), 630/630 tests, build exit 0, regression B+C clean, playtest triaged (0 BUGs),
+determinism pin exact on production dist, console 0/0, security audit clean (I194), size in
+budget (I197). The remaining two workstreams (human playtest confirmation, E9 Blender art
+pass) are explicitly post-E8 by the milestone plan.
+
+## Verification evidence
+- node scripts/build.mjs exit 0 (fresh, this iteration).
+- npm test 630/630 (I203; src unchanged since).
+- .evidence/I204/01-dist-gameplay.png (production dist).
+- .evidence/I202/ (3 playtest screenshots), .evidence/I199/ (matrix.txt).
+- production/build-size-audit.md (I197), production/qa-plan.md (E8 plan, I201),
+  production/bug-triage.md (Triage v2, I203), production/playtest-report.md (v3, I202).
+
+## Next owner / decision
+- I205 (ST-205): final sweep - regression round D (qa-plan E8) over this build.
+- I206 (ST-206): E8 closeout (cgs-milestone-review) + gate G8.6 sign-off.
+- Then E9 (ST-207+): Blender asset/art pass (GLTF pipeline, ship/rock/boss model refresh,
+  skybox/arena ring) + the 8 HUMAN-PENDING items when a human is available.
