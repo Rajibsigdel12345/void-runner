@@ -2,9 +2,9 @@
 
 - project: Void Runner (E:\Game, three.js, no bundler)
 - epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-145 (next)
-- current_iteration: I144 (committed)
+- current_story: ST-146 (next)
+- current_iteration: I145 (committed)
 - branch: main
-- tests: 428/428
+- tests: 456/456
 - build: exit 0
-- notes: I144 done (ST-144 balance pass E8-2, cgs-balance-check). Audited the boss family (Monolith/Warden/Splicer): found + fixed the Splicer phase-1 spiral being unthreadable (gap 1.82u < ship obstacle 2.24u; pool over-cap drops). spiralEvery 0.26 -> 0.6 (gap 4.2u, 1.88x obstacle), phase2.spiralEveryMult 0.6 -> 0.65 (enrage gap 2.73u, 1.22x). +2 invariant tests (gap-vs-obstacle, pool occupancy). design/balance-e8-2.md. 428/428, build 0, browser smoke ?nocache=144 (p1 9-12 live bolts, p2 15-20, under cap 24, 0 NaN, console 0/0; .evidence/I144/I144_spiral_gap.png). Next: I145 ST-145 test batch E8C (25+ new tests across E8-2 systems; the two balance invariants as template). NOTE: Blender 5.2.3 connected - E9 Blender epic (I207-I217) after E8 closeout; use blender MCP tools there. Do NOT spawn sub-agents.
+- notes: I145 done (ST-145 test batch E8C). New tests/e8cBatch.test.js: 28 cross-system invariant tests over the E8-2 contracts (boss alternation, heavyweight exclusivity, HP/score family, pool pressure, belt coexistence, determinism, edge cases). Fixed one inverted assertion while authoring (belt pass-through test: the bolt ends 2.48 u past the rock, so the old d1 < d0 check could never hold; replaced with full-distance/velocity/far-side + rock-untouched checks). 456/456 (was 428), build 0, tests-only (no smoke). Next: I146 ST-146 browser verify E8C (console 0/0, no NaN across the E8-2 systems: belt, mines, vortex, drones, pickup magnet, Splicer spiral). NOTE: Blender 5.2.3 connected - E9 Blender epic (I207-I217) after E8 closeout; use blender MCP tools there. Do NOT spawn sub-agents.
