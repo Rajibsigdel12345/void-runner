@@ -5,7 +5,7 @@
 // flat 0x04060f background - no boot gate, matching the assetLoader policy.
 import * as THREE from 'three';
 
-export function createSkybox(scene, url) {
+export function createSkybox(scene, url, onReady) {
   const handle = { ready: false, url };
   const loader = new THREE.TextureLoader();
   loader.load(
@@ -15,6 +15,7 @@ export function createSkybox(scene, url) {
       tex.colorSpace = THREE.SRGBColorSpace;
       scene.background = tex;
       handle.ready = true;
+      if (onReady) onReady(tex); // I213: PBR-lite IBL hook (PMREM env map)
     },
     undefined,
     (err) => {

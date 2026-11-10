@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { createStarfield } from './render/starfield.js';
 import { createSkybox } from './render/skybox.js'; // I212
 import { createArenaRing } from './render/arenaRing.js'; // I212
+import { createEngineTrail } from './core/engineTrail.js'; // I213
 import { createShipMesh } from './render/shipMesh.js';
 import { createInput } from './render/input.js';
 import { createBulletPool } from './render/bulletPool.js';
@@ -66,7 +67,15 @@ app.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x04060f);
 scene.fog = new THREE.Fog(0x04060f, 60, 240);
-const skybox = createSkybox(scene, 'assets/skybox_equirect.png'); // I212: equirect sky - fire-and-forget, flat-color fallback
+const skybox = createSkybox(scene, 'assets/skybox_equirect.png', (tex) => { // I212: equirect sky - fire-and-forget, flat-color fallback
+  // I213: PBR-lite IBL - bake the sky into a PMREM env map so the MeshStandard rocks/ship/belt pick up nebula
+  // reflections (they previously only had hemisphere+ambient+directional). envMapIntensity is kept low so
+  // hull speculars stay under the bloom threshold (0.72) - only intended glows bloom.
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromEquirectangular(tex).texture;
+  pmrem.dispose();
+  scene.traverse((o) => { const ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : []; for (const m of ms) if (m.isMeshStandardMaterial) m.envMapIntensity = CONFIG.fx.env.intensity; });
+});
 
 const camera = new THREE.PerspectiveCamera(CONFIG.camera.fovBase, window.innerWidth / window.innerHeight, 0.1, 400); // ST-082: base FOV from config
 
@@ -361,6 +370,7 @@ const screens = createScreens(document.body, {
   },
 });
 const particles = createParticles(scene);
+const engineTrail = createEngineTrail(CONFIG.fx.engineTrail); // I213: throttled trail emission (pure core, unit-tested)
 fxPreviewFn = (tier) => { // ST-067: show the new tier immediately (arena center, behind the panel)
   const n = tier === 'high' ? CONFIG.fx.particleHigh : CONFIG.fx.particleLow;
   particles.burst(0, 0, { count: n, color: 0x7fd0ff, speed: 6, life: 0.7 });
@@ -469,7 +479,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, (replayView && world.game.in(STATE.REPLAY)) ? replayIntent() : intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -602,6 +612,7 @@ function tick(dt, intent) {
   if (tutorialActive) return; // I151: freeze the sim while the first-run tutorial is up (render keeps going)
   if (!intent) input.tick(dt); // ST-033: decay touch fire-tail / pause cooldown
   const it = intent || { thrust: input.state.thrust, aimPoint: resolveAimPoint(), firing: input.state.firing };
+  if (intent) { input.state.thrust.x = it.thrust.x; input.state.thrust.y = it.thrust.y; input.state.firing = it.firing; } // I213: mirror scripted intent into the live input state so the render layer (flame, engine trail) tracks the pilot
   if (recorder && !recStopped && world.simActive) recorder.record(it); // ST-191: record exactly the intent the sim receives (one per substep; freezes at stop/death/tutorial)
   world.step(dt, it);
   for (const e of world.drainEvents()) {
@@ -745,6 +756,17 @@ function syncVisuals(dt) {
   enemyBulletRenders.sync(world.enemyBullets, simT); // ST-056
   powerupRenders.sync(world.powerups, dt);
   if (!motionOff && st === STATE.PLAYING) { for (const d of world.powerups.drops) { if (d.dead || !d.magnetPull) continue; particles.burst(d.pos.x, d.pos.y, { count: 2, color: CONFIG.fx.palette.pickup.magnet, speed: 1.5, life: 0.35, shape: 'radial' }); } } // ST-177: magnet pull trail (motion-gated comet wisp behind the orb the magnet drags)
+  if (!motionOff && st === STATE.PLAYING) { // I213: engine trail - motion-gated additive puffs behind the ship while thrusting
+    const thrust = Math.min(1, Math.hypot(input.state.thrust.x, input.state.thrust.y));
+    const nEmit = engineTrail.update(dt, thrust, true);
+    if (nEmit > 0) {
+      const tf = world.ship.forward(shipFwd); // ST-074 scratch reuse
+      const tx = world.ship.pos.x - tf.x * CONFIG.fx.engineTrail.offset;
+      const tz = world.ship.pos.y - tf.y * CONFIG.fx.engineTrail.offset;
+      const cnt = liveSettings.fx === 'low' ? CONFIG.fx.engineTrail.countLow : CONFIG.fx.engineTrail.countHigh;
+      for (let k = 0; k < nEmit; k++) particles.burst(tx, tz, { count: cnt, palette: CONFIG.fx.palette.engine, speed: CONFIG.fx.engineTrail.speed, life: CONFIG.fx.engineTrail.life, shape: 'radial' });
+    }
+  }
   shieldRing.sync(world, dt, !motionOff); // I62: freeze under reduced motion
   if (st === STATE.PLAYING) vortexFx.update(dt); // ST-059 (frozen while paused)
   particles.sync(dt);

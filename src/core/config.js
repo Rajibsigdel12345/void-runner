@@ -377,6 +377,18 @@ export const CONFIG = {
     },
     particleHigh: 48,         // burst size at FX quality High
     particleLow: 16,          // burst size at FX quality Low
+    engineTrail: {           // I213: engine trail emission (ST-213; core/engineTrail.js)
+      rate: 14,               // puffs/s at full thrust
+      minThrust: 0.12,        // thrust fraction below which the trail is silent
+      dtMax: 0.25,            // dt clamp (tab restore can't burst a giant puff)
+      maxPerUpdate: 4,        // hard cap on puffs per frame
+      countHigh: 2,           // particles per puff at FX High
+      countLow: 1,            // particles per puff at FX Low
+      speed: 2.2,             // radial spread u/s
+      life: 0.38,             // puff life (s) - full-speed trail ~ rate*life long
+      offset: 1.15,           // puff distance behind the ship (u)
+    },
+    env: { intensity: 0.55 }, // I213: envMapIntensity for PBR-lite IBL from the skybox (bloom-safe)
     bloom: {                  // I35: post-fx, High quality only (GDD: "Low disables bloom")
       strength: 0.6,
       radius: 0.35,
@@ -396,6 +408,7 @@ export const CONFIG = {
       pickup: { rapid: 0xffe066, spread: 0xff9f43, shield: 0x53d8ff, bomb: 0xff5252, magnet: 0x69f0ae, overdrive: 0xff4dd8, slowmo: 0x9fe8ff }, // ST-177: per-type collect sparkle (matches powerupMesh orb colors)
       power:    [0xff5ad8, 0xff8ae8, 0xffb6f2],   // magenta overdrive
       bulletLevel: [0xbff4ff, 0x8affc0, 0xffd27a],   // ST-123 weapon L1/L2/L3 (cyan/mint/amber)
+      engine:   [0xffa860, 0xffd9a0, 0x9fd8ff],  // I213 warm core -> cool tail (matches the flame)
       belt:     [0x9fb4d0, 0x7c93b8, 0xcfe0f5]      // ST-139 cool steel - indestructible belt clink
     }
   },
