@@ -80,3 +80,53 @@ test('score: reset clears kills and maxCombo', () => {
   assert.equal(s.kills, 0);
   assert.equal(s.maxCombo, 0);
 });
+
+// I111: tier + heat (combo HUD preconditions)
+
+test('score: tier is 0 with no chain and rises with combo', () => {
+  const s = new ScoreKeeper();
+  assert.equal(s.tier, 0, 'no chain -> tier 0');
+  s.kill(100, 0);
+  assert.equal(s.tier, 0, 'first kill (combo 1) stays base tier 0');
+  s.kill(100, 0.2);
+  assert.equal(s.tier, 1, 'second kill (combo 2) -> tier 1');
+});
+
+test('score: tier is monotonic and capped at tierCount', () => {
+  const s = new ScoreKeeper();
+  let prev = 0;
+  for (let c = 1; c <= CONFIG.combo.cap; c++) {
+    s.kill(10, c * 0.01);
+    assert.ok(s.tier >= prev, 'tier must not decrease at combo ' + c);
+    prev = s.tier;
+    assert.ok(s.tier <= CONFIG.combo.tierCount, 'tier within tierCount');
+  }
+  assert.equal(s.tier, CONFIG.combo.tierCount, 'reaches top tier at cap');
+});
+
+test('score: heat is 1 right after a kill and drains to 0 at window', () => {
+  const s = new ScoreKeeper();
+  s.kill(100, 0);
+  assert.ok(Math.abs(s.heatAt(0) - 1) < 1e-9, 'full heat right after kill');
+  assert.ok(Math.abs(s.heatAt(W / 2) - 0.5) < 1e-9, 'half heat at half window');
+  assert.equal(s.heatAt(W), 0, 'zero at exact window edge');
+  assert.equal(s.heatAt(W + 10), 0, 'clamped after window');
+});
+
+test('score: heat is 0 with no active combo', () => {
+  const s = new ScoreKeeper();
+  assert.equal(s.heatAt(5), 0, 'no combo -> zero heat');
+  s.kill(100, 0);
+  s.tick(W + 1); // expire
+  assert.equal(s.combo, 0);
+  assert.equal(s.heatAt(W + 1), 0, 'expired -> zero heat');
+});
+
+test('score: damage zeroes tier and heat immediately', () => {
+  const s = new ScoreKeeper();
+  s.kill(100, 0);
+  s.kill(100, 0.2);
+  s.onDamage();
+  assert.equal(s.tier, 0);
+  assert.equal(s.heatAt(0.3), 0);
+});

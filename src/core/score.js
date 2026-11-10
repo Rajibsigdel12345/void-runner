@@ -17,6 +17,23 @@ export class ScoreKeeper {
     return 1 + this.cfg.combo.step * (Math.min(this.combo, this.cfg.combo.cap) - 1);
   }
 
+  // I111: discrete multiplier tier (0 = no chain, 1..tierCount) for HUD level-up pops.
+  get tier() {
+    const cap = this.cfg.combo.cap;
+    const tiers = this.cfg.combo.tierCount;
+    if (this.combo <= 1) return 0;
+    const width = (cap - 1) / tiers;
+    const t = Math.floor((this.combo - 1) / width);
+    return Math.min(tiers, t + 1);
+  }
+
+  // I111: fraction of the combo window still alive at sim time t (1 = just killed, 0 = expired).
+  heatAt(t) {
+    if (this.combo <= 0) return 0;
+    const f = 1 - (t - this.lastKillTime) / this.cfg.combo.window;
+    return Math.max(0, Math.min(1, f));
+  }
+
   /** Award a kill at sim time t. Returns points actually added (base * combo multiplier * overdrive, floored). */
   kill(base, t) {
     if (t - this.lastKillTime > this.cfg.combo.window) this.combo = 0;
