@@ -64,6 +64,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 - Every 2s it bursts a ring of 8 S asteroids radially outward from itself (bounded by the field's concurrent cap).
 - Contact with the boss costs a life, same flow as a rock hit (knockback + invuln). The boss is not damaged by contact.
 - While alive, a MONOLITH HP bar shows at top center. Only one boss at a time.
+- Phase 2 enrage (I133): when the Monolith drops below 50% HP it enrages one-way (config.boss.phase2) - homing 45% faster (2.32 u/s, still dodgeable), 40% faster turning, a visible 1.6 rad/s tumble, and both the ring and the aimed-bolt cadences 40% faster (ring 2.0 -> 1.2 s, bolt 2.2 -> 1.32 s). A single bossPhase2 event announces the transition for FX; the HP bar keeps showing.
 
 ## Enemy Bullets (ST-056)
 

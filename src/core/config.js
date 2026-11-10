@@ -129,6 +129,13 @@ export const CONFIG = {
     ringCount: 8,    // S rocks per burst (capped by the field's maxConcurrent)
     splitCount: 4,   // M rocks on death
     fireEvery: 2.2,  // ST-056: seconds between aimed bolts
+    phase2: {        // ST-133: enrage state below the HP threshold (one-way)
+      hpFrac: 0.5,      // enter phase 2 when HP < 50%
+      speedMult: 1.45,  // homing speed (1.6 -> 2.32 u/s - still dodgeable)
+      turnMult: 1.4,    // turn rate (0.8 -> 1.12 rad/s)
+      spin: 1.6,        // tumble rad/s in phase 2 (phase 1 is 0.3)
+      ringEveryMult: 0.6 // ring + aimed-bolt cadence multiplier (2.0 -> 1.2 s)
+    },
     score: 1000      // kill reward (the big one)
   },
 

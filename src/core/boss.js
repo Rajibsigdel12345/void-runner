@@ -23,6 +23,7 @@ export class Monolith {
     this.alive = true;
     this.ringTimer = b.ringEvery; // first burst after one full interval
     this.rot = this.rng.next() * Math.PI * 2;
+    this.phase = 1; // ST-133: 1 normal, 2 enrage (one-way)
   }
 
   get hpFrac() { return this.alive ? this.hp / this.maxHp : 0; }
@@ -33,24 +34,25 @@ export class Monolith {
    */
   step(dt, shipPos) {
     const b = this.cfg.boss;
-    const speed = b.speed;
+    const p2 = this.phase === 2 ? b.phase2 : null; // ST-133: enrage multipliers
+    const speed = b.speed * (p2 ? p2.speedMult : 1);
     const cur = this._heading();
     const tgt = Math.atan2(shipPos.y - this.pos.y, shipPos.x - this.pos.x);
     let diff = tgt - cur;
     while (diff > Math.PI) diff -= 2 * Math.PI;
     while (diff < -Math.PI) diff += 2 * Math.PI;
-    const maxTurn = b.turn * dt;
+    const maxTurn = b.turn * (p2 ? p2.turnMult : 1) * dt;
     const ang = cur + (diff > maxTurn ? maxTurn : diff < -maxTurn ? -maxTurn : diff);
     this._vel = v2(Math.cos(ang) * speed, Math.sin(ang) * speed);
     this.pos.x += this._vel.x * dt;
     this.pos.y += this._vel.y * dt;
-    this.rot += dt * 0.3;
+    this.rot += dt * (p2 ? p2.spin : 0.3);
     // arena clamp (keep the boss inside the rim)
     const R = this.cfg.arena.radius - this.radius;
     const d = v2Len(this.pos) || 1;
     if (d > R) { this.pos.x *= R / d; this.pos.y *= R / d; }
     this.ringTimer -= dt;
-    if (this.ringTimer <= 0) { this.ringTimer += b.ringEvery; return 'ring'; }
+    if (this.ringTimer <= 0) { this.ringTimer += b.ringEvery * (p2 ? p2.ringEveryMult : 1); return 'ring'; }
     return null;
   }
 
@@ -64,6 +66,8 @@ export class Monolith {
     if (!this.alive) return false;
     this.hp -= 1;
     if (this.hp <= 0) { this.alive = false; return true; }
+    const p2 = this.cfg.boss.phase2; // ST-133: one-way enrage below the threshold
+    if (this.phase === 1 && p2 && this.hp / this.maxHp < p2.hpFrac) this.phase = 2;
     return false;
   }
 }

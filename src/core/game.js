@@ -30,6 +30,7 @@ export class World {
     this.enemyBullets = new EnemyBulletField(cfg); // ST-056
     this.vortex = new VortexField(rng, cfg); // ST-059
     this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056
+    this._bossPhaseEmitted = false; // ST-133: enrage event fires once per boss
     this.events = [];
     this._eventSpare = [];
     this.scoreKeeper = new ScoreKeeper(cfg);
@@ -147,7 +148,7 @@ export class World {
       if (this.boss.step(edt, this.ship.pos) === 'ring') this.bossRingBurst(); // ST-115: scaled under slow-mo
       this.bossFireTimer -= edt; // ST-115: boss fire cadence slows under slow-mo
       if (this.bossFireTimer <= 0) {
-        this.bossFireTimer += this.cfg.boss.fireEvery;
+        this.bossFireTimer += this.cfg.boss.fireEvery * (this.boss.phase === 2 ? this.cfg.boss.phase2.ringEveryMult : 1); // ST-133: enraged cadence
         const b = this.fireAimedBolt(this.boss.pos, this.cfg.enemyBullets.speed);
         if (b) this.emit('bossFire', { pos: { x: this.boss.pos.x, y: this.boss.pos.y } });
       }
@@ -312,6 +313,7 @@ export class World {
     } while (Math.hypot(pos.x - this.ship.pos.x, pos.y - this.ship.pos.y) < 10 && tries < 8);
     this.boss = new Monolith(this.rng, this.cfg, pos, bossHpForWave(this.cfg, wave)); // ST-064: endless-arc HP
     this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056: fresh boss starts a full interval
+    this._bossPhaseEmitted = false; // ST-133: fresh boss, enrage not yet announced
     this.emit('bossSpawn', { pos: { x: pos.x, y: pos.y } });
   }
 
@@ -338,6 +340,10 @@ export class World {
       if (Math.hypot(boss.pos.x - blt.pos.x, boss.pos.y - blt.pos.y) < boss.radius + blt.radius) {
         this.weapons.markHit(blt.id);
         if (boss.hit()) this.bossDeath();
+        else if (boss.phase === 2 && !this._bossPhaseEmitted) { // ST-133: announce the enrage once
+          this._bossPhaseEmitted = true;
+          this.emit('bossPhase2', { pos: { x: boss.pos.x, y: boss.pos.y }, hpFrac: boss.hpFrac });
+        }
       }
     }
     this.weapons.compact();
@@ -476,6 +482,7 @@ export class World {
     this.enemyBullets.clear(); // ST-056
     this.vortex.reset(); // ST-059
     this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056
+    this._bossPhaseEmitted = false; // ST-133
     this.scoreKeeper.reset();
     this.waves.reset();
     this.powerups.clear();

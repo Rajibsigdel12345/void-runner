@@ -1,7 +1,7 @@
 // Void Runner - deterministic bot playtest harness (I129, ST-129)
 // Headless (DOM-free): runs the full World with a simple competent bot and
 // reports per-wave + per-run balance data. Usage:
-//   node scripts/playtest.mjs <seed> <minutes> [oldmix]   (I131 A/B arm: pre-I131 mix formula)
+//   node scripts/playtest.mjs <seed> <minutes> [arm]   (arm: oldmix = pre-I131 mix, phase1 = pre-I133 no-enrage, infinite = pre-I129)
 // The bot: leads its target (bullet-flight-time prediction), flees from ANY
 // threat inside 4.5s time-to-impact, kills nearby drones (cheap, fast),
 // strafes around the boss, collects drops when safe, otherwise drifts center.
@@ -9,6 +9,9 @@ import { World } from '../src/core/game.js';
 import { RNG } from '../src/core/rng.js';
 import { v2, v2Len, v2Dist, v2Norm } from '../src/core/math.js';
 import { CONFIG } from '../src/core/config.js';
+
+// I133: phase1 arm - boss never enters phase 2 (pre-I133 behavior)
+const PHASE1 = { ...CONFIG, boss: { ...CONFIG.boss, phase2: { ...CONFIG.boss.phase2, hpFrac: 0 } } };
 
 // I131: oldmix arm - exact emulation of the pre-I131 pickSize formula as
 // per-wave rows: w1-2 L:M 50/50 no S; w3+ S = 0.3 (ramping +0.02/wave from
@@ -95,14 +98,14 @@ function botIntent(w, simT) {
 }
 
 function newWaveRow(wave, t0, score0) {
-  return { wave, t0, score0, hits: 0, kills: 0, shieldedKills: 0, shieldedHits: 0, droneKills: 0, droneDeaths: 0, droneDecays: 0, bossKills: 0, nearmiss: 0, bombs: 0, goldenKills: 0, spawns: { L: 0, M: 0, S: 0 }, killSizes: { L: 0, M: 0, S: 0 }, dropsTaken: {}, dropsSpawned: {}, shots: { 1: 0, 2: 0, 3: 0 } };
+  return { wave, t0, score0, hits: 0, kills: 0, shieldedKills: 0, shieldedHits: 0, droneKills: 0, droneDeaths: 0, droneDecays: 0, bossKills: 0, bossPhase2: 0, bossRing: 0, bossFire: 0, nearmiss: 0, bombs: 0, goldenKills: 0, spawns: { L: 0, M: 0, S: 0 }, killSizes: { L: 0, M: 0, S: 0 }, dropsTaken: {}, dropsSpawned: {}, shots: { 1: 0, 2: 0, 3: 0 } };
 }
 function closeRow(waves, cur, w, simT) {
   if (cur.wave < 1) return;
   waves.push({
     wave: cur.wave, clearSec: +(simT - cur.t0).toFixed(1), hits: cur.hits, kills: cur.kills,
     shieldedKills: cur.shieldedKills, shieldedHits: cur.shieldedHits, droneKills: cur.droneKills,
-    droneDeaths: cur.droneDeaths, droneDecays: cur.droneDecays, bossKills: cur.bossKills, nearmiss: cur.nearmiss, bombs: cur.bombs,
+    droneDeaths: cur.droneDeaths, droneDecays: cur.droneDecays, bossKills: cur.bossKills, bossPhase2: cur.bossPhase2, bossRing: cur.bossRing, bossFire: cur.bossFire, nearmiss: cur.nearmiss, bombs: cur.bombs,
     goldenKills: cur.goldenKills, spawns: { ...cur.spawns }, killSizes: { ...cur.killSizes }, dropsTaken: { ...cur.dropsTaken }, dropsSpawned: { ...cur.dropsSpawned },
     shots: { ...cur.shots },
     scoreDelta: w.score - cur.score0,
@@ -141,6 +144,9 @@ function runPlaytest(seed, maxSteps, setup = null, startWave = 0, cfg = null) {
         if (e.data.golden) cur.goldenKills++;
       } else if (e.type === 'droneExplode') cur.droneDeaths++;
       else if (e.type === 'droneDecay') cur.droneDecays++; // I129: seeker battery expired
+      else if (e.type === 'bossPhase2') cur.bossPhase2++;
+      else if (e.type === 'bossRing') cur.bossRing++;
+      else if (e.type === 'bossFire') cur.bossFire++;
       else if (e.type === 'nearmiss') cur.nearmiss++;
       else if (e.type === 'powerup') cur.dropsTaken[e.data.type] = (cur.dropsTaken[e.data.type] || 0) + 1;
       else if (e.type === 'powerupDrop') cur.dropsSpawned[e.data.type] = (cur.dropsSpawned[e.data.type] || 0) + 1;
@@ -162,7 +168,7 @@ function runPlaytest(seed, maxSteps, setup = null, startWave = 0, cfg = null) {
     totals: {
       kills: sum('kills'), shieldedKills: sum('shieldedKills'), shieldedHits: sum('shieldedHits'),
       droneKills: sum('droneKills'), droneDeaths: sum('droneDeaths'), droneDecays: sum('droneDecays'), goldenKills: sum('goldenKills'),
-      hits: sum('hits'), nearmiss: sum('nearmiss'), bombs: sum('bombs'),
+      hits: sum('hits'), bossPhase2: sum('bossPhase2'), bossRing: sum('bossRing'), bossFire: sum('bossFire'), nearmiss: sum('nearmiss'), bombs: sum('bombs'),
       shotsL1: sumShots(1), shotsL2: sumShots(2), shotsL3: sumShots(3),
       stallAdvances: waves.filter(x => x.clearSec >= 44).length,
       spawnMix: sumSizes('spawns'), killSizes: sumSizes('killSizes'),
@@ -178,7 +184,8 @@ if (args[0] === 'scenario') {
   const N = Number(args[1] || 8);
   const preFix = args[2] === 'infinite'; // I129 pre-fix arm: no seeker battery (maxAge Infinity)
   const oldMix = args[2] === 'oldmix'; // I131 A/B arm: pre-I131 mix formula
-  const cfg = preFix ? { ...CONFIG, drone: { ...CONFIG.drone, maxAge: Infinity } } : oldMix ? OLD_MIX : null;
+  const phase1 = args[2] === 'phase1'; // I133 A/B arm: boss never enrages (pre-I133)
+  const cfg = preFix ? { ...CONFIG, drone: { ...CONFIG.drone, maxAge: Infinity } } : oldMix ? OLD_MIX : phase1 ? PHASE1 : null;
   r = runPlaytest(100 + N, 150 * 60, (w) => {
     w.waves.state = 'active';
     w.waves.wave = N;
@@ -195,9 +202,12 @@ if (args[0] === 'scenario') {
   r.scenario = N;
   if (preFix) r.arm = 'pre-fix (maxAge Infinity)';
   if (oldMix) r.arm = 'oldmix (pre-I131 formula)';
+  if (phase1) r.arm = 'phase1 (pre-I133, no enrage)';
 } else {
   const oldMix = args[2] === 'oldmix';
-  r = runPlaytest(seed, maxSteps, null, 0, oldMix ? OLD_MIX : null);
+  const phase1 = args[2] === 'phase1';
+  r = runPlaytest(seed, maxSteps, null, 0, oldMix ? OLD_MIX : phase1 ? PHASE1 : null);
   if (oldMix) r.arm = 'oldmix (pre-I131 formula)';
+  if (phase1) r.arm = 'phase1 (pre-I133, no enrage)';
 }
 console.log(JSON.stringify(r, null, 1));

@@ -234,3 +234,4 @@ Format: ID | story | acceptance criteria | verification
 - ST-214 | Asset perf + memory audit (draw calls, tris, VRAM), LOD/merge | audit notes, budget met | build + browser
 - ST-215 | Test batch E9 (loader fallback, asset swap, budget assertions) + browser verify | 15+ tests, console clean | node + browser
 - ST-216 | G9.0 gate (cgs-gate-check) + E9 docs + changelog + log audit 1..216 | gate PASS, docs | doc + node
+- ST-217 | Post-processing polish pass (art research 2026-11-10): half-res bloom + additive particle trails + boss-kill flash / phase-2 hit-stop, FX-tier + adaptive-gated, frame-time before/after | browser: measure + screenshot | browser
