@@ -719,3 +719,9 @@ One entry per iteration. Format:
 - Goal: break the E8 expansion milestone into sub-epics per cgs-create-epics (outcome, dependencies, risk, validation gate each).
 - Changed: production/epics.md (E8 + E8A Planning / E8B Core gameplay / E8C Content variety / E8D UI/UX + a11y / E8E Audio + feel / E8F Robustness + testing + QA, each with iteration map, outcome, dependencies, risk, and gate G8.0-G8.6; E8 risk register R-E8-1..6); CHANGELOG.md + active.md updated. No code changes.
 - Verification: phase iteration counts sum to exactly 100 (4+22+18+18+18+14+6); every iteration I107-I206 mapped to exactly one sub-epic; cuttable items (I143, I166, I190-191) match the scope-check cut order; docs-only (233/233 + build exit 0, sequence 1..108); next I109 cgs-create-stories (batch 1: E8A+E8B stories with acceptance criteria).
+
+## I109 - E8 story map: ST-107..206 with acceptance criteria (ST-109)
+
+- Goal: break E8 into owner-sized stories per cgs-create-stories (story, acceptance criteria, verification kind) so every remaining iteration has a concrete contract.
+- Changed: production/stories.md (E8 section: 100 story rows ST-107..ST-206, one per iteration, each with an acceptance criterion and node/browser/doc verification kind; cuttable items ST-143/166/190/191 marked); CHANGELOG.md + active.md updated. No code changes.
+- Verification: story count 100 = iteration span; ST IDs map 1:1 onto I107-I206; every row has a testable acceptance clause; docs-only (233/233 + build exit 0, sequence 1..109); next I110 cgs-gate-check -> G8.0 entry gate (fresh baseline evidence + gate record in production/gates.md).

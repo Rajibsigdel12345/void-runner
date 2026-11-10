@@ -115,3 +115,106 @@ Format: ID | story | acceptance criteria | verification
 - ST-098 | Release checklist v2 + dist verification | ship verdict | doc + build
 - ST-099 | Final polish sweep from checklist + closing commit | checklist complete | repo
 - ST-100 | Wrap: verify 100 log entries, final CHANGELOG, screenshot set | verified | repo
+
+## E8 Expansion Milestone (I107-I206)
+- ST-107 | E8 scope check (cgs-scope-check): six-phase phasing, cut list, deferrals | scope-check-E8.md, 100-iter map | doc
+- ST-108 | E8 epics E8A-E8F with outcomes/dependencies/gates | epics.md E8 section | doc
+- ST-109 | E8 story map: ST-107..206 with acceptance criteria | this section | doc
+- ST-110 | G8.0 entry gate (cgs-gate-check): fresh baseline tests/build/perf/sequence | gate PASS | doc + node + build
+- ST-111 | Combo/score multiplier (core): chain-kill window, multiplier levels, decay | unit: window expiry, level cap, score math | node --test
+- ST-112 | Combo HUD (xN + window bar) + kill feedback pop | browser: HUD live, no NaN | browser
+- ST-113 | Bomb power-up (core): screen-clear nova + brief invuln | unit: clear behavior, pickup, timer | node --test
+- ST-114 | Bomb render + SFX (nova ring + flash) | browser: visual + audio | browser
+- ST-115 | Slow-mo power-up (core): time scale on enemies/bullets, ship retains speed | unit: scale apply/restore | node --test
+- ST-116 | Slow-mo render tint + verify | browser: tint + behavior | browser
+- ST-117 | Homing drone (core): spawn wave 8+, seek + wobble, 1 HP, score | unit: seek behavior, spawn gate | node --test
+- ST-118 | Drone render + tuning | browser: drone visible + behaves | browser
+- ST-119 | Chain-splitter rocks (core): L splits 2x M, M splits 2x S | unit: split chain + cap | node --test
+- ST-120 | Splitter tuning + scoring | unit + browser | node + browser
+- ST-121 | Shielded rocks (core): armor N hits, visual state, never splits | unit: armor + no-split | node --test
+- ST-122 | Weapon progression (core): levels 1-3 by wave, damage/rate changes | unit: level thresholds | node --test
+- ST-123 | Weapon visuals: bullet color/trail per level | browser | browser
+- ST-124 | Balance pass E8-1 (new-system deltas) | notes + config | doc + node
+- ST-125 | Determinism re-verify (harness incl. new systems) | replay bit-identical | node
+- ST-126 | Test batch E8B (combo/bomb/slow-mo/drone/splitter/shielded/weapon) | 30+ new tests | node --test
+- ST-127 | Browser verify E8B (all new systems + screenshot) | console 0/0, no NaN | browser
+- ST-128 | G8.1 gate (cgs-gate-check) | gate PASS | doc
+- ST-129 | Balance follow-up (post-gate playtest findings) | notes + config | doc
+- ST-130 | Power-up drop rebalance (7 types) | unit: drop table | node
+- ST-131 | Enemy spawn-mix rebalance (rocks/mines/drones) | unit: spawn mix | node
+- ST-132 | E8B docs + changelog (GDD addendum: new systems) | docs | doc
+- ST-133 | Boss phase 2 (core): <50% HP -> spin + speed + rate up | unit: phase transition | node
+- ST-134 | Boss radial burst pattern (core) | unit: burst geometry | node
+- ST-135 | Boss intro banner + entrance polish | browser | browser
+- ST-136 | Mini-boss (core): armored drone on non-boss 5th waves | unit: spawn + hp | node
+- ST-137 | Mini-boss render + death burst | browser | browser
+- ST-138 | Asteroid belt (core): wave 8+ drifting indestructible rocks, collision = damage | unit: belt spawn + collision | node
+- ST-139 | Belt tuning + perf | browser + perf | browser
+- ST-140 | Daily seeded run (core): date -> seed, DAILY badge | unit: seed derivation + reproducibility | node
+- ST-141 | Daily UI (menu: today seed + daily best) | browser | browser
+- ST-142 | Shareable result string (score+seed+wave, encode/decode) | unit: codec round-trip | node
+- ST-143 | Boss variant 2 (alternate pattern) [CUTTABLE] | unit + browser | node + browser
+- ST-144 | Balance pass E8-2 | notes + config | doc + node
+- ST-145 | Test batch E8C | 25+ new tests | node --test
+- ST-146 | Browser verify E8C | console 0/0, no NaN | browser
+- ST-147 | G8.2 gate (cgs-gate-check) | gate PASS + regression A clean | doc + node + browser
+- ST-148 | Regression round A (extended browser) | clean | node + browser
+- ST-149 | Fix round A findings | fixes + tests | node + browser
+- ST-150 | E8C docs + changelog | docs | doc
+- ST-151 | First-run tutorial overlay (dismiss, persist) | browser | browser
+- ST-152 | Session stats (accuracy, best combo, kills, waves) | unit + browser | node + browser
+- ST-153 | Kill feed / event ticker | browser | browser
+- ST-154 | Wave banner polish (scale/fade) | browser | browser
+- ST-155 | Colorblind shape cue for golden rocks + toggle | browser: cue w/o color | browser
+- ST-156 | Colorblind verify + palette check | browser | browser
+- ST-157 | Hotkeys: M mute, P pause, F fx toggle | browser | browser
+- ST-158 | Options rows (slow-mo hint, colorblind, music) | browser | browser
+- ST-159 | Game-over share screen (copy string) | browser | browser
+- ST-160 | In-run HUD rework (compact score + multiplier) | browser | browser
+- ST-161 | A11y pass (focus, font scale, reduced-motion on new FX) | browser | browser
+- ST-162 | Test batch E8D (stats storage, hotkeys, codec) | 15+ new tests | node --test
+- ST-163 | Browser verify E8D (all screens) | screenshots + console clean | browser
+- ST-164 | G8.3 gate (cgs-gate-check) | gate PASS | doc
+- ST-165 | UX fix round | fixes | browser
+- ST-166 | Locales-ready string extraction [CUTTABLE] | docs | doc
+- ST-167 | UI perf check (text drawing) | perf notes | browser
+- ST-168 | E8D docs + changelog | docs | doc
+- ST-169 | Procedural music: ambient drone loop (WebAudio) | browser: audible | browser
+- ST-170 | Music intensity layers (wave/boss escalation) | browser | browser
+- ST-171 | Music toggle (options) + persist | unit + browser | node + browser
+- ST-172 | Bullet-time audio (pitch drop on slow-mo) | browser | browser
+- ST-173 | SFX pass for new content (bomb, drone, mini-boss, pickup) | browser | browser
+- ST-174 | Death slow-mo (bullet time + zoom + flash) | browser | browser
+- ST-175 | Unified screen-shake table (config) | unit + browser | node + browser
+- ST-176 | Damage vignette (reduced-motion aware) | browser | browser
+- ST-177 | Particles: pickup burst + magnet trails | browser | browser
+- ST-178 | Weapon-upgrade fanfare + visual | browser | browser
+- ST-179 | Balance pass E8-3 (feel params) | notes + config | doc
+- ST-180 | Audio headless tests (WebAudio stub) | 10+ new tests | node --test
+- ST-181 | Browser verify E8E (audio on/off, reduced motion) | console clean | browser
+- ST-182 | G8.4 gate (cgs-gate-check) | gate PASS | doc
+- ST-183 | Feel tuning round 2 | notes | doc
+- ST-184 | Perf profile (new entities) + optimize | perf notes | browser
+- ST-185 | Memory audit (new entity pooling) | audit notes | node + browser
+- ST-186 | E8E docs + changelog | docs | doc
+- ST-187 | Context-loss hardening (re-init path) | browser (simulated) | browser
+- ST-188 | Context-loss test + verify | evidence | browser
+- ST-189 | Visibility-pause hardening (auto-pause, dt clamp) | unit + browser | node + browser
+- ST-190 | Replay viewer (watch saved replay) [CUTTABLE] | browser | browser
+- ST-191 | Replay capture UI (record toggle, save) [CUTTABLE] | browser | browser
+- ST-192 | Test growth to 300+ (new-system coverage) | 300+ tests | node --test
+- ST-193 | Test flakiness check (deterministic runs) | notes | node
+- ST-194 | Security audit (storage parse, seed codecs) | audit doc | doc
+- ST-195 | Regression round B (extended soak) | clean | node + browser
+- ST-196 | Fix round B findings | fixes + tests | node + browser
+- ST-197 | Build size + load-perf audit | audit notes | build + browser
+- ST-198 | G8.5 gate (cgs-gate-check) + determinism final | gate PASS | doc + node
+- ST-199 | Regression round C + playtest prep | clean | node + browser
+- ST-200 | E8F mid docs + changelog | docs | doc
+- ST-201 | cgs-qa-plan E8 | QA plan doc | doc
+- ST-202 | Human playtest round 1 (incl. carried perception items) | playtest report | doc
+- ST-203 | Playtest findings triage + fix | fixes | node + browser
+- ST-204 | cgs-release-checklist E8 | checklist | doc
+- ST-205 | Final polish sweep (console clean, all screens) | sweep complete | browser
+- ST-206 | E8 closeout: milestone review + final CHANGELOG + log audit 1..206 | sequence 1..206, docs | repo
+
