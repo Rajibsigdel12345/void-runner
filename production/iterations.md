@@ -1909,3 +1909,61 @@ One entry per iteration. Format:
 - Result: DONE. ST-208 closed. Next I209 ST-209 (Blender asteroid set refresh:
   jitter asymmetry + crater insets per Sleep Fight method, L/M/S + shielded/golden
   visual variants).
+
+## I209 - Blender asteroid set refresh (cgs-dev-story) (ST-209)
+- Summary: ST-209 closed. The three I103-era rock GLBs (plain jittered
+  icospheres) are replaced by a rebuilt set with stronger displacement and
+  baked vertex-color shading: per-size seeded 3-octave directional caggy
+  field + white-noise facet break, face-cluster dents (L 10, M 4, S 6),
+  four real inset craters on M (+12 tris), per-vertex color baked from
+  radial displacement (bumps bright, pits dark, mottled). In-code material
+  behavior is unchanged; the shared rock materials now sample vertex colors.
+- Story Goal: rocks distinct per size, craggy/asymmetric/pitted per the spec
+  purpose ("displacement + vertex color"), tri budgets and exact logical
+  radii (2.2/1.3/0.7) held, no core change.
+- Owner: /root (Blender MCP 5.2.3 + repo). Dependencies: ST-207 (GLB pipeline
+  + assetGlbs.test.js) - met at I207; I208 exporter axis-flip lesson applied.
+- Acceptance: GLBs load and swap into the pool, nodes VR_Rock_L/M/S +
+  material VR_Rock, tris <= 320/120/80, max vertex radius within 5% of CONFIG
+  (exact), COLOR_0 present on every primitive, browser smoke console 0/0,
+  distinct silhouettes visually confirmed (Blender viewport + in-game).
+- Build notes: Blender 5.2.3 findings this pass: (1) the glTF exporter only
+  emits COLOR_0 when the material node tree actually uses a Color Attribute
+  node (wire 'Col' -> Base Color; the first export silently dropped the colors
+  with a log warning); (2) the export_colors keyword no longer exists;
+  (3) ShaderNodeVertexColor.data_type is gone; (4) mathutils Vector has no
+  .distance (use (a-b).length) and len(Vector) returns the COMPONENT COUNT (3),
+  not magnitude - the first radius pass scaled by radius/3 (caught by the GLB
+  audit max-radius check, fixed with .length). Geometry: L = icosphere
+  subdiv 3 (320 tris = budget cap, dents only - no inset headroom), M =
+  subdiv 2 + 4 inset craters (104 tris), S = subdiv 2 (80 tris exact).
+  Displacement = sum of directional sine fields (a product-of-sines field has
+  dead zones that left v1 rocks too round - rejected on visual review) +
+  white noise (S spikiest: caggy 0.40/0.32/0.30, noise 0.08/0.05/0.02-0.03).
+  Vertex color = clamp(1 + 1.4*(|v|-1), 0.45, 1.2) + per-vertex mottle,
+  exported as COLOR_0. Pre-rotation (x,y,z)->(x,-z,y) applied per the I208
+  axis fix (axis-agnostic for rocks, done for consistency).
+- Changed: assets/asteroid_L.glb (37.7 KB, 320 tris), assets/asteroid_M.glb
+  (12.2 KB, 104 tris), assets/asteroid_S.glb (10.3 KB, 80 tris),
+  src/render/asteroidRenderer.js (mat/matBelt/matGold vertexColors:true;
+  bakeVariant bakes a white color attribute for the procedural fallback;
+  setGLB defensively adds a white color attribute when a GLB lacks COLOR_0),
+  tests/assetGlbs.test.js (meshStats exposes hasColor; asteroid test asserts
+  COLOR_0 per primitive), design/asset-spec.md (I209 amendment),
+  CHANGELOG.md, production/iterations.md, production/session-state/active.md.
+- Verification: npm test 633/633 (COLOR_0 assertions live against the new
+  GLBs); node scripts/build.mjs exit 0; GLB structural audit (node, raw
+  container parse): nodes/mats/budgets/radii exact 2.2000/1.3000/0.7000;
+  browser smoke (fresh context ?nocache=209a, MCP browser closed first per
+  the I208 env lesson): 5/5 assets ready, rockL/M/S geometry carries the
+  color attribute at 320/104/80 tris, menu boot clean, aggressive pilot
+  t=55.4 wave 2 score 14353 kills 64 (16 rocks alive, 0 NaN, ship finite),
+  live pool mesh = GLB geometry + color attribute, 22 calls / 15 programs;
+  3x-scaled L-rock close-up via a standalone showcase mesh (sync() resets
+  pool transforms every frame even while paused - scene.add of a shared-geo
+  mesh is the reliable route), restored after; resumed to wave 3 t=104.5
+  all finite; console 0/0. Screenshots .evidence/I209/ (01-menu, 02-combat,
+  03-rock-closeup) + Blender 3-angle material-shaded viewport (craggy,
+  cratered, distinct per size).
+- Result: DONE. ST-209 closed. Next I210 ST-210 (Blender boss Monolith
+  refresh + shielded-rock armor shell visual state).

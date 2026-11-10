@@ -204,3 +204,37 @@ notes, and acceptance criteria otherwise stand unchanged):
   anchor 'VR_Ship_Wings' node is retired with the merge (test updated in
   I208; material names all three retained).
 - No engine flame in the model (ST-063 flame is in-code, unchanged).
+
+## I209 asteroid amendment (E9 ST-209, cgs-dev-story)
+Supersedes the I102 asteroid geometry section (dimensions, material
+non-authoritativeness, budgets, and acceptance criteria otherwise stand
+unchanged):
+- Geometry v2 (refine, not restyle - I207 video grounding): icosphere base
+  retained + seeded displacement: 3-octave directional sine field (seeds
+  701/802/903; caggy amplitude L 0.30 / M 0.32 / S 0.40) + white-noise facet
+  break (L 0.02 / M 0.05 / S 0.08), face-cluster dents (L 10 @ 0.42,
+  M 4 @ 0.48, S 6 @ 0.52 of cluster radius), and four real inset craters on
+  M only (0.35 unit-space depth; L is at its 320-tri cap so dents only;
+  S is at 80 exact).
+- Vertex colors (new, per the story's "displacement + vertex color"):
+  per-vertex color baked in Blender from radial displacement - shade =
+  clamp(1 + 1.4*(|v|-1), 0.45, 1.2) + per-vertex mottle (bumps bright, pits
+  dark) - exported as COLOR_0. Consumed in code: the shared rock material,
+  matBelt, and matGold now use vertexColors:true (multiplies base color -
+  golden rocks get shaded craters, belt rocks slightly darker pits).
+  bakeVariant bakes a white (identity) color attribute so the procedural
+  fallback cannot render black, and setGLB() defensively adds a white color
+  attribute when a GLB lacks COLOR_0.
+- Triangle counts (actual): L 320 (cap), M 104 (80 base + 4 craters x 3),
+  S 80 (exact). Budgets unchanged (L <= 320, M <= 120, S <= 80).
+- Radii: max vertex radius EXACT 2.2 / 1.3 / 0.7 (= CONFIG; recentered then
+  scaled in Blender; the test keeps its 5% band).
+- Nodes/materials: VR_Rock_L / VR_Rock_M / VR_Rock_S, one VR_Rock material
+  per GLB (non-authoritative; the code override is unchanged).
+- Draw calls: unchanged (the pool still shares one geometry per size; vertex
+  colors are an attribute, not a material - the only program delta is the
+  USE_COLOR define on the three rock materials).
+- Shielded/golden remain CODE states (additive shell child + material
+  override) per the I102 spec; the new geometry + vertex colors make both
+  states read better (the shell is radius-scaled in sync; the golden
+  material multiplies the shaded colors).

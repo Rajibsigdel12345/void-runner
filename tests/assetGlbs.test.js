@@ -63,7 +63,7 @@ function meshStats({ buf, json, binOff }) {
         const r = x * x + y * y + z * z;
         if (r > maxR) maxR = r;
       }
-      prims.push({ name: m.name || '?', tris, maxRadius: Math.sqrt(maxR), posAcc });
+      prims.push({ name: m.name || '?', tris, maxRadius: Math.sqrt(maxR), posAcc, hasColor: p.attributes.COLOR_0 !== undefined }); // I209
     }
   }
   return { prims, totalTris, nodeNames: (json.nodes || []).map((n) => n.name).filter(Boolean), matNames: (json.materials || []).map((m) => m.name) };
@@ -102,6 +102,7 @@ test('asteroid L/M/S: naming, poly budgets, radii match CONFIG (+/-5%)', () => {
     const s = meshStats({ buf, json, binOff });
     assert.ok(s.nodeNames.includes('VR_Rock_' + size), 'VR_Rock_' + size + ' node');
     assert.ok(s.matNames.includes('VR_Rock'), 'VR_Rock material');
+    for (const p of s.prims) assert.ok(p.hasColor, size + ' primitive has COLOR_0 vertex colors (I209)');
     assert.ok(s.totalTris <= BUDGETS[size], size + ' tris ' + s.totalTris + ' <= ' + BUDGETS[size]);
     const logical = CONFIG.asteroid.sizes[size].radius;
     const maxR = Math.max(...s.prims.map((p) => p.maxRadius));

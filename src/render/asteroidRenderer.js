@@ -14,6 +14,10 @@ function bakeVariant(seed, radius) {
     pos.setXYZ(i, v.x, v.y, v.z);
   }
   geo.computeVertexNormals();
+  // I209: white vertex-color identity - the shared rock materials now use
+  // vertexColors, so procedural fallback geos must carry the attribute too.
+  const col = new Float32Array(pos.count * 3).fill(1);
+  geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
   return geo;
 }
 
@@ -31,9 +35,9 @@ export function createAsteroidRenderer(scene) {
   // I104: GLB geometries (Blender pass) swap in as they load; until then the
   // procedural 3-variant bakes are used.
   const glbGeo = {};
-  const mat = new THREE.MeshStandardMaterial({ color: 0x8a7f72, roughness: 0.95, metalness: 0.05, flatShading: true });
+  const mat = new THREE.MeshStandardMaterial({ color: 0x8a7f72, roughness: 0.95, metalness: 0.05, flatShading: true, vertexColors: true }); // I209: GLB-baked shading
   // ST-139: belt rock - dark cold metal so drifting indestructibles read as "unbreakable".
-  const matBelt = new THREE.MeshStandardMaterial({ color: 0x2a313d, roughness: 0.42, metalness: 0.9, flatShading: true, emissive: 0x2f6fd0, emissiveIntensity: 0.6 });
+  const matBelt = new THREE.MeshStandardMaterial({ color: 0x2a313d, roughness: 0.42, metalness: 0.9, flatShading: true, emissive: 0x2f6fd0, emissiveIntensity: 0.6, vertexColors: true }); // I209: vertexColors
   // I60: rim-lit upgrade - cool fresnel edge added on top of the standard lighting.
   mat.onBeforeCompile = (shader) => {
     shader.uniforms.uRimColor = { value: new THREE.Color(0x5f7fd8) };
@@ -49,7 +53,7 @@ export function createAsteroidRenderer(scene) {
         '#include <opaque_fragment>');
   };
   // ST-052: golden rock - bright emissive so bloom (High FX) makes it glow.
-  const matGold = new THREE.MeshStandardMaterial({ color: 0xffc94d, emissive: 0xffa018, emissiveIntensity: 1.6, roughness: 0.3, metalness: 0.55, flatShading: true });
+  const matGold = new THREE.MeshStandardMaterial({ color: 0xffc94d, emissive: 0xffa018, emissiveIntensity: 1.6, roughness: 0.3, metalness: 0.55, flatShading: true, vertexColors: true }); // I209: vertexColors
   // ST-127: shielded rock - additive energy shell rendered as a CHILD of the rock mesh (hidden by
   // default; the rock's visible=false hides it with the parent). Three shared materials keyed by
   // armor level: the shell DIMS on every absorbed hit so the player can read hits-left at a glance.
@@ -112,7 +116,13 @@ export function createAsteroidRenderer(scene) {
     if (!obj || !size || glbGeo[size]) return;
     let g = null;
     obj.traverse((n) => { if (n.isMesh && !g) g = n.geometry; });
-    if (g) glbGeo[size] = g;
+    if (g) {
+      if (!g.hasAttribute("color")) { // I209: materials use vertexColors; keep GLBs without COLOR_0 safe
+        const col = new Float32Array(g.attributes.position.count * 3).fill(1);
+        g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+      }
+      glbGeo[size] = g;
+    }
   }
 
   // I155: shape-cue toggle (settings.shapeCues; on by default for colorblind-friendly play).
