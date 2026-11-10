@@ -332,8 +332,16 @@ export const CONFIG = {
     shake: 1,                 // master screen-shake scale (0..1)
     shakeDecay: 6,            // shake energy decay (1/s, exponential)
     shakeAmplitude: 0.5,      // max camera jitter (world units) at energy 1
-    shakeHit: 0.5,            // energy added on a ship hit
-    shakeBomb: 1.0,           // energy added on a bomb blast
+    shakeTable: {            // ST-175: unified screen-shake table (event -> energy 0..1; master/decay/amplitude above scale it)
+      hit: 0.5,              // ship hit
+      bomb: 1.0,             // bomb blast
+      mineExplode: 0.4,      // mine detonation
+      droneExplode: 0.35,    // seeker drone explosion
+      bossSpawn: 0.7,        // boss arrival
+      bossDeath: 1.0,        // boss death
+      wardenSpawn: 0.5,      // mini-boss arrival
+      wardenDeath: 0.8       // mini-boss death
+    },
     punch: {                  // ST-081: camera punch - brief directed jolt (boss death / bomb)
       decay: 12,              // punch energy decay (1/s, exponential)
       amplitude: 2.0,         // max camera displacement (world units) at energy 1
