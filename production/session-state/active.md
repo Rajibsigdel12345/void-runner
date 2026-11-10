@@ -2,9 +2,9 @@
 
 - project: Void Runner (E:\Game, three.js, no bundler)
 - epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-162 (next)
-- current_iteration: I161 (committed)
+- current_story: ST-163 (next)
+- current_iteration: I162 (committed)
 - branch: main
-- tests: 470/470
+- tests: 491/491
 - build: exit 0
-- notes: I161 done (ST-161 a11y pass): font scale now covers waveBanner/scorePopups/bossHealth label (calc --vr-fs); slow-mo hint fade gated by reducedMotion (transition none); gold focus ring extended to #vr-pause-btn + #vr-ctx-btn via one injected style rule. 470/470, build 0, console 0/0, screenshot .evidence/I161/. Next: I162 ST-162 test batch E8D (15+ new node --test tests for stats storage, hotkeys, codec). NOTE: Blender 5.2.3 connected - E9 Blender epic after E8 closeout (model low-poly ship/rocks/bosses/warden, export GLB, integrate via useGLB/setGLB/assetLoader). Art-direction improvement = accepted research item. Do NOT spawn sub-agents.
+- notes: I162 done (ST-162 E8D test batch): 21 new tests in tests/e8dBatch.test.js - codec hardening (9), stats storage (10), F-hotkey storage contract (2); zero production changes, 491/491, build 0, no rendering change (no browser smoke). Next: I163 ST-163 browser verify E8D - all screens (menu / pause / game over / settings / tutorial) + screenshots + console clean. NOTE: Blender 5.2.3 connected - E9 Blender epic after E8 closeout (low-poly ship/rocks/bosses/warden -> GLB -> useGLB/setGLB/assetLoader, procedural fallback). Art-direction improvement = accepted research item. Do NOT spawn sub-agents.
