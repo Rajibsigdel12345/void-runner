@@ -300,3 +300,28 @@ drone material are authoritative; GLB materials are decorative only.
   (all positive). I211 incident: the four first-session emblem exports skipped recalc -
   powerup_shield was consistently inward (fixed by in-place index-winding flip) and
   powerup_rapid mixed (rebuilt). The signed-volume check is part of the asset-audit routine.
+
+## I212 background pass amendment (E9 ST-212, cgs-dev-story)
+
+- skybox_equirect.png: 1024x512 equirect (2:1), 41.2 KB (budget <=300 KB). Deterministic numpy
+  generation in Blender (seed 212): base #04060f; equatorial galactic band (gaussian sigma
+  0.18 rad, color #0d1430, 3x/7x-u low-freq structure, amplitude 0.6); 6 soft nebula blobs
+  (violet 0x3a2a66 / teal 0x123a4a / magenta 0x4a1a3a, amplitude 0.10-0.18, |latitude| < 1.1
+  rad keeps the poles clean); 900 stars (70% 1 px / 25% 2 px / 5% 3 px, brightness 0.3-1.0,
+  tints blue-white/white/warm, uniform-latitude placement via arcsin). All features wrap-drawn
+  at the u edge (x, x-W, x+W) -> seam-free 0/1 longitude wrap. Color pipeline: designed in
+  sRGB -> linear buffer (Blender converts linear->sRGB on 8-bit PNG save); rows reversed
+  before foreach_set (Blender buffer row 0 = bottom, PNG top row = last buffer row) -> north
+  pole at the top of the PNG, the orientation three.js EquirectangularReflectionMapping
+  expects; verified in-browser (band at the horizon).
+- arena_ring.glb: 24 segmented plates (11-degree plate / 4-degree gap), 48 tris / 144 verts
+  (budget <=120), inner radius 0.94 / outer 1.0 (unit-radius convention, like shield.glb),
+  flat in XZ (|y| = 0), all face normals +Y, no vertex colors (in-code material authoritative),
+  node + material VR_ArenaRing, 4.7 KB. Rendered in-code as a translucent MeshBasic 0x4a6cff
+  (opacity 0.55, DoubleSide, depthWrite false) scaled by CONFIG.arena.radius (26) at y = 0.03
+  above the polar grid: static (reduced-motion safe), +1 draw call, color luma below the
+  bloom threshold (bloom-safe).
+- Dist budget status after I212: 1934.9 KB raw / 500.7 KB gzip vs the adopted budget
+  <=2048 KB / <=550 KB - still green, but only ~49 KB gzip headroom remains; further E9
+  assets must stay tiny or go through a documented budget amendment (I197 precedent).
+- Assets after I212: 15 GLBs + 1 PNG.

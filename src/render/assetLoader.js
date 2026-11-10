@@ -20,6 +20,7 @@ const ASSETS = {
   puOverdrive: 'assets/powerup_overdrive.glb',
   puSlowmo: 'assets/powerup_slowmo.glb',
   drone: 'assets/drone.glb',
+  arenaRing: 'assets/arena_ring.glb', // I212: arena boundary ring
 };
 
 export function createAssetLoader() {

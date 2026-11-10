@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105).
-const BUDGETS = { ship: 300, L: 320, M: 120, S: 80, boss: 250, shield: 120, emblem: 60, drone: 100 }; // I210 + I211
+const BUDGETS = { ship: 300, L: 320, M: 120, S: 80, boss: 250, shield: 120, emblem: 60, drone: 100, arenaRing: 120 }; // I210 + I211 + I212
 const MAX_FILE_BYTES = 100 * 1024;
 
 function parseGlb(file) {
@@ -214,4 +214,44 @@ test('drone.glb: naming, poly budget, dart dimensions vs procedural parity (I211
   assert.ok(Math.abs(e.x - 2.24) / 2.24 <= 0.15, 'drone X extent ' + e.x.toFixed(3) + ' ~ 2.24');
   const cross = Math.max(e.y, e.z);
   assert.ok(Math.abs(cross - 1.19) / 1.19 <= 0.15, 'drone cross ' + cross.toFixed(3) + ' ~ 1.19');
+});
+
+// I212: arena boundary ring (ST-212, cgs-dev-story).
+test('arena_ring.glb: naming, 48 tris, flat unit ring, +Y normals, no vertex colors (I212)', () => {
+  const { buf, json, binOff } = parseGlb('arena_ring.glb');
+  assert.ok(buf.length < MAX_FILE_BYTES, 'arena_ring.glb under 100 KB');
+  const s = meshStats({ buf, json, binOff });
+  assert.ok(s.nodeNames.includes('VR_ArenaRing'), 'VR_ArenaRing node');
+  assert.ok(s.matNames.includes('VR_ArenaRing'), 'VR_ArenaRing material');
+  for (const p of s.prims) assert.ok(!p.hasColor, 'no vertex colors (in-code material authoritative)');
+  assert.equal(s.totalTris, 48, 'exactly 48 tris (24 plates x 2)');
+  assert.ok(s.totalTris <= BUDGETS.arenaRing, 'ring tris ' + s.totalTris + ' <= ' + BUDGETS.arenaRing);
+  const maxR = Math.max(...s.prims.map((p) => p.maxRadius));
+  assert.ok(Math.abs(maxR - 1.0) <= 0.05, 'max vertex radius ' + maxR.toFixed(4) + ' ~ 1.0');
+  // Flat in XZ (|y| ~ 0), inner radius 0.94, every face normal +Y (outward/up).
+  let maxAbsY = 0, minR = Infinity, up = 0, total = 0;
+  for (const p of s.prims) {
+    const bv = json.bufferViews[p.posAcc.bufferView];
+    for (let i = 0; i < p.posAcc.count; i++) {
+      const o = binOff + (bv.byteOffset || 0) + (p.posAcc.byteOffset || 0) + i * 12;
+      const x = buf.readFloatLE(o); const y = buf.readFloatLE(o + 4); const z = buf.readFloatLE(o + 8);
+      if (Math.abs(y) > maxAbsY) maxAbsY = Math.abs(y);
+      const r = Math.sqrt(x * x + z * z);
+      if (r < minR) minR = r;
+    }
+    const acc = p.posAcc;
+    const bv2 = json.bufferViews[acc.bufferView];
+    for (let t = 0; t < acc.count; t += 3) {
+      const b = (i2) => binOff + (bv2.byteOffset || 0) + (acc.byteOffset || 0) + i2 * 12;
+      const ax = buf.readFloatLE(b(t + 1)) - buf.readFloatLE(b(t));
+      const az = buf.readFloatLE(b(t + 1) + 8) - buf.readFloatLE(b(t) + 8);
+      const bx = buf.readFloatLE(b(t + 2)) - buf.readFloatLE(b(t));
+      const bz = buf.readFloatLE(b(t + 2) + 8) - buf.readFloatLE(b(t) + 8);
+      total++;
+      if (az * bx - ax * bz > 0) up++;
+    }
+  }
+  assert.ok(maxAbsY < 1e-4, 'flat ring maxAbsY ' + maxAbsY.toExponential(2));
+  assert.ok(Math.abs(minR - 0.94) <= 0.01, 'inner radius ' + minR.toFixed(4) + ' ~ 0.94');
+  assert.equal(up, total, 'all face normals +Y');
 });

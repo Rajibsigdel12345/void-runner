@@ -1,6 +1,8 @@
 ﻿﻿﻿// Void Runner - boot (I12: World orchestrator drives ship/weapons/asteroids/collisions)
 import * as THREE from 'three';
 import { createStarfield } from './render/starfield.js';
+import { createSkybox } from './render/skybox.js'; // I212
+import { createArenaRing } from './render/arenaRing.js'; // I212
 import { createShipMesh } from './render/shipMesh.js';
 import { createInput } from './render/input.js';
 import { createBulletPool } from './render/bulletPool.js';
@@ -64,6 +66,7 @@ app.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x04060f);
 scene.fog = new THREE.Fog(0x04060f, 60, 240);
+const skybox = createSkybox(scene, 'assets/skybox_equirect.png'); // I212: equirect sky - fire-and-forget, flat-color fallback
 
 const camera = new THREE.PerspectiveCamera(CONFIG.camera.fovBase, window.innerWidth / window.innerHeight, 0.1, 400); // ST-082: base FOV from config
 
@@ -87,6 +90,7 @@ dir.position.set(6, 12, 4);
 scene.add(dir);
 
 const grid = new THREE.PolarGridHelper(26, 12, 8, 64, 0x1b2a55, 0x101a38);
+const arenaRing = createArenaRing(scene, CONFIG.arena.radius); // I212: boundary ring just above the grid
 scene.add(grid);
 
 const stars = createStarfield(1337);
@@ -122,6 +126,7 @@ assetLoader.onAsset((name, entry) => {
   else if (name === 'puOverdrive') powerupRenders.setGLB('overdrive', entry.object);
   else if (name === 'puSlowmo') powerupRenders.setGLB('slowmo', entry.object);
   else if (name === 'drone') droneRenders.useGLB(entry.object); // I211
+  else if (name === 'arenaRing') arenaRing.useGLB(entry.object); // I212
 });
 assetLoader.loadAll();
 const bossHealth = createBossHealth(document.body); // ST-055
@@ -464,7 +469,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, (replayView && world.game.in(STATE.REPLAY)) ? replayIntent() : intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
