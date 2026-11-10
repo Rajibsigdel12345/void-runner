@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-128 (next)
-- current_iteration: I127
+- current_story: ST-129 (next)
+- current_iteration: I128
 - branch: main
-- notes: I127 done (ST-127 browser verify E8B + shield fix). Browser sweep of the whole E8B set passed (weapons L2/L3 toasts+tints ffd27a, natural shielded M at wave 4, rockShieldHit x2 + kill x1, drone mesh==sim pos, slow-mo 0.4->1, bomb 23->0, split gen chain, NaN clean, console 0/0). Found + fixed 2 real ST-121 gaps (render-only): shielded rocks now have an additive cyan energy-shell child that DIMS per absorbed hit (3 tiers: 0.50/0.36/0.22, shared materials), rockShieldHit now has a cyan spark burst + new shieldHit SFX cue (880->220 Hz square, rate-limited). Caught an off-by-one armor->material index during the browser probe (armor 2/1 rendered bright tier) - fixed + re-verified 3->2->1. Screenshot .evidence/I127_shield_verify.png. 324/324 + build 0 + seq 1..127. Next: I128 ST-128 G8.1 gate check (re-read cgs-gate-check skill first). NOTE: Blender 5.2.3 connected - the E9 Blender Graphics & Assets epic (ST-207..216) runs after the E8 closeout; keep re-reading CGS skills (cgs-dev-story for builds, cgs-gate-check for gates, cgs-balance-check for balance).
+- notes: I128 done (ST-128 G8.1 E8B phase gate, cgs-gate-check) - PASS. Fresh evidence: 324/324 + build 0 + seq 1..128; browser ?dbg=1 forced wave-10 scene: wlevel 3 + ffd27a tint, 2 shielded rocks w/ armor-3 shells (0.50/8ff2ff), 3 drones mesh==sim, slow-mo 0.4, bomb 21->0 + invuln 1.47 s, combo fed by kill x8 + nearmiss x6, 0 NaN all six lists, dbg overlay 26-29 calls / 1878-2190 tris, 60-frame sample 3.08 ms mean, console 0/0, screenshot .evidence/I128_gate_dbg.png. Concerns labeled: dbg ms = tab throttling artifact; lives=999 heart row = test artifact. Next: I129 ST-129 balance follow-up (post-gate playtest findings, notes + config). NOTE: Blender 5.2.3 connected - the E9 Blender Graphics & Assets epic (ST-207..216) runs after the E8 closeout; keep re-reading CGS skills (cgs-dev-story for builds, cgs-gate-check for gates, cgs-balance-check for balance).

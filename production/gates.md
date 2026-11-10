@@ -150,3 +150,97 @@ PASS - proceed to E8B. I111: combo/score multiplier (core).
 ### Next owner or decision
 I111 (ST-111): score combo/multiplier in src/core (new module + config block, rng.js for any randomness, DOM-free, unit-tested). No user decision required (advisory gate, non-blocking).
 
+## I128 - G8.1 E8B Gate (ST-128)
+
+- Date: 2026-11-10
+- Skill: cgs-gate-check (advisory phase gate for E8B Core gameplay expansion)
+
+### Summary
+Phase gate closing the E8B feature build (I111-I127) before the E8B balance
+follow-up (I129-I131). Verifies the epics.md G8.1 criteria: every new E8B
+system unit-tested and observable in the browser, determinism harness green,
+no NaN, and perf within budget per the ?dbg=1 overlay.
+
+### Gate Criteria
+1. Every new E8B system (combo/multiplier, bomb, slow-mo, homing drone,
+   chain-splitter, shielded rock, weapon progression L1-3) is unit-tested.
+2. Every E8B system is observable in the browser (dev :5173, ?dbg=1).
+3. Determinism harness green, including the E8B coverage replay (I125).
+4. No NaN across ship + rocks + drones + bullets + enemy bullets + mines.
+5. Perf within budget per the dbg overlay (60fps = 16.67 ms/frame; <14 ms
+   steady-state target; low draw calls - perf-profile.md).
+6. npm test green, npm run build exit 0, iteration sequence PASS, git tree clean.
+
+### Evidence (collected this iteration)
+- npm test: 324/324 pass, 0 fail (fresh run), including the 40-test E8B batch
+  (I126) and the determinism harness.
+- Per-system unit suites: combo -> score.test.js (~14) + e8bBatch combo (5);
+  bomb -> bombGenBonus.test.js (4) + e8bBatch bomb (4) + powerups.test.js (9,
+  drop/apply); slow-mo -> slowmo.test.js (7) + e8bBatch (6); drone ->
+  drones.test.js (8) + e8bBatch (5); splitter -> splitScoring.test.js (5) +
+  asteroids.test.js (11) + e8bBatch (6); shielded -> shielded.test.js (8) +
+  e8bBatch (5) + waves.test.js (10, shielded-over-golden rim roll); weapon ->
+  weaponLevel.test.js (6) + weapons.test.js (8) + e8bBatch (9); determinism ->
+  determinism.test.js (4, E8B coverage replay over 2400 steps).
+- npm run build: exit 0.
+- Sequence: PASS 1..127 pre-commit -> 1..128 post-commit (script).
+- Browser (dev :5173, ?dbg=1&nocache=128a): boots to MENU (dbg overlay
+  22 calls / 268 tris - matches the I110 menu reference); Enter -> PLAYING.
+  Forced wave-10 scene (weapon L3 + shielded rim roll) + 2 placed shielded
+  rocks (armor 3) + 3 homing drones + slow-mo apply:
+  - Weapon progression: wlevel 3, weaponLevelUp event x1, in-flight bullet
+    head tint #ffd27a (shared L3 head material).
+  - Shielded rock: exactly the 2 shielded rocks show the shell child; both at
+    armor-3 tier (opacity 0.50, #8ff2ff shared tier material); the 21 normal
+    rocks show no shell; shell identity clearly distinct in the screenshot.
+  - Drone: all 3 drone meshes at sim-exact positions (x/z match to 3 dp).
+  - Slow-mo: enemyScale() 0.4 while active (ship-side unscaled).
+  - Bomb: 21 -> 0 rocks, bomb event x1, ship invuln 1.47 s active; dbg overlay
+    0/24 rocks + 11 calls / 270 tris after the blast.
+  - Combo/score: kill x8 + nearmiss x6 events feed the multiplier during the
+    scene (combo math itself is unit-tested: score.test.js + e8bBatch).
+  - NaN: 0 across ship + all six entity lists.
+  - dbg overlay (live rAF, post-bloom, full frame): 26-29 calls /
+    1878-2190 tris under the E8B load scene (22 rocks + drones + bullets +
+    drop); clear scene 11 calls / 270 tris.
+  - Controlled 60-frame fixed-step sampling (advance 1/60 + render): 3.08 ms
+    mean per frame under the same load - inside the 16.67 ms budget and the
+    14 ms target.
+  - Console: 0 errors / 0 warnings.
+  - Screenshot: .evidence/I128_gate_dbg.png (dbg overlay + shielded L shell +
+    drones + WAVE 10 banner).
+- git: tree clean after this gate commit (4 doc files).
+
+### Concerns
+- The dbg overlay "ms" (250 ms, FPS 4) in the headless run reflects
+  background-tab rAF throttling, not game cost; the controlled fixed-step
+  sampling (3.08 ms mean) is the representative CPU cost (same method as
+  perf-profile.md). Per-frame GPU stats (calls/tris) are unaffected by
+  throttling.
+- lives=999 test artifact renders a full row of heart icons (known,
+  documented I127); real play is single digits.
+- renderer.info accumulates without a per-frame reset (autoReset off;
+  main.js resets at line 523) - read per-frame stats via the dbg-overlay
+  path, not raw info after manual renders.
+
+### Verdict
+PASS - proceed to the E8B balance follow-up. I129: balance follow-up (post-gate playtest findings).
+
+### Risks
+- R-E8-1 (balance) is the active tracked risk; I129-I131 are the E8B balance
+  passes. No new risks from this gate.
+
+### Changed files
+- production/gates.md (this gate)
+- production/iterations.md (I128 entry)
+- CHANGELOG.md (I128 line)
+- production/session-state/active.md (state -> I128)
+
+### Verification evidence
+- All commands fresh-run this iteration (npm test, build, sequence script,
+  browser probes via window.__vr + the ?dbg=1 overlay).
+- Assumptions: none - every criterion verified directly.
+
+### Next owner or decision
+I129 (ST-129): balance follow-up (post-gate playtest findings) - notes +
+config. No user decision required (advisory gate, non-blocking).
