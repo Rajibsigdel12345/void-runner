@@ -1501,3 +1501,36 @@ One entry per iteration. Format:
 - Docs verified CURRENT (no change needed): design/feel-balance.md (ST-179 audit + ST-183 tuning; the ladder table matches the shipped src/main.js values incl. the I183 wardenDeath punch 0.7), production/perf-profile.md (I184 section complete; I95/I128 sections are historical, their Next pointers left as-is by convention), production/memory-audit.md (I185), production/gates.md (I182 G8.4 PASS with full evidence), production/epics.md (E8E arc list I169-I186 matches the shipped iteration headers 1:1), production/stories.md (status lives in active.md + iterations.md; no per-story markers by convention).
 - Quality bar: 581/581 (docs only - no code changed); node scripts/build.mjs exit 0; no browser smoke (no rendering change).
 - Result: DONE. ST-186 closed - E8E (ST-169..186) complete. Next I187 ST-187 context-loss hardening (re-init path) - E8F opens.
+## I187 - Context-loss hardening (re-init path) (ST-187)
+
+- Skill: cgs-bugfix (proactive-hardening variant - no user-visible defect; the I75 baseline left the re-init path unprobeable and the loop kept doing sim/HUD work while the GL context was dead).
+- Summary: named the webglcontextlost/restored handlers so the re-init path is probeable, added a ctxLost loop guard so the rAF loop does ZERO sim/render work while the context is dead, added re-init on restore (bloom composer render targets re-created, renderer.info reset, and a NEW clock.reset() so the stall interval never becomes a dt spike on the first restored frame), and a framesRendered loop-work counter. Smoke also caught and fixed an I187 line-merge that swallowed the I75 __vr.ctxOverlay probe into a comment (exposed probe silently gone - restored on its own line).
+- Reproduction (the gap I75 left): I75 handlers were inline arrows - not probeable; the loop kept calling tick/sync/renderer.info/adaptive-quality every frame while the context was dead (three.js render() is a no-op while lost, but the sim kept advancing toward a dead context and the HUD kept updating); no clock re-init on restore (the first restored frame could eat the whole stall as dt - only the ST-078 0.25s clamp + 8-substep backlog backstopped it); a real GL loss cannot be forced in headless Chromium, so evidence goes through handler-path probes (simCtxLost/simCtxRestore call the real named handlers with a synthetic preventDefault).
+- Minimal Fix (src/main.js only):
+  1. let ctxLost = false + let framesRendered = 0 (loop-work counter).
+  2. onCtxLost(e) (named): preventDefault (mark restorable), ctxLost = true, world.pause() if PLAYING, overlay flex + I75 initial status text, 10s escalation timer (I75 behavior preserved).
+  3. onCtxRestored() (named): clearTimeout, renderer.setSize, bloom.resize (composer RTs died with the GL context - resize re-creates them; three.js re-uploads geoms/texs/programs lazily), renderer.info.reset(), clock.reset(performance.now()) (I187 re-init: stall time discarded, no dt spike on the first restored frame; ST-078 clamp is the backstop), ctxLost = false, overlay hidden.
+  4. Loop guard at the top of frame(): if (ctxLost) return; - skips tick/sync/info/adaptive while dead.
+  5. framesRendered++ after bloom.render().
+  6. Probes: __vr.ctxLost(), __vr.simCtxLost(), __vr.simCtxRestore(), __vr.framesRendered(); restored the I75 __vr.ctxOverlay exposure (smoke-caught regression).
+- Regression Test: I188 (ST-188) is the dedicated evidence story (repeated cycles in both states, escalation timing, NaN/finite scans, screenshots); the probes are the seam.
+- Evidence:
+  - 581/581 green; node scripts/build.mjs exit 0; node --check (ESM) clean.
+  - Browser smoke (Playwright, ?nocache=187b/187c, REAL Enter gesture; rAF in this headless Chromium throttles variably ~1-56 ticks/s):
+    - C (PLAYING baseline): 117 frames / 2.7s window (187b); 3/3 (187c, throttled tick) - loop renders when not lost.
+    - D (simCtxLost from PLAYING): ctxLost=true, state PAUSED, overlay flex, status = initial "The browser dropped the 3D rendering context..." text; screenshot .evidence/I187/I187_1_ctx_loss_overlay.png.
+    - E (guard - the key assertion): 152 rAF ticks fired (187b) / 3 ticks (187c) yet framesDelta = 0 in both; world.time bit-identical across the 2.7s window (1.0666666666666678 -> same); rock pos bit-identical (187b: 3.7117490637942008 -> same).
+    - F (simCtxRestore): ctxLost=false, overlay none, state stays PAUSED (restore does NOT auto-resume - the pause screen takes over).
+    - G (recovery): post-restore window framesDelta 2-3 > 0 (loop alive); world.resume() -> PLAYING; advance(0.5) -> timeDelta 0.4999999999999982 (fixed substeps), ship + all rocks finite.
+    - H (timer discipline): 5 rapid lost/restore cycles -> final lost: ctxLost=true + overlay flex (no double-fire, no leaked timer); final restore clean.
+    - I (MENU path): Q from PAUSED -> MENU; simCtxLost leaves state MENU (no pause), overlay flex; window framesDelta 0; restore -> loop resumes in MENU (framesDelta 3).
+  - Console 0 errors / 0 warnings across all smoke pages.
+  - Bonus real-world signal: on the earlier 187a page a REAL headless GL loss/restore event pair fired mid-smoke (GPU-process churn); afterwards the page showed overlay=none, ctxLost=false, loop running - the handlers survived a genuine cycle unaided.
+- Risks:
+  - First post-restore frame = one-time lazy WebGL re-upload (geoms/texs/programs), same one-time hitch class as I95's cold first-gameplay frame; documented, not fixed here (post-restore re-upload is inherently lazy in three.js r160).
+  - sim probes exercise the real handler path but not the renderer's own lost/restore internals; I188 adds evidence depth (repeated cycles, escalation text timing, NaN scans).
+  - clock.reset(performance.now()) discards the stall interval - correct for a game (no fast-forward after context death), consistent with ST-078 resume semantics.
+  - Smoke methodology note: an initial G-step NaN was caused by MY probe input (thrust: 0, a number) - advance()'s documented intent is {thrust:{x,y}, aimPoint, firing}; a number gives thrust.x = undefined -> NaN in Ship.step. Game code is correct; re-ran with the correct vector (clean). No validation added to the debug probe (minimalism).
+- Changed files: src/main.js ONLY.
+- Verification: npm test 581/581; build exit 0; ESM parse clean; smoke A-I as above; console 0/0.
+- Result: DONE. ST-187 closed - E8F (ST-187..206) open at I187. Next I188 ST-188 context-loss test + verify (browser).

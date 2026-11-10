@@ -434,8 +434,13 @@ ctxOverlay.appendChild(ctxBtn);
 document.head.appendChild(Object.assign(document.createElement('style'), { textContent: '#vr-pause-btn:focus-visible,#vr-ctx-btn:focus-visible{outline:2px solid #ffe08a;outline-offset:2px;}' }));
 document.body.appendChild(ctxOverlay);
 let ctxRestoreTimer = 0;
-renderer.domElement.addEventListener('webglcontextlost', (e) => {
+// I187: named handlers (were inline arrows) so the re-init path is probeable, and a
+// ctxLost flag so the frame loop fully stops while the context is dead.
+let ctxLost = false;
+let framesRendered = 0; // I187: loop-work counter (probe) - frozen while the context is lost
+function onCtxLost(e) {
   e.preventDefault(); // mark the context as restorable
+  ctxLost = true; // I187: the loop guard below skips sim + render until restored
   if (world.game.state === STATE.PLAYING) world.pause();
   ctxOverlay.style.display = 'flex'; // I75
   ctxStatus.textContent = 'The browser dropped the 3D rendering context. It usually comes back on its own - please wait.';
@@ -443,14 +448,22 @@ renderer.domElement.addEventListener('webglcontextlost', (e) => {
   ctxRestoreTimer = setTimeout(() => { // I75: no restore yet - escalate
     ctxStatus.textContent = 'Still no signal after 10s. If it does not come back, reload the game.';
   }, 10000);
-});
-renderer.domElement.addEventListener('webglcontextrestored', () => {
+}
+function onCtxRestored() {
   clearTimeout(ctxRestoreTimer); // I75
   renderer.setSize(window.innerWidth, window.innerHeight);
-  bloom.resize(window.innerWidth, window.innerHeight);
+  bloom.resize(window.innerWidth, window.innerHeight); // composer render targets died with the GL context; resize re-creates them (three.js re-uploads geoms/texs/programs lazily on the first post-restore render)
   renderer.info.reset();
+  clock.reset(performance.now()); // I187: re-init path - stall time discarded, no dt spike on the first restored frame (ST-078 clamp is the backstop)
+  ctxLost = false;
   ctxOverlay.style.display = 'none'; // I75: back to normal (pause screen takes over if the game was running)
-});
+}
+renderer.domElement.addEventListener('webglcontextlost', onCtxLost);
+renderer.domElement.addEventListener('webglcontextrestored', onCtxRestored);
+window.__vr.ctxLost = () => ctxLost; // I187: probe
+window.__vr.simCtxLost = () => onCtxLost({ preventDefault() {} }); // I187: exercise the real handler path without an actual GL loss (smoke/debug only)
+window.__vr.simCtxRestore = () => onCtxRestored(); // I187
+window.__vr.framesRendered = () => framesRendered; // I187: loop-work counter (frozen while the context is lost)
 window.__vr.ctxOverlay = ctxOverlay; // I75: expose after declaration (TDZ-safe)
 window.__vr.applyColorblindPreview = (on) => applyColorblindPreview(on); // I158: probe
 window.__vr.slowmoHintEl = slowmoHintEl; // I158: probe
@@ -688,6 +701,7 @@ function syncVisuals(dt) {
 
 function frame() {
   requestAnimationFrame(frame);
+  if (ctxLost) return; // I187: context lost - stop sim + render (three.js render() is a no-op while lost anyway; this also skips tick/sync/info/adaptive overhead). onCtxRestored resets the clock, so no dt spike on the first restored frame.
   const now = performance.now();
   const cur = world.game.state;
   if (prevState === STATE.PAUSED && cur === STATE.PLAYING) clock.reset(now); // ST-078: no accumulated dt carried into resume
@@ -705,6 +719,7 @@ function frame() {
   syncVisuals(frameDt); // I36: reads previous frame GPU stats
   renderer.info.reset(); // I36: clear before this frame accumulates (autoReset off)
   bloom.render();
+  framesRendered++; // I187
   if (debugOverlay) { // I80: sample this frame's GPU stats + entity pools (post-bloom = full frame)
     const gi = renderer.info.render;
     debugOverlay.update(frameDt, {
