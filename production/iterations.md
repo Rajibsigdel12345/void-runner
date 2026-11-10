@@ -2248,3 +2248,18 @@ No test changes (render-layer only - scope-check-E10 notes ST-219 as "the only r
 - Risk disposition: R-E10-1 CLOSED (armored + spent screenshots, I220 + I222 same-frame A/B), R-E10-2 CLOSED (lead exact + 1.2 cap + pilot parity + frames delta ~0), R-E10-3 CLOSED (dist 1954.9/506.2 in budget, assetPerf pinned at 16 assets). Carried: 8 HUMAN-PENDING perception items + low-end physical device validation.
 
 - Result: GATE G10.0 PASS - E10 CLOSED (3/3 stories ST-218..220, 4 iterations I219..I222). Next I223: open E11 (scope check + stories, cgs-scope-check + cgs-create-stories).
+
+## I223 - E11 scope check + YouTube grounding + epic/stories opening (cgs-scope-check + cgs-create-stories)
+
+- Goal: open E11 (Combat Juice & Low-End Validation) over the two remaining bot-verifiable carried items - T4 (no kill-time juice channel, P2, owner senior_game_artist) and the low-end device validation risk (bot-verifiable half). Scope check + stories + docs; no src changes.
+
+- Evidence:
+- YouTube grounding (youtube_search 2026-11-11, 6 queries / 59 unique): GMTK "Secrets of Game Feel and Juice" (1.1M, youtu.be/216_5nu4aVQ: juice ladders ordered by event importance), IndividualKex "Guide to Good Combat Feel" (97K, youtu.be/FpGgpUWEb_k: hit-stop + camera punch + particle sync tuned per hit class), wutsmyname101 "Where to Start with Bullet Hell" (75K, youtu.be/mLcPznUc4pw: readability first - effects must not bury the threat), GMTK "How to Keep Players Engaged" (2.8M, youtu.be/hbzGO_Qonu0: reward the kill chain => overdrive combo-heat), mobile/web perf ladder (3 videos: screen scale/DPR before draw calls; measure, never sniff). Coverage note: transcripts rate-limited at fetch (metadata + chapters + snippets only, same treatment as I173/I178/I219).
+- T4 code verification (src/main.js L630-634): the kill event fires only score popup + kill feed + particle burst - zero juice channels; the hierarchy hole at the rock-kill rung confirmed (drone kill L637: shake 0.35 + flash 0.2; rock kill: nothing). The kill event data already carries overdrive + multiplier (the popup binds them at L630) - no core change needed for the escalation input.
+- Punch scale grounded (src/core/fx.js + config): punch energy 0..1, amplitude 2.0 u, decay 12/s, max-stacking; existing rungs bossDeath 1.0 / bomb 0.8 / wardenDeath 0.7 / weaponFanfare 0.45 => kill punch 0.08/0.12/0.18 (S/M/L) = 0.16/0.24/0.36 u max displacement, settles ~0.3 s; overdrive x1.5 capped so L+od 0.27 stays below the 0.45 fanfare.
+- Docs: production/scope-check-E11.md (new; full Output Contract: Summary / Scope Fit / Cut Option / Deferral / Recommendation / Risks / Changed / Verification / Next owner), epics.md (+E11 + risk register R-E11-1..3), stories.md (+E11 ST-221..223), timeline.md (+E11 line), CHANGELOG.md (+I223), active.md (title + epic/story/iteration lines + I223 notes).
+- Tests: 677/677 (docs-only iteration; quality bar re-run).
+- Build: exit 0; dist unchanged 1954.9 KB raw / 506.2 KB gzip (<=2048/<=550, ~43.8 KB headroom).
+- Log audit: 222 entries 1..222 sequential, 0 dupes (+I223 = 1..223).
+- Result: DONE
+- Risk/follow-up: R-E11-1..3 (production/scope-check-E11.md). No Blender assets needed (no new content). Next I224: ST-221 (kill juice; cgs-dev-story + cgs-standards-tests).
