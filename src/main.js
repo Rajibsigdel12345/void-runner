@@ -380,7 +380,10 @@ function tick(dt, intent) {
         dangerA = Math.min(1, dangerA + (e.data.lives <= 1 ? 1 : 0.6)); // I85: last-life hit reads harder
       } else if (e.type === 'shieldPop') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.75), palette: CONFIG.fx.palette.shield, speed: 8, life: 0.5, shape: 'ring' });
       else if (e.type === 'bomb') {
-        particles.burst(0, 0, { count: fxCount * 2, palette: CONFIG.fx.palette.bomb, speed: 16, life: 0.7, shape: 'ring' });
+        // I114: nova scales with the rocks cleared (small clear = tight, big clear = huge); anchored so the ~3-rock bomb keeps the old fxCount*2 intensity.
+        const cleared = e.data.count || 0;
+        const nova = Math.ceil(fxCount * (2 + (Math.min(cleared, 10) - 3) * 0.15));
+        particles.burst(0, 0, { count: nova, palette: CONFIG.fx.palette.bomb, speed: 16, life: 0.7, shape: 'ring' });
         shake.trigger(CONFIG.fx.shakeBomb);
         flashA = Math.min(0.8, flashA + 0.35);
         hitStop = Math.max(hitStop, CONFIG.fx.hitStop.bomb); punch.trigger({ x: 0, y: 0.7, z: 0.5 }, 0.8); // ST-081
