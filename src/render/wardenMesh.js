@@ -1,6 +1,8 @@
-// ST-137: WARDEN mini-boss rendering - one armored drone (not pooled), procedural.
-// Hull: jittered dodecahedron. Armor: a hex plate ring around the core that retracts
-// and the glow shifts cyan -> hot orange once the armor is spent (visual armor state).
+// ST-137: WARDEN mini-boss rendering - one armored drone (not pooled).
+// I220 (E10): hull + armor geometry from assets/warden.glb (VR_Warden_Hull /
+// VR_Warden_Armor) when the asset loads; the procedural fallback below (jittered
+// dodecahedron hull + hex plate ring) stays for a failed load. Armor: the plate
+// ring retracts and the glow shifts cyan -> hot orange once the armor is spent.
 import * as THREE from 'three';
 import { RNG } from '../core/rng.js';
 import { CONFIG } from '../core/config.js';
@@ -80,13 +82,22 @@ export function createWardenMesh(scene) {
     group.visible = true;
   }
 
-  // ST-211 (E9): useGLB(obj) - swap in the Blender drone geometry (hull only); the
-  // in-code materials are kept, so a GLB's own materials are ignored.
+  // I220 (E10): useGLB(obj) - swap in the Blender Warden geometry. Two meshes by
+  // node name: VR_Warden_Hull -> hull, VR_Warden_Armor -> armor plate (the existing
+  // sync() drives the armor retract/glow unchanged). In-code materials are kept, so
+  // the GLB's own materials are ignored.
   function useGLB(obj) {
     if (!obj) return;
-    let g = null;
-    obj.traverse((n) => { if (n.isMesh && !g) g = n.geometry; });
-    if (g) hull.geometry = g;
+    let hullG = null;
+    let armorG = null;
+    obj.traverse((n) => {
+      if (!n.isMesh) return;
+      const nm = n.name || '';
+      if (nm.indexOf('Armor') >= 0 && !armorG) armorG = n.geometry;
+      else if (!hullG) hullG = n.geometry;
+    });
+    if (hullG) hull.geometry = hullG;
+    if (armorG) armor.geometry = armorG;
   }
 
   // I155: shape-cue toggle (settings.shapeCues; on by default for colorblind-friendly play).

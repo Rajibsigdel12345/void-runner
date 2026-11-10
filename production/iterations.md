@@ -2166,3 +2166,31 @@ One entry per iteration. Format:
 **Changed:** production/scope-check-E10.md (new), production/epics.md (+E10 section + risk register), production/stories.md (+E10 section), production/iterations.md, CHANGELOG.md, production/session-state/active.md.
 
 - Result: DONE. E10 opened. Next I220: ST-218 (Blender Warden model).
+
+## I220 - ST-218 - Warden Blender model (last procedural enemy -> armored sentinel GLB)
+
+**Skill:** cgs-dev-story. **Story:** ST-218 (E10 Post-E9 Polish).
+
+**Goal:** Replace the last procedurally-drawn enemy (the warden) with a Blender-made GLB: a jagged armored sentinel whose armor is a SEPARATE mesh node, so the existing armor-state animation in wardenMesh.js (armorScale pulse, plate glow) carries over unchanged. Procedural fallback preserved. Budgets: <=200 tris, <=40 KB, <=3 materials, VR_ naming, identity transforms, POSITION+NORMAL only.
+
+**Asset (Blender 5.2.3):** assets/warden.glb (11,772 B):
+- VR_Warden_Hull (60 tris): jittered dodecahedron r=1.7 (dual of icosphere-1, seed 0x5c4e, radial jitter +0.16/-0.12 +0.16) + 4 capped 4-sided spikes at 45/135/225/315 deg (base r 1.45, tip r ~1.75, inside the armor ring).
+- VR_Warden_Armor (120 tris): 6 closed trapezoid plates at +-0.26 rad (top r 2.35->2.62 at y=0.22, bottom r 2.42->2.68 at y=-0.24, centered on rim hex faces 30/90/... deg) + closed hex rim band (corners 0/60/... deg, r_in 2.30 r_out 2.45, y -0.26->-0.08).
+- 180 tris total (<=200), 11.5 KB (<=40 KB), 2 materials (<=3), origin-centered (centroid XZ ~0), all closed solids (signed volume hull 3.768 / armor 1.315 > 0), no COLOR_0.
+
+**Changed:**
+- assets/warden.glb (new, 16th GLB)
+- src/render/assetLoader.js (16th entry warden: 'assets/warden.glb'; header fifteen -> sixteen)
+- src/render/wardenMesh.js (useGLB now finds GLB meshes by node name: VR_Warden_Armor -> armor slot, first other mesh -> hull; in-code materials kept as before)
+- src/main.js (onAsset: else if name === 'warden' -> wardenMesh.useGLB(entry.object))
+- tests/assetGlbs.test.js (header sixteen; BUDGETS + warden: 200; new warden audit: size, both nodes + mats, no COLOR_0, tris <= 200, hull maxR 0.95r..1.25r, armor maxR ~= 1.55r +-10%)
+- tests/assetPerf.test.js (asset-count test 15 -> 16 "(15 models + arena ring)")
+
+**Verification:**
+- npm test 677/677 (net +1); node scripts/build.mjs exit 0.
+- dist 1952.8 KB raw / 505.4 KB gzip (<=2048/<=550, ~44.6 KB headroom); dist/assets/warden.glb present.
+- Browser smoke ?nocache=220a (browser closed + re-navigated first): 16/16 assets + skybox ready; GLB swap proven (hull 124 / armor 240 GLB vertices vs procedural 108/56); armored + spent states captured (.evidence/I220/06-warden-armored-final.png, 07-warden-spent-final.png) = R-E10-1 satisfied; kill path (armor 0 + hp 1 + pushed bullet) -> alive false, score +400, kills +1, group hidden, state still PLAYING; scripted pilot PLAYING to t=12.92 s (15 kills / 1770 pts, all finite); console 0 errors / 0 warnings.
+- Showcase technique: fresh start -> ship.invuln = 1e9 (god), cfg.warden.speed = 0 (freeze homing; restored 2.4 after), spawnWardenForWave(5), warden placed on the view axis (pos.y = sy + 3.13 at render height 2.17).
+- Demo pin structurally untouched (no core changes; full suite green).
+
+- Result: DONE. ST-218 complete. Next I221: ST-219 (camera/feel).

@@ -135,6 +135,7 @@ assetLoader.onAsset((name, entry) => {
   else if (name === 'puOverdrive') powerupRenders.setGLB('overdrive', entry.object);
   else if (name === 'puSlowmo') powerupRenders.setGLB('slowmo', entry.object);
   else if (name === 'drone') droneRenders.useGLB(entry.object); // I211
+  else if (name === 'warden') wardenMesh.useGLB(entry.object); // I220: armored sentinel (hull + armor plate)
   else if (name === 'arenaRing') arenaRing.useGLB(entry.object); // I212
 });
 assetLoader.loadAll();

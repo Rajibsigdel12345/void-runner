@@ -1,5 +1,5 @@
 // I207: vendored GLB asset audit (ST-207, cgs-asset-audit). Pure node - no DOM,
-// no three. Validates the Blender-authored GLBs in assets/ (I211: fifteen total) against the
+// no three. Validates the Blender-authored GLBs in assets/ (I220: sixteen total) against the
 // container format, the VR_ naming convention, the poly budgets from
 // design/asset-spec.md, and the logical radii in CONFIG (visual/hitbox parity).
 import test from 'node:test';
@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105).
-const BUDGETS = { ship: 300, L: 320, M: 120, S: 80, boss: 250, shield: 120, emblem: 60, drone: 100, arenaRing: 120 }; // I210 + I211 + I212
+const BUDGETS = { ship: 300, L: 320, M: 120, S: 80, boss: 250, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200 }; // I210 + I211 + I212 + I220
 const MAX_FILE_BYTES = 100 * 1024;
 
 function parseGlb(file) {
@@ -254,4 +254,26 @@ test('arena_ring.glb: naming, 48 tris, flat unit ring, +Y normals, no vertex col
   assert.ok(maxAbsY < 1e-4, 'flat ring maxAbsY ' + maxAbsY.toExponential(2));
   assert.ok(Math.abs(minR - 0.94) <= 0.01, 'inner radius ' + minR.toFixed(4) + ' ~ 0.94');
   assert.equal(up, total, 'all face normals +Y');
+});
+
+// I220: Warden mini-boss (ST-218, cgs-dev-story) - armored sentinel: jagged dodeca
+// hull with spike accents + separate armor-plate mesh (VR_Warden_Armor) that the
+// in-code armor-state animation drives (retract + cyan->orange glow).
+test('warden.glb: naming, poly budget, hull/armor radii vs CONFIG (I220)', () => {
+  const { buf, json, binOff } = parseGlb('warden.glb');
+  assert.ok(buf.length <= 40 * 1024, 'warden.glb under 40 KB');
+  const s = meshStats({ buf, json, binOff });
+  assert.ok(s.nodeNames.includes('VR_Warden_Hull'), 'VR_Warden_Hull node');
+  assert.ok(s.nodeNames.includes('VR_Warden_Armor'), 'VR_Warden_Armor node');
+  assert.ok(s.matNames.includes('VR_Warden_Hull'), 'VR_Warden_Hull material');
+  assert.ok(s.matNames.includes('VR_Warden_Armor'), 'VR_Warden_Armor material');
+  for (const p of s.prims) assert.ok(!p.hasColor, 'no vertex colors (in-code materials authoritative)');
+  assert.ok(s.totalTris <= BUDGETS.warden, 'warden tris ' + s.totalTris + ' <= 200');
+  const hull = s.prims.find((p) => p.name.includes('Hull'));
+  const armor = s.prims.find((p) => p.name.includes('Armor'));
+  const r = CONFIG.warden.radius;
+  assert.ok(hull.maxRadius >= r * 0.95, 'hull covers the logical body (' + hull.maxRadius.toFixed(3) + ')');
+  assert.ok(hull.maxRadius <= r * 1.25, 'hull max radius ' + hull.maxRadius.toFixed(3) + ' <= r*1.25 (spike accents stay inside the armor ring)');
+  assert.ok(Math.abs(armor.maxRadius - r * 1.55) / (r * 1.55) <= 0.10,
+    'armor outer radius ' + armor.maxRadius.toFixed(3) + ' ~ r*1.55 (procedural plate-ring parity)');
 });
