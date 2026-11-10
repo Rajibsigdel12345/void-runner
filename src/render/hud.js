@@ -40,11 +40,21 @@ export function createHUD(root) {
   }
 
   const scoreBox = box('top:14px;left:18px');
+  // I160: compact score row - the combo multiplier rides inline next to the
+  // score (hidden while there is no chain), so the bottom-center block shrinks
+  // to a heat bar.
+  const scoreRow = document.createElement('div');
+  scoreRow.style.cssText = 'display:flex;align-items:baseline;gap:8px;';
   const score = document.createElement('div');
-  score.style.cssText = 'font-size:calc(26px * var(--vr-fs,1));font-weight:700;letter-spacing:1px;';
+  score.id = 'hud-score';
+  score.style.cssText = 'font-size:calc(24px * var(--vr-fs,1));font-weight:700;letter-spacing:1px;';
+  const mult = document.createElement('span');
+  mult.id = 'hud-mult';
+  mult.style.cssText = 'font-size:calc(15px * var(--vr-fs,1));font-weight:800;letter-spacing:1px;display:none;transform-origin:left center;';
+  scoreRow.append(score, mult);
   const best = document.createElement('div');
   best.style.cssText = 'font-size:calc(13px * var(--vr-fs,1));opacity:0.9;margin-top:2px;'; // I44: 0.75 -> 0.9 contrast
-  scoreBox.append(score, best);
+  scoreBox.append(scoreRow, best);
 
   // I123: weapon-level indicator (WPN label + 3 pips) under the score, top-left.
   const wpnBox = box('top:58px;left:18px');
@@ -99,17 +109,21 @@ export function createHUD(root) {
     chips[t] = { chip, fill, lastBar: -1 };
   }
 
-  const comboWrap = box('bottom:26px;left:50%;transform:translateX(-50%);text-align:center;transition:opacity 0.15s linear');
-  const combo = document.createElement('div');
-  combo.style.cssText = 'font-size:calc(20px * var(--vr-fs,1));font-weight:700;color:#ffe08a;';
-  // I44: drain bar under the chain text - the 4s combo window becomes visible.
+  // I160: bottom-center is a compact combo heat bar (small label + 4s drain);
+  // the chain/multiplier text now rides the score line (top-left).
+  const heatWrap = box('bottom:26px;left:50%;transform:translateX(-50%);text-align:center;transition:opacity 0.15s linear');
+  const comboLabel = document.createElement('div');
+  comboLabel.id = 'hud-combo-label';
+  comboLabel.textContent = 'COMBO';
+  comboLabel.style.cssText = 'font-size:calc(10px * var(--vr-fs,1));font-weight:800;letter-spacing:3px;margin-bottom:4px;color:#ffe08a;opacity:0.9;';
   const comboTrack = document.createElement('div');
-  comboTrack.style.cssText = 'width:calc(150px * var(--vr-fs,1));height:3px;margin:4px auto 0;background:rgba(255,255,255,0.15);';
+  comboTrack.id = 'hud-combo-track';
+  comboTrack.style.cssText = 'width:calc(150px * var(--vr-fs,1));height:3px;margin:0 auto;background:rgba(255,255,255,0.15);';
   const comboFill = document.createElement('div');
   comboFill.style.cssText = 'height:100%;width:100%;background:#ffe08a;transform-origin:left center;transform:scaleX(1);';
   comboTrack.appendChild(comboFill);
-  comboWrap.append(combo, comboTrack);
-  comboWrap.style.opacity = '0';
+  heatWrap.append(comboLabel, comboTrack);
+  heatWrap.style.opacity = '0';
 
   const cache = {};
   function set(part, node, text) {
@@ -161,24 +175,27 @@ export function createHUD(root) {
 
     const c = world.scoreKeeper.combo;
     if (c > 1) {
-      comboWrap.style.opacity = '1';
-      set('combo', combo, `COMBO ${c}  \u00d7${world.scoreKeeper.multiplier.toFixed(1)}`);
-      // I112: kill feedback pop + tier color. Kill = kills counter up; a tier-up pops bigger.
+      heatWrap.style.opacity = '1';
+      // I160: multiplier rides the score line (top-left); big bottom text removed.
+      if (mult.style.display === 'none') mult.style.display = 'inline-block';
+      set('mult', mult, '\u00d7' + world.scoreKeeper.multiplier.toFixed(1));
+      // I112 (I160): kill feedback pop + tier color. Kill = kills counter up; a tier-up pops bigger.
       const tierNow = world.scoreKeeper.tier;
-      if (world.scoreKeeper.kills > prevKills) popScale = tierNow > prevTier ? 1.5 : 1.3;
+      if (world.scoreKeeper.kills > prevKills) popScale = tierNow > prevTier ? 1.35 : 1.15;
       prevKills = world.scoreKeeper.kills;
       prevTier = tierNow;
       const tcol = TIER_COLOR[tierNow] || TIER_COLOR[0];
-      if (cache['comboColor'] !== tcol) { cache['comboColor'] = tcol; combo.style.color = tcol; }
+      if (cache['comboColor'] !== tcol) { cache['comboColor'] = tcol; mult.style.color = tcol; comboLabel.style.color = tcol; }
       const effPop = reduceMotion ? 1 : popScale;
-      comboWrap.style.transform = Math.abs(effPop - 1) > 0.001 ? 'translateX(-50%) scale(' + effPop.toFixed(3) + ')' : 'translateX(-50%)';
+      mult.style.transform = Math.abs(effPop - 1) > 0.001 ? 'scale(' + effPop.toFixed(3) + ')' : 'scale(1)';
       // I112: combo window bar driven by ScoreKeeper.heatAt() (I111) - single source for the drain.
       const q = Math.floor(world.scoreKeeper.heatAt(world.time) * 40) / 40;
       if (q !== lastComboBar) { lastComboBar = q; comboFill.style.transform = `scaleX(${q})`; }
     } else {
-      comboWrap.style.opacity = '0';
+      heatWrap.style.opacity = '0';
+      if (mult.style.display !== 'none') mult.style.display = 'none';
+      mult.style.transform = 'scale(1)';
       lastComboBar = -1;
-      comboWrap.style.transform = 'translateX(-50%)';
     }
     // I112: pop decay + sim-time tracking run every frame (even while the combo is hidden).
     const dtPop = prevTime === null ? 0 : Math.max(0, world.time - prevTime);

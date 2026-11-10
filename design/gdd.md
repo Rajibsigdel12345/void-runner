@@ -170,10 +170,12 @@ GAME_OVER (stats + "Enter to restart") -> PLAYING.
 - Menu presentation (I65): the MENU screen has a gradient, softly glowing "VOID RUNNER" title, a drifting nebula backdrop (the live 3D starfield shows through the semi-transparent panel), the controls in a bordered card, and a credits line. The title glow and backdrop drift are pure presentation and freeze to static under Reduced Motion; no gameplay effect.
 
 ## HUD
-Top-left: score + best. Top-center: wave. Top-right: lives (ship icons) + active
-power-up indicators (shape + color + label with a drain bar - never color
-alone, per accessibility). Bottom-center: combo meter (visible when combo>=2)
-with a drain bar showing the 4s window remaining.
+Top-left: score + best, with the combo multiplier (xN.N) riding inline next to
+the score while a chain is active (I160). Top-center: wave. Top-right: lives
+(ship icons) + active power-up indicators (shape + color + label with a drain
+bar - never color alone, per accessibility). Bottom-center: compact combo heat
+bar (small label + drain bar, visible when combo>=2) showing the 4s window
+remaining (I160: the big combo text moved onto the score line).
 All DOM/CSS overlay (crisp text, easy to style), not canvas. A subtle fire-line
 reticle extends from the ship nose along the actual fire direction while
 playing (teaches lead-aim; playtest rec #3, I44).
