@@ -342,6 +342,17 @@ export const CONFIG = {
       wardenSpawn: 0.5,      // mini-boss arrival
       wardenDeath: 0.8       // mini-boss death
     },
+    flashTable: {            // ST-179: unified white-flash bump table (event -> bump 0..0.8, added under the shared 0.8 cap)
+      hit: 0.5,              // ship hit (reinforced by the ST-176 damage vignette)
+      bossDeath: 0.5,        // boss death
+      bossSpawn: 0.4,        // boss arrival
+      wardenDeath: 0.4,      // mini-boss death
+      bomb: 0.35,            // bomb blast
+      mineExplode: 0.25,     // mine detonation
+      wardenSpawn: 0.25,     // mini-boss arrival
+      droneExplode: 0.2,     // seeker drone explosion
+      overdrive: 0.15        // overdrive pickup flash
+    },
     dangerVignette: {        // ST-176: reduced-motion damage vignette (steady-then-fade, opacity only)
       hold: 0.5,             // seconds held at full severity after a hit
       fade: 0.5              // seconds of linear fade back to 0
