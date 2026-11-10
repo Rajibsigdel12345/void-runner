@@ -1,6 +1,7 @@
 ﻿﻿﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I210: Blender boss (Monolith) + armor shell (cgs-dev-story) - boss.glb rebuilt as a 96-tri 8-column jagged obelisk (cross EXACT 4.1 / height EXACT 8.8, centered, COLOR_0 crown gradient) replacing the 192-tri box jitter; NEW shield.glb: 80 gapped energy-armor plates (unit radius) for the shielded-rock armor state; boss material vertexColors + GLB color guard, asteroidRenderer.setShieldGLB pool swap, 6th asset wired; 634/634, build 0, wave-5 boss smoke 0/0 (ST-210)
 - I209: Blender asteroid set refresh (cgs-dev-story) - L/M/S rocks rebuilt: icosphere base + seeded 3-octave directional caggy jitter + white-noise facet break + face-cluster dents (L10/M4/S6) + 4 inset craters on M; baked per-vertex shading (COLOR_0) now consumed by the shared rock materials (vertexColors; fallback bakes white); nodes VR_Rock_L/M/S + VR_Rock kept, tris 320/104/80 in budget, max radii EXACT 2.2/1.3/0.7, GLB 37.7/12.2/10.3 KB; 633/633, build 0, smoke 0/0 with pool GLB swap + vertex colors verified (ST-209)
 - I208: Blender ship model refresh (cgs-dev-story) - 40-tri faceted delta (14 hull faces incl. rear-bottom V-cap + 6 fin quads) + recessed 6-tri canopy gem replaces 254-tri ship; nodes VR_Ship_Hull/VR_Ship_Cockpit, watertight, wingspan 2.5 / length 1.9 exact, 3 draw calls; exporter axis flip compensated (GLB nose +Z up +Y); 633/633, build 0, smoke 0/0 (ST-208)
 - I207: E9 opens: asset audit + GLB pipeline verification (cgs-asset-audit) - 5/5 GLBs valid, in-budget, radii exact; fallback proven; 3 new tests (ST-207)

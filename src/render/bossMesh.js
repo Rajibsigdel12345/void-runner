@@ -22,6 +22,8 @@ function bakeObeliskGeometry() {
     pos.setXYZ(i, v.x, v.y, v.z);
   }
   geo.computeVertexNormals();
+  const col = new Float32Array(pos.count * 3).fill(1); // I210: materials use vertexColors
+  geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
   return geo;
 }
 
@@ -29,7 +31,7 @@ export function createBossMesh(scene) {
   const geo = bakeObeliskGeometry();
   const mat = new THREE.MeshStandardMaterial({
     color: 0x3a3252, roughness: 0.45, metalness: 0.4, flatShading: true,
-    emissive: 0x7a4dff, emissiveIntensity: 0.25,
+    emissive: 0x7a4dff, emissiveIntensity: 0.25, vertexColors: true, // I210: GLB-baked crown gradient
   });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.visible = false;
@@ -56,7 +58,13 @@ export function createBossMesh(scene) {
     if (!obj) return;
     let g = null;
     obj.traverse((n) => { if (n.isMesh && !g) g = n.geometry; });
-    if (g) mesh.geometry = g;
+    if (g) {
+      if (!g.hasAttribute("color")) { // I210: materials use vertexColors; keep GLBs without COLOR_0 safe
+        const col = new Float32Array(g.attributes.position.count * 3).fill(1);
+        g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+      }
+      mesh.geometry = g;
+    }
   }
 
   return { sync, mesh, useGLB };

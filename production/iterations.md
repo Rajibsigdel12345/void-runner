@@ -1967,3 +1967,58 @@ One entry per iteration. Format:
   cratered, distinct per size).
 - Result: DONE. ST-209 closed. Next I210 ST-210 (Blender boss Monolith
   refresh + shielded-rock armor shell visual state).
+
+## I210 - Blender boss (Monolith) + armor shell (cgs-dev-story) (ST-210)
+
+- Summary: boss.glb rebuilt in Blender as a 96-tri 8-column jagged obelisk
+  (replaces the 192-tri box-jitter v1) with a baked COLOR_0 crown gradient, and
+  a NEW 6th asset shield.glb: 80 gapped energy-armor plates that give the
+  shielded-rock armor state a faceted read instead of a smooth bubble.
+- Story Goal: Blender boss (Monolith) + shielded-rock armor shell (visual
+  armor state) | boss + shield render | browser.
+- Owner: gameplay-programmer (assets via Blender MCP). Dependencies: none
+  (assets + swap code; in-code materials stay authoritative).
+- Acceptance: boss GLB in node VR_Boss / mat VR_Boss, <=250 tris, cross ~4.1,
+  height ~8.8, centered, COLOR_0 present; shield GLB VR_Shield <=120 tris,
+  maxR ~1.0; 6/6 assets load in-browser; wave-5 boss renders from the GLB with
+  the emissive pulse alive; a shielded rock renders the plate shell; tests +
+  build green; console clean.
+- Build notes (Blender 5.2):
+  - Boss: 8 columns x 6 rings (ring i at y = -4.4 + 8.8*i/6; base ring y
+    pinned), per-column taper multipliers 0.9-1.1, angle jitter +/-0.07 rad,
+    radial jitter +/-7%, ring y jitter +/-0.15 (interior rings); bottom cap
+    fan 8 tris + 40 side quads + top apex fan 8 tris = 96 tris. Post-jitter
+    x/z normalized to cross-section EXACT 4.1; height EXACT 8.8 (base/apex
+    pinned); centered all axes. First attempt REJECTED on visual+audit review:
+    top ring placed at apex height (H*i/(RINGS-1)) -> degenerate crown fan and
+    jitter past the apex (z max 4.525); fixed with H*i/RINGS.
+  - Vertex colors (COLOR_0): base 0.70 -> crown 1.25 by tTop + mottle +/-0.08
+    (clamped 0.45-1.25), slight purple tint; exported via a Color Attribute
+    node wired into Base Color (I209 gotcha - without it COLOR_0 is silently
+    dropped).
+  - Shield: bmesh icosphere (subdivisions=2 -> 80 faces; NEW gotcha: Blender
+    5.2 create_icosphere(subdivisions=n) = 20*4^(n-1) faces, so 1 = base 20 -
+    the first build came out 20 plates), de-indexed, each face pulled 0.86x
+    toward its centroid -> 240 unique verts, 80 independent gapped plates;
+    normalized to max vertex radius EXACT 1.0. No vertex colors (the additive
+    shellMats in code are authoritative; armor-level dimming is the read).
+  - Pre-rotation (x,y,z)->(x,-z,y) before export (I208 axis-flip gotcha),
+    export_yup/apply/materials; GLB node-audit verified both files.
+- Changed: assets/boss.glb (rebuilt, 11.4 KB), assets/shield.glb (new, 7.2 KB),
+  src/render/assetLoader.js (+shield, 6th asset), src/render/asteroidRenderer.js
+  (setShieldGLB pool shell-geo swap + glbShellGeo flag), src/render/bossMesh.js
+  (mat vertexColors:true + fallback white color attr + useGLB color guard),
+  src/main.js (shield wiring), tests/assetGlbs.test.js (BUDGETS.shield=120,
+  boss COLOR_0 assert, new shield test).
+- Verification: 634/634 (67 files), build exit 0; smoke ?nocache=210a (MCP
+  browser closed first): 6/6 assets ready, boss mesh = GLB 96 tris with
+  COLOR_0 + vertexColors material, pool shells = 80-tri plate geometry (240
+  unique verts); multi-attempt aggressive pilot (dodges rocks/drones/mines/
+  bullets/boss) reached wave-5 MONOLITH at t=138, ran to t=186.3 with
+  entered=1, emissive pulse sampled 0.195/0.359/0.184 at 0x7a4dff (purple
+  monolith), live armor-3 M rock shell verified (0x8ff2ff, opacity 0.5, scale
+  1.69 = r.radius*1.3); 60 calls / 24 programs; all positions finite; console
+  0 errors / 0 warnings. Screenshots .evidence/I210/ (01 pause w/ boss behind
+  overlay, 02 clean boss shot, 03 shielded-rock plate close-up).
+- Result: DONE. ST-210 closed. Next I211 ST-211 (power-up emblems x7 +
+  drone/dart visuals).

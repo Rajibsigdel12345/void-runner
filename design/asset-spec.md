@@ -238,3 +238,33 @@ unchanged):
   override) per the I102 spec; the new geometry + vertex colors make both
   states read better (the shell is radius-scaled in sync; the golden
   material multiplies the shaded colors).
+
+## I210 boss + shield amendment (E9 ST-210, cgs-dev-story)
+
+Supersedes the I102 boss section (procedural obelisk) and the I102 shielded-rock
+shell (smooth unit icosphere) with the Blender v2 assets:
+
+- boss.glb v2: 96-tri 8-column jagged obelisk - 6 vertical rings (ring i at
+  y = -4.4 + 8.8*i/6, base ring y pinned) with per-column taper multipliers
+  0.9-1.1, angle jitter +/-0.07 rad, radial jitter +/-7%; bottom cap fan
+  (8 tris) + 40 side quads + top apex fan (8 tris). Cross-section EXACT 4.1
+  (x/z normalized post-jitter), height EXACT 8.8 (base y=-4.4 / apex y=+4.4
+  pinned), origin centered all axes. Vertex colors (COLOR_0): base 0.70 ->
+  crown 1.25 by tTop + mottle (+/-0.08, clamped 0.45-1.25), consumed by the
+  in-code material (vertexColors: true; the guard in useGLB keeps a
+  COLOR_0-less GLB safe).
+- shield.glb (NEW, 6th asset): 80 de-indexed icosphere faces pulled 0.86x
+  toward each face centroid -> 240 unique verts, independent gapped energy
+  plates; max vertex radius EXACT 1.0 (sync scales r.radius*1.3 as before);
+  NO vertex colors (the additive MeshBasicMaterial shellMats stay
+  authoritative; armor-level dimming remains the read mechanism).
+- Nodes/materials: VR_Boss (Principled 0x3a3252, metallic 0.4, roughness 0.45,
+  emission 0x7a4dff@0.3 + Color Attribute node) and VR_Shield (cyan 0x7fe0ff,
+  emission @0.5) - non-authoritative in-engine (the in-code pulsing emissive /
+  shellMats override), kept for editor and tooling parity.
+- Budgets: boss 96/250 (was 192 for the v1 box jitter), shield 80/120 (new).
+- File sizes: boss 11.4 KB, shield 7.2 KB (dist stays ~1.83 MB raw, in the
+  2 MB budget).
+- Draw calls: unchanged - one boss mesh; all pooled shells share the single
+  swapped geometry (setShieldGLB replaces it once; per-armor material swap in
+  sync is unchanged).

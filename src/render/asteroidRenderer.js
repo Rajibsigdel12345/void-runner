@@ -35,6 +35,7 @@ export function createAsteroidRenderer(scene) {
   // I104: GLB geometries (Blender pass) swap in as they load; until then the
   // procedural 3-variant bakes are used.
   const glbGeo = {};
+  let glbShellGeo = false; // I210: shield GLB loaded flag
   const mat = new THREE.MeshStandardMaterial({ color: 0x8a7f72, roughness: 0.95, metalness: 0.05, flatShading: true, vertexColors: true }); // I209: GLB-baked shading
   // ST-139: belt rock - dark cold metal so drifting indestructibles read as "unbreakable".
   const matBelt = new THREE.MeshStandardMaterial({ color: 0x2a313d, roughness: 0.42, metalness: 0.9, flatShading: true, emissive: 0x2f6fd0, emissiveIntensity: 0.6, vertexColors: true }); // I209: vertexColors
@@ -57,7 +58,7 @@ export function createAsteroidRenderer(scene) {
   // ST-127: shielded rock - additive energy shell rendered as a CHILD of the rock mesh (hidden by
   // default; the rock's visible=false hides it with the parent). Three shared materials keyed by
   // armor level: the shell DIMS on every absorbed hit so the player can read hits-left at a glance.
-  const shellGeo = new THREE.IcosahedronGeometry(1, 1);
+  let shellGeo = new THREE.IcosahedronGeometry(1, 1); // I210: setShieldGLB swaps in the Blender armor plates
   const shellMats = [
     new THREE.MeshBasicMaterial({ color: 0x7fe0ff, transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending, depthWrite: false }), // armor 1: faint
     new THREE.MeshBasicMaterial({ color: 0x66d9ff, transparent: true, opacity: 0.36, blending: THREE.AdditiveBlending, depthWrite: false }), // armor 2
@@ -125,8 +126,17 @@ export function createAsteroidRenderer(scene) {
     }
   }
 
+  // I210: setShieldGLB(obj) - swap the Blender armor-plate shell into every pooled
+  // shell (they share one geometry; per-rock scale in sync is unchanged).
+  function setShieldGLB(obj) {
+    if (!obj || glbShellGeo) return;
+    let g = null;
+    obj.traverse((n) => { if (n.isMesh && !g) g = n.geometry; });
+    if (g) { glbShellGeo = true; shellGeo = g; for (const m of pool) m.children[0].geometry = g; }
+  }
+
   // I155: shape-cue toggle (settings.shapeCues; on by default for colorblind-friendly play).
   function setShapeCues(on) { shapeCuesOn = on === true; }
 
-  return { sync, pool, setGLB, setShapeCues };
+  return { sync, pool, setGLB, setShieldGLB, setShapeCues };
 }

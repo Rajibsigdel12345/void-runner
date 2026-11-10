@@ -10,6 +10,7 @@ const ASSETS = {
   rockM: 'assets/asteroid_M.glb',
   rockS: 'assets/asteroid_S.glb',
   boss: 'assets/boss.glb',
+  shield: 'assets/shield.glb', // I210: energy armor plates
 };
 
 export function createAssetLoader() {

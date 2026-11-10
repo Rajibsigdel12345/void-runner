@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105).
-const BUDGETS = { ship: 300, L: 320, M: 120, S: 80, boss: 250 };
+const BUDGETS = { ship: 300, L: 320, M: 120, S: 80, boss: 250, shield: 120 }; // I210
 const MAX_FILE_BYTES = 100 * 1024;
 
 function parseGlb(file) {
@@ -117,6 +117,7 @@ test('boss.glb: naming, poly budget, cross-section and height vs spec', () => {
   const s = meshStats({ buf, json, binOff });
   assert.ok(s.nodeNames.includes('VR_Boss'), 'VR_Boss node');
   assert.ok(s.matNames.includes('VR_Boss'), 'VR_Boss material');
+  for (const p of s.prims) assert.ok(p.hasColor, 'boss primitive has COLOR_0 vertex colors (I210)');
   assert.ok(s.totalTris <= BUDGETS.boss, 'boss tris ' + s.totalTris + ' <= 250');
   // Spec: cross-section ~4.1, height ~8.8 (boss.radius 3.4 * 1.2 / * 2.6), +/-10%.
   let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity, minZ = Infinity, maxZ = -Infinity;
@@ -138,4 +139,15 @@ test('boss.glb: naming, poly budget, cross-section and height vs spec', () => {
   assert.ok(Math.abs((minX + maxX) / 2) <= 0.5, 'x centered');
   assert.ok(Math.abs((minY + maxY) / 2) <= 0.5, 'y centered');
   assert.ok(Math.abs((minZ + maxZ) / 2) <= 0.5, 'z centered');
+});
+
+test('shield.glb: naming, poly budget, unit radius (I210)', () => {
+  const { buf, json, binOff } = parseGlb('shield.glb');
+  assert.ok(buf.length < MAX_FILE_BYTES, 'shield.glb under 100 KB');
+  const s = meshStats({ buf, json, binOff });
+  assert.ok(s.nodeNames.includes('VR_Shield'), 'VR_Shield node');
+  assert.ok(s.matNames.includes('VR_Shield'), 'VR_Shield material');
+  assert.ok(s.totalTris <= BUDGETS.shield, 'shield tris ' + s.totalTris + ' <= 120');
+  const maxR = Math.max(...s.prims.map((p) => p.maxRadius));
+  assert.ok(Math.abs(maxR - 1.0) <= 0.05, 'shield max vertex radius ' + maxR.toFixed(4) + ' ~ 1.0');
 });
