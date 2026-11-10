@@ -174,7 +174,7 @@ export function createAudio() {
   // with the A-minor pad). Research grounding: design/audio-music.md. musicIntensity(x)
   // is the ST-170 escalation seam (not wired to gameplay yet).
   let musicBus = null, musicNodes = [], musicFilter = null, musicLfo = null, musicLfoGain = null;
-  let musicTimers = [], musicPad = [], musicSub = null, musicChordIdx = 0, musicIntensityVal = 0;
+  let musicTimers = [], musicPad = [], musicSub = null, musicChordIdx = 0, musicIntensityVal = 0, musicWarpCents = 0; // I172
   const MUSIC_BASE = 0.13;
   const MUSIC_CHORDS = [ // I169: 4 voices each, same register as the I158 pad
     [110.00, 164.81, 220.00, 329.63], // Am:   A2 E3 A3 E4 (open root-fifth)
@@ -193,7 +193,7 @@ export function createAudio() {
     musicBus.connect(musicFilter); musicFilter.connect(master);
     const t = ctx.currentTime;
     musicBus.gain.setTargetAtTime(MUSIC_BASE, t, 1.4);
-    musicChordIdx = 0; musicIntensityVal = 0;
+    musicChordIdx = 0; musicIntensityVal = 0; musicWarpCents = 0; // I172
     for (const f of MUSIC_CHORDS[0]) { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = (Math.random() * 8) - 4; const g = ctx.createGain(); g.gain.value = 0.15; o.connect(g); g.connect(musicBus); o.start(); musicNodes.push(o, g); musicPad.push(o); }
     { // I169: sub drone - sine at chord root/2 with a 0.1Hz breathing tremolo
       musicSub = ctx.createOscillator(); musicSub.type = 'sine'; musicSub.frequency.value = MUSIC_ROOTS[0];
@@ -230,7 +230,7 @@ export function createAudio() {
     if (!musicBus || ctx.state !== 'running') return;
     const f = PLUCK[(Math.random() * PLUCK.length) | 0];
     const t = ctx.currentTime;
-    const o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = f;
+    const o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = f; o.detune.value = musicWarpCents; // I172: pluck inherits warp so the melody doesn't stick out
     const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.11, t + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
     o.connect(g); g.connect(musicFilter); o.start(t); o.stop(t + 1.2);
   }
@@ -251,6 +251,18 @@ export function createAudio() {
     const it = ctx.currentTime;
     musicFilter.frequency.setTargetAtTime(1200 + 1400 * musicIntensityVal, it, 1.0); // open the filter as tension rises
     musicBus.gain.setTargetAtTime(MUSIC_BASE + 0.05 * musicIntensityVal, it, 0.8); // +~38% headroom at full intensity
+  }
+  function timeWarp(x, opts = {}) { // I172: ST-172 bullet-time seam - 0 (normal time) .. 1 (fully dilated). Smooth retargets; call anytime.
+    const centsMax = (opts && opts.centsMax > 0) ? opts.centsMax : 700;
+    const keep = (opts && typeof opts.filterKeep === 'number') ? opts.filterKeep : 0.3;
+    const wx = Math.max(0, Math.min(1, x || 0));
+    musicWarpCents = wx === 0 ? 0 : -wx * centsMax;
+    if (!musicBus) return;
+    const wt = ctx.currentTime;
+    for (const o of musicPad) o.detune.setTargetAtTime(musicWarpCents, wt, 0.25); // pitch drops as the world slows (separate param: composes with chord glides)
+    if (musicSub) musicSub.detune.setTargetAtTime(musicWarpCents, wt, 0.25);
+    const base = 1200 + 1400 * musicIntensityVal; // compose with I170 intensity
+    musicFilter.frequency.setTargetAtTime(base * (1 - wx * (1 - keep)), wt, 0.25); // darken as time dilates
   }
 
 
@@ -305,5 +317,5 @@ export function createAudio() {
     return true;
   }
 
-  return { init, setVolume, setSfx, setMuted, state, sfx, ambience, ambOn: () => !!ambBus, music, setMusic, musicOn: () => !!musicBus, musicChord: () => ({ i: musicChordIdx, f: MUSIC_CHORDS[musicChordIdx], sub: MUSIC_ROOTS[musicChordIdx] }), musicIntensity, musicIntensityVal: () => musicIntensityVal, ambLevel: () => (ambBus ? ambBus.gain.value : null), meter, played, lastPan: () => lastPan, weights: () => Object.fromEntries(Object.entries(CUES).map(([k, s]) => [k, s.gain])), get volume() { return volume; } };
+  return { init, setVolume, setSfx, setMuted, state, sfx, ambience, ambOn: () => !!ambBus, music, setMusic, musicOn: () => !!musicBus, musicChord: () => ({ i: musicChordIdx, f: MUSIC_CHORDS[musicChordIdx], sub: MUSIC_ROOTS[musicChordIdx] }), musicIntensity, musicIntensityVal: () => musicIntensityVal, timeWarp, warpCents: () => musicWarpCents, ambLevel: () => (ambBus ? ambBus.gain.value : null), meter, played, lastPan: () => lastPan, weights: () => Object.fromEntries(Object.entries(CUES).map(([k, s]) => [k, s.gain])), get volume() { return volume; } }; // I172: +timeWarp/warpCents seam
 }

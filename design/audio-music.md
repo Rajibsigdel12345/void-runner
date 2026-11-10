@@ -229,5 +229,100 @@ adds the player-facing toggle surface on top:
   settings.music)) + audio.setMusic - a mid-run flip stops/restarts the bed
   on the next syncVisuals frame.
 
+## ST-172 implementation (I172)
+
+Bullet-time audio: while the slow-mo power-up is active (ST-115), the
+drone bed drops in pitch and darkens so time dilation is felt aurally,
+not just visually (I116 tint + hint). Grounded in the standard
+snapshot / time-stretch treatment of bullet-time cues (research table
+below): the mix drops by semitones / thirds while time is dilated and
+glides back when it snaps forward.
+
+### Audio Goal
+- The world "slows down" in the mix: drone pad + sub drop in pitch
+  proportional to the dilation amount; the pluck melody inherits the
+  same detune so nothing sticks out.
+- The drone lowpass closes (darkens) in the same window, composing
+  with the I170 intensity filter so the two never fight.
+- On expiry everything glides back with tau 0.25s - no click, no
+  snap; the seam is safe to call at any time (menu-safe: no-op
+  while the bed is stopped).
+
+### Mapping (src/core/timeWarp.js - NEW, pure, DOM-free)
+- timeWarpX(scale) = clamp(1 - scale, 0, 1). Game seam:
+  world.enemyScale() - 1 normally, 0.4 while slow-mo is active
+  (CONFIG.powerup.types.slowmo). Slow-mo therefore lands at x = 0.6.
+- timeWarpCents(x, {centsMax}) = -x * centsMax. centsMax = 700 (a
+  tritone at full warp); slow-mo lands at exactly -420 cents (a bit
+  over a major third down). The proportional alternative (-1586)
+  would be sub-bass and inaudibly extreme; real bullet-time cues
+  drop by semitones / thirds, not octaves.
+- x = 0 returns an explicit 0 (not -0) so strict assertions hold
+  (assert/strict compares with Object.is).
+
+### Tunables (CONFIG.music.warp - src/core/config.js)
+- centsMax: 700 - max pitch drop in cents at full warp.
+- filterKeep: 0.3 - fraction of the intensity-opened filter kept at
+  full warp (the rest is darkened away).
+
+### Wiring (src/render/audio.js + src/main.js)
+- audio.timeWarp(x, {centsMax, filterKeep}): detunes every pad
+  oscillator + the sub drone via o.detune (a separate AudioParam, so
+  it composes cleanly with the 18s chord-frequency glides); the pluck
+  inherits the current cents at creation; the lowpass retargets to
+  (1200 + 1400*intensity) * (1 - x*(1-keep)) - composing with the
+  I170 intensity opening. All retargets use setTargetAtTime(tau 0.25).
+- main.js syncVisuals: while PLAYING, wx = timeWarpX(
+  world.enemyScale()); change-cached with |dx| > 0.02 hysteresis
+  (I167/I170 discipline - no per-frame AudioParam churn); _timeWarp
+  resets to 0 off-PLAYING so a (re)start re-applies from rest. Two
+  new __vr probes: timeWarp(x, o), warpCents().
+- Seam note: the handoff referenced world.game.enemyScale(), but
+  world.game is the GameState machine; the method lives on World
+  (src/core/game.js) - the wiring calls world.enemyScale().
+
+### Mix Target
+- Slow-mo window: pad + sub at -420 cents, lowpass from the
+  intensity-opened value down to ~30% of its opening - the bed
+  recedes while the SFX layer (untouched) stays forward, the
+  Max-Payne-lineage "world drops, player stays present" cue.
+- Normal time: exactly the I170 mix (0 cents, intensity-only
+  filter) - zero drift when the feature is idle.
+
+### QA
+- Slow-mo can be triggered from gameplay (the T-labeled drop) AND
+  from the __vr world API; both drive the same enemyScale() seam, so
+  the audio reacts identically to either.
+- No new nodes, no timers: only retargets on existing params -
+  nothing to leak on pause/resume or music stop.
+- Detune is a separate AudioParam from frequency, so the chord glides
+  keep working while warped (no LFO/param fight).
+
+### Research (YouTube; metadata/chapters verified, transcripts
+rate-limited - see Coverage note)
+| Source | What it grounded |
+|---|---|
+| Arin Eakins - "Creating Bullet Time Effects in FMOD" (youtu.be/E2NQmKmw-mg) | Snapshot-instrument technique per the description: capture the mix, time-stretch it for the slow-mo window (stretching time down lowers pitch + darkens), restore after. |
+| Aftertouch Audio - "Sniper Ghost Warrior Contracts Slow Motion Bullet" SFX demo (youtu.be/8cU9A0mDHjA, ~34K views) | Title/description only: a slow-motion bullet one-shot in the SSGW Contracts style - the genre's standard dilated-time cue. |
+| Tom Player Music - "Bullet time" Matrix-style track (youtu.be/WhxbYTMNMxo) | Title/description only: a score-side bullet-time piece - the music itself carries the dilated beat. |
+
+Coverage note: transcripts for all three were rate-limited at
+research time (per-IP limit); the findings above come from titles,
+descriptions and chapter metadata only. No quotes are used.
+
+### Verification
+- tests/timeWarp.test.js: 7 tests (curve values, clamps, explicit 0
+  at scale 1, -0 guard, custom centsMax, degenerate inputs).
+  npm test: 510/510.
+- Parse: node --check clean (audio.js + main.js via .mjs copies).
+- Build: node scripts/build.mjs exit 0.
+- Browser smoke ?nocache=172 (PLAYING, ship invulnerable): baseline
+  warpCents 0 -> world.powerups.apply('slowmo') -> enemyScale 0.4 ->
+  next frame warpCents exactly -420 -> advance(2s) still -420
+  (3.0s left, active) -> advance(4s) back to 0, enemyScale 1,
+  inactive. Console 0 errors / 0 warnings; NaN scan (ship + 5 rocks +
+  velocity) 0; screenshot .evidence/I172/I172_1_slowmo_active.png
+  (SLOW-MO HUD chip + tint + hint visible).
+
 ## Next
-ST-172 (I172): bullet-time audio (pitch drop on slow-mo).
+ST-173 (I173): SFX pass for new content (bomb, drone, mini-boss, pickup).

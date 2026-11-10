@@ -1,4 +1,4 @@
-﻿# Iteration Log - Void Runner
+﻿﻿# Iteration Log - Void Runner
 
 One entry per iteration. Format:
 ## I<nn> - <title>
@@ -1337,3 +1337,15 @@ One entry per iteration. Format:
 - Verification: parse node --check clean (main.js via .mjs copy + screens/tutorialOverlay/settingsPanel); 503/503 (499 + 4 new); build 0; browser smoke ?nocache=171: menu status row renders + live-tracks N (ON->OFF->ON, checkbox syncs, toast 'MUSIC OFF'/'ON'); Enter->PLAYING musicOn() true; N mid-run -> musicSetting false + musicOn() false (still PLAYING - the bed stopped, not the state); N again -> musicOn() true; N->OFF persists to localStorage ("music":false) and survives a full reload (setting + checkbox + status row off on the fresh page); controls grid N keycap labeled 'music'; console 0 errors/0 warnings; screenshot .evidence/I171/I171_1_menu_status.png.
 - Result: DONE. ST-171 closed.
 - Risk/follow-up: none material - the toggle rides the I158 gate (audio.music(PLAYING && settings.music)); a mid-run flip takes effect on the next syncVisuals frame (<=1 frame latency, by design). Next I172 ST-172 bullet-time audio (pitch drop on slow-mo).
+
+## I172 - Bullet-time audio (ST-172)
+- Story: ST-172 | Goal: aural treatment for the slow-mo power-up - while the world is dilated the music bed drops in pitch + darkens, then glides back (Max-Payne-lineage bullet-time cue), grounded in YouTube research (Eakins FMOD bullet-time, Aftertouch slow-mo SFX, Tom Player Music "Bullet time"; transcripts rate-limited, Coverage note in design/audio-music.md).
+- Mapping (src/core/timeWarp.js, NEW, pure, DOM-free): timeWarpX(scale) = clamp(1 - scale, 0, 1) on the game seam world.enemyScale() (1 normally, 0.4 while slow-mo is active - CONFIG.powerup.types.slowmo) => slow-mo lands at x = 0.6; timeWarpCents(x, {centsMax: 700}) = -x*centsMax => exactly -420 cents at slow-mo (a bit over a major third; the proportional -1586 rejected as sub-bass - real cues drop by semitones/thirds). x = 0 returns explicit 0, not -0 (assert/strict uses Object.is).
+- Tunables: CONFIG.music.warp {centsMax: 700, filterKeep: 0.3} (src/core/config.js).
+- Render (src/render/audio.js): audio.timeWarp(x, {centsMax, filterKeep}) - detunes pad osc + sub drone via o.detune (separate AudioParam: composes with the I169 18s chord freq glides); pluck inherits current cents at creation; lowpass retarget = (1200 + 1400*intensity) * (1 - x*(1-keep)) (composes with the I170 intensity opening); all setTargetAtTime(tau 0.25). No new nodes or timers - menu-safe no-op while the bed is stopped.
+- Wiring (src/main.js syncVisuals): PLAYING-gated wx = timeWarpX(world.enemyScale()); change-cached |dx| > 0.02 (I167/I170 discipline - no per-frame AudioParam churn); _timeWarp resets to 0 off-PLAYING so a (re)start re-applies from rest; +2 __vr probes (timeWarp, warpCents).
+- Seam correction: handoff referenced world.game.enemyScale(), but world.game is the GameState machine; the actual method is World.enemyScale() (src/core/game.js) - wiring + comments fixed to world.enemyScale() before smoke.
+- Changed: src/core/timeWarp.js (NEW); tests/timeWarp.test.js (NEW, 7 tests); src/core/config.js (CONFIG.music.warp); src/render/audio.js (musicWarpCents state + reset, pluck inherit, timeWarp(), export); src/main.js (import, _timeWarp cache, syncVisuals seam, 2 probes); design/audio-music.md (ST-172 implementation section per cgs-team-audio contract).
+- Verification: parse node --check clean (audio.js + main.js via .mjs copies; config.js imports, CONFIG.music.warp verified); 510/510 (503 + 7 new); build 0; browser smoke ?nocache=172: PLAYING (ship invulnerable), baseline warpCents 0 -> world.powerups.apply('slowmo') -> enemyScale 0.4 -> next frame warpCents exactly -420 -> advance(2s) still -420 (3.0s left, active) -> advance(4s) warpCents 0, enemyScale 1, inactive; console 0 errors/0 warnings; NaN scan (ship + 5 rocks + velocity) 0; screenshot .evidence/I172/I172_1_slowmo_active.png (SLOW-MO HUD chip + tint + hint visible).
+- Result: DONE. ST-172 closed.
+- Risk/follow-up: I174 (death slow-mo) can reuse the timeWarp seam - main.js will call audio.timeWarp with a death scale for ~0.8s. Next I173 ST-173 SFX pass for new content (bomb, drone, mini-boss, pickup).

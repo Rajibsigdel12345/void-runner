@@ -1,4 +1,4 @@
-﻿// ALL tunables live here (balance table). See design/gdd.md for rationale.
+﻿﻿﻿// ALL tunables live here (balance table). See design/gdd.md for rationale.
 export const CONFIG = {
   arena: { radius: 26 },
 
@@ -11,6 +11,10 @@ export const CONFIG = {
       waveK: 12,      // exp time-constant in waves (larger = slower build)
       waveCeil: 0.75, // max intensity from wave alone (headroom below 1 for the boss)
       bossFloor: 0.9  // min intensity while a boss is alive (peak-tension moment)
+    },
+    warp: {           // I172 (ST-172): bullet-time (slow-mo) audio
+      centsMax: 700,  // max pitch drop in cents at full warp (a tritone; slow-mo 0.4x lands at -420)
+      filterKeep: 0.3 // fraction of the intensity-opened filter kept at full warp (darken)
     }
   },
 
