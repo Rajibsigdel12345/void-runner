@@ -2194,3 +2194,34 @@ One entry per iteration. Format:
 - Demo pin structurally untouched (no core changes; full suite green).
 
 - Result: DONE. ST-218 complete. Next I221: ST-219 (camera/feel).
+
+## I221 - ST-219 - Camera/feel (art research lever 6): state-tied subtle camera
+
+**Skill:** cgs-dev-story. **Story:** ST-219 (E10 Post-E9 Polish).
+
+**Goal (YouTube-grounded, I219):** subtle state-tied camera only - the genre comps (Disasteroids 3D / Solaroids) use near-fixed arena views; dynamic camera = state-driven, never free-floating.
+
+**Levers:**
+1. 2-5% camera lead toward the aim point (eased, capped) - the LOOK target leads; the camera position stays on the ship-follow (dodge-read rule: the view does not move under the player).
+2. Boss-approach zoom-out of a few degrees (eased in and out) - additive to the existing FOV stack (base + speed + kick).
+3. Slow menu orbit drift (MENU state only, ~105 s per revolution) - phase 0 = the legacy (0,9,13) view, so boot is visually unchanged.
+View FIXED during normal PLAYING (no new motion beyond the look-target lead). Motion-gated: reduced motion freezes the orbit and disables the aim lead; the boss zoom is FOV-only (same class as the pre-existing fovSpeed, not gated). FX-tier: camera feel is deliberately independent of the FX quality setting (negligible cost, not particle FX - documented decision).
+
+**Changed:**
+- src/core/config.js (camera block + ST-219 tunables: aimLeadFrac 0.03, aimLeadCap 1.2, bossZoomFov 2.5, bossZoomRange 14, bossZoomDamp 3, menuOrbitRate 0.06)
+- src/main.js (follow-camera block: MENU orbit targets (radius 13, phase advances at 0.06 rad/s); PLAYING look-target lead = min(ship->aim * 0.03, 1.2) while the pointer is active; boss zoom = (1 - dist/14 clamped) * 2.5 degrees while a boss is alive, eased at 3/s; targetFov += bossZoomFov; NEW __vr.cameraFeel() probe {menuOrbitA, bossZoomFov})
+
+No test changes (render-layer only - scope-check-E10 notes ST-219 as "the only render-only lever with no test surface beyond browser"); no asset changes.
+
+**Verification:**
+- npm test 677/677 (unchanged); node scripts/build.mjs exit 0.
+- Browser smoke ?nocache=221a (browser closed first): 16/16 assets + skybox ready.
+- Menu orbit: menuOrbitA 0.28 -> 1.03 rad at 0.06 rad/s (gap-consistent; ~105 s/rev); camera azimuth 0.27 -> 1.02 rad (damp-lags the target - smooth); A/B screenshots .evidence/I221/01-menu-orbit-a.png + 02-menu-orbit-b.png (visibly rotated vantage: arena ring + starfield + ship).
+- Aim lead (ship pinned at origin, forward from aim angle): base 0/0; pointer aim ndc (0.9,-0.8) -> lead +0.223/+0.334 (3% of the ship->aim offset, under cap); release -> 0/0 (eased out); touchDrag aim 50 units ahead -> lead EXACTLY +1.2 x (0.03*50 = 1.5 capped to 1.2); after clear -> 0.
+- Boss zoom (PAUSED world so the sim is frozen, fake live boss swapped via defineProperty, RAF camera loop keeps running): boss at dist 2 -> fov 62.134 (theoretical 62.14 = 60 + 2.5*(1-2/14)); boss moved to dist 40 -> 60.01 (eased out); original boss reference restored (identity check); resumed to PLAYING.
+- Pilot parity (proven !r.dead pilot, real advance()): t=18.02 s PLAYING, 2099 pts / 14 kills, ship + camera all finite, bossZoomFov ~ 1e-98.
+- Frame time (rAF delta probe, 3 s / 182 frames in PLAYING): avg 16.57 / p50 16.7 / p95 16.8 / max 17.0 ms - locked to 60 fps, delta ~ 0 (acceptance met).
+- Console 0 errors / 0 warnings.
+- Demo pin structurally untouched (no core changes; the replay.test.js core pin is green in the suite).
+
+- Result: DONE. ST-219 complete. Next I222: ST-220 (regression + G10.0 gate + E10 closeout).

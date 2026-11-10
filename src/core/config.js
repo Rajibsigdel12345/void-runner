@@ -420,6 +420,13 @@ export const CONFIG = {
     lookAhead: 4,          // camera look-ahead along ship facing (world units) at rest
     lookAheadSpeed: 2,     // extra look-ahead at full speed (lean into the motion)
     fovDamp: 8,            // FOV ease rate (1/s)
+  // ST-219: state-tied camera feel (I221) - subtle, motion-gated, view stays dodge-readable
+  aimLeadFrac: 0.03,     // camera lead toward the aim point (2-5% of the ship->aim offset)
+  aimLeadCap: 1.2,       // max lead offset (world units) - keeps the view dodge-readable
+  bossZoomFov: 2.5,      // extra vertical FOV (degrees) near a live boss - a few degrees out
+  bossZoomRange: 14,     // boss distance window (world units) where the zoom-out applies
+  bossZoomDamp: 3,       // zoom ease rate (1/s) - eased in and out
+  menuOrbitRate: 0.06    // slow MENU orbit drift (rad/s, ~105 s per revolution; motion-gated)
   },
   storage: {
     bestKey: 'voidrunner.best',

@@ -470,6 +470,9 @@ const aimWorld = new THREE.Vector3();
 const shipFwd = { x: 0, y: 0 }; // ST-074: scratch for ship.forward()
 const camPos = { x: 0, y: 9, z: 13 };
 const camLook = { x: 0, y: 0, z: 0 };
+// ST-219: state-tied camera feel - MENU orbit phase (0 = legacy (0,9,13) view) + boss zoom-out (degrees)
+let menuOrbitA = 0;
+let bossZoomFov = 0;
 
 // event drain sink (I16 HUD / I24 fx / I27 audio hook in here)
 const eventTally = {}; const juiceTally = createJuiceTally(); // ST-183: per-run feel-channel tally (probe: __vr.juiceTally())
@@ -480,7 +483,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, (replayView && world.game.in(STATE.REPLAY)) ? replayIntent() : intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -778,15 +781,33 @@ function syncVisuals(dt) {
   const f = ship.forward(shipFwd); // ST-074: scratch reuse (no per-frame alloc)
   const spdFrac = Math.min(1, ship.speed / CONFIG.ship.maxSpeed); // ST-082: 0..1 speed fraction
   const ahead = CONFIG.camera.lookAhead + CONFIG.camera.lookAheadSpeed * spdFrac; // ST-082: speed-scaled look-ahead
-  camPos.x = damp(camPos.x, ship.pos.x, 5, dt);
-  camPos.y = damp(camPos.y, 9, 5, dt);
-  camPos.z = damp(camPos.z, ship.pos.y + 13, 5, dt);
-  camLook.x = damp(camLook.x, ship.pos.x + f.x * ahead, 6, dt); // ST-082: speed-scaled look-ahead
+  // ST-219: state-tied camera feel - MENU orbit drift + 2-5% aim lead (eased + capped; dodge-read rule)
+  if (st === STATE.MENU && !motionOff) menuOrbitA += dt * CONFIG.camera.menuOrbitRate; // slow drift, motion-gated
+  let camTX = ship.pos.x, camTY = 9, camTZ = ship.pos.y + 13;
+  let lookTX = ship.pos.x + f.x * ahead, lookTZ = ship.pos.y + f.y * ahead; // ST-082
+  if (st === STATE.MENU) { // slow orbit around the arena center (static under reduced motion)
+    camTX = Math.sin(menuOrbitA) * 13; camTZ = Math.cos(menuOrbitA) * 13; lookTX = 0; lookTZ = 0;
+  } else if (st === STATE.PLAYING && !motionOff) { // 2-5% lead toward the aim point, capped, eased by the look damp
+    const aim = resolveAimPoint();
+    if (aim) {
+      const ox = aim.x - ship.pos.x, oz = aim.y - ship.pos.y;
+      const m = Math.hypot(ox, oz);
+      if (m > 0.001) { const len = Math.min(m * CONFIG.camera.aimLeadFrac, CONFIG.camera.aimLeadCap); lookTX += ox / m * len; lookTZ += oz / m * len; }
+    }
+  }
+  camPos.x = damp(camPos.x, camTX, 5, dt);
+  camPos.y = damp(camPos.y, camTY, 5, dt);
+  camPos.z = damp(camPos.z, camTZ, 5, dt);
+  camLook.x = damp(camLook.x, lookTX, 6, dt);
   camLook.y = damp(camLook.y, 0, 6, dt);
-  camLook.z = damp(camLook.z, ship.pos.y + f.y * ahead, 6, dt); // ST-082: speed-scaled look-ahead
+  camLook.z = damp(camLook.z, lookTZ, 6, dt);
+  // ST-219: boss-approach zoom-out (a few degrees, eased in and out; a boss is only alive during play)
+  const boss = world.boss;
+  const zoomTX = (boss && boss.alive) ? Math.max(0, 1 - Math.hypot(boss.pos.x - ship.pos.x, boss.pos.y - ship.pos.y) / CONFIG.camera.bossZoomRange) * CONFIG.camera.bossZoomFov : 0;
+  bossZoomFov = damp(bossZoomFov, zoomTX, CONFIG.camera.bossZoomDamp, dt);
   camera.position.set(camPos.x, camPos.y, camPos.z);
   camera.lookAt(camLook.x, camLook.y, camLook.z);
-  const targetFov = CONFIG.camera.fovBase + CONFIG.camera.fovSpeed * spdFrac + fovKick.value(); // ST-082: base + speed + kick
+  const targetFov = CONFIG.camera.fovBase + CONFIG.camera.fovSpeed * spdFrac + fovKick.value() + bossZoomFov; // ST-082: base + speed + kick; ST-219: boss zoom
   if (Math.abs(targetFov - camera.fov) > 0.01) { // only touch the projection when it actually moves
     camera.fov = damp(camera.fov, targetFov, CONFIG.camera.fovDamp, dt);
     camera.updateProjectionMatrix();
