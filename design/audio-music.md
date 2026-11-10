@@ -208,5 +208,26 @@ Verification (I170)
   errors / 0 warnings; NaN scan of ship + 10 rocks + warden + boss refs: 0
   NaN. Screenshot .evidence/I170/I170_1_playing.png.
 
+## ST-171 implementation (I171)
+Music toggle: hotkey + live status. The options checkbox + persistence already
+shipped in I158 (storage seam: DEFAULT_SETTINGS.music, getSettings/setSettings
+boolean guard, audio.setMusic + the per-frame PLAYING gate in main.js); ST-171
+adds the player-facing toggle surface on top:
+- N key (any state) = flip the music bed, PERSISTED like F (not session-only
+  like M): storage.setSettings({ music }) -> applySettings -> menu/pause panel
+  sync -> toast('MUSIC ON/OFF'). Key choice: N sits next to M in the
+  left-hand audio cluster (M = mute ALL audio, N = music bed only); the
+  initial-letter mnemonic collides (M), so adjacency is the discovery cue.
+- Menu status row (I165 pattern) gains 'N - MUSIC (ON/OFF)'; the menu controls
+  grid + the first-run tutorial key list gain ['N', 'music']; the settings
+  panel keydown guard swallows N while a control holds focus (F parity - a
+  focused checkbox must never trigger the global hotkey).
+- Unit: tests/musicToggle.test.js (4 tests: default ON; N-contract persist /
+  reload / isolation from other settings; 9-flip round-trip through storage;
+  non-boolean partials discarded).
+- No new audio: the toggle re-uses the I158 gate (audio.music(PLAYING &&
+  settings.music)) + audio.setMusic - a mid-run flip stops/restarts the bed
+  on the next syncVisuals frame.
+
 ## Next
-ST-171 (I171): music toggle for the drone bed (hotkey + options row).
+ST-172 (I172): bullet-time audio (pitch drop on slow-mo).

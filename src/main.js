@@ -355,6 +355,13 @@ window.addEventListener('keydown', (e) => {
     menuSettings.sync();
     pauseSettings.sync();
     toast('FX ' + next.toUpperCase());
+  } else if (e.key === 'n' || e.key === 'N') { // I171 (ST-171): music bed hotkey - PERSISTED (mirrors F), not session-only like M
+    const next = !storage.getSettings().music;
+    const merged = storage.setSettings({ music: next });
+    applySettings(merged);
+    menuSettings.sync();
+    pauseSettings.sync();
+    toast('MUSIC ' + (next ? 'ON' : 'OFF'));
   }
 });
 const raycaster = new THREE.Raycaster();
@@ -562,6 +569,7 @@ function syncVisuals(dt) {
   hudOpts.best = bestScore;
   screenOpts.muted = muted;
   screenOpts.fx = liveSettings.fx; // I157: pause screen F row
+  screenOpts.music = liveSettings.music !== false; // I171: menu status row N part
   screenOpts.best = bestScore;
   screenOpts.newBest = newBest;
   screenOpts.reducedMotion = motionOff; // I65: menu polish (reduced-motion gates the new animations)

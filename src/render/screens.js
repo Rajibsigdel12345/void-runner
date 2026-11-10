@@ -70,7 +70,7 @@ export function createScreens(root, settings = {}) {
   controls.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:8px 22px;font-size:calc(14px * var(--vr-fs,1));margin-top:6px;padding:16px 24px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);'; // I65: controls card
   const CONTROL_ROWS = settings.touch // I71: touch vs keyboard instructions
     ? [['DRAG', 'fly the ship'], ['TOUCH', 'auto-fire'], ['2 FINGERS', 'pause']]
-    : [['WASD / ARROWS', 'thrust'], ['MOUSE', 'aim'], ['CLICK / SPACE', 'fire'], ['P / ESC', 'pause'], ['M', 'mute'], ['F', 'fx']];
+    : [['WASD / ARROWS', 'thrust'], ['MOUSE', 'aim'], ['CLICK / SPACE', 'fire'], ['P / ESC', 'pause'], ['M', 'mute'], ['F', 'fx'], ['N', 'music']];
   for (const [k, v] of CONTROL_ROWS) {
     const key = document.createElement('div');
     key.style.cssText = 'text-align:right;';
@@ -96,7 +96,7 @@ export function createScreens(root, settings = {}) {
   menuGrid.classList.add('vr-menu-grid'); // I71: collapse to one column on narrow viewports
   menuGrid.append(controls, top5);
   menu.appendChild(menuGrid);
-  const menuStatus = line(menu, 'M \u2014 MUTE (OFF)     F \u2014 FX (HIGH)', 'font-size:calc(12px * var(--vr-fs,1));letter-spacing:2px;opacity:0.65;margin-top:10px;'); // I165: live session status on the menu (I164 finding)
+  const menuStatus = line(menu, 'M \u2014 MUTE (OFF)     F \u2014 FX (HIGH)     N \u2014 MUSIC (ON)', 'font-size:calc(12px * var(--vr-fs,1));letter-spacing:2px;opacity:0.65;margin-top:10px;'); // I165: live session status on the menu (I164 finding); I171: + N music
   if (settings.touch && settings.actions && settings.actions.start) { // I71: tappable start on touch
     const startBtn = document.createElement('button');
     startBtn.type = 'button';
@@ -256,7 +256,7 @@ export function createScreens(root, settings = {}) {
   root.appendChild(overlay);
 
   /** @param {string} state @param {object} world @param {{muted:boolean, best:number, newBest:boolean}} opts */
-  function update(state, world, opts = { muted: false, best: 0, newBest: false, reducedMotion: false, scoresText: '', fx: 'high' }) {
+  function update(state, world, opts = { muted: false, best: 0, newBest: false, reducedMotion: false, scoresText: '', fx: 'high', music: true }) {
     overlay.classList.toggle('vr-reduced', !!opts.reducedMotion); // I65: gate menu animations
     showPanel(state);
     if (state === STATE.GAME_OVER) {
@@ -275,7 +275,7 @@ export function createScreens(root, settings = {}) {
       else dailyBadge.style.display = 'none';
     }
     if (state === STATE.MENU) {
-      set('menuStatus', menuStatus, 'M \u2014 MUTE (' + (opts.muted ? 'ON' : 'OFF') + ')     F \u2014 FX (' + (opts.fx === 'low' ? 'LOW' : 'HIGH') + ')'); // I165: live mute + fx state
+      set('menuStatus', menuStatus, 'M \u2014 MUTE (' + (opts.muted ? 'ON' : 'OFF') + ')     F \u2014 FX (' + (opts.fx === 'low' ? 'LOW' : 'HIGH') + ')     N \u2014 MUSIC (' + (opts.music !== false ? 'ON' : 'OFF') + ')'); // I165: live mute + fx state; I171: + N music
       set('menuBest', menuBest, opts.best > 0 ? `BEST ${opts.best}` : '');
       set('top5', top5Body, opts.scoresText ? opts.scoresText : '\u2014 no scores yet \u2014'); // I66
       set('menuDaily', menuDaily, opts.dailyMenu ? ('DAILY ' + opts.dailyMenu.key + '  \u00b7  ' + (opts.dailyMenu.value > 0 ? 'BEST ' + opts.dailyMenu.value : 'NO BEST YET')) : ''); // ST-141

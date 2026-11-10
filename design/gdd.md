@@ -225,9 +225,9 @@ kill feed, and banner render on the same 0-mutation steady-state HUD path
   deuteranopia/protanopia + tritanopia (palette dE 41-106 across every
   critical pair); the COLORBLIND options row applies a live deuteranopia
   preview filter to the canvas.
-- Hotkeys (I157): M mute, P pause, F FX quality (persisted; user choice
-  overrides adaptive auto-downgrade; keycaps swallow M/P/F while a settings
-  control is focused).
+- Hotkeys (I157, I171): M mute, P pause, F FX quality, N music bed (F + N
+  persisted; user choice overrides adaptive auto-downgrade; keycaps swallow
+  M/P/F/N while a settings control is focused).
 - Options rows (I158): MUSIC (generative ambient pad + pentatonic pluck
   bed, default on, own bus under master, gesture-gated), COLORBLIND
   (deuteranopia canvas preview), SLOW-MO HINT caption, SHAPE CUES,

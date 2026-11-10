@@ -149,7 +149,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   }
 
   // ST-067 key nav + hotkey guard: while a panel control holds focus the game
-  // must not see Enter (start) / P,Escape (pause) / M (mute) / Space (fire).
+  // must not see Enter (start) / P,Escape (pause) / M (mute) / F,N (fx/music) / Space (fire).
   // range + select keep native arrow behavior (value / option change).
   wrap.addEventListener('keydown', (e) => {
     const t = e.target;
@@ -159,7 +159,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
       e.preventDefault();
       e.stopPropagation();
       moveFocus(t, e.key === 'ArrowDown' ? 1 : -1);
-    } else if (e.key === ' ' || e.key === 'Enter' || e.key === 'Escape' || e.key === 'p' || e.key === 'P' || e.key === 'm' || e.key === 'M' || e.key === 'f' || e.key === 'F') {
+    } else if (e.key === ' ' || e.key === 'Enter' || e.key === 'Escape' || e.key === 'p' || e.key === 'P' || e.key === 'm' || e.key === 'M' || e.key === 'f' || e.key === 'F' || e.key === 'n' || e.key === 'N') {
       e.stopPropagation(); // native checkbox/select behavior still runs (no preventDefault)
     }
   });

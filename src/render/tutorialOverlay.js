@@ -57,7 +57,7 @@ export function createTutorialOverlay(root, opts = {}) {
   grid.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:8px 22px;font-size:calc(14px * var(--vr-fs,1));padding:16px 22px;box-sizing:border-box;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);';
   const ROWS = touch
     ? [['DRAG', 'fly the ship'], ['TOUCH', 'auto-fire'], ['2 FINGERS', 'pause']]
-    : [['WASD / ARROWS', 'thrust'], ['MOUSE', 'aim'], ['CLICK / SPACE', 'fire'], ['P / ESC', 'pause'], ['M', 'mute']];
+    : [['WASD / ARROWS', 'thrust'], ['MOUSE', 'aim'], ['CLICK / SPACE', 'fire'], ['P / ESC', 'pause'], ['M', 'mute'], ['N', 'music']];
   for (const [k, v] of ROWS) {
     const key = document.createElement('div');
     key.style.cssText = 'text-align:right;';
