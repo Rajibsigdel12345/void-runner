@@ -327,11 +327,13 @@ window.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     // I37: side effects only on the transitions that use them - stray Enter
     // mid-game (PLAYING/PAUSED) must not clear popups or re-show the tutorial hint.
-    if (st === STATE.MENU) {
+    const ae = document.activeElement;
+    const onButton = !!(ae && ae.tagName === 'BUTTON'); // I165: a focused button owns Enter (DAILY, COPY RESULT, TAP) so its label is never lied to
+    if (!onButton && st === STATE.MENU) {
       startRun('normal'); // ST-141: Enter starts a normal run (DAILY button for the daily run)
-    } else if (st === STATE.GAME_OVER) {
+    } else if (!onButton && st === STATE.GAME_OVER) {
       restartRun(); // ST-141: reseed when daily so Enter reproduces today's run
-    } else if (st === STATE.PAUSED) { // I68: Enter resumes
+    } else if (!onButton && st === STATE.PAUSED) { // I68: Enter resumes
       world.resume();
     }
   } else if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {

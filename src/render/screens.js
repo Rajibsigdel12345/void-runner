@@ -96,6 +96,7 @@ export function createScreens(root, settings = {}) {
   menuGrid.classList.add('vr-menu-grid'); // I71: collapse to one column on narrow viewports
   menuGrid.append(controls, top5);
   menu.appendChild(menuGrid);
+  const menuStatus = line(menu, 'M \u2014 MUTE (OFF)     F \u2014 FX (HIGH)', 'font-size:calc(12px * var(--vr-fs,1));letter-spacing:2px;opacity:0.65;margin-top:10px;'); // I165: live session status on the menu (I164 finding)
   if (settings.touch && settings.actions && settings.actions.start) { // I71: tappable start on touch
     const startBtn = document.createElement('button');
     startBtn.type = 'button';
@@ -274,6 +275,7 @@ export function createScreens(root, settings = {}) {
       else dailyBadge.style.display = 'none';
     }
     if (state === STATE.MENU) {
+      set('menuStatus', menuStatus, 'M \u2014 MUTE (' + (opts.muted ? 'ON' : 'OFF') + ')     F \u2014 FX (' + (opts.fx === 'low' ? 'LOW' : 'HIGH') + ')'); // I165: live mute + fx state
       set('menuBest', menuBest, opts.best > 0 ? `BEST ${opts.best}` : '');
       set('top5', top5Body, opts.scoresText ? opts.scoresText : '\u2014 no scores yet \u2014'); // I66
       set('menuDaily', menuDaily, opts.dailyMenu ? ('DAILY ' + opts.dailyMenu.key + '  \u00b7  ' + (opts.dailyMenu.value > 0 ? 'BEST ' + opts.dailyMenu.value : 'NO BEST YET')) : ''); // ST-141

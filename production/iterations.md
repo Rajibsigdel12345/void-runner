@@ -1246,3 +1246,19 @@ One entry per iteration. Format:
 - Deliverable: production/gates.md G8.3 section (PASS). Verdict: PASS - proceed to I165.
 - Result: DONE. ST-164 closed. Next I165 ST-165 UX fix round.
 
+## I165 - UX fix round: menu status row + Enter focus guard (ST-165)
+- Goal: ST-165 acceptance - UX fix round over the E8D surface (fixes, browser-verified). Skill: cgs-ux-review.
+- UX review (cgs-ux-review contract):
+  - Friction: (a) I164 gate finding - the MENU showed no live mute/fx state (only the pause screen had the M/F rows), so a keyboard user could not see the effect of M/F without pausing; (b) NEW - global Enter vs focused buttons: Enter on a focused DAILY RUN button triggered both the native click (startRun daily) and the global startRun(normal), with the global handler running last and silently overriding the button the user targeted; the same class of bug hit the game-over COPY RESULT button (Enter restarted the run instead of copying the code).
+  - Comprehension: the DAILY button and COPY RESULT button now do exactly what their labels say, for both mouse and keyboard; the menu status row uses the exact phrasing of the pause rows ('M - MUTE (x)' / 'F - FX (y)') so the two screens read identically.
+  - Accessibility: keyboard operability improved - focused buttons are activated by Enter as every user expects (native behavior preserved; the global handler yields instead of fighting it). The status row is static text (no motion FX, reduced-motion safe by construction) and scales with --vr-fs. Mouse flow unchanged (all tappable buttons blur() after click, so body focus is restored and global Enter still works).
+  - UX verdict: both findings fixed, no new friction introduced; remaining E8D surface (tutorial, kill feed, banner, share flow) re-reviewed, no further blocking items found for this round.
+- Fix 1 (screens.js): menuStatus row - 'const menuStatus = line(menu, ...)' inserted after the menu grid; updated in the MENU branch of update() via set() from screenOpts.muted/screenOpts.fx (already passed per frame by main.js, no main.js change needed for this fix).
+- Fix 2 (main.js): Enter branch computes onButton = document.activeElement.tagName === 'BUTTON' and skips the global start/restart/resume when true (native button activation owns Enter).
+- Verification (browser ?nocache=165/165b/165c/165d):
+  - Menu row: default 'M - MUTE (OFF)   F - FX (HIGH)'; after M+F -> 'M - MUTE (ON)   F - FX (LOW)' with the pause-screen labels showing the same values (parity); restored to defaults; fontScale 1.5 -> computed 18px (12px at scale 1); screenshot .evidence/I165/I165_1_menu_status.png.
+  - Enter guard: real DAILY button click -> seed 317547475 (the documented 2026-11-10 daily seed, matches I147); fresh tab + focused DAILY + physical Enter -> seed 317547475 (daily run, bug fixed); fresh tab + body focus + Enter -> seed 17035 (normal run, no regression); game over + focused COPY RESULT + Enter -> 'COPIED!' flash observed by a 50ms text poller, state stayed GAME_OVER (no restart).
+- Tests: 491/491 (unchanged - render/boot layer only, no core diff). Build: exit 0. Console 0/0 (one info-level adaptive-quality notice from background-tab throttling).
+- Result: DONE. ST-165 closed. Next I166 ST-166 string extraction [CUTTABLE].
+
+
