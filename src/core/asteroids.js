@@ -10,15 +10,24 @@ export class AsteroidField {
     this.nextId = 1;
   }
 
-  /** Spawn a rock at the arena rim heading inward, or at an explicit position (splits). */
-  spawn(size, speedMult = 1, at = null, noNear = null, golden = false) {
+  /** Spawn a rock at the arena rim heading inward, or at an explicit position (splits).
+   *  dirHint (ST-119): a direction the fragment inherits momentum from - the fragment angle is
+   *  atan2(dirHint) +/- cfg.asteroid.split.spread instead of fully random. gen (ST-119): split
+   *  generation (rim spawn = 0, each split +1) for lineage-aware tuning/scoring. */
+  spawn(size, speedMult = 1, at = null, noNear = null, golden = false, dirHint = null, gen = 0) {
     const a = this.cfg.asteroid;
     if (this.rocks.length >= a.maxConcurrent) return null;
     const spec = a.sizes[size];
     let pos, ang;
     if (at) {
       pos = v2(at.x, at.y);
-      ang = this.rng.next() * Math.PI * 2;
+      if (dirHint) {
+        // ST-119: chain-split outward kick - bias the fragment around the parent heading
+        const base = Math.atan2(dirHint.y, dirHint.x);
+        ang = base + this.rng.range(-this.cfg.asteroid.split.spread, this.cfg.asteroid.split.spread);
+      } else {
+        ang = this.rng.next() * Math.PI * 2;
+      }
     } else {
       let rimA = this.rng.next() * Math.PI * 2;
       const r = this.cfg.arena.radius - spec.radius * 0.5;
@@ -45,6 +54,7 @@ export class AsteroidField {
       spin: this.rng.range(a.spin[0], a.spin[1]) * (this.rng.chance(0.5) ? -1 : 1),
       rot: this.rng.next() * Math.PI * 2,
       variant: this.rng.int(0, 2),
+      gen,           // ST-119: split generation (0 = rim spawn)
       speedMult,
       golden,
       nearImmune: this.cfg.nearMiss.spawnImmunity, // ST-053: no instant graze from spawn/split
@@ -83,7 +93,9 @@ export class AsteroidField {
     }
   }
 
-  /** Kill a rock; spawn + return its fragments (none for S). Honors the concurrent cap. */
+  /** Kill a rock; spawn + return its fragments (none for S). Honors the concurrent cap.
+   *  ST-119: fragments kick outward along the parent heading (momentum inheritance) and
+   *  carry gen = parent.gen + 1 (L0 -> M1 -> S2). */
   destroy(id) {
     const rock = this.rocks.find(r => r.id === id && !r.dead);
     if (!rock) return [];
@@ -92,8 +104,10 @@ export class AsteroidField {
     const spec = this.cfg.asteroid.sizes[rock.size];
     if (spec.splits.length) {
       const n = this.rng.int(spec.splits[0], spec.splits[1]);
+      const heading = v2Norm(rock.vel);
+      const childGen = (rock.gen || 0) + 1;
       for (let i = 0; i < n; i++) {
-        const c = this.spawn(spec.child, rock.speedMult, { x: rock.pos.x, y: rock.pos.y });
+        const c = this.spawn(spec.child, rock.speedMult, { x: rock.pos.x, y: rock.pos.y }, null, false, heading, childGen);
         if (c) children.push(c);
       }
     }

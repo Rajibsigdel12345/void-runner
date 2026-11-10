@@ -83,3 +83,45 @@ test('asteroids: spawn respects noNear player distance (I34)', () => {
     assert.ok(v2Dist(r.pos, player) >= 8 - 1e-9, 'rock too close: ' + v2Dist(r.pos, player).toFixed(2));
   }
 });
+
+// ST-119: chain-split lineage + outward kick
+test('asteroids: split fragments carry generation depth (L0->M1->S2)', () => {
+  const f = new AsteroidField(new RNG(21));
+  const L = f.spawn('L', 1, { x: 5, y: 0 });
+  assert.equal(L.gen, 0, 'rim/explicit spawn is gen 0');
+  const ms = f.destroy(L.id);
+  assert.ok(ms.length >= 2);
+  assert.ok(ms.every(c => c.size === 'M' && c.gen === 1), 'M fragments are gen 1');
+  const ss = f.destroy(ms[0].id);
+  assert.ok(ss.length >= 2);
+  assert.ok(ss.every(c => c.size === 'S' && c.gen === 2), 'S fragments are gen 2');
+});
+
+test('asteroids: fragments kick along parent heading within spread (ST-119)', () => {
+  const f = new AsteroidField(new RNG(22));
+  const L = f.spawn('L', 1, { x: 0, y: 0 });
+  L.vel = v2(5, 0); // heading +x (angle 0)
+  const spread = CONFIG.asteroid.split.spread;
+  const frags = f.destroy(L.id);
+  assert.ok(frags.length > 0);
+  for (const c of frags) {
+    const a = Math.atan2(c.vel.y, c.vel.x);
+    assert.ok(Math.abs(a) <= spread + 1e-9, 'fragment angle ' + a.toFixed(2) + ' outside spread ' + spread);
+  }
+  // seeded bias: mean direction should still lean toward the parent heading
+  let mx = 0, my = 0;
+  for (const c of frags) { mx += c.vel.x; my += c.vel.y; }
+  const ml = Math.hypot(mx, my) || 1;
+  assert.ok(mx / ml > 0.25, 'mean direction not biased toward heading: ' + (mx / ml).toFixed(2));
+});
+
+test('asteroids: split fragments honor the concurrent cap (ST-119)', () => {
+  const f = new AsteroidField(new RNG(23));
+  const L = f.spawn('L', 1, { x: 0, y: 0 });
+  while (f.count < CONFIG.asteroid.maxConcurrent - 1) {
+    if (!f.spawn('S')) break;
+  }
+  const frags = f.destroy(L.id);
+  assert.ok(f.count <= CONFIG.asteroid.maxConcurrent, 'cap exceeded: ' + f.count);
+  assert.ok(frags.length <= 1, 'only the free slots should fill: ' + frags.length);
+});
