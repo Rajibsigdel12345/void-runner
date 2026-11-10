@@ -1708,3 +1708,13 @@ One entry per iteration. Format:
 - Verification: every patch anchor uniqueness-enforced by the patcher (no double hits); patched sections read back and reviewed (Controls, Replay & Recording, Game States, README table); docs-only change (no src/ diff) so no test/build/browser step per the quality bar; GDD + AGENTS.md state machines now agree with each other and with main.js.
 - Risks: none gameplay-impacting (docs only). systems-map.md remains an MVP-era plan (no E8 systems listed) - intentionally unchanged.
 - Result: DONE. ST-200 closed. Next I201 ST-201 QA plan (cgs-qa-plan).
+
+## I201 - QA plan E8 (cgs-qa-plan) (ST-201)
+- Summary: E8 pre-release QA posture - coverage map of the six gated arcs (G8.0-G8.5) against the 630-test suite, final risk coverage (R7 robustness debt from I100 now CLOSED by I187-189), G8.6 acceptance criteria, and the explicit perception-only scope for the I202 human playtest (4 carried + 6 new E8 items). Plan artifact - no code changes.
+- Test Matrix: E8 features x evidence layer (node suite / browser probes / gate) for content, balance passes, daily/share, a11y/i18n, music, feel/juice, context-loss, visibility pause, replay, security, build size.
+- Risk Coverage: R1-R6 GREEN; R7 (robustness) CLOSED (was open at I100); R8 GREEN; new R-E8 (replay determinism) GREEN via the I191 quantization fidelity pin + I198 in-browser demo-pilot pin.
+- Acceptance Criteria (G8.6): 107..206 sequential log audit; 300+ tests (actual 630); build green + payload in budget (449.6 KB gz); regression B+C clean (final round D at I205); playtest filed + triaged (PENDING I202/I203); release checklist (PENDING I204).
+- I202 instrument: production/playtest-checklist.md (I199) + the 10 named perception items; triage buckets BUG/BALANCE/UX/ART-AUDIO for I203.
+- Verification: plan-only change (no src/ diff); every cited record is committed (I110-I199); baseline carried from I199 (630/630, build 0, console 0/0, no src/ changes since).
+- Risks: physical touch/low-end hardware untested (carried, low); playtest may force a small balance/feel follow-up (I203 decides; cut candidates: fanfare/shake constants).
+- Result: DONE. ST-201 closed. Next I202 ST-202 human playtest (cgs-playtest-report).

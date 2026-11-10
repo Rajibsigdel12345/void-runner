@@ -1,6 +1,7 @@
 ﻿﻿﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I201: QA plan (E8) - coverage map across G8.0-G8.5 + 630-test suite, R7 robustness debt closed (I187-189), G8.6 acceptance criteria, I202 human-playtest scope (10 perception items: 4 carried + 6 new) - plan only, no code changes (ST-201)
 - I200: Docs sweep (cgs-consistency-check) - 9 contradictions fixed: GDD controls list + SLOWMO mislabel (pickup, not a key) + new Replay & Recording section + Game States REPLAY/visibility branches; README controls table + replay sentence; AGENTS.md test-runner (npm test is the real runner) + REPLAY state branch - docs only, no code changes (ST-200)
 - I199: Regression round C - first-run tutorial (sim frozen while the card is up, dismisses once), full hotkey map (M/N/F/O/P/R/Q + replay speed 1/2/3), mute meter 0.142 -> 0 -> 0.190, persistence battery (best/board/daily/replay/settings), 3/3 suite matrix 630/630 incl. cross-process; playtest checklist for I202 (production/playtest-checklist.md); console 0/0, no code changes (ST-199)
 - I198: Gate G8.5 (E8F robustness) PASS - visibility pause freezes the sim through the real handler and resumes cleanly; replay pipeline round-trips the demo pilot to the exact core-pinned death index (2169/2220); 630/630 tests green and deterministic with the I194 security totality battery; payload 449.6 KB gzip within the adopted budget; console 0/0 - evidence-only gate, no code changes (ST-198)

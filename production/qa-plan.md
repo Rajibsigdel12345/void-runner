@@ -146,3 +146,88 @@ non-blocking, and outside the automated QA scope.
 - E7 code side is COMPLETE. Proceed to the user-requested Blender graphics pass: cgs-art-bible -> cgs-asset-spec ->
   cgs-asset-audit (update graphics/geometry/textures using Blender now that it is available). A human playtest is
   recommended before a final release call.
+
+## E8 QA Plan (I201, ST-201)
+
+Scope: E8 arc (I107-I206) pre-release QA posture - what is already evidenced, what the
+human playtest (I202) must add, and the acceptance criteria for the G8.6 closeout gate (I206).
+Append-style continuation of the I40 plan; no rewrite of the historical sections.
+
+### Summary
+The E7 closeout (I100) left two open QA debts: human-perception playtest evidence and the
+Blender art pass (E9). E8 delivered six gated arcs (G8.0 I110, G8.1 I128, G8.2 I147, G8.3 I164,
+G8.4 I182, G8.5 I198) with in-gate browser measurements, grew the suite from 233 to 630 tests
+(+397, all deterministic/seed-pinned), and added the robustness arc (context-loss, visibility
+pause, replay capture/view, security totality) that the I40 plan had left as known gaps (R7).
+Remaining QA work is perception-only (human playtest I202) plus the release checklist (I204).
+
+### Test Matrix (E8 features x evidence layer)
+
+| Feature (E8) | node (630 suite) | browser evidence | Gate |
+|---|---|---|---|
+| Content: endless-arc boss HP, wave caps, breather, vortex v2 | yes | forced-wave probes | G8.0/G8.1 |
+| Balance passes E8-1/E8-2/E8-3 (feel) | yes (pinned values) | live runs | G8.0/G8.2 |
+| Daily seeded run + share code (ST-140/142) | yes (codec totality) | reproducible daily (I147) | G8.2 |
+| i18n string inventory + a11y (I155-166) | yes (storage/keys) | CVD preview, font scale, focus ring | G8.3 |
+| Music bed + intensity + slow-mo audio (I157-174) | yes (synth headless, I180) | live meter/chord probes, gesture gate | G8.3/G8.4 |
+| Feel/juice: shake, vignette, fanfare, pickup burst (I175-178) | - (render) | per-iteration smokes + rm variants | G8.4 |
+| Context-loss: clock stall, WebGL ctx loss (I187-188) | yes (clock) | simCtxLost/Restore probes, ?nocache runs | G8.5 |
+| Visibility pause (I189) | yes (visibilityAction) | real-handler freeze/resume (I198) | G8.5 |
+| Replay viewer + capture (ST-190/191) | yes (codec, RLE, caps) | idx 2169 pin in-browser (I196/I198/I199) | G8.5 |
+| Security: share/replay/storage/daily codecs (I194) | yes (8 totality tests) | - (adversarial inputs are node-side) | G8.5 |
+| Build size + load (I197) | - | load profile: 86 resources, 622 ms | G8.5 (cited) |
+
+### Risk Coverage (E8, final posture)
+- R1 core loop: 630-suite + regression rounds B (I195/196) + C (I199) - GREEN.
+- R2 state machine: node transitions + I196 six-transition walk + I199 hotkey sweep - GREEN.
+- R3 restart hygiene: node reset tests + I199 R-restart probe - GREEN.
+- R4 persistence: node fake-store + I195 19/19 live probe + I199 battery (best/board/daily/replay/settings) - GREEN.
+- R5 input modes: synthetic keys/pointers verified (I199); physical touch + physical device still open (carried from E7; low risk, desktop-first target).
+- R6 perf: I95 frame profile + I184 deep profile + I185 memory audit + I197 payload/load audit - GREEN (budgets documented).
+- R7 robustness: WAS open gap at I100 - now CLOSED by I187-189 (clock reset, ctx-loss recovery, visibility pause) with G8.5 evidence.
+- R8 balance drift: config.js single-source + per-pass balance docs (E8-1/2/3) + I192 config codec pins - GREEN.
+- NEW R-E8 (determinism in replay): quantization fidelity pinned (I191 0.0007 ship distance) + demo pilot pinned in suite and re-verified in-browser (I198) - GREEN.
+
+### Acceptance Criteria (for G8.6, I206)
+1. 100/100 E8 iterations logged sequentially 107..206 (audit at I206).
+2. 300+ tests green - actual: 630/630 (2.1x target).
+3. Build green (exit 0) + payload within adopted budget (I197: 449.6 KB gzip vs 550 KB).
+4. Regression B (I195/196) + C (I199) clean - done; final sweep at I205.
+5. Human playtest (I202) filed + triaged (I203) - PENDING (this plan's I202 section below).
+6. Release checklist (I204) done - PENDING.
+
+### I202 Human Playtest - what it must add (the bot-unverifiable perception items)
+Carried from E7 (4): post-boss breather feel; vortex dodgeability feel; combo/overdrive feel;
+in-world wave-modifier legibility.
+New E8 items (6): music bed quality/level over SFX (I157-170); death slow-mo feel (I172/174);
+juice intensity (shake/flash/fanfare) too much vs too little (I175-178); replay UX clarity
+(WATCH THIS RUN affordance, speed keys discoverability); tutorial card clarity (I151);
+REC chip clarity (is it obvious a run is being recorded?).
+Protocol + note fields: production/playtest-checklist.md (I199). Triage buckets (I203):
+BUG / BALANCE / UX / ART-AUDIO.
+
+### Regression Suite (E8 posture, updated from the I40 definition)
+- Suite A (every iteration): npm test (630/630) + build exit 0 + browser console 0/0.
+- Suite B (gameplay/UX/render iterations): I40's 8 critical-path probes + the I199 hotkey sweep + replay pin.
+- Suite C (gates): I40's extended set + forced-scene perf sample (G8.4 method) + finiteness scan + load profile (I197 method).
+Executed for E8F: rounds B (I195/196) and C (I199); round D (final) at I205.
+
+### Evidence
+- production/gates.md: G8.0-G8.5 verdicts (I110/I128/I147/I164/I182/I198).
+- production/regression-report.md + .evidence/I195/ + .evidence/I196/ + .evidence/I199/ (rounds B/C).
+- production/perf-profile.md (I95/I184), production/memory-audit.md (I185), production/build-size-audit.md (I197).
+- production/playtest-checklist.md (I199, the I202 instrument).
+
+### Risks
+- Physical touch device + low-end physical hardware untested (carried; desktop-first, adaptive FX mitigates).
+- Playtest perception findings may force a balance/feel follow-up pass (I203 triage decides; scope-cut candidates: fanfare/shake constants only).
+
+### Changed files
+- production/qa-plan.md (append: this E8 plan).
+
+### Verification evidence
+- Plan only - no code changes; all cited evidence from committed iteration records (I110-I199).
+- Current baseline (I199, one iteration back, no src/ diff since): 630/630, build 0, console 0/0.
+
+### Next owner / decision
+I202 (ST-202): human playtest per production/playtest-checklist.md - the perception items above are the explicit output this session must produce.
