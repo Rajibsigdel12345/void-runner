@@ -37,6 +37,8 @@ const CUES = {
   // ST-029 stingers: rising arpeggio on wave clear, falling motif on game over
   cleared:   { type: 'sine',     gain: 0.2,  min: 0.2, notes: [[523, 523, 0.12, 0, 0.2], [659, 659, 0.12, 0.09, 0.2], [784, 784, 0.12, 0.18, 0.2], [1046, 1046, 0.3, 0.27, 0.24]] }, // ST-083: 4-note rising jingle (C5-E5-G5-C6)
   gameover:  { type: 'sawtooth', gain: 0.26, min: 0.3, noise: 0.5, notes: [[440, 440, 0.2, 0, 0.28], [330, 330, 0.2, 0.18, 0.28], [196, 196, 0.55, 0.36, 0.3]] },
+  // ST-123 weapon level-up: bright rising 3-note arpeggio (event tier)
+  levelUp:   { type: 'triangle', gain: 0.22, min: 0.15, notes: [[523, 523, 0.1, 0, 0.2], [659, 659, 0.1, 0.09, 0.2], [784, 784, 0.22, 0.18, 0.24]] },
 };
 const ARENA_R = 26; // for pan normalization (matches config arena radius)
 

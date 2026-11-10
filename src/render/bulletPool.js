@@ -57,6 +57,17 @@ export function createBulletPool(scene) {
     trails.push(m);
   }
 
+  let curLevel = 0;
+
+  // ST-123: recolor the shared bullet head + trail tint by weapon level (no-op on repeat).
+  function setLevel(level) {
+    if (curLevel === level) return;
+    curLevel = level;
+    const c = CONFIG.fx.palette.bulletLevel[Math.max(0, Math.min(2, level - 1))] || 0xbff4ff;
+    mat.color.setHex(c);
+    trailMat.color.setHex(c);
+  }
+
   function sync(weapons) {
     let idx = 0;
     for (const b of weapons.bullets) {
@@ -87,5 +98,5 @@ export function createBulletPool(scene) {
     for (let i = idx; i < max; i++) { pool[i].visible = false; trails[i].visible = false; }
   }
 
-  return { sync, pool, trails };
+  return { sync, setLevel, pool, trails };
 }

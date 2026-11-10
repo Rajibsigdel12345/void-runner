@@ -20,6 +20,9 @@ const MOD_TAG = { fast: ['FAST ROCKS', '#ff9a6b'], small: ['SMALL ROCKS', '#6fe3
 // I112: combo text brightens as the chain climbs multiplier tiers (index = tier, 0..tierCount).
 const TIER_COLOR = ['#ffe08a', '#ffe08a', '#fff0b0', '#fff6cf', '#fffdf2', '#ffffff'];
 
+// I123: hex number -> css color (weapon-level pips read CONFIG.fx.palette.bulletLevel).
+function hexColor(h) { return '#' + (h >>> 0).toString(16).padStart(6, '0'); }
+
 export function createHUD(root) {
   const el = document.createElement('div');
   el.id = 'hud';
@@ -42,6 +45,23 @@ export function createHUD(root) {
   const best = document.createElement('div');
   best.style.cssText = 'font-size:calc(13px * var(--vr-fs,1));opacity:0.9;margin-top:2px;'; // I44: 0.75 -> 0.9 contrast
   scoreBox.append(score, best);
+
+  // I123: weapon-level indicator (WPN label + 3 pips) under the score, top-left.
+  const wpnBox = box('top:58px;left:18px');
+  const wpnLabel = document.createElement('div');
+  wpnLabel.style.cssText = 'font-size:calc(11px * var(--vr-fs,1));font-weight:800;letter-spacing:2px;opacity:0.85;margin-bottom:3px;';
+  wpnLabel.textContent = 'WPN';
+  wpnBox.appendChild(wpnLabel);
+  const pipRow = document.createElement('div');
+  pipRow.style.cssText = 'display:flex;gap:5px;';
+  const pips = [];
+  for (let pi = 0; pi < 3; pi++) {
+    const p = document.createElement('span');
+    p.style.cssText = 'display:inline-block;width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.16);';
+    pipRow.appendChild(p);
+    pips.push(p);
+  }
+  wpnBox.appendChild(pipRow);
 
   const waveBox = box('top:16px;left:50%;transform:translateX(-50%);text-align:center');
   const wave = document.createElement('div');
@@ -114,6 +134,13 @@ export function createHUD(root) {
       lastModTag = modTag;
       if (modTag !== 'none') { waveMod.textContent = MOD_TAG[modTag][0]; waveMod.style.color = MOD_TAG[modTag][1]; waveMod.style.display = 'block'; }
       else { waveMod.textContent = ''; waveMod.style.display = 'none'; }
+    }
+    // I123: weapon-level pips - fill by level, recolor by level; write only on change.
+    const wl = (typeof world.weaponLevel === 'function') ? world.weaponLevel() : 1;
+    if (cache['wpn'] !== wl) {
+      cache['wpn'] = wl;
+      const wcol = hexColor(CONFIG.fx.palette.bulletLevel[Math.min(2, wl - 1)]);
+      for (let i = 0; i < 3; i++) pips[i].style.background = i < wl ? wcol : 'rgba(255,255,255,0.16)';
     }
     const n = world.lives;
     set('lives', lives, '♥'.repeat(n) + '♡'.repeat(Math.max(0, world.livesMgr.max - n)));

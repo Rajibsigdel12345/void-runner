@@ -242,7 +242,8 @@ export const CONFIG = {
       shield:   [0x53d8ff, 0x7fe8ff, 0x33c4ff],  // cyan shield
       hit:      [0xff6b57, 0xff8f7a, 0xffb4a4],  // ship damage
       bomb:     [0xfff3b0, 0xffd27a, 0xffffff],  // bright blast
-      power:    [0xff5ad8, 0xff8ae8, 0xffb6f2]   // magenta overdrive
+      power:    [0xff5ad8, 0xff8ae8, 0xffb6f2],   // magenta overdrive
+      bulletLevel: [0xbff4ff, 0x8affc0, 0xffd27a]   // ST-123 weapon L1/L2/L3 (cyan/mint/amber)
     }
   },
 
