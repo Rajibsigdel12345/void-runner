@@ -1560,3 +1560,25 @@ One entry per iteration. Format:
 - Changed files: src/main.js (the __vr.clockState probe line ONLY).
 - Verification evidence: npm test 581/581; node scripts/build.mjs exit 0; node --check (ESM) clean; T0-T8 results above; console 0/0; screenshots .evidence/I188/I188_1_menu_ctx_lost.png (+ I187's overlay shot).
 - Result: DONE. ST-188 closed. Next I189 ST-189 visibility-pause hardening (auto-pause, dt clamp).
+
+## I189 - Visibility-pause hardening (auto-pause, dt clamp) (ST-189)
+
+- Skill: cgs-bugfix (proactive-hardening variant: Summary / Reproduction / Minimal Fix / Regression Test / Evidence / Risks / Changed files / Verification evidence / Next owner).
+- Summary: the I43 inline auto-pause arrow (unprobeable, decision logic in the DOM layer, untestable) is now a named handler (main.js) that delegates to a new pure core module, src/core/visibilityPause.js (visibilityAction: 'pause' only when visibility==='hidden' AND state==='PLAYING', else 'none'). The policy is documented deliberately in the module header: (a) pause on hidden-while-PLAYING because the tab's rAF stalls anyway - the player gets the pause screen instead of a surprise death, and the existing ST-078 clock (maxFrameDt 0.25 + clock.reset on PAUSED->PLAYING) discards the stall so no dt spike on resume; (b) NO auto-resume on 'visible' - a surprise resume across a tab switch can kill the ship while the player looks away; same "restore does not auto-resume" policy as the I187 ctx-restore path. The dt-clamp path was evidenced, not re-built.
+- Reproduction: the gap was the I43 line document.addEventListener('visibilitychange', () => {...world.pause()}) - an inline arrow cannot be driven from outside and the decision lived in the DOM layer. A real tab-hide cannot be forced in headless Chromium, so the browser evidence drives the REAL named handler via the new __vr.simVisibility(v) probe: it shadows document.visibilityState with a temporary own property, calls onVisibilityChange(), then deletes the shadow (own-property delete restores the prototype getter - verified).
+- Minimal Fix: (1) NEW src/core/visibilityPause.js - VISIBILITY constants + visibilityAction(visibility, state), pure, DOM-free, ~1.6KB, header documents both policy decisions. (2) src/main.js - imports visibilityAction; inline arrow replaced by named function onVisibilityChange() (two lines); new __vr.simVisibility probe. (3) NEW tests/visibilityPause.test.js.
+- Regression Test: tests/visibilityPause.test.js, 10 tests - exhaustive 4x2 visibility x state matrix (exactly one pause cell), hidden x {MENU, PAUSED, GAME_OVER} -> none, visible x all states -> none, unknown visibility strings (prerender/unloaded/''/undefined/null) -> none, unknown/case-mismatched states -> none, exact-match semantics (not substring, not case-insensitive), contract values only ('pause' | 'none').
+- Evidence (Playwright, page ?nocache=189a; transition spam asserted via world.game.transitions length deltas):
+  - V1 PLAYING -> simVisibility('hidden') -> PAUSED, exactly 1 transition recorded.
+  - V2 hidden again while PAUSED -> stays PAUSED, 0 new transitions (no double-pause spam).
+  - V3 simVisibility('visible') while PAUSED -> stays PAUSED (no auto-resume), 0 transitions.
+  - V4 resume -> PLAYING; simVisibility('prerender') -> stays PLAYING, 0 transitions (defensive unknown value).
+  - V5b PLAYING -> hidden -> 1.2 s real sleep: state PAUSED, world.time bit-frozen (delta 0); visible -> still PAUSED; resume -> after 2 rAFs, clockState().last within 100 ms of performance.now and acc=0 (ST-078 reset verified directly); then advance(1.0) -> exactly 1.0 (no backlog burst).
+  - V6realEvent document.dispatchEvent(new Event('visibilitychange')) with the real visibilityState='visible' -> no state change, 0 transitions, getter intact.
+  - V7 MENU path: P -> PAUSED, Q -> MENU, then simVisibility('hidden') -> stays MENU (no pause), simVisibility('visible') -> MENU, 0 new transitions total.
+  - npm test 591/591 (581 + 10 new); node scripts/build.mjs exit 0; node --check (ESM) clean; console 0/0.
+- Method note: the first V5 attempt read clockState() synchronously right after world.resume() - the ST-078 clock reset happens in the NEXT rAF frame (inside frame()), not synchronously in resume(), so the assertion failed spuriously. Re-ran after 2 rAFs (V5b). Probe-timing artifact, not a game bug.
+- Risks: __vr.simVisibility is not a real tab-hide - in a genuinely hidden tab rAF stops for real; the ST-078 clamp covers the rAF-stall case even if the visibilitychange event is delayed or missing, so dt-spike protection does not depend on this handler firing. No-auto-resume is a deliberate UX policy - confirm at the I202 human playtest.
+- Changed files: src/main.js (named handler + simVisibility probe ONLY), NEW src/core/visibilityPause.js, NEW tests/visibilityPause.test.js.
+- Verification evidence: V1-V7 above; 591/591; build 0; ESM parse clean; console 0/0.
+- Result: DONE. ST-189 closed. Next I190 ST-190 replay viewer + capture UI (browser) [CUTTABLE - assess vs scope-check-E8.md cap].

@@ -36,6 +36,7 @@ import { createFpsMeter } from './render/fpsMeter.js';
 import { createDebugOverlay } from './render/debugOverlay.js'; // ST-080
 import { createAdaptiveQuality } from './core/adaptiveQuality.js'; // ST-073
 import { createClock } from './core/clock.js'; // ST-078
+import { visibilityAction } from './core/visibilityPause.js'; // I189: pure visibility-pause decision (unit-tested)
 import { STATE } from './core/state.js';
 import { Storage, toggleFxQuality } from './core/storage.js';
 import { CONFIG } from './core/config.js';
@@ -405,9 +406,14 @@ window.addEventListener('resize', () => {
 });
 // I43: auto-pause when the tab is hidden (rAF stalls anyway; pausing gives the
 // player the pause screen instead of a dt spike on return).
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden' && world.game.state === STATE.PLAYING) world.pause();
-});
+// I189: decision moved to the pure core visibilityAction (unit-tested in tests/visibilityPause.test.js);
+// named handler so browser evidence can drive the REAL path (see the simVisibility probe below).
+// NO auto-resume on 'visible' by design - a surprise resume across a tab switch can kill the ship while
+// the player is looking away; the player resumes deliberately (P/Enter). Same policy as I187 ctx-restore.
+function onVisibilityChange() {
+  if (visibilityAction(document.visibilityState, world.game.state) === 'pause') world.pause();
+}
+document.addEventListener('visibilitychange', onVisibilityChange);
 // I43: WebGL context loss - three.js reinitializes its GL state on restore; we
 // pause the game, and force render-target re-allocation (composer + bloom).
 // I75: user-facing overlay while the 3D context is gone, with a reload fallback
@@ -466,6 +472,11 @@ window.__vr.simCtxRestore = () => onCtxRestored(); // I187
 window.__vr.framesRendered = () => framesRendered; // I187: loop-work counter (frozen while the context is lost)
 window.__vr.ctxOverlay = ctxOverlay; // I75: expose after declaration (TDZ-safe)
 window.__vr.clockState = () => clock.state(); // I188: ST-078 clock internals probe (context-loss evidence: reset discards the stall) - called post-load only (TDZ-safe)
+window.__vr.simVisibility = (v) => { // I189: drive the REAL visibility handler with a synthetic document.visibilityState (smoke/debug only)
+  Object.defineProperty(document, 'visibilityState', { value: v, configurable: true });
+  try { onVisibilityChange(); } finally { delete document.visibilityState; }
+  return world.game.state;
+};
 window.__vr.applyColorblindPreview = (on) => applyColorblindPreview(on); // I158: probe
 window.__vr.slowmoHintEl = slowmoHintEl; // I158: probe
 window.__vr.musicOn = () => audio.musicOn(); // I158: probe
