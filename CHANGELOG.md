@@ -1,6 +1,7 @@
 ﻿﻿﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I202: Playtest v3 (cgs-playtest-report) - 3 scripted runs per the I199 checklist: demo pilot pin re-verified in-browser (t=36.15s, score 11334, 57 kills, idx 2169/2220); aggressive pilot 187.9s to wave-5 boss death (30161 pts, 147 kills, music ramp 0->0.90, bossSpawn/bossFire/bossBurst, no new bugs); first-run tutorial verified (shows once, sim frozen, Enter dismiss, persists, no re-appear), first kill 3.15s; 10 perception items mapped (bot evidence + HUMAN-PENDING labels); console 0/0 - no source changes (ST-202)
 - I201: QA plan (E8) - coverage map across G8.0-G8.5 + 630-test suite, R7 robustness debt closed (I187-189), G8.6 acceptance criteria, I202 human-playtest scope (10 perception items: 4 carried + 6 new) - plan only, no code changes (ST-201)
 - I200: Docs sweep (cgs-consistency-check) - 9 contradictions fixed: GDD controls list + SLOWMO mislabel (pickup, not a key) + new Replay & Recording section + Game States REPLAY/visibility branches; README controls table + replay sentence; AGENTS.md test-runner (npm test is the real runner) + REPLAY state branch - docs only, no code changes (ST-200)
 - I199: Regression round C - first-run tutorial (sim frozen while the card is up, dismisses once), full hotkey map (M/N/F/O/P/R/Q + replay speed 1/2/3), mute meter 0.142 -> 0 -> 0.190, persistence battery (best/board/daily/replay/settings), 3/3 suite matrix 630/630 incl. cross-process; playtest checklist for I202 (production/playtest-checklist.md); console 0/0, no code changes (ST-199)

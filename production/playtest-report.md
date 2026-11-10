@@ -162,3 +162,105 @@ Run B **beats the wave-5 Monolith** (hp 40, ~15.6s) but pays **2 lives** for it,
 - **I93 (UI-UX-review):** take the "invisible wave modifiers" friction as a candidate wave-banner tag.
 
 - **Human playtest (when available):** confirm the boss-spike difficulty and the "combo is never meaningful" question - both are labeled assumption/bot-limited here.
+
+## Playtest v3 (I202, ST-202)
+
+Method: scripted self-play again (no human available; the I90 precedent). Three runs per
+production/playtest-checklist.md (I199 instrument). All numbers are measured evidence via the
+window.__vr handle (advance / eventTally / juiceTally / replayView / musicIntensityVal).
+Perception judgments are explicitly labeled HUMAN-PENDING for I203 triage.
+
+### Run A - demo pilot replay (passive baseline)
+- startReplay(demoReplay()); 145 x advance(0.25) drives REPLAY -> GAME_OVER.
+- Dies at t=36.15s, score 11334, wave 2, 57 kills, maxCombo 15, 198 shots / 57 hits (accuracy 0.288).
+- Replay position 2169/2220 = exact core pin (tests/replay.test.js:246); re-verified in-browser.
+
+### Run B - aggressive scripted pilot (the "player")
+- Pilot: aim nearest live rock, dodge thrust from rocks within 6u (weight 1.5), centering bias
+  0.12, always firing. 3730 x advance(0.05).
+- Dies at t=187.93s (3:07), score 30161, wave 5 (boss), 147 kills, maxCombo 15, 1049 shots /
+  149 hits (accuracy 0.142).
+- Music intensity curve: 0.00 (w1) -> 0.06 (w2) -> 0.12 (w3) -> 0.17 (w4) -> 0.90 (w5, boss):
+  the 5x boss spike works as designed.
+- Events (tally diff): bossSpawn 1, bossRing 2, bossFire 2, bossBurst 1, hit 3 (all three hull
+  hits), powerupDrop 7, weaponLevelUp 1 (>=1 pickup), nearmiss 8, rockShieldHit 2. waveCleared 0
+  is legitimate (a wave advances on spawn exhaustion / intermission; the bot never cleared rocks).
+- Juice: hit flash 3 + shake 3, bossSpawn flash 1 + shake 1, weaponLevelUp punch 1. No juice
+  channel fires on kills (kill feedback is particles + popups only).
+- Death: wave 5 boss - bossFire/bossBurst + hit 3 (3 hull hits = all lives lost).
+- Game-over screen (screenshot .evidence/I202/02-runB-gameover.png): SCORE 30161 / KILLS 147
+  WAVE 5 / MAX COMBO 15 TIME 3:07 / ACCURACY 14% SHOTS 149/1049 / BOARD RANK #3 / COPY RESULT.
+  WATCH THIS RUN correctly absent (no O). "BEST 999999" + RANK #3 = I199 persistence-battery
+  residue in localStorage, labeled probe artifact, not a defect (fresh Run C board is clean).
+
+### Run C - first-run experience (cleared profile)
+- Cleared all 6 localStorage keys (incl. best=999999 + tutorial seen=true) -> fresh boot.
+- MENU -> Enter: tutorial card appears (screenshot .evidence/I202/03-runC-tutorial.png), sim
+  frozen while up (advance(1.0) -> dt 0), state PLAYING behind it.
+- Enter dismisses -> voidrunner.tutorial {seen:true} persisted; run 2 starts immediately with no
+  tutorial re-appear.
+- First wave 2.25s; first kill 3.15s (fast onboarding).
+- Aggressive pilot dies at 172.47s, wave 5, 161 kills, score 36426, maxCombo 15.
+- Gameplay HUD verified in .evidence/I202/04-runC-gameplay.png: score 3788 x2.4, WPN meter,
+  WAVE 1 banner, kill feed (S ROCK +360 x2.4 ...), COMBO bar, S power-up on field.
+
+### The 10 perception items (4 carried E7 + 6 new E8)
+1. Post-boss breather feel (E7) - HUMAN-PENDING. Both bot runs died IN the wave-5 boss; no
+   post-boss sample exists for a bot (it cannot clear the boss).
+2. Vortex dodgeability feel (E7) - HUMAN-PENDING. No vortex events in either run (no vortex
+   encounter within 172-188s of play).
+3. Combo/overdrive feel (E7) - quantitative: the cap (15) is reached in ~12s (wave 1, 17 kills)
+   for an active pilot - the mastery ceiling is trivially reachable, re-affirming I90 F4 ("combo
+   is never meaningful"). Feel HUMAN-PENDING.
+4. In-world wave-modifier legibility (E7) - HUMAN-PENDING (visual judgment). Mechanism (I93
+   banner tag) unchanged, covered in E7.
+5. Music quality (E8) - HUMAN-PENDING (subjective). Intensity ramp measured and matches design
+   (0 -> 0.06 -> 0.12 -> 0.17 -> 0.90 boss).
+6. Death slow-mo feel (E8) - HUMAN-PENDING. Death-warp window exists (I174 deathWarpT probe);
+   gameover fired cleanly in both runs.
+7. Juice intensity (E8) - quantitative: ~1 juice event per 60s for an active pilot (3 hit
+   flash/shake + 1 bossSpawn + 1 punch in 188s). No kill shake/punch channel - sparse for a
+   fast arcade shooter; candidate for feel tuning / E9.
+8. Replay UX (E8) - mechanics re-verified (Run A: 145 x 0.25 -> end, idx 2169/2220, clean
+   GAME_OVER); speed/pause/quit keys verified at I199. Feel HUMAN-PENDING.
+9. Tutorial clarity (E8) - timing behavior fully verified (first-run only, frozen sim, Enter
+   dismiss, persists, no re-appear). Content clarity HUMAN-PENDING.
+10. REC chip clarity (E8) - presence/absence logic verified (Run B game-over without recording
+    shows no WATCH THIS RUN; O flow verified at I199). Clarity HUMAN-PENDING.
+
+### Friction / observations (bot-verifiable)
+- Onboarding is fast: first wave 2.25s, first kill 3.15s.
+- Game-over stat line is readable (score/wave/kills/combo/time/accuracy/shots/rank).
+- Combo cap reached in ~12s -> a skilled player sits at the flat 2.4x multiplier for most of the
+  run (BALANCE).
+- The wave-5 boss killed the naive pilot in 3 hull hits - the boss wave is the difficulty ceiling
+  (BALANCE: acceptable for a bot, needs human confirmation for players).
+- 7 power-up drops vs >=1 pickup (the bot does not chase drops) - pickup value untestable by
+  this pilot (BALANCE/UX note).
+- Accuracy: demo 0.288 vs aggressive bot 0.142 - current-position aiming is inefficient
+  (informational; the I41 lead-aim pilot would do better).
+
+### Design implications (I203 triage input)
+- BALANCE: (a) combo cap 15 reached too fast (re-affirms F4); (b) boss lethality at wave 5
+  (3 hits = dead for a naive pilot); (c) pickup rarity vs drop rate.
+- ART/AUDIO (E9): kill juice is quiet; the music boss spike is large (0.90) - mix check.
+- BUG bucket: empty - no new defects (console 0/0, no NaN, no stuck states).
+- UX: no new confusion found in bot-verifiable scope.
+
+### Changed files or proposed files
+- production/playtest-report.md (this section).
+- production/iterations.md, CHANGELOG.md, production/session-state/active.md (bookkeeping).
+- No source changes -> the I199 baseline carries (630/630, build exit 0; not re-run, src/
+  unchanged since I199).
+
+### Verification evidence
+- Console: 0 errors / 0 warnings (1 info = adaptive quality FX high->low at ~4 fps headless rAF,
+  expected).
+- Screenshots: .evidence/I202/02-runB-gameover.png, 03-runC-tutorial.png, 04-runC-gameplay.png.
+- Baseline demo pin re-verified in-browser (idx 2169/2220).
+- No code changes -> no build needed (I199 green baseline carried).
+
+### Next owner / decision
+- I203 (ST-203, cgs-bug-triage): triage this report. BUG bucket empty (disposition only); the 3
+  BALANCE items + juice sparsity + music spike go to balance-notes dispositions; ART/AUDIO ->
+  the E9 Blender pass. HUMAN-PENDING items carry to the I203 disposition list.

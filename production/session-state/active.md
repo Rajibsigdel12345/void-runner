@@ -2,11 +2,12 @@
 
 - project: Void Runner (E:\Game, three.js, no bundler)
 - epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-202 (human playtest, next)
-- current_iteration: I201 (committed)
+- current_story: ST-203 (triage/fix, next)
+- current_iteration: I202 (committed)
 - branch: main
 - tests: 630/630
 - build: exit 0
+- notes: I202 done (ST-202 playtest v3 (cgs-playtest-report)): 3 scripted runs (I90 precedent, no human available) - demo pin re-verified in-browser (idx 2169/2220); aggressive pilot 187.93s to wave-5 boss death (30161 pts, 147 kills, music 0->0.90 ramp, boss events); first-run tutorial verified (shows once, sim frozen, Enter dismiss, persists, no re-appear), first kill 3.15s; 10 perception items mapped with bot evidence + HUMAN-PENDING labels; 0 new bugs (console 0/0, no NaN, no stuck states); BALANCE inputs for I203: combo cap reached in ~12s (re-affirms F4), wave-5 boss lethality, pickup rarity; no source changes (I199 baseline carries).
 - notes: I201 done (ST-201 QA plan E8 (cgs-qa-plan)): coverage map G8.0-G8.5 x 630-suite; R7 robustness debt (open at I100) CLOSED by I187-189; G8.6 acceptance criteria; I202 = 10 perception items (4 carried + 6 new E8), instrument production/playtest-checklist.md; plan only, no code changes. Next I202 human playtest.
 - notes: I200 done (ST-200 docs sweep (cgs-consistency-check)): 9 contradictions fixed across design/gdd.md (controls list, SLOWMO pickup-not-key, new Replay & Recording section, Game States REPLAY + visibility branches), README.md (controls table + replay sentence), AGENTS.md (test runner = npm test, state machine REPLAY branch). Docs only, no code changes. systems-map.md labeled historical, unchanged. Next I201 QA plan (cgs-qa-plan).
 - notes: I199 done (ST-199 regression round C + playtest prep (cgs-regression-suite)): 3/3 suite matrix 630/630 (incl. cross-process over 66 files); first-run tutorial flow green (sim frozen while card up, dismiss once); full hotkey sweep green (M meter 0.142->0->0.190, N/F persist, O record, P/R/Q, replay speed 1/2/3 = x1/x2/x4 matching the UI hint); persistence battery green; finiteness clean (sentinel only); NEW production/playtest-checklist.md for I202; console 0/0, no code changes. Next I200 docs sweep.

@@ -1718,3 +1718,37 @@ One entry per iteration. Format:
 - Verification: plan-only change (no src/ diff); every cited record is committed (I110-I199); baseline carried from I199 (630/630, build 0, console 0/0, no src/ changes since).
 - Risks: physical touch/low-end hardware untested (carried, low); playtest may force a small balance/feel follow-up (I203 decides; cut candidates: fanfare/shake constants).
 - Result: DONE. ST-201 closed. Next I202 ST-202 human playtest (cgs-playtest-report).
+
+## I202 - Playtest v3: 3-run scripted self-play, 10 perception items mapped (cgs-playtest-report) (ST-202)
+
+- Skill: cgs-playtest-report (qa-playtester). No human available - I90 precedent: scripted
+  self-play, perception items labeled HUMAN-PENDING.
+- Instrument: production/playtest-checklist.md (I199). 3 runs on the dev server (Playwright,
+  ?nocache=202 / ?nocache=202c).
+- Run A (demo pilot replay): startReplay(demoReplay()) -> 145 x advance(0.25) -> GAME_OVER at
+  t=36.15s, score 11334, wave 2, 57 kills, maxCombo 15, accuracy 0.288 (198/57 shots/hits);
+  replay idx 2169/2220 = exact core pin (tests/replay.test.js:246).
+- Run B (aggressive scripted pilot: aim nearest rock + 6u dodge + centering + always fire):
+  3730 x advance(0.05) -> death at t=187.93s, wave 5 (boss), score 30161, 147 kills, maxCombo 15,
+  accuracy 0.142 (1049/149). Music intensity 0.00/0.06/0.12/0.17/0.90 (w1-w5, 5x boss spike).
+  Events: bossSpawn 1, bossRing 2, bossFire 2, bossBurst 1, hit 3 (all three hull hits),
+  powerupDrop 7, weaponLevelUp 1 (>=1 pickup), nearmiss 8. Juice: 3 hit flash+shake, bossSpawn
+  flash+shake, weaponLevelUp punch; no kill-time juice channel. Game-over screen: BOARD RANK #3 +
+  COPY RESULT present; WATCH THIS RUN correctly absent (no O). "BEST 999999" = I199 probe
+  residue (labeled, not a defect).
+- Run C (cleared profile): tutorial shows once (first run), sim frozen while up (advance(1.0) ->
+  dt 0), Enter dismisses, {seen:true} persists, no re-appear on run 2; first wave 2.25s, first
+  kill 3.15s; pilot dies 172.47s, wave 5, 161 kills, 36426 pts.
+- 10 perception items mapped in production/playtest-report.md v3: bot-verifiable evidence for
+  combo saturation, music ramp, juice density, replay mechanics, tutorial timing, REC presence;
+  HUMAN-PENDING: post-boss breather feel, vortex dodgeability, music quality, death slow-mo
+  feel, tutorial content clarity, REC chip clarity, wave-modifier legibility, overdrive feel.
+- Bugs found: none (console 0/0, no NaN, no stuck states; the 1 info line is adaptive quality at
+  ~4 fps headless rAF, expected).
+- Triage input for I203: BALANCE (combo cap 15 reached in ~12s, re-affirms I90 F4; wave-5 boss
+  lethality; pickup rarity), ART/AUDIO -> E9 (kill juice quiet; boss music spike 0.90 mix check).
+- Changed files: production/playtest-report.md (+v3), CHANGELOG.md, production/iterations.md,
+  production/session-state/active.md. Evidence: .evidence/I202/ (3 screenshots).
+- Verification: console 0 errors / 0 warnings; demo pin re-verified; no source changes -> I199
+  baseline carries (630/630, build exit 0, not re-run).
+- Result: DONE. ST-202 closed. Next I203 ST-203 triage/fix (cgs-bug-triage).
