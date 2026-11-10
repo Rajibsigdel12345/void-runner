@@ -374,3 +374,25 @@ Changed files: src/core/config.js (spawnMix block; waveEndless sBias keys remove
 Verification: 345/345 tests (+8 new: table shape/order/lFloor/S-cap, mixRow band boundaries + unbounded fallback, 20k-draw distributions per band incl. exact pre-I131 w1-9 match, determinism, RNG draw-width preservation, small-mod preservation), build 0. A/B: full runs seeds 11/22/44/55/66/77/88/99/101/111 bit-identical, seed 33 identical through w10, diverges w11 (as designed); forced w10-16: 21/21 hits, realized L +5.1 pp. No render change - no browser smoke.
 
 Next owner: I132 (E8B GDD addendum - spawnMix table joins the drone-section and I130 drop-table documentation).
+
+## I203 - playtest v3 dispositions (ST-203)
+
+Source: production/playtest-report.md v3 (I202) + production/bug-triage.md Triage v2.
+No config change this iteration (dispositions only). Deterministic demo pin unchanged.
+
+- Combo (T1): cap 15 / window 4.0 s / step 0.1. The active scripted pilot hit the cap in ~12 s
+  (wave 1, 17 kills). The I92 lever (cap 10->15) was the only human-independent direction;
+  further levers (cap 20, window 3.0 s) reshape the multiplier curve AND change the demo pin
+  (maxCombo 15). Decision: DEFER to E9 with a human playtest data point. If changed later, update:
+  config.combo, tests/replay.test.js:246 (demo pin), GDD Combo section.
+- Boss lethality (T2): the wave-5 boss killed a 3-life pilot at 187.9 s (3 hull hits). Decision:
+  ACCEPT - the boss is the designed ceiling and 3 lives is arcade-standard. Revisit only if a
+  human session reports cheap deaths.
+- Pickup rarity (T3): 7 drops, >=1 pickup by a non-chasing pilot. Decision: HOLD - the I130
+  weighted table + lifetime is in effect; chasing is player behavior the bot cannot measure.
+  Human session to confirm.
+- Kill juice (T4): no shake/punch channel on kills (juice per ~3 min run: 3 hit flash+shake, 1
+  bossSpawn, 1 weaponLevelUp punch). ROUTED to E9 (ST-207+ art/feel pass) as a candidate
+  kill-punch.
+- Boss music spike (T5): intensity 0.17 -> 0.90 (w4 -> w5 boss). ROUTED to the E9 audio mix
+  check.

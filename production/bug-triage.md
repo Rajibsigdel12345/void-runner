@@ -69,3 +69,92 @@ Pre-wrap triage of every open item that has accumulated across the E7 content/po
 
 - **I92 (balance-check):** take **F9** as the primary fix (post-boss difficulty spike) and make the **F4** + **F2** decisions. Log any tunable change in `balance-notes.md` and re-run the node suite + a browser smoke. The four watch items stay closed-here unless I92 surfaces a concrete, measured reason.
 - **Human playtest (when available):** the boss-spike difficulty and W-golden / W-graze / W-mine are the items that genuinely need a human. Until then they are deferred, not assumed resolved.
+
+## Triage v2 (I203, ST-203)
+
+Input: production/playtest-report.md v3 (I202) - 3-run scripted self-play; the I199 regression
+battery; the I198 gate. No console error, NaN, or stuck state in any E8 iteration.
+
+### Summary
+0 new BUG findings in I202 (console 0/0, no NaN, no stuck states, demo pin exact). The 3
+BALANCE observations and 2 ART/AUDIO notes are dispositions only (no code change): the combo-cap
+evidence re-affirms F4 (addressed at I92 in the only human-independent direction), and boss
+lethality / pickup rarity are by-design for a non-chasing bot. 8 HUMAN-PENDING perception items
+carry as the human-session checklist. No config change -> the deterministic demo pin (maxCombo
+15) is untouched.
+
+### Triage table (I202 findings)
+- T1 combo cap (15) reached in ~12 s by an active pilot; flat 2.4x for the rest of the run.
+  Bucket BALANCE | Severity Low | Priority P3 | Repro High (bot-measured, 2 runs) | Owner
+  senior_game_designer | Disposition: disposition only. I92 already raised the cap 10->15 (F4).
+  Raising it further or shortening the 4 s window changes the demo pin (maxCombo 15,
+  tests/replay.test.js:246) - deferred to the E9 feel pass with a human data point.
+- T2 wave-5 boss kills the naive pilot in 3 hull hits (187.9 s). Bucket BALANCE | Low | P3 |
+  High | senior_game_designer | Disposition: accept - 3 lives is arcade-standard, the boss is the
+  designed ceiling; human session before any tuning (HUMAN-PENDING #1).
+- T3 7 power-up drops vs >=1 pickup (the bot does not chase drops). Bucket BALANCE/UX | Info |
+  P3 | High | game_designer | Disposition: not bot-testable; the I130 rebalance (weighted table +
+  lifetime) is in effect; carried to the human session.
+- T4 no kill-time juice channel (juice ~1 event/60 s for an active pilot). Bucket ART/AUDIO |
+  Info | P2 | High | senior_game_artist | Disposition: routed to the E9 Blender/art pass
+  (ST-207+); candidate kill-punch tuning.
+- T5 boss music spike 0.17 -> 0.90 is large. Bucket ART/AUDIO | Info | P3 | High (measured) |
+  sound_designer | Disposition: E9 mix check; no change this milestone.
+- T6 "BEST 999999 / RANK #3" on the Run B game-over screen. Bucket probe artifact | N/A | N/A |
+  Certain | qa_playtester | Disposition: I199 persistence-battery residue in the dev-profile
+  localStorage; not a product defect; cleared by Run C.
+- T7 1 console INFO: adaptive quality FX high->low at ~4 fps. Bucket expected | N/A | N/A |
+  Certain | qa_playtester | Disposition: headless rAF artifact; the adaptive system behaving as
+  designed (I73).
+- T8 waveCleared events = 0 across 5 waves. Bucket expected | N/A | N/A | Certain | qa_playtester
+  | Disposition: waveCleared fires only when all rocks are dead (waves.js:137); the bot never
+  cleared a wave. Not a defect.
+
+### HUMAN-PENDING carry (8 items for a human session)
+1. Post-boss breather feel (E7)
+2. Vortex dodgeability feel (E7)
+3. Overdrive feel (E7; combo quantified at T1)
+4. In-world wave-modifier legibility (E7)
+5. Music quality (E8)
+6. Death slow-mo feel (E8)
+7. Tutorial content clarity (E8)
+8. REC chip clarity (E8)
+
+### Severity / priority rationale
+- No P0/P1: no wrong behavior, no crashes, no data loss; all states reachable/exitable (state
+  machine walked at I199).
+- P2 (T4) is the only actionable item and is routed to E9 (the user-requested Blender/art pass),
+  not a mid-milestone code change.
+- P3 items are dispositions/deferrals, not work.
+
+### Owner
+- senior_game_designer: T1, T2.
+- game_designer: T3.
+- senior_game_artist / sound_designer: T4, T5 (E9).
+- qa_playtester: T6-T8 (labeled, closed).
+
+### Release impact
+None. No code change, no config change, no test churn. The G8.6 "playtest triaged" criterion is
+satisfied by this section + the v3 report.
+
+### Risks
+- The 8 HUMAN-PENDING items remain the player-experience evidence gap (non-blocking; the bot
+  covered everything bot-verifiable quantitatively).
+- If a human session later flags T1 (combo flatness) as P1, the fix touches config.combo + the
+  demo pin (tests/replay.test.js:246) - the blast radius is documented in advance.
+
+### Changed files or proposed files
+- production/bug-triage.md (this section).
+- production/balance-notes.md (I203 dispositions section).
+- production/iterations.md, CHANGELOG.md, production/session-state/active.md (bookkeeping).
+
+### Verification evidence
+- npm test 630/630 (re-run this iteration; per-iteration gate even with no code change).
+- node scripts/build.mjs exit 0 (same).
+- I202 browser evidence: console 0/0, .evidence/I202/ screenshots, exact demo pin (2169/2220).
+
+### Next owner / decision
+- I204 (ST-204, cgs-release-checklist): E8 release checklist (append an E8 version to
+  production/release-checklist.md).
+- Human playtest (when available): run the 8-item HUMAN-PENDING checklist (this section +
+  production/playtest-checklist.md).

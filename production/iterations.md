@@ -1752,3 +1752,20 @@ One entry per iteration. Format:
 - Verification: console 0 errors / 0 warnings; demo pin re-verified; no source changes -> I199
   baseline carries (630/630, build exit 0, not re-run).
 - Result: DONE. ST-202 closed. Next I203 ST-203 triage/fix (cgs-bug-triage).
+
+## I203 - Triage v2: I202 findings triaged, 0 BUGs, dispositions recorded (cgs-bug-triage) (ST-203)
+
+- Skill: cgs-bug-triage (producer). Input: playtest-report v3 (I202) + I199 regression battery +
+  I198 gate.
+- Result: 0 new BUG findings (console 0/0, no NaN, no stuck states, demo pin exact). 8 triage
+  entries (T1-T8): 3 BALANCE dispositions (combo cap DEFER to E9 with human data - blast radius
+  documented: config.combo + demo pin tests/replay.test.js:246; boss lethality ACCEPT; pickup
+  rarity HOLD), 2 ART/AUDIO routed to E9 (kill juice P2 - only actionable item; boss music spike
+  mix check), 3 labeled non-defects (I199 probe residue, headless adaptive-quality INFO,
+  waveCleared semantics).
+- 8 HUMAN-PENDING perception items carried as the human-session checklist.
+- G8.6 "playtest triaged" criterion now satisfied.
+- Changed files: production/bug-triage.md (+Triage v2), production/balance-notes.md (+I203),
+  CHANGELOG.md, production/iterations.md, production/session-state/active.md.
+- Verification: npm test 630/630; node scripts/build.mjs exit 0; no code changes.
+- Result: DONE. ST-203 closed. Next I204 ST-204 release checklist (cgs-release-checklist).

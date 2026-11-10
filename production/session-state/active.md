@@ -2,11 +2,12 @@
 
 - project: Void Runner (E:\Game, three.js, no bundler)
 - epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-203 (triage/fix, next)
-- current_iteration: I202 (committed)
+- current_story: ST-204 (release checklist, next)
+- current_iteration: I203 (committed)
 - branch: main
 - tests: 630/630
 - build: exit 0
+- notes: I203 done (ST-203 triage v2 (cgs-bug-triage)): 0 new BUGs; T1-T8 triaged - 3 BALANCE dispositions (combo cap DEFER to E9, boss lethality ACCEPT, pickup rarity HOLD), 2 ART/AUDIO -> E9 (kill juice P2, music spike), 3 labeled non-defects; 8 HUMAN-PENDING items carried; G8.6 playtest-triaged met; no code changes (630/630, build 0).
 - notes: I202 done (ST-202 playtest v3 (cgs-playtest-report)): 3 scripted runs (I90 precedent, no human available) - demo pin re-verified in-browser (idx 2169/2220); aggressive pilot 187.93s to wave-5 boss death (30161 pts, 147 kills, music 0->0.90 ramp, boss events); first-run tutorial verified (shows once, sim frozen, Enter dismiss, persists, no re-appear), first kill 3.15s; 10 perception items mapped with bot evidence + HUMAN-PENDING labels; 0 new bugs (console 0/0, no NaN, no stuck states); BALANCE inputs for I203: combo cap reached in ~12s (re-affirms F4), wave-5 boss lethality, pickup rarity; no source changes (I199 baseline carries).
 - notes: I201 done (ST-201 QA plan E8 (cgs-qa-plan)): coverage map G8.0-G8.5 x 630-suite; R7 robustness debt (open at I100) CLOSED by I187-189; G8.6 acceptance criteria; I202 = 10 perception items (4 carried + 6 new E8), instrument production/playtest-checklist.md; plan only, no code changes. Next I202 human playtest.
 - notes: I200 done (ST-200 docs sweep (cgs-consistency-check)): 9 contradictions fixed across design/gdd.md (controls list, SLOWMO pickup-not-key, new Replay & Recording section, Game States REPLAY + visibility branches), README.md (controls table + replay sentence), AGENTS.md (test runner = npm test, state machine REPLAY branch). Docs only, no code changes. systems-map.md labeled historical, unchanged. Next I201 QA plan (cgs-qa-plan).
