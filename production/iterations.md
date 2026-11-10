@@ -713,3 +713,9 @@ One entry per iteration. Format:
 - Goal: open the E8 expansion milestone (I107-I206) with a cgs-scope-check of the user request (100 further improvement iterations via the codex-game-studio workflow, internet/downloads permitted), per the skill output contract.
 - Changed: production/scope-check-E8.md (new - Summary/Scope Fit/Cut Option/Deferral/Recommendation/Risks/Changed or proposed files/Verification evidence/Next owner); CHANGELOG.md + active.md updated. No code changes.
 - Verification: baseline evidence re-confirmed this session (233/233, build exit 0, sequence 1..106, clean tree at 85dde8e); six-phase phasing (P0 planning I107-I110, P1 gameplay I111-I132, P2 content I133-I150, P3 UI/UX I151-I168, P4 audio/feel I169-I186, P5 robustness I187-I200, P6 QA/release I201-I206) totals exactly 100 iterations; cut order + deferral list recorded; docs-only (233/233 + build exit 0, sequence 1..107); next I108 cgs-create-epics.
+
+## I108 - E8 epics: E8A-E8F sub-epics with outcomes, dependencies, gates (ST-108)
+
+- Goal: break the E8 expansion milestone into sub-epics per cgs-create-epics (outcome, dependencies, risk, validation gate each).
+- Changed: production/epics.md (E8 + E8A Planning / E8B Core gameplay / E8C Content variety / E8D UI/UX + a11y / E8E Audio + feel / E8F Robustness + testing + QA, each with iteration map, outcome, dependencies, risk, and gate G8.0-G8.6; E8 risk register R-E8-1..6); CHANGELOG.md + active.md updated. No code changes.
+- Verification: phase iteration counts sum to exactly 100 (4+22+18+18+18+14+6); every iteration I107-I206 mapped to exactly one sub-epic; cuttable items (I143, I166, I190-191) match the scope-check cut order; docs-only (233/233 + build exit 0, sequence 1..108); next I109 cgs-create-stories (batch 1: E8A+E8B stories with acceptance criteria).
