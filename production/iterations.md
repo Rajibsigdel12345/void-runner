@@ -969,3 +969,13 @@ One entry per iteration. Format:
 - Playtest sanity: node scripts/playtest.mjs scenario 15 ran clean (belt rocks appear from wave 8; the bot takes belt contact hits as designed - a hazard, not a crash).
 - Result: DONE. Next I139 ST-139 belt tuning + perf (browser): belt rock visual distinction in rockRenders, beltHit spark FX, perf check (5 belt + 24 normal rocks), playtest A/B.
 
+## I139 - Belt tuning + perf + I138 test-contract fixes (browser) (ST-139)
+
+- Test-contract fixes (2 pre-existing failures found at session start): belt.test.js's beltHit assertion expected a flat {x,y} but game.js already emits the universal {pos:{x,y}} event shape (same as kill / rockShieldHit / shieldPop) - the test was corrected to {pos:{x,y}}. endless.test.js 'wave 10 content' asserted w.field.count === 14 (total), but ST-138 puts belt rocks inside the field and the belt test's own contract is 'total = cap + 1 belt rock' - so the endless assertion now counts non-belt rocks (w.field.rocks.filter(r => !r.belt).length === 14). No gameplay logic was touched by either fix.
+- Render (asteroidRenderer.js): the mesh pool grew from maxConcurrent (24) to maxConcurrent + belt.max (29) so every persistent belt rock gets a mesh - before the change, belt rocks past pool index 24 were silently dropped. New matBelt = dark cold metal (color 0x2a313d, metalness 0.9, roughness 0.42, flat) with a slow-pulsing cold-blue emissive core (0x2f6fd0, intensity 0.4..0.85 at ~0.28 Hz): belt rocks read as unbreakable 'cold' hulls, contrasting the WARM amber shatter of normal rocks. sync(field, t = 0) assigns matBelt when rock.belt; the hum pulses the shared material once per frame.
+- FX / audio: config.fx.palette.belt = cool-steel grays [0x9fb4d0, 0x7c93b8, 0xcfe0f5]; main.js maps beltHit -> SFX_CUES 'shieldHit' (the rate-limited metallic-clank background cue - safe under held fire on an indestructible) and fires a subtle cool-steel particle spark (no shake, no flash) when a bullet sparks off a belt rock.
+- Tests: 389/389 (the 2 I138 regressions are now fixed; belt.test.js + endless.test.js green).
+- Build: 0.
+- Browser smoke: dev :5173 ?nocache=140 - forced 4 normal + 5 belt rocks; in-scene material breakdown = exactly 5 meshes at metalness 0.9 (matBelt) and 4 at metalness 0.05 (normal brown 0x8a7f72) -> visual distinction confirmed in the scene; fired at a belt rock ~1.6 s -> beltHit delta 6, belt rock still alive (indestructible), 0 NaN, console 0/0. Perf at max load (24 normal + 5 belt = 29 rocks): 60 FPS. Screenshots: .evidence/I139/{belt_vs_normal,belt_hit_spark}.png, .evidence/I139b/{belt_vs_normal,belt_glow}.png (cold-glow peak).
+- Result: DONE. Next I140 ST-140 daily seeded run (core: date->seed, DAILY badge, unit: seed derivation + reproducibility).
+

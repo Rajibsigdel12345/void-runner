@@ -18,7 +18,7 @@ function bakeVariant(seed, radius) {
 }
 
 export function createAsteroidRenderer(scene) {
-  const max = CONFIG.asteroid.maxConcurrent;
+  const max = CONFIG.asteroid.maxConcurrent + CONFIG.belt.max; // ST-139: pool also covers persistent belt rocks
   const sizes = ['L', 'M', 'S'];
   const geos = {};
   for (const s of sizes) {
@@ -32,6 +32,8 @@ export function createAsteroidRenderer(scene) {
   // procedural 3-variant bakes are used.
   const glbGeo = {};
   const mat = new THREE.MeshStandardMaterial({ color: 0x8a7f72, roughness: 0.95, metalness: 0.05, flatShading: true });
+  // ST-139: belt rock - dark cold metal so drifting indestructibles read as "unbreakable".
+  const matBelt = new THREE.MeshStandardMaterial({ color: 0x2a313d, roughness: 0.42, metalness: 0.9, flatShading: true, emissive: 0x2f6fd0, emissiveIntensity: 0.6 });
   // I60: rim-lit upgrade - cool fresnel edge added on top of the standard lighting.
   mat.onBeforeCompile = (shader) => {
     shader.uniforms.uRimColor = { value: new THREE.Color(0x5f7fd8) };
@@ -68,13 +70,14 @@ export function createAsteroidRenderer(scene) {
     pool.push(m);
   }
 
-  function sync(field) {
+  function sync(field, t = 0) {
+    matBelt.emissiveIntensity = 0.4 + 0.45 * (0.5 + 0.5 * Math.sin((t || 0) * 1.8)); // ST-139: slow cold hum (0.4..0.85)
     let i = 0;
     for (const r of field.rocks) {
       if (r.dead || i >= max) continue;
       const m = pool[i++];
       m.geometry = glbGeo[r.size] || geos[r.size][r.variant]; // I104: GLB when loaded
-      m.material = r.golden ? matGold : mat; // ST-052
+      m.material = r.belt ? matBelt : (r.golden ? matGold : mat); // ST-052/ST-139
       const shell = m.children[0]; // ST-127: shield shell tracks armor (dim = 1 hit away)
       if (r.shielded) {
         shell.material = shellMats[Math.max(0, Math.min(2, r.armor - 1))]; // armor 3/2/1 -> bright/mid/faint

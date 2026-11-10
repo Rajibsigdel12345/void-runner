@@ -108,5 +108,5 @@ test('endless: wave event carries the endless flag (seed 70)', () => {
   assert.equal(waveEv.data.n, 10);
   assert.equal(waveEv.data.endless, true, 'wave 10 is endless');
   assert.equal(w.waves.endless(), true);
-  assert.equal(w.field.count, 14, 'wave 10 content = min(cap, 4+10) all spawned');
+  assert.equal(w.field.rocks.filter(r => !r.belt).length, 14, 'wave 10 content = min(cap, 4+10) all spawned (belt rocks excluded)');
 });

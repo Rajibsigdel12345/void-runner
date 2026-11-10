@@ -136,7 +136,7 @@ let fxCount = 0;
 let motionOff = false;
 let liveSettings = storage.getSettings(); // ST-026: settings panel keeps this fresh (audio consumes in I27)
 // Audio (ST-027): WebAudio synth, initialized on first user gesture.
-const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', waveCleared: 'cleared', gameover: 'gameover', nearmiss: 'swish', mineExplode: 'mine', bossSpawn: 'bossSpawn', bossRing: 'bossRing', bossDeath: 'bossDeath', bossFire: 'bossFire', mineFire: 'mineFire', vortexTelegraph: 'vortexTelegraph', vortexStart: 'vortexStart', droneExplode: 'drone', weaponLevelUp: 'levelUp', rockShieldHit: 'shieldHit', droneDecay: 'drone', wardenSpawn: 'bossSpawn', wardenArmor: 'shieldHit', wardenDeath: 'bossDeath' }; // ST-059/ST-117/ST-123/ST-127/ST-129/ST-137 (decay reuses the seeker zap cue; the warden reuses boss/shield cues)
+const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', waveCleared: 'cleared', gameover: 'gameover', nearmiss: 'swish', mineExplode: 'mine', bossSpawn: 'bossSpawn', bossRing: 'bossRing', bossDeath: 'bossDeath', bossFire: 'bossFire', mineFire: 'mineFire', vortexTelegraph: 'vortexTelegraph', vortexStart: 'vortexStart', droneExplode: 'drone', weaponLevelUp: 'levelUp', rockShieldHit: 'shieldHit', droneDecay: 'drone', wardenSpawn: 'bossSpawn', wardenArmor: 'shieldHit', wardenDeath: 'bossDeath', beltHit: 'shieldHit' }; // ST-059/ST-117/ST-123/ST-127/ST-129/ST-137 (decay reuses the seeker zap cue; the warden reuses boss/shield cues)
 
 const audio = createAudio();
 audio.setVolume(liveSettings.volume);
@@ -395,6 +395,7 @@ else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, 
         dangerA = Math.min(1, dangerA + (e.data.lives <= 1 ? 1 : 0.6)); // I85: last-life hit reads harder
       } else if (e.type === 'shieldPop') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.75), palette: CONFIG.fx.palette.shield, speed: 8, life: 0.5, shape: 'ring' });
       else if (e.type === 'rockShieldHit') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.max(6, Math.ceil(fxCount * 0.4)), palette: CONFIG.fx.palette.shield, speed: 6, life: 0.3 }); // ST-127 armor-absorb sparks (cyan, subtle)
+      else if (e.type === 'beltHit') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.max(4, Math.ceil(fxCount * 0.2)), palette: CONFIG.fx.palette.belt, speed: 4, life: 0.28 }); // ST-139 indestructible clink (cool steel, subtle, no shake)
       else if (e.type === 'bomb') {
         // I114: nova scales with the rocks cleared (small clear = tight, big clear = huge); anchored so the ~3-rock bomb keeps the old fxCount*2 intensity.
         const cleared = e.data.count || 0;
@@ -455,7 +456,7 @@ function syncVisuals(dt) {
   reticle.sync(world.ship, st === STATE.PLAYING); // I44: only while playing
   bullets.sync(world.weapons);
   bullets.setLevel(world.weaponLevel()); // ST-123
-  rockRenders.sync(world.field);
+  rockRenders.sync(world.field, simT); // ST-139
   mineRenders.sync(world.mines, simT); // ST-054
   droneRenders.sync(world.drones, simT); // ST-117
   bossMesh.sync(world.boss, simT); // ST-055

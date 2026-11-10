@@ -87,7 +87,7 @@ test("indestructible: a live bullet is consumed - no score, no split, beltHit em
   const evs = w.drainEvents();
   const beltHit = evs.find(e => e.type === "beltHit");
   assert.ok(beltHit, "beltHit event emitted");
-  assert.deepEqual(beltHit.data, { x: r.pos.x, y: r.pos.y }, "beltHit carries the rock pos");
+  assert.deepEqual(beltHit.data, { pos: { x: r.pos.x, y: r.pos.y } }, "beltHit carries the rock pos");
   assert.equal(evs.find(e => e.type === "kill"), undefined, "no kill event");
 });
 
