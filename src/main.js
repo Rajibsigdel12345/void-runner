@@ -205,8 +205,10 @@ const fovKick = createFovKick({ decay: CONFIG.fx.fovKick.decay, max: CONFIG.fx.f
 let simT = 0; // sim-clock for timed visuals (invuln blink)
 const flashEl = document.getElementById('flash'); // hit/bomb flash overlay (index.html)
 const vignetteDangerEl = document.getElementById('vignette-danger'); // I85: red danger-edge vignette (opacity JS-driven; #vignette is static CSS)
+const slowmoTintEl = document.getElementById('slowmo-tint'); // I116: cold-edge tint while slow-mo is active (index.html)
 let flashA = 0;
-let dangerA = 0; // I85: transient danger spike on hit (gated by !motionOff like the flash)
+let dangerA = 0;
+let slowmoT = 0; // I116: slow-mo tint ramp 0..1 // I85: transient danger spike on hit (gated by !motionOff like the flash)
 function togglePause() { // ST-033: shared by keyboard and two-finger touch
   const st = world.game.state;
   if (st === STATE.PLAYING) world.pause();
@@ -482,6 +484,13 @@ function syncVisuals(dt) {
   if (dangerA > 0) dangerA = Math.max(0, dangerA - dt * 1.4);
   const dangerOp = Math.max((st === STATE.PLAYING && world.lives <= 1) ? 0.55 : 0, dangerA);
   if (vignetteDangerEl) { const vo = dangerOp.toFixed(3); if (vignetteDangerEl.style.opacity !== vo) vignetteDangerEl.style.opacity = vo; }
+  // I116: slow-mo tint - smooth ramp toward the active state (steady state indicator, reduced-motion safe)
+  if (slowmoTintEl) {
+    const smTarget = (st === STATE.PLAYING && world.powerups.active('slowmo')) ? 1 : 0;
+    slowmoT = smTarget > slowmoT ? Math.min(1, slowmoT + dt * 5) : Math.max(0, slowmoT - dt * 5);
+    const so = (slowmoT * 0.55).toFixed(3);
+    if (slowmoTintEl.style.opacity !== so) slowmoTintEl.style.opacity = so;
+  }
 
   stars.rotation.y += dt * 0.004;
   if (fpsMeter) fpsMeter.sync(dt); // I36

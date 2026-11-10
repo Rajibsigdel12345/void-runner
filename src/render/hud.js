@@ -12,6 +12,7 @@ const PU_STYLE = {
   shield: { label: 'SHIELD', letter: 'H', color: '#53d8ff' },
   magnet: { label: 'MAGNET', letter: 'M', color: '#7dff9e' },
   overdrive: { label: 'OVERDRIVE', letter: 'O', color: '#ff6ae2' },
+  slowmo: { label: 'SLOW-MO', letter: 'T', color: '#9fe8ff' }, // ST-116
 };
 
 const MOD_TAG = { fast: ['FAST ROCKS', '#ff9a6b'], small: ['SMALL ROCKS', '#6fe3ff'], inward: ['INWARD DRIFT', '#8bff9e'] }; // I93: persistent active-modifier tag
