@@ -288,3 +288,44 @@ None.
 
 ## Next owner / decision
 - I223: open E11 - scope check via cgs-scope-check + cgs-create-stories. Candidate directions: (a) new content arc, (b) HUMAN-PENDING-informed polish (human session), (c) low-end device validation plan, (d) carried deferrals (combo cap balance, 512x256 skybox).
+
+## E11 CLOSED - Combat Juice & Low-End Validation, final closeout (I226, G11.0 PASS)
+
+## Summary
+E11 (Combat Juice & Low-End Validation) closed: 3/3 stories ST-221..223 complete across 4 iterations (I223..I226) - rock kills got the missing bottom juice rung (class-scaled directed kill punch + overdrive combo-heat, no flash/hit-stop on plain kills) and the bot-verifiable half of the carried low-end device validation is documented (FX tier matrix, adaptive ladder, DPR cap, rm + FX-low combo).
+
+## Milestone Goal
+Close the juice ladder hole (T4: per-hit-class punch at the rock-kill rung, grounded in GMTK / IndividualKex / bullet-hell readability research) and finish the bot-verifiable half of the long-carried low-end device validation (hardware remainder labeled). No new content, no scoring changes (demo pin untouched), no new dependencies.
+
+## Metrics
+- Tests: 677 -> 689 (net +12: killPunch.js + 12 tests; ST-222/223 evidence-only)
+- Build: exit 0; dist 1954.9 -> 1958.4 KB raw / 506.2 -> 507.8 KB gzip (budget <=2048/<=550, ~42 KB headroom; delta = killPunch.js + config + tests)
+- Assets: unchanged (16 GLBs + skybox)
+- Iterations: 4 (I223 scope open, I224 ST-221, I225 ST-222, I226 ST-223 + gate + closeout)
+- Performance: frame probe delta ~0 (I222 16.93 ms avg -> I225 16.75/16.85 dense -> I226 16.65 ms avg, 0 drops; 60 fps locked; this session's display is 60 Hz)
+
+## Evidence (per story)
+- ST-221 (I224): kill juice (T4) - src/core/killPunch.js pure core (killPunchEnergy/killPunchDir; S 0.08 / M 0.12 / L 0.18, all under the drone rung 0.35 shake + the 0.45 weapon fanfare; overdrive x1.5 capped at 0.3) + CONFIG.fx.killPunch + main.js kill branch (motion-gated; NO flash/hit-stop/fovKick = bullet-hell readability rule) + 12 unit tests. Browser: juiceTally 8 rock kills -> kill:{punch:8} with all other channels 0; live class rungs EXACT (S 0.0655 / M 0.0982 / L 0.1474 = rung x e^-0.2 after the in-tick step; overdrive x1.5 exact, reverts off); decay settles ~0.5 s; rm A/B (tally unchanged + magnitude 0; .evidence/I224/); pilot 1080 ticks finite; frame delta ~0; console 0/0.
+- ST-222 (I225): low-end device validation, bot-verifiable half - perf-profile.md '## I225' matrix: dense worst case (24 M rocks + live Monolith hp-protected + sustained fire) p95 16.8 ms at BOTH FX tiers at the 60 Hz vsync floor; sporadic single-frame drops only (1/167 high, 4/170 low, 0/451 in the 8 s follow-up with 19 live enemy bolts); bloom composer = 12-14 draw-call premium (MENU 24 -> 10); adaptive ladder verified end-to-end headlessly (downgrade fires after 2 bad windows + toast + exact console line; 6 s of 120 fps holds low = hysteresis; user lock blocks re-downgrade; reset clean; F path re-applies settings before userSet); DPR cap min(dpr,2) code-verified + runtime honored; rm + FX-low combo playable (2 kills under rm -> zero kill punch = I224 gate re-confirmed in combo); 3 scope-vs-code flags + labeled HARDWARE-pending checklist (low-spec phone, dpr 2-3, thermal, 60 Hz compliance, touch).
+- ST-223 (I226): regression round + G11.0 gate - node matrix 3/3 689/689 (in-process x2 + cross-process); build 0; dist 1958.4/507.8 KB (in budget); browser ?nocache=226b/226c (fresh loads, 60 Hz display): assets 16/16 + skybox both; state machine 10/10 (incl. forced death -> GAME_OVER in 1 tick + live restart + replay exit branch); persistence intact; demo pin EXACT via REAL UI path (menu REPLAYS button -> DEMO PILOT button -> key 3: idx 2169/2220, score 11334, t=36.15, 57 kills); fresh scripted pilot 1080 ticks (113.8 ms loop) PLAYING dt=18.0 s / 2690 pts / 15 kills / 3 lives all finite + kill-punch tally EXACT 15/15 (all other channels 0 = I224 gate re-confirmed live); frames 301 f (30 warm-up excluded) avg 16.65 / p50 16.7 / p95 16.8 / max 17.1 ms (0 drops >17.5 ms, 0 doubles >30 ms; 60 fps locked); console 0/0; log audit 1..226 sequential.
+
+## Blocker
+None.
+
+## Transition Verdict
+**CLOSED - E11 complete: 3/3 stories, 4 iterations (I224..I226).** Demo pin structurally untouched (render-layer + pure-core mapping only), re-verified exact in-browser at I226 via the real UI path.
+
+## Risks
+- Carried (8 HUMAN-PENDING): perception items in production/bug-triage.md (2 ART/AUDIO) - non-blocking, need a human session.
+- Carried: low-end physical device / GPU validation (HARDWARE-pending checklist in perf-profile.md '## I225').
+- Carried: 3 I225 scope-vs-code flags (no FX off tier; no load-reactive DPR 1.5; auto-downgrade does not update the stored settings tier - minor UX, F path correct) - E12 candidates.
+- New: none; R-E11-1..3 all CLOSED at G11.0.
+
+## Changed files
+- production/gates.md (+G11.0 block), production/milestone-review.md (this section), production/epics.md (E11 Result CLOSED), production/timeline.md (+E11 closed line), production/stories.md (ST-221..223 DONE + E11 CLOSED line), CHANGELOG.md (+I226), production/iterations.md (+I226), production/session-state/active.md. No src changes (closeout iteration).
+
+## Verification evidence
+- I226 fresh: npm test 689/689 x2 in-process + node --test over the tests glob 689/689 cross-process; node scripts/build.mjs exit 0; dist 1958.4/507.8 KB; log audit 1..226 sequential (.evidence/I226/); browser smokes ?nocache=226b (demo pin + replay exit), ?nocache=226c (state machine + pilot + frames + console).
+
+## Next owner / decision
+- I227: open E12 - scope check via cgs-scope-check + cgs-create-stories. Candidates: the 3 I225 scope-vs-code flags as small stories (FX off tier, load-reactive DPR 1.5, auto-downgrade settings-tier sync), art levers (research-backed), new content. 8 HUMAN-PENDING items parked for a human session.

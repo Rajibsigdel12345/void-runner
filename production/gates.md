@@ -658,3 +658,41 @@ Closeout gate for the E10 Post-E9 Polish milestone (ST-218..220) per cgs-gate-ch
 
 ### Next owner / decision
 - I223: open E11 - scope check + stories (cgs-scope-check + cgs-create-stories). Candidates: carried polish (8 HUMAN-PENDING-informed items), new content arc, or low-end device validation plan. 8 HUMAN-PENDING items parked for a human session.
+
+## G11.0 - E11 closeout gate (I226)
+
+### Summary
+Closeout gate for the E11 Combat Juice & Low-End Validation milestone (ST-221..223) per cgs-gate-check. ST-221 (I224) closed the T4 kill-juice hole; ST-222 (I225) closed the bot-verifiable half of the carried low-end device validation; this iteration runs the E11 regression round and closes the epic. Advisory gate.
+
+### Gate Criteria
+Per epics.md (verbatim): "kill juice unit-tested + browser-verified (juiceTally deltas, A/B screenshots, pilot parity, frame delta ~0, reduced-motion gated), low-end tier matrix documented (all tiers stable, adaptive ladder fires + stabilizes, DPR cap honored), fresh tests + build + dist in budget, demo pin re-verified exact, regression round green, log audit sequential."
+
+### Evidence
+- (1) Kill juice (I224, ST-221): pure core killPunch.js + CONFIG.fx.killPunch + 12 unit tests; browser: juiceTally 8 rock kills -> kill:{punch:8} with all other channels 0, live class rungs EXACT (S 0.0655 / M 0.0982 / L 0.1474 = rung x e^-0.2 after the in-tick step; overdrive x1.5 exact, reverts off), decay settles ~0.5 s, rm A/B (tally unchanged + magnitude 0; screenshots .evidence/I224/), pilot parity 1080 ticks finite, frame delta ~0 (punch = camera offset only, no sim freeze).
+- (2) Low-end tier matrix (I225, ST-222): production/perf-profile.md "## I225" - FX high/low dense worst case at the 60 Hz vsync floor (p95 16.8 ms both tiers; sporadic single-frame drops only: 1/167 high, 4/170 low, 0/451 in the 8 s follow-up with 19 live enemy bolts), bloom composer = 12-14 call premium (MENU 24 -> 10), cold first frame inside the standing one-time init range; adaptive ladder verified end-to-end (downgrade after 2 bad 2 s windows + toast + exact console line; 6 s of 120 fps holds low = hysteresis; user lock blocks re-downgrade; reset clean; F path re-applies settings before userSet); DPR cap min(dpr,2) code-verified + runtime honored (1.25 -> 1.25); rm + FX-low combo playable (2 kills under rm -> zero kill punch = I224 gate in combo); 3 scope-vs-code flags + labeled HARDWARE-pending checklist.
+- (3) I226 fresh: npm test 689/689 x2 (in-process) + node --test over the tests glob 689/689 (cross-process); node scripts/build.mjs exit 0; dist 1958.4 KB raw / 507.8 KB gzip (budget <=2048/<=550, ~42 KB headroom).
+- (4) I226 regression ?nocache=226b/226c (fresh loads; this session's display 60 Hz): assets 16/16 + skybox on both; state machine 10/10 (MENU->Enter->PLAYING; P->PAUSED sim-frozen (dt 0 over 2 frames); P->PLAYING; P->PAUSED; Q->MENU; Enter->PLAYING; forced death -> GAME_OVER in 1 tick; Enter -> PLAYING live restart) + replay branch (REPLAY -> death -> GAME_OVER -> Enter -> MENU); persistence intact (tutorial seen, scores, best 36426, full settings object); demo pin EXACT via REAL UI path (menu REPLAYS button -> DEMO PILOT button -> key 3 = 4x): GAME_OVER idx 2169/2220, score 11334, t=36.15, 57 kills; fresh scripted pilot 1080 ticks (113.8 ms loop) -> PLAYING dt=18.0 s / 2690 pts / 15 kills / 3 lives all finite + kill-punch tally EXACT (15 punches / 15 kills, all other channels 0 = I224 gate re-confirmed live); frame probe 301 f (30 warm-up excluded) avg 16.65 / p50 16.7 / p95 16.8 / max 17.1 ms (0 drops >17.5 ms, 0 doubles >30 ms; 60 fps locked, delta ~0 vs I222 16.93 / I225 16.75); console 0/0 (no adaptive line - the ladder never triggers at a stable 60 fps).
+- (5) I226 log audit: 225 entries 1..225 sequential, 0 dupes, 0 missing (pre-append); I226 appended -> 1..226.
+- (6) Risks: R-E11-1 CLOSED (juiceTally deltas exact in I224 + 15/15 re-confirmed in the I226 pilot; A/B screenshots .evidence/I224/), R-E11-2 CLOSED (core scoring untouched; pilot parity finite + comparable across I221-I226), R-E11-3 CLOSED (ladder verified headlessly with the proven load-injection pattern; headless-only observations labeled; hardware remainder HARDWARE-pending in perf-profile.md).
+- (7) 600 s soak decision: NOT WARRANTED - E11 changes are a render-layer juice channel + config + one pure-core mapping (no new per-frame allocation path beyond the pre-existing punch path, no new long-lived state; memory pattern identical to pre-E11; I185 soak precedent).
+
+### Concerns
+- Physical low-end device / GPU validation (phone, dpr 2-3, thermal) remains HARDWARE-pending (labeled checklist in perf-profile.md "## I225").
+- 3 scope-vs-code flags from I225 (no FX off tier; no load-reactive DPR 1.5; auto-downgrade does not update the stored settings tier - minor UX, F path correct) are E12 candidates.
+- 8 HUMAN-PENDING perception items remain the player-experience evidence gap (non-blocking; need a human session).
+- PROBE FIX recorded: w.lives is a getter-only property delegating to livesMgr.count; a sloppy-mode w.lives = N in page evaluate silently no-ops - forced-death staging must set w.livesMgr.count (the one early "forced death" success on ?nocache=226b was a fluke: the idle ship had already lost 2 lives in the wild, so the real count happened to be 1).
+
+### Verdict
+**PASS - E11 CLOSED.** 3/3 stories (ST-221..223) complete with per-iteration evidence (I224..I226); kill juice unit-tested + browser-verified + motion-gated; low-end tier matrix documented with the adaptive ladder firing + stabilizing and the DPR cap honored; fresh 689/689 x3 + build 0 + dist in budget; demo pin re-verified exact via the real UI path; regression round green; log 1..226 sequential.
+
+### Risks
+- Carried: 8 HUMAN-PENDING perception items (production/bug-triage.md), low-end physical device / GPU validation (HARDWARE-pending checklist), the 3 I225 scope-vs-code flags (E12 candidates).
+
+### Changed files
+- production/gates.md (this block), production/milestone-review.md (E11 CLOSED section), production/epics.md (E11 Result CLOSED), production/timeline.md (+E11 closed line), production/stories.md (ST-221..223 DONE + E11 CLOSED line), CHANGELOG.md (+I226), production/iterations.md (+I226), production/session-state/active.md. No src changes (closeout iteration).
+
+### Verification evidence
+- npm test 689/689 x2 in-process + node --test over the tests glob 689/689 cross-process (this iteration); node scripts/build.mjs exit 0 (this iteration); dist 1958.4/507.8 KB (this iteration); log audit 1..226 sequential (this iteration); browser smokes ?nocache=226b/226c (this iteration).
+
+### Next owner / decision
+- I227: open E12 - scope check + stories (cgs-scope-check + cgs-create-stories). Candidates: the 3 I225 scope-vs-code flags as small stories (FX off tier, load-reactive DPR 1.5, auto-downgrade settings-tier sync), art levers (research-backed), new content. 8 HUMAN-PENDING items parked for a human session.
