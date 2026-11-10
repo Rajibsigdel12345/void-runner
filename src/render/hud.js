@@ -16,6 +16,9 @@ const PU_STYLE = {
 
 const MOD_TAG = { fast: ['FAST ROCKS', '#ff9a6b'], small: ['SMALL ROCKS', '#6fe3ff'], inward: ['INWARD DRIFT', '#8bff9e'] }; // I93: persistent active-modifier tag
 
+// I112: combo text brightens as the chain climbs multiplier tiers (index = tier, 0..tierCount).
+const TIER_COLOR = ['#ffe08a', '#ffe08a', '#fff0b0', '#fff6cf', '#fffdf2', '#ffffff'];
+
 export function createHUD(root) {
   const el = document.createElement('div');
   el.id = 'hud';
@@ -95,6 +98,11 @@ export function createHUD(root) {
   }
 
   let lastComboBar = -1;
+  const reduceMotion = (typeof window !== 'undefined' && window.matchMedia) ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false; // I112 a11y: skip scale pop
+  let prevKills = 0;    // I112: kill-feedback pop trigger (kills counter)
+  let prevTier = 0;     // I112: tier-up moment -> bigger pop
+  let popScale = 1;     // I112: combo text scale, 1 = settled
+  let prevTime = null;  // I112: sim dt source for pop decay
   let lastModTag = ''; // I93: cache for the persistent modifier tag
   function render(world, opts = {}) {
     set('score', score, String(world.score));
@@ -127,13 +135,27 @@ export function createHUD(root) {
     if (c > 1) {
       comboWrap.style.opacity = '1';
       set('combo', combo, `COMBO ${c}  \u00d7${world.scoreKeeper.multiplier.toFixed(1)}`);
-      const remain = CONFIG.combo.window - (world.time - world.scoreKeeper.lastKillTime);
-      const q = Math.floor(Math.min(1, Math.max(0, remain / CONFIG.combo.window)) * 40) / 40;
+      // I112: kill feedback pop + tier color. Kill = kills counter up; a tier-up pops bigger.
+      const tierNow = world.scoreKeeper.tier;
+      if (world.scoreKeeper.kills > prevKills) popScale = tierNow > prevTier ? 1.5 : 1.3;
+      prevKills = world.scoreKeeper.kills;
+      prevTier = tierNow;
+      const tcol = TIER_COLOR[tierNow] || TIER_COLOR[0];
+      if (cache['comboColor'] !== tcol) { cache['comboColor'] = tcol; combo.style.color = tcol; }
+      const effPop = reduceMotion ? 1 : popScale;
+      comboWrap.style.transform = Math.abs(effPop - 1) > 0.001 ? 'translateX(-50%) scale(' + effPop.toFixed(3) + ')' : 'translateX(-50%)';
+      // I112: combo window bar driven by ScoreKeeper.heatAt() (I111) - single source for the drain.
+      const q = Math.floor(world.scoreKeeper.heatAt(world.time) * 40) / 40;
       if (q !== lastComboBar) { lastComboBar = q; comboFill.style.transform = `scaleX(${q})`; }
     } else {
       comboWrap.style.opacity = '0';
       lastComboBar = -1;
+      comboWrap.style.transform = 'translateX(-50%)';
     }
+    // I112: pop decay + sim-time tracking run every frame (even while the combo is hidden).
+    const dtPop = prevTime === null ? 0 : Math.max(0, world.time - prevTime);
+    popScale += (1 - popScale) * Math.min(1, dtPop * 12);
+    prevTime = world.time;
   }
 
   let visible = true;

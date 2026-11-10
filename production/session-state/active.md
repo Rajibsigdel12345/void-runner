@@ -1,7 +1,7 @@
 # Active Session State
 
 - current_epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-112 (next)
-- current_iteration: I111
+- current_story: ST-113 (next)
+- current_iteration: I112
 - branch: main
-- notes: I111 done (ST-111 combo/score - record correction: the combo system pre-existed ST-013, so I111 = verify + enhance, not rebuild). ScoreKeeper now exposes `tier` (discrete multiplier tier 0..tierCount) and `heatAt(t)` (combo window remaining 1->0); config combo.tierCount:5; +5 unit tests. 238/238 + build exit 0 + sequence 1..111. Next: I112 ST-112 combo HUD render (src/render: xN multiplier display + window bar driven by heatAt + kill feedback pop driven by tier; browser smoke + screenshot + console/no-NaN required).
+- notes: I112 done (ST-112 combo HUD - record correction: xN + drain bar pre-existed ST-016/I44, so I112 = verify + new DOM feedback). hud.js gains kill feedback pop (1.3 per kill, 1.5 on tier-up, sim-dt decay, prefers-reduced-motion a11y guard), tier color ramp TIER_COLOR, and the drain bar now driven by ScoreKeeper.heatAt() (I111). 238/238 + build exit 0 + sequence 1..112; browser smoke: combo 'COMBO 5 x1.4' + live bar + tier-2 color rendered, pop maxScale 1.5 caught, console 0/0, 0 NaN, screenshot evidence/I112_combo_hud.png. Next: I113 ST-113 bomb power-up (core) - screen-clear nova + brief invuln (unit: clear behavior, pickup, timer).
