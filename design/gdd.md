@@ -67,6 +67,13 @@ multipliers, and grab power-ups. Survive as long as you can.
 - Phase 2 enrage (I133): when the Monolith drops below 50% HP it enrages one-way (config.boss.phase2) - homing 45% faster (2.32 u/s, still dodgeable), 40% faster turning, a visible 1.6 rad/s tumble, and both the ring and the aimed-bolt cadences 40% faster (ring 2.0 -> 1.2 s, bolt 2.2 -> 1.32 s). A single bossPhase2 event announces the transition for FX; the HP bar keeps showing.
 - Entrance (I135): the Monolith enters over 1.2 s (config.boss.enterTime) with no attacks - a purple "THE MONOLITH" banner (wave + HP) plays while the obelisk scales in (easeOutCubic), and the ring / aimed-bolt / radial-burst timers are held until the entrance completes (a held ring fires immediately afterwards).
 
+## The WARDEN (ST-136)
+
+- Every 5th wave that does NOT spawn a MONOLITH (a previous Monolith is still alive) spawns a WARDEN at the arena rim as the heavyweight for that wave: an armored mini-boss drone. One heavyweight at a time - the boss OR the warden.
+- Armor 6 absorbs player hits first (one wardenArmor ping event per absorbed hit); then 12 HP chip away - 18 hits total to kill.
+- 1.7 radius, bounded homing 2.4 u/s - faster and smaller than the Monolith. +400 points (between seeker 200 and Monolith 1000). On death it splits into 2 small rocks (wardenDeath event).
+- Contact costs 1 ship life and the WARDEN survives the hit (mirrors boss contact).
+
 ## Enemy Bullets (ST-056)
 
 - The MONOLITH fires an aimed bolt at the ship every 2.2s (speed 9 u/s).

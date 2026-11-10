@@ -146,6 +146,19 @@ export const CONFIG = {
     },
     score: 1000      // kill reward (the big one)
   },
+  warden: {
+    // ST-136: the WARDEN - armored drone mini-boss. Spawns on 5th waves where
+    // the Monolith did not spawn (a previous Monolith is still alive): that
+    // wave's heavyweight is the drone. Armor absorbs hits before HP loss.
+    armor: 6,       // hits absorbed with no HP loss (armor ping FX)
+    hp: 12,         // HP after armor (18 total vs the Monolith's 40)
+    radius: 1.7,    // smaller than the Monolith (3.4)
+    speed: 2.4,     // faster homing than the Monolith (1.6) - still dodgeable
+    turn: 1.5,      // heading change rad/s
+    spin: 0.9,      // body tumble rad/s
+    splitCount: 2,  // S rocks on death
+    score: 400      // kill reward (seeker 200, Monolith 1000)
+  },
 
   mine: {
     // ST-054: mine drones - slow homing mines that chase the ship. 1 bullet kills

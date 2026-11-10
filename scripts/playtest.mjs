@@ -98,14 +98,14 @@ function botIntent(w, simT) {
 }
 
 function newWaveRow(wave, t0, score0) {
-  return { wave, t0, score0, hits: 0, kills: 0, shieldedKills: 0, shieldedHits: 0, droneKills: 0, droneDeaths: 0, droneDecays: 0, bossKills: 0, bossPhase2: 0, bossRing: 0, bossFire: 0, bossBurst: 0, nearmiss: 0, bombs: 0, goldenKills: 0, spawns: { L: 0, M: 0, S: 0 }, killSizes: { L: 0, M: 0, S: 0 }, dropsTaken: {}, dropsSpawned: {}, shots: { 1: 0, 2: 0, 3: 0 } };
+  return { wave, t0, score0, hits: 0, kills: 0, shieldedKills: 0, shieldedHits: 0, droneKills: 0, droneDeaths: 0, droneDecays: 0, bossKills: 0, bossPhase2: 0, bossRing: 0, bossFire: 0, bossBurst: 0, wardenSpawns: 0, wardenKills: 0, nearmiss: 0, bombs: 0, goldenKills: 0, spawns: { L: 0, M: 0, S: 0 }, killSizes: { L: 0, M: 0, S: 0 }, dropsTaken: {}, dropsSpawned: {}, shots: { 1: 0, 2: 0, 3: 0 } };
 }
 function closeRow(waves, cur, w, simT) {
   if (cur.wave < 1) return;
   waves.push({
     wave: cur.wave, clearSec: +(simT - cur.t0).toFixed(1), hits: cur.hits, kills: cur.kills,
     shieldedKills: cur.shieldedKills, shieldedHits: cur.shieldedHits, droneKills: cur.droneKills,
-    droneDeaths: cur.droneDeaths, droneDecays: cur.droneDecays, bossKills: cur.bossKills, bossPhase2: cur.bossPhase2, bossRing: cur.bossRing, bossFire: cur.bossFire, bossBurst: cur.bossBurst, nearmiss: cur.nearmiss, bombs: cur.bombs,
+    droneDeaths: cur.droneDeaths, droneDecays: cur.droneDecays, bossKills: cur.bossKills, bossPhase2: cur.bossPhase2, bossRing: cur.bossRing, bossFire: cur.bossFire, bossBurst: cur.bossBurst, wardenSpawns: cur.wardenSpawns, wardenKills: cur.wardenKills, nearmiss: cur.nearmiss, bombs: cur.bombs,
     goldenKills: cur.goldenKills, spawns: { ...cur.spawns }, killSizes: { ...cur.killSizes }, dropsTaken: { ...cur.dropsTaken }, dropsSpawned: { ...cur.dropsSpawned },
     shots: { ...cur.shots },
     scoreDelta: w.score - cur.score0,
@@ -141,6 +141,7 @@ function runPlaytest(seed, maxSteps, setup = null, startWave = 0, cfg = null) {
         if (e.data.shielded) cur.shieldedKills++;
         if (e.data.drone) cur.droneKills++;
         if (e.data.boss) cur.bossKills++;
+        if (e.data.size === 'warden') cur.wardenKills++;
         if (e.data.golden) cur.goldenKills++;
       } else if (e.type === 'droneExplode') cur.droneDeaths++;
       else if (e.type === 'droneDecay') cur.droneDecays++; // I129: seeker battery expired
@@ -148,6 +149,7 @@ function runPlaytest(seed, maxSteps, setup = null, startWave = 0, cfg = null) {
       else if (e.type === 'bossRing') cur.bossRing++;
       else if (e.type === 'bossFire') cur.bossFire++;
       else if (e.type === 'bossBurst') cur.bossBurst++;
+      else if (e.type === 'wardenSpawn') cur.wardenSpawns++;
       else if (e.type === 'nearmiss') cur.nearmiss++;
       else if (e.type === 'powerup') cur.dropsTaken[e.data.type] = (cur.dropsTaken[e.data.type] || 0) + 1;
       else if (e.type === 'powerupDrop') cur.dropsSpawned[e.data.type] = (cur.dropsSpawned[e.data.type] || 0) + 1;
@@ -169,7 +171,7 @@ function runPlaytest(seed, maxSteps, setup = null, startWave = 0, cfg = null) {
     totals: {
       kills: sum('kills'), shieldedKills: sum('shieldedKills'), shieldedHits: sum('shieldedHits'),
       droneKills: sum('droneKills'), droneDeaths: sum('droneDeaths'), droneDecays: sum('droneDecays'), goldenKills: sum('goldenKills'),
-      hits: sum('hits'), bossPhase2: sum('bossPhase2'), bossRing: sum('bossRing'), bossFire: sum('bossFire'), bossBurst: sum('bossBurst'), nearmiss: sum('nearmiss'), bombs: sum('bombs'),
+      hits: sum('hits'), bossPhase2: sum('bossPhase2'), bossRing: sum('bossRing'), bossFire: sum('bossFire'), bossBurst: sum('bossBurst'), wardenSpawns: sum('wardenSpawns'), wardenKills: sum('wardenKills'), nearmiss: sum('nearmiss'), bombs: sum('bombs'),
       shotsL1: sumShots(1), shotsL2: sumShots(2), shotsL3: sumShots(3),
       stallAdvances: waves.filter(x => x.clearSec >= 44).length,
       spawnMix: sumSizes('spawns'), killSizes: sumSizes('killSizes'),

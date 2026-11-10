@@ -6,6 +6,7 @@ import { AsteroidField } from './asteroids.js';
 import { MineField } from './mines.js';
 import { DroneField } from './drones.js'; // ST-117
 import { Monolith, bossHpForWave, bossBurstVectors } from './boss.js';
+import { Warden } from './warden.js'; // ST-136
 import { EnemyBulletField } from './enemyBullets.js';
 import { VortexField } from './vortex.js'; // ST-059
 import { bulletHitRock, shipHitRock } from './collision.js';
@@ -32,6 +33,7 @@ export class World {
     this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056
     this._bossPhaseEmitted = false; // ST-133: enrage event fires once per boss
     this.bossBurstTimer = this.cfg.boss.burst.every; // ST-134
+    this.warden = null; // ST-136
     this.bossBursts = 0; // ST-134: volley count (spiral offset)
     this.events = [];
     this._eventSpare = [];
@@ -131,6 +133,7 @@ export class World {
       this.emit('wave', { n: wv.startedWave, mod: this.waves.activeMod, endless: wv.startedWave >= this.cfg.waveEndless.first }); // ST-051
       this.spawnMinesForWave(wv.startedWave); // ST-054
       this.spawnBossForWave(wv.startedWave); // ST-055
+      this.spawnWardenForWave(wv.startedWave); // ST-136 (only on 5th waves without a live Monolith)
       this.spawnDronesForWave(wv.startedWave); // ST-117
     }
     const wl = this.weaponLevel(); // ST-122: weapon progression by wave
@@ -138,6 +141,7 @@ export class World {
     if (wv.waveCleared) this.emit('waveCleared', { n: wv.waveCleared });
     this.mines.step(edt, this.ship.pos); // ST-054 (ST-115: scaled under slow-mo)
     this.drones.step(edt, this.ship.pos); // ST-117 (ST-115: scaled under slow-mo)
+    if (this.warden) this.warden.step(edt, this.ship.pos); // ST-136 (ST-115: scaled under slow-mo)
     for (const dc of this.drones.decayed) { // I129: seeker battery expired -> self-destruct event (render FX in main.js)
       this.emit('droneDecay', { pos: { x: dc.pos.x, y: dc.pos.y } });
     }
@@ -164,10 +168,12 @@ export class World {
     }
     this.resolveBulletMines(); // ST-054
     this.resolveBulletBoss(); // ST-055
+    this.resolveBulletWarden(); // ST-136
     this.resolveShipMines(); // ST-054
     this.resolveBulletDrones(); // ST-117
     this.resolveShipDrones(); // ST-117
     this.resolveShipBoss(); // ST-055
+    this.resolveShipWarden(); // ST-136
     this.resolveShipEnemyBullets(); // ST-056
     this.resolveBulletRocks();
     this.resolveShipRocks();
@@ -410,6 +416,71 @@ export class World {
     this.emit('bossBurst', { pos: { x: this.boss.pos.x, y: this.boss.pos.y }, fired });
   }
 
+  /** ST-136: the WARDEN spawns on 5th waves where the Monolith did not (a
+   * previous Monolith is still alive) - that wave's heavyweight is the drone.
+   * No-op on other waves, while a Monolith is alive, or while one is live. */
+  spawnWardenForWave(wave) {
+    const w = this.cfg.warden;
+    const b = this.cfg.boss;
+    if (wave % b.everyWave !== 0 || this.boss || this.warden) return;
+    const R = this.cfg.arena.radius - w.radius;
+    let pos = null, tries = 0;
+    do {
+      const a = this.rng.next() * Math.PI * 2;
+      pos = v2(Math.cos(a) * R, Math.sin(a) * R);
+      tries++;
+    } while (Math.hypot(pos.x - this.ship.pos.x, pos.y - this.ship.pos.y) < 10 && tries < 8);
+    this.warden = new Warden(this.rng, this.cfg, pos);
+    this.emit('wardenSpawn', { pos: { x: pos.x, y: pos.y }, wave, hp: this.warden.maxHp });
+  }
+
+  /** ST-136: bullets damage the WARDEN (armor first); armor pings emit 'wardenArmor'. */
+  resolveBulletWarden() {
+    const wd = this.warden;
+    if (!wd || !wd.alive) return;
+    for (const blt of this.weapons.bullets) {
+      if (blt.dead) continue;
+      if (Math.hypot(wd.pos.x - blt.pos.x, wd.pos.y - blt.pos.y) < wd.radius + blt.radius) {
+        this.weapons.markHit(blt.id);
+        const r = wd.hit();
+        if (r.killed) this.wardenDeath();
+        else if (r.absorbed) this.emit('wardenArmor', { pos: { x: wd.pos.x, y: wd.pos.y }, armor: wd.armor });
+      }
+    }
+    this.weapons.compact();
+  }
+
+  /** ST-136: the WARDEN dies - score (feeds the combo), splits into S rocks, FX event. */
+  wardenDeath() {
+    const w = this.cfg.warden;
+    const px = this.warden.pos.x, py = this.warden.pos.y;
+    const pts = this.scoreKeeper.kill(w.score, this.time);
+    this.emit('kill', { pos: { x: px, y: py }, size: 'warden', points: pts,
+      combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive') });
+    for (let i = 0; i < w.splitCount; i++) this.field.spawn('S', 1, { x: px, y: py });
+    this.emit('wardenDeath', { pos: { x: px, y: py } });
+    this.warden = null;
+  }
+
+  /** ST-136: the WARDEN touching the ship costs a life (same flow as a boss hit). The drone survives. */
+  resolveShipWarden() {
+    if (this.ship.isInvulnerable || this.lives <= 0) return;
+    const wd = this.warden;
+    if (!wd || !wd.alive) return;
+    if (Math.hypot(wd.pos.x - this.ship.pos.x, wd.pos.y - this.ship.pos.y) < wd.radius + this.cfg.ship.radius) {
+      const livesLeft = this.livesMgr.damage();
+      this.scoreKeeper.onDamage();
+      const nx = (this.ship.pos.x - wd.pos.x), ny = (this.ship.pos.y - wd.pos.y);
+      const n = Math.hypot(nx, ny) || 1;
+      this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+      this.ship.damage(v2(nx / n, ny / n));
+      if (livesLeft <= 0) {
+        this.game.to(STATE.GAME_OVER);
+        this.emit('gameover', { score: this.score });
+      }
+    }
+  }
+
   /** ST-056: a bolt touching the ship costs a life (same flow as rock contact). */
   resolveShipEnemyBullets() {
     if (this.ship.isInvulnerable || this.lives <= 0) return;
@@ -503,6 +574,7 @@ export class World {
     this.mines.clear();
     this.drones.clear(); // ST-117
     this.boss = null; // ST-055
+    this.warden = null; // ST-136
     this.enemyBullets.clear(); // ST-056
     this.vortex.reset(); // ST-059
     this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056
