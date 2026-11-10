@@ -398,6 +398,7 @@ export const CONFIG = {
       life: 0.38,             // puff life (s) - full-speed trail ~ rate*life long
       offset: 1.15,           // puff distance behind the ship (u)
     },
+    dpr: { high: 2, low: 1.5 }, // ST-225: per-tier device-pixel-ratio caps (load-reactive DPR)
     env: { intensity: 0.55 }, // I213: envMapIntensity for PBR-lite IBL from the skybox (bloom-safe)
     bloom: {                  // I35: post-fx, High quality only (GDD: "Low disables bloom")
       strength: 0.6,

@@ -2318,3 +2318,20 @@ No test changes (render-layer only - scope-check-E10 notes ST-219 as "the only r
 - Result: DONE
 - Follow-up: I229 = ST-225 (load-reactive DPR 1.5 + effective-tier settings sync; cgs-dev-story + cgs-standards-tests).
 
+## I229 - ST-225: load-reactive DPR + effective-tier settings sync (cgs-dev-story + cgs-standards-tests)
+
+- Story: ST-225 (I225 flags 2+3) - the FX tier drives devicePixelRatio from one place; the stored user choice is never overwritten by automation; the effective tier is visible in the UI when automation chose it.
+- Changed:
+  - NEW src/core/dprTier.js (pure): dprForTier(tier, dpr, caps) - high -> min(dpr, caps.high=2), low/off -> min(dpr, caps.low=1.5); invalid tier -> high; invalid dpr -> 1; invalid caps -> 2/1.5.
+  - NEW tests/dprTier.test.js (6 tests: high/low/off caps, dpr 2 -> 1.5, dpr 1.25 no-op, invalid tier/dpr, custom + invalid caps).
+  - src/core/config.js: CONFIG.fx.dpr = { high: 2, low: 1.5 } (single source for the caps).
+  - src/main.js: applySettings no longer owns FX state (old fxCount + bloom lines removed); applyFxTier(tier, label) is the single writer for fxCount / bloom / DPR / marker, reached only from boot, F hotkey, panel changes, auto-downgrade. applyDprForTier(label) no-ops when |target - current| < 1e-6, else setPixelRatio + renderer.setSize + bloom.resize + one labeled console.info line. updateFxMarker() shows 'AUTO: LOW' on both panels while adaptive.state().autoLow. autoDowngrade handler + F key + both panel callbacks route through applyFxTier.
+  - src/render/settingsPanel.js: row() returns the label div; new fxAuto chip (hidden by default, transition:opacity .2s) on the FX QUALITY label; setFxMarker(text) (null -> opacity 0).
+- Design note (pinned): the stored user choice (storage) is NEVER overwritten by automation; the marker shows the effective tier when automation chose it. Because applySettings no longer touches FX state, unrelated settings changes (volume etc.) can no longer revert an auto-downgraded tier (closes the I225 flag 3 reversion family).
+- Verification: npm test 697/697 (691 + 6 new dprTier tests); build exit 0; dist 1962.5 raw / 510.3 gzip KB (<=2048/<=550, 104 files); log audit 1..229 sequential after append.
+- Browser smoke (60 Hz display):
+  - 229a (devicePixelRatio=2 via addInitScript): boot DPR 2 (min(2,2) high); forced auto-downgrade (20 fps x 8.25 s > 2 x 2.0 s windows, confirm 2): pixelRatio 2.00 -> 1.50 exactly, console.info '[voidrunner] DPR 2.00 -> 1.50 (FX low, auto-downgrade)', bloom off, 'AUTO: LOW' chip opacity 1 on BOTH panels, storage still fx=high (untouched); no-revert: applySettings(stored fx=high) leaves DPR 1.5 + bloom off (pre-ST-225 this reverted to high); user restore F x3 (low/off/high): no DPR line at low/off (target 1.5 = current, no-op), marker cleared on first F (userSet clears autoLow), high -> 'DPR 1.50 -> 2.00 (FX high, hotkey)' + bloom on + storage ends 'high'; frame probe 165 f around the switches: one 67 ms labeled resize hitch + 4 x 33 ms double-quantum frames, no sustained degradation; console 0/0.
+  - 229b (native dpr 1.25, no emulation): boot no-op - zero console messages (min(1.25,2)=1.25 = init value); 229b2: stored fx=low reload -> DPR 1.25 (cap 1.5 does not bind below 1.25 - no line, correct), bloom off, zero console messages.
+- Demo pin: structurally untouched (render/settings layer only; unit-covered); browser re-verify scheduled at ST-227 (I231).
+- Result: DONE
+- Follow-up: I230 = ST-226 (skybox art pass - Blender node-based equirect, budget-staged, net delta <= 40 KB raw vs 41.2 KB current, PMREM IBL unchanged)

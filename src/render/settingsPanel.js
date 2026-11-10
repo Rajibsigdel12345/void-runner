@@ -44,6 +44,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
     d.style.cssText = 'text-align:right;font-weight:600;color:#ffe08a;font-size:calc(13px * var(--vr-fs,1));';
     d.textContent = label;
     target.appendChild(d);
+    return d; // ST-225: callers may append inline state (the FX AUTO marker)
   }
   function styleCtl(c) {
     c.style.cssText = 'background:rgba(10,18,40,0.8);border:1px solid #2b4a8a;border-radius:4px;color:#cfe4ff;font-family:inherit;';
@@ -77,7 +78,14 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
 
   // VISUALS group
   const visCard = card('VISUALS');
-  row('FX QUALITY', visCard);
+  const fxRow = row('FX QUALITY', visCard);
+  const fxAuto = document.createElement('span'); // ST-225: AUTO tier marker (effective tier chosen by automation)
+  fxAuto.textContent = ' AUTO: LOW';
+  fxAuto.style.cssText = 'margin-left:8px;padding:1px 6px;border-radius:3px;background:rgba(255,224,138,0.15);border:1px solid rgba(255,224,138,0.4);color:#ffe08a;font-size:calc(10px * var(--vr-fs,1));letter-spacing:1px;opacity:0;transition:opacity .2s;';
+  fxRow.appendChild(fxAuto);
+  function setFxMarker(text) { // ST-225(b): null hides; text shows e.g. 'AUTO: LOW'
+    if (text) { fxAuto.textContent = ' ' + text; fxAuto.style.opacity = '1'; } else { fxAuto.style.opacity = '0'; }
+  }
   const fxSel = document.createElement('select');
   for (const opt of ['high', 'low', 'off']) { // ST-224: off tier
     const o = document.createElement('option');
@@ -184,5 +192,5 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
     smHint.checked = s.slowmoHint; // I158
   }
 
-  return { el: wrap, sync };
+  return { el: wrap, sync, setFxMarker };
 }

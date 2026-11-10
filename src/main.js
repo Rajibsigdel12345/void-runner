@@ -43,6 +43,7 @@ import { createBloom } from './render/bloom.js';
 import { createFpsMeter } from './render/fpsMeter.js';
 import { createDebugOverlay } from './render/debugOverlay.js'; // ST-080
 import { createAdaptiveQuality } from './core/adaptiveQuality.js'; // ST-073
+import { dprForTier } from './core/dprTier.js'; // ST-225: load-reactive DPR (pure core)
 import { createClock } from './core/clock.js'; // ST-078
 import { visibilityAction } from './core/visibilityPause.js'; // I189: pure visibility-pause decision (unit-tested)
 import { STATE } from './core/state.js';
@@ -242,11 +243,12 @@ document.body.appendChild(slowmoHintEl);
 
 function applySettings(s) {
   liveSettings = s;
-  fxCount = s.fx === 'low' ? CONFIG.fx.particleLow : s.fx === 'high' ? CONFIG.fx.particleHigh : CONFIG.fx.particleOff; // ST-224: off = 0
+  // ST-225: FX tier state (fxCount / bloom / DPR) now lives in applyFxTier below - unrelated
+  // settings changes (volume etc.) can no longer revert an auto-downgraded tier.
   motionOff = s.reducedMotion === true;
   slowmoHintEl.style.transition = motionOff ? 'none' : 'opacity .2s'; // I161: no fade under reduced motion
   setUiScale(); // I70+I71: UI scale = fontScale x viewport (cascades to DOM overlays only; canvas unaffected)
-  bloom.setEnabled(s.fx === 'high');
+
   if (audio.state() !== 'uninitialized') { audio.setVolume(s.volume); audio.setSfx(s.sfx); }
   audio.setMusic(s.music !== false); // I158: music bed toggle (ctx-free; bed driven in syncVisuals)
   applyColorblindPreview(s.colorblindPreview); // I158: deuteranopia canvas preview
@@ -270,16 +272,46 @@ function toast(msg) {
 }
 const adaptive = createAdaptiveQuality(CONFIG.adaptive, (info) => {
   if (info.type === 'autoDowngrade') {
-    fxCount = CONFIG.fx.particleLow;
-    bloom.setEnabled(false);
+    applyFxTier(info.tier, 'auto-downgrade'); // ST-225: particles + bloom + DPR + marker in one place
     console.info('[voidrunner] adaptive quality: FX high -> low (rolling ' + CONFIG.adaptive.windowSec + 's avg ' + Math.round(info.fps) + ' fps < ' + CONFIG.adaptive.thresholdFps + ')');
     toast('FX AUTO-SET TO LOW (LOW FPS)');
   }
 });
 // ST-026: settings panels (menu + pause) - after storage/applySettings (TDZ order).
 let fxPreviewFn = null; // ST-067: live FX preview, wired once particles exist
-const menuSettings = createSettingsPanel(storage, applySettings, (tier) => { adaptive.userSet(tier); if (fxPreviewFn) fxPreviewFn(tier); }); // ST-073: user FX choice overrides automation
-const pauseSettings = createSettingsPanel(storage, applySettings, (tier) => { adaptive.userSet(tier); if (fxPreviewFn) fxPreviewFn(tier); }); // ST-073
+const menuSettings = createSettingsPanel(storage, applySettings, (tier) => { adaptive.userSet(tier); applyFxTier(tier, 'panel'); if (fxPreviewFn) fxPreviewFn(tier); }); // ST-073/ST-225: user FX choice overrides automation
+const pauseSettings = createSettingsPanel(storage, applySettings, (tier) => { adaptive.userSet(tier); applyFxTier(tier, 'panel'); if (fxPreviewFn) fxPreviewFn(tier); }); // ST-073/ST-225
+
+// ST-225: effective FX tier - the single writer for fxCount / bloom / DPR / the AUTO marker.
+// Only user FX changes (F hotkey, settings panels) and the adaptive auto-downgrade mutate it;
+// the stored user choice (storage) is never overwritten, and unrelated settings changes
+// (volume, music, ...) can no longer silently revert an auto-downgraded tier.
+let effectiveTier = liveSettings.fx;
+function applyDprForTier(label) {
+  const target = dprForTier(effectiveTier, window.devicePixelRatio, CONFIG.fx.dpr);
+  const cur = renderer.getPixelRatio();
+  if (Math.abs(target - cur) < 1e-6) return false;
+  renderer.setPixelRatio(target);
+  renderer.setSize(window.innerWidth, window.innerHeight); // three.js: pixel-ratio change needs a setSize to take effect
+  bloom.resize(window.innerWidth, window.innerHeight);
+  console.info('[voidrunner] DPR ' + cur.toFixed(2) + ' -> ' + target.toFixed(2) + ' (FX ' + effectiveTier + ', ' + label + ')');
+  return true;
+}
+function updateFxMarker() {
+  const st = adaptive.state();
+  const marker = st.autoLow ? 'AUTO: LOW' : null; // automation chose the tier; user choice untouched
+  menuSettings.setFxMarker(marker);
+  pauseSettings.setFxMarker(marker);
+}
+function applyFxTier(tier, label) {
+  if (tier !== 'high' && tier !== 'low' && tier !== 'off') tier = 'high';
+  effectiveTier = tier;
+  fxCount = tier === 'low' ? CONFIG.fx.particleLow : tier === 'high' ? CONFIG.fx.particleHigh : CONFIG.fx.particleOff; // ST-224: off = 0
+  bloom.setEnabled(tier === 'high');
+  applyDprForTier(label);
+  updateFxMarker();
+}
+applyFxTier(liveSettings.fx, 'boot'); // boot: stored tier (one labeled DPR resize if the cap differs from the min(dpr,2) init)
 
 // ST-141: daily seeded run. One canonical calendar-day seed so every player today runs
 // the identical board (comparable daily scores). dailyMode marks the active run as the
@@ -450,6 +482,7 @@ window.addEventListener('keydown', (e) => {
     const next = toggleFxQuality(storage.getSettings().fx);
     const merged = storage.setSettings({ fx: next });
     applySettings(merged);
+    applyFxTier(next, 'hotkey'); // ST-225: FX tier state (particles / bloom / DPR / marker)
     adaptive.userSet(next); // I157: user choice overrides adaptive automation
     if (fxPreviewFn) fxPreviewFn(next); // ST-067: live particle preview
     menuSettings.sync();
