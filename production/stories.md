@@ -218,7 +218,7 @@ Format: ID | story | acceptance criteria | verification
 - ST-205 | Final polish sweep (console clean, all screens) | sweep complete | browser
 - ST-206 | E8 closeout: milestone review + final CHANGELOG + log audit 1..206 | sequence 1..206, docs | repo
 
-## E9 Blender Graphics & Assets (I207+)
+## E9 Blender Graphics & Assets (I207..I218) - CLOSED (I218)
 - Blender 5.2.3 is connected. Assets are modeled procedurally in Blender (bpy), exported as GLB,
   vendored under assets/, and loaded in the render layer via three.js GLTFLoader with a PROCEDURAL
   FALLBACK (the game still boots if a GLB is missing or fails to parse). Polycounts stay within the
@@ -234,4 +234,5 @@ Format: ID | story | acceptance criteria | verification
 - ST-214 | Asset perf + memory audit (draw calls, tris, VRAM), LOD/merge | audit notes, budget met | build + browser
 - ST-215 | Test batch E9 (loader fallback, asset swap, budget assertions) + browser verify | 15+ tests, console clean | node + browser
 - ST-216 | G9.0 gate (cgs-gate-check) + E9 docs + changelog + log audit 1..216 | gate PASS, docs | doc + node
-- ST-217 | Post-processing polish pass (art research 2026-11-10): half-res bloom + additive particle trails + boss-kill flash / phase-2 hit-stop, FX-tier + adaptive-gated, frame-time before/after | browser: measure + screenshot | browser
+- ST-217 | Post-processing polish pass (art research 2026-11-10): half-res bloom + additive particle trails + boss-kill flash / phase-2 hit-stop, FX-tier + adaptive-gated, frame-time before/after | browser: measure + screenshot | browser - DONE at I217
+- CLOSED (I218): 11/11 stories ST-207..217 done (I207..I217); G9.1 closeout gate PASS (fresh 676/676, build 0, dist 1940.6/501.9 KB, log audit 1..218 sequential).

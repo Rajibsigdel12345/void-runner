@@ -576,3 +576,41 @@ Gate check for the E9 Blender graphics & assets milestone (ST-207..216) per cgs-
 
 ### Next owner / decision
 - I217 ST-217: post-processing polish pass (half-res bloom + boss-kill flash / phase-2 hit-stop, FX-tier + adaptive-gated, frame-time before/after) per design/art-direction-research.md; then E9 closeout.
+
+## G9.1 - E9 closeout gate (I218)
+
+### Summary
+Closeout gate for the E9 Blender graphics & assets milestone (ST-207..217) per cgs-gate-check. G9.0 (I216) verified the asset phase (ST-207..216); I217 closed ST-217 (post-processing polish), the last queued art story; this gate closes E9. Advisory gate.
+
+### Gate Criteria
+1. All E9 stories complete: ST-207..217 (11 stories), each with iteration evidence in production/iterations.md.
+2. Post-processing polish (ST-217) landed: half-res bloom with frame-time before/after, phase-2 hit-stop, FX-tier + motion gated.
+3. Quality: fresh test suite green, fresh build green, dist within budget.
+4. Documentation: milestone review final + epics CLOSED + timeline + changelog + stories + log audit sequential (no gaps/dups).
+5. Risk register disposition: R-E9-1..4 closed or explicitly carried.
+
+### Evidence
+- (1) Stories: ST-207 (I207), ST-208 (I208), ST-209 (I209), ST-210 (I210), ST-211 (I211), ST-212 (I212), ST-213 (I213), ST-214 (I214), ST-215 (I215), ST-216 (I216), ST-217 (I217) - 11/11 closed across 12 iterations (I207..I218).
+- (2) I217: half-res bloom (vendor setSize halves the forced half again -> internal bright pass + 5-mip chain at 1/4 frame; glow visually unchanged, .evidence/I217/01-halfres-bloom.png); post chain steady 3.183 -> 2.586 ms avg (~11% cheaper, same scripted pilot + probe); 40 ms phase-2 hit-stop (research window, below bomb/bossDeath) + main.js juice branch; levers 2/3 verified already-done (particles.js AdditiveBlending; ST-179 flashTable bossDeath flash).
+- (3) I218 fresh: npm test 676/676; node scripts/build.mjs exit 0; dist 1940.6 KB raw / 501.9 KB gzip (budget <=2048/<=550, ~48.1 KB headroom).
+- (4) I218 log audit: 217 entries 1..217 sequential (no gaps/dups); I218 appended -> 1..218. Milestone review final section + epics CLOSED + timeline line + CHANGELOG + stories CLOSED line all landed this iteration.
+- (5) Risks: R-E9-1 CLOSED (dist 1940.6/501.9, budgets pinned by assetPerf.test.js), R-E9-2 CLOSED (fallback proven I207; naming/attribute/budget tests green), R-E9-3 CLOSED (Blender 5.2 exporter quirks captured in I208-I212 notes; audits re-verify exports), R-E9-4 CLOSED (art research capped; ST-217 was the last queued art story). 8 HUMAN-PENDING perception items CARRIED to E10 (non-blocking; need a human session; 2 of them ART/AUDIO).
+
+### Concerns
+- Low-end physical device / GPU validation untested (adaptive quality I73 mitigates; carried).
+- 8 HUMAN-PENDING perception items remain the player-experience evidence gap (non-blocking).
+
+### Verdict
+**PASS - E9 CLOSED.** 11/11 stories (ST-207..217) complete with per-iteration evidence; fresh suite/build/dist green; log 1..218 sequential; risk register closed except the carried 8 HUMAN-PENDING items + low-end device validation.
+
+### Risks
+- Carried: 8 HUMAN-PENDING perception items (production/bug-triage.md), low-end physical device / GPU validation.
+
+### Changed files
+- production/gates.md (this block), production/milestone-review.md (E9 final closeout section), production/epics.md (E9 header + Result CLOSED), production/timeline.md, production/stories.md (E9 CLOSED line), CHANGELOG.md, production/iterations.md, production/session-state/active.md.
+
+### Verification evidence
+- npm test 676/676 (fresh, this iteration); node scripts/build.mjs exit 0 (fresh, this iteration); log audit 1..218 sequential (this iteration); dist 1940.6/501.9 KB (this iteration).
+
+### Next owner / decision
+- I219: open E10 (post-E9 polish) - scope check + stories (cgs-scope-check + cgs-create-stories). First candidate: art research lever 6 (camera/feel: 2-5% aim-lead, boss-approach zoom-out, menu orbit drift - the only unowned lever). 8 HUMAN-PENDING items parked for a human session.

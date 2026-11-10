@@ -207,3 +207,44 @@ E9 delivered the user-requested Blender art pass: 15 low-poly GLBs + an equirect
 
 ### Verdict
 **PASS - E9 asset phase (ST-207..216) closed at I216.** Next: I217 ST-217 post-processing polish, then E9 closeout.
+
+## E9 CLOSED - Blender Graphics & Assets, final closeout (I218, G9.1 PASS)
+
+## Summary
+Final closeout of the E9 milestone. G9.0 (I216) gate-verified the asset phase (ST-207..216); I217 closed ST-217 (post-processing polish), the last queued art story; G9.1 (I218) closes the milestone.
+
+## Milestone Goal
+Replace/refine the procedural look with Blender-authored low-poly assets inside the draw-call/tri budgets (procedural fallback preserved), plus the post-processing polish (half-res bloom, phase-2 hit-stop) - a REFINEMENT of the shipped art direction (same palette, flat-shaded low-poly language), not a restyle (art-direction-research.md verdict).
+
+## Evidence (per story)
+- ST-207 (I207): Blender->GLB->GLTFLoader pipeline + procedural fallback proven (5/5 aborted loads -> procedural boot, exactly 5 warns); tests/assetGlbs.test.js.
+- ST-208 (I208): ship 40-tri faceted delta + 6-tri recessed canopy gem; exporter axis flip found + compensated.
+- ST-209 (I209): rocks L/M/S 320/104/80 tris, seeded caggy displacement + COLOR_0 mottle, 4 inset craters on M.
+- ST-210 (I210): boss 96-tri jagged obelisk + COLOR_0 crown; shield 80 de-indexed plates (inward-normals incident fixed + signed-volume audit gate added).
+- ST-211 (I211): 7 powerup emblems (16..48 tris, exact extents) + 52-tri drone dart.
+- ST-212 (I212): equirect skybox 1024x512 (41.2 KB) + arena ring (24 plates, 48 tris, +Y normals hand-set).
+- ST-213 (I213): PMREM IBL (88/88 standard mats @ envMapIntensity 0.55) + emissive engine trail + bloom-safe threshold audit.
+- ST-214 (I214): asset perf + memory audit - 15 GLBs = 111.3 KB / 92.9 KB geo / 1021 tris / 17 mats / 0 UV2; 280 pooled meshes over 26 unique geos; ~5.5 MB GPU textures; NO bottleneck; budgets pinned (tests/assetPerf.test.js).
+- ST-215 (I215): 18 core tests over the thinnest coverage (652->670).
+- ST-216 (I216): G9.0 gate PASS + docs gap closed (E9 was stories.md-only) + log audit 1..216.
+- ST-217 (I217): half-res bloom (internal chain 1/4 frame; post chain steady 3.183 -> 2.586 ms avg) + 40 ms phase-2 hit-stop + test-file clobber repaired (8 I133 tests restored, +6 new = 14 in the file).
+
+## Blocker
+None. (The 8 HUMAN-PENDING perception items are a non-blocking evidence gap; parked for a human session.)
+
+## Transition Verdict
+**CLOSED - E9 complete: 11/11 stories, 12 iterations (I207..I218).** Fresh at close: 676/676 tests, build 0, dist 1940.6/501.9 KB (<=2048/<=550), log audit 1..218 sequential. Proceed to E10 (post-E9 polish; first lever = camera/feel, art-direction-research.md lever 6).
+
+## Risks
+- 8 HUMAN-PENDING perception items (2 ART/AUDIO) - E10 must not block on them; human session when available.
+- Low-end physical device / GPU validation untested (adaptive quality I73 mitigates).
+- dist gzip headroom ~48.1 KB - any E10 asset work needs the same size review as E9 (R-E9-1 pattern).
+
+## Changed files or proposed files
+- production/milestone-review.md (this section), production/gates.md (G9.1 block), production/epics.md (E9 header + Result CLOSED), production/timeline.md (+E9 closed line), production/stories.md (E9 CLOSED line), CHANGELOG.md (+I218), production/iterations.md (+I218), production/session-state/active.md.
+
+## Verification evidence
+- I218 fresh: npm test 676/676; node scripts/build.mjs exit 0; dist 1940.6/501.9 KB; log audit 217 entries 1..217 no gaps/dups (+I218 = 1..218).
+
+## Next owner / decision
+- I219: E10 scope check + stories (cgs-scope-check + cgs-create-stories).

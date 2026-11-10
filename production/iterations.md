@@ -2119,3 +2119,31 @@ One entry per iteration. Format:
 - bossPhase2 e2e juice probe: SKIPPED (a ~138 s scripted boss drive is flaky; the handoff allows the skip) - branch verified by code inspection (one line in the motion-gated juice chain) + the core emit is unit-covered for Monolith AND Splicer through full World steps.
 
 - Result: DONE. ST-217 closed. Next I218: E9 final closeout (milestone review final + gate + timeline) - ST-217 was the last queued art story.
+
+## I218 - E9 final closeout: G9.1 gate + milestone review final + log audit 1..218 (cgs-milestone-review + cgs-gate-check)
+
+**Summary:** E9 (Blender Graphics & Assets) is CLOSED. G9.0 (I216) verified the asset phase (ST-207..216); I217 closed ST-217 (post-processing polish), the last queued art story. This iteration runs the closeout gate (G9.1) and lands the final docs: milestone review final section, epics CLOSED, timeline, stories CLOSED, changelog, active.md. No src changes.
+
+**Milestone Goal (from epics.md):** Blender-authored low-poly assets inside the draw-call/tri budgets (procedural fallback preserved) + post-processing polish - a refinement of the shipped art direction, not a restyle.
+
+**Story Goal:** Close E9 with a gate, a final milestone review, and a sequential log audit.
+
+**Owner + Dependencies:** main agent; depends on I216 (G9.0) + I217 (ST-217).
+
+**Acceptance / G9.1 criteria:**
+1. 11/11 stories ST-207..217 closed with iteration evidence.
+2. ST-217 polish landed with frame-time before/after (I217).
+3. Fresh tests + build green, dist within budget.
+4. Docs final: milestone review + epics + timeline + stories + changelog + log audit sequential.
+5. Risk register disposition: R-E9-1..4 closed or explicitly carried.
+
+**Verification:**
+- G9.1 verdict: **PASS - E9 CLOSED.**
+- Fresh: npm test 676/676; node scripts/build.mjs exit 0; dist 1940.6 KB raw / 501.9 KB gzip (<=2048/<=550, ~48.1 KB headroom).
+- Log audit: 217 entries 1..217 sequential (no gaps/dups) -> +I218 = 1..218.
+- Per-story evidence: ST-207 I207 (pipeline + fallback), ST-208 I208 (ship), ST-209 I209 (rocks), ST-210 I210 (boss + shield), ST-211 I211 (emblems + drone), ST-212 I212 (skybox + ring), ST-213 I213 (IBL + trail), ST-214 I214 (perf audit, no bottleneck), ST-215 I215 (18 tests), ST-216 I216 (G9.0 + docs), ST-217 I217 (half-res bloom + phase-2 hit-stop).
+- Risks: R-E9-1..4 CLOSED (gates G9.1 evidence); carried: 8 HUMAN-PENDING perception items (2 ART/AUDIO; non-blocking) + low-end physical device / GPU validation (adaptive quality I73 mitigates).
+
+**Changed:** production/gates.md (+G9.1), production/milestone-review.md (+E9 CLOSED section), production/epics.md (E9 header + Result CLOSED), production/timeline.md (+line), production/stories.md (ST-217 DONE + E9 CLOSED), CHANGELOG.md (+I218), production/session-state/active.md, this entry.
+
+- Result: DONE. E9 CLOSED (G9.1 PASS). Next I219: E10 (post-E9 polish) scope check + stories (cgs-scope-check + cgs-create-stories); first candidate = art research lever 6 (camera/feel).

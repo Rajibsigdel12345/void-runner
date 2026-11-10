@@ -12,3 +12,5 @@
 - 2026-11-10  E8E closed at I186: G8.4 gate PASS (I182), 581/581 tests, E8E deep perf profile (I184) + 600 s memory soak (I185) clean. Next: E8F - context-loss hardening (ST-187, I187).
 
 - 2026-11-11  E9 asset phase (ST-207..216, I207..I216) gate G9.0 PASS at I216: 15 Blender GLBs + equirect skybox (111.3 KB / 1021 tris, budgets met, fallback proven), IBL + engine trail (I213), asset perf no bottleneck (I214), tests 630->670, dist 1939.2/501.3 KB. Next: I217 ST-217 (post-processing polish).
+
+- 2026-11-11  E9 CLOSED at I218 (G9.1 closeout gate PASS): 11/11 stories ST-207..217 (I207..I217) + closeout. 15 Blender GLBs + skybox (111.3 KB / 1021 tris, budgets pinned, fallback proven), IBL + emissive engine trail (I213), asset perf no bottleneck (I214), post-processing polish (half-res bloom internal 1/4 frame, 40 ms phase-2 hit-stop; I217), tests 630->676, dist 1940.6/501.9 KB (<=2048/<=550). Carried: 8 HUMAN-PENDING perception items + low-end device validation. Next: E10 (post-E9 polish; first lever = camera/feel per art research lever 6).

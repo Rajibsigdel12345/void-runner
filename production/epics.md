@@ -148,12 +148,13 @@ recorded in production/gates.md.
 - R-E8-5 (low) WebAudio music cost -> synthesis, mute + music toggle, gesture init.
 - R-E8-6 (low) Scope creep -> scope-check-E8.md is the cap; new ideas to Deferral.
 
-## E9 Blender Graphics & Assets (ST-207..216)
+## E9 Blender Graphics & Assets (ST-207..217) - CLOSED (I218)
 - Context: Blender 5.2.3 connected. Assets modeled procedurally in Blender (bpy), exported as GLB, vendored under assets/, loaded by the render layer via three.js GLTFLoader with a PROCEDURAL FALLBACK (the game still boots if a GLB is missing or fails to parse). Polycounts stay within the existing draw-call / triangle budgets. The AGENTS.md 'no external art assets' convention is extended at ST-207 to 'Blender-authored, vendored GLB assets + procedural fallback'.
 - Stories: ST-207 pipeline (Blender->GLB + GLTFLoader path, fallback, assets/ dir, AGENTS.md note); ST-208 ship model (40-tri faceted delta + canopy gem); ST-209 asteroid set L/M/S (320/104/80 tris, caggy displacement + COLOR_0 mottle, 4 inset craters on M); ST-210 boss (96-tri jagged obelisk + COLOR_0 crown) + shield shell (80 de-indexed plates); ST-211 seven powerup emblems (16..48 tris) + drone dart (52 tris); ST-212 equirect skybox (1024x512, 41 KB) + arena ring (24 plates, 48 tris); ST-213 materials/lighting (PMREM IBL envMapIntensity 0.55, emissive engine trail, bloom-safe audit); ST-214 asset perf + memory audit; ST-215 test batch E9 (18 tests); ST-216 G9.0 gate + docs + log audit 1..216.
 - Depends on: E8 closed (I206); the I101-I106 Blender arc (art bible, asset spec, first 5 GLBs, GLTF hooks).
 - Gate G9.0: 15 GLBs + skybox load at runtime, per-asset poly/tri/file/attribute budgets met (pinned by tests), procedural fallback proven, asset perf within budget (no bottleneck), fresh tests + build + dist + browser smoke green, log audit 1..216 sequential.
 - Result (I216): PASS. 15 GLBs = 111.3 KB / 92.9 KB parsed geo / 1021 tris / 17 materials / 0 UV2; 280 pooled meshes over 26 unique geometries; ~5.5 MB GPU textures; 630->670 tests; dist 1939.2/501.3 KB (<=2048/550); ST-217 (post-processing polish) continues the art direction.
+- Result (I218): CLOSED (G9.1 PASS). ST-217 done at I217 (half-res bloom - internal chain 1/4 frame, post chain ~11% cheaper steady; 40 ms phase-2 hit-stop; levers 2/3 verified already-done). Fresh at close: 676/676, build 0, dist 1940.6/501.9 KB, log audit 1..218 sequential. R-E9-1..4 CLOSED (gates G9.1 evidence); 8 HUMAN-PENDING perception items carried to E10.
 
 ## E9 Risk Register
 - R-E9-1 (medium) dist budget creep from assets -> I214 audit: 15 GLBs = 111.3 KB (~6% of dist raw); pinned by assetPerf.test.js (total files <=160 KB, per-file <=60 KB, tris <=1500).
