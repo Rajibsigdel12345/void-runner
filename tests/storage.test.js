@@ -260,3 +260,40 @@ test('storage: a future-versioned best falls back to 0 (ST-079)', () => {
   store.set(a.bestKey, JSON.stringify({ version: 2, value: 999 }));
   assert.equal(a.getBest(), 0);
 });
+
+test('storage: daily best starts null and records/raises for a given day (ST-141)', () => {
+  const store = memStore();
+  const a = new Storage(store);
+  assert.equal(a.getDailyBest(), null);
+  assert.deepEqual(a.recordDaily('2026-11-10', 500), { newBest: true, value: 500 });
+  assert.deepEqual(a.getDailyBest(), { key: '2026-11-10', value: 500 });
+  assert.deepEqual(a.recordDaily('2026-11-10', 300), { newBest: false, value: 500 }); // lower same-day does not raise
+  assert.deepEqual(a.recordDaily('2026-11-10', 800), { newBest: true, value: 800 }); // higher same-day raises
+  assert.equal(a.getDailyBest().value, 800);
+});
+
+test('storage: daily best rolls over to a new day (key differs -> fresh best) (ST-141)', () => {
+  const store = memStore();
+  const a = new Storage(store);
+  a.recordDaily('2026-11-09', 9999);
+  const r = a.recordDaily('2026-11-10', 10); // new day: even a smaller score is a fresh best
+  assert.equal(r.newBest, true);
+  assert.deepEqual(a.getDailyBest(), { key: '2026-11-10', value: 10 });
+});
+
+test('storage: daily best ignores zero scores (does not persist) (ST-141)', () => {
+  const store = memStore();
+  const a = new Storage(store);
+  assert.deepEqual(a.recordDaily('2026-11-10', 0), { newBest: false, value: 0 });
+  assert.equal(a.getDailyBest(), null);
+});
+
+test('storage: daily best persists across instances and survives a corrupt payload (ST-141)', () => {
+  const store = memStore();
+  const a = new Storage(store);
+  a.recordDaily('2026-11-10', 4242);
+  const b = new Storage(store); // new instance, same backing store
+  assert.deepEqual(b.getDailyBest(), { key: '2026-11-10', value: 4242 });
+  store.set(b.dailyBestKey, JSON.stringify({ version: 2, key: 'x', value: 1 })); // unknown future version
+  assert.equal(b.getDailyBest(), null); // degrades to null, no throw
+});

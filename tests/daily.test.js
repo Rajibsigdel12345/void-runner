@@ -77,3 +77,31 @@ test("reproducibility: same daily seed -> bit-identical early run (World)", () =
   assert.equal(a[2].length, b[2].length, "same rock count at t=6.6s");
   assert.deepEqual(a, b, "bit-identical early run from the same daily seed");
 });
+
+test("World.reseed returns this and reseats the shared RNG", () => {
+  const w = new World(new RNG(42), CONFIG);
+  const ret = w.reseed(0x1234abcd);
+  assert.equal(ret, w, "chainable (returns this)");
+  assert.equal(w.rng.seed, 0x1234abcd, "shared RNG reseated to the given seed");
+  const ref = new RNG(0x1234abcd);
+  for (let i = 0; i < 10; i++) assert.equal(w.rng.next(), ref.next(), "identical stream after reseed");
+});
+
+test("reseed makes the run independent of the initial RNG (same daily seed -> identical run)", () => {
+  const s = dailySeed(2026, 11, 10);
+  function run(initialSeed) {
+    const w = new World(new RNG(initialSeed), CONFIG);
+    w.reseed(s);
+    w.begin();
+    const snap = [];
+    for (let i = 0; i < 300; i++) {
+      w.step(DT, NEUTRAL);
+      if (i === 59 || i === 149 || i === 299) {
+        snap.push(w.field.rocks.map(r => [Math.round(r.pos.x*1000)/1000, Math.round(r.pos.y*1000)/1000, Math.round(r.vel.x*1000)/1000, Math.round(r.vel.y*1000)/1000]));
+      }
+    }
+    return snap;
+  }
+  const a = run(1), b = run(987654321); // very different pre-reseed RNG states
+  assert.deepEqual(a, b, "identical run regardless of the pre-reseed RNG state");
+});

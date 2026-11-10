@@ -106,7 +106,18 @@ export function createScreens(root, settings = {}) {
   } else {
     line(menu, 'PRESS ENTER TO START', 'font-size:calc(18px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;margin-top:14px;animation:vrPulse 1.6s ease-in-out infinite;');
   }
+  if (settings.actions && typeof settings.actions.startDaily === 'function') { // ST-141: DAILY button (today's seeded board)
+    const dailyBtn = document.createElement('button');
+    dailyBtn.type = 'button';
+    dailyBtn.className = 'vr-pause-btn';
+    dailyBtn.textContent = 'DAILY RUN';
+    dailyBtn.style.cssText = 'margin-top:10px;letter-spacing:3px;';
+    dailyBtn.setAttribute('aria-label', 'Start the daily seeded run');
+    dailyBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.startDaily(); dailyBtn.blur(); });
+    menu.appendChild(dailyBtn);
+  }
   const menuBest = line(menu, '', 'font-size:calc(13px * var(--vr-fs,1));opacity:0.85;'); // best score lands in I18 (I44 contrast)
+  const menuDaily = line(menu, '', 'font-size:calc(13px * var(--vr-fs,1));opacity:0.85;letter-spacing:1px;color:#9fd8ff;'); // ST-141: daily board line
   const credit = document.createElement('div'); // I65: credits
   credit.className = 'vr-credit';
   credit.textContent = 'a three.js arcade shooter \u25c6 Blender-modeled low-poly assets \u25c6 built with the Codex Game Studio pipeline';
@@ -168,6 +179,9 @@ export function createScreens(root, settings = {}) {
   const statsLine1 = line(gameOver, '', 'font-size:calc(15px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#cfe4ff;margin-top:10px;'); // ST-031
   const statsLine2 = line(gameOver, '', 'font-size:calc(15px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#cfe4ff;'); // ST-031
   const rankLine = line(gameOver, '', 'font-size:calc(14px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#ffe08a;opacity:0.95;'); // I69: board rank
+  const dailyBadge = document.createElement('div'); // ST-141: DAILY RUN badge (only for daily runs)
+  dailyBadge.style.cssText = 'display:none;font-size:calc(12px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#9fd8ff;border:1px solid rgba(159,216,255,0.4);border-radius:20px;padding:4px 14px;background:rgba(60,120,220,0.16);';
+  gameOver.appendChild(dailyBadge);
   if (settings.touch && settings.actions && settings.actions.restart) { // I71: tappable restart on touch
     const reBtn = document.createElement('button');
     reBtn.type = 'button';
@@ -219,10 +233,13 @@ export function createScreens(root, settings = {}) {
       const ss = String(Math.floor(world.time) % 60).padStart(2, '0');
       set('stats1', statsLine1, "KILLS " + world.scoreKeeper.kills + "    WAVE " + Math.max(1, world.wave));
       set('stats2', statsLine2, "MAX COMBO " + world.scoreKeeper.maxCombo + "    TIME " + mm + ":" + ss);
+      if (opts.dailyMode) { dailyBadge.style.display = 'inline-block'; set('dailyBadge', dailyBadge, 'DAILY RUN' + (opts.dailyKey ? '  \u00b7  ' + opts.dailyKey : '') + (opts.dailyNewBest ? '   NEW DAILY BEST' : '')); } // ST-141
+      else dailyBadge.style.display = 'none';
     }
     if (state === STATE.MENU) {
       set('menuBest', menuBest, opts.best > 0 ? `BEST ${opts.best}` : '');
       set('top5', top5Body, opts.scoresText ? opts.scoresText : '\u2014 no scores yet \u2014'); // I66
+      set('menuDaily', menuDaily, opts.dailyMenu ? ('DAILY ' + opts.dailyMenu.key + '  \u00b7  ' + (opts.dailyMenu.value > 0 ? 'BEST ' + opts.dailyMenu.value : 'NO BEST YET')) : ''); // ST-141
     }
     if (state === STATE.PAUSED) {
       set('mute', muteLabel, `M — MUTE (${opts.muted ? 'ON' : 'OFF'})`);

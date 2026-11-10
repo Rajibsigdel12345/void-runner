@@ -82,6 +82,8 @@ export class World {
 
   /** Full session restart from MENU or GAME_OVER: reset all systems, then begin. */
   restart() { this.reset(); return this.begin(); }
+  /** ST-141: reseed the shared RNG so a run can start from a specific seed (daily runs). */
+  reseed(seed) { this.rng.reset(seed); return this; }
 
   emit(type, data) { this.events.push({ type, data }); }
   drainEvents() {

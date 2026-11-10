@@ -34,6 +34,7 @@ import { STATE } from './core/state.js';
 import { Storage } from './core/storage.js';
 import { CONFIG } from './core/config.js';
 import { World } from './core/game.js';
+import { dailyForDate } from './core/daily.js'; // ST-141
 import { RNG } from './core/rng.js';
 import { damp, v2 } from './core/math.js';
 
@@ -187,12 +188,44 @@ const adaptive = createAdaptiveQuality(CONFIG.adaptive, (info) => {
 let fxPreviewFn = null; // ST-067: live FX preview, wired once particles exist
 const menuSettings = createSettingsPanel(storage, applySettings, (tier) => { adaptive.userSet(tier); if (fxPreviewFn) fxPreviewFn(tier); }); // ST-073: user FX choice overrides automation
 const pauseSettings = createSettingsPanel(storage, applySettings, (tier) => { adaptive.userSet(tier); if (fxPreviewFn) fxPreviewFn(tier); }); // ST-073
+
+// ST-141: daily seeded run. One canonical calendar-day seed so every player today runs
+// the identical board (comparable daily scores). dailyMode marks the active run as the
+// daily one; restart re-seeds to the stored seed to reproduce it exactly.
+let dailyMode = false;
+let dailyKey = null;      // 'YYYY-MM-DD' for the active daily run (badge text)
+let dailySeedVal = 0;     // the exact seed the active daily run started from
+let dailyNewBest = false; // set on a daily game over when today's daily best was raised
+let dailyMenu = { key: '', value: 0 }; // menu display info (today's daily best)
+let _dailyMenuDay = '';
+let _dailyDirty = true;
+function refreshDailyMenu() {
+  const key = dailyForDate(new Date(), CONFIG.daily.salt).key;
+  const db = storage.getDailyBest();
+  dailyMenu = { key, value: (db && db.key === key) ? db.value : 0 };
+  _dailyMenuDay = key;
+  _dailyDirty = false;
+}
+refreshDailyMenu();
+function startRun(mode) {
+  newBest = false; popups.clear(); hint.show(); dailyNewBest = false;
+  if (mode === 'daily') { const d = dailyForDate(new Date(), CONFIG.daily.salt); dailyMode = true; dailyKey = d.key; dailySeedVal = d.seed; world.reseed(d.seed); }
+  else { dailyMode = false; dailyKey = null; dailySeedVal = 0; }
+  world.begin();
+}
+function restartRun() {
+  newBest = false; popups.clear(); hint.show(); dailyNewBest = false;
+  if (dailyMode) world.reseed(dailySeedVal); // ST-141: same seed -> reproduce today's run
+  world.restart();
+}
+
 const screens = createScreens(document.body, {
   menu: menuSettings, pause: pauseSettings, touch: coarse, // I71: touch-aware menu
-  actions: { // I68: pause overlay actions; I71: start for touch
-    start: () => { newBest = false; popups.clear(); hint.show(); world.begin(); },
+  actions: { // I68: pause overlay actions; I71: start for touch; ST-141: startDaily for the DAILY button
+    start: () => startRun('normal'),
+    startDaily: () => startRun('daily'),
     resume: () => { world.resume(); },
-    restart: () => { newBest = false; popups.clear(); hint.show(); world.restart(); },
+    restart: () => restartRun(),
     quit: () => { newBest = false; popups.clear(); vortexFx.hide(); world.quitToMenu(); },
   },
 });
@@ -238,22 +271,16 @@ window.addEventListener('keydown', (e) => {
     // I37: side effects only on the transitions that use them - stray Enter
     // mid-game (PLAYING/PAUSED) must not clear popups or re-show the tutorial hint.
     if (st === STATE.MENU) {
-      newBest = false;
-      popups.clear(); // ST-030: no stale popups across sessions
-      hint.show(); // ST-032: first-wave tutorial hint
-      world.begin();
+      startRun('normal'); // ST-141: Enter starts a normal run (DAILY button for the daily run)
     } else if (st === STATE.GAME_OVER) {
-      newBest = false;
-      popups.clear();
-      hint.show();
-      world.restart();
+      restartRun(); // ST-141: reseed when daily so Enter reproduces today's run
     } else if (st === STATE.PAUSED) { // I68: Enter resumes
       world.resume();
     }
   } else if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
     togglePause();
   } else if (e.key === 'r' || e.key === 'R') { // I68: restart from pause
-    if (st === STATE.PAUSED) { newBest = false; popups.clear(); hint.show(); world.restart(); }
+    if (st === STATE.PAUSED) restartRun(); // ST-141: reseed when daily
   } else if (e.key === 'q' || e.key === 'Q') { // I68: quit from pause
     if (st === STATE.PAUSED) { newBest = false; popups.clear(); vortexFx.hide(); world.quitToMenu(); }
   } else if (e.key === 'm' || e.key === 'M') {
@@ -415,10 +442,16 @@ else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, 
     } else if (e.type === 'gameover') {
       newBest = storage.setBest(e.data.score); // true when the stored best was raised
       bestScore = storage.getBest();
+      dailyNewBest = false; // ST-141
       if (e.data.score > 0) { // I66: top-5 board (wave/kills from live world state)
         const rec = storage.recordScore({ score: e.data.score, wave: Math.max(1, world.wave), kills: world.scoreKeeper.kills });
         scoreRank = rec.rank; // I69
         refreshScoresText();
+      }
+      if (e.data.score > 0 && dailyMode) { // ST-141: daily best (same board today)
+        const dr = storage.recordDaily(dailyKey, e.data.score);
+        dailyNewBest = !!dr.newBest;
+        _dailyDirty = true; // refresh the menu daily line when we return to the menu
       }
       if (newBest && !motionOff && fxCount > 0) { // I69: new-best confetti (reduced motion: static)
         const sx = world.ship.pos.x, sy = world.ship.pos.y;
@@ -449,6 +482,11 @@ function syncVisuals(dt) {
   screenOpts.reducedMotion = motionOff; // I65: menu polish (reduced-motion gates the new animations)
   screenOpts.scoresText = scoresText; // I66: top-5 table
   screenOpts.scoreRank = scoreRank; // I69: board rank on game over
+  if (st === STATE.MENU) { const tk = dailyForDate(new Date(), CONFIG.daily.salt).key; if (tk !== _dailyMenuDay || _dailyDirty) refreshDailyMenu(); } // ST-141: refresh daily line on menu (day rollover / after a daily run)
+  screenOpts.dailyMenu = dailyMenu; // ST-141
+  screenOpts.dailyMode = dailyMode; // ST-141
+  screenOpts.dailyKey = dailyKey; // ST-141
+  screenOpts.dailyNewBest = dailyNewBest; // ST-141
   hud.render(world, hudOpts);
   if (coarse && st === STATE.PLAYING) { if (pauseBtn.style.display !== 'flex') pauseBtn.style.display = 'flex'; } else if (pauseBtn.style.display !== 'none') pauseBtn.style.display = 'none'; // I71: on-screen pause button (touch, PLAYING only)
   screens.update(st, world, screenOpts);

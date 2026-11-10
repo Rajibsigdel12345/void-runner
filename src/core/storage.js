@@ -61,6 +61,7 @@ export class Storage {
     this.bestKey = keys.bestKey || 'voidrunner.best';
     this.settingsKey = keys.settingsKey || 'voidrunner.settings';
     this.highScoresKey = keys.highScoresKey || 'voidrunner.scores'; // I66
+    this.dailyBestKey = keys.dailyBestKey || 'voidrunner.daily'; // ST-141: daily best (per calendar day)
     this.maxScores = (Number.isInteger(keys.highScoresMax) && keys.highScoresMax > 0) ? keys.highScoresMax : 5; // I66
   }
 
@@ -174,6 +175,31 @@ export class Storage {
     const list = prev.concat([{ score, wave, kills }]).sort((a, b) => b.score - a.score).slice(0, this.maxScores);
     this._write(this.highScoresKey, { version: STORE_VERSION, list });
     return { list, rank, newBest };
+  }
+
+  /** ST-141: read the stored daily best. @returns {{key:string, value:number}|null} */
+  getDailyBest() {
+    const d = this._readVersioned(this.dailyBestKey);
+    if (!d) return null;
+    const key = typeof d.key === 'string' ? d.key : '';
+    const value = Number.isFinite(d.value) ? Math.floor(d.value) : 0;
+    return { key, value: Math.max(0, value) };
+  }
+
+  /**
+   * ST-141: record a daily run score (per calendar-day key). Raises today's daily
+   * best when higher, or rolls the day over when the key differs (a new day starts fresh).
+   * @param {string} key @param {number} score
+   * @returns {{newBest:boolean, value:number}}
+   */
+  recordDaily(key, score) {
+    const s = Math.max(0, Math.floor(Number.isFinite(score) ? score : 0));
+    const cur = this.getDailyBest();
+    if (s <= 0) return { newBest: false, value: (cur && cur.key === key) ? cur.value : 0 };
+    const sameDay = cur && cur.key === key;
+    const newBest = !sameDay || s > cur.value;
+    if (newBest) this._write(this.dailyBestKey, { version: STORE_VERSION, key, value: s });
+    return { newBest, value: newBest ? s : (cur ? cur.value : 0) };
   }
 
   remove(key) {
