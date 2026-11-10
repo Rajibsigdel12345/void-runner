@@ -1787,3 +1787,24 @@ One entry per iteration. Format:
 - Verification: build exit 0 (fresh); 630/630 (I203 baseline, src unchanged); console 0/0 on
   dist.
 - Result: DONE. ST-204 closed. Next I205 ST-205 final sweep / regression round D (cgs-regression-suite).
+
+## I205 - Regression round D (E8 final sweep): 3/3 matrix + 6/6 dist scenarios, PASS (cgs-regression-suite) (ST-205)
+
+- Skill: cgs-regression-suite (qa-playtester). E8 closing regression; no source changes since
+  I199.
+- Test matrix (.evidence/I205/matrix.txt): R1 in-process 630/630 (6.9 s), R2 in-process repeat
+  630/630 (6.9 s), R3 cross-process node --test over 66 files 630/630 (8.1 s).
+- Production-dist browser sweep (:4174): S1 boot+console clean; S2 full lifecycle
+  (exit-replay -> MENU -> PLAYING -> death 154.2 s wave 5 -> GAME_OVER -> restart PLAYING,
+  game-over auto-recorded 43442 to the board); S3 pause freeze/resume/quit green; S4 demo pin
+  EXACT (cited I204, same build); S5 persistence 4/4 green (best/settings/scores/replay) after
+  correcting two harness assertion bugs (getBest returns a number; board is rank-sorted desc) +
+  bonus: invalid setBest(undefined) rejected by the I79 guard; S6 finiteness clean (sentinel
+  only).
+- Prior-bug re-checks: F4 disposition carried (no regression), I151 tutorial key ownership
+  verified on dist, replay lifecycle green, I79 storage guard green.
+- Result: PASS. Console 0/0.
+- Changed files: production/regression-report.md (+Round D I205), CHANGELOG.md,
+  production/iterations.md, production/session-state/active.md. Evidence: .evidence/I205/matrix.txt.
+- Result: DONE. ST-205 closed. Next I206 ST-206 E8 closeout (cgs-milestone-review) + G8.6 gate.
+

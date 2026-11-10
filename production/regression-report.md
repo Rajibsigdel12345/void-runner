@@ -149,3 +149,73 @@ the I92/I93 changes pass. No NaN, console 0 errors / 0 warnings (one expected ad
 ### Next owner / decision
 - No fix needed. Proceed to I100 (ST-100): final wrap + the 100th iteration + cgs-qa-plan closeout. Then the Blender
   graphics pass (cgs-art-bible -> cgs-asset-spec -> cgs-asset-audit).
+
+## Round D (I205) - E8 final sweep (E8 round D; E7s was I99)
+
+### Summary
+E8 closing regression. No source changes since I199 (the 630-test baseline). 3/3 test matrix
+green; the 6-scenario production-dist browser sweep green; console 0/0. Two S5 probe-assertion
+bugs in this rounds own harness (getBest shape, assumed board order) were corrected on re-probe
+- product behavior was correct on all four persistence paths. Round D: PASS.
+
+### Method
+- Test matrix (.evidence/I205/matrix.txt): R1 in-process npm test, R2 in-process repeat, R3
+  cross-process node --test across all 66 test files.
+- Browser sweep on the PRODUCTION DIST (Playwright, :4174 serving dist/, ?nocache=e8): S1 boot,
+  S2 full lifecycle, S3 pause semantics, S4 demo replay pin (I204, same build), S5 persistence,
+  S6 finiteness.
+
+### Critical Path (verified)
+- S1 boot -> MENU; console clean (0 errors / 0 warnings; 1 expected adaptive-quality INFO at
+  headless ~4 fps rAF, I73).
+- S2: exit-replay GAME_OVER -> MENU (Enter) -> PLAYING (Enter) -> play to death (154.2 s, wave
+  5) -> GAME_OVER -> restart (Enter) -> PLAYING at t approx 0.13. The game-over auto-recorded
+  the run score to the board (43442, wave 5, 170 kills) - live-flow persistence working.
+- S3: p -> PAUSED (sim frozen across advance(2.0), dt 0), p -> PLAYING, p + q -> MENU.
+- S4: demo replay pin EXACT on dist (I204, same build): t=36.15 s, score 11334, 57 kills, wave
+  2, idx 2169/2220.
+- S5 persistence: best round-trip (setBest(777777) -> getBest() === 777777); settings round-trip
+  (volume 0.4 / fx low); recordScore rank-sorted desc (12345 lands rank 2 under the 43442
+  auto-record, board stays sorted desc, newBest false); saveReplay round-trip (saved=true,
+  getReplays non-empty). Bonus: invalid setBest(undefined) rejected by the I79 version guard
+  (no write, prior best preserved). setBest is high-water-only by design (never lowers).
+- S6 finiteness: ship / scoreKeeper / waves scanned - sole non-finite is the documented sentinel
+  scoreKeeper.lastKillTime = -Infinity.
+
+### Prior Bug
+- F4 (combo never meaningful, I90): re-quantified at I202 (cap reached in ~12 s) - disposition
+  deferred to E9 (I203 T1); no regression.
+- I151 tutorial key ownership: verified on dist this round (first p dismisses tutorial, second
+  p pauses) - no regression.
+- I190/191 replay lifecycle: exit / pin / speed verified (I204 + this round) - no regression.
+- I79 storage guards: invalid setBest rejected - no regression.
+
+### Regression Case
+- No code changes since I199; I195/I196 (round B) + I199 (round C) results carry; this round
+  re-confirms on the final build.
+- Determinism: the demo pin is identical across the dev server (I196/I198/I199/I202) and the
+  production dist (I204/I205).
+
+### Result
+PASS. 630/630 x3 (matrix), browser sweep 6/6 scenarios green, console 0/0.
+
+### Risks
+- The two S5 probe-assertion bugs were harness errors (wrong getBest shape, assumed board
+  order), not product defects - both re-verified with corrected assertions.
+- The 4174 test profile held probe residue (board 43442/12345/12345, best 777777);
+  localStorage was cleared at the end of the sweep - profile clean again.
+
+### Changed / proposed files
+- production/regression-report.md (this section).
+- .evidence/I205/matrix.txt (new).
+- Bookkeeping: CHANGELOG.md, production/iterations.md, production/session-state/active.md.
+
+### Verification evidence
+- .evidence/I205/matrix.txt (3/3 at 630/630, ~7-8 s per run).
+- Browser sweep output (this round, Playwright on :4174 dist).
+- .evidence/I204/01-dist-gameplay.png (same build).
+
+### Next owner / decision
+- I206 (ST-206): E8 closeout (cgs-milestone-review) + G8.6 gate sign-off - all prerequisite
+  evidence is now in place: 100 iterations, 630/630, build 0, regression B+C+D clean, playtest
+  triaged (0 BUGs), release checklist SHIP-READY.
