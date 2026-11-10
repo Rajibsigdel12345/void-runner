@@ -465,6 +465,7 @@ window.__vr.simCtxLost = () => onCtxLost({ preventDefault() {} }); // I187: exer
 window.__vr.simCtxRestore = () => onCtxRestored(); // I187
 window.__vr.framesRendered = () => framesRendered; // I187: loop-work counter (frozen while the context is lost)
 window.__vr.ctxOverlay = ctxOverlay; // I75: expose after declaration (TDZ-safe)
+window.__vr.clockState = () => clock.state(); // I188: ST-078 clock internals probe (context-loss evidence: reset discards the stall) - called post-load only (TDZ-safe)
 window.__vr.applyColorblindPreview = (on) => applyColorblindPreview(on); // I158: probe
 window.__vr.slowmoHintEl = slowmoHintEl; // I158: probe
 window.__vr.musicOn = () => audio.musicOn(); // I158: probe
