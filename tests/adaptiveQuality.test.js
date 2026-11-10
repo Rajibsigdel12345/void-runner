@@ -69,6 +69,23 @@ test('invalid userSet values are ignored', () => {
   assert.equal(aq.state().userLocked, false);
 });
 
+test('userSet("off") locks the off tier; the ladder never auto-produces off (ST-224)', () => {
+  const events = [];
+  const aq = createAdaptiveQuality({ windowSec: 1.0, thresholdFps: 45, confirmWindows: 1 }, (e) => events.push(e));
+  aq.userSet("off");
+  assert.equal(aq.state().tier, "off");
+  assert.equal(aq.state().userLocked, true);
+  assert.equal(aq.state().autoLow, false);
+  assert.deepEqual(events, [{ type: "user", tier: "off" }]);
+  badWindow(aq); badWindow(aq);
+  assert.equal(aq.state().tier, "off"); // ladder only fires from high - off is untouched
+  assert.equal(events.filter((e) => e.type === "autoDowngrade").length, 0);
+  // any userSet locks automation for the session (existing contract) - reset() re-arms it
+  aq.reset();
+  badWindow(aq); badWindow(aq);
+  assert.equal(aq.state().tier, "low"); // ladder works again after a session reset
+});
+
 test('non-positive dt is ignored (no NaN, no frame count)', () => {
   const aq = createAdaptiveQuality({ windowSec: 0.5, thresholdFps: 45, confirmWindows: 1 });
   aq.noteFrame(0); aq.noteFrame(-1); aq.noteFrame(NaN);

@@ -344,12 +344,24 @@ test('storage: shapeCues defaults on, round-trips, and rejects bad types (I155)'
   assert.equal(a.getSettings().shapeCues, true); // corrupt -> default, no throw
 });
 
-test('storage: toggleFxQuality flips tiers and treats unknown as high (I157)', () => {
+test('storage: toggleFxQuality cycles high -> low -> off -> high, unknown as high (I157/ST-224)', () => {
   assert.equal(toggleFxQuality('high'), 'low');
-  assert.equal(toggleFxQuality('low'), 'high');
+  assert.equal(toggleFxQuality('low'), 'off');
+  assert.equal(toggleFxQuality('off'), 'high');
   assert.equal(toggleFxQuality(undefined), 'low'); // missing -> treated as high -> flips to low
   assert.equal(toggleFxQuality('garbage'), 'low');
-  assert.equal(toggleFxQuality(toggleFxQuality('high')), 'high'); // double flip = identity
+  assert.equal(toggleFxQuality(toggleFxQuality(toggleFxQuality('high'))), 'high'); // triple flip = identity (ST-224)
+});
+
+test('storage: fx 3-tier persistence - off round-trips, invalid rejected, old 2-tier values still valid (ST-224)', () => {
+  const store = memStore();
+  const s = new Storage(store);
+  assert.equal(s.getSettings().fx, 'high'); // default unchanged
+  assert.equal(s.setSettings({ fx: 'off' }).fx, 'off');
+  assert.equal(s.getSettings().fx, 'off'); // round-trip
+  assert.equal(s.setSettings({ fx: 'ultra' }).fx, 'high'); // invalid -> default (same clean semantics as the 2-tier build)
+  assert.equal(s.setSettings({ fx: 'low' }).fx, 'low');
+  assert.equal(s.setSettings({ fx: 'high' }).fx, 'high'); // old 2-tier values stay valid
 });
 
 test('storage: I158 options (music / colorblindPreview / slowmoHint) defaults, round-trip, reject, corrupt', () => {

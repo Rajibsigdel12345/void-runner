@@ -219,13 +219,14 @@ test("storage: getBest falls back to 0 for non-finite or non-numeric stored valu
 });
 
 // ---------------------------------------------------------- hotkey storage
-test("hotkey: toggleFxQuality has strict parity over repeated flips", () => {
+test("hotkey: toggleFxQuality has strict 3-cycle parity over repeated flips (ST-224)", () => {
   let fx = "high";
+  const cyc = ["low", "off", "high"]; // ST-224 3-cycle
   for (let i = 1; i <= 9; i++) {
     fx = toggleFxQuality(fx);
-    assert.equal(fx, i % 2 === 1 ? "low" : "high");
+    assert.equal(fx, cyc[(i - 1) % 3]);
   }
-  assert.equal(toggleFxQuality("anything-weird"), "low"); // non-'low' input -> 'low' (defensive mirror)
+  assert.equal(toggleFxQuality("anything-weird"), "low"); // non-'low'/'off' input -> treated as high -> 'low' (ST-224 defensive mirror)
 });
 
 test("hotkey: F contract - setSettings({fx}) persists, survives reload, and touches nothing else", () => {

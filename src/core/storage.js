@@ -17,7 +17,7 @@ export const STORE_VERSION = 1;
 export const DEFAULT_SETTINGS = Object.freeze({
   volume: 0.7,      // master audio volume 0..1 (I27 consumes)
   sfx: true,        // sound effects on/off (I27 consumes)
-  fx: 'high',       // 'high' | 'low' particle/fx tier (I26 panel, I25 particles honor)
+  fx: 'high',       // 'high' | 'low' | 'off' particle/fx tier (I26 panel, I25 particles honor, ST-224 off)
   reducedMotion: false, // disable shake/flash (I25 honors)
   fontScale: 1,         // UI text scale 1 | 1.25 | 1.5 (I70; applied as --vr-fs)
   shapeCues: true,      // colorblind-friendly silhouette cues (I155; asteroidRenderer/wardenMesh honor)
@@ -28,9 +28,10 @@ export const DEFAULT_SETTINGS = Object.freeze({
 
 export const FONT_SCALES = Object.freeze([1, 1.25, 1.5]);
 
-/** I157: F hotkey - flip the FX quality tier. Anything that is not exactly 'low' is treated as 'high' (defensive; mirrors applySettings). */
+/** I157/ST-224: F hotkey - cycle the FX quality tier high -> low -> off -> high. Anything that is not exactly 'low' or 'off' is treated as 'high' (defensive; mirrors applySettings). */
 export function toggleFxQuality(fx) {
-  return fx === 'low' ? 'high' : 'low';
+  const t = fx === 'low' || fx === 'off' ? fx : 'high';
+  return t === 'high' ? 'low' : t === 'low' ? 'off' : 'high';
 }
 
 // Migration registry: key = the "from" version, value = (data) => next-version data.
@@ -135,7 +136,7 @@ export class Storage {
     if (!d || typeof d !== 'object') return out;
     if (typeof d.volume === 'number' && isFinite(d.volume)) out.volume = Math.min(1, Math.max(0, d.volume));
     if (typeof d.sfx === 'boolean') out.sfx = d.sfx;
-    if (d.fx === 'high' || d.fx === 'low') out.fx = d.fx;
+    if (d.fx === 'high' || d.fx === 'low' || d.fx === 'off') out.fx = d.fx; // ST-224: 3-tier
     if (typeof d.reducedMotion === 'boolean') out.reducedMotion = d.reducedMotion;
     if (FONT_SCALES.includes(d.fontScale)) out.fontScale = d.fontScale; // I70
     if (typeof d.shapeCues === "boolean") out.shapeCues = d.shapeCues; // I155
@@ -152,7 +153,7 @@ export class Storage {
     const clean = { ...DEFAULT_SETTINGS };
     if (typeof merged.volume === 'number' && isFinite(merged.volume)) clean.volume = Math.min(1, Math.max(0, merged.volume));
     if (typeof merged.sfx === 'boolean') clean.sfx = merged.sfx;
-    if (merged.fx === 'high' || merged.fx === 'low') clean.fx = merged.fx;
+    if (merged.fx === 'high' || merged.fx === 'low' || merged.fx === 'off') clean.fx = merged.fx; // ST-224: 3-tier
     if (typeof merged.reducedMotion === 'boolean') clean.reducedMotion = merged.reducedMotion;
     if (FONT_SCALES.includes(merged.fontScale)) clean.fontScale = merged.fontScale; // I70
     if (typeof merged.shapeCues === "boolean") clean.shapeCues = merged.shapeCues; // I155

@@ -242,7 +242,7 @@ document.body.appendChild(slowmoHintEl);
 
 function applySettings(s) {
   liveSettings = s;
-  fxCount = s.fx === 'low' ? CONFIG.fx.particleLow : CONFIG.fx.particleHigh;
+  fxCount = s.fx === 'low' ? CONFIG.fx.particleLow : s.fx === 'high' ? CONFIG.fx.particleHigh : CONFIG.fx.particleOff; // ST-224: off = 0
   motionOff = s.reducedMotion === true;
   slowmoHintEl.style.transition = motionOff ? 'none' : 'opacity .2s'; // I161: no fade under reduced motion
   setUiScale(); // I70+I71: UI scale = fontScale x viewport (cascades to DOM overlays only; canvas unaffected)
@@ -374,7 +374,7 @@ const screens = createScreens(document.body, {
 const particles = createParticles(scene);
 const engineTrail = createEngineTrail(CONFIG.fx.engineTrail); // I213: throttled trail emission (pure core, unit-tested)
 fxPreviewFn = (tier) => { // ST-067: show the new tier immediately (arena center, behind the panel)
-  const n = tier === 'high' ? CONFIG.fx.particleHigh : CONFIG.fx.particleLow;
+  const n = tier === 'high' ? CONFIG.fx.particleHigh : tier === 'low' ? CONFIG.fx.particleLow : CONFIG.fx.particleOff; // ST-224: off preview = no burst
   particles.burst(0, 0, { count: n, color: 0x7fd0ff, speed: 6, life: 0.7 });
 };
 // Screen shake (ST-025): core envelope, render layer applies the camera offset.
@@ -446,7 +446,7 @@ window.addEventListener('keydown', (e) => {
   } else if (e.key === 'm' || e.key === 'M') {
     muted = !muted;
     audio.setMuted(muted);
-  } else if (e.key === 'f' || e.key === 'F') { // I157: FX quality hotkey (HIGH <-> LOW)
+  } else if (e.key === 'f' || e.key === 'F') { // I157/ST-224: FX quality hotkey (HIGH -> LOW -> OFF -> HIGH)
     const next = toggleFxQuality(storage.getSettings().fx);
     const merged = storage.setSettings({ fx: next });
     applySettings(merged);
@@ -770,7 +770,7 @@ function syncVisuals(dt) {
       const tf = world.ship.forward(shipFwd); // ST-074 scratch reuse
       const tx = world.ship.pos.x - tf.x * CONFIG.fx.engineTrail.offset;
       const tz = world.ship.pos.y - tf.y * CONFIG.fx.engineTrail.offset;
-      const cnt = liveSettings.fx === 'low' ? CONFIG.fx.engineTrail.countLow : CONFIG.fx.engineTrail.countHigh;
+      const cnt = liveSettings.fx === 'low' ? CONFIG.fx.engineTrail.countLow : liveSettings.fx === 'high' ? CONFIG.fx.engineTrail.countHigh : CONFIG.fx.engineTrail.countOff; // ST-224: off = silent trail
       for (let k = 0; k < nEmit; k++) particles.burst(tx, tz, { count: cnt, palette: CONFIG.fx.palette.engine, speed: CONFIG.fx.engineTrail.speed, life: CONFIG.fx.engineTrail.life, shape: 'radial' });
     }
   }

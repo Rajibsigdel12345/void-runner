@@ -79,7 +79,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   const visCard = card('VISUALS');
   row('FX QUALITY', visCard);
   const fxSel = document.createElement('select');
-  for (const opt of ['high', 'low']) {
+  for (const opt of ['high', 'low', 'off']) { // ST-224: off tier
     const o = document.createElement('option');
     o.value = opt; o.textContent = opt.toUpperCase();
     fxSel.appendChild(o);

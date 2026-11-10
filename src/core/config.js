@@ -385,6 +385,7 @@ export const CONFIG = {
     },
     particleHigh: 48,         // burst size at FX quality High
     particleLow: 16,          // burst size at FX quality Low
+    particleOff: 0,           // burst size at FX quality Off (ST-224: zero FX-tier-gated particles)
     engineTrail: {           // I213: engine trail emission (ST-213; core/engineTrail.js)
       rate: 14,               // puffs/s at full thrust
       minThrust: 0.12,        // thrust fraction below which the trail is silent
@@ -392,6 +393,7 @@ export const CONFIG = {
       maxPerUpdate: 4,        // hard cap on puffs per frame
       countHigh: 2,           // particles per puff at FX High
       countLow: 1,            // particles per puff at FX Low
+      countOff: 0,            // particles per puff at FX Off (ST-224: silent trail)
       speed: 2.2,             // radial spread u/s
       life: 0.38,             // puff life (s) - full-speed trail ~ rate*life long
       offset: 1.15,           // puff distance behind the ship (u)

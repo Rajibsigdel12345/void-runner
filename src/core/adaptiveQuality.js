@@ -31,7 +31,7 @@ export function createAdaptiveQuality(cfg = {}, onTier = null) {
     }
   }
   function userSet(t) {
-    if (t !== "low" && t !== "high") return;
+    if (t !== "low" && t !== "high" && t !== "off") return; // ST-224: off is user-only; the ladder only ever fires from high
     userLocked = true;
     autoLow = false;
     tier = t;
