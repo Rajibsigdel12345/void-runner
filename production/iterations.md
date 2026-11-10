@@ -1260,5 +1260,29 @@ One entry per iteration. Format:
   - Enter guard: real DAILY button click -> seed 317547475 (the documented 2026-11-10 daily seed, matches I147); fresh tab + focused DAILY + physical Enter -> seed 317547475 (daily run, bug fixed); fresh tab + body focus + Enter -> seed 17035 (normal run, no regression); game over + focused COPY RESULT + Enter -> 'COPIED!' flash observed by a 50ms text poller, state stayed GAME_OVER (no restart).
 - Tests: 491/491 (unchanged - render/boot layer only, no core diff). Build: exit 0. Console 0/0 (one info-level adaptive-quality notice from background-tab throttling).
 - Result: DONE. ST-165 closed. Next I166 ST-166 string extraction [CUTTABLE].
+## I166 - locales-ready string extraction (ST-166, CUTTABLE)
+
+- Skill: cgs-localize (contract: Summary / String Context / Text Expansion / Locale Risk / Review / Blocking issues / Changed or proposed files / Verification evidence / Next owner).
+- Deliverable: design/i18n-strings.md - PLAN ONLY. No production diff, no i18n implementation; the story was marked [CUTTABLE] and the plan doc is the entire deliverable.
+- Inventory method: node regex scan over the 8 render files at c042dc7 (~455 raw quoted fragments) + targeted grep for the dynamic templates (SCORE/BEST/NEW BEST/BOARD RANK/KILLS/MAX COMBO/ACCURACY/DAILY badge/COPY family/INBOUND/WEAPON LEVEL/RELOAD GAME); every line reference in the doc was read from source this iteration, not recalled.
+- Inventory result: ~95 curated player-facing strings:
+  - screens.js: title (brand, untranslated), tagline, touch/fine keycap rows, TOP 5, TAP/PRESS ENTER TO START (+RESTART pair), DAILY RUN + aria, best/daily dynamic lines, I165 status row 'M - MUTE (x)   F - FX (y)', PAUSED + RESUME/RESTART/QUIT, GAME OVER + SCORE/BEST/NEW BEST!/BOARD RANK #n/KILLS n WAVE n/MAX COMBO n TIME m:ss/ACCURACY n% SHOTS h/f, daily badge ('DAILY RUN - key  NEW DAILY BEST'), COPY RESULT/COPIED!/COPY FAILED + aria + caption, '- no scores yet -' empty state.
+  - hud.js: 6 power-up tags (RAPID/SPREAD/SHIELD/MAGNET/OVERDRIVE/SLOW-MO), 3 mod tags (FAST ROCKS/SMALL ROCKS/INWARD DRIFT), COMBO, WAVE n, BEST n.
+  - waveBanner.js: WAVE n, CLEARED, ENDLESS, MOD_LABELS (shared family with hud), THE SPLICER/THE MONOLITH + 'WAVE n - maxHp HP' sub, NEXT WAVE IN n.
+  - killFeed.js: THE SPLICER/THE MONOLITH, WARDEN, MINE, SEEKER, GOLDEN ROCK, L/M/S ROCK.
+  - tutorialOverlay.js: HOW TO PLAY, sub pair (fly, auto-fire... / fly, aim, fire...), keycap rows, 'survive the waves - bosses arrive on wave 5 and beyond' (widest string), TAP TO LAUNCH/LAUNCH, ENTER, dismiss aria.
+  - settingsPanel.js: AUDIO card (VOLUME/SFX/MUSIC + arias), VISUALS card (FX QUALITY LOW/HIGH, REDUCED MOTION, FONT SCALE NORMAL/LARGE, SHAPE CUES, COLORBLIND, SLOW-MO HINT + arias), footer 'TAB NAVIGATES - ARROWS MOVE - SPACE TOGGLES'.
+  - bossHealth.js: SPLICER / MONOLITH bar labels.
+  - main.js: FX AUTO-SET TO LOW (LOW FPS), FX HIGH/LOW toast, SPLICER INBOUND, WARDEN INBOUND, WEAPON LEVEL n, context-loss message + RELOAD GAME.
+- Excluded as non-localizable: keycap hardware glyphs (WASD/MOUSE/ENTER/DRAG/2 FINGERS...), audio.js (0 UI strings), debug overlay, SFX cue names, storage keys.
+- Key naming convention (proposed): <area>.<item>[_<variant>] snake_case - menu.*, pause.*, over.*, hud.*, banner.*, feed.*, tutorial.*, settings.*, toast.*, ctxlost.*, keycaps.* (~70 keys). Dynamic parts become {var} placeholders, never sprintf %s.
+- Extraction plan (future pass, NOT executed): src/core/strings.js DOM-free (core contract preserved) with en table + t(key,vars) (throws on unknown key in dev) + kc(keycap); render modules swap ~95 textContent literals; tests/strings.test.js (every key resolves, placeholders match call sites, unknown key throws); ordering screens -> settingsPanel -> banner/killfeed/hud -> tutorial/toasts/ctxlost, one commit per group.
+- Text expansion: widest = settings footer hint (44ch, wraps OK), tutorial boss note (58ch, card has no overflow:hidden), copy caption; keycap grids - captions wrap (no nowrap), touch column '2 FINGERS / pause' is the squeeze point; banner 40px/52px letter-spacing 8px; kill feed right-aligned ~18ch ceiling - keep localized rock terms short.
+- Pluralization: none needed - all counts number-suffixed; board rank numeric (no ordinals). Only latent spot: over.rank if a locale ever wants ordinals.
+- Locale risk (7): (1) boss names are proper nouns - RECOMMENDATION keep English in all locales, translate surrounding grammar only (creative sign-off W1); (2) m:ss time kept as raw pair; (3) n% percent placement needs number/% as separate tokens; (4) SHOTS h/f as {hit}/{fired} tokens, locale picks order; (5) RTL not a target (flex layouts would contain the damage); (6) CJK falls back to system fonts (accepted risk); (7) daily key ISO date already locale-neutral.
+- Blockers: none. Warnings: W1 boss-name translation policy (creative-director lane), W2 keycap-per-layout mapping is a separate workstream (this doc defines only the keycaps.* seam).
+- CUTTABLE confirmed: deleting this story costs nothing at runtime; the game is fully playable and tested without it.
+- Verification: docs-only - no rendering change, no browser smoke required. Quality bar rerun: npm test 491/491 (unchanged), node scripts/build.mjs exit 0.
+- Result: DONE. ST-166 closed (CUTTABLE story delivered as plan doc). Next I167 ST-167 UI perf check (text drawing).
 
 
