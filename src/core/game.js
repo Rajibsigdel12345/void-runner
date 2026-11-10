@@ -38,12 +38,22 @@ export class World {
     this.livesMgr = new Lives(cfg.ship.lives);
     this.game = new GameState();
     this.time = 0;
+    this._wlevel = 1; // ST-122: current weapon level (drives weaponLevelUp events)
   }
 
   get score() { return this.scoreKeeper.score; }
   get wave() { return this.waves.wave; }
   get lives() { return this.livesMgr.count; }
   get gameOver() { return this.game.in(STATE.GAME_OVER); }
+
+  /** ST-122: current weapon level (1-based) from the wave - highest level whose minWave <= wave. */
+  weaponLevel() {
+    const lv = this.cfg.weapon.levels;
+    let lvl = 1;
+    for (let i = 0; i < lv.length; i++) if (this.waves.wave >= lv[i].minWave) lvl = i + 1;
+    return lvl;
+  }
+  weaponSpec() { return this.cfg.weapon.levels[this.weaponLevel() - 1]; }
 
   /** MENU -> PLAYING and start the wave director. No-op unless in MENU. */
   begin() {
@@ -120,6 +130,8 @@ export class World {
       this.spawnBossForWave(wv.startedWave); // ST-055
       this.spawnDronesForWave(wv.startedWave); // ST-117
     }
+    const wl = this.weaponLevel(); // ST-122: weapon progression by wave
+    if (wl > this._wlevel) { this._wlevel = wl; this.emit('weaponLevelUp', { level: wl }); }
     if (wv.waveCleared) this.emit('waveCleared', { n: wv.waveCleared });
     this.mines.step(edt, this.ship.pos); // ST-054 (ST-115: scaled under slow-mo)
     this.drones.step(edt, this.ship.pos); // ST-117 (ST-115: scaled under slow-mo)
@@ -152,15 +164,19 @@ export class World {
   /** Firing with power-up modifiers (ST-021): RAPID doubles cadence, SPREAD fires a 3-way burst. */
   fireWeapon() {
     const pt = this.cfg.powerup.types;
-    const rateMul = this.powerups.active('rapid') ? pt.rapid.rate : 1;
+    const spec = this.weaponSpec(); // ST-122: permanent level (count/arc/rateMul by wave)
+    const rateMul = (this.powerups.active('rapid') ? pt.rapid.rate : 1) * spec.rateMul; // rapid stacks on the level
+    const spread = this.powerups.active('spread');
+    const count = spread ? pt.spread.count : spec.count; // spread power-up overrides the level layout
+    const arc = spread ? pt.spread.arc : spec.arc;
     let shots;
-    if (this.powerups.active('spread')) {
-      shots = this.weapons.fireSpread(this.ship.pos, this.ship.aim, pt.spread.count, pt.spread.arc, rateMul);
+    if (count > 1) {
+      shots = this.weapons.fireSpread(this.ship.pos, this.ship.aim, count, arc, rateMul);
     } else {
       const b = this.weapons.fire(this.ship.pos, this.ship.aim, rateMul);
       shots = b ? [b] : [];
     }
-    for (const b of shots) this.emit('fire', { pos: b.pos });
+    for (const b of shots) this.emit('fire', { pos: b.pos, level: this.weaponLevel() }); // ST-122: level for render
   }
 
   /** GDD: BOMB shatters all on-screen asteroids; each counts as a kill feeding the
@@ -461,6 +477,7 @@ export class World {
     this.livesMgr.reset();
     this.game.reset(); // also clears the gameOver getter (it derives from game state)
     this.time = 0;
+    this._wlevel = 1; // ST-122: weapon level resets with the run
     this.events.length = 0;
     this._eventSpare.length = 0; // ST-074: spare buffer too (no stale events after swap)
   }

@@ -218,3 +218,19 @@ Format: ID | story | acceptance criteria | verification
 - ST-205 | Final polish sweep (console clean, all screens) | sweep complete | browser
 - ST-206 | E8 closeout: milestone review + final CHANGELOG + log audit 1..206 | sequence 1..206, docs | repo
 
+## E9 Blender Graphics & Assets (I207+)
+- Blender 5.2.3 is connected. Assets are modeled procedurally in Blender (bpy), exported as GLB,
+  vendored under assets/, and loaded in the render layer via three.js GLTFLoader with a PROCEDURAL
+  FALLBACK (the game still boots if a GLB is missing or fails to parse). Polycounts stay within the
+  existing draw-call / triangle budget. The AGENTS.md 'no external art assets' convention is extended
+  at ST-207 to 'Blender-authored, vendored GLB assets + procedural fallback'.
+- ST-207 | E9 pipeline: Blender->GLB + GLTFLoader render path (async load, procedural fallback, assets/ dir, AGENTS.md note) | pipeline works + fallback | browser + node
+- ST-208 | Blender ship model (low-poly fighter, <~1.5k tris) replaces the procedural ship mesh | ship GLB renders/rotates, 0 NaN, budget met | browser
+- ST-209 | Blender asteroid set (L/M/S + shielded + golden variants; displacement + vertex color) replaces icosahedrons | rocks distinct per size, tri budget met | browser
+- ST-210 | Blender boss (Monolith) + shielded-rock armor shell (visual armor state) | boss + shield render | browser
+- ST-211 | Blender power-up emblems (7 types) + drone/dart polish | pickups render distinct | browser
+- ST-212 | Blender background: starfield/nebula skybox + arena ring | skybox renders, perf budget | browser
+- ST-213 | Material/lighting pass: emissive engine trail, PBR-lite rocks, bloom-safe materials | looks pass within perf budget | browser
+- ST-214 | Asset perf + memory audit (draw calls, tris, VRAM), LOD/merge | audit notes, budget met | build + browser
+- ST-215 | Test batch E9 (loader fallback, asset swap, budget assertions) + browser verify | 15+ tests, console clean | node + browser
+- ST-216 | G9.0 gate (cgs-gate-check) + E9 docs + changelog + log audit 1..216 | gate PASS, docs | doc + node

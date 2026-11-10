@@ -19,7 +19,16 @@ export const CONFIG = {
     bulletLife: 1.1,
     bulletRadius: 0.18,
     maxBullets: 64,
-    homing: { turn: 3, range: 8 } // MAGNET: max steering rad/s, target search radius
+    homing: { turn: 3, range: 8 }, // MAGNET: max steering rad/s, target search radius
+    // ST-122: permanent weapon progression by wave - level 1 (base) -> 2 -> 3.
+    // Each level: minWave (unlock), count (bullets per trigger), arc (total radians),
+    // rateMul (extra fire-rate multiplier stacked on top of the rapid power-up).
+    // The spread POWER-UP overrides count/arc for its duration; rateMul always stacks.
+    levels: [
+      { minWave: 1,  count: 1, arc: 0,     rateMul: 1.0 },  // L1 (base): single shot
+      { minWave: 5,  count: 2, arc: 0.16,  rateMul: 1.0 },  // L2: narrow twin
+      { minWave: 10, count: 3, arc: 0.34,  rateMul: 1.15 }  // L3: triple + faster
+    ]
   },
 
   asteroid: {
