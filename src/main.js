@@ -18,6 +18,7 @@ import { createVortexFx } from './render/vortexFx.js'; // ST-059
 import { createParticles } from './render/particles.js';
 import { createShake, createPunch, createFovKick } from './core/fx.js'; // ST-081/ST-082
 import { shakeEnergy } from './core/shakeTable.js'; // ST-175: unified screen-shake table lookup
+import { dangerVignetteX } from './core/dangerVignette.js'; // ST-176: reduced-motion damage vignette envelope
 import { createHUD } from './render/hud.js';
 import { createReticle } from './render/reticle.js';
 import { createScreens } from './render/screens.js';
@@ -301,6 +302,9 @@ const vignetteDangerEl = document.getElementById('vignette-danger'); // I85: red
 const slowmoTintEl = document.getElementById('slowmo-tint'); // I116: cold-edge tint while slow-mo is active (index.html)
 let flashA = 0;
 let dangerA = 0;
+let _rmHitT = -1; // ST-176: seconds elapsed since the last reduced-motion hit (-1 = none)
+let _rmHitSev = 0; // ST-176: severity of the pending reduced-motion vignette (0..1)
+let _lastDangerOp = 0; // ST-176: last computed danger-vignette opacity (probe)
 let slowmoT = 0; // I116: slow-mo tint ramp 0..1 // I85: transient danger spike on hit (gated by !motionOff like the flash)
 function togglePause() { // ST-033: shared by keyboard and two-finger touch
   if (tutorialActive) return; // I151: can't pause while reading the first-run tutorial
@@ -455,6 +459,7 @@ window.__vr.timeWarp = (x, o) => audio.timeWarp(x, o); window.__vr.warpCents = (
 window.__vr.deathWarpT = () => _deathWarpT; // I174: probe (seconds left of the death-slow-mo window)
 window.__vr.shakeEnergy = (t) => shakeEnergy(t, CONFIG.fx.shakeTable); // ST-175: probe (table energy for an event type)
 window.__vr.shakeMag = () => shake.magnitude(); // ST-175: probe (current shake energy 0..1)
+window.__vr.dangerOp = () => _lastDangerOp; // ST-176: probe (current danger-vignette opacity 0..1)
 window.__vr.lastShare = () => screens.lastShare(); // I159: probe
 
 // Fixed-timestep simulation (60Hz) with render at display rate (ST-078: the
@@ -531,7 +536,7 @@ else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, 
     if (e.type === 'vortexTelegraph') { vortexFx.onTelegraph(e.data.pos); } // ST-059 (state always advances; particles above are motion-gated)
     else if (e.type === 'vortexStart') { vortexFx.onStart(e.data.pos); }
     else if (e.type === 'vortexEnd') { vortexFx.onEnd(); }
-    else if (e.type === 'hit') _deathWarpT = CONFIG.music.warp.death.dur; // I174: death-slow-mo audio window (state-agnostic like the vortex chain - it is audio, not motion)
+    else if (e.type === 'hit') { _deathWarpT = CONFIG.music.warp.death.dur; if (motionOff) { _rmHitT = 0; _rmHitSev = e.data.lives <= 1 ? 1 : 0.6; } } // I174: death-slow-mo audio window (state-agnostic like the vortex chain - it is audio, not motion); ST-176: reduced-motion damage vignette arm (steady-then-fade, mirrors the I85 juice severities; the juice spike + flash stay motion-gated)
     if (e.type === 'shieldPop') {
       shieldRing.pulse();
     } else if (e.type === 'gameover') {
@@ -646,7 +651,10 @@ function syncVisuals(dt) {
   } else if (flashEl && flashEl.style.opacity !== '0') flashEl.style.opacity = '0';
   // I85: danger vignette - steady last-life tint + transient hit spike (spike gated off under reduced motion)
   if (dangerA > 0) dangerA = Math.max(0, dangerA - dt * 1.4);
-  const dangerOp = Math.max((st === STATE.PLAYING && world.lives <= 1) ? 0.55 : 0, dangerA);
+  let _rmOp = 0; // ST-176: reduced-motion damage vignette (steady-then-fade, opacity only; decayed here so the final hit plays through GAME_OVER)
+  if (_rmHitSev > 0) { _rmHitT += dt; _rmOp = _rmHitSev * dangerVignetteX(_rmHitT, CONFIG.fx.dangerVignette.hold, CONFIG.fx.dangerVignette.fade); if (_rmOp <= 0) _rmHitSev = 0; }
+  const dangerOp = Math.max((st === STATE.PLAYING && world.lives <= 1) ? 0.55 : 0, dangerA, _rmOp);
+  _lastDangerOp = dangerOp; // ST-176: probe value
   if (vignetteDangerEl) { const vo = dangerOp.toFixed(3); if (vignetteDangerEl.style.opacity !== vo) vignetteDangerEl.style.opacity = vo; }
   // I116: slow-mo tint - smooth ramp toward the active state (steady state indicator, reduced-motion safe)
   if (slowmoTintEl) {

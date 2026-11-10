@@ -71,5 +71,71 @@ exactly: same 8 events, same values.
   surface for the ST-179 feel balance pass; future shake events get a
   table row, not a new literal.
 
+## ST-176 damage vignette, reduced-motion aware (I176)
+
+### Combat Goal
+Under reduced motion, per-hit damage feedback must exist without motion or
+strobe. Before ST-176 a hit with reduced motion produced zero vignette or
+flash feedback (the juice spike and the #flash burst are motion-gated) -
+only the steady last-life tint (0.55) existed. ST-176 adds a
+reduced-motion-only steady-then-fade damage vignette: same severities as
+the I85 juice (0.6 normal / 1.0 last life), opacity only, no flash, no
+positional motion. Motion-ON behavior is unchanged (the juice spike +
+flash stay as they were; the new path is simply not armed).
+
+### Tuning
+- CONFIG.fx.dangerVignette = { hold: 0.5, fade: 0.5 } - hold the hit
+  severity for 0.5s, then fall linearly to 0 over 0.5s (1.0s total).
+- src/core/dangerVignette.js (new, pure, DOM-free): dangerVignetteX(t,
+  hold, fade) - the steady-then-fade multiplier (1 -> 0); 0 for invalid
+  hold/fade; fade = 0 degenerates to a pure step; hold = 0 to a pure fade.
+- Severities mirror the I85 juice: 1.0 on the last-life hit, 0.6 otherwise.
+
+### Feedback
+- Armed in the state-always-advances chain (the same line as the I174
+  death-warp arm) and ONLY when motionOff: hit -> _rmHitT = 0, _rmHitSev =
+  severity.
+- Decayed in the vignette render section, state-agnostic: the final hit
+  plays through the GAME_OVER frames (the visual half of the I174 death
+  beat).
+- Composition: dangerOp = max(steady last-life 0.55, juice dangerA, rm
+  steady vignette) - the same #vignette-danger element and the same
+  change-cached opacity write.
+- #flash (full-screen burst) stays motion-gated - it is the strobe-class
+  effect the reduced-motion policy exists to kill.
+- Probe: __vr.dangerOp() (current composed opacity 0..1).
+
+### QA Scenario
+- Unit (tests/dangerVignette.test.js, 10 tests): start/hold/fade/end
+  values, negative-t clamp, monotonicity + [0,1] range, fade = 0 pure
+  step, hold = 0 pure fade, invalid hold/fade -> 0, shipped CONFIG
+  validity.
+- Browser smoke part 1 ?nocache=176a (reducedMotion: true seeded in
+  localStorage, then reload; real Enter keypress -> PLAYING): baseline op
+  0 with shake 0; hit (lives 3) + advance(0.05) -> op exactly 0.6 (hold)
+  with shake still 0; still 0.6 at t = 13/60 (hold); op 0.54 at t = 33/60
+  (mid-fade = 0.6*(1-(0.55-0.5)/0.5)); settles to exactly 0; a fresh
+  last-life hit window runs exactly 60 advances (1.0s), peak exactly 1.0,
+  end exactly 0; final-death hit (lives 0) peaks at 1.0 and decays fully.
+  Console 0 errors / 0 warnings; NaN scan 0; screenshot
+  .evidence/I176/I176_1_damage_vignette_hit.png.
+- Browser smoke part 2 ?nocache=176b (reducedMotion: false): hit +
+  advance(0.05) -> op 0.576667 = 0.6 - 1.4*(1/60) exactly (the I85 juice
+  linear decay - proves the rm path is not armed with motion on); shake
+  fires (0.37041); baseline 0; settles to exactly 0. Console 0/0; NaN
+  scan 0.
+
+### Changed files
+- src/core/dangerVignette.js - NEW pure envelope
+- src/core/config.js - +CONFIG.fx.dangerVignette { hold: 0.5, fade: 0.5 }
+- src/main.js - import, 3 states, arm line, vignette composition + probe
+- tests/dangerVignette.test.js - NEW (10 tests)
+- design/feel.md - this section
+
+### Risks
+- None material: reduced-motion-only path (zero motion-on change - proven
+  by the part-2 smoke), opacity-only (no motion, no strobe), no new
+  elements/nodes/timers.
+
 ## Next
-ST-176 (I176): damage vignette (reduced-motion aware).
+ST-177 (I177): Particles: pickup burst + magnet trails.

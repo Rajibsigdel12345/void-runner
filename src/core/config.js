@@ -342,6 +342,10 @@ export const CONFIG = {
       wardenSpawn: 0.5,      // mini-boss arrival
       wardenDeath: 0.8       // mini-boss death
     },
+    dangerVignette: {        // ST-176: reduced-motion damage vignette (steady-then-fade, opacity only)
+      hold: 0.5,             // seconds held at full severity after a hit
+      fade: 0.5              // seconds of linear fade back to 0
+    },
     punch: {                  // ST-081: camera punch - brief directed jolt (boss death / bomb)
       decay: 12,              // punch energy decay (1/s, exponential)
       amplitude: 2.0,         // max camera displacement (world units) at energy 1
