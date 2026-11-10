@@ -244,3 +244,60 @@ PASS - proceed to the E8B balance follow-up. I129: balance follow-up (post-gate 
 ### Next owner or decision
 I129 (ST-129): balance follow-up (post-gate playtest findings) - notes +
 config. No user decision required (advisory gate, non-blocking).
+
+## I147 - G8.2 E8C Gate (ST-147)
+
+- Date: 2026-11-10
+- Skill: cgs-gate-check (advisory phase gate for E8C Content variety)
+
+### Summary
+Phase gate closing the E8C feature build (I133-I146) before the E8C
+regression/fix/docs tail (I148-I150). Verifies the epics.md G8.2 criteria:
+boss phases + mini-boss + belt verified in the browser, daily seed
+reproducible (same date => same run), share string decodes, regression A
+clean.
+
+### Gate Criteria (epics.md G8.2)
+1. Boss phases + mini-boss + belt verified in the browser.
+2. Daily seed reproducible (same date => same run).
+3. Share string decodes.
+4. Regression A clean (npm test green, build 0, core-loop browser clean).
+Plus the standing baseline: fresh npm test + build this iteration, console 0/0.
+
+### Evidence (collected this iteration)
+- npm test: 456/456 pass (fresh run); npm run build: exit 0 (fresh run).
+- Boss phases (browser, dev :5173 ?nocache=147, fresh tab):
+  - Monolith wave 15 (maxHp 52): phase 1 -> enrage after 27 hits -> phase 2 at hp 25 (just under the 50% threshold, 26).
+  - Splicer wave 15 (maxHp 30): phase 1 -> enrage after 16 hits -> phase 2 at hp 14 (just under 15).
+  - bossPhase2 announce event: emitted exactly once at the threshold - unit contract (tests/bossPhase2.test.js:89). The live phase transitions above were driven synchronously via hit(), so the step-loop announce tick did not run inside the probe (expected test-method artifact, not a defect).
+- Mini-boss Warden (browser): wave 15, no heavyweight -> Warden (armor 6, hp 12). First bullet hit absorbed by armor (armor 6 -> 5, hp stays 12); after 10 more hits armor 0, hp 7 - the armor-first contract holds. 15 s live soak: Warden orbiting (x -1.48), belt 5/5, 0 NaN, state PLAYING. Screenshot .evidence/I147/I147_warden_belt.png.
+- Belt (browser): 5/5 rocks present and stable across the gate soaks (also covered by the I146 soup: 60 s + Splicer-spiral coexistence, bolt pass-through verified I145).
+- Daily seed reproducible (node): dailySeed(2026,11,10) = 317547475; same date => same seed, 2026-11-11 => 300769856 (differs). Two full 90 s daily runs (canonical input script) bit-identical (JSON snapshots): final score 27249, wave 5, 120 kills, GAME_OVER, Monolith alive.
+- Share string decodes (node): encodeResult({seed, score 27249, wave 5, kills 120}) -> "vr1.592577.l0x.5.3c.6g" -> decodeResult round-trips exactly; corrupted checksum rejected; wrong magic rejected; uppercase rejected. Replay: a fresh World reseeded from the DECODED seed replays to the claimed score/wave/kills (27249/5/120) - a verifiable score claim, end to end.
+- Regression A (browser, fresh tab): begin -> PLAYING; pause -> PAUSED; resume -> PLAYING; forced death (1 life, rock teleported onto the ship) -> GAME_OVER in 103 ms; restart -> PLAYING with lives 3 / score 0. Console on the gate tab: 0 errors / 0 warnings.
+- NaN: 0 across ship + Warden + boss + vortex + all rocks + enemy bolts during the gate scenes (scoreKeeper.lastKillTime = -Infinity is the intentional sentinel, not a NaN).
+
+### Concerns
+- The bossPhase2 announce event was not observed in the live event tally (the synchronous hit() probe skips the step-loop tick); the once-only emission is locked by the unit test. No behavior change implied.
+- Headless rAF runs at 4-6 fps (background-tab throttling); adaptive quality downgraded FX to low. All state-level evidence is dt-driven (step-based), so throttling does not affect the correctness conclusions; perf re-baselining is E8E scope (I184).
+- The one "missing ) after argument list" console error from the I146 first session tab remained non-reproducible (three fresh gate/verify tabs: 0/0); still classified as a transient tooling artifact.
+
+### Verdict
+PASS - proceed to the E8C regression tail. I148: regression round A (extended browser).
+
+### Risks
+- R-E8-1 (balance): covered by I144 (boss family audit) + this gate's curve spot checks (Monolith 52 @ w15, Splicer 30 @ w15, Warden 12 hp + 6 armor on 5th waves). No new balance risks.
+- No new risks introduced by this gate.
+
+### Changed files
+- production/gates.md (this gate)
+- production/iterations.md (I147 entry)
+- CHANGELOG.md (I147 line)
+- production/session-state/active.md (state -> I147)
+
+### Verification evidence
+- All commands fresh-run this iteration: npm test, build, a temporary node daily/share evidence script (deleted after the run), browser probes via window.__vr on a fresh tab (?nocache=147).
+- Assumptions: none - every criterion verified directly.
+
+### Next owner or decision
+I148 (ST-148): regression round A (extended browser) - longer real-time runs across the E8C systems (waves 1-20+ with boss + Warden + belt + mines + drones + vortex) and game-over/restart cycles under load. No user decision required (advisory gate, non-blocking).

@@ -1051,3 +1051,11 @@ One entry per iteration. Format:
 - Console: the fresh tab that ran the full soup = 0 errors / 0 warnings (adaptive-quality INFO only in the long-running heavy tab, expected at headless 4-6 fps). One "missing ) after argument list" console error appeared in the FIRST tab of the session only; it did not reproduce on two fresh tabs (one idle 23 s, one running the full 90 s+ soup) and the codebase has no eval / new Function / string timers (no runtime SyntaxError path), so it is classified as a transient tooling artifact, not a game bug.
 - Screenshot: .evidence/I146/I146_e8c_soup.png (teal Splicer + SPLICER health bar, 5 belt rocks, mine, drone, ship center).
 - Result: E8C browser verify PASS. Next I147 ST-147 G8.2 gate (cgs-gate-check).
+
+## I147 - G8.2 gate: E8C content variety (cgs-gate-check) (ST-147)
+
+- Gate: epics.md G8.2 criteria - boss phases + mini-boss + belt in the browser, daily seed reproducible, share string decodes, regression A clean (plus fresh test/build baseline, console 0/0).
+- Evidence: fresh 456/456 + build 0. Browser (?nocache=147, fresh tab): Monolith w15 52 hp phase 1 -> 2 at hp 25 (27 hits); Splicer w15 30 hp phase 1 -> 2 at hp 14 (16 hits); Warden mini-boss armor-first contract (hit absorbed 6 -> 5, hp 12; 10 hits later armor 0 / hp 7) with a 15 s live soak (orbit + belt 5/5 + 0 NaN, .evidence/I147/I147_warden_belt.png); core loop PLAYING -> PAUSED -> PLAYING -> GAME_OVER (103 ms) -> restart PLAYING (lives 3 / score 0); console 0/0. Node: daily seed 2026-11-10 = 317547475 (date-stable, date-unique vs 300769856 for 2026-11-11); two 90 s daily runs bit-identical (score 27249, wave 5, 120 kills); share string vr1.592577.l0x.5.3c.6g round-trips exactly, rejects corrupted checksum / wrong magic / uppercase, and a replay from the DECODED seed reproduces the claimed score/wave/kills end to end (verifiable claim).
+- Concern: the bossPhase2 announce did not appear in the live event tally (synchronous hit() probe skips the step tick); once-only emission is locked by tests/bossPhase2.test.js:89. No defect implied.
+- Verdict: PASS. Full gate doc per the cgs-gate-check output contract: production/gates.md.
+- Result: DONE. Next I148 ST-148 regression round A (extended browser).
