@@ -46,6 +46,7 @@ const LETTERS = { rapid: 'R', spread: 'S', shield: 'H', bomb: 'B', magnet: 'M', 
 export function createPowerupRenderer(scene) {
   const max = 4; // pool headroom over maxActiveDrops (I078 audits pools)
   const geos = {}, mats = {};
+  const glbGeo = {}; // I211: per-type Blender emblem geometry, swapped in when the asset resolves
   for (const [t, def] of Object.entries(TYPES)) {
     geos[t] = def.make();
     mats[t] = new THREE.MeshStandardMaterial({
@@ -87,7 +88,7 @@ export function createPowerupRenderer(scene) {
       if (d.dead || i >= max) continue;
       const idx = i++;
       const m = pool[idx];
-      m.geometry = geos[d.type];
+      m.geometry = glbGeo[d.type] || geos[d.type]; // I211: GLB emblem when loaded
       m.material = mats[d.type];
       m.position.set(d.pos.x, 0.45 + Math.sin(t * 2.2 + d.id) * 0.08, d.pos.y);
       m.rotation.y = t * 1.4 + d.id;
@@ -106,5 +107,16 @@ export function createPowerupRenderer(scene) {
     for (; i < max; i++) { pool[i].visible = false; badges[i].visible = false; }
   }
 
-  return { sync, pool, badges };
+  // I211: swap a type's geometry to its Blender emblem (first mesh of the GLB scene).
+  // In-code per-type materials stay authoritative (GLB materials unused); these assets carry
+  // no vertex colors, so no color-attribute guard is needed (unlike the rocks/boss).
+  function setGLB(type, obj) {
+    let g = null;
+    obj.traverse((o) => {
+      if (!g && o.isMesh) g = o.geometry;
+    });
+    if (g) glbGeo[type] = g;
+  }
+
+  return { sync, pool, badges, setGLB };
 }

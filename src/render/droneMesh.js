@@ -12,7 +12,7 @@ function bakeDroneGeometry() {
 
 export function createDroneRenderer(scene) {
   const max = CONFIG.drone.maxConcurrent;
-  const geo = bakeDroneGeometry();
+  let geo = bakeDroneGeometry(); // I211: reassigned by useGLB when the drone GLB resolves
   // dark steel body + cold cyan core glow; sync() pulses emissiveIntensity (shared = all blink together)
   const mat = new THREE.MeshStandardMaterial({
     color: 0x1f3340, roughness: 0.45, metalness: 0.55, flatShading: true,
@@ -40,5 +40,18 @@ export function createDroneRenderer(scene) {
     for (; i < max; i++) pool[i].visible = false;
   }
 
-  return { sync, pool };
+  // I211: swap the pooled dart geometry to the Blender drone GLB (first mesh).
+  // Pool meshes captured geo at creation, so re-point every pooled mesh on swap
+  // (same pattern as asteroidRenderer.setShieldGLB, I210).
+  function useGLB(obj) {
+    let g = null;
+    obj.traverse((o) => {
+      if (!g && o.isMesh) g = o.geometry;
+    });
+    if (!g) return;
+    geo = g;
+    for (const m of pool) m.geometry = g;
+  }
+
+  return { sync, pool, useGLB };
 }

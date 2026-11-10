@@ -1,5 +1,5 @@
 // Void Runner - GLB asset loader (I104). Fire-and-forget async load of the
-// five Blender-pass GLBs in assets/ with procedural fallback: renderers
+// fifteen Blender-pass GLBs in assets/ with procedural fallback: renderers
 // start procedural and each asset swaps in (via onAsset) as it resolves.
 // A failed load warns and keeps the procedural stand-in - no boot gate.
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -11,6 +11,15 @@ const ASSETS = {
   rockS: 'assets/asteroid_S.glb',
   boss: 'assets/boss.glb',
   shield: 'assets/shield.glb', // I210: energy armor plates
+  // I211: seven powerup emblems + drone (Blender, silhouette-matched to procedural fallbacks)
+  puRapid: 'assets/powerup_rapid.glb',
+  puSpread: 'assets/powerup_spread.glb',
+  puShield: 'assets/powerup_shield.glb',
+  puBomb: 'assets/powerup_bomb.glb',
+  puMagnet: 'assets/powerup_magnet.glb',
+  puOverdrive: 'assets/powerup_overdrive.glb',
+  puSlowmo: 'assets/powerup_slowmo.glb',
+  drone: 'assets/drone.glb',
 };
 
 export function createAssetLoader() {

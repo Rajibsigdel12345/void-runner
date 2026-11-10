@@ -1,5 +1,5 @@
 // I207: vendored GLB asset audit (ST-207, cgs-asset-audit). Pure node - no DOM,
-// no three. Validates the five Blender-authored GLBs in assets/ against the
+// no three. Validates the Blender-authored GLBs in assets/ (I211: fifteen total) against the
 // container format, the VR_ naming convention, the poly budgets from
 // design/asset-spec.md, and the logical radii in CONFIG (visual/hitbox parity).
 import test from 'node:test';
@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105).
-const BUDGETS = { ship: 300, L: 320, M: 120, S: 80, boss: 250, shield: 120 }; // I210
+const BUDGETS = { ship: 300, L: 320, M: 120, S: 80, boss: 250, shield: 120, emblem: 60, drone: 100 }; // I210 + I211
 const MAX_FILE_BYTES = 100 * 1024;
 
 function parseGlb(file) {
@@ -150,4 +150,68 @@ test('shield.glb: naming, poly budget, unit radius (I210)', () => {
   assert.ok(s.totalTris <= BUDGETS.shield, 'shield tris ' + s.totalTris + ' <= 120');
   const maxR = Math.max(...s.prims.map((p) => p.maxRadius));
   assert.ok(Math.abs(maxR - 1.0) <= 0.05, 'shield max vertex radius ' + maxR.toFixed(4) + ' ~ 1.0');
+});
+
+// I211: power-up emblems + drone (ST-211, cgs-dev-story).
+
+const EMBLEM_TARGETS = {
+  powerup_rapid: 0.9, powerup_spread: 0.85, powerup_shield: 1.0, powerup_bomb: 0.95,
+  powerup_magnet: 0.88, powerup_overdrive: 0.85, powerup_slowmo: 0.9,
+};
+const EMBLEM_NODES = {
+  powerup_rapid: 'VR_PU_Rapid', powerup_spread: 'VR_PU_Spread', powerup_shield: 'VR_PU_Shield',
+  powerup_bomb: 'VR_PU_Bomb', powerup_magnet: 'VR_PU_Magnet', powerup_overdrive: 'VR_PU_Overdrive',
+  powerup_slowmo: 'VR_PU_Slowmo',
+};
+
+function extents({ buf, json, binOff }) {
+  // Per-axis min/max over all primitives (world = Blender units).
+  const min = [Infinity, Infinity, Infinity];
+  const max = [-Infinity, -Infinity, -Infinity];
+  for (const m of json.meshes || []) {
+    for (const p of m.primitives || []) {
+      const acc = json.accessors[p.attributes.POSITION];
+      const bv = json.bufferViews[acc.bufferView];
+      for (let i = 0; i < acc.count; i++) {
+        const o = binOff + (bv.byteOffset || 0) + (acc.byteOffset || 0) + i * 12;
+        for (let k = 0; k < 3; k++) {
+          const v = buf.readFloatLE(o + k * 4);
+          if (v < min[k]) min[k] = v;
+          if (v > max[k]) max[k] = v;
+        }
+      }
+    }
+  }
+  return { x: max[0] - min[0], y: max[1] - min[1], z: max[2] - min[2] };
+}
+
+test('powerup emblems: naming, poly budgets, normalized extents, no vertex colors (I211)', () => {
+  for (const [file, target] of Object.entries(EMBLEM_TARGETS)) {
+    const { buf, json, binOff } = parseGlb(file + '.glb');
+    assert.ok(buf.length < MAX_FILE_BYTES, file + '.glb under 100 KB');
+    const s = meshStats({ buf, json, binOff });
+    const node = EMBLEM_NODES[file];
+    assert.ok(s.nodeNames.includes(node), node + ' node');
+    assert.ok(s.matNames.includes(node), node + ' material');
+    for (const p of s.prims) assert.ok(!p.hasColor, file + ': no vertex colors (in-code materials authoritative)');
+    assert.ok(s.totalTris <= BUDGETS.emblem, file + ' tris ' + s.totalTris + ' <= 60');
+    const e = extents({ buf, json, binOff });
+    const maxExt = Math.max(e.x, e.y, e.z);
+    assert.ok(Math.abs(maxExt - target) / target <= 0.15,
+      file + ' max extent ' + maxExt.toFixed(3) + ' within 15% of target ' + target);
+  }
+});
+
+test('drone.glb: naming, poly budget, dart dimensions vs procedural parity (I211)', () => {
+  const { buf, json, binOff } = parseGlb('drone.glb');
+  assert.ok(buf.length < MAX_FILE_BYTES, 'drone.glb under 100 KB');
+  const s = meshStats({ buf, json, binOff });
+  assert.ok(s.nodeNames.includes('VR_Drone'), 'VR_Drone node');
+  assert.ok(s.matNames.includes('VR_Drone'), 'VR_Drone material');
+  assert.ok(s.totalTris <= BUDGETS.drone, 'drone tris ' + s.totalTris + ' <= 100');
+  const e = extents({ buf, json, binOff });
+  // Procedural parity: octahedron r=0.7 scaled (1.6, 0.85, 0.85) -> length 2.24 along X, cross ~1.19.
+  assert.ok(Math.abs(e.x - 2.24) / 2.24 <= 0.15, 'drone X extent ' + e.x.toFixed(3) + ' ~ 2.24');
+  const cross = Math.max(e.y, e.z);
+  assert.ok(Math.abs(cross - 1.19) / 1.19 <= 0.15, 'drone cross ' + cross.toFixed(3) + ' ~ 1.19');
 });

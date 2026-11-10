@@ -268,3 +268,35 @@ shell (smooth unit icosphere) with the Blender v2 assets:
 - Draw calls: unchanged - one boss mesh; all pooled shells share the single
   swapped geometry (setShieldGLB replaces it once; per-armor material swap in
   sync is unchanged).
+
+## I211 powerup emblems + drone amendment (E9 ST-211, cgs-dev-story)
+
+Eight new GLBs (14 total in assets/). Naming: node = material = VR_PU_<Cap> / VR_Drone.
+No vertex colors on any I211 asset - in-code per-type materials (powerupMesh TYPES) and the
+drone material are authoritative; GLB materials are decorative only.
+
+| file | geometry | tris (budget) | normalized max extent |
+|---|---|---|---|
+| powerup_rapid.glb | twisted 4-col crystal (two 4-rings at 45deg twist, nose/tail tips) | 16 (<=60) | 0.9 (Y) |
+| powerup_spread.glb | triple-fan blade cluster | 13 (<=60) | 0.85 (Y) |
+| powerup_shield.glb | chunky 6-side ring (six gapped plates) | 48 (<=60) | 1.0 (X) |
+| powerup_bomb.glb | box + 8 corner tri-pyramid spikes | 36 (<=60) | 0.95 (X/Y/Z) |
+| powerup_magnet.glb | horseshoe U of three boxes | 36 (<=60) | 0.88 (X) |
+| powerup_overdrive.glb | hex gem + piercing spike core | 32 (<=60) | 0.85 (Y) |
+| powerup_slowmo.glb | box base + elongated octa spike | 20 (<=60) | 0.9 (Y) |
+| drone.glb | 8-seg dart: nose 1.12, rings r .35/.595/.30 at x .6/0/-.85, tail -1.12, dorsal+ventral fins | 52 (<=100) | X 2.24, cross 1.19-1.24 |
+
+- Normalized extent = max bounding-box extent scaled to target in Blender before export
+  (Y-up glTF space after the (x,y,z)->(x,-z,y) pre-rotation).
+- Draw calls unchanged: pools share geometry per type; the emblem swap is a geometry-pointer
+  swap on pooled meshes (setGLB / useGLB), no new materials or programs.
+- File sizes: rapid 2.0 KB, spread 2.1 KB, shield 3.7 KB, bomb 3.5 KB, magnet 3.0 KB,
+  overdrive 3.2 KB, slowmo 2.2 KB, drone 4.2 KB (~24 KB added raw; dist budget unaffected).
+- Parity: emblem silhouettes match the procedural fallback families (crystal ~ octa, fan ~ cone,
+  ring ~ torus, bomb ~ box, U ~ sphere slot, gem ~ hex-cyl, spike ~ icosa); drone length 2.24 and
+  cross 1.19 match the procedural OctahedronGeometry(0.7) scaled (1.6, 0.85, 0.85), so
+  hit-feel/size perception is unchanged.
+- Normals: recalc_face_normals before export; verified post-export via signed-volume audit
+  (all positive). I211 incident: the four first-session emblem exports skipped recalc -
+  powerup_shield was consistently inward (fixed by in-place index-winding flip) and
+  powerup_rapid mixed (rebuilt). The signed-volume check is part of the asset-audit routine.

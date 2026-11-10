@@ -114,6 +114,14 @@ assetLoader.onAsset((name, entry) => {
   else if (name === 'rockS') rockRenders.setGLB('S', entry.object);
   else if (name === 'boss') bossMesh.useGLB(entry.object);
   else if (name === 'shield') rockRenders.setShieldGLB(entry.object); // I210: armor plates
+  else if (name === 'puRapid') powerupRenders.setGLB('rapid', entry.object); // I211
+  else if (name === 'puSpread') powerupRenders.setGLB('spread', entry.object);
+  else if (name === 'puShield') powerupRenders.setGLB('shield', entry.object);
+  else if (name === 'puBomb') powerupRenders.setGLB('bomb', entry.object);
+  else if (name === 'puMagnet') powerupRenders.setGLB('magnet', entry.object);
+  else if (name === 'puOverdrive') powerupRenders.setGLB('overdrive', entry.object);
+  else if (name === 'puSlowmo') powerupRenders.setGLB('slowmo', entry.object);
+  else if (name === 'drone') droneRenders.useGLB(entry.object); // I211
 });
 assetLoader.loadAll();
 const bossHealth = createBossHealth(document.body); // ST-055

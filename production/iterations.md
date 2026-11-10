@@ -2022,3 +2022,14 @@ One entry per iteration. Format:
   overlay, 02 clean boss shot, 03 shielded-rock plate close-up).
 - Result: DONE. ST-210 closed. Next I211 ST-211 (power-up emblems x7 +
   drone/dart visuals).
+
+## I211 - Blender powerup emblems x7 + drone GLB (cgs-dev-story) (ST-211)
+
+- Summary: Seven power-up emblems + the seeker drone are now low-poly Blender GLBs, swapped in over the procedural fallbacks per pooled mesh. In-code materials stay authoritative.
+- Story Goal: E9 art pass - replace generic primitive powerups (octa/cone/torus/box/sphere/hex-cyl/icosa) and the stretched-octahedron drone with distinct, silhouette-matched, budget-bounded assets.
+- Owner + Dependencies: render (assetLoader, powerupMesh, droneMesh, main.js) + tests; builds on the I210 swap-in pipeline (assetLoader onAsset, setShieldGLB pool-swap precedent).
+- Acceptance: 8 new GLBs on disk (14 total); node/material naming VR_PU_*/VR_Drone; budgets emblem <=60 / drone <=100 tris; normalized max extents within 15% of target; no vertex colors; 636/636; build 0; smoke 14/14 ready + emblem/drone geometry swap verified + console 0/0.
+- Build notes (Blender 5.2): raw verts/faces -> normalize max extent to target -> pre-rotate (x,y,z)->(x,-z,y) (exporter Y-up flip) -> recalc_face_normals -> shade_flat -> GLB export (use_selection, export_yup, export_apply, export_materials). Gotchas: (1) the previous session's 4 emblem exports skipped recalc - powerup_shield came out consistently inward (36/48 faces) and powerup_rapid mixed (8/16); shield fixed by an in-place index-winding flip (byte-identical size), rapid by a full rebuild; (2) the first rapid rebuild emitted only one of two band triangles per twisted quad (12 tris, see-through holes) - closed to 16; (3) a Python print of str+float raised TypeError AFTER the export ran, so the files still landed - always verify on disk.
+- Changed: assets/ +powerup_rapid/spread/shield/bomb/magnet/overdrive/slowmo.glb +drone.glb (~24 KB raw); src/render/assetLoader.js (8 assets, 14 total); src/render/powerupMesh.js (glbGeo per-type holder + setGLB; sync prefers GLB geo); src/render/droneMesh.js (let geo + useGLB re-points the pool); src/main.js (8 onAsset branches); tests/assetGlbs.test.js (BUDGETS.emblem=60/drone=100, extents() helper, emblem loop test, drone dart-parity test).
+- Verification: node audit 8/8 (nodes/mats exact, tris 16/13/48/36/36/32/20/52, extents 0.9/0.85/1.0/0.95/0.88/0.85/0.9 exact, drone X 2.24 + cross 1.19-1.24, signed volume > 0 on all after the normal fixes); 636/636 (was 634); build exit 0; smoke ?nocache=211a (MCP browser closed first): 14/14 ready, drone pool geo 52 tris (GLB; procedural was 12), pilot run 1 -> magnet drop t=3.18 -> pool mesh 36 tris/72 verts (GLB; fallback was 320-tri sphere) with in-code 0x69f0ae material + M badge, screenshot .evidence/I211/01-magnet-emblem.png, console 0/0.
+- Result: DONE. ST-211 closed. Next I212 ST-212 (starfield/nebula skybox + arena ring).
