@@ -3,6 +3,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CONFIG } from '../src/core/config.js';
 import { encodeResult, decodeResult } from '../src/core/share.js';
+import { World } from '../src/core/game.js'; // ST-159: wiring-contract test
+import { RNG } from '../src/core/rng.js';
 
 test('config: share block shape', () => {
   assert.equal(typeof CONFIG.share.magic, 'string');
@@ -73,4 +75,18 @@ test('decode rejects a wrong-magic string', () => {
   const parts = s.split('.');
   const body = ['vr9', parts[1], parts[2], parts[3], parts[4]].join('.');
   assert.equal(decodeResult(body + '.' + parts[5]).ok, false);
+});
+
+test('share code built from a World result round-trips (ST-159 wiring contract)', () => {
+  const world = new World(new RNG(0x1234));
+  world.begin();
+  const seed = world.rng.seed;
+  const wave = Math.max(1, world.wave); // mirrors the game-over wiring (the codec clamps wave to >= 1)
+  const code = encodeResult({ seed, score: world.score, wave, kills: world.scoreKeeper.kills });
+  const d = decodeResult(code);
+  assert.equal(d.ok, true);
+  assert.equal(d.seed, seed);
+  assert.equal(d.score, world.score);
+  assert.equal(d.wave, wave);
+  assert.equal(d.kills, world.scoreKeeper.kills);
 });

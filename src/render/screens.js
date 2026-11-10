@@ -1,5 +1,6 @@
 ﻿// Void Runner - menu / pause / game-over screens (ST-017). DOM only; text change-cached.
 import { STATE } from '../core/state.js';
+import { encodeResult } from '../core/share.js'; // ST-159: shareable result code
 
 export function createScreens(root, settings = {}) {
   const overlay = document.createElement('div');
@@ -196,6 +197,38 @@ export function createScreens(root, settings = {}) {
     line(gameOver, 'PRESS ENTER TO RESTART', 'font-size:calc(16px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;margin-top:10px;animation:vrPulse 1.6s ease-in-out infinite;');
   }
 
+  // ST-159: shareable result - copy the reproducible result code (ST-142 codec) to the clipboard.
+  let goShare = '';
+  const shareBtn = document.createElement('button');
+  shareBtn.type = 'button';
+  shareBtn.className = 'vr-pause-btn';
+  shareBtn.id = 'vr-share-btn';
+  shareBtn.setAttribute('aria-label', 'Copy result code');
+  shareBtn.textContent = 'COPY RESULT';
+  shareBtn.style.cssText = 'margin-top:4px;pointer-events:auto;';
+  function legacyCopy(text) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    } catch (e) { return false; }
+  }
+  function copyShare() {
+    const feedback = (ok) => {
+      shareBtn.textContent = ok ? 'COPIED!' : 'COPY FAILED';
+      shareBtn.disabled = true;
+      setTimeout(() => { shareBtn.textContent = 'COPY RESULT'; shareBtn.disabled = false; }, 1400);
+    };
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      navigator.clipboard.writeText(goShare).then(() => feedback(true), () => feedback(legacyCopy(goShare)));
+    } else feedback(legacyCopy(goShare));
+  }
+  shareBtn.addEventListener('click', (e) => { e.stopPropagation(); if (goShare) copyShare(); shareBtn.blur(); });
+  gameOver.appendChild(shareBtn);
+  line(gameOver, 'copies a reproducible result code', 'font-size:calc(11px * var(--vr-fs,1));opacity:0.6;letter-spacing:1px;margin-top:-8px;');
   const PANELS = {
     [STATE.MENU]: menu,
     [STATE.PAUSED]: paused,
@@ -236,6 +269,7 @@ export function createScreens(root, settings = {}) {
       set('stats1', statsLine1, "KILLS " + world.scoreKeeper.kills + "    WAVE " + Math.max(1, world.wave));
       set('stats2', statsLine2, "MAX COMBO " + world.scoreKeeper.maxCombo + "    TIME " + mm + ":" + ss);
       const st = world.sessionStats(); set('stats3', statsLine3, "ACCURACY " + Math.round(st.accuracy * 100) + "%    SHOTS " + st.shotsHit + "/" + st.shotsFired); // I152
+      goShare = encodeResult({ seed: world.rng.seed, score: world.score, wave: Math.max(1, world.wave), kills: world.scoreKeeper.kills }); // ST-159
       if (opts.dailyMode) { dailyBadge.style.display = 'inline-block'; set('dailyBadge', dailyBadge, 'DAILY RUN' + (opts.dailyKey ? '  \u00b7  ' + opts.dailyKey : '') + (opts.dailyNewBest ? '   NEW DAILY BEST' : '')); } // ST-141
       else dailyBadge.style.display = 'none';
     }
@@ -251,6 +285,6 @@ export function createScreens(root, settings = {}) {
     }
   }
 
-  return { update, overlay };
+  return { update, overlay, lastShare: () => goShare, shareButton: shareBtn }; // ST-159
 }
 
