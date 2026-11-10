@@ -41,6 +41,24 @@ export function createWardenMesh(scene) {
   armor.rotation.y = Math.PI / 6; // stagger the hex plate from the core facets
   group.add(armor);
 
+  // I155: shape cues (colorblind-friendly) - a spike collar extends once the armor is spent,
+  // so the "exposed" state reads by silhouette, not just by the orange glow.
+  let shapeCuesOn = true;
+  const spikeGeo = new THREE.ConeGeometry(r * 0.16, r * 0.55, 4);
+  const spikeMat = new THREE.MeshStandardMaterial({ color: 0x8fa3c8, roughness: 0.3, metalness: 0.85, flatShading: true, emissive: 0xff7a3c, emissiveIntensity: 0.5 });
+  const spikes = new THREE.Group();
+  for (let i = 0; i < 8; i++) {
+    const holder = new THREE.Object3D();
+    holder.rotation.y = (i / 8) * Math.PI * 2;
+    const s = new THREE.Mesh(spikeGeo, spikeMat);
+    s.position.set(r * 1.35, 0, 0);
+    s.rotation.z = -Math.PI / 2; // cone tip (+Y) points outward along the holder
+    holder.add(s);
+    spikes.add(holder);
+  }
+  spikes.visible = false;
+  group.add(spikes);
+
   group.visible = false;
   scene.add(group);
 
@@ -49,7 +67,7 @@ export function createWardenMesh(scene) {
 
   /** sync(warden, t): place the drone, pulse the glow, show the armor state. */
   function sync(warden, t) {
-    if (!warden || !warden.alive) { group.visible = false; armor.scale.setScalar(1); return; }
+    if (!warden || !warden.alive) { group.visible = false; armor.scale.setScalar(1); spikes.visible = false; return; }
     group.position.set(warden.pos.x, r * 1.1 + 0.3, warden.pos.y);
     group.rotation.y = warden.rot;
     const armored = warden.armor > 0;
@@ -58,6 +76,7 @@ export function createWardenMesh(scene) {
     hullMat.emissiveIntensity = (armored ? 0.26 : 0.5) + 0.18 * (0.5 + 0.5 * Math.sin(t * (armored ? 2.2 : 5.0)));
     armorMat.emissive.copy(c);
     armor.scale.setScalar(armored ? 1 : 0.62); // spent armor retracts to a thin skirt
+    spikes.visible = shapeCuesOn && !armored; // I155: silhouette cue for the exposed state
     group.visible = true;
   }
 
@@ -70,5 +89,8 @@ export function createWardenMesh(scene) {
     if (g) hull.geometry = g;
   }
 
-  return { sync, mesh: group, useGLB };
+  // I155: shape-cue toggle (settings.shapeCues; on by default for colorblind-friendly play).
+  function setShapeCues(on) { shapeCuesOn = on === true; }
+
+  return { sync, mesh: group, useGLB, setShapeCues };
 }

@@ -102,6 +102,13 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   fontSel.addEventListener('change', () => emit({ fontScale: Number(fontSel.value) }));
   visCard.appendChild(styleCtl(fontSel));
 
+  row('SHAPE CUES', visCard); // I155: colorblind-friendly silhouette markers (on by default)
+  const cues = document.createElement('input');
+  cues.type = 'checkbox'; cues.checked = s0.shapeCues;
+  cues.setAttribute('aria-label', 'Shape cues');
+  cues.addEventListener('change', () => emit({ shapeCues: cues.checked }));
+  visCard.appendChild(cues);
+
   const groups = document.createElement('div');
   groups.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:14px;align-items:start;';
   groups.append(audioCard, visCard);
@@ -112,7 +119,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   hint.style.cssText = 'font-size:calc(11px * var(--vr-fs,1));letter-spacing:2px;opacity:0.55;';
   wrap.appendChild(hint);
 
-  const order = [vol, sfx, fxSel, rm, fontSel];
+  const order = [vol, sfx, fxSel, rm, fontSel, cues]; // I155
 
   function moveFocus(from, dir) {
     const i = order.indexOf(from);
@@ -150,6 +157,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
     fxSel.value = s.fx;
     rm.checked = s.reducedMotion;
     fontSel.value = String(s.fontScale); // I70
+    cues.checked = s.shapeCues; // I155
   }
 
   return { el: wrap, sync };

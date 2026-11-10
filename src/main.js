@@ -174,6 +174,8 @@ function applySettings(s) {
   setUiScale(); // I70+I71: UI scale = fontScale x viewport (cascades to DOM overlays only; canvas unaffected)
   bloom.setEnabled(s.fx === 'high');
   if (audio.state() !== 'uninitialized') { audio.setVolume(s.volume); audio.setSfx(s.sfx); }
+  rockRenders.setShapeCues(s.shapeCues !== false); // I155: colorblind-friendly silhouette cues
+  wardenMesh.setShapeCues(s.shapeCues !== false);
 }
 applySettings(liveSettings);
 // ST-073: adaptive quality - rolling FPS below threshold auto-downgrades FX (console log + toast).

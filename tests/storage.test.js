@@ -331,3 +331,15 @@ test('storage: uses the injected tutorialKey when provided (I151)', () => {
   assert.ok(store._map.has('custom.tutorial'));
   assert.equal(new Storage(store, { tutorialKey: 'custom.tutorial' }).getTutorialSeen(), true);
 });
+
+test('storage: shapeCues defaults on, round-trips, and rejects bad types (I155)', () => {
+  const store = memStore();
+  const a = new Storage(store);
+  assert.equal(a.getSettings().shapeCues, true); // default on (colorblind-friendly)
+  assert.equal(a.setSettings({ shapeCues: false }).shapeCues, false);
+  assert.equal(a.getSettings().shapeCues, false); // round-trips
+  assert.equal(new Storage(store).getSettings().shapeCues, false); // persists across instances
+  assert.equal(a.setSettings({ shapeCues: 'no' }).shapeCues, true); // non-boolean -> default
+  store.set(a.settingsKey, '{bad json');
+  assert.equal(a.getSettings().shapeCues, true); // corrupt -> default, no throw
+});

@@ -17,6 +17,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   fx: 'high',       // 'high' | 'low' particle/fx tier (I26 panel, I25 particles honor)
   reducedMotion: false, // disable shake/flash (I25 honors)
   fontScale: 1,         // UI text scale 1 | 1.25 | 1.5 (I70; applied as --vr-fs)
+  shapeCues: true,      // colorblind-friendly silhouette cues (I155; asteroidRenderer/wardenMesh honor)
 });
 
 export const FONT_SCALES = Object.freeze([1, 1.25, 1.5]);
@@ -114,7 +115,7 @@ export class Storage {
     return this._write(this.bestKey, { version: STORE_VERSION, value: s });
   }
 
-  /** @returns {{volume:number, sfx:boolean, fx:string, reducedMotion:boolean}} saved settings merged over defaults. */
+  /** @returns {{volume:number, sfx:boolean, fx:string, reducedMotion:boolean, fontScale:number, shapeCues:boolean}} saved settings merged over defaults. */
   getSettings() {
     const d = this._readVersioned(this.settingsKey);
     const out = { ...DEFAULT_SETTINGS };
@@ -124,6 +125,7 @@ export class Storage {
     if (d.fx === 'high' || d.fx === 'low') out.fx = d.fx;
     if (typeof d.reducedMotion === 'boolean') out.reducedMotion = d.reducedMotion;
     if (FONT_SCALES.includes(d.fontScale)) out.fontScale = d.fontScale; // I70
+    if (typeof d.shapeCues === "boolean") out.shapeCues = d.shapeCues; // I155
     return out;
   }
 
@@ -137,6 +139,7 @@ export class Storage {
     if (merged.fx === 'high' || merged.fx === 'low') clean.fx = merged.fx;
     if (typeof merged.reducedMotion === 'boolean') clean.reducedMotion = merged.reducedMotion;
     if (FONT_SCALES.includes(merged.fontScale)) clean.fontScale = merged.fontScale; // I70
+    if (typeof merged.shapeCues === "boolean") clean.shapeCues = merged.shapeCues; // I155
     this._write(this.settingsKey, { version: STORE_VERSION, ...clean });
     return clean;
   }

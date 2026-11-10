@@ -59,12 +59,21 @@ export function createAsteroidRenderer(scene) {
     new THREE.MeshBasicMaterial({ color: 0x66d9ff, transparent: true, opacity: 0.36, blending: THREE.AdditiveBlending, depthWrite: false }), // armor 2
     new THREE.MeshBasicMaterial({ color: 0x8ff2ff, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false })  // armor 3: bright
   ];
+  // I155: shape cues (colorblind-friendly) - golden rocks get a low-poly wireframe cage so
+  // the high-value target keeps a distinct silhouette independent of its gold color.
+  // Shared geo + material; a child of every pool mesh, visible only for golden rocks when enabled.
+  let shapeCuesOn = true;
+  const cageGeo = new THREE.IcosahedronGeometry(1, 0);
+  const cageMat = new THREE.MeshBasicMaterial({ color: 0xffd24d, wireframe: true, transparent: true, opacity: 0.85, depthWrite: false });
   const pool = [];
   for (let i = 0; i < max; i++) {
     const m = new THREE.Mesh(geos.L[0], mat);
     const shell = new THREE.Mesh(shellGeo, shellMats[2]); // ST-127 (unit sphere; scaled per rock in sync)
     shell.visible = false;
     m.add(shell);
+    const cage = new THREE.Mesh(cageGeo, cageMat); // I155: golden-rock silhouette cue
+    cage.visible = false;
+    m.add(cage);
     m.visible = false;
     scene.add(m);
     pool.push(m);
@@ -86,6 +95,9 @@ export function createAsteroidRenderer(scene) {
       } else {
         shell.visible = false;
       }
+      const cage = m.children[1]; // I155: children[0] is the shield shell
+      cage.visible = shapeCuesOn && !!r.golden && !r.belt;
+      cage.scale.setScalar(r.radius * 1.5);
       m.position.set(r.pos.x, 0.4, r.pos.y);
       m.rotation.set(r.rot * 0.7, r.rot, r.rot * 0.31);
       m.visible = true;
@@ -103,5 +115,8 @@ export function createAsteroidRenderer(scene) {
     if (g) glbGeo[size] = g;
   }
 
-  return { sync, pool, setGLB };
+  // I155: shape-cue toggle (settings.shapeCues; on by default for colorblind-friendly play).
+  function setShapeCues(on) { shapeCuesOn = on === true; }
+
+  return { sync, pool, setGLB, setShapeCues };
 }
