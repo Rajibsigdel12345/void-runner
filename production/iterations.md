@@ -1857,3 +1857,55 @@ One entry per iteration. Format:
   browser smoke console 0/0; screenshots .evidence/I207/ (02-combat-glb,
   03-boss-combat).
 - Result: DONE. ST-207 closed. Next I208 ST-208 (Blender ship model refresh).
+
+## I208 - Blender ship model refresh (cgs-dev-story) (ST-208)
+- Summary: ST-208 closed. The 254-tri I103 ship GLB (cone hull + 224-tri UV-sphere
+  cockpit) is replaced by a hand-built 40-tri faceted delta: one merged hull mesh
+  (hull + swept knife-edge wings + dorsal fin, 2 materials) + one recessed 6-tri
+  canopy gem, per the I207 video grounding (Imphenzia spaceship series: angular
+  delta, recessed faceted canopy, 2-material accent).
+- Story Goal: ship reads as an angular low-poly delta with a glowing recessed gem
+  in combat (not a ball), <=300 tris, 3 draw calls, wingspan 2.5 / length 1.9,
+  watertight, loads via the existing GLB pipeline with no code change.
+- Owner: /root (Blender MCP 5.2.3 + repo). Dependencies: ST-207 (GLB pipeline +
+  assetGlbs.test.js) - met at I207.
+- Acceptance: GLB loads and swaps (ship_body removed), nodes VR_Ship_Hull +
+  VR_Ship_Cockpit, all 3 material names present, tris <= 300, wingspan 2.5 +/-10%,
+  length 1.9 +/-10%, tail end z = -0.95, watertight hull, browser smoke console
+  0/0, silhouette visually confirmed.
+- Build notes: scene rebuilt cleanly from the verified face list (the I207-era
+  partial run-3 mesh was unreliable). Watertightness proven with the correct
+  bmesh check (len(e.link_faces) != 2 = boundary edge; the handoff pair-counter
+  over bm.edges is always 1 by construction and is NOT a valid manifold check).
+  Hull = 14 faces (13 I207-listed + rear-bottom triangle (L_T,mT,R_T) the partial
+  build lacked; Euler 13-25+14=2) + 6 fin quads = closed 2-shell mesh; canopy = 6
+  tris, open base ring only (embedded below the ridge, by design). Exporter axis
+  quirk found + compensated: this Blender glTF exporter maps Blender (x,y,z) to
+  GLB (x, z, -y) - the nose was landing on GLB +Y (up). Meshes pre-rotated
+  (x,y,z) -> (x,-z,y) so the GLB is nose +Z, up +Y per the render contract
+  (GLB bounds verified: x +/-1.25, y -0.08..0.30, z -0.95..0.95). Blender material
+  colors match the in-code palette (VR_Ship_Hull 0x8fd8ff, VR_Ship_Wing 0x2f5aa8,
+  VR_Ship_Cockpit 0x0b1830 emissive 0x59d8ff x1.4); in-code name override remains
+  authoritative (shipMesh.useGLB).
+- Changed: assets/ship.glb (re-exported, 4.9 KB, 40 tris: 34 hull + 6 canopy),
+  tests/assetGlbs.test.js (ship node anchor VR_Ship_Wings retired -> VR_Ship_Cockpit),
+  design/asset-spec.md (I208 ship amendment, written in the prior session),
+  CHANGELOG.md, production/iterations.md, production/session-state/active.md.
+- Verification: npm test 633/633; node scripts/build.mjs exit 0; browser smoke
+  (fresh context, ?nocache=208c): 5/5 assets ready, shipGroup children
+  [flame, flame, GLB group] with ship_body gone, menu boot clean, aggressive
+  pilot 50+ s (t=68.2, wave 2, 12245 pts, all finite), 29 calls / 614 tris,
+  console 0/0; 4x-scale close-up (restored after) confirms angular delta +
+  recessed cyan gem + dorsal fin + flame. Screenshots .evidence/I208/ (01-menu,
+  02-combat, 03-ship-closeup).
+- Environment note (NOT a game bug): the Playwright MCP browser left open across
+  the session boundary had a zombie network state - every /assets/*.glb fetch
+  failed with net::ERR_FAILED while index/vendor/src loads succeeded. Proven not a
+  server bug: raw TCP (IPv4 + IPv6), PowerShell and the Playwright Node client all
+  got 200 on the same URLs; no service worker, no proxy; server (PID 20708, up
+  since I207) healthy. A fresh browser context boots clean. If /assets/ fetches
+  fail in-browser again, close/reopen the MCP browser before investigating the
+  game code.
+- Result: DONE. ST-208 closed. Next I209 ST-209 (Blender asteroid set refresh:
+  jitter asymmetry + crater insets per Sleep Fight method, L/M/S + shielded/golden
+  visual variants).

@@ -177,3 +177,30 @@ Overall (rendering gate at I104):
 - Decision: 1-geometry-per-size for asteroids (3 GLBs) with rotation variety, as
   spec'd (bounded pass). 3-variant-per-size (9 GLBs) for richer variety is a
   possible follow-up if needed.
+
+## I208 ship amendment (E9 ST-208, cgs-dev-story)
+Supersedes the I102 ship geometry section (dimensions, materials, integration
+notes, and acceptance criteria otherwise stand unchanged):
+- Geometry v2 (per I207 audit R2 + video grounding): ONE faceted delta mesh
+  (hull + swept knife-edge wings + dorsal fin merged) + ONE recessed faceted
+  canopy gem. The I103 6-tri cone hull and 224-tri UV-sphere cockpit are
+  retired (the sphere was 60% of the ship's tris and the only non-faceted
+  element; the cone read thin from the side).
+- Build: V-top ridge (nose 0.95 -> tail -0.95, ridge y 0.15 -> 0.08), flat
+  keel bottom (y -0.08, centerline splits), knife-edge leading edges/wingtips
+  (top and bottom share the leading-edge edge - classic low-poly delta
+  language), tail closed by one V-cap triangle. Canopy = 6-tri angular gem,
+  base embedded below the ridge (no boolean). Fin = small box at the tail.
+- Materials: VR_Ship_Hull (leading-edge panels, keel, tail cap), VR_Ship_Wing
+  (four wing top panels + fin) - the two-material accent language;
+  VR_Ship_Cockpit on the gem. In-code override by name is authoritative
+  (shipMesh.useGLB: *Cockpit* -> cockpit, *Wing* -> wing, else hull).
+- Draw calls: 3 (hull mesh x2 materials + canopy) vs 4 before.
+- Triangle budget: ~42 total (was 254). Hard cap <=300 unchanged.
+- Dimensions pinned (tests/assetGlbs.test.js): wingspan 2.5 +/-10%, length
+  1.9 +/-10%, tail end at z ~= -0.95 (in-code flame stays at z -0.8, apex
+  anchored to the group origin - unchanged).
+- Node names: VR_Ship_Hull (merged mesh), VR_Ship_Cockpit. The I207 test
+  anchor 'VR_Ship_Wings' node is retired with the merge (test updated in
+  I208; material names all three retained).
+- No engine flame in the model (ST-063 flame is in-code, unchanged).

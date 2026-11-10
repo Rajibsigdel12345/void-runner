@@ -74,7 +74,7 @@ test('ship.glb: container, naming, poly budget, silhouette dimensions', () => {
   assert.ok(buf.length < MAX_FILE_BYTES, 'ship.glb under 100 KB');
   const s = meshStats({ buf, json, binOff });
   assert.ok(s.nodeNames.includes('VR_Ship_Hull'), 'VR_Ship_Hull node');
-  assert.ok(s.nodeNames.includes('VR_Ship_Wings'), 'VR_Ship_Wings node');
+  assert.ok(s.nodeNames.includes('VR_Ship_Cockpit'), 'VR_Ship_Cockpit node');
   for (const mat of ['VR_Ship_Hull', 'VR_Ship_Wing', 'VR_Ship_Cockpit']) {
     assert.ok(s.matNames.includes(mat), 'material ' + mat);
   }

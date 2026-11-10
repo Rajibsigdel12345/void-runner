@@ -1,12 +1,13 @@
-# Active session state - Void Runner (E8)
+# Active session state - Void Runner (E9)
 
 - project: Void Runner (E:\Game, three.js, no bundler)
-- epic: E8 - Expansion Milestone (I107-I206)
-- current_story: ST-208 (E9: Blender ship model refresh, next)
-- current_iteration: I207 (committed)
+- epic: E9 - Blender asset/art pass (ST-207..ST-216)
+- current_story: ST-209 (E9: Blender asteroid set refresh, next)
+- current_iteration: I208 (committed)
 - branch: main
-- tests: 630/630
+- tests: 633/633
 - build: exit 0
+- notes: I208 done (ST-208 E9 Blender ship model refresh (cgs-dev-story)): 40-tri faceted delta (hull+wings+fin merged, 14 hull faces incl. rear-bottom V-cap + 6 fin quads, 2 materials) + 6-tri recessed canopy gem; watertight 2 shells via correct link_faces boundary check (handoff pair-counter over bm.edges invalid - always 1); exporter axis flip found + compensated (Blender (x,y,z) -> GLB (x,z,-y); pre-rotated (x,y,z)->(x,-z,y) so GLB nose +Z up +Y; bounds x +/-1.25, y -0.08..0.30, z -0.95..0.95 verified); ship.glb 4.9 KB; assetGlbs anchor VR_Ship_Wings -> VR_Ship_Cockpit; 633/633, build 0; smoke fresh context ?nocache=208c: 5/5 GLB ready, ship_body gone, pilot 50+ s (wave 2, all finite), 29 calls/614 tris, console 0/0, 4x close-up confirms delta + gem + fin + flame (.evidence/I208/). ENV NOTE: stale MCP browser zombie network state - /assets/* fetches ERR_FAILED while everything else loaded; raw TCP (v4+v6)/PowerShell/Node all 200 on same URLs, no SW/proxy, server healthy -> fresh browser context fixed; reopen MCP browser first if it recurs.
 - notes: I207 done (ST-207 E9 asset audit + GLB pipeline verification (cgs-asset-audit)): E9 opens - node: 5/5 GLBs valid glTF v2, VR_ names, budgets met (254/320/80/80/192), rock radii EXACTLY 2.2/1.3/0.7, ship 2.5x1.9, boss +6%/+2% in band; browser: 5/5 loaded+swapped, wave-5 boss on 384-vert GLB w/ in-code material, rock pool 10/10 GLB, golden on GLB ok, 0 non-finite, combat 19 calls/1566 tris, console 0/0; fallback proven (5/5 aborted -> procedural boot, exactly 5 warns); NEW tests/assetGlbs.test.js (633/633), production/asset-audit.md, video grounding (Imphenzia recessed-canopy angular delta -> ST-208; Sleep Fight jitter+crater insets -> ST-209; genre comps: refine not restyle).
 - notes: I206 done (ST-206 E8 closeout + G8.6 (cgs-milestone-review)): GATE G8.6 PASS - sequence 1..206 complete (E8 100/100), 630/630 (fresh), build 0 (fresh), regression B+C+D clean, playtest triaged (0 BUGs), release checklist SHIP-READY (code side); MILESTONE E8 CLOSED (all six sub-arcs gate-verified, tests 233->630, demo pin identical dev+dist); transition verdict: proceed to E9 (Blender asset/art pass, ST-207+); no code changes.
 - notes: I205 done (ST-205 regression round D / E8 final sweep (cgs-regression-suite)): PASS - 3/3 matrix 630/630 (2 in-process + cross-process, 66 files, .evidence/I205/matrix.txt); production-dist browser sweep 6/6 (full lifecycle with game-over auto-record, pause freeze/resume/quit, demo pin exact, persistence 4/4 after fixing two harness assertion bugs - getBest is a number + board is rank-sorted desc, finiteness sentinel-only); bonus robustness data: invalid setBest(undefined) rejected by I79 guard; prior-bug re-checks green (F4/I151/replay/I79); console 0/0; no code changes.
