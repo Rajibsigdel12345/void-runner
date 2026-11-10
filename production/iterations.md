@@ -1079,3 +1079,13 @@ One entry per iteration. Format:
 - Action: none required - no code or test changes.
 - Tests: 459/459 fresh, build 0 (no code diff since I148).
 - Result: ST-149 closed (no-findings). Next I150 ST-150 E8C docs + changelog.
+
+## I150 - E8C GDD addendum + changelog review (ST-150)
+
+- Story: ST-150 | Goal: close epic E8C on documentation - add the four missing E8C systems to design/gdd.md, fix the WARDEN bullet for ST-143, add a kill-base-score ladder, and review the E8C changelog entries.
+- Method: cgs-consistency-check - every GDD number was cross-checked against src/core/config.js + src/core/splicer.js/daily.js/share.js + game.js (spawnBossForWave / spawnWardenForWave) BEFORE writing; unverified assumptions labeled separately from evidence.
+- Changed: design/gdd.md (new sections The Splicer (ST-143), Boss Variant Alternation (ST-143), Daily Seeded Run (ST-140/141), Shareable Result String (ST-142); WARDEN bullet MONOLITH -> BOSS; Scoring kill-base-score ladder), production/session-state/active.md, CHANGELOG.md, this log.
+- Consistency check (cgs-consistency-check, canonical source = config.js + the pure modules): Splicer maxHp 30 / hpFirstWave 15 / hpStep 8 / hpCap 72 / radius 2.6 / score 600 / splitCount 2 (M) / holdRadius 11 / orbitSpeed 0.5 / spin 0.4 / enterTime 1.2 / arms 2 / armSpin 1.2 / spiralEvery 0.6 / boltSpeed 7.0 / aimEvery 2.6 / phase2 {hpFrac 0.5, orbitSpeedMult 1.4, armSpinMult 1.5, spiralEveryMult 0.65, aimEveryMult 0.7, spin 1.2} all match config.js:149-179. splicerHpForWave steps = floor((wave - 15) / 5) confirmed splicer.js:13 (wave 10/15 = 30, wave 20 = 38, cap 72). Alternation (bossSpawnCount%2, even=Monolith odd=Splicer, increment only on actual spawn, rim re-roll 8x if <10u) confirmed game.js:351-376. WARDEN gate (this.boss || this.warden) confirmed game.js:489. dailySeed = fnv1a('daily:YYYY-MM-DD') confirmed daily.js:24-26 (node: 2026-11-10 -> 317547475). share vr1.<seed36>.<score36>.<wave36>.<kills36>.<ck>, ck = fnv1a(body) % 1296 (2-char base36), 6 parts / magic / base36+dot charset / ranges confirmed share.js:19-47 (node: vr1.592577.l0x.5.3c.6g round-trips to the 2026-11-10 daily result). Score ladder L25/M50/S100, golden 5x, mine 150, seeker 200, Warden 400, Splicer 600, Monolith 1000 confirmed config.js. RESULT: no drift found.
+- Verification: 459/459 tests (docs-only - no code or test diff), build exit 0.
+- Browser: not applicable (docs-only, no rendering changes).
+- Result: DONE. ST-150 closed; epic E8C closed (ST-133..150). Next I151 ST-151 first-run tutorial overlay (dismiss + persist) - E8D UI/UX epic begins.

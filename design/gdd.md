@@ -67,9 +67,27 @@ multipliers, and grab power-ups. Survive as long as you can.
 - Phase 2 enrage (I133): when the Monolith drops below 50% HP it enrages one-way (config.boss.phase2) - homing 45% faster (2.32 u/s, still dodgeable), 40% faster turning, a visible 1.6 rad/s tumble, and both the ring and the aimed-bolt cadences 40% faster (ring 2.0 -> 1.2 s, bolt 2.2 -> 1.32 s). A single bossPhase2 event announces the transition for FX; the HP bar keeps showing.
 - Entrance (I135): the Monolith enters over 1.2 s (config.boss.enterTime) with no attacks - a purple "THE MONOLITH" banner (wave + HP) plays while the obelisk scales in (easeOutCubic), and the ring / aimed-bolt / radial-burst timers are held until the entrance completes (a held ring fires immediately afterwards).
 
+## The Splicer (ST-143)
+
+- The Splicer is BOSS VARIANT 2, spawned in strict alternation with the Monolith (see Boss Variant Alternation below). Instead of homing, it holds a slow orbit around the arena center at radius 11 (config.splicer.holdRadius) - a "spinning sun" the ship weaves through.
+- Entrance (ST-143): it glides from its rim spawn to the hold radius over 1.2 s (config.splicer.enterTime) with NO bolts until the entrance completes (entered >= 1); a purple "THE SPLICER" banner (wave + HP) plays, a "SPLICER INBOUND" toast announces it, and the body tumbles at 0.4 rad/s.
+- Spiral attack: every 0.6 s (config.splicer.spiralEvery) it fires one undestroyable bolt per arm (arms 2) at 7 u/s, while the two arms rotate at 1.2 rad/s (config.splicer.armSpin) - a continuous two-arm spiral. I144: the 0.6 s cadence leaves a 7 x 0.6 = 4.2 u gap (~1.9x the ship's 2.24 u effective obstacle) - threadable; the pre-I144 0.26 s cadence was a 1.82 u wall (unthreadable).
+- Aimed bolt: it also fires one aimed bolt at the ship every 2.6 s (config.splicer.aimEvery). The Splicer fires NO rock rings and NO radial burst - that is what sets it apart from the Monolith.
+- HP: base 30 (Monolith 40). Endless-arc (splicerHpForWave): from wave 15 (config.splicer.hpFirstWave) it gains +8 HP per 5-wave boss, capped at 72 - wave 10 = 30, wave 15 = 30, wave 20 = 38, rising to the 72 cap (steps = floor((wave - 15) / 5)).
+- Bullets deal 1 damage each. Radius 2.6 (between the Warden's 1.7 and the Monolith's 3.4). On death it pays +600 (Warden 400 < Splicer 600 < Monolith 1000), feeds the combo, and splits into 2 M asteroids at its position.
+- Phase 2 enrage (I133): below 50% HP (config.splicer.phase2.hpFrac) it enrages one-way - orbit 40% faster (0.5 -> 0.7 rad/s), arms 50% faster (1.2 -> 1.8 rad/s), spiral cadence 35% faster (0.6 -> 0.39 s; enrage gap 2.73 u ~ 1.22x the obstacle - tight but fair), aimed cadence 30% faster (2.6 -> 1.82 s), body tumble 1.2 rad/s. A single bossPhase2 event announces the transition; the HP bar keeps showing.
+- Orbit direction is seeded at spawn (rng.chance(0.5) - 50/50 clockwise or counter-clockwise).
+
+## Boss Variant Alternation (ST-143)
+
+- spawnBossForWave runs on every 5th wave (5, 10, 15, ...) when no boss is alive. The variant is chosen by boss-spawn count: even (0, 2, ...) = MONOLITH, odd (1, 3, ...) = SPLICER - a strict Monolith -> Splicer -> Monolith -> ... alternation.
+- bossSpawnCount increments ONLY on an actual boss spawn. A 5th wave that is skipped because the previous boss is still alive consumes NO variant, so the alternation is preserved across skips (the next boss is still the other variant).
+- The boss spawns at the arena rim (a seeded angle) at that variant's radius, re-rolled up to 8 times if it lands within 10 u of the ship.
+- A bossSpawn event carries the kind (monolith | splicer) so the render layer picks the right mesh and the entrance banner names the right boss.
+
 ## The WARDEN (ST-136)
 
-- Every 5th wave that does NOT spawn a MONOLITH (a previous Monolith is still alive) spawns a WARDEN at the arena rim as the heavyweight for that wave: an armored mini-boss drone. One heavyweight at a time - the boss OR the warden.
+- Every 5th wave that does NOT spawn a BOSS (a previous Monolith or Splicer is still alive) spawns a WARDEN at the arena rim as the heavyweight for that wave: an armored mini-boss drone. One heavyweight at a time - the boss OR the warden.
 - Armor 6 absorbs player hits first (one wardenArmor ping event per absorbed hit); then 12 HP chip away - 18 hits total to kill.
 - 1.7 radius, bounded homing 2.4 u/s - faster and smaller than the Monolith. +400 points (between seeker 200 and Monolith 1000). On death it splits into 2 small rocks (wardenDeath event).
 - Contact costs 1 ship life and the WARDEN survives the hit (mirrors boss contact).
@@ -121,6 +139,7 @@ Stacks: each has its own timer; grabbing the same type refreshes its timer.
 
 ## Scoring & Records
 - Score = sum(kill base score x current multiplier).
+- Kill base scores (multipliers stack on top): asteroid L 25 / M 50 / S 100 (a golden rock pays 5x that rock's base); mine drone 150; seeker drone 200; WARDEN 400; Splicer 600; Monolith 1000.
 - Overdrive (ST-057): while OVERDRIVE is active, all points earned are x2 (applied after the combo multiplier).
 - Near-miss (ST-053): a rock skimming within 2.6u of the ship (no hit) pays a flat +15 once per approach (swish SFX, small popup, subtle cyan wisp). Fragments/splits get 0.3s immunity so a kill near the ship cannot farm graze points. Graze is not a kill: it never extends the combo chain.
 - Best score persisted to localStorage key `voidrunner.best` (int).
@@ -129,6 +148,21 @@ Stacks: each has its own timer; grabbing the same type refreshes its timer.
 - Game over (I69): the stats panel also shows this run's BOARD RANK #N (position on the persistent top-5 board from the I66 high-score storage). A NEW BEST run fires a three-colour confetti burst (gold/cyan/magenta) at the ship and the NEW BEST! line pulses (vrBestPulse); both are pure presentation and freeze to static under Reduced Motion.
 - Pause overlay (ST-068): deeper dim (rgba 0.74 + vignette) over the frozen scene with a session snapshot and three actions - RESUME (P/Esc/Enter), RESTART (R), QUIT TO MENU (Q) - each as a clickable button (mouse) with arrow-key focus moves and a gold focus ring; while a button holds focus the game hotkeys are swallowed so the focused action wins. QUIT is a new PAUSED -> MENU transition (abandons the run, full reset).
 - Options panel (ST-026, polished ST-067): AUDIO (volume, SFX) and VISUALS (FX quality, reduced motion) groups, keyboard operable (Tab + arrow focus moves; game hotkeys are swallowed while a control holds focus; visible gold focus ring), and a live particle-burst preview when the FX tier changes.
+
+## Daily Seeded Run (ST-140/141)
+
+- One canonical seeded run per calendar day (ST-140): the seed is a pure FNV-1a 32-bit hash of the date, dailySeed = fnv1a('daily:YYYY-MM-DD'), so every player on the same day plays an identical, comparable run (deterministic, no crypto, DOM-free).
+- The 'daily' salt (config.daily.salt) namespaces the scheme so the format can evolve without colliding with other seeds; dailyForDate(Date) is the UI path and the deterministic test path passes explicit (year, month, day).
+- The MENU has a DAILY RUN button (startDaily); a daily run is badged "DAILY RUN - <date>" on the game-over screen, and today's daily best is shown on the MENU.
+- Restart re-seeds to the stored daily seed (ST-141), so restarting a daily run reproduces the identical run instead of rolling a new one.
+- Example: 2026-11-10 -> seed 317547475 (I147: two 90 s runs bit-identical - score 27249, wave 5, 120 kills).
+
+## Shareable Result String (ST-142)
+
+- encodeResult({seed, score, wave, kills}) -> vr1.<seed36>.<score36>.<wave36>.<kills36>.<ck>: URL-safe (lowercase base36 + dots), where <ck> is a 2-char integrity checksum = (fnv1a(body) % 1296) in lowercase base36, zero-padded to 2 chars.
+- decodeResult validates the whole string: exactly 6 dot-parts, the magic prefix vr1 (config.share.magic), a ^[0-9a-z.]+$ shape (rejects case, symbols, spaces), a matching checksum, and sane ranges (seed 0..0xffffffff, score >= 0, wave >= 1, kills >= 0); anything off returns {ok:false}.
+- The seed is INCLUDED in the string, so a shared result is REPRODUCIBLE: reseed the World to the decoded seed to replay the identical run and verify the claimed score (I147: a decoded-seed replay reproduced the claimed score end-to-end).
+- Example: vr1.592577.l0x.5.3c.6g decodes to seed 317547475 / score 27249 / wave 5 / 120 kills (the 2026-11-10 daily run's result); re-encoding those values reproduces the exact string.
 
 ## Game States
 MENU (title + "Enter to start" + controls) -> PLAYING -> PAUSED (overlay) ->
