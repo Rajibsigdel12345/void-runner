@@ -739,3 +739,50 @@ E12 (Quality Settings Consistency & Skybox Art Pass) closeout gate over 4 iterat
 
 ### Next owner / decision
 - I232: open E13 (cgs-scope-check + cgs-create-stories). Candidates from carryover: new content arc, combo cap (demo-pin compatible), music quality (HP #5), hardware remainder, + any new feel/art levers. 8 HUMAN-PENDING items parked for a human session.
+
+## G13.0 - E13 closeout gate (I236)
+
+### Summary
+E13 (Mid-Run Content Arc) closeout gate over 4 iterations (I233..I236, ST-228..231). Closes the wave 3-9 content valley: the HEAVY ROCKS modifier (the BIG counterweight to SMALL), the STINGER charger enemy (the rammer archetype), the 17th Blender asset (the STINGER dart GLB), and the skybox JPEG re-encode that restored the gzip headroom. Headline: the demo pin re-verified EXACT via the real UI.
+
+### Gate Criteria (epics.md)
+1. Modifier unit + browser (4-way roll determinism, HEAVY ROCKS live + banner, W1-2 plain + breather invariants).
+2. Stinger unit + browser (full lifecycle, kill +250 + feed + juice, contact death, 6-charge fizzle, cap 2, W7+ 15 u, rm glow kept / wobble gated, FX-off no extra particles).
+3. GLB loads 17/17 + fallback proven.
+4. Skybox A/B readability-equivalent + dist in budget (net delta <= 0, headroom >= 8 KB).
+5. Demo pin EXACT via real UI (2169/2220, 11334, 57, 36.15, wave 2).
+6. Fresh tests + build + dist in budget.
+7. Regression green.
+8. Log audit sequential.
+
+### Evidence
+- (1) ST-228/I233: node scan of the 4-way roll determinism + the daily seed pin (new canonical 2026-11-10 seed 1312111789); browser 233a (seed 393 staged via reset+reseed+begin fast-forward): rolls 3:big 4:small 5:big 6:none 7:big 8:big 9:fast; wave 3 banner + violet HUD tag live, in-page pickSize probe n=2000 matches the config rows exactly, wave 7 re-staged banner 'WAVE 7 HEAVY ROCKS' + field 5L/5M/1S + screenshot .evidence/I233/01; W1-2 plain + breather invariants pinned by unit tests (697 -> 699: big/L mix n=400 + daily seed pin).
+- (2) ST-229/I234: +11 stinger tests + 2 table pins; browser 234a/234b (seed 393, 937-tick stage to wave 7): toast in DOM, telegraph ramp exact 1.4 @ t=0.3 + wobble +/-0.14/0.1 (RM ON: offset exactly 0, glow still ramps - FX-independent), charge 7.5 exact + white core 2.9, kill +250 + STINGER +250 feed row, contact 1 life no score + invuln 1.8, wave 8 cap 2, FX matrix HIGH 120 / LOW 40 / OFF 0 (3.0x, zero-FX live), NaN 0, console 0/0; screenshots .evidence/I234/01-02. ST-230/I235 re-verified the GLB swap live (235a/235b): telegraph ramp 1.45 @ t=0.317 + GLB dart glow visible, natural charge 7.5 exact + white 2.9, kill +250 + feed row + pool hidden.
+- (3) GLB: 17/17 assets load (235a/235b + 236a __vr.assetLoader.names), the pool shares the GLB geometry (32/8 tris across the pool), procedural fallback path unchanged + unit-covered (assetPerf 17-pin).
+- (4) Skybox A/B: I235 A/B visually identical (q80 re-encode of the I230 stage-1024 master; the I230 staged q75/q80/q85 all landed at the identical 74915 B - Blender quality not applied; PIL q55..q85 staged, q80 = 59.4 KB gz = highest under the <=60 target); 74915 -> 60905 B; dist net -12.3 KB; headroom 1.8 -> 13.0 KB (>= 8 KB restored); dist 108 files 2002.7 raw / 537.0 gz (cap 2048/550).
+- (5) Demo pin: EXACT via REAL UI at 236a (MENU -> REPLAYS button -> DEMO PILOT row -> key 3 x4): GAME_OVER after ~11.3 s wall at x4 - idx 2169/2220, score 11334, kills 57, wave 2, t=36.15 (display 0:36), 'MAX COMBO 15', 'ACCURACY 29% SHOTS 57/198', best unchanged 36426; t=36.15 = 2169/60 structurally; screenshot .evidence/I236/01-demo-pin.png.
+- (6) I236 fresh: npm test 710/710 x2 in-process + node --test over the tests glob 710/710 cross-process; node scripts/build.mjs exit 0; dist 108 files / 2002.7 raw KB (headroom 45.3) / 537.0 gzip KB (headroom 13.0 KB) - matches I235 exactly.
+- (7) Regression 236a/236b/236c/236d: state machine 10/10 EXACT from verified MENU (second run with a capture-phase event probe: only the 9 synthetic keydowns fired; the first run started at PLAYING from a probe-verified MENU - 67+ s instrumented idle monitoring showed zero drift + zero events and no auto-start path exists in code, attributed to one-off external input on this user-active machine; documented environmental); persistence intact (best 36426, 5 scores, settings, tutorialSeen; the forced-death 0-score did not pollute the list); FX-off zero-leak re-confirmed via the real F-key path (idle/thrust/kill-burst live 0; readability floor EXACT 8 at off; player shots emit no particles by design at any tier); user-lock holds (165 x noteFrame(0.05) @ 20 fps: tier stayed off, userLocked true, autoLow false); fresh scripted pilot 1080 ticks all finite (0 non-finite across all pools); frame probe fast windows: full 300f PLAYING probe avg 16.99 / p50 16.8 / p95 20.3 / p99 26.5 / max 31.3 (90 frames in the 17.5-20 ms VM frame-grid jitter band, 2 > 30 ms, 0 > 100 ms) + micro-probes 90f avg 16.47 / p95 18.4 / max 18.8 and 60f avg 16.34 / p50 16.7 / max 18.5 - p50 holds the 60 fps grid; '0 drops > 17.5' not reproducible this session (VM 1-fps rAF throttle + full rAF pause in occluded tabs; 2 probe calls lost to the 300 s tool cap; one 14 s deadline-guarded probe saw 0 rAF frames) - documented as an environment caveat, not a regression; the game's throttle handling (clamped-dt fixed-step clock + adaptive auto-downgrade - it fired live as 'FX AUTO-SET TO LOW (LOW FPS)' during the x4 demo - + visibility auto-pause) verified live; console 0/0 on all tabs (the lone 236a log line = the designed 'adaptive quality: FX high -> low' INFO toast during the x4 demo).
+- (8) Log audit: 235 entries 1..235 sequential pre-append, 0 dupes / 0 missing; +I236 -> 1..236.
+- (9) Risks: R-E13-1 CLOSED (pin re-verified EXACT via real UI at I236 + gating: modifier W3+ / stinger W7+ vs the demo wave 2 + the unit check that the demo seed never reaches W3); R-E13-2 CLOSED (telegraph 0.8 s + FX-tier-independent glow verified live incl. RM-on offset exactly 0; perception parked at HUMAN-PENDING #9); R-E13-3 CLOSED (skybox re-encode funds the GLB: net -12.3 KB, headroom 13.0 KB >= 8, dist pinned by the size audits); R-E13-4 CLOSED (pinned-roll unit tests updated intentionally + documented, determinism harness green, roll invariants pinned); R-E13-5 CLOSED (pool 4 / cap 2, no new per-frame allocations, 17/17 loads, frame-probe evidence above).
+
+### Concerns
+- Frame probe '0-over-17.5' not reproducible this session: the VM oscillates between 60 fps fast windows (~1-2 s after a tab opens) and a hard 1 fps rAF throttle (p50 ~1015 ms) and full rAF pause in occluded tabs. p50 holds the 60 fps grid at 16.3-16.8 ms across every fast-window probe; no sustained stalls / GC spikes; the throttle handling fired live as designed. Documented as an environment caveat, not a regression.
+- One state-machine run started at PLAYING from an instrumented-idle MENU (67+ s zero drift, zero events; no auto-start path exists in code - startRun reachable only via Enter or the menu buttons); attributed to one-off external input on this user-active machine. Environmental, not a code defect; the verified-MENU run was 10/10 exact.
+- 9 HUMAN-PENDING perception items (incl. #9 stinger telegraph/charge feel) remain the player-experience evidence gap (non-blocking; need a human session).
+- Low-end physical device / GPU validation remains HARDWARE-pending (checklist in perf-profile.md '## I225').
+
+### Verdict
+**PASS - E13 CLOSED.** 4/4 stories (ST-228..231) complete with per-iteration evidence (I233..I236); the wave 3-9 content valley filled (HEAVY ROCKS modifier + STINGER charger + 17th Blender asset); the gzip headroom restored (1.8 -> 13.0 KB) with the story net-negative (-12.3 KB); fresh 710/710 x3 + build 0 + dist in budget; demo pin re-verified EXACT via the real UI; log 1..236 sequential.
+
+### Risks
+- Carried: 9 HUMAN-PENDING perception items (production/bug-triage.md, incl. #9 stinger telegraph/charge feel), low-end physical device / GPU validation (HARDWARE-pending checklist), frame-probe environment caveat (VM rAF throttle/pause; p50 evidence above).
+
+### Changed files
+- production/gates.md (this block), production/milestone-review.md (E13 CLOSED section), production/epics.md (E13 Result CLOSED + risks CLOSED), production/stories.md (E13 header + CLOSED line), production/timeline.md (+E13 closed line), CHANGELOG.md (+I236), production/iterations.md (+I236), production/session-state/active.md.
+
+### Verification evidence
+- npm test 710/710 x2 in-process + node --test over the tests glob 710/710 cross-process (this iteration); node scripts/build.mjs exit 0 (this iteration); dist 108 files / 2002.7 raw / 537.0 gzip KB (this iteration); log audit 1..236 sequential (this iteration); browser smokes ?nocache=236a (regression round + demo pin + screenshot), ?nocache=236b (pilot + micro frame probes), ?nocache=236c/236d (frame-probe environment characterization).
+
+### Next owner / decision
+- Next epic: pick up from carryover - candidates: combo cap (demo-pin compatible), music quality (HUMAN-PENDING #5), hardware remainder, evasive flyer enemy (E14 candidate), touch fallback. 9 HUMAN-PENDING items parked for a human session.

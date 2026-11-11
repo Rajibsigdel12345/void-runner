@@ -364,3 +364,32 @@ None.
 
 ## Next owner / decision
 - I232: open E13 via cgs-scope-check + cgs-create-stories. Candidates: new content arc, combo cap (demo-pin compatible), music quality (HP #5), hardware remainder, + new feel/art levers. 8 HUMAN-PENDING items parked for a human session.
+
+## E13 CLOSED (I236, ST-231)
+
+## Summary
+E13 (Mid-Run Content Arc) complete: 4/4 stories ST-228..231 over 4 iterations (I233..I236), G13.0 gate PASS. Fills the wave 3-9 content valley: the HEAVY ROCKS modifier (the BIG counterweight to SMALL), the STINGER charger enemy (the rammer archetype from the YouTube grounding pass), the 17th Blender asset (the STINGER dart GLB), and the skybox JPEG re-encode that restored the gzip headroom.
+
+## Milestone Goal
+Make waves 3-9 carry their own verbs (a tactical counterweight modifier + a dodge-or-die charger) without touching the demo pin, and land the last two asset levers (STINGER GLB + skybox budget) within the dist budget.
+
+## Evidence (per story)
+- ST-228 (I233): HEAVY ROCKS modifier - 4th waveMods.list entry 'big' (bigLBias 0.5, the L mirror of smallSBias), deterministic (seed, wave) roll, 'HEAVY ROCKS' banner + violet HUD tag + i18n, W1-2 plain + breather invariants pinned; daily salt bump 'daily' -> 'daily:v2' (ST-140 namespacing) + new canonical 2026-11-10 seed 1312111789 pin; browser 233a seeded live scenario (wave 3 banner + tag, wave 7 re-staged 5L/5M/1S, pickSize probe n=2000 exact). 699/699.
+- ST-229 (I234): STINGER charger enemy - cruise 1.8 u/s -> 0.8 s telegraph (FX-tier-independent core glow + rising saw SFX, aim locked at telegraph start) -> charge 7.5 u/s x 1.4 s -> 1.2 s recover, 6-charge lifetime fizzle, wave 7+ 1/wave cap 2, rim 15 u, contact 1 life no score, kill +250 + feed + juice, pool 4 + procedural fallback + GLB hook, 2 SFX cues, toast; browser 234a/234b lifecycle matrix (RM-on offset exactly 0 with the glow kept; FX HIGH 120 / LOW 40 / OFF 0). 710/710 (+11 stinger tests, 2 table pins).
+- ST-230 (I235): Blender STINGER model + skybox JPEG re-encode - the 17th asset (VR_Stinger_Body 32-tri diamond-section dart + 4 kite fletching fins, VR_Stinger_Core 8-tri smooth octa; 40 tris, 2 mats, 3.2 KB raw / 1.2 KB gz, POSITION+NORMAL only) swapped through the pre-wired useGLB hook (in-code materials kept); skybox 74915 -> 60905 B (PIL q80 - Blender's image-save quality was not applying; staged q55..q85, A/B visually identical); dist net -12.3 KB, headroom 1.8 -> 13.0 KB; assetPerf 16 -> 17. 710/710.
+- ST-231 (I236): regression round + G13.0 + closeout - node 3/3 (710/710 x3), build 0, dist 108 files 2002.7/537.0 KB (headroom 45.3/13.0), state machine 10/10 EXACT from verified MENU (first run's PLAYING start documented as one-off external input on the user-active machine - environmental), persistence intact, FX-off zero-leak + readability floor 8 via the real F-key path, user-lock 165x, fresh 1080-tick pilot all finite, frame probe fast windows (300f avg 16.99 / p50 16.8; env 1-fps throttle + rAF-pause windows documented, p50 holds the 60 fps grid), console 0/0 on 4 tabs, demo pin EXACT via real UI (idx 2169/2220, 11334, 57 kills, wave 2, t 36.15, screenshot .evidence/I236/01-demo-pin.png).
+
+## Blocker
+None.
+
+## Transition Verdict
+**CLOSED - E13 complete: 4/4 stories, 4 iterations (I233..I236).** Demo-pin-compatible by gating (modifier W3+, stinger W7+ vs the demo's wave 2), re-verified exact in-browser at I236 via the real UI path.
+
+## Risks
+- Carried (9 HUMAN-PENDING): perception items in production/bug-triage.md (incl. #9 stinger telegraph/charge feel) - non-blocking, need a human session.
+- Carried: low-end physical device / GPU validation (HARDWARE-pending checklist in perf-profile.md '## I225').
+- New: none; R-E13-1..5 all CLOSED at G13.0.
+- WATCH: none open (gzip headroom back to 13.0 KB after the skybox re-encode).
+
+## Changed files
+- production/gates.md (+G13.0 block), production/milestone-review.md (this section), production/epics.md (E13 Result CLOSED + risks CLOSED), production/stories.md (E13 header + CLOSED line), production/timeline.md (+E13 closed line), CHANGELOG.md (+I236), production/iterations.md (+I236), production/session-state/active.md.
