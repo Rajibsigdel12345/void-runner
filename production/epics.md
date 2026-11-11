@@ -223,11 +223,11 @@ recorded in production/gates.md.
 - Depends on: E13 closed (I236); ST-117 seeker pool/battery precedent; E9 GLB pipeline + I235 stinger GLB pattern; I236 frame-probe pattern + deterministic staging recipe; ST-190 replay viewer (pin re-verify path).
 - Gate G14.0: flyer unit + browser (weave determinism at pinned times, 2-hit +400 + feed + juice, lifetime fizzle, cap 2, W9+ 15 u, RM amp gated, FX high/low/off matrix, no contact lethality, GLB 18/18 + fallback); combo capFor unit + browser (W1-2 cap 15 exact, W3+ cap 20, multiplier table, HUD tiers, pin test tests/replay.test.js:246 passes UNMODIFIED, real-UI re-verify); GLB 18/18; dist headroom >=8 KB after the story; fresh tests + build + dist; regression green; log audit sequential (1..241 at close).
 - Scope check: production/scope-check-E14.md (I237, APPROVED with cut option, deferrals, risks R-E14-1..5).
-- Result: (pending - G14.0 at ST-235/I241).
+- Result (I241): CLOSED (G14.0 PASS). 4/4 stories ST-232..235 (I238..I241). The late-run mastery band shipped (FLYER sine-weave lead-shot target + combo cap wave-scaling + 18th Blender asset + skybox q75 re-encode), fresh 731/731 x3 + build 0 + dist 111 files 2014.0/534.0 KB (headroom 34.0/16.0), demo pin re-verified EXACT via the real UI, log 1..241 sequential.
 
 ## E14 Risk Register
-- R-E14-1 (med) flyer hit-rate feel -> weave tuned against the bot lead-shot model in the browser (target ~50-70% hit at max ship speed, ~30% low); HUMAN-PENDING #10 to append at ST-232.
-- R-E14-2 (low) demo-pin drift -> wave gate structural (flyer W9+ / cap W3+ vs demo wave 2); pin test tests/replay.test.js:246 passes UNMODIFIED; real-UI re-verify at ST-235.
-- R-E14-3 (low) gzip budget -> GLB staged <=4 KB gz; headroom floor >=8 KB after the story (I236 baseline 13.0 KB).
-- R-E14-4 (low) W9+ density overload -> cap 2, 1/wave, 9-12 s lifetime, pool 4; bot soak at the gate.
-- R-E14-5 (low) W1-2 combo flat = accepted non-goal (onboarding band); HUD tier math re-mapped cap-relative with tests.
+- R-E14-1 (med), CLOSED at I241) flyer hit-rate feel -> weave tuned against the bot lead-shot model in the browser (target ~50-70% hit at max ship speed, ~30% low); HUMAN-PENDING #10 to append at ST-232.
+- R-E14-2 (low), CLOSED at I241) demo-pin drift -> wave gate structural (flyer W9+ / cap W3+ vs demo wave 2); pin test tests/replay.test.js:246 passes UNMODIFIED; real-UI re-verify at ST-235.
+- R-E14-3 (low), CLOSED at I241) gzip budget -> GLB staged <=4 KB gz; headroom floor >=8 KB after the story (I236 baseline 13.0 KB).
+- R-E14-4 (low), CLOSED at I241) W9+ density overload -> cap 2, 1/wave, 9-12 s lifetime, pool 4; bot soak at the gate.
+- R-E14-5 (low), CLOSED at I241) W1-2 combo flat = accepted non-goal (onboarding band); HUD tier math re-mapped cap-relative with tests.

@@ -786,3 +786,50 @@ E13 (Mid-Run Content Arc) closeout gate over 4 iterations (I233..I236, ST-228..2
 
 ### Next owner / decision
 - Next epic: pick up from carryover - candidates: combo cap (demo-pin compatible), music quality (HUMAN-PENDING #5), hardware remainder, evasive flyer enemy (E14 candidate), touch fallback. 9 HUMAN-PENDING items parked for a human session.
+
+## G14.0 - E14 closeout gate (I241)
+
+### Summary
+E14 (Late-Run Mastery Arc) closeout gate over 4 iterations (I238..I241, ST-232..235). Closes the late-run mastery band: the FLYER evasive enemy (the sine-weave lead-shot skill target - the game's one pure aim verb), the combo cap wave-scaling (the T1 combo flatline fixed where mastery matters), the 18th Blender asset (the FLYER saucer GLB) and the skybox q75 re-encode. Headline: the demo pin re-verified EXACT via the real UI.
+
+### Gate Criteria (epics.md)
+1. Flyer unit + browser (weave determinism at pinned times, 2-hit +400 + feed + juice, lifetime fizzle, cap 2, W9+ 15 u, RM amp gated, FX high/low/off matrix, no contact lethality, GLB 18/18 + fallback).
+2. Combo capFor unit + browser (W1-2 cap 15 exact, W3+ cap 20, multiplier table, HUD tiers, pin test tests/replay.test.js:246 passing UNMODIFIED, real-UI re-verify).
+3. GLB 18/18.
+4. dist headroom >= 8 KB after the story.
+5. Demo pin EXACT via real UI (2169/2220, 11334, 57, 36.15, wave 2).
+6. Fresh tests + build + dist in budget.
+7. Regression green.
+8. Log audit sequential (1..241 at close).
+
+### Evidence
+- (1) ST-232/I238: +14 flyer tests (seeds 91-103); browser smoke (seed 393, 1205-tick stage to wave 9): toast + pool 4 + determinism 54/100-tick bit-identical, weave maxOff 1.194 <= 1.32 / 7 sign changes / 3 s, cruise 2e-14, reduced-motion identity 1.62e-14, combat via the real UI path (hit1 + hitFlash, hit2 kill +400 -> +440 combo, feed #ffb3ec, particles 44-48), cap 2, RM ampScale 0.4 (1.2 -> 0.489 in ~2 s, motion kept), contact non-lethality CLEAN (lives 3->3, flyer on ship, invuln 0, zero hit events), FX matrix via real F keydowns high 132 > low 44 > off 0, NaN 0 / 240 ticks, console 0/0. 4 real bugs fixed (rim-spawn death, rescale drift, hit-event routing, missing killPunch rung).
+- (2) ST-233/I239: capFor(wave, cfg) pure export + ScoreKeeper cap (W1-2 15 EXACT / W3+ 20 = 2.9x; I111 tier width cap-relative W1-2 2.8 / W3+ 3.8); +7 tests (724 -> 731); browser 401-tick stage: live cap 20, 20-kill chain mult 2.9 + tier 5 + HUD x2.9 DOM, fresh begin cap 15 at W1 AND W2, NaN 0 / 240 ticks, console 0/0. Re-verified live at I241: cap transitions W1 15 / W2 15 / W3 20 / W4..W9 20 on the same 401-tick recipe. Pin test tests/replay.test.js:246 green UNMODIFIED across the whole matrix.
+- (3) ST-234/I240: assets/flyer.glb (18th asset; 4940 B raw / 1.6 KB gz; 52 tris; 2 materials; POSITION+NORMAL only, flat, Y-up) swapped through the pre-wired ST-232 hook (assetLoader ASSETS += flyer; zero main.js changes; in-code domeMats kept - hitFlash unchanged); skybox q80 -> q75 re-encode from the same I230 1024x512 master (60905 -> 50004 B); assetPerf pin 17 -> 18; pool shares the GLB geometry (hull 24 / dome 28 tris) + hitFlash through the GLB. 731/731; dist 111 files 2014.0 raw / 534.0 gzip KB.
+- (4) dist headroom after the story: 16.0 KB gzip (cap 550) / 34.0 KB raw (cap 2048) >= the 8 KB floor.
+- (5) Demo pin: EXACT via the REAL UI at I241 (MENU -> REPLAYS button -> DEMO PILOT row -> key 3 x4): GAME_OVER screen - SCORE 11334, KILLS 57, WAVE 2, MAX COMBO 15, TIME 0:36 (= 36.15 s = 2169/60), BEST 36426; screenshot .evidence/I241/01-demo-pin.png; the pin test (idx 2169/2220) green UNMODIFIED.
+- (6) I241 fresh: npm test 731/731 x2 in-process + node --test 'tests/*.test.js' 731/731 cross-process; node scripts/build.mjs exit 0; dist 111 files / 2014.0 raw KB (headroom 34.0) / 534.0 gzip KB (headroom 16.0) - matches I240 exactly.
+- (7) Regression I241: state machine 10/10 EXACT from verified MENU (capture-phase event probe: received = dispatched = 10, zero external input; ONE PROBE ARTIFACT documented - the first forced-death probe called ship.damage(1) with a scalar where a knockback vector {x,y} is expected; the scalar NaN-poisoned ship.pos, sticky through the camera damp; reload + 240-tick NaN check INCLUDING camera fields = 0 non-finite -> probe artifact, not a regression, camera code healthy; the second forced death used livesMgr.count = 1 + a real rock at ship position -> GAME_OVER in ~2 s, score 50, far below the TOP 5 floor of 25394 - no pollution); persistence intact (TOP 5 36426/29543/28045/26132/25394 + BEST 36426); FX-off zero-leak via the real F-key path (idle/thrust/kill-burst live 0; readability floor EXACT 8 at off; player shots emit no particles by design at any tier); user-lock holds (165 x noteFrame(50) @ 20 fps: tier stayed off, userLocked true); fresh 1080-tick scripted pilot all finite (0 non-finite across ship pos / time / rocks pos+radius / bullets pos+vel; wave 8 / t 18.13 s); E14-specific live: cap transitions W1-2 15 / W3+ 20 (401-tick recipe) + flyer live at wave 9 (1 of cap 2; 1204-tick stage bit-matches I238/I240) + pool shares GLB geometry (24/28 tris) + assets 18/18; frame probe - environment caveat (the VM tab's rAF was fully paused while occluded this session: 1 frame in 95 s wall in the 300-frame window, dt 203.6 ms; last measurable fast-window p50 = 16.3-16.8 ms at I236, structurally untouched by I239/I240 - no loop changes; the clamped-dt fallback + adaptive + visibility auto-pause stayed live - sim clock advanced ~0.13 s game-time / 1.5 s wall) - documented environment caveat, not a regression; console 0/0 (4 INFO lines = the designed 'adaptive quality: FX high -> low' toast from the first page load only).
+- (8) Log audit: 240 top-level headers 1..240 sequential pre-append (the 8 inline '## I' references in entry bodies are not headers); +I241 -> 1..241.
+- (9) Risks: R-E14-1 CLOSED (weave tuned against the bot lead-shot model at I238; HP #10 perception parked); R-E14-2 CLOSED (pin re-verified EXACT via real UI + pin test UNMODIFIED + gating: flyer W9+ / cap W3+ vs the demo's wave 2); R-E14-3 CLOSED (GLB 1.6 KB gz; skybox q75 re-encode; dist headroom 34.0/16.0 >= 8); R-E14-4 CLOSED (cap 2, 1/wave, 9-12 s lifetime, pool 4; 1204-tick staged soak clean + 1080-tick pilot 0 non-finite); R-E14-5 CLOSED (W1-2 flat onboarding band accepted; cap-relative tier math tested I239 + live-verified W1-2 2.8 / W3+ 3.8 bands).
+
+### Concerns
+- Frame probe not measurable this session: the VM tab's rAF was fully paused while occluded (1 frame in 95 s wall; the sim clock advanced ~0.13 s game-time / 1.5 s wall = the clamped-dt fallback working as designed; adaptive + visibility auto-pause verified live). Last measurable fast-window p50 = 16.3-16.8 ms at I236; I239/I240 made no loop changes (core scoring + render assets only). Documented as an environment caveat, not a regression.
+- One probe artifact in the state-machine round (ship.damage() scalar -> NaN poison, sticky through the camera damp; reload + 240-tick camera-inclusive NaN check clean). Probe bug, not a code defect; the camera code is healthy.
+- 10 HUMAN-PENDING perception items (incl. #10 flyer weave feel, #5 music quality) remain the player-experience evidence gap (non-blocking; need a human session).
+- Low-end physical device / GPU validation remains HARDWARE-pending (checklist in perf-profile.md '## I225').
+
+### Verdict
+**PASS - E14 CLOSED.** 4/4 stories (ST-232..235) complete with per-iteration evidence (I238..I241); the late-run mastery band shipped (FLYER sine-weave lead-shot target + combo cap wave-scaling + 18th Blender asset); dist headroom grew (13.0 -> 16.0 KB gzip) with the story net-negative (-9.0 KB); fresh 731/731 x3 + build 0 + dist in budget; demo pin re-verified EXACT via the real UI; log 1..241 sequential.
+
+### Risks
+- Carried: 10 HUMAN-PENDING perception items (production/bug-triage.md, incl. #10 flyer weave feel + #5 music quality), low-end physical device / GPU validation (HARDWARE-pending checklist), frame-probe environment caveat (VM rAF pause; p50 evidence at I236).
+
+### Changed files
+- production/gates.md (this block), production/milestone-review.md (E14 CLOSED section), production/epics.md (E14 Result CLOSED + risks CLOSED), production/stories.md (E14 header + CLOSED line), production/timeline.md (+E14 closed line), CHANGELOG.md (+I241), production/iterations.md (+I241), production/session-state/active.md.
+
+### Verification evidence
+- npm test 731/731 x2 in-process + node --test 'tests/*.test.js' 731/731 cross-process (this iteration); node scripts/build.mjs exit 0 (this iteration); dist 111 files / 2014.0 raw / 534.0 gzip KB (this iteration); log audit 1..241 sequential (this iteration); browser smokes ?nocache=i241 (regression round + demo pin + screenshot) + the seeded 401/1204-tick E14-specific stages.
+
+### Next owner / decision
+- Next epic: pick up from carryover - candidates: music quality (HUMAN-PENDING #5), hardware remainder, touch fallback (own arc), art improvements (user standing suggestion - research -> task list). 10 HUMAN-PENDING items parked for a human session.

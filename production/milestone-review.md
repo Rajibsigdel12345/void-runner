@@ -393,3 +393,33 @@ None.
 
 ## Changed files
 - production/gates.md (+G13.0 block), production/milestone-review.md (this section), production/epics.md (E13 Result CLOSED + risks CLOSED), production/stories.md (E13 header + CLOSED line), production/timeline.md (+E13 closed line), CHANGELOG.md (+I236), production/iterations.md (+I236), production/session-state/active.md.
+
+## E14 CLOSED (I241, ST-235)
+
+## Summary
+E14 (Late-Run Mastery Arc) complete: 4/4 stories ST-232..235 over 4 iterations (I238..I241), G14.0 gate PASS. Closes the late-run mastery band: the FLYER evasive enemy (the sine-weave lead-shot skill target - the game's one pure aim verb), the combo cap wave-scaling (the T1 combo flatline fixed where mastery matters), the 18th Blender asset (the FLYER saucer GLB), and the skybox q75 re-encode that grew the gzip headroom.
+
+## Milestone Goal
+Make wave 9+ carry its own mastery verbs (a weaving lead-shot target + a combo cap that scales with mastery) without touching the demo pin, and land the 18th Blender asset within the dist budget.
+
+## Evidence (per story)
+- ST-232 (I238): FLYER evasive enemy - W9+ 1/wave cap 2 pool 4; magenta hexa-disc saucer, rim 15 u entry, cruise 2.5 u/s + perpendicular sine weave (amp 1.2 u / period 0.9 s, continuously re-aiming), lifetime 9-12 s rim exit (no score), 2 hits +400 + magenta burst + shake 0.65 + punch 0.25 + ascending chime + FLYER kill feed, NO contact lethality (stinger = dodge verb, flyer = aim verb), RM amp x0.4 continuous in-flight rescale, procedural fallback + GLB hook, 2 SFX cues, first-spawn toast, HUMAN-PENDING #10. +14 tests (724/724); browser 1205-tick stage: determinism bit-identical, weave identity 1.6e-14, combat via the real UI path, contact non-lethality clean, FX high 132 > low 44 > off 0.
+- ST-233 (I239): combo cap wave-scaling - capFor(wave) pure fn: W1-2 cap 15 EXACT (onboarding band; demo pin structurally untouched), W3+ cap 20 = 2.9x mastery band; ScoreKeeper.setCap at wave start; I111 5-tier width cap-relative (W1-2 2.8 / W3+ 3.8). +7 tests (731/731); browser 401-tick stage: live cap 20, 20-kill chain mult 2.9 + tier 5 + HUD x2.9 DOM, fresh begin cap 15 at W1/W2; pin test tests/replay.test.js:246 green UNMODIFIED.
+- ST-234 (I240): Blender FLYER model - the 18th asset (VR_Flyer_Body tapered elongated hexa-disc 24 tris + VR_Flyer_Dome 6-seg hemisphere 28 tris = 52 tris, 2 materials, POSITION+NORMAL only, flat, Y-up; 4940 B raw / 1.6 KB gz; extents match the procedural fallback, dome top 0.5895 exact) swapped through the pre-wired ST-232 hook (assetLoader ASSETS += flyer; zero main.js changes); skybox re-encode q80 -> q75 from the same I230 1024x512 master (60905 -> 50004 B) to hold the >= 8 KB gzip headroom; assetPerf pin 17 -> 18; pool shares the GLB geometry (24/28 tris) + hitFlash through the GLB. 731/731.
+- ST-235 (I241): regression round + G14.0 + closeout - node 3/3 (731/731 x3), build 0, dist 111 files 2014.0/534.0 KB (headroom 34.0/16.0), demo pin EXACT via the real UI (SCORE 11334, KILLS 57, WAVE 2, MAX COMBO 15, TIME 0:36 = 36.15 s = 2169/60, BEST 36426; .evidence/I241/01-demo-pin.png), state machine 10/10 EXACT from verified MENU (capture-phase probe; one probe artifact documented - ship.damage scalar NaN poison, reload + 240-tick camera-inclusive NaN check clean), persistence intact, FX-off zero-leak + floor 8 via the real F-key path, user-lock 165x holds, fresh 1080-tick pilot all finite (wave 8 / t 18.13 s), E14-specific live (cap W1-2 15 / W3+ 20 + flyer at wave 9 + GLB pool geometry), frame-probe environment caveat (rAF fully paused this session; p50 16.3-16.8 ms last measurable at I236, structurally untouched), console 0/0.
+
+## Blocker
+None.
+
+## Transition Verdict
+**CLOSED - E14 complete: 4/4 stories, 4 iterations (I238..I241).** Demo-pin-compatible by gating (flyer W9+ / cap W3+ vs the demo's wave 2), re-verified exact in-browser at I241 via the real UI path.
+
+## Risks
+- Carried (10 HUMAN-PENDING): perception items in production/bug-triage.md (incl. #10 flyer weave feel, #5 music quality) - non-blocking, need a human session.
+- Carried: low-end physical device / GPU validation (HARDWARE-pending checklist in perf-profile.md '## I225').
+- Carried: frame-probe environment caveat (VM rAF pause in occluded tabs; p50 16.3-16.8 ms at I236, structurally untouched by I239/I240).
+- New: none; R-E14-1..5 all CLOSED at G14.0.
+- WATCH: none open (gzip headroom grew 13.0 -> 16.0 KB with the story net -9.0 KB).
+
+## Changed files
+- production/gates.md (+G14.0 block), production/milestone-review.md (this section), production/epics.md (E14 Result CLOSED + risks CLOSED), production/stories.md (E14 header + CLOSED line), production/timeline.md (+E14 closed line), CHANGELOG.md (+I241), production/iterations.md (+I241), production/session-state/active.md.
