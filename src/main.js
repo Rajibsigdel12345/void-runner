@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { createStarfield } from './render/starfield.js';
 import { createSkybox } from './render/skybox.js'; // I212
 import { createArenaRing } from './render/arenaRing.js'; // I212
+import { createArenaFloorGrid } from './render/arenaFloor.js'; // ST-257 (I269)
 import { createEngineTrail } from './core/engineTrail.js'; // I213
 import { createShipMesh } from './render/shipMesh.js';
 import { createInput } from './render/input.js';
@@ -115,9 +116,8 @@ const dir = new THREE.DirectionalLight(0xffe2c4, 1.25); // warm key
 dir.position.set(3, 9, 10); // I257 final: camera-side key (see comment above)
 scene.add(dir);
 
-const grid = new THREE.PolarGridHelper(26, 12, 8, 64, CONFIG.arena.gridBright, CONFIG.arena.gridDim); // ST-248: grid colors data-driven
+const grid = createArenaFloorGrid(scene, CONFIG.arena); // ST-257 (I269): warm sparse floor grid + radial falloff (1 draw call; was PolarGridHelper ST-248)
 const arenaRing = createArenaRing(scene, CONFIG.arena.radius); // I212: boundary ring just above the grid
-scene.add(grid);
 
 const stars = createStarfield(1337);
 scene.add(stars);
@@ -540,7 +540,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, (replayView && world.game.in(STATE.REPLAY)) ? replayIntent() : intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shockwaves, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, shipFlameGlow: shipMesh.flameGlow, // ST-256 (I268)
+window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shockwaves, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, shipFlameGlow: shipMesh.flameGlow, arenaFloor: grid, // ST-257 (I269)
   applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });

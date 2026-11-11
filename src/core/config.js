@@ -2,8 +2,19 @@
 export const CONFIG = {
   arena: {
     radius: 26,
-    gridBright: 0x1b2a55, // ST-248: PolarGridHelper bright rings (data-driven; was a main.js literal)
-    gridDim: 0x101a38, // ST-248: PolarGridHelper dim rings
+    // ST-257 (I269): custom warm floor grid (src/render/arenaFloor.js) replaces
+    // the cool PolarGridHelper (ST-248). gridBright = center-hub / brightest
+    // line; its luma is the ST-177 FX-off floor bg proxy (tests/paletteHarmony
+    // .test.js), so it must stay <= bomb pickup luma (118.8) - 59.
+    gridBright: 0x463529, // ST-257: warm neutral hub (was 0x1b2a55 cool blue); sRGB luma 55.7
+    gridDim: 0x201812, // ST-257: dim edge band (was 0x101a38); sRGB luma 25.3 < FLOOR 50
+    grid: {
+      rings: 5, // was 8
+      sectors: 8, // was 12
+      divisions: 48, // per-ring segments (was 64)
+      spokeSegs: 8, // spoke subdivisions - per-vertex radial falloff
+      falloffPow: 1.6, // mix = dim + (bright - dim) * (1 - t)^pow, t = r / radius
+    },
   },
 
   // I170 (ST-170): procedural-music intensity escalation, driven from world state.
