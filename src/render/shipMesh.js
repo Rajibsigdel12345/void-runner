@@ -1,5 +1,6 @@
 // Void Runner - procedural ship mesh (ST-006). Low-poly, no external assets.
 import * as THREE from 'three';
+import { CONFIG } from '../core/config.js';
 
 export function createShipMesh() {
   const group = new THREE.Group();
@@ -11,9 +12,13 @@ export function createShipMesh() {
   shipBody.name = 'ship_body';
   group.add(shipBody);
 
-  const bodyMat = new THREE.MeshStandardMaterial({ color: 0x8fd8ff, metalness: 0.35, roughness: 0.35, flatShading: true });
-  const wingMat = new THREE.MeshStandardMaterial({ color: 0x2f5aa8, metalness: 0.3, roughness: 0.5, flatShading: true });
-  const cockpitMat = new THREE.MeshStandardMaterial({ color: 0x0b1830, emissive: 0x59d8ff, emissiveIntensity: 1.4, roughness: 0.2 });
+  // ST-251 (I262): palette is data-driven (CONFIG.ship.palette; E19 warm-world hero pass).
+  // The cockpit cyan emissive stays the FROZEN identity accent - pinned in
+  // tests/paletteHarmony.test.js; retune only via a design pass.
+  const P = CONFIG.ship.palette;
+  const bodyMat = new THREE.MeshStandardMaterial({ color: P.body.color, metalness: P.body.metalness, roughness: P.body.roughness, flatShading: true });
+  const wingMat = new THREE.MeshStandardMaterial({ color: P.wing.color, metalness: P.wing.metalness, roughness: P.wing.roughness, flatShading: true });
+  const cockpitMat = new THREE.MeshStandardMaterial({ color: P.cockpit.color, emissive: P.cockpit.emissive, emissiveIntensity: P.cockpit.emissiveIntensity, roughness: P.cockpit.roughness });
 
   const bodyGeo = new THREE.ConeGeometry(0.55, 1.7, 4);
   bodyGeo.rotateX(Math.PI / 2); // tip toward +Z (forward in render space)

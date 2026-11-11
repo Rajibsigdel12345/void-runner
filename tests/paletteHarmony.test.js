@@ -115,3 +115,31 @@ test('ST-249: belt clink stays cool (B-dominant) - warm/cool separation from the
     assert.ok(b > r, 'cool steel 0x' + c.toString(16) + ': B ' + b + ' > R ' + r);
   }
 });
+
+// ST-251 (I262): player-ship hero palette invariants (CONFIG.ship.palette; E19).
+test('ST-251: ship body = warm brass-steel (R>B, mid-luma above the warm rocks)', () => {
+  const c = CONFIG.ship.palette.body.color;
+  const r = (c >> 16) & 255, b = c & 255;
+  assert.ok(r > b, 'warm: R ' + r + ' > B ' + b + ' (0x' + c.toString(16) + ')');
+  const l = luma(c);
+  assert.ok(l >= 120 && l <= 150, 'mid-luma body, luma=' + l.toFixed(1));
+});
+
+test('ST-251: ship wing = dark umber shadow tone (luma 50-80)', () => {
+  const l = luma(CONFIG.ship.palette.wing.color);
+  assert.ok(l >= 50 && l <= 80, 'dark wing, luma=' + l.toFixed(1));
+});
+
+test('ST-251: body vs wing two-tone separation (>= 50 luma)', () => {
+  const d = luma(CONFIG.ship.palette.body.color) - luma(CONFIG.ship.palette.wing.color);
+  assert.ok(d >= 50, 'body-wing delta ' + d.toFixed(1) + ' >= 50');
+});
+
+test('ST-251: cockpit cyan emissive is the FROZEN identity (0x59d8ff)', () => {
+  assert.equal(CONFIG.ship.palette.cockpit.emissive, 0x59d8ff, 'identity pin');
+});
+
+test('ST-251: ship body clears the enemy-bullet luma zone (>= 20 above 0xff4a2a)', () => {
+  const d = luma(CONFIG.ship.palette.body.color) - luma(CONFIG.fx.enemyBullet.emissive);
+  assert.ok(d >= 20, 'body ' + luma(CONFIG.ship.palette.body.color).toFixed(1) + ' vs enemy ' + luma(CONFIG.fx.enemyBullet.emissive).toFixed(1) + ', delta ' + d.toFixed(1) + ' >= 20');
+});
