@@ -29,7 +29,7 @@ function makeTrailTexture() {
 export function createBulletPool(scene) {
   const max = CONFIG.weapon.maxBullets;
   const geo = new THREE.SphereGeometry(CONFIG.weapon.bulletRadius, 8, 8);
-  const mat = new THREE.MeshBasicMaterial({ color: 0xbff4ff });
+  const mat = new THREE.MeshBasicMaterial({ color: CONFIG.fx.palette.bulletLevel[0] }); // ST-248: cockpit-cyan accent (config)
   const pool = [];
   for (let i = 0; i < max; i++) {
     const m = new THREE.Mesh(geo, mat);
@@ -60,10 +60,13 @@ export function createBulletPool(scene) {
   let curLevel = 0;
 
   // ST-123: recolor the shared bullet head + trail tint by weapon level (no-op on repeat).
-  function setLevel(level) {
-    if (curLevel === level) return;
-    curLevel = level;
-    const c = CONFIG.fx.palette.bulletLevel[Math.max(0, Math.min(2, level - 1))] || 0xbff4ff;
+  // ST-248: overdrive heat shift - white-hot variants while overdrive is active (config data-driven).
+  function setLevel(level, overdrive) {
+    const key = (Math.max(0, level) & 3) * 2 + (overdrive ? 1 : 0);
+    if (curLevel === key) return;
+    curLevel = key;
+    const arr = overdrive ? CONFIG.fx.palette.bulletLevelOverdrive : CONFIG.fx.palette.bulletLevel;
+    const c = arr[Math.max(0, Math.min(2, level - 1))] || CONFIG.fx.palette.bulletLevel[0];
     mat.color.setHex(c);
     trailMat.color.setHex(c);
   }

@@ -1,6 +1,10 @@
 ﻿﻿﻿// ALL tunables live here (balance table). See design/gdd.md for rationale.
 export const CONFIG = {
-  arena: { radius: 26 },
+  arena: {
+    radius: 26,
+    gridBright: 0x1b2a55, // ST-248: PolarGridHelper bright rings (data-driven; was a main.js literal)
+    gridDim: 0x101a38, // ST-248: PolarGridHelper dim rings
+  },
 
   // I170 (ST-170): procedural-music intensity escalation, driven from world state.
   // x in [0,1] is fed to audio.musicIntensity(x) (opens the drone filter + lifts the
@@ -470,7 +474,7 @@ export const CONFIG = {
       threshold: 0.72
     },
     palette: {                // ST-086: per-entity particle color palettes (hex, additive-blended)
-      rock:     [0xffb24a, 0xff8a3c, 0xffd27a],  // warm amber shatter
+      rock:     [0xfff0c8, 0xffa44a, 0xd96a2a],  // ST-248: warm ember core -> amber -> deep ember (harmonized to the I257 warm rock)
       golden:   [0xfff0a0, 0xffe070, 0xfff8dc],  // gold
       graze:    [0x7fd4ff, 0x9fe0ff, 0x54b4ff],  // cool cyan near-miss
       mine:     [0xff5a3c, 0xff8a5a, 0xffc4a0],  // hot red-orange
@@ -482,12 +486,15 @@ export const CONFIG = {
       bomb:     [0xfff3b0, 0xffd27a, 0xffffff],  // bright blast
       pickup: { rapid: 0xffe066, spread: 0xff9f43, shield: 0x53d8ff, bomb: 0xff5252, magnet: 0x69f0ae, overdrive: 0xff4dd8, slowmo: 0x9fe8ff }, // ST-177: per-type collect sparkle (matches powerupMesh orb colors)
       power:    [0xff5ad8, 0xff8ae8, 0xffb6f2],   // magenta overdrive
-      bulletLevel: [0xbff4ff, 0x8affc0, 0xffd27a],   // ST-123 weapon L1/L2/L3 (cyan/mint/amber)
+      bulletLevel: [0x7fe4ff, 0x8affc0, 0xffd27a],   // ST-123 weapon L1/L2/L3; ST-248: L1 = cockpit-cyan accent (0x59d8ff family, brighter for the bullet read)
+      bulletLevelOverdrive: [0xd2f5ff, 0xd6ffec, 0xfff1e1], // ST-248: overdrive heat shift (white-hot, hue-preserving per level)
+      killRing: 0xffa44a,                    // ST-248: plain-kill shockwave ring (amber; was implicit palette.rock[0])
       engine:   [0xffa860, 0xffd9a0, 0x9fd8ff],  // I213 warm core -> cool tail (matches the flame)
       belt:     [0x9fb4d0, 0x7c93b8, 0xcfe0f5],    // ST-139 cool steel - indestructible belt clink
       stinger:  [0xd8f4ff, 0x9fd4ff, 0xffffff],    // ST-229 hot cyan-white (the telegraph family)
       flyer:    [0xff9de8, 0xffc4f0, 0xff6ad5]    // ST-232 magenta saucer (the evasive-target family)
-    }
+    },
+    enemyBullet: { base: 0x5a1410, emissive: 0xff4a2a, emissiveIntensity: 1.2 }, // ST-248: hot red-orange threat bolt (data-driven; values unchanged)
   },
 
   camera: {                // ST-082: dynamic camera feel (fovBase 60 = pre-ST-082 hardcode)

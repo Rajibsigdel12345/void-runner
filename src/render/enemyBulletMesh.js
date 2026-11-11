@@ -6,9 +6,10 @@ import { CONFIG } from '../core/config.js';
 export function createEnemyBulletRenderer(scene) {
   const max = CONFIG.enemyBullets.maxConcurrent;
   const geo = new THREE.SphereGeometry(CONFIG.enemyBullets.radius * 1.9, 8, 8);
+  const EB = CONFIG.fx.enemyBullet || { base: 0x5a1410, emissive: 0xff4a2a, emissiveIntensity: 1.2 }; // ST-248: data-driven (values unchanged)
   const mat = new THREE.MeshStandardMaterial({
-    color: 0x5a1410, roughness: 0.4, metalness: 0.1,
-    emissive: 0xff4a2a, emissiveIntensity: 1.2,
+    color: EB.base, roughness: 0.4, metalness: 0.1,
+    emissive: EB.emissive, emissiveIntensity: EB.emissiveIntensity,
   });
   const pool = [];
   for (let i = 0; i < max; i++) {

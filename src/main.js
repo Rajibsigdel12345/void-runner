@@ -115,7 +115,7 @@ const dir = new THREE.DirectionalLight(0xffe2c4, 1.25); // warm key
 dir.position.set(3, 9, 10); // I257 final: camera-side key (see comment above)
 scene.add(dir);
 
-const grid = new THREE.PolarGridHelper(26, 12, 8, 64, 0x1b2a55, 0x101a38);
+const grid = new THREE.PolarGridHelper(26, 12, 8, 64, CONFIG.arena.gridBright, CONFIG.arena.gridDim); // ST-248: grid colors data-driven
 const arenaRing = createArenaRing(scene, CONFIG.arena.radius); // I212: boundary ring just above the grid
 scene.add(grid);
 
@@ -692,7 +692,7 @@ else if (e.type === 'flyerSpawn') toast('FLYER INBOUND'); // ST-232: first spawn
     else if (e.type === 'nearmiss') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points); // ST-053 (plain small popup)
     else if (e.type === 'weaponLevelUp') toast('WEAPON LEVEL ' + e.data.level); // ST-123
     if (!motionOff) {
-      if (e.type === 'kill') { particles.burst(e.data.pos.x, e.data.pos.y, { count: e.data.golden ? Math.ceil(fxCount * 1.5) : fxCount, palette: e.data.golden ? CONFIG.fx.palette.golden : CONFIG.fx.palette.rock, speed: 9, life: 0.5 }); const _ke = killPunchEnergy(e.data.size, !!e.data.overdrive, CONFIG.fx.killPunch); const _swr = fxCount > 0 ? shockwaveRadius(e.data.size, CONFIG.fx.shockwave) : 0; _killCh.punch = 0; _killCh.ring = 0; if (_ke > 0) { punch.trigger(killPunchDir(world.ship.pos, e.data.pos, 0.35, _kpd), _ke); _killCh.punch = 1; } if (_swr > 0) { shockwaves.spawn(e.data.pos.x, e.data.pos.y, { radius: _swr, color: e.data.golden ? CONFIG.fx.palette.golden[0] : (SW_COLORS[e.data.size] || CONFIG.fx.palette.rock[0]) }); _killCh.ring = 1; } if (_killCh.punch || _killCh.ring) juiceTally.record('kill', _killCh); } // ST-052, ST-221 (I224): class-scaled kill punch (T4); ST-238 (I245): pooled shockwave ring on class-scaled plain kills (no flash/hit-stop)
+      if (e.type === 'kill') { particles.burst(e.data.pos.x, e.data.pos.y, { count: e.data.golden ? Math.ceil(fxCount * 1.5) : fxCount, palette: e.data.golden ? CONFIG.fx.palette.golden : CONFIG.fx.palette.rock, speed: 9, life: 0.5 }); const _ke = killPunchEnergy(e.data.size, !!e.data.overdrive, CONFIG.fx.killPunch); const _swr = fxCount > 0 ? shockwaveRadius(e.data.size, CONFIG.fx.shockwave) : 0; _killCh.punch = 0; _killCh.ring = 0; if (_ke > 0) { punch.trigger(killPunchDir(world.ship.pos, e.data.pos, 0.35, _kpd), _ke); _killCh.punch = 1; } if (_swr > 0) { shockwaves.spawn(e.data.pos.x, e.data.pos.y, { radius: _swr, color: e.data.golden ? CONFIG.fx.palette.golden[0] : (SW_COLORS[e.data.size] || CONFIG.fx.palette.killRing) }); _killCh.ring = 1; } if (_killCh.punch || _killCh.ring) juiceTally.record('kill', _killCh); } // ST-052, ST-221 (I224): class-scaled kill punch (T4); ST-238 (I245): pooled shockwave ring on class-scaled plain kills (no flash/hit-stop)
       else if (e.type === 'nearmiss') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.max(4, Math.ceil(fxCount * 0.25)), palette: CONFIG.fx.palette.graze, speed: 5, life: 0.3 }); // ST-053 subtle graze wisp
       else if (e.type === 'mineExplode') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.mine, speed: 10, life: 0.5 }); shake.trigger(shakeEnergy('mineExplode', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('mineExplode', CONFIG.fx.flashTable)); juiceTally.record('mineExplode', { shake: 1, flash: 1 }); } // ST-054/ST-175
       else if (e.type === 'droneExplode') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.drone, speed: 9, life: 0.45 }); shake.trigger(shakeEnergy('droneExplode', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('droneExplode', CONFIG.fx.flashTable)); juiceTally.record('droneExplode', { shake: 1, flash: 1 }); } // ST-117/ST-175 seeker burst
@@ -817,7 +817,7 @@ function syncVisuals(dt) {
   shipMesh.sync(world.ship, simT, !motionOff, Math.min(1, Math.hypot(input.state.thrust.x, input.state.thrust.y))); // ST-063 engine flame
   reticle.sync(world.ship, st === STATE.PLAYING); // I44: only while playing
   bullets.sync(world.weapons);
-  bullets.setLevel(world.weaponLevel()); // ST-123
+  bullets.setLevel(world.weaponLevel(), st === STATE.PLAYING && world.powerups.active('overdrive')); // ST-123, ST-248: overdrive heat shift
   rockRenders.sync(world.field, simT); // ST-139
   mineRenders.sync(world.mines, simT); // ST-054
   droneRenders.sync(world.drones, simT); // ST-117
