@@ -45,19 +45,27 @@ export function createAsteroidRenderer(scene) {
   // R79/G55/B37 - the rim was the ENTIRE cool cast; lights/env were innocent). A WARM rim
   // (0xd8a878 @ 0.12, ^5 silhouette falloff) keeps the edge accent, harmonizes with the warm
   // rock palette, and lifts rock-vs-nebula contrast (face luma ~57 no-rim -> ~96).
+  let rimU = null; // I278 (ST-264): live uniform handle (set at first compile) - the setRim probe/A-B hook
   mat.onBeforeCompile = (shader) => {
-    shader.uniforms.uRimColor = { value: new THREE.Color(0xd8a878) }; // I257 final: warm edge (cool rim was the periwinkle root cause)
-    shader.uniforms.uRimStrength = { value: 0.12 }; // I257 final: 0.5 -> 0.22 -> 0.12 (quantitative screenshot A/B)
-    shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nvarying vec3 vRimViewPos;')
-      .replace('#include <project_vertex>', '#include <project_vertex>\nvRimViewPos = -mvPosition.xyz;');
+    rimU = shader.uniforms;
+    shader.uniforms.uRimColor = { value: new THREE.Color(CONFIG.asteroid.rim.color) }; // I257 final warm edge (I278: data-driven in CONFIG, value FROZEN)
+    shader.uniforms.uRimStrength = { value: CONFIG.asteroid.rim.strength }; // I257 final (I278: data-driven in CONFIG, value FROZEN)
+    // I278 (ST-264): FRAGMENT-ONLY rim (the I272 boss pattern) - the standard vertex already sets
+    // vViewPosition = -mvPosition.xyz, so the old custom rim varying + the #include <project_vertex>
+    // vertex injection are dropped. Every statement sits on its own line and the trailing #include
+    // line-starts its own segment (the I263 comment-swallow regression family; pinned by tests).
+     // I278 SIGN FIX: vViewPosition (fragment->camera), so (1 - NdotV) is the real fresnel edge falloff
+     // (the old -sign forced f=1 on every front pixel = a flat coat; the power knob was inert since I60).
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nvarying vec3 vRimViewPos;\nuniform vec3 uRimColor;\nuniform float uRimStrength;')
+      .replace('#include <common>', '#include <common>\nuniform vec3 uRimColor;\nuniform float uRimStrength;')
       .replace('#include <opaque_fragment>',
-        'float vRimF = pow(1.0 - clamp(dot(normalize(-vRimViewPos), normal), 0.0, 1.0), 5.0); // I257: 3 -> 5 (silhouette-hugging)\n' +
+        'float vRimF = pow(1.0 - clamp(dot(normalize(vViewPosition), normal), 0.0, 1.0), ' + CONFIG.asteroid.rim.power.toFixed(2) + '); // I278 (ST-264): power data-driven + SIGN FIX (was -vViewPosition => f=1 flat coat since I60, power knob inert; vViewPosition = true edge fresnel)\n' +
         'outgoingLight += uRimColor * (vRimF * uRimStrength);\n' +
         '#include <opaque_fragment>');
   };
+  // I278 (ST-264): probe/A-B hook - live-set the rock rim strength (rim-off A/B per the I257 precedent);
+  // no-op until the material has compiled. Belt/gold materials never had a rim (unchanged).
+  function setRim(s) { if (rimU && typeof s === 'number' && isFinite(s)) rimU.uRimStrength.value = s; }
   // ST-052: golden rock - bright emissive so bloom (High FX) makes it glow.
   const matGold = new THREE.MeshStandardMaterial({ color: 0xffc94d, emissive: 0xffa018, emissiveIntensity: 1.6, roughness: 0.3, metalness: 0.55, flatShading: true, vertexColors: true }); // I209: vertexColors
   // ST-127: shielded rock - additive energy shell rendered as a CHILD of the rock mesh (hidden by
@@ -148,5 +156,5 @@ export function createAsteroidRenderer(scene) {
   // warm key light reads instead of the blue-violet nebula washing them periwinkle.
   function setEnvIntensity(v) { if (typeof v === 'number' && isFinite(v)) mat.envMapIntensity = v; }
 
-  return { sync, pool, setGLB, setShieldGLB, setShapeCues, setEnvIntensity };
+  return { sync, pool, setGLB, setShieldGLB, setShapeCues, setEnvIntensity, setRim };
 }

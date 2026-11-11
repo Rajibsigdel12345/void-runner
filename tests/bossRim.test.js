@@ -9,6 +9,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { CONFIG } from '../src/core/config.js';
 
 const src = fs.readFileSync(
   path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'render', 'bossMesh.js'),
@@ -17,7 +18,7 @@ const src = fs.readFileSync(
 
 test('I272: boss rim uses the standard vViewPosition varying (no custom rim varying)', () => {
   assert.ok(!src.includes('vRimViewPos'), 'custom rim varying must be gone (I272)');
-  assert.ok(src.includes('normalize(-vViewPosition)'), 'rim must use the standard vViewPosition');
+  assert.ok(src.includes('normalize(vViewPosition)') && !src.includes('normalize(-vViewPosition)'), 'I278 sign fix: vViewPosition (fragment->camera), NOT -vViewPosition (f=1 flat coat since I60)');
 });
 
 test('I272: the rim #include starts its own line (resolveIncludes regex is line-anchored)', () => {
@@ -39,4 +40,15 @@ test('I272: no // comment may share a line with the rim add-term (I263 comment-s
 test('I272: rim add-term and strength uniform are still injected', () => {
   assert.ok(src.includes("'outgoingLight += uRimColor * (vRimF * uRimStrength);\\n' +"), 'rim add-term kept');
   assert.ok(src.includes('shader.uniforms.uRimStrength = { value: rim.strength };'), 'rim strength uniform kept');
+});
+
+test('I278: boss rim power is data-driven in CONFIG (no hardcoded 5.0 pow)', () => {
+  assert.ok(src.includes('CONFIG.boss.rim.power'), 'CONFIG.boss.rim.power referenced in the injected GLSL');
+  assert.ok(!src.includes(', 5.0);'), 'no hardcoded pow(..., 5.0) left in the rim GLSL');
+});
+
+test('I278: CONFIG.boss.rim.power sits in the silhouette-hugging band', () => {
+  const p = CONFIG.boss.rim.power;
+  assert.ok(typeof p === 'number' && Number.isFinite(p), 'power is a finite number');
+  assert.ok(7 <= p && p <= 10, 'power 7..10 (silhouette-hugging; thinner than the I272 5.0 flood)');
 });

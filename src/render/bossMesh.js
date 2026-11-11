@@ -149,6 +149,8 @@ export function createBossMesh(scene) {
   // as redundant), and every statement sits on its own line so three's resolveIncludes (regex
   // ^[ 	]*#include) still expands the trailing include. The asteroid rim (I257) already had
   // this safe line structure - which is why rocks always rendered fine.
+   // I278 SIGN FIX: vViewPosition (fragment->camera) so (1 - NdotV) is the real fresnel (the old -sign 
+   // forced f=1 on every front pixel = a flat coat; the power knob was inert since I60).
   const rimState = (strength) => ({ color: new THREE.Color(CONFIG.boss.rim.color), strength, push: null });
   const rimHull = rimState(CONFIG.boss.rim.hull);
   const rimCrown = rimState(CONFIG.boss.rim.crown);
@@ -161,7 +163,7 @@ export function createBossMesh(scene) {
       shader.fragmentShader = shader.fragmentShader
         .replace('#include <common>', '#include <common>\nuniform vec3 uRimColor;\nuniform float uRimStrength;')
         .replace('#include <opaque_fragment>',
-          'float vRimF = pow(1.0 - clamp(dot(normalize(-vViewPosition), normal), 0.0, 1.0), 5.0); // I257/I263: silhouette-hugging power\n' +
+          'float vRimF = pow(1.0 - clamp(dot(normalize(vViewPosition), normal), 0.0, 1.0), ' + CONFIG.boss.rim.power.toFixed(2) + '); // I278 (ST-264): power data-driven + SIGN FIX (was -vViewPosition => f=1 flat coat since I60, power knob inert; vViewPosition = true edge fresnel)\n' +
           'outgoingLight += uRimColor * (vRimF * uRimStrength);\n' +
           '#include <opaque_fragment>');
     };

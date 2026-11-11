@@ -104,6 +104,12 @@ export const CONFIG = {
       armor: 3,         // bullet hits to exhaust the shield before it shatters
       size: 'M',        // footprint/speed from sizes.M (render adds a shield shell later)
       score: 400        // shatter reward - higher than any single rock; costs armor shots
+    },
+    rim: {             // I278 (ST-264): rock silhouette rim (I257 warm-edge family), data-driven
+      color: 0xd8a878,      // I257 final warm edge (FROZEN accent - the cool rim was the periwinkle root cause)
+      strength: 0.12,       // I257 final (FROZEN): 0.5 -> 0.22 -> 0.12 (quantitative screenshot A/B)
+      power: 8              // I278 (ST-264): fresnel power (was hardcoded 5.0) - 8 = thinnest edge accent so the
+                            // rim hugs the silhouette and the I257 face values (rim-off R79/G55/B37) hold
     }
   },
 
@@ -188,8 +194,11 @@ export const CONFIG = {
       splicerColor: 0x2dd4bf, // Splicer rim - teal identity (matches the variant body hex)
       hull: 0.45,             // hull edge strength (I267 ST-255: stronger so the hull reads vs the cool sky; still sub-bloom)
       crown: 0.30,            // crown edge strength (I267 ST-255: a touch softer than the hull)
-      phase2Lift: 1.6         // phase-2 enrage: rim brightens with the body (hull 0.45 -> 0.72 max,
+      phase2Lift: 1.6,         // phase-2 enrage: rim brightens with the body (hull 0.45 -> 0.72 max,
                               // still under the bloom band - ST-252 bloom-band audit confirms)
+      power: 7                // I278 (ST-264): fresnel power, DATA-DRIVEN (was hardcoded pow 5.0): a thinner,
+                              // silhouette-hugging rim instead of the I272 face-flood (grounding: power = the
+                              // thickness/softness lever; strengths stay frozen 0.45/0.30)
     },
     phase2: {        // ST-133: enrage state below the HP threshold (one-way)
       hpFrac: 0.5,      // enter phase 2 when HP < 50%
