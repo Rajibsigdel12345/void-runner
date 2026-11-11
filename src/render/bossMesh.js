@@ -135,10 +135,20 @@ export function createBossMesh(scene) {
   group.add(core);
 
   // ST-252 (I263): silhouette rim on hull + crown - the obelisk's edges separate from the warm
-  // E18 world at distance. Same proven onBeforeCompile pattern as the asteroid rim (I257); data
-  // driven in CONFIG.boss.rim. rim.color is a shared Color instance (auto-pushed by the uniform);
-  // rim.push() mirrors the per-frame strength once the program has compiled. The core seam
-  // carries NO rim - its pulsing emissive IS the distance read.
+  // E18 world at distance. Data-driven in CONFIG.boss.rim. rim.color is a shared Color instance
+  // (auto-pushed by the uniform); rim.push() mirrors the per-frame strength once the program has
+  // compiled. The core seam carries NO rim - its pulsing emissive IS the distance read.
+  // I272 (ST-259) ROOT-CAUSE FIX for the (0,0,0,0) boss silhouette hole: the I263 fragment
+  // injection ended its first concat segment with a // comment and NO trailing newline, so the
+  // comment swallowed the rest of the one-line concatenation - the rim add-term AND the
+  // trailing #include <opaque_fragment>, which is the ONLY place the standard fragment assigns
+  // gl_FragColor. The hull/crown programs therefore compiled cleanly but never wrote the
+  // fragment output, and the GPU emitted the undefined (0,0,0,0) pixels where the obelisk
+  // stands. The rim is now fragment-only: the standard vertex already sets
+  // vViewPosition = -mvPosition.xyz (so the custom rim varying + vertex injection were dropped
+  // as redundant), and every statement sits on its own line so three's resolveIncludes (regex
+  // ^[ 	]*#include) still expands the trailing include. The asteroid rim (I257) already had
+  // this safe line structure - which is why rocks always rendered fine.
   const rimState = (strength) => ({ color: new THREE.Color(CONFIG.boss.rim.color), strength, push: null });
   const rimHull = rimState(CONFIG.boss.rim.hull);
   const rimCrown = rimState(CONFIG.boss.rim.crown);
@@ -148,14 +158,11 @@ export function createBossMesh(scene) {
       u = shader.uniforms;
       shader.uniforms.uRimColor = { value: rim.color };
       shader.uniforms.uRimStrength = { value: rim.strength };
-      shader.vertexShader = shader.vertexShader
-        .replace('#include <common>', '#include <common>\nvarying vec3 vRimViewPos;')
-        .replace('#include <project_vertex>', '#include <project_vertex>\nvRimViewPos = -mvPosition.xyz;');
       shader.fragmentShader = shader.fragmentShader
-        .replace('#include <common>', '#include <common>\nvarying vec3 vRimViewPos;\nuniform vec3 uRimColor;\nuniform float uRimStrength;')
+        .replace('#include <common>', '#include <common>\nuniform vec3 uRimColor;\nuniform float uRimStrength;')
         .replace('#include <opaque_fragment>',
-          'float vRimF = pow(1.0 - clamp(dot(normalize(-vRimViewPos), normal), 0.0, 1.0), 5.0); // ST-252: silhouette-hugging power (I257)' +
-          'outgoingLight += uRimColor * (vRimF * uRimStrength);' +
+          'float vRimF = pow(1.0 - clamp(dot(normalize(-vViewPosition), normal), 0.0, 1.0), 5.0); // I257/I263: silhouette-hugging power\n' +
+          'outgoingLight += uRimColor * (vRimF * uRimStrength);\n' +
           '#include <opaque_fragment>');
     };
     rim.push = (s) => { if (u) u.uRimStrength.value = s; };
