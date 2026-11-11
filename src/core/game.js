@@ -6,6 +6,7 @@ import { AsteroidField } from './asteroids.js';
 import { MineField } from './mines.js';
 import { DroneField } from './drones.js'; // ST-117
 import { StingerField } from './stinger.js'; // ST-229
+import { FlyerField } from './flyer.js'; // ST-232
 import { Monolith, bossHpForWave, bossBurstVectors } from './boss.js';
 import { Splicer, splicerHpForWave } from './splicer.js';
 import { Warden } from './warden.js'; // ST-136
@@ -30,6 +31,7 @@ export class World {
     this.mines = new MineField(rng, cfg); // ST-054
     this.drones = new DroneField(rng, cfg); // ST-117
     this.stingers = new StingerField(rng, cfg); // ST-229
+    this.flyers = new FlyerField(rng, cfg); // ST-232
     this.boss = null; // ST-055
     this.enemyBullets = new EnemyBulletField(cfg); // ST-056
     this.vortex = new VortexField(rng, cfg); // ST-059
@@ -172,6 +174,7 @@ export class World {
       this.spawnBeltForWave(wv.startedWave); // ST-138 (one drifting indestructible per wave from wave 8, up to the cap)
       this.spawnDronesForWave(wv.startedWave); // ST-117
       this.spawnStingersForWave(wv.startedWave); // ST-229
+      this.spawnFlyersForWave(wv.startedWave); // ST-232
     }
     const wl = this.weaponLevel(); // ST-122: weapon progression by wave
     if (wl > this._wlevel) { this._wlevel = wl; this.emit('weaponLevelUp', { level: wl }); }
@@ -179,6 +182,7 @@ export class World {
     this.mines.step(edt, this.ship.pos); // ST-054 (ST-115: scaled under slow-mo)
     this.drones.step(edt, this.ship.pos); // ST-117 (ST-115: scaled under slow-mo)
     this.stingers.step(edt, this.ship.pos); // ST-229 (ST-115: scaled under slow-mo)
+    this.flyers.step(edt); // ST-232 (ST-115: scaled under slow-mo; no homing - pure crosser)
     if (this.warden) this.warden.step(edt, this.ship.pos); // ST-136 (ST-115: scaled under slow-mo)
     for (const dc of this.drones.decayed) { // I129: seeker battery expired -> self-destruct event (render FX in main.js)
       this.emit('droneDecay', { pos: { x: dc.pos.x, y: dc.pos.y } });
@@ -186,6 +190,10 @@ export class World {
     for (const se of this.stingers.drainEvents()) { // ST-229: telegraph / charge / fizzle (SFX + FX in main.js)
       const p = { x: se.pos.x, y: se.pos.y };
       this.emit(se.kind === 'fizzle' ? 'stingerFizzle' : se.kind === 'telegraph' ? 'stingerTelegraph' : 'stingerCharge', { pos: p });
+    }
+    for (const fe of this.flyers.drainEvents()) { // ST-232: hit / exit (SFX + FX in main.js)
+      const p = { x: fe.pos.x, y: fe.pos.y };
+      this.emit(fe.kind === 'hit' ? 'flyerHit' : 'flyerExit', { pos: p });
     }
     for (const f of this.mines.takeFires()) { // ST-056
       const b = this.fireAimedBolt(f, this.cfg.enemyBullets.mineSpeed);
@@ -221,6 +229,7 @@ export class World {
     this.resolveBulletDrones(); // ST-117
     this.resolveShipDrones(); // ST-117
     this.resolveBulletStingers(); // ST-229
+    this.resolveBulletFlyers(); // ST-232
     this.resolveShipStingers(); // ST-229
     this.resolveShipBoss(); // ST-055
     this.resolveShipWarden(); // ST-136
@@ -703,6 +712,43 @@ export class World {
     this.weapons.compact();
   }
 
+  /** ST-232: spawn the wave flyers once eligible (wave >= firstWave). The first
+   * spawn of a run emits flyerSpawn (the main.js "FLYER INBOUND" toast). */
+  spawnFlyersForWave(wave) {
+    const s = this.cfg.flyer;
+    if (wave < s.firstWave) return;
+    for (let i = 0; i < s.perWave; i++) {
+      const fl = this.flyers.spawn(this.ship.pos);
+      if (fl && !this._flyerToasted) {
+        this._flyerToasted = true;
+        this.emit('flyerSpawn', { pos: { x: fl.pos.x, y: fl.pos.y }, wave });
+      }
+    }
+  }
+
+  /** ST-232: bullets damage flyers (2 hits). The kill pays +400 and feeds the combo.
+   * Hit/exit events are drained in step() - emit kills here only. */
+  resolveBulletFlyers() {
+    for (const b of this.weapons.bullets) {
+      if (b.dead) continue;
+      const hit = this.flyers.flyers.find(fm => !fm.dead &&
+        Math.hypot(fm.pos.x - b.pos.x, fm.pos.y - b.pos.y) < fm.radius + b.radius);
+      if (!hit) continue;
+      this.onPlayerBulletHit(b.id);
+      const fl = this.flyers.hit(hit.id);
+      for (const fe of this.flyers.drainEvents()) { // ST-232: hit events reach the world immediately (exits drain in step)
+        const p = { x: fe.pos.x, y: fe.pos.y };
+        this.emit(fe.kind === 'hit' ? 'flyerHit' : 'flyerExit', { pos: p });
+      }
+      if (fl.dead) {
+        const points = this.scoreKeeper.kill(this.cfg.flyer.score, this.time);
+        this.emit('kill', { pos: { x: fl.pos.x, y: fl.pos.y }, size: 'flyer', points,
+          combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), flyer: true });
+        this.emit('flyerDeath', { pos: { x: fl.pos.x, y: fl.pos.y } });
+      }
+    }
+    this.weapons.compact();
+  }
   /** ST-229: a stinger touching the ship costs a life (NO score) and is lost. */
   resolveShipStingers() {
     if (this.ship.isInvulnerable || this.lives <= 0) return;
@@ -729,7 +775,9 @@ export class World {
     this.mines.clear();
     this.drones.clear(); // ST-117
     this.stingers.clear(); // ST-229
+    this.flyers.clear(); // ST-232
     this._stingerToasted = false; // ST-229: re-arm the run's first-spawn callout
+    this._flyerToasted = false; // ST-232: re-arm the run's first-spawn callout
     this.boss = null; // ST-055
     this.warden = null; // ST-136
     this.enemyBullets.clear(); // ST-056

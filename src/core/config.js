@@ -281,6 +281,25 @@ export const CONFIG = {
     rimDist: 15,        // spawn: rim point at least this far from the ship
     score: 250          // kill reward (seeker 200 < stinger 250 < warden 400)
   },
+  flyer: {
+    // ST-232: FLYER - evasive sine-weave crosser (wave 9+). The game one pure
+    // lead-shot skill target: it never homes, never fires, never rams - you must
+    // read the weave and shoot where it is going. Two hits to kill.
+    firstWave: 9,       // W9: after the W8 drone debut (boss waves are 5/10)
+    perWave: 1,
+    maxConcurrent: 2,   // render pool 4 (maxConcurrent + 2, stinger pattern)
+    radius: 0.9,
+    cruiseSpeed: 2.5,   // u/s crossing speed (ship 14 - never a threat, a target)
+    weaveAmp: 1.2,      // u: perpendicular weave amplitude (the lead to read)
+    weavePeriod: 0.9,   // s: weave period (w = 2*pi/period)
+    lifetimeMin: 9.0,   // s: rng window for the exit drift (min)
+    lifetimeMax: 12.0,  // s (max) - then it drifts out, no score
+    hitsToKill: 2,      // high-value target: two hits (dome flashes on the first)
+    rimDist: 15,        // spawn: rim point at least this far from the ship (stinger pattern)
+    crossLatMax: 0.6,   // rad: max random deviation of the inward heading
+    rmAmpScale: 0.4,    // reduced-motion: weave amplitude x0.4 (motion kept - identity)
+    score: 400          // kill reward (stinger 250 < flyer 400 = warden 400 rung)
+  },
   enemyBullets: {     // ST-056: enemy bolts - separate pool, always slower than the ship
     maxConcurrent: 24,
     radius: 0.22,
@@ -359,6 +378,7 @@ export const CONFIG = {
       mineExplode: 0.4,      // mine detonation
       droneExplode: 0.35,    // seeker drone explosion
       stingerDeath: 0.6,     // ST-229: charger burst (0.5 wardenSpawn < 0.6 < 0.8 wardenDeath)
+      flyerDeath: 0.65,     // ST-232: evasive-target kill (0.6 stingerDeath < 0.65 < 0.8 wardenDeath)
       bossSpawn: 0.7,        // boss arrival
       bossDeath: 1.0,        // boss death
       wardenSpawn: 0.5,      // mini-boss arrival
@@ -388,6 +408,7 @@ export const CONFIG = {
       m: 0.12,                // medium rock (0.24 u)
       l: 0.18,                // large rock (0.36 u; below the 0.45 weapon fanfare)
       stinger: 0.2,           // ST-229: charger kill (L 0.18 < 0.2 < the 0.35 drone shake rung)
+      flyer: 0.25,           // ST-232: evasive-target kill (0.2 stinger < 0.25; overdrive 0.375 -> cap 0.3)
       overdriveBoost: 0.5,    // combo-heat: x1.5 while overdrive is active
       max: 0.3                // hard cap (L + overdrive 0.27 stays under the fanfare rung)
     },
@@ -444,7 +465,8 @@ export const CONFIG = {
       bulletLevel: [0xbff4ff, 0x8affc0, 0xffd27a],   // ST-123 weapon L1/L2/L3 (cyan/mint/amber)
       engine:   [0xffa860, 0xffd9a0, 0x9fd8ff],  // I213 warm core -> cool tail (matches the flame)
       belt:     [0x9fb4d0, 0x7c93b8, 0xcfe0f5],    // ST-139 cool steel - indestructible belt clink
-      stinger:  [0xd8f4ff, 0x9fd4ff, 0xffffff]      // ST-229 hot cyan-white (the telegraph family)
+      stinger:  [0xd8f4ff, 0x9fd4ff, 0xffffff],    // ST-229 hot cyan-white (the telegraph family)
+      flyer:    [0xff9de8, 0xffc4f0, 0xff6ad5]    // ST-232 magenta saucer (the evasive-target family)
     }
   },
 

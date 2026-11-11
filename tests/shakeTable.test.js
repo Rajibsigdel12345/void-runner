@@ -19,9 +19,10 @@ const PREVIOUS = {
   wardenSpawn: 0.5,
   wardenDeath: 0.8,
   stingerDeath: 0.6, // ST-229: charger burst rung (0.5 wardenSpawn < 0.6 < 0.8 wardenDeath)
+  flyerDeath: 0.65, // ST-232: evasive-target kill rung (0.6 stingerDeath < 0.65 < 0.8 wardenDeath)
 };
 
-test('the table is exactly the nine shaking events', () => {
+test('the table is exactly the ten shaking events', () => {
   assert.deepEqual(Object.keys(T).sort(), Object.keys(PREVIOUS).sort());
 });
 

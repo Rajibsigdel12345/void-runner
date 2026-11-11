@@ -69,6 +69,13 @@ multipliers, and grab power-ups. Survive as long as you can.
 - 1 bullet destroys one (+250, feeds the combo; icy burst + shake rung 0.6, no flash/hit-stop - the readability rule). Contact costs a life and destroys the STINGER (NO score; stingerDeath fires before the hit, knockback + 1.8 s invuln, same flow as a drone hit).
 - Distinct silhouette from both drone families: a stretched dart body with a separate glowing core (Blender model lands in ST-230; procedural dart + core fallback).
 
+## The FLYER (ST-232)
+- From wave 9, each wave adds one FLYER at the arena rim: a magenta hexa-disc saucer crossing on a straight inward line at 2.5 u/s with a perpetual sinusoidal weave (amplitude 1.2 u, period 0.9 s) - the lateral motion never stops, so a hit demands a LEAD SHOT (camera lead only; the game has no bullet aim-assist, the flyer is the one pure skill-shot target). Max 2 live at once.
+- It never homes, never fires and never rams: contact costs NOTHING (no contact lethality - the stinger is the dodge verb, the flyer the aim verb; the dodge/aim split stays clean).
+- 2 S-bullets destroy one (+400, feeds the combo; magenta burst + shake rung 0.65 + kill punch 0.25 + ascending chime + a magenta "FLYER" kill-feed row). The first hit flashes the dome white-hot (FX-tier-independent readability).
+- Two exits, both NO score (the stinger fizzle precedent): the arena rim or its lifetime (9-12 s game-time, so the slot frees before later waves pile up).
+- Reduced motion: the weave amplitude scales to x0.4 with the motion kept - the rescale is continuous (in-flight flyers adapt over ~0.5 s with no position jump; new spawns scale at birth).
+- The run's first flyer toasts "FLYER INBOUND" (callout pattern). Blender GLB model lands in ST-234; procedural hexa-disc + dome fallback.
 ## The Monolith (ST-055)
 
 - Every 5th wave (5, 10, 15, ...) spawns a MONOLITH at the arena rim, in addition to the wave's normal asteroids: a huge, slow-homing boss (base 40 HP, 1.6 u/s - always dodgeable).

@@ -26,7 +26,7 @@ function fresh(t) {
 const CUE_NAMES = [
   'shoot', 'kill', 'hit', 'powerup', 'slowmo', 'shieldPop', 'shieldHit', 'swish',
   'mine', 'drone', 'droneDecay', 'bossSpawn', 'wardenSpawn', 'bossRing', 'bossDeath',
-  'wardenDeath', 'stingerTelegraph', 'stingerDeath', 'bossFire', 'mineFire', 'overdrive', 'vortexTelegraph', 'vortexStart',
+  'wardenDeath', 'stingerTelegraph', 'stingerDeath', 'flyerSpawn', 'flyerDeath', 'bossFire', 'mineFire', 'overdrive', 'vortexTelegraph', 'vortexStart',
   'bomb', 'wave', 'cleared', 'gameover', 'levelUp',
 ];
 

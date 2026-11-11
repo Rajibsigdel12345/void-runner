@@ -39,6 +39,10 @@ const CUES = {
   stingerTelegraph: { type: 'sawtooth', f0: 220, f1: 880, dur: 0.8, gain: 0.2, min: 0.25 },
   // ST-229: Stinger death - mid boom BELOW the warden rung (wardenDeath f0 70 / gain 0.34)
   stingerDeath: { type: 'square', f0: 58, f1: 26, dur: 0.4, gain: 0.28, min: 0.2, noise: 0.25 },
+  // ST-232: flyer spawn - descending UFO chirp (high-value target inbound)
+  flyerSpawn: { type: 'sine', f0: 1320, f1: 880, dur: 0.35, gain: 0.16, min: 0.2 },
+  // ST-232: flyer kill - bright ascending chime (the high-value payoff)
+  flyerDeath: { type: 'triangle', f0: 988, f1: 1568, dur: 0.3, gain: 0.22, min: 0.2, noise: 0.12 },
   // ST-056 enemy bolts: low saw zap (boss), soft tick (mine)
   bossFire: { type: 'sawtooth', f0: 520, f1: 180, dur: 0.18, gain: 0.20, min: 0.12 },
   mineFire: { type: 'square',   f0: 340, f1: 220, dur: 0.10, gain: 0.12, min: 0.1,  noise: 0.08 },

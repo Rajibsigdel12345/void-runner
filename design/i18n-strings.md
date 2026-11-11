@@ -130,6 +130,7 @@ Line references are as of commit c042dc7 (I165). Values with a suffix are runtim
 | 475 | WARDEN INBOUND | mini-boss callout toast |
 | 478 | WEAPON LEVEL n | upgrade toast |
 | 668 | STINGER INBOUND | charger callout toast (ST-229) |
+| 669 | FLYER INBOUND | evasive-target callout toast (ST-232) |
 | 405 | The browser dropped the 3D rendering context. It usually comes back on its own - please wait. | context-loss overlay |
 | 409 | RELOAD GAME | context-loss button |
 

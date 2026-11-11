@@ -34,6 +34,7 @@ export function createKillFeed(root) {
     if (d.size === 'mine') return 'MINE';
     if (d.size === 'drone') return 'SEEKER';
     if (d.size === 'stinger') return 'STINGER';
+    if (d.size === 'flyer') return 'FLYER';
     if (d.golden) return 'GOLDEN ROCK';
     const s = String(d.size || 'M').toUpperCase();
     return s + ' ROCK';
@@ -42,6 +43,7 @@ export function createKillFeed(root) {
     if (d.size === 'boss' || d.boss) return '#ffe08a';
     if (d.size === 'warden') return '#ff9d6d';
     if (d.size === 'stinger') return '#baf3ff';
+    if (d.size === 'flyer') return '#ffb3ec';
     if (d.golden) return '#ffe08a';
     return '#cfe4ff';
   }
