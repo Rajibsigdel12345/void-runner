@@ -6,7 +6,7 @@
 // design/feel-balance.md (ST-179): feel tuning should ride on what fired,
 // not on guess. An empty tally under reduced motion is a feature: it proves
 // the gate, and it is the data baseline for the I202 human playtest.
-export const JUICE_CHANNELS = ["flash", "shake", "punch", "hitStop", "fovKick"];
+export const JUICE_CHANNELS = ["flash", "shake", "punch", "hitStop", "fovKick", "ring"]; // ST-238 (I245): + ring (the shockwave channel)
 
 function newRow() {
   const row = {};

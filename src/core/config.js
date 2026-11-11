@@ -414,6 +414,20 @@ export const CONFIG = {
       overdriveBoost: 0.5,    // combo-heat: x1.5 while overdrive is active
       max: 0.3                // hard cap (L + overdrive 0.27 stays under the fanfare rung)
     },
+    shockwave: {            // ST-238 (I245): pooled additive shockwave ring on class-scaled plain kills (Brackeys layering recipe)
+      life: 0.42,           // s: ring lifetime - a layer over the particle burst, not a second explosion
+      baseOpacity: 0.85,    // starting opacity (fades to 0 over life)
+      pool: 8,              // pooled ring meshes (ring-buffer overwrite when busy; no per-kill allocation)
+      height: 0.35,         // ring plane above the floor (the particle burst rides at 0.4)
+      classes: {            // target ring radius (world units) per kill class - no rung = no ring
+        S: 1.6,             // small rock (radius 0.7)
+        M: 2.4,             // medium rock (radius 1.3)
+        L: 3.4,             // large rock (radius 2.2)
+        drone: 1.6,         // seeker (radius 0.7)
+        stinger: 2.0,       // charger (radius 0.8)
+        warden: 3.0         // mini-boss (radius 1.7)
+      }
+    },
     punch: {                  // ST-081: camera punch - brief directed jolt (boss death / bomb)
       decay: 12,              // punch energy decay (1/s, exponential)
       amplitude: 2.0,         // max camera displacement (world units) at energy 1

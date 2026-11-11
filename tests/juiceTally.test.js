@@ -2,8 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createJuiceTally, JUICE_CHANNELS } from "../src/core/juiceTally.js";
 
-test("the five channels are the fixed schema", () => {
-  assert.deepEqual([...JUICE_CHANNELS].sort(), ["flash", "fovKick", "hitStop", "punch", "shake"]);
+test("the six channels are the fixed schema (ST-238: + ring)", () => {
+  assert.deepEqual([...JUICE_CHANNELS].sort(), ["flash", "fovKick", "hitStop", "punch", "ring", "shake"]);
 });
 
 test("a fresh tally is empty", () => {
@@ -83,4 +83,12 @@ test("snapshot is a deep copy (mutating it cannot corrupt the tally)", () => {
   s.bomb.faked = 1;
   assert.equal(t.total("bomb", "punch"), 1);
   assert.ok(!("faked" in t.snapshot().bomb));
+});
+
+test("the ST-238 ring channel records like the others", () => {
+  const t = createJuiceTally();
+  t.record("kill", { punch: 1, ring: 1 });
+  assert.equal(t.total("kill", "ring"), 1);
+  assert.equal(t.total("kill", "punch"), 1);
+  assert.equal(t.total("kill", "flash"), 0);
 });

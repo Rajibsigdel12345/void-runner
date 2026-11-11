@@ -21,9 +21,11 @@ import { createPowerupRenderer } from './render/powerupMesh.js';
 import { createShieldRing } from './render/shieldRing.js';
 import { createVortexFx } from './render/vortexFx.js'; // ST-059
 import { createParticles } from './render/particles.js';
+import { createShockwaves } from './render/shockwave.js'; // ST-238 (I245): pooled additive shockwave ring
 import { createShake, createPunch, createFovKick } from './core/fx.js'; // ST-081/ST-082
 import { createJuiceTally } from './core/juiceTally.js'; // ST-183: per-run juice-channel tally (feel telemetry)
 import { killPunchEnergy, killPunchDir } from './core/killPunch.js'; // ST-221 (I224): class-scaled kill punch (T4)
+import { shockwaveRadius } from './core/shockwave.js'; // ST-238 (I245): class-scaled ring sizes (pure core)
 import { shakeEnergy } from './core/shakeTable.js'; // ST-175: unified screen-shake table lookup
 import { flashEnergy } from './core/flashTable.js'; // ST-179: unified white-flash bump table lookup
 import { dangerVignetteX } from './core/dangerVignette.js'; // ST-176: reduced-motion damage vignette envelope
@@ -416,6 +418,7 @@ const screens = createScreens(document.body, {
   },
 });
 const particles = createParticles(scene);
+const shockwaves = createShockwaves(scene, CONFIG.fx.shockwave); // ST-238 (I245): one shared geometry + fixed mesh pool
 const engineTrail = createEngineTrail(CONFIG.fx.engineTrail); // I213: throttled trail emission (pure core, unit-tested)
 fxPreviewFn = (tier) => { // ST-067: show the new tier immediately (arena center, behind the panel)
   const n = tier === 'high' ? CONFIG.fx.particleHigh : tier === 'low' ? CONFIG.fx.particleLow : CONFIG.fx.particleOff; // ST-224: off preview = no burst
@@ -426,6 +429,8 @@ const shake = createShake({ master: CONFIG.fx.shake, decay: CONFIG.fx.shakeDecay
 const shakeOff = { x: 0, y: 0, z: 0 };
 const punch = createPunch({ decay: CONFIG.fx.punch.decay, amplitude: CONFIG.fx.punch.amplitude }); // ST-081: directed camera jolt
 const _kpd = { x: 0, y: 0, z: 0 }; // ST-221 (I224): kill-punch direction scratch (no per-kill allocation)
+const _killCh = { punch: 0, ring: 0 }; // ST-238 (I245): kill juice-channel scratch (no per-kill allocation)
+const SW_COLORS = { drone: CONFIG.fx.palette.drone[0], stinger: CONFIG.fx.palette.stinger[0], warden: CONFIG.fx.palette.boss[0] }; // ST-238 (I245): per-class ring colors (built once)
 let hitStop = 0; // ST-081: sim-freeze seconds remaining (render loop; rendering keeps going)
 const fovKick = createFovKick({ decay: CONFIG.fx.fovKick.decay, max: CONFIG.fx.fovKick.max }); // ST-082: dynamic FOV kick
 let simT = 0; // sim-clock for timed visuals (invuln blink)
@@ -530,7 +535,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, (replayView && world.game.in(STATE.REPLAY)) ? replayIntent() : intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shockwaves, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -627,6 +632,8 @@ window.__vr.flashEnergy = (t) => flashEnergy(t, CONFIG.fx.flashTable); // ST-179
 window.__vr.shakeMag = () => shake.magnitude(); // ST-175: probe (current shake energy 0..1)
 window.__vr.dangerOp = () => _lastDangerOp; // ST-176: probe (current danger-vignette opacity 0..1)
 window.__vr.particleLive = () => particles.live; // ST-177: probe (live particle count)
+window.__vr.shockwaveLive = () => shockwaves.live; // ST-238 (I245): probe (live ring count; 0 under FX off / reduced motion)
+window.__vr.shockwaveRings = () => shockwaves.rings; // ST-238 (I245): probe (pooled ring entries: mesh/mat/age/life/radius/active)
 window.__vr.magnetPullCount = () => world.powerups.drops.filter((d) => !d.dead && d.magnetPull).length; // ST-177: probe (orbs currently magnet-pulled)
 window.__vr.weaponFanfareN = () => _weaponFanfareN; // ST-178: probe (fanfires fired; increments only in the motion-ON branch)
 window.__vr.lastShare = () => screens.lastShare(); // I159: probe
@@ -680,7 +687,7 @@ else if (e.type === 'flyerSpawn') toast('FLYER INBOUND'); // ST-232: first spawn
     else if (e.type === 'nearmiss') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points); // ST-053 (plain small popup)
     else if (e.type === 'weaponLevelUp') toast('WEAPON LEVEL ' + e.data.level); // ST-123
     if (!motionOff) {
-      if (e.type === 'kill') { particles.burst(e.data.pos.x, e.data.pos.y, { count: e.data.golden ? Math.ceil(fxCount * 1.5) : fxCount, palette: e.data.golden ? CONFIG.fx.palette.golden : CONFIG.fx.palette.rock, speed: 9, life: 0.5 }); const _ke = killPunchEnergy(e.data.size, !!e.data.overdrive, CONFIG.fx.killPunch); if (_ke > 0) { punch.trigger(killPunchDir(world.ship.pos, e.data.pos, 0.35, _kpd), _ke); juiceTally.record('kill', { punch: 1 }); } } // ST-052, ST-221 (I224): class-scaled kill punch (T4) - no flash/hit-stop on plain kills
+      if (e.type === 'kill') { particles.burst(e.data.pos.x, e.data.pos.y, { count: e.data.golden ? Math.ceil(fxCount * 1.5) : fxCount, palette: e.data.golden ? CONFIG.fx.palette.golden : CONFIG.fx.palette.rock, speed: 9, life: 0.5 }); const _ke = killPunchEnergy(e.data.size, !!e.data.overdrive, CONFIG.fx.killPunch); const _swr = fxCount > 0 ? shockwaveRadius(e.data.size, CONFIG.fx.shockwave) : 0; _killCh.punch = 0; _killCh.ring = 0; if (_ke > 0) { punch.trigger(killPunchDir(world.ship.pos, e.data.pos, 0.35, _kpd), _ke); _killCh.punch = 1; } if (_swr > 0) { shockwaves.spawn(e.data.pos.x, e.data.pos.y, { radius: _swr, color: e.data.golden ? CONFIG.fx.palette.golden[0] : (SW_COLORS[e.data.size] || CONFIG.fx.palette.rock[0]) }); _killCh.ring = 1; } if (_killCh.punch || _killCh.ring) juiceTally.record('kill', _killCh); } // ST-052, ST-221 (I224): class-scaled kill punch (T4); ST-238 (I245): pooled shockwave ring on class-scaled plain kills (no flash/hit-stop)
       else if (e.type === 'nearmiss') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.max(4, Math.ceil(fxCount * 0.25)), palette: CONFIG.fx.palette.graze, speed: 5, life: 0.3 }); // ST-053 subtle graze wisp
       else if (e.type === 'mineExplode') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.mine, speed: 10, life: 0.5 }); shake.trigger(shakeEnergy('mineExplode', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('mineExplode', CONFIG.fx.flashTable)); juiceTally.record('mineExplode', { shake: 1, flash: 1 }); } // ST-054/ST-175
       else if (e.type === 'droneExplode') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.drone, speed: 9, life: 0.45 }); shake.trigger(shakeEnergy('droneExplode', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('droneExplode', CONFIG.fx.flashTable)); juiceTally.record('droneExplode', { shake: 1, flash: 1 }); } // ST-117/ST-175 seeker burst
@@ -832,6 +839,7 @@ function syncVisuals(dt) {
   shieldRing.sync(world, dt, !motionOff); // I62: freeze under reduced motion
   if (st === STATE.PLAYING) vortexFx.update(dt); // ST-059 (frozen while paused)
   particles.sync(dt);
+  shockwaves.sync(dt); // ST-238 (I245)
   banner.sync(world.waves, dt, motionOff); // ST-028
 
   const ship = world.ship;
