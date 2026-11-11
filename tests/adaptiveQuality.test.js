@@ -109,3 +109,64 @@ test('defaults are used when cfg is omitted', () => {
   assert.equal(s.threshold, 45);
   assert.equal(s.tier, "high");
 });
+
+// I255: the ladder must initialize from the stored FX tier (3rd arg) so a persisted
+// non-default 'low'/'off' is a locked prior choice and is never overridden by a phantom
+// high->low auto-downgrade (ST-225 "stored choice never overwritten").
+test('I255: initialTier "off" is respected - the ladder never downgrades it to low', () => {
+  const events = [];
+  const aq = createAdaptiveQuality({ windowSec: 1.0, thresholdFps: 45, confirmWindows: 2 }, (e) => events.push(e), "off");
+  assert.equal(aq.state().tier, "off");
+  assert.equal(aq.state().userLocked, true);
+  badWindow(aq); badWindow(aq); badWindow(aq);
+  assert.equal(aq.state().tier, "off");
+  assert.equal(aq.state().autoLow, false);
+  assert.equal(events.filter((e) => e.type === "autoDowngrade").length, 0);
+});
+
+test('I255: initialTier "low" is respected - the ladder never downgrades it', () => {
+  const events = [];
+  const aq = createAdaptiveQuality({ windowSec: 1.0, thresholdFps: 45, confirmWindows: 1 }, (e) => events.push(e), "low");
+  assert.equal(aq.state().tier, "low");
+  assert.equal(aq.state().userLocked, true);
+  badWindow(aq); badWindow(aq);
+  assert.equal(aq.state().tier, "low");
+  assert.equal(events.filter((e) => e.type === "autoDowngrade").length, 0);
+});
+
+test('I255: default (omitted) initialTier "high" still auto-downgrades (behavior preserved)', () => {
+  const events = [];
+  const aq = createAdaptiveQuality({ windowSec: 1.0, thresholdFps: 45, confirmWindows: 2 }, (e) => events.push(e));
+  badWindow(aq); badWindow(aq);
+  assert.equal(aq.state().tier, "low");
+  assert.equal(events.filter((e) => e.type === "autoDowngrade").length, 1);
+});
+
+test('I255: explicit initialTier "high" stays auto-manageable (unlocked) and downgrades', () => {
+  const aq = createAdaptiveQuality({ windowSec: 1.0, thresholdFps: 45, confirmWindows: 2 }, null, "high");
+  assert.equal(aq.state().tier, "high");
+  assert.equal(aq.state().userLocked, false);
+  badWindow(aq); badWindow(aq);
+  assert.equal(aq.state().tier, "low");
+});
+
+test('I255: invalid initialTier falls back to "high" (auto-manageable)', () => {
+  const aq = createAdaptiveQuality({ windowSec: 1.0, thresholdFps: 45, confirmWindows: 2 }, null, "ultra");
+  assert.equal(aq.state().tier, "high");
+  assert.equal(aq.state().userLocked, false);
+  badWindow(aq); badWindow(aq);
+  assert.equal(aq.state().tier, "low");
+});
+
+test('I255: reset() restores the stored initialTier (off stays locked off)', () => {
+  const aq = createAdaptiveQuality({ windowSec: 1.0, thresholdFps: 45, confirmWindows: 1 }, null, "off");
+  aq.userSet("low");
+  assert.equal(aq.state().tier, "low");
+  aq.reset();
+  const s2 = aq.state();
+  assert.equal(s2.tier, "off");
+  assert.equal(s2.userLocked, true);
+  assert.equal(s2.autoLow, false);
+  badWindow(aq); badWindow(aq);
+  assert.equal(aq.state().tier, "off");
+});

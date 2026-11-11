@@ -290,7 +290,7 @@ const adaptive = createAdaptiveQuality(CONFIG.adaptive, (info) => {
     console.info('[voidrunner] adaptive quality: FX high -> low (rolling ' + CONFIG.adaptive.windowSec + 's avg ' + Math.round(info.fps) + ' fps < ' + CONFIG.adaptive.thresholdFps + ')');
     toast('FX AUTO-SET TO LOW (LOW FPS)');
   }
-});
+}, liveSettings.fx); // I255: reconcile the ladder to the stored FX tier - a stored 'off'/'low' is a locked prior choice, never overridden by a phantom high->low auto-downgrade
 // ST-026: settings panels (menu + pause) - after storage/applySettings (TDZ order).
 let fxPreviewFn = null; // ST-067: live FX preview, wired once particles exist
 const menuSettings = createSettingsPanel(storage, applySettings, (tier) => { adaptive.userSet(tier); applyFxTier(tier, 'panel'); if (fxPreviewFn) fxPreviewFn(tier); }); // ST-073/ST-225: user FX choice overrides automation
