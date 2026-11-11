@@ -45,7 +45,13 @@ test("different days -> different seeds (spread sample)", () => {
 
 test("salt namespaces the seed (same day, different salt -> different seed)", () => {
   assert.notEqual(dailySeed(2026, 11, 10, "daily"), dailySeed(2026, 11, 10, "other"), "different salt differs");
-  assert.equal(dailySeed(2026, 11, 10, CONFIG.daily.salt), dailySeed(2026, 11, 10), "config salt == default 'daily'");
+  assert.equal(dailySeed(2026, 11, 10, CONFIG.daily.salt), dailySeed(2026, 11, 10), 'config salt == default (single-sourced from config.daily.salt since ST-228)');
+});
+
+test('canonical daily seed pin (ST-228/I233: the salt bump daily -> daily:v2 re-versioned the run)', () => {
+  assert.equal(CONFIG.daily.salt, 'daily:v2', 'salt is the v2 namespace');
+  assert.equal(dailySeed(2026, 11, 10), 1312111789, '2026-11-10 canonical seed (salt daily:v2)');
+  assert.notEqual(dailySeed(2026, 11, 10), 317547475, 'no longer the pre-I233 daily-salt seed');
 });
 
 test("dailyForDate uses the local calendar day (1-based month)", () => {

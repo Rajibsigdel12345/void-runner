@@ -12,7 +12,7 @@ export class WaveDirector {
     this.intermission = 0;
     this.state = 'idle'; // idle | intermission | active
     this.waveElapsed = 0; // I42: active time of the current wave (stall timer)
-    this.activeMod = 'none'; // ST-051: none | fast | small | inward
+    this.activeMod = 'none'; // ST-051: none | fast | small | inward | big (ST-228)
   }
 
   start() {
@@ -84,6 +84,11 @@ export class WaveDirector {
       if (r < this.cfg.waveMods.smallSBias) return 'S';
       const r2 = this.rng.next();
       return r2 < 0.5 ? 'L' : 'M';
+    }
+    if (this.activeMod === 'big') { // ST-228: L-favored wave (mirror of 'small')
+      if (r < this.cfg.waveMods.bigLBias) return 'L';
+      const r2 = this.rng.next();
+      return r2 < 0.5 ? 'S' : 'M';
     }
     const row = this.mixRow(); // ST-131: data-driven L/M/S mix (1 draw, pre-I131 width)
     if (r < row.L) return 'L';

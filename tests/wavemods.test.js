@@ -23,6 +23,7 @@ test('wavemods: config sanity', () => {
   assert.ok(m.fastSpeedMult > 1, 'fastSpeedMult');
   assert.ok(m.smallSBias > 0 && m.smallSBias <= 1, 'smallSBias in (0,1]');
   assert.ok(m.inwardAccel > 0, 'inwardAccel');
+  assert.ok(m.bigLBias > 0 && m.bigLBias <= 1, 'bigLBias in (0,1]');
 });
 
 test('wavemods: modifierFor is a pure function of (seed, wave)', () => {
@@ -36,7 +37,7 @@ test('wavemods: waves before waveMods.first are plain', () => {
   for (let w = 1; w < CONFIG.waveMods.first; w++) assert.equal(dir.modifierFor(w), 'none', 'wave ' + w);
 });
 
-test('wavemods: picks stay in the list (or a post-boss breather) and all three appear over 60 waves', () => {
+test('wavemods: picks stay in the list (or a post-boss breather) and all four appear over 60 waves (ST-228: the 4th list entry re-maps the (seed, wave) rolls from wave 3 onward - pinned tests updated intentionally, I233)', () => {
   const { dir } = dirFor(41);
   const isBreather = (w) => w - 1 >= CONFIG.boss.everyWave && (w - 1) % CONFIG.boss.everyWave === 0;
   const seen = new Set();
@@ -93,6 +94,21 @@ test('wavemods: SMALL waves roll S far more often than plain waves', () => {
   };
   assert.ok(rolls('small', 3, 44) > 0.4, 'small wave: S fraction > 0.4 (got ' + rolls('small', 3, 44) + ')');
   assert.ok(rolls('none', 3, 44) < 0.4, 'plain wave: S fraction < 0.4 (baseline ~0.3, got ' + rolls('none', 3, 44) + ')');
+});
+
+test('wavemods: HEAVY (big) waves roll L far more often than plain waves (ST-228, mirror of SMALL)', () => {
+  const rolls = (mod, wave, seed) => {
+    const field = new AsteroidField(new RNG(seed));
+    const dir = new WaveDirector(new RNG(seed + 100), field);
+    dir.start();
+    dir.wave = wave;
+    dir.activeMod = mod;
+    let l = 0;
+    for (let i = 0; i < 400; i++) if (dir.pickSize() === 'L') l++;
+    return l / 400;
+  };
+  assert.ok(rolls('big', 3, 44) > 0.4, 'big wave: L fraction > 0.4 (got ' + rolls('big', 3, 44) + ')');
+  assert.ok(rolls('none', 3, 44) < 0.4, 'plain wave: L fraction < 0.4 (baseline ~0.3, got ' + rolls('none', 3, 44) + ')');
 });
 
 test('wavemods: INWARD pulls rocks toward the arena center', () => {

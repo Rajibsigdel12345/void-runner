@@ -15,7 +15,7 @@ const PU_STYLE = {
   slowmo: { label: 'SLOW-MO', letter: 'T', color: '#9fe8ff' }, // ST-116
 };
 
-const MOD_TAG = { fast: ['FAST ROCKS', '#ff9a6b'], small: ['SMALL ROCKS', '#6fe3ff'], inward: ['INWARD DRIFT', '#8bff9e'] }; // I93: persistent active-modifier tag
+const MOD_TAG = { fast: ['FAST ROCKS', '#ff9a6b'], small: ['SMALL ROCKS', '#6fe3ff'], inward: ['INWARD DRIFT', '#8bff9e'], big: ['HEAVY ROCKS', '#c99eff'] }; // I93: persistent active-modifier tag; ST-228: big
 
 // I112: combo text brightens as the chain climbs multiplier tiers (index = tier, 0..tierCount).
 const TIER_COLOR = ['#ffe08a', '#ffe08a', '#fff0b0', '#fff6cf', '#fffdf2', '#ffffff'];

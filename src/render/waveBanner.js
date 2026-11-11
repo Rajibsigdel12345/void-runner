@@ -24,7 +24,7 @@ export function createWaveBanner(root) {
   let lastCountdown = '';
   let lastBig = null; // I167: per-frame same-value text writes committed 3 DOM mutations/frame during banner holds
   let lastSub = null; // I167
-  const MOD_LABELS = { fast: 'FAST ROCKS', small: 'SMALL ROCKS', inward: 'INWARD DRIFT' }; // ST-051
+  const MOD_LABELS = { fast: 'FAST ROCKS', small: 'SMALL ROCKS', inward: 'INWARD DRIFT', big: 'HEAVY ROCKS' }; // ST-051; ST-228: big
 
   function startWave(n, mod, endless) {
     const parts = []; // ST-058: ENDLESS tag, then the wave modifier label

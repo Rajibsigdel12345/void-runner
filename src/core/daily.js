@@ -2,6 +2,7 @@
 // day so every player on the same day shares an identical run (comparable daily run).
 // DOM-free: all functions take explicit date components so tests can pin them.
 import { RNG } from './rng.js';
+import { CONFIG } from './config.js'; // ST-228: the default salt is single-sourced from config.daily.salt (namespaced daily scheme)
 
 /** FNV-1a 32-bit over a string -> unsigned 32-bit int. Deterministic, no crypto. */
 export function fnv1a(str) {
@@ -21,18 +22,18 @@ export function dailyKey(year, month, day) {
 }
 
 /** Stable 32-bit seed for a calendar day. Same (y, m, d, salt) -> same seed. */
-export function dailySeed(year, month, day, salt = 'daily') {
+export function dailySeed(year, month, day, salt = CONFIG.daily.salt) {
   return fnv1a(salt + ':' + dailyKey(year, month, day));
 }
 
 /** An RNG for a calendar day (pure: pass explicit components). */
-export function dailyRng(year, month, day, salt = 'daily') {
+export function dailyRng(year, month, day, salt = CONFIG.daily.salt) {
   return new RNG(dailySeed(year, month, day, salt));
 }
 
 /** From a JS Date (UI convenience; NOT the deterministic test path).
  *  Returns { key, seed } for the local calendar day of the date. */
-export function dailyForDate(date, salt = 'daily') {
+export function dailyForDate(date, salt = CONFIG.daily.salt) {
   const y = date.getFullYear();
   const m = date.getMonth() + 1;
   const d = date.getDate();

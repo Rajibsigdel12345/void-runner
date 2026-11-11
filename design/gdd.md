@@ -121,10 +121,10 @@ multipliers, and grab power-ups. Survive as long as you can.
 
 ## Waves & Difficulty
 - Wave n: startAsteroids = 4 + n, maxConcurrent = 6 + 2n (cap 24), speedMult = 1 + 0.06n (cap 2.1).
-- Spawn mix (ST-131): the L/M/S spawn ratio is a data-driven table (config spawnMix, first matching row wins): waves 1-2 L50/M50/S0 (teach: big targets, no S), waves 3-9 L30/M40/S30, waves 10-14 L28/M32/S40, wave 15+ L30/M30/S40. Two invariants: no row may drop L below 28% (lFloor - the "break the big rock" core loop stays present into the endless), and S is capped at 40% (split fragments already supply most on-screen S, so the spawn ramp is a weak lever there - I131 playtest data). The SMALL modifier overrides per wave: 50% S, remainder L:M 50/50.
+- Spawn mix (ST-131): the L/M/S spawn ratio is a data-driven table (config spawnMix, first matching row wins): waves 1-2 L50/M50/S0 (teach: big targets, no S), waves 3-9 L30/M40/S30, waves 10-14 L28/M32/S40, wave 15+ L30/M30/S40. Two invariants: no row may drop L below 28% (lFloor - the "break the big rock" core loop stays present into the endless), and S is capped at 40% (split fragments already supply most on-screen S, so the spawn ramp is a weak lever there - I131 playtest data). The SMALL modifier overrides per wave: 50% S, remainder L:M 50/50; its mirror, HEAVY ROCKS (ST-228), overrides with 50% L, remainder S:M 50/50 (the BIG counterweight, so the 'break the big rock' core loop stays in play when the field runs small-rock-heavy).
 - Wave advances when all spawned asteroids for that wave are destroyed, or after 45s without a clear (stall advance): the wave increments regardless, undestroyed asteroids carry into the next wave, and the intermission is skipped (I42, closes playtest finding F1 - a camped field can no longer freeze the escalation).
 - 2.2s intermission between waves with "WAVE n" banner.
-- From wave 3, each wave rolls one modifier deterministically from (world seed, wave number) - stall-vs-clear timing cannot change the pick (ST-051): FAST ROCKS (spawns 40% faster, on top of the ramp), SMALL ROCKS (spawns roll S with 50% probability), INWARD DRIFT (all rocks pulled toward the arena center at 2.0 u/s^2). Waves 1-2 are always plain. The wave immediately after a boss wave (6, 11, 16, ...) is also plain - a modifier-free breather that gives a recovery beat after the boss (ST-092/F9). The active modifier is announced under the WAVE banner.
+- From wave 3, each wave rolls one modifier deterministically from (world seed, wave number) - stall-vs-clear timing cannot change the pick (ST-051): FAST ROCKS (spawns 40% faster, on top of the ramp), SMALL ROCKS (spawns roll S with 50% probability), HEAVY ROCKS (ST-228: spawns roll L with 50% probability - the BIG counterweight to SMALL), INWARD DRIFT (all rocks pulled toward the arena center at 2.0 u/s^2). Waves 1-2 are always plain. The wave immediately after a boss wave (6, 11, 16, ...) is also plain - a modifier-free breather that gives a recovery beat after the boss (ST-092/F9). The active modifier is announced under the WAVE banner.
 - Endless (ST-058): from wave 10 the game never ends - wave content caps at 36 rocks, intermissions shrink from 2.2s toward a 1.2s floor (0.08s/wave), and the small-rock share rises from 30% toward 45%; the WAVE banner carries an ENDLESS tag.
 
 ## Combo
@@ -157,18 +157,18 @@ Stacks: each has its own timer; grabbing the same type refreshes its timer.
 
 ## Daily Seeded Run (ST-140/141)
 
-- One canonical seeded run per calendar day (ST-140): the seed is a pure FNV-1a 32-bit hash of the date, dailySeed = fnv1a('daily:YYYY-MM-DD'), so every player on the same day plays an identical, comparable run (deterministic, no crypto, DOM-free).
-- The 'daily' salt (config.daily.salt) namespaces the scheme so the format can evolve without colliding with other seeds; dailyForDate(Date) is the UI path and the deterministic test path passes explicit (year, month, day).
+- One canonical seeded run per calendar day (ST-140): the seed is a pure FNV-1a 32-bit hash of salt + date, dailySeed = fnv1a(salt + ':' + 'YYYY-MM-DD'), so every player on the same day plays an identical, comparable run (deterministic, no crypto, DOM-free).
+- The salt (config.daily.salt - 'daily:v2' since ST-228/I233, when the 4th modifier re-mapped the wave rolls and the canonical daily run was re-versioned) namespaces the scheme so the format can evolve without colliding with other seeds; dailyForDate(Date) is the UI path and the deterministic test path passes explicit (year, month, day).
 - The MENU has a DAILY RUN button (startDaily); a daily run is badged "DAILY RUN - <date>" on the game-over screen, and today's daily best is shown on the MENU.
 - Restart re-seeds to the stored daily seed (ST-141), so restarting a daily run reproduces the identical run instead of rolling a new one.
-- Example: 2026-11-10 -> seed 317547475 (I147: two 90 s runs bit-identical - score 27249, wave 5, 120 kills).
+- Example: 2026-11-10 -> seed 1312111789 (salt 'daily:v2'; the pre-I233 'daily' salt gave 317547475, whose I147 evidence was two 90 s runs bit-identical - score 27249, wave 5, 120 kills).
 
 ## Shareable Result String (ST-142)
 
 - encodeResult({seed, score, wave, kills}) -> vr1.<seed36>.<score36>.<wave36>.<kills36>.<ck>: URL-safe (lowercase base36 + dots), where <ck> is a 2-char integrity checksum = (fnv1a(body) % 1296) in lowercase base36, zero-padded to 2 chars.
 - decodeResult validates the whole string: exactly 6 dot-parts, the magic prefix vr1 (config.share.magic), a ^[0-9a-z.]+$ shape (rejects case, symbols, spaces), a matching checksum, and sane ranges (seed 0..0xffffffff, score >= 0, wave >= 1, kills >= 0); anything off returns {ok:false}.
 - The seed is INCLUDED in the string, so a shared result is REPRODUCIBLE: reseed the World to the decoded seed to replay the identical run and verify the claimed score (I147: a decoded-seed replay reproduced the claimed score end-to-end).
-- Example: vr1.592577.l0x.5.3c.6g decodes to seed 317547475 / score 27249 / wave 5 / 120 kills (the 2026-11-10 daily run's result); re-encoding those values reproduces the exact string.
+- Example: vr1.592577.l0x.5.3c.6g decodes to seed 317547475 / score 27249 / wave 5 / 120 kills (the 2026-11-10 daily run's result under the pre-I233 'daily' salt); re-encoding those values reproduces the exact string.
 
 ## Replay & Recording (ST-190/191)
 

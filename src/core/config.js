@@ -127,10 +127,11 @@ export const CONFIG = {
     // ST-051: per-wave modifiers, chosen deterministically from (world seed, wave
     // number) via a derived RNG - stall-vs-clear timing cannot change the pick.
     first: 3,             // waves 1-2 stay plain (teach the base loop first)
-    list: ['fast', 'small', 'inward'],
+    list: ['fast', 'small', 'inward', 'big'], // ST-228: 4th entry - the (seed, wave) roll re-maps from wave 3 onward (documented, I233)
     fastSpeedMult: 1.4,   // 'fast': extra spawn-speed multiplier on top of the ramp
     smallSBias: 0.5,      // 'small': spawn rolls S with this probability
-    inwardAccel: 2.0      // 'inward': u/s^2 pull of all rocks toward the arena center
+    inwardAccel: 2.0,     // 'inward': u/s^2 pull of all rocks toward the arena center
+    bigLBias: 0.5         // ST-228: 'big' (HEAVY ROCKS): spawn rolls L with this probability (mirror of smallSBias)
   },
 
   boss: {
@@ -223,7 +224,7 @@ export const CONFIG = {
     // ST-140: the DAILY run - one canonical seeded run per calendar day. The seed is
     // derived from the date so every player on the same day shares an identical run
     // (comparable daily leaderboard). Salt namespaces the scheme (future-proofing).
-    salt: 'daily',     // mixed into the FNV-1a hash before seeding the RNG
+    salt: 'daily:v2',  // mixed into the FNV-1a hash before seeding the RNG (ST-228/I233: bumped from 'daily' - the 4th modifier re-mapped the wave rolls, so the canonical daily run is re-versioned per the ST-140 namespacing)
   },
   share: {
     // ST-142: shareable result string magic prefix (namespaces the codec; versioned).

@@ -62,7 +62,7 @@ Line references are as of commit c042dc7 (I165). Values with a suffix are runtim
 | Line | String | Kind |
 | --- | --- | --- |
 | 10-15 | RAPID, SPREAD, SHIELD, MAGNET, OVERDRIVE, SLOW-MO | power-up tags |
-| 18 | FAST ROCKS, SMALL ROCKS, INWARD DRIFT | wave-modifier tags |
+| 18 | FAST ROCKS, SMALL ROCKS, INWARD DRIFT, HEAVY ROCKS | wave-modifier tags |
 | 117 | COMBO | label |
 | dynamic | WAVE n, BEST n | HUD counters |
 
@@ -72,7 +72,7 @@ Line references are as of commit c042dc7 (I165). Values with a suffix are runtim
 | --- | --- | --- |
 | 31 / 35 | WAVE n | big line |
 | 29 | ENDLESS | tag |
-| 25 | FAST ROCKS, SMALL ROCKS, INWARD DRIFT | MOD_LABELS (shared family with hud) |
+| 25 | FAST ROCKS, SMALL ROCKS, INWARD DRIFT, HEAVY ROCKS | MOD_LABELS (shared family with hud) |
 | 34-35 | CLEARED | big line (gold) |
 | 39-40 | THE SPLICER / THE MONOLITH | boss name |
 | 77 | NEXT WAVE IN n | intermission countdown |
