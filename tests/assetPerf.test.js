@@ -89,7 +89,7 @@ test('every GLB has POSITION + NORMAL (render layer assumes both)', () => {
   }
 });
 
-test('COLOR_0 only on the mottled rocks + boss (in-code materials read it; others must not carry it)', () => {
+test('COLOR_0 only on the mottled rocks + boss + ship (in-code materials read it; others must not carry it)', () => { // I273 (G5): ship hull-bottom value fill
   const withColor = parsed.filter((p) => p.attrs.has('COLOR_0')).map((p) => p.file).sort();
-  assert.deepEqual(withColor, ['asteroid_L.glb', 'asteroid_M.glb', 'asteroid_S.glb', 'boss.glb']);
+  assert.deepEqual(withColor, ['asteroid_L.glb', 'asteroid_M.glb', 'asteroid_S.glb', 'boss.glb', 'ship.glb']); // I273 (G5): + ship
 });

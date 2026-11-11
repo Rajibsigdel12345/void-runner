@@ -2966,3 +2966,19 @@ No test changes (render-layer only - scope-check-E10 notes ST-219 as "the only r
 - Evidence: .evidence/I272/ - boss_closeup.png (BEFORE: transparent hole, prior session), boss_closeup_fixed_fxoff_2.png (AFTER, cam B 3/4), boss_closeup_fixed_fxon.png (FX high), distance_ship_boss_fxoff.png + verify_boss.png (criterion c), floor50_probe.png (first FLOOR-50 attempt, bullet occluded - kept as lesson), probes.json (all luma tables + root cause chain).
 - BY LAYER: render + docs.
 - Result: DONE - ST-259 complete (criterion (c) PASS via the boss fix; (a) stays deferred watchlist; (b)/(d) in-band). Next I273: ST-260 ship form + G5 hull-bottom fill (Blender MCP, <= 12 KB pin, fallback = fill-only + defer form).
+
+## I273 - ST-260 ship form + G5 hull-bottom fill (Blender: delta-hull reshape + recessed canopy + baked COLOR_0 belly gradient)
+- Story: ST-260 (E21 2/4) | Goal: ship form pass in the Imphenzia/Jokinen hard-surface language + G5 hull-bottom fill so the ship has no black underside from the follow cam; GLB <= 12 KB pin; frozen accents untouched.
+- cgs-skill: cgs-dev-story (acceptance-driven; Blender asset pass per blender-export-pipelines; evidence hygiene per cgs-standards-data-files)
+- Baseline: ship.glb 10904 B (I266 form); astern belly box 56.8% px <15 luma (near-black mass); 813/813; dist 116 files / 2010.5 KB.
+- Findings:
+  - Blender (blender/Untitled.blend, 6 ship meshes, all flat-shaded/identity transforms): hull delta-flare reshaped (widest delta row v9..v12 at y=0.35, half-span 0.50, belly v12 z=-0.22; tail y=0.70); cockpit dome verts z -= 0.12 (dome top 0.400 -> 0.280, recessed 0.04 above hull top plane 0.24).
+  - G5 baked as hull POINT color attr 'Color': neutral-gray z-gradient v = 0.60 + 0.40*clamp((z+0.22)/0.46,0,1) -> belly floor 0.60, top 1.0, sides ~0.83-0.86.
+  - Export pitfall: hull material had no Color Attribute node wired -> glTF exporter emitted a BROKEN COLOR_0 VEC4 (81 floats overread). Fix: ShaderNodeVertexColor (layer_name='Color') -> Principled Base Color; re-export = clean single COLOR_0 VEC3 n=81 (same comp 5126 pattern as boss.glb; GLTFLoader reads 0.60-1.0 Float32Array, verified live).
+- Changed files: assets/ship.glb (10904 -> 11980 B, <= 12288 B pin, margin 308; 6 nodes + 3 materials VR_Ship_* preserved), src/render/shipMesh.js (ensureWhiteColors(geo) adds white COLOR_0 default so procedural + GLB paths both get identity-multiplier vertex colors; bodyMat vertexColors:true; material routing by name unchanged), tests/assetPerf.test.js (withColor deepEqual + ship.glb).
+- Tests: npm test 813/813 PASS (assetPerf green with ship COLOR_0; paletteHarmony unaffected).
+- Evidence: .evidence/I273/ - blender before/after (34/astern/belly/front/top + hull_reshape set), browser BEFORE (before_ship_closeup_34.png, before_ship_astern_belly.png) + AFTER (after_ship_closeup_34.png, after_ship_astern_belly.png, after_ship_silhouette_10u.png).
+  - G5 A/B (same astern cam, belly box x480-760 y450-540): BEFORE mean 56.3 / 56.8% px <15 luma (near-black mass) -> AFTER mean 67.7 / 2.1% px <15 (97.5% mid-band). 3/4 close-up hull-top box mean 21.8 -> 54.5.
+  - 10u silhouette value-graded: ship box mean 54.9 vs sky 40.1 (min 2.6 shadow side, max 221.4 cockpit accent) - silhouette reads at 10u.
+  - Fresh boot ?nocache=i273b: console 0 errors / 0 warnings; NaN scan 4362 numerics, only -Infinity sentinel (score.js:19 lastKillTime, by design).
+- Result: DONE - ST-260 acceptance met (before/after close-up + follow-cam evidence, silhouette reads at 10u, GLB 11980 B <= 12 KB, node names/materials preserved, cockpit 0x59d8ff + bullet accents frozen, demo pin BY LAYER). Build exit 0; dist 116 files / 2012.4 KB. Next I274: ST-261 menu hero G4 (in-code MENU camera drift, 0 new calls, reduced-motion static, MENU fx=off 15 calls/244 tris).

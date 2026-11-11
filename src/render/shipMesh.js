@@ -31,6 +31,18 @@ function makeGlowTexture() {
   g.fillRect(0, 0, 64, 64);
   return new THREE.CanvasTexture(c);
 }
+function ensureWhiteColors(geo) {
+  // G5 (I273): bodyMat reads COLOR_0 (hull-bottom value fill). Add a white
+  // default color to any geometry that lacks COLOR_0 (procedural fallback +
+  // GLB meshes routed to bodyMat, e.g. the nozzle) so nothing renders black.
+  // White (1,1,1) is the identity multiplier: zero look change for those.
+  if (geo.hasAttribute('color')) return;
+  const n = geo.getAttribute('position').count;
+  const c = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) { c[i * 3] = 1; c[i * 3 + 1] = 1; c[i * 3 + 2] = 1; }
+  geo.setAttribute('color', new THREE.BufferAttribute(c, 3));
+}
+
 export function createShipMesh() {
   const group = new THREE.Group();
   group.name = 'ship';
@@ -45,12 +57,13 @@ export function createShipMesh() {
   // The cockpit cyan emissive stays the FROZEN identity accent - pinned in
   // tests/paletteHarmony.test.js; retune only via a design pass.
   const P = CONFIG.ship.palette;
-  const bodyMat = new THREE.MeshStandardMaterial({ color: P.body.color, metalness: P.body.metalness, roughness: P.body.roughness, flatShading: true });
+  const bodyMat = new THREE.MeshStandardMaterial({ color: P.body.color, metalness: P.body.metalness, roughness: P.body.roughness, flatShading: true, vertexColors: true }); // G5 (I273): reads COLOR_0 hull-bottom fill
   const wingMat = new THREE.MeshStandardMaterial({ color: P.wing.color, metalness: P.wing.metalness, roughness: P.wing.roughness, flatShading: true });
   const cockpitMat = new THREE.MeshStandardMaterial({ color: P.cockpit.color, emissive: P.cockpit.emissive, emissiveIntensity: P.cockpit.emissiveIntensity, roughness: P.cockpit.roughness });
 
   const bodyGeo = new THREE.ConeGeometry(0.55, 1.7, 4);
   bodyGeo.rotateX(Math.PI / 2); // tip toward +Z (forward in render space)
+ensureWhiteColors(bodyGeo); // G5 (I273): bodyMat reads COLOR_0
   const body = new THREE.Mesh(bodyGeo, bodyMat);
   body.scale.set(1, 0.5, 1);
   shipBody.add(body);
@@ -76,6 +89,7 @@ export function createShipMesh() {
 // fallbacks exact extent (browser-verified parity; tests/assetPerf.test.js pins the sizes).
 const nozzleGeo = new THREE.CylinderGeometry(0.18, 0.3, 0.25, 6);
 nozzleGeo.rotateX(Math.PI / 2); // axis along Z: radiusTop (0.18) faces forward +Z, flare 0.3 at the rear
+ensureWhiteColors(nozzleGeo); // G5 (I273): bodyMat reads COLOR_0
 const nozzle = new THREE.Mesh(nozzleGeo, bodyMat);
 nozzle.position.set(0, 0, -0.775); // spans z -0.90..-0.65 (flame apex at -0.8 emerges from it)
 shipBody.add(nozzle);
@@ -143,7 +157,7 @@ shipBody.add(mouth);
       const nm = (n.material && n.material.name) || '';
       if (nm.indexOf('Cockpit') !== -1) n.material = cockpitMat;
       else if (nm.indexOf('Wing') !== -1) n.material = wingMat; // wing + fin
-      else n.material = bodyMat;
+      else { n.material = bodyMat; ensureWhiteColors(n.geometry); } // G5 (I273): bodyMat reads COLOR_0
     });
     group.add(obj);
   }
