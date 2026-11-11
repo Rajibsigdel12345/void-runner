@@ -6,3 +6,4 @@ dist/
 .tools/
 .npm-cache/
 .playwright-mcp/
+blender/
