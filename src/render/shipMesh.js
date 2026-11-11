@@ -1,7 +1,36 @@
 // Void Runner - procedural ship mesh (ST-006). Low-poly, no external assets.
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
+import { flameScales } from '../core/flame.js'; // ST-256 (I268): layered flame math (pure core)
 
+// ST-256 (I268): canvas textures for the layered flame - built once, no per-frame allocs.
+// The falloff map fades the plume toward its tail: cone UV v=1 is the apex and
+// CanvasTexture flipY maps canvas y=0 to v=1, so gradient stop 0 (opaque) sits at
+// the apex (nozzle root) and fades to clear at the tail (base). No hard prop tip.
+function makeFlameFalloffTexture() {
+  const c = document.createElement('canvas');
+  c.width = 2; c.height = 64;
+  const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 0, 64);
+  grad.addColorStop(0, 'rgba(255,255,255,1)');    // apex (v=1): opaque
+  grad.addColorStop(0.75, 'rgba(255,255,255,0.35)');
+  grad.addColorStop(1, 'rgba(255,255,255,0)');    // base (v=0): soft tail
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 2, 64);
+  return new THREE.CanvasTexture(c);
+}
+function makeGlowTexture() {
+  const c = document.createElement('canvas');
+  c.width = 64; c.height = 64;
+  const g = c.getContext('2d');
+  const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grad.addColorStop(0, 'rgba(255,255,255,0.9)');
+  grad.addColorStop(0.35, 'rgba(255,255,255,0.4)');
+  grad.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 64, 64);
+  return new THREE.CanvasTexture(c);
+}
 export function createShipMesh() {
   const group = new THREE.Group();
   group.name = 'ship';
@@ -57,34 +86,46 @@ const mouth = new THREE.Mesh(mouthGeo, cockpitMat); // the emissive slot - glows
 mouth.position.set(0, 0, -0.902); // 2 mm proud of the nozzle flare, no z-fight
 shipBody.add(mouth);
 
-  // ST-063: rear engine flame (additive, thrust-reactive). Apex anchored at the
-  // hull rear (+Z end toward the body) so it only grows backward (-Z) with
-  // thrust. Two cones: orange plume + hot near-white core. No per-frame allocs.
-  const FLAME_LEN = 1.5;
-  const flameOuterGeo = new THREE.ConeGeometry(0.3, FLAME_LEN, 10, 1, true);
-  flameOuterGeo.rotateX(Math.PI / 2);
-  flameOuterGeo.translate(0, 0, -FLAME_LEN / 2); // pivot at apex
-  const flameOuterMat = new THREE.MeshBasicMaterial({
-    color: 0xff9a3d, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending,
-    depthWrite: false, side: THREE.DoubleSide,
+  // ST-256 (I268): layered engine flame - a hot white core inside a warm orange plume
+  // (soft length falloff, no hard prop tip), + an additive glow sprite at the nozzle
+  // root (no new geometry: the two existing cones + one sprite). All sizes come
+  // from CONFIG.ship.flame via flameScales() (pure core, unit-tested). Both cones
+  // are UNIT (radius 1, length 1, pivot at the apex) so every dimension is
+  // data-driven. Apex anchored at the hull rear (z=-0.8, inside the nozzle) so the
+  // flame only grows backward (-Z). No per-frame allocs (textures built once).
+  const F = CONFIG.ship.flame;
+  const flameTex = makeFlameFalloffTexture();
+  const midGeo = new THREE.ConeGeometry(1, 1, 10, 1, true);
+  midGeo.rotateX(Math.PI / 2);
+  midGeo.translate(0, 0, -0.5); // pivot at apex (z=0), base (wide end) at z=-1
+  const midMat = new THREE.MeshBasicMaterial({
+    color: F.mid.color, map: flameTex, transparent: true, opacity: F.mid.opacity,
+    blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
   });
-  const flameOuter = new THREE.Mesh(flameOuterGeo, flameOuterMat);
-  flameOuter.position.set(0, 0, -0.8);
-  flameOuter.visible = false;
-  group.add(flameOuter);
+  const flameMid = new THREE.Mesh(midGeo, midMat);
+  flameMid.position.set(0, 0, -0.8);
+  flameMid.visible = false;
+  group.add(flameMid);
 
-  const CORE_LEN = 1.0;
-  const flameCoreGeo = new THREE.ConeGeometry(0.15, CORE_LEN, 8, 1, true);
-  flameCoreGeo.rotateX(Math.PI / 2);
-  flameCoreGeo.translate(0, 0, -CORE_LEN / 2);
-  const flameCoreMat = new THREE.MeshBasicMaterial({
-    color: 0xfff2d6, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending,
-    depthWrite: false, side: THREE.DoubleSide,
+  const coreGeo = new THREE.ConeGeometry(1, 1, 8, 1, true);
+  coreGeo.rotateX(Math.PI / 2);
+  coreGeo.translate(0, 0, -0.5);
+  const coreMat = new THREE.MeshBasicMaterial({
+    color: F.core.color, map: flameTex, transparent: true, opacity: F.core.opacity,
+    blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
   });
-  const flameCore = new THREE.Mesh(flameCoreGeo, flameCoreMat);
+  const flameCore = new THREE.Mesh(coreGeo, coreMat);
   flameCore.position.set(0, 0, -0.8);
   flameCore.visible = false;
   group.add(flameCore);
+
+  const glowSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+    color: F.glow.color, map: makeGlowTexture(), transparent: true, opacity: F.glow.opacity,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  }));
+  glowSprite.position.set(0, 0, -0.88); // just behind the nozzle mouth (-0.902 faces -Z)
+  glowSprite.visible = false;
+  group.add(glowSprite);
 
   group.position.y = 0.4; // hover just above the arena plane
 
@@ -108,17 +149,21 @@ shipBody.add(mouth);
   }
 
   function setFlame(thrustMag, t, motionOn) {
-    const on = thrustMag > 0.05;
-    flameOuter.visible = on;
+    const on = thrustMag > 0.05; // ST-063 gate (unchanged)
+    flameMid.visible = on;
     flameCore.visible = on;
+    glowSprite.visible = on;
     if (!on) return;
-    // Length tracks thrust; flicker (two incommensurate sines) only when motion is allowed.
-    let len = thrustMag;
-    if (motionOn) len *= 0.8 + 0.2 * Math.sin(t * 40) + 0.1 * Math.sin(t * 77);
-    len = Math.max(0.12, len);
-    const w = 0.55 + 0.45 * thrustMag;
-    flameOuter.scale.set(w, w, len);
-    flameCore.scale.set(w * 0.78, w * 0.78, len * 0.7);
+    // ST-256: layered scales + deterministic flicker (flameScales, pure core).
+    const s = flameScales(thrustMag, t, motionOn);
+    flameMid.scale.set(s.midRadius, s.midRadius, s.midLen);
+    flameMid.rotation.x = s.swayX;
+    flameMid.rotation.y = s.swayY;
+    flameCore.scale.set(s.coreRadius, s.coreRadius, s.coreLen);
+    flameCore.rotation.x = s.swayX * 1.4;
+    flameCore.rotation.y = s.swayY * 1.4;
+    glowSprite.scale.setScalar(s.glowScale);
+    glowSprite.material.opacity = s.glowOpacity;
   }
 
   function sync(ship, t, motionOn, thrustMag) {
@@ -130,5 +175,5 @@ shipBody.add(mouth);
     setFlame(thrustMag || 0, t, motionOn); // ST-063: engine flame
   }
 
-  return { group, sync, flame: flameOuter, flameCore, useGLB };
+  return { group, sync, flame: flameMid, flameCore, flameGlow: glowSprite, useGLB };
 }

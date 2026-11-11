@@ -2856,3 +2856,24 @@ No test changes (render-layer only - scope-check-E10 notes ST-219 as "the only r
 - Tests (tests/assetGlbs.test.js only; no new tests - 791/791): global COLOR_0 floor 0.30 -> 0.18; hull pins tightened to cMin < 0.30 && cMax > 0.90 (the old 0.33/0.88 bake now FAILS the pins = the I267 change is pinned). paletteHarmony unchanged - peak rim contribution = 0.45*1.6*luma(0x9a5bff=116.24) = 83.7 < 100 holds.
 - Verification: 791/791, build 0, dist 113 files 1998.3 raw / headroom 49.7 KB (>= 8). BY LAYER (render/assets + config + tests; no salt bump; demo pin re-verify at ST-258). Log audit: 267 iteration headers sequential 1..267.
 - Result: DONE - ST-255 complete (hull reads as a panelled armored form at follow-cam distance; no-bloom verified). Next I268: ST-256 engine flame layering (cgs-dev-story; in-code render: replace the single flat pale-cream cone with a layered flame - hot white-hot core + warm-orange mid + soft colored outer additive glow, sized to the nozzle, deterministic per-frame flicker (rng/time; reduced-motion steady); no new geometry, 0 KB asset).
+
+## I268 - ST-256 engine flame layering (E20 story 2/4)
+- Goal: replace the single flat pale-cream engine cone with a LAYERED flame - hot white core + warm-orange mid plume + soft root glow - sized to the nozzle, with deterministic per-frame flicker (reduced-motion: steady). Flame math in pure core (unit-testable); render layer only applies scales.
+- Story: ST-256 (cgs-dev-story). E20 readability arc: I266 evidence showed the flame as a flat, oversized, hard-edged prop-like cream wedge from every angle.
+- Changed files:
+  - src/core/flame.js (NEW): pure deterministic flame math - flicker(t, motionOn, phase) (2-sine: 0.15@40Hz + 0.10@77Hz, motion-gated, bounded +/-26%, always positive) + flameScales(thrust, t, motionOn) (monotone in thrust across all 6 dims; layer order core<mid guaranteed).
+  - src/core/config.js: CONFIG.ship.flame (core 0xffffff/0.95/.10r/.70L; mid 0xff9a3d/0.65/.28r/1.25L; glow 0xffb347/0.40/1.1; flicker amps+freqs).
+  - src/render/shipMesh.js: 2 UNIT cones (apex at nozzle z=-0.8, open tail, 2x64 falloff CanvasTexture) + glow Sprite (64x64 radial CanvasTexture); setFlame() applies flameScales per frame (no per-frame allocs); ST-063 gate (thrust>0.05) unchanged.
+  - src/main.js: __vr exposes shipFlame/shipFlameCore/shipFlameGlow. FIX discovered in browser smoke: an earlier splice left the __vr line with a line-comment swallowing the closing brace -> browser 'Unexpected token .' on load (build/tests do NOT parse render-layer files - browser smoke is the guard); fixed same session.
+  - tests/flame.test.js (NEW, 7 tests) + tests/paletteHarmony.test.js (+3): 801/801.
+- Flame math: core .10r/.70L white .95a; mid .28r/1.25L 0xff9a3d .65a; glow sprite 1.1/.40a; flicker 2-sine 0.15/0.10 @ 40/77 Hz motion-gated (reduced-motion: steady), bounded +/-26%.
+- Verification (browser, dev :5173, Playwright):
+  - Flicker A/B: advance t vs t+0.034 -> midLen 1.2331->1.1776, coreLen 0.6716->0.5689, glowScale 1.099->1.052 (deterministic per-frame motion).
+  - FX-on zone audit (fx=high, raw render readback, trail puffs hidden; astern cam (0.35,1.55,30.3) fov50): coreZone d0.95-1.44 linEq 195.8 > 183.6 = INTENDED hot-core accent (bloom allowed, like cockpit); midTail d1.56-1.96 linEq 164.3 < 183.6 = NO accidental bloom; monotone warm falloff sRGB 238->134, RGB [255,237,197]->[155,130,111] (soft tail, no hard prop tip); glowRim (0.42 lateral) linEq 5.7 (no bloom ring); shipBody 172.3 sRGB visible/un-occluded.
+  - FX-off floor: mid band 255 sRGB (warm [255,255,226] on-axis @d1.5; R>G>B monotone tail 255->216) >= FLOOR 50.
+  - Fresh reload (?nocache=i268final): console 0/0; flame objects live; scripted thrust drives scales (midLen 1.147 / coreLen 0.662 at thrust 1).
+  - ST-213 trail puffs (additive, drift along flame axis) inflate plume readouts -> hidden during zone sampling, restored for natural shots; pre-existing puff clip documented, NOT fixed here (out of scope).
+- Audit lesson: the ST-025 invuln blink latches shipGroup.visible=false when sync() last ran in blink phase 1; with rAF frozen the group stays hidden and flame A/B diffs read exactly ZERO (cost ~10 captures to isolate). Audit pattern: set world.ship.isInvulnerable=false AND force shipGroup.visible=true in the SAME evaluate as the render.
+- Tests: 801/801 (was 791; +10). Build: exit 0. dist: 114 files / 2003.6 KB raw (+5.3 KB; headroom ~44.4 KB >= 8).
+- BY LAYER: render + config + docs.
+- Result: DONE - ST-256 complete. Next I269: ST-257 arena floor grid restyle (warmer/sparser/softer + radial falloff; keep FX-off FLOOR 50; re-verify ST-177 bullet-contrast floor in-browser).

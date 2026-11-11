@@ -169,3 +169,26 @@ test('ST-252: boss rim stays subtle and under the bloom band (even with the phas
   const peak = rim.hull * rim.phase2Lift * luma(rim.color);
   assert.ok(peak < 100, 'peak rim contribution ' + peak.toFixed(1) + ' luma < 100 (bloom band 183.6, headroom for the audit)');
 });
+// ST-256 (I268): engine flame layered palette invariants (CONFIG.ship.flame).
+const FL = CONFIG.ship.flame;
+
+test('ST-256: flame core is white-hot (the hot accent, near-white zone)', () => {
+  assert.ok(luma(FL.core.color) >= 245, 'core luma ' + luma(FL.core.color).toFixed(1) + ' >= 245');
+  const r = (FL.core.color >> 16) & 255, g = (FL.core.color >> 8) & 255, b = FL.core.color & 255;
+  assert.ok(r >= g && g >= b, 'neutral hot white (R>=G>=B)');
+});
+
+test('ST-256: flame mid + glow are warm (R>G>B) - harmonize with the E18 world + engine trail', () => {
+  for (const [name, c] of [['mid', FL.mid.color], ['glow', FL.glow.color]]) {
+    const r = (c >> 16) & 255, g = (c >> 8) & 255, b = c & 255;
+    assert.ok(r > g && g > b, name + ' warm family R>G>B (0x' + c.toString(16) + ')');
+  }
+});
+
+test('ST-256: hot core is the brightest flame layer (layered value separation)', () => {
+  const coreV = luma(FL.core.color) * FL.core.opacity;
+  const midV = luma(FL.mid.color) * FL.mid.opacity;
+  const glowV = luma(FL.glow.color) * FL.glow.opacity;
+  assert.ok(coreV > midV && midV > glowV, 'layered brightness: ' + coreV.toFixed(0) + ' > ' + midV.toFixed(0) + ' > ' + glowV.toFixed(0));
+});
+

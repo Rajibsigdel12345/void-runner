@@ -42,6 +42,12 @@ export const CONFIG = {
       wing:    { color: 0x54402e, metalness: 0.3, roughness: 0.55 },    // dark umber - the ship shadow tone (luma 67)
       cockpit: { color: 0x0b1830, emissive: 0x59d8ff, emissiveIntensity: 1.4, roughness: 0.2 } // FROZEN identity (pinned in tests/paletteHarmony.test.js)
     },
+    flame: { // ST-256 (I268): layered engine flame - math in src/core/flame.js (pure, tested)
+      core:  { color: 0xffffff, opacity: 0.95, radius: 0.10, len: 0.70 }, // hot white core (small; blooms = INTENDED engine accent, like the cockpit)
+      mid:   { color: 0xff9a3d, opacity: 0.65, radius: 0.28, len: 1.25 }, // warm orange plume (R linear = 0.65 < 0.72 bloom threshold - sub-band)
+      glow:  { color: 0xffb347, opacity: 0.40, size: 1.1 },               // soft additive glow sprite at the nozzle root (no geometry)
+      flicker: { amp: 0.15, speed: 40, amp2: 0.10, speed2: 77 }          // deterministic two-sine flicker (motion-gated; reduced-motion = steady)
+    },
   },
 
   weapon: {
