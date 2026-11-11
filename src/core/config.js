@@ -475,7 +475,7 @@ export const CONFIG = {
     },
     palette: {                // ST-086: per-entity particle color palettes (hex, additive-blended)
       rock:     [0xfff0c8, 0xffa44a, 0xd96a2a],  // ST-248: warm ember core -> amber -> deep ember (harmonized to the I257 warm rock)
-      golden:   [0xfff0a0, 0xffe070, 0xfff8dc],  // gold
+      golden:   [0xfff0a0, 0xffe070, 0xffc94d],  // ST-249: gold family (ring [0] unchanged; tail 0xfff8dc -> 0xffc94d = the golden rock albedo - the near-white tail sat in the I258 rock-core 0xfff0c8 zone and was the game brightest particle color; pure white stays with the bomb)
       graze:    [0x7fd4ff, 0x9fe0ff, 0x54b4ff],  // cool cyan near-miss
       mine:     [0xff5a3c, 0xff8a5a, 0xffc4a0],  // hot red-orange
       drone:    [0x6fe8ff, 0x9fe8ff, 0x3cc4ff],  // ST-117 cold cyan seeker

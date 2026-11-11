@@ -72,3 +72,46 @@ test('ST-248: kill ring is amber (warm, mid-luma accent)', () => {
   const l = luma(c);
   assert.ok(l >= 150 && l <= 200, 'mid-luma accent, luma=' + l.toFixed(1));
 });
+
+
+// ST-249 (I259): pickup + golden/belt read audit post-palette invariants.
+
+test('ST-249: golden kill ring is the brightest kill accent (5x value reads)', () => {
+  const l = luma(P.golden[0]);
+  assert.ok(l >= 230, 'golden ring bright, luma=' + l.toFixed(1));
+  assert.ok(l - luma(P.killRing) >= 40, 'golden ring ' + l.toFixed(1) + ' - killRing ' + luma(P.killRing).toFixed(1) + ' >= 40');
+});
+
+test('ST-249: golden burst = saturated gold family (no near-white, R>=G>=B, above rock mid)', () => {
+  for (const c of P.golden) {
+    const r = (c >> 16) & 255, g = (c >> 8) & 255, b = c & 255;
+    assert.ok(r >= g && g >= b, 'gold family 0x' + c.toString(16));
+  }
+  for (const c of P.golden.slice(1)) {
+    const l = luma(c);
+    assert.ok(l < 245, 'no near-white stop (white belongs to the bomb), luma=' + l.toFixed(1));
+    assert.ok(l >= luma(P.rock[1]), 'brighter than the rock-kill mid stop');
+  }
+});
+
+test('ST-249: the white-hot zone is bomb + stinger only (golden burst no longer intrudes)', () => {
+  const whites = [];
+  const scan = (name, vals) => { for (const c of vals) if (luma(c) >= 250) whites.push(name + ' 0x' + c.toString(16)); };
+  scan('bomb', P.bomb);
+  for (const k of ['rock','golden','mine','drone','stinger','flyer','engine','belt','boss','bossKill','shield','hit','power','graze']) scan(k, P[k]);
+  assert.deepEqual(whites, ['bomb 0xffffff', 'stinger 0xffffff'], 'white-hot zone = bomb + stinger telegraph only (golden burst no longer intrudes): ' + whites.join(', '));
+});
+
+test('ST-249: pickup orbs clear the FX-off floor (ST-177) with margin', () => {
+  const bg = Math.max(NEBULA_LUMA, luma(CONFIG.arena.gridBright));
+  for (const [t, c] of Object.entries(P.pickup)) {
+    assert.ok(luma(c) - bg >= 59, t + ': luma ' + luma(c).toFixed(1) + ' - bg ' + bg.toFixed(1) + ' >= 59');
+  }
+});
+
+test('ST-249: belt clink stays cool (B-dominant) - warm/cool separation from the I257 rocks', () => {
+  for (const c of P.belt) {
+    const r = (c >> 16) & 255, b = c & 255;
+    assert.ok(b > r, 'cool steel 0x' + c.toString(16) + ': B ' + b + ' > R ' + r);
+  }
+});
