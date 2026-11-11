@@ -277,8 +277,9 @@ test('boss.glb: naming, poly budget, cross-section and height vs spec (ST-252)',
   assert.ok(core.maxZ > 0.5, 'core reads from the player side (maxZ ' + core.maxZ.toFixed(3) + ' > 0.5)');
   assert.ok(crown.minY > 0, 'crown on TOP (minY ' + crown.minY.toFixed(3) + ' > 0)');
   assert.ok(h > w, 'tall along Y (h ' + h.toFixed(2) + ' > w ' + w.toFixed(2) + ')');
-  // ST-252 hull mottling: grayscale, in [0.30,1.00], and STRONGER than the old 0.72..1.0
-  // bake (min below 0.50, max above 0.80 -> facet value spread > 0.8).
+  // I267 (ST-255) hull mottling: grayscale, panelled, in [0.18,1.00] - a WIDER spread than
+  // the old ST-252 bake (hull now 0.21..0.95, vs 0.33..0.88) so the obelisk reads against
+  // the cool sky. min below 0.30 AND max above 0.90 -> facet value spread > 0.9, not a flat slab.
   for (const m of json.meshes || []) {
     for (const p of m.primitives || []) {
       const acc = json.accessors[p.attributes.COLOR_0];
@@ -291,12 +292,12 @@ test('boss.glb: naming, poly budget, cross-section and height vs spec (ST-252)',
         const g = buf.readFloatLE(base + i * stride * 4 + 4);
         const b = buf.readFloatLE(base + i * stride * 4 + 8);
         assert.ok(Math.abs(r - g) <= 0.02 && Math.abs(g - b) <= 0.02, m.name + ' COLOR_0 grayscale at ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
-        assert.ok(r >= 0.3 - 0.01 && r <= 1.0 + 0.01, m.name + ' COLOR_0 in [0.30,1.00] at ' + i + ': ' + r.toFixed(3));
+        assert.ok(r >= 0.18 - 0.01 && r <= 1.0 + 0.01, m.name + ' COLOR_0 in [0.18,1.00] at ' + i + ': ' + r.toFixed(3));
         if (r < cMin) cMin = r; if (r > cMax) cMax = r;
       }
       if ((m.name || '').indexOf('Hull') >= 0) {
-        assert.ok(cMin < 0.50, 'hull mottling min ' + cMin.toFixed(3) + ' < 0.50 (stronger than old 0.72 floor)');
-        assert.ok(cMax > 0.80, 'hull mottling max ' + cMax.toFixed(3) + ' > 0.80');
+        assert.ok(cMin < 0.30, 'hull mottling min ' + cMin.toFixed(3) + ' < 0.30 (I267 darker floor; old bake was 0.33)');
+        assert.ok(cMax > 0.90, 'hull mottling max ' + cMax.toFixed(3) + ' > 0.90 (I267 brighter top; old bake was 0.88)');
       }
     }
   }

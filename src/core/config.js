@@ -169,9 +169,9 @@ export const CONFIG = {
                        // seam carries no rim (its pulsing emissive IS the distance read).
       color: 0x9a5bff,        // Monolith rim - purple identity (B>R>G), harmonizes with body 0x7a4dff
       splicerColor: 0x2dd4bf, // Splicer rim - teal identity (matches the variant body hex)
-      hull: 0.35,             // hull edge strength (subtle; shader power 5 = silhouette-hugging, I257)
-      crown: 0.25,            // crown edge strength (spike edges a touch softer than the hull)
-      phase2Lift: 1.6         // phase-2 enrage: rim brightens with the body (hull 0.35 -> 0.56 max,
+      hull: 0.45,             // hull edge strength (I267 ST-255: stronger so the hull reads vs the cool sky; still sub-bloom)
+      crown: 0.30,            // crown edge strength (I267 ST-255: a touch softer than the hull)
+      phase2Lift: 1.6         // phase-2 enrage: rim brightens with the body (hull 0.45 -> 0.72 max,
                               // still under the bloom band - ST-252 bloom-band audit confirms)
     },
     phase2: {        // ST-133: enrage state below the HP threshold (one-way)

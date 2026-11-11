@@ -114,14 +114,14 @@ export function createBossMesh(scene) {
   const group = new THREE.Group();
 
   const hullMat = new THREE.MeshStandardMaterial({
-    color: 0x3a3252, roughness: 0.45, metalness: 0.4, flatShading: true,
+    color: 0x6b5f88, roughness: 0.45, metalness: 0.4, flatShading: true,
     emissive: 0x7a4dff, emissiveIntensity: 0.25, vertexColors: true,
   });
   const hull = new THREE.Mesh(bakeHullGeometry(), hullMat);
   group.add(hull);
 
   const crownMat = new THREE.MeshStandardMaterial({
-    color: 0x4a4166, roughness: 0.4, metalness: 0.5, flatShading: true,
+    color: 0x7a6f9c, roughness: 0.4, metalness: 0.5, flatShading: true,
     emissive: 0x7a4dff, emissiveIntensity: 0.18, vertexColors: true,
   });
   const crown = new THREE.Mesh(bakeCrownGeometry(), crownMat);
