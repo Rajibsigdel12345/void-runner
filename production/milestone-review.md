@@ -329,3 +329,38 @@ None.
 
 ## Next owner / decision
 - I227: open E12 - scope check via cgs-scope-check + cgs-create-stories. Candidates: the 3 I225 scope-vs-code flags as small stories (FX off tier, load-reactive DPR 1.5, auto-downgrade settings-tier sync), art levers (research-backed), new content. 8 HUMAN-PENDING items parked for a human session.
+
+## E12 CLOSED (I231, ST-227)
+
+## Summary
+E12 (Quality Settings Consistency & Skybox Art Pass) complete: 4/4 stories ST-224..227 over 4 iterations (I228..I231), G12.0 gate PASS. Closes the 3 I225 scope-vs-code flags + the carried 512x256 skybox deferral (per the standing user art/Blender directive).
+
+## Milestone Goal
+Make the quality settings tell the truth (stored choice vs effective tier), complete the FX tier set (off), make DPR load-reactive (1.5 under auto-downgrade), and land the last Blender art item (skybox) within the dist budget.
+
+## Evidence (per story)
+- ST-224 (I228): FX off tier - F cycles high->low->off->high (pure core), panel 3rd option, off zeros FX-tier-gated render effects (kill channel browser-verified exactly 0; trail 0; bloom high-only), user-only tier, 3-tier storage. 691/691.
+- ST-225 (I229): load-reactive DPR + effective-tier sync - pure dprForTier + 6 tests; applyFxTier single writer (no-revert family closed); 'AUTO: LOW' chip on both panels while autoLow, stored choice never overwritten; dpr-2 bot path verified 2.0 -> 1.5 -> 2.0. 697/697.
+- ST-226 (I230): skybox art pass - Blender 5.2 node-baked equirect v5 (math-only unit direction after the VectorMath LENGTH/NORMALIZE bake corruption was root-caused with constant probes), 1024x512 JPEG 73.2 KB (net +32.0 KB <= 40 KB budget), PMREM IBL unchanged, sky subordinate at every FX tier. 697/697 (1 audit rewritten).
+- ST-227 (I231): regression round + G12.0 + closeout - node 3/3 (697/697 x3), build 0, dist 105 files 1994.7/543.4 KB, state machine 10/10, persistence intact, demo pin EXACT via real UI, FX-off zero-leak re-confirm, user-lock semantics, frame probes 0 drops, console 0/0 on 3 tabs, log 1..231 sequential. 1-line gate fix: F-hotkey userSet before applyFxTier (stale AUTO: LOW marker after an auto-downgrade; live repro 231b, post-fix verify 231c + pause-panel screenshot .evidence/I231/03).
+
+## Blocker
+None.
+
+## Transition Verdict
+**CLOSED - E12 complete: 4/4 stories, 4 iterations (I228..I231).** Demo pin structurally untouched (render/settings/asset layer only), re-verified exact in-browser at I231 via the real UI path.
+
+## Risks
+- Carried (8 HUMAN-PENDING): perception items in production/bug-triage.md (2 ART/AUDIO) - non-blocking, need a human session.
+- Carried: low-end physical device / GPU validation (HARDWARE-pending checklist in perf-profile.md '## I225').
+- New: none; R-E12-1..4 all CLOSED at G12.0 (R-E12-4 realized in-gate as the 1-line F-marker fix, closed at I231).
+- WATCH: gzip headroom 6.6 KB after the skybox JPEG - future asset stories need a size review before landing.
+
+## Changed files
+- src/main.js (1-line reorder), production/gates.md (+G12.0 block), production/milestone-review.md (this section), production/epics.md (E12 Result CLOSED + risks CLOSED), production/timeline.md (+E12 closed line), production/stories.md (ST-224..227 DONE + E12 CLOSED line), CHANGELOG.md (+I231), production/iterations.md (+I231), production/session-state/active.md.
+
+## Verification evidence
+- I231 fresh: npm test 697/697 x2 in-process + node --test over the tests glob 697/697 cross-process; node scripts/build.mjs exit 0; dist 1994.7/543.4 KB (105 files); log audit 1..231 sequential; browser smokes ?nocache=231a (regression + demo pin exact), ?nocache=231b (dpr-2 user-lock + pre-fix repro), ?nocache=231c (post-fix marker path + .evidence/I231/03 screenshot).
+
+## Next owner / decision
+- I232: open E13 via cgs-scope-check + cgs-create-stories. Candidates: new content arc, combo cap (demo-pin compatible), music quality (HP #5), hardware remainder, + new feel/art levers. 8 HUMAN-PENDING items parked for a human session.

@@ -696,3 +696,46 @@ Per epics.md (verbatim): "kill juice unit-tested + browser-verified (juiceTally 
 
 ### Next owner / decision
 - I227: open E12 - scope check + stories (cgs-scope-check + cgs-create-stories). Candidates: the 3 I225 scope-vs-code flags as small stories (FX off tier, load-reactive DPR 1.5, auto-downgrade settings-tier sync), art levers (research-backed), new content. 8 HUMAN-PENDING items parked for a human session.
+## G12.0 - E12 closeout gate (I231)
+
+### Summary
+E12 (Quality Settings Consistency & Skybox Art Pass) closeout gate over 4 iterations (I228..I231, ST-224..227). Closes the 3 I225 scope-vs-code flags (FX off tier, load-reactive DPR 1.5, effective-tier settings sync) + the carried 512x256 skybox deferral (standing user art/Blender directive). One 1-line gate fix found live and closed in-gate (F-marker ordering, the R-E12-4 surface).
+
+### Gate Criteria (epics.md)
+1. FX off tier unit + browser verified (zero particle/trail leak at off, F cycle + persistence + user-lock semantics).
+2. DPR + tier sync unit + browser verified (dprForTier exact; dpr-2 emulation downgrade 2.0 -> 1.5 -> restore; panel AUTO marker in/out; storage untouched).
+3. Skybox A/B (MENU + in-flight, readability preserved both FX tiers) + dist in budget + frame delta ~0 + IBL probe.
+4. Fresh tests + build + dist in budget.
+5. Demo pin re-verified exact via the real UI.
+6. Regression round green.
+7. Log audit sequential.
+
+### Evidence
+- (1) ST-224/I228: F cycle exact + 3 options + reload persistence + panel sync (228a/228b); off zero-leak: scripted kills at off -> live 0 + trail 0 + bloom off (kill channel browser-verified exactly 0 over 5 scripted S-rock kills; I231a re-confirm: idle 0 / thrust 0 / kill-burst 0 / trail 0; readability floors powerup 8 / belt 4 / shield 6 / muzzle 4-8 still emit by design); user-lock: off never auto-produced (ladder fires only from high; unit test) + 231b: userLocked true holds high under 165 x noteFrame(50) (0 fps, belowStreak 165, no downgrade); I231c re-ran the F cycle live (low -> off -> high, exact toasts + storage round-trip + bloom on at high).
+- (2) ST-225/I229: dprForTier 6 unit tests; 229a dpr-2 boot 2.0 -> forced downgrade 'DPR 2.00 -> 1.50 (FX low, auto-downgrade)' + both markers + storage untouched + no-revert via applySettings(stored high); 231c (post-fix): downgrade -> markers 1+1 + storage 'high' untouched -> FIRST user F clears both markers (the I231 gate fix) + autoLow false / userLocked true -> restore F 'DPR 1.50 -> 2.00 (FX high, hotkey)' + bloom on; 229b native dpr 1.25: silent no-op boot + stored-low reload no line (cap not binding, correct).
+- (3) ST-226/I230: skybox v5 JPEG 73.2 KB (net +32.0 KB raw, within the <= 40 KB budget); 230a + 231a: skybox.ready on the new URL, MENU A/B vs I227 baseline (layered subordinate sky, UI pops), in-flight readable at FX high/low/off + IBL tints on rock faces; frames 787 f avg 16.67 (I230) + 312 f avg 16.65 / p95 16.9 / max 17.4 (I231, 0 drops >17.5) = delta ~0; no upload hitch; accepted art note (warm-brown magenta x gold overlap) holds.
+- (4) I231 fresh: npm test 697/697 x2 in-process + node --test over the tests glob 697/697 cross-process; node scripts/build.mjs exit 0; dist 105 files, 1994.7 raw / 543.4 gzip KB (<=2048/<=550; gzip headroom 6.6 KB = WATCH).
+- (5) Demo pin: EXACT via REAL UI at 231a (REPLAYS button -> DEMO PILOT button -> key 3 x4): GAME_OVER idx 2169/2220, score 11334, kills 57, t=36.15, wave 2, 'SHOTS 57/198'; structurally untouched across E12 (render/settings/asset layer only) + unit-covered in 697.
+- (6) Regression 231a/231b/231c (60 Hz; dpr 1.25 native + dpr-2 emulation): state machine 10/10 (incl. forced death 1 tick + live restart + replay exit branch), persistence intact (tutorial, best 36426, 5 scores, settings object), fresh scripted pilot 1080 ticks PLAYING dt=18.1 s / 2711 pts / 16 kills all finite, console 0/0 on every tab (231c: 7 lines total, all accounted - lone 'adaptive quality' line without a DPR line = reset()-re-armed downgrade whose 1.5 target already equaled the current pixelRatio, correct no-op).
+- (7) Log audit: 230 entries 1..230 sequential pre-append, 0 dupes / 0 missing; +I231 -> 1..231.
+- (8) Risks: R-E12-1 CLOSED (off zero-leak browser-verified twice + CONFIG single source + unit tests), R-E12-2 CLOSED (single labeled resize; frame probes after every switch: one 67 ms hitch at 229a, 0 hitches >30 at 231b/231c restore probes), R-E12-3 CLOSED (JPEG 73.2 KB staged within the <= 40 KB net budget; dist 543.4/550 KB pinned by the skybox JPEG audit test), R-E12-4 CLOSED (marker semantics verified live: chip shows only while autoLow, cleared on the first user F - the in-gate 1-line fix made the F-hotkey path match the panel path; storage-untouched re-verified every cycle; pre-fix repro 231b + post-fix verify 231c + pause-panel screenshot .evidence/I231/03).
+
+### Concerns
+- Gzip headroom 6.6 KB (WATCH): the skybox JPEG does not re-compress under gzip; future asset stories need a size review before landing (carry-forward rule from I214).
+- 8 HUMAN-PENDING perception items remain the player-experience evidence gap (non-blocking; need a human session).
+- Physical low-end device / GPU validation remains HARDWARE-pending (labeled checklist in perf-profile.md '## I225').
+
+### Verdict
+**PASS - E12 CLOSED.** 4/4 stories (ST-224..227) complete with per-iteration evidence (I228..I231); all 3 I225 scope-vs-code flags closed in code + browser; skybox art pass landed within budget; one 1-line gate fix (F-marker ordering) found live, fixed, and re-verified in-gate; fresh 697/697 x3 + build 0 + dist in budget; demo pin re-verified exact via the real UI; log 1..231 sequential.
+
+### Risks
+- Carried: 8 HUMAN-PENDING perception items (production/bug-triage.md), low-end physical device / GPU validation (HARDWARE-pending checklist), gzip headroom WATCH.
+
+### Changed files
+- src/main.js (1-line reorder: F-hotkey userSet before applyFxTier), production/gates.md (this block), production/milestone-review.md (E12 CLOSED section), production/epics.md (E12 Result CLOSED + risks CLOSED), production/timeline.md (+E12 closed line), production/stories.md (ST-224..227 DONE + E12 CLOSED line), CHANGELOG.md (+I231), production/iterations.md (+I231), production/session-state/active.md.
+
+### Verification evidence
+- npm test 697/697 x2 in-process + node --test over the tests glob 697/697 cross-process (this iteration); node scripts/build.mjs exit 0 (this iteration); dist 1994.7/543.4 KB (this iteration); log audit 1..231 sequential (this iteration); browser smokes ?nocache=231a (regression + demo pin), ?nocache=231b (dpr-2 user-lock + pre-fix repro), ?nocache=231c (post-fix marker path + pause-panel screenshot .evidence/I231/03).
+
+### Next owner / decision
+- I232: open E13 (cgs-scope-check + cgs-create-stories). Candidates from carryover: new content arc, combo cap (demo-pin compatible), music quality (HP #5), hardware remainder, + any new feel/art levers. 8 HUMAN-PENDING items parked for a human session.

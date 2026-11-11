@@ -482,8 +482,8 @@ window.addEventListener('keydown', (e) => {
     const next = toggleFxQuality(storage.getSettings().fx);
     const merged = storage.setSettings({ fx: next });
     applySettings(merged);
+    adaptive.userSet(next); // I157: user choice overrides adaptive automation - BEFORE applyFxTier so updateFxMarker reads the post-userSet autoLow (I231: marker cleared on the first user F after an auto-downgrade)
     applyFxTier(next, 'hotkey'); // ST-225: FX tier state (particles / bloom / DPR / marker)
-    adaptive.userSet(next); // I157: user choice overrides adaptive automation
     if (fxPreviewFn) fxPreviewFn(next); // ST-067: live particle preview
     menuSettings.sync();
     pauseSettings.sync();
