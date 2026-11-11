@@ -110,7 +110,7 @@ carry as the human-session checklist. No config change -> the deterministic demo
   | Disposition: waveCleared fires only when all rocks are dead (waves.js:137); the bot never
   cleared a wave. Not a defect.
 
-### HUMAN-PENDING carry (8 items for a human session)
+### HUMAN-PENDING carry (9 items for a human session)
 1. Post-boss breather feel (E7)
 2. Vortex dodgeability feel (E7)
 3. Overdrive feel (E7; combo quantified at T1)
@@ -119,6 +119,7 @@ carry as the human-session checklist. No config change -> the deterministic demo
 6. Death slow-mo feel (E8)
 7. Tutorial content clarity (E8)
 8. REC chip clarity (E8)
+9. Stinger telegraph/charge feel (E13)
 
 ### Severity / priority rationale
 - No P0/P1: no wrong behavior, no crashes, no data loss; all states reachable/exitable (state
@@ -138,7 +139,7 @@ None. No code change, no config change, no test churn. The G8.6 "playtest triage
 satisfied by this section + the v3 report.
 
 ### Risks
-- The 8 HUMAN-PENDING items remain the player-experience evidence gap (non-blocking; the bot
+- The 9 HUMAN-PENDING items remain the player-experience evidence gap (non-blocking; the bot
   covered everything bot-verifiable quantitatively).
 - If a human session later flags T1 (combo flatness) as P1, the fix touches config.combo + the
   demo pin (tests/replay.test.js:246) - the blast radius is documented in advance.
@@ -156,5 +157,5 @@ satisfied by this section + the v3 report.
 ### Next owner / decision
 - I204 (ST-204, cgs-release-checklist): E8 release checklist (append an E8 version to
   production/release-checklist.md).
-- Human playtest (when available): run the 8-item HUMAN-PENDING checklist (this section +
+- Human playtest (when available): run the 9-item HUMAN-PENDING checklist (this section +
   production/playtest-checklist.md).

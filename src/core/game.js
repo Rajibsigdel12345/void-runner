@@ -5,6 +5,7 @@ import { Weapons } from './weapons.js';
 import { AsteroidField } from './asteroids.js';
 import { MineField } from './mines.js';
 import { DroneField } from './drones.js'; // ST-117
+import { StingerField } from './stinger.js'; // ST-229
 import { Monolith, bossHpForWave, bossBurstVectors } from './boss.js';
 import { Splicer, splicerHpForWave } from './splicer.js';
 import { Warden } from './warden.js'; // ST-136
@@ -28,6 +29,7 @@ export class World {
     this.field = new AsteroidField(rng, cfg);
     this.mines = new MineField(rng, cfg); // ST-054
     this.drones = new DroneField(rng, cfg); // ST-117
+    this.stingers = new StingerField(rng, cfg); // ST-229
     this.boss = null; // ST-055
     this.enemyBullets = new EnemyBulletField(cfg); // ST-056
     this.vortex = new VortexField(rng, cfg); // ST-059
@@ -169,15 +171,21 @@ export class World {
       this.spawnWardenForWave(wv.startedWave); // ST-136 (only on 5th waves without a live Monolith)
       this.spawnBeltForWave(wv.startedWave); // ST-138 (one drifting indestructible per wave from wave 8, up to the cap)
       this.spawnDronesForWave(wv.startedWave); // ST-117
+      this.spawnStingersForWave(wv.startedWave); // ST-229
     }
     const wl = this.weaponLevel(); // ST-122: weapon progression by wave
     if (wl > this._wlevel) { this._wlevel = wl; this.emit('weaponLevelUp', { level: wl }); }
     if (wv.waveCleared) this.emit('waveCleared', { n: wv.waveCleared });
     this.mines.step(edt, this.ship.pos); // ST-054 (ST-115: scaled under slow-mo)
     this.drones.step(edt, this.ship.pos); // ST-117 (ST-115: scaled under slow-mo)
+    this.stingers.step(edt, this.ship.pos); // ST-229 (ST-115: scaled under slow-mo)
     if (this.warden) this.warden.step(edt, this.ship.pos); // ST-136 (ST-115: scaled under slow-mo)
     for (const dc of this.drones.decayed) { // I129: seeker battery expired -> self-destruct event (render FX in main.js)
       this.emit('droneDecay', { pos: { x: dc.pos.x, y: dc.pos.y } });
+    }
+    for (const se of this.stingers.drainEvents()) { // ST-229: telegraph / charge / fizzle (SFX + FX in main.js)
+      const p = { x: se.pos.x, y: se.pos.y };
+      this.emit(se.kind === 'fizzle' ? 'stingerFizzle' : se.kind === 'telegraph' ? 'stingerTelegraph' : 'stingerCharge', { pos: p });
     }
     for (const f of this.mines.takeFires()) { // ST-056
       const b = this.fireAimedBolt(f, this.cfg.enemyBullets.mineSpeed);
@@ -212,6 +220,8 @@ export class World {
     this.resolveShipMines(); // ST-054
     this.resolveBulletDrones(); // ST-117
     this.resolveShipDrones(); // ST-117
+    this.resolveBulletStingers(); // ST-229
+    this.resolveShipStingers(); // ST-229
     this.resolveShipBoss(); // ST-055
     this.resolveShipWarden(); // ST-136
     this.resolveShipEnemyBullets(); // ST-056
@@ -661,12 +671,65 @@ export class World {
     }
   }
 
+
+  /** ST-229: spawn the wave's stingers once eligible (wave >= firstWave). The first
+   * spawn of a run emits 'stingerSpawn' (the main.js "STINGER INBOUND" toast). */
+  spawnStingersForWave(wave) {
+    const s = this.cfg.stinger;
+    if (wave < s.firstWave) return;
+    for (let i = 0; i < s.perWave; i++) {
+      const st = this.stingers.spawn(this.ship.pos);
+      if (st && !this._stingerToasted) {
+        this._stingerToasted = true;
+        this.emit('stingerSpawn', { pos: { x: st.pos.x, y: st.pos.y }, wave });
+      }
+    }
+  }
+
+  /** ST-229: bullets destroy stingers (1 hit). Each kill pays +250 and feeds the combo. */
+  resolveBulletStingers() {
+    for (const b of this.weapons.bullets) {
+      if (b.dead) continue;
+      const hit = this.stingers.stingers.find(sm => !sm.dead &&
+        Math.hypot(sm.pos.x - b.pos.x, sm.pos.y - b.pos.y) < sm.radius + b.radius);
+      if (!hit) continue;
+      this.onPlayerBulletHit(b.id);
+      this.stingers.destroy(hit.id);
+      const points = this.scoreKeeper.kill(this.cfg.stinger.score, this.time);
+      this.emit('kill', { pos: { x: hit.pos.x, y: hit.pos.y }, size: 'stinger', points,
+        combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), stinger: true });
+      this.emit('stingerDeath', { pos: { x: hit.pos.x, y: hit.pos.y } });
+    }
+    this.weapons.compact();
+  }
+
+  /** ST-229: a stinger touching the ship costs a life (NO score) and is lost. */
+  resolveShipStingers() {
+    if (this.ship.isInvulnerable || this.lives <= 0) return;
+    const hit = this.stingers.stingers.find(sm => !sm.dead &&
+      Math.hypot(sm.pos.x - this.ship.pos.x, sm.pos.y - this.ship.pos.y) < sm.radius + this.cfg.ship.radius);
+    if (!hit) return;
+    this.stingers.destroy(hit.id);
+    this.emit('stingerDeath', { pos: { x: hit.pos.x, y: hit.pos.y } });
+    const livesLeft = this.livesMgr.damage();
+    this.scoreKeeper.onDamage();
+    const nx = (this.ship.pos.x - hit.pos.x), ny = (this.ship.pos.y - hit.pos.y);
+    const n = Math.hypot(nx, ny) || 1;
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.ship.damage(v2(nx / n, ny / n));
+    if (livesLeft <= 0) {
+      this.game.to(STATE.GAME_OVER);
+      this.emit('gameover', { score: this.score });
+    }
+  }
   reset() {
     this.ship = new Ship(0, 0, this.cfg);
     this.weapons.clear();
     this.field.clear();
     this.mines.clear();
     this.drones.clear(); // ST-117
+    this.stingers.clear(); // ST-229
+    this._stingerToasted = false; // ST-229: re-arm the run's first-spawn callout
     this.boss = null; // ST-055
     this.warden = null; // ST-136
     this.enemyBullets.clear(); // ST-056

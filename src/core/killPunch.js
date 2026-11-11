@@ -18,7 +18,7 @@
 // warden, specials) map to 0 - their own events carry the bigger punches.
 export function killPunchEnergy(size, overdrive, cfg) {
   const c = cfg || {};
-  const base = size === 'L' ? c.l : size === 'M' ? c.m : size === 'S' || size === 'mine' ? c.s : 0;
+  const base = size === 'L' ? c.l : size === 'M' ? c.m : size === 'S' || size === 'mine' ? c.s : size === 'stinger' ? (c.stinger || 0) : 0; // ST-229: the charger owns its own rung
   if (!(base > 0) || !isFinite(base)) return 0;
   const boosted = overdrive ? base * (1 + (c.overdriveBoost || 0)) : base;
   const cap = (c.max != null && isFinite(c.max)) ? c.max : Infinity;

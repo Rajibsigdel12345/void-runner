@@ -129,6 +129,7 @@ Line references are as of commit c042dc7 (I165). Values with a suffix are runtim
 | 474 | THE SPLICER / THE MONOLITH (banner arg), SPLICER INBOUND | boss callout toast |
 | 475 | WARDEN INBOUND | mini-boss callout toast |
 | 478 | WEAPON LEVEL n | upgrade toast |
+| 668 | STINGER INBOUND | charger callout toast (ST-229) |
 | 405 | The browser dropped the 3D rendering context. It usually comes back on its own - please wait. | context-loss overlay |
 | 409 | RELOAD GAME | context-loss button |
 
@@ -162,7 +163,7 @@ module. Dynamic parts become {vars} in ICU-ish placeholders (NOT sprintf %s).
   settings.visuals, settings.fx(+_aria, .low, .high), settings.reduced_motion(+_aria),
   settings.font_scale(+_aria, .normal, .large), settings.shape_cues(+_aria),
   settings.colorblind(+_aria), settings.slowmo_hint(+_aria), settings.kbd_hint
-- toast.* - toast.fx_auto_low, toast.fx_level, toast.splicer, toast.warden, toast.weapon
+- toast.* - toast.fx_auto_low, toast.fx_level, toast.splicer, toast.stinger, toast.warden, toast.weapon
 - ctxlost.* - ctxlost.message, ctxlost.reload
 - keycaps.* - keycaps.wasd, keycaps.arrows, keycaps.mouse, keycaps.click, keycaps.space, keycaps.p,
   keycaps.esc, keycaps.m, keycaps.f, keycaps.enter, keycaps.drag, keycaps.touch, keycaps.two_fingers

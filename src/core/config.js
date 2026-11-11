@@ -261,6 +261,26 @@ export const CONFIG = {
     score: 200,         // kill reward (more than a mine - faster and meaner)
     maxAge: 30          // I129: seeker battery - drone self-destructs after this many (game-time) seconds, bounding the accumulation that stacks onto boss waves
   },
+  stinger: {
+    // ST-229: STINGER charger - telegraphed line-of-sight dash rammer (wave 7+).
+    // Cruises in, locks a telegraph (core glows cyan->white), then charges in a
+    // straight line at the ship's position at lock time. Six charges, then fizzle.
+    firstWave: 7,       // wave 7: one after the W6 breather (boss waves are 5/10)
+    perWave: 1,
+    maxConcurrent: 2,
+    radius: 0.8,
+    cruiseSpeed: 1.8,   // u/s (dodgeable: ship maxSpeed 14)
+    cruiseTurn: 1.4,    // rad/s (gentle homing while cruising)
+    cruiseMin: 1.5,     // s: rng window for the cruise between charges (min)
+    cruiseMax: 3.0,     // s (max)
+    telegraph: 0.8,     // s: warning before the dash (the glow is FX-tier-independent)
+    chargeSpeed: 7.5,   // u/s (ship 14 - dodgeable with an early read)
+    chargeDur: 1.4,     // s: charge length (or until the arena rim)
+    recover: 1.2,       // s: vulnerable drift after each charge
+    maxCharges: 6,      // lifetime dashes, then it fizzles (seeker maxAge precedent)
+    rimDist: 15,        // spawn: rim point at least this far from the ship
+    score: 250          // kill reward (seeker 200 < stinger 250 < warden 400)
+  },
   enemyBullets: {     // ST-056: enemy bolts - separate pool, always slower than the ship
     maxConcurrent: 24,
     radius: 0.22,
@@ -338,6 +358,7 @@ export const CONFIG = {
       bomb: 1.0,             // bomb blast
       mineExplode: 0.4,      // mine detonation
       droneExplode: 0.35,    // seeker drone explosion
+      stingerDeath: 0.6,     // ST-229: charger burst (0.5 wardenSpawn < 0.6 < 0.8 wardenDeath)
       bossSpawn: 0.7,        // boss arrival
       bossDeath: 1.0,        // boss death
       wardenSpawn: 0.5,      // mini-boss arrival
@@ -366,6 +387,7 @@ export const CONFIG = {
       s: 0.08,                // small rock / mine (max displacement 0.16 u at the 2.0 u amplitude)
       m: 0.12,                // medium rock (0.24 u)
       l: 0.18,                // large rock (0.36 u; below the 0.45 weapon fanfare)
+      stinger: 0.2,           // ST-229: charger kill (L 0.18 < 0.2 < the 0.35 drone shake rung)
       overdriveBoost: 0.5,    // combo-heat: x1.5 while overdrive is active
       max: 0.3                // hard cap (L + overdrive 0.27 stays under the fanfare rung)
     },
@@ -421,7 +443,8 @@ export const CONFIG = {
       power:    [0xff5ad8, 0xff8ae8, 0xffb6f2],   // magenta overdrive
       bulletLevel: [0xbff4ff, 0x8affc0, 0xffd27a],   // ST-123 weapon L1/L2/L3 (cyan/mint/amber)
       engine:   [0xffa860, 0xffd9a0, 0x9fd8ff],  // I213 warm core -> cool tail (matches the flame)
-      belt:     [0x9fb4d0, 0x7c93b8, 0xcfe0f5]      // ST-139 cool steel - indestructible belt clink
+      belt:     [0x9fb4d0, 0x7c93b8, 0xcfe0f5],    // ST-139 cool steel - indestructible belt clink
+      stinger:  [0xd8f4ff, 0x9fd4ff, 0xffffff]      // ST-229 hot cyan-white (the telegraph family)
     }
   },
 

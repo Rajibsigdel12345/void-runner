@@ -35,6 +35,10 @@ const CUES = {
   bossDeath: { type: 'square', f0: 80,  f1: 30,  dur: 0.7,  gain: 0.45, min: 0.3,  noise: 0.5 },  // ST-087 impact tier: trimmed 0.5->0.45 for limiter headroom
   // I173 (ST-173): Warden death - mid boom, below the full-boss impact tier
   wardenDeath: { type: 'square', f0: 70, f1: 32, dur: 0.45, gain: 0.34, min: 0.2, noise: 0.3 },
+  // ST-229: Stinger telegraph - a rising saw sweep over the 0.8 s warning (locks at the dash)
+  stingerTelegraph: { type: 'sawtooth', f0: 220, f1: 880, dur: 0.8, gain: 0.2, min: 0.25 },
+  // ST-229: Stinger death - mid boom BELOW the warden rung (wardenDeath f0 70 / gain 0.34)
+  stingerDeath: { type: 'square', f0: 58, f1: 26, dur: 0.4, gain: 0.28, min: 0.2, noise: 0.25 },
   // ST-056 enemy bolts: low saw zap (boss), soft tick (mine)
   bossFire: { type: 'sawtooth', f0: 520, f1: 180, dur: 0.18, gain: 0.20, min: 0.12 },
   mineFire: { type: 'square',   f0: 340, f1: 220, dur: 0.10, gain: 0.12, min: 0.1,  noise: 0.08 },

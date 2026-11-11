@@ -13,6 +13,7 @@ import { createMineRenderer } from './render/mineMesh.js';
 import { createDroneRenderer } from './render/droneMesh.js'; // ST-117
 import { createBossMesh } from './render/bossMesh.js';
 import { createWardenMesh } from './render/wardenMesh.js'; // ST-137
+import { createStingerRenderer } from './render/stingerMesh.js'; // ST-229
 import { createBossHealth } from './render/bossHealth.js';
 import { createEnemyBulletRenderer } from './render/enemyBulletMesh.js';
 import { createPowerupRenderer } from './render/powerupMesh.js';
@@ -118,6 +119,7 @@ const mineRenders = createMineRenderer(scene); // ST-054
 const droneRenders = createDroneRenderer(scene); // ST-117
 const bossMesh = createBossMesh(scene); // ST-055
 const wardenMesh = createWardenMesh(scene); // ST-137
+const stingerRenders = createStingerRenderer(scene); // ST-229
 // I104: GLB assets (Blender pass) - fire-and-forget load with procedural
 // fallback: renderers start procedural and each asset swaps in as it loads.
 const assetLoader = createAssetLoader();
@@ -138,6 +140,7 @@ assetLoader.onAsset((name, entry) => {
   else if (name === 'puSlowmo') powerupRenders.setGLB('slowmo', entry.object);
   else if (name === 'drone') droneRenders.useGLB(entry.object); // I211
   else if (name === 'warden') wardenMesh.useGLB(entry.object); // I220: armored sentinel (hull + armor plate)
+else if (name === 'stinger') stingerRenders.useGLB(entry.object); // ST-230: Blender stinger (pre-wired hook)
   else if (name === 'arenaRing') arenaRing.useGLB(entry.object); // I212
 });
 assetLoader.loadAll();
@@ -196,7 +199,7 @@ let fxCount = 0;
 let motionOff = false;
 let liveSettings = storage.getSettings(); // ST-026: settings panel keeps this fresh (audio consumes in I27)
 // Audio (ST-027): WebAudio synth, initialized on first user gesture.
-const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', waveCleared: 'cleared', gameover: 'gameover', nearmiss: 'swish', mineExplode: 'mine', bossSpawn: 'bossSpawn', bossRing: 'bossRing', bossDeath: 'bossDeath', bossFire: 'bossFire', mineFire: 'mineFire', vortexTelegraph: 'vortexTelegraph', vortexStart: 'vortexStart', droneExplode: 'drone', weaponLevelUp: 'levelUp', rockShieldHit: 'shieldHit', droneDecay: 'droneDecay', wardenSpawn: 'wardenSpawn', wardenArmor: 'shieldHit', wardenDeath: 'wardenDeath', beltHit: 'shieldHit' }; // ST-059/ST-117/ST-123/ST-127/ST-129/ST-137, I173: decay + warden get their own cues (warden armor keeps shieldHit)
+const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', waveCleared: 'cleared', gameover: 'gameover', nearmiss: 'swish', mineExplode: 'mine', bossSpawn: 'bossSpawn', bossRing: 'bossRing', bossDeath: 'bossDeath', bossFire: 'bossFire', mineFire: 'mineFire', vortexTelegraph: 'vortexTelegraph', vortexStart: 'vortexStart', droneExplode: 'drone', weaponLevelUp: 'levelUp', rockShieldHit: 'shieldHit', droneDecay: 'droneDecay', wardenSpawn: 'wardenSpawn', wardenArmor: 'shieldHit', wardenDeath: 'wardenDeath', beltHit: 'shieldHit', stingerTelegraph: 'stingerTelegraph', stingerCharge: 'swish', stingerDeath: 'stingerDeath', stingerFizzle: 'droneDecay' }; // ST-229: charger cues (charge whoosh reuses swish; fizzle reuses the seeker decay) // ST-059/ST-117/ST-123/ST-127/ST-129/ST-137, I173: decay + warden get their own cues (warden armor keeps shieldHit)
 
 const audio = createAudio();
 audio.setVolume(liveSettings.volume);
@@ -518,7 +521,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, (replayView && world.game.in(STATE.REPLAY)) ? replayIntent() : intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -662,6 +665,7 @@ function tick(dt, intent) {
     else if (e.type === 'waveCleared') banner.showCleared(e.data.n);
     else if (e.type === 'bossSpawn') { banner.showBoss(e.data.wave, e.data.hp, e.data.kind === 'splicer' ? 'THE SPLICER' : 'THE MONOLITH', e.data.kind); if (e.data.kind === 'splicer') toast('SPLICER INBOUND'); } // I154: kind for variant glow // ST-135/143: boss intro (+ Splicer callout)
     else if (e.type === 'wardenSpawn') toast('WARDEN INBOUND'); // ST-137: mini-boss callout
+    else if (e.type === 'stingerSpawn') toast('STINGER INBOUND'); // ST-229: first spawn of the run calls out the charger
     else if (e.type === 'kill') { popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 || e.data.golden || e.data.boss, gold: !!e.data.golden, od: !!e.data.overdrive }); killFeed.add(e.data); } // ST-030/052, I153
     else if (e.type === 'nearmiss') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points); // ST-053 (plain small popup)
     else if (e.type === 'weaponLevelUp') toast('WEAPON LEVEL ' + e.data.level); // ST-123
@@ -671,6 +675,8 @@ function tick(dt, intent) {
       else if (e.type === 'mineExplode') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.mine, speed: 10, life: 0.5 }); shake.trigger(shakeEnergy('mineExplode', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('mineExplode', CONFIG.fx.flashTable)); juiceTally.record('mineExplode', { shake: 1, flash: 1 }); } // ST-054/ST-175
       else if (e.type === 'droneExplode') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.drone, speed: 9, life: 0.45 }); shake.trigger(shakeEnergy('droneExplode', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('droneExplode', CONFIG.fx.flashTable)); juiceTally.record('droneExplode', { shake: 1, flash: 1 }); } // ST-117/ST-175 seeker burst
 else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount ? Math.max(4, fxCount >> 1) : 0, palette: CONFIG.fx.palette.drone, speed: 5, life: 0.6 }); } // I129: seeker battery self-destruct - small cyan fizzle, no shake, honors FX tier off
+      else if (e.type === 'stingerDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 1.5), palette: CONFIG.fx.palette.stinger, speed: 11, life: 0.55 }); shake.trigger(shakeEnergy('stingerDeath', CONFIG.fx.shakeTable)); juiceTally.record('stingerDeath', { shake: 1 }); } // ST-229: charger burst - 0.6 shake rung, NO flash/hit-stop (readability rule)
+      else if (e.type === 'stingerFizzle') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount ? Math.max(4, fxCount >> 1) : 0, palette: CONFIG.fx.palette.stinger, speed: 5, life: 0.6 }); } // ST-229: charge-budget fizzle (seeker decay pattern - honors FX off)
       else if (e.type === 'bossSpawn') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.boss, speed: 8, life: 0.7 }); shake.trigger(shakeEnergy('bossSpawn', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('bossSpawn', CONFIG.fx.flashTable)); juiceTally.record('bossSpawn', { shake: 1, flash: 1 }); } // ST-055/ST-175
       else if (e.type === 'bossPhase2') { hitStop = Math.max(hitStop, CONFIG.fx.hitStop.bossPhase2); juiceTally.record('bossPhase2', { hitStop: 1 }); } // ST-217: 40 ms hit-stop on enrage entry (hit-stop only - no shake/flash; phase < death in the juice hierarchy)
       else if (e.type === 'bossRing') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.6), palette: CONFIG.fx.palette.boss, speed: 7, life: 0.4, shape: 'ring' }); // ST-055
@@ -792,6 +798,7 @@ function syncVisuals(dt) {
   droneRenders.sync(world.drones, simT); // ST-117
   bossMesh.sync(world.boss, simT); // ST-055
   wardenMesh.sync(world.warden, simT); // ST-137
+  stingerRenders.sync(world.stingers, simT, motionOff); // ST-229: core glow FX-tier-independent; telegraph wobble motion-gated
   bossHealth.sync(world.boss); // ST-055
   enemyBulletRenders.sync(world.enemyBullets, simT); // ST-056
   powerupRenders.sync(world.powerups, dt);

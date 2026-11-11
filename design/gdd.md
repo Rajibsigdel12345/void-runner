@@ -62,6 +62,13 @@ multipliers, and grab power-ups. Survive as long as you can.
 - Seeker battery (I129): each drone runs a 30 s game-time battery (scales with slow-mo). When it empties the drone self-destructs in place - small cyan fizzle, no shake, no score, no drop. This bounds the live pool to the last ~1-2 waves: a drone that outlives its wave expires before it can pile onto later (boss) waves. The fizzle honors the FX tier (no particles with FX off).
 - Distinct silhouette from the mine drone (ST-118): cyan, spiky, tumbles while wobbling.
 
+## The STINGER (ST-229)
+- From wave 7, each wave adds one STINGER at the arena rim: a dark-violet dart that charges at the ship (the "rammer" archetype - it checks its aim line, then goes faster). Max 2 live at once (wave 7's stinger can carry into wave 8).
+- State loop: cruise (homing 1.8 u/s, slow 1.4 rad/s turn, 1.5-3.0 s) -> telegraph 0.8 s (stops and faces the ship along the charge line; its core glows cyan -> white - the glow is FX-tier-independent readability, plus a rising warning SFX) -> charge 7.5 u/s for 1.4 s straight along the line locked at telegraph start (white-hot core) -> recover 1.2 s, back to cruise. The aim locks at telegraph start (after the final cruise tick), so the charge line is readable before it fires.
+- Lifetime: 6 charges, then it fizzles in place - small icy burst, no shake, no score (the seeker-decay pattern; honors the FX tier, zero particles with FX off).
+- 1 bullet destroys one (+250, feeds the combo; icy burst + shake rung 0.6, no flash/hit-stop - the readability rule). Contact costs a life and destroys the STINGER (NO score; stingerDeath fires before the hit, knockback + 1.8 s invuln, same flow as a drone hit).
+- Distinct silhouette from both drone families: a stretched dart body with a separate glowing core (Blender model lands in ST-230; procedural dart + core fallback).
+
 ## The Monolith (ST-055)
 
 - Every 5th wave (5, 10, 15, ...) spawns a MONOLITH at the arena rim, in addition to the wave's normal asteroids: a huge, slow-homing boss (base 40 HP, 1.6 u/s - always dodgeable).
@@ -145,7 +152,7 @@ Stacks: each has its own timer; grabbing the same type refreshes its timer.
 
 ## Scoring & Records
 - Score = sum(kill base score x current multiplier).
-- Kill base scores (multipliers stack on top): asteroid L 25 / M 50 / S 100 (a golden rock pays 5x that rock's base); mine drone 150; seeker drone 200; WARDEN 400; Splicer 600; Monolith 1000.
+- Kill base scores (multipliers stack on top): asteroid L 25 / M 50 / S 100 (a golden rock pays 5x that rock's base); mine drone 150; seeker drone 200; STINGER 250; WARDEN 400; Splicer 600; Monolith 1000.
 - Overdrive (ST-057): while OVERDRIVE is active, all points earned are x2 (applied after the combo multiplier).
 - Near-miss (ST-053): a rock skimming within 2.6u of the ship (no hit) pays a flat +15 once per approach (swish SFX, small popup, subtle cyan wisp). Fragments/splits get 0.3s immunity so a kill near the ship cannot farm graze points. Graze is not a kill: it never extends the combo chain.
 - Best score persisted to localStorage key `voidrunner.best` (int).

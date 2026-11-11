@@ -26,7 +26,7 @@ function fresh(t) {
 const CUE_NAMES = [
   'shoot', 'kill', 'hit', 'powerup', 'slowmo', 'shieldPop', 'shieldHit', 'swish',
   'mine', 'drone', 'droneDecay', 'bossSpawn', 'wardenSpawn', 'bossRing', 'bossDeath',
-  'wardenDeath', 'bossFire', 'mineFire', 'overdrive', 'vortexTelegraph', 'vortexStart',
+  'wardenDeath', 'stingerTelegraph', 'stingerDeath', 'bossFire', 'mineFire', 'overdrive', 'vortexTelegraph', 'vortexStart',
   'bomb', 'wave', 'cleared', 'gameover', 'levelUp',
 ];
 
@@ -59,6 +59,9 @@ test('weights() maps every cue to a finite positive gain', (t) => {
   assert.equal(w.droneDecay, 0.14);
   assert.equal(w.wardenSpawn, 0.22);
   assert.equal(w.wardenDeath, 0.34);
+  // ST-229 charger cues, pinned for drift (telegraph sweep g 0.2; death boom below the warden rung 0.34)
+  assert.equal(w.stingerTelegraph, 0.2);
+  assert.equal(w.stingerDeath, 0.28);
   assert.equal(w.slowmo, 0.18);
   assert.equal(w.bomb, 0.55);
   assert.equal(w.hit, 0.45);
