@@ -541,7 +541,23 @@ export const CONFIG = {
   bossZoomFov: 2.5,      // extra vertical FOV (degrees) near a live boss - a few degrees out
   bossZoomRange: 14,     // boss distance window (world units) where the zoom-out applies
   bossZoomDamp: 3,       // zoom ease rate (1/s) - eased in and out
-  menuOrbitRate: 0.06    // slow MENU orbit drift (rad/s, ~105 s per revolution; motion-gated)
+  menuOrbitRate: 0.06,   // slow MENU orbit drift (rad/s, ~105 s per revolution; motion-gated)
+  // ST-261 (I274): MENU hero framing (G4) - closer, lower hero orbit + ship hero pose + gentle engine
+  // idle. Drift/rock/flicker are motion-gated; reduced motion gets a static pose + a steady flame.
+  // Camera transform + existing meshes only (the idle flame lights 3 already-allocated flame meshes).
+  menuHero: {
+    radius: 4.8,        // MENU orbit radius (was hardcoded 13) - hero scale in frame
+    height: 2.3,        // MENU camera height (was hardcoded 9) - low 3/4 hero angle
+    lookY: 0.5,         // MENU look-target Y (was 0) - frames the hovering ship, not the floor
+    yaw: -1.0,           // ship facing (rad, render-only) - nose left-forward 3/4, engine stream reads right
+    pitch: -0.10,       // ship pitch (rad) - slight nose-up
+    bank: -0.18,        // ship bank (rad) - hero tilt
+    rockAmp: 0.05,      // idle bank-rock amplitude (rad); 0 under reduced motion
+    rockRate: 0.6,      // idle bank-rock rate (rad/s)
+    flameIdle: 0.34,    // gentle engine-idle thrust fraction (steady under reduced motion)
+    flameFlicker: 0.22, // idle flicker depth (fraction of flameIdle); 0 under reduced motion
+    flameRate: 4.6      // idle flicker rate (rad/s)
+  }
   },
   render: {                 // ST-236 (I243): renderer color/tone pipeline (applied at boot by the render layer; pre-pass three defaults)
     tone: {

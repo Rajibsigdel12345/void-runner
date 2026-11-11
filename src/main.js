@@ -815,7 +815,18 @@ function syncVisuals(dt) {
   hud.render(world, hudOpts);
   if (coarse && st === STATE.PLAYING) { if (pauseBtn.style.display !== 'flex') pauseBtn.style.display = 'flex'; } else if (pauseBtn.style.display !== 'none') pauseBtn.style.display = 'none'; // I71: on-screen pause button (touch, PLAYING only)
   screens.update(st, world, screenOpts);
-  shipMesh.sync(world.ship, simT, !motionOff, Math.min(1, Math.hypot(input.state.thrust.x, input.state.thrust.y))); // ST-063 engine flame
+  const thrustFrac = Math.min(1, Math.hypot(input.state.thrust.x, input.state.thrust.y));
+  const mh = CONFIG.camera.menuHero; // ST-261: MENU hero block (framing + pose + idle flame)
+  const menuFlame = st === STATE.MENU ? (motionOff ? mh.flameIdle : mh.flameIdle * (1 - mh.flameFlicker * (0.5 + 0.5 * Math.sin(simT * mh.flameRate)))) : thrustFrac; // ST-261: gentle engine idle in MENU (steady under reduced motion)
+  shipMesh.sync(world.ship, simT, !motionOff, menuFlame); // ST-063 engine flame; ST-261: MENU idle
+  if (st === STATE.MENU) { // ST-261: hero pose (render-only - sync owns rotation.y each frame, so this override is authoritative while in MENU)
+    shipMesh.group.rotation.y = mh.yaw;
+    shipMesh.group.rotation.x = mh.pitch;
+    shipMesh.group.rotation.z = mh.bank + (motionOff ? 0 : mh.rockAmp * Math.sin(simT * mh.rockRate)); // idle rock, static under reduced motion
+  } else { // no MENU pose bleed into the follow cam
+    shipMesh.group.rotation.x = 0;
+    shipMesh.group.rotation.z = 0;
+  }
   reticle.sync(world.ship, st === STATE.PLAYING); // I44: only while playing
   bullets.sync(world.weapons);
   bullets.setLevel(world.weaponLevel(), st === STATE.PLAYING && world.powerups.active('overdrive')); // ST-123, ST-248: overdrive heat shift
@@ -856,8 +867,9 @@ function syncVisuals(dt) {
   if (st === STATE.MENU && !motionOff) menuOrbitA += dt * CONFIG.camera.menuOrbitRate; // slow drift, motion-gated
   let camTX = ship.pos.x, camTY = 9, camTZ = ship.pos.y + 13;
   let lookTX = ship.pos.x + f.x * ahead, lookTZ = ship.pos.y + f.y * ahead; // ST-082
-  if (st === STATE.MENU) { // slow orbit around the arena center (static under reduced motion)
-    camTX = Math.sin(menuOrbitA) * 13; camTZ = Math.cos(menuOrbitA) * 13; lookTX = 0; lookTZ = 0;
+  let lookTY = 0; // ST-261: MENU frames the hovering ship line (default = arena plane)
+  if (st === STATE.MENU) { // slow orbit around the arena center (static under reduced motion); ST-261 hero framing
+    camTX = Math.sin(menuOrbitA) * mh.radius; camTZ = Math.cos(menuOrbitA) * mh.radius; camTY = mh.height; lookTX = 0; lookTZ = 0; lookTY = mh.lookY;
   } else if (st === STATE.PLAYING && !motionOff) { // 2-5% lead toward the aim point, capped, eased by the look damp
     const aim = resolveAimPoint();
     if (aim) {
@@ -870,7 +882,7 @@ function syncVisuals(dt) {
   camPos.y = damp(camPos.y, camTY, 5, dt);
   camPos.z = damp(camPos.z, camTZ, 5, dt);
   camLook.x = damp(camLook.x, lookTX, 6, dt);
-  camLook.y = damp(camLook.y, 0, 6, dt);
+  camLook.y = damp(camLook.y, lookTY, 6, dt); // ST-261: MENU look target on the ship line
   camLook.z = damp(camLook.z, lookTZ, 6, dt);
   // ST-219: boss-approach zoom-out (a few degrees, eased in and out; a boss is only alive during play)
   const boss = world.boss;
