@@ -110,11 +110,42 @@ test('asteroid L/M/S: naming, poly budgets, radii match CONFIG (+/-5%)', () => {
       size + ' max vertex radius ' + maxR.toFixed(4) + ' within 5% of logical ' + logical);
   }
 });
-// I257 (ST-247 periwinkle incident): pin the COLOR_0 band of the I253/I257 warm rock bakes.
-// The renderer-side bug (saturated rim term + blue light wash) is what made these warm bakes
-// read periwinkle; this keeps the DATA side pinned too: I209 clamp band 0.45..1.2 and warm
-// ordering R>=G>=B on every vertex of every rock size.
-test('asteroid L/M/S: COLOR_0 warm band + R>=G>=B (I257 periwinkle regression pin)', () => {
+// I257 (ST-247 periwinkle incident) -> I264 (ST-253 world micro-pass): pin the COLOR_0
+// band of the warm rock bakes. I264 re-baked per-facet value mottling into the SAME
+// geometry (Blender 3D value noise, per-size seed; radii/tris/byte budgets unchanged):
+// band widens 0.45..1.20 -> 0.30..1.20, warm ordering R>=G>=B unchanged, facet means
+// stay at the originals (0.622/0.716/0.636) so brightness is preserved, and the FACET
+// luma spread (per-triangle mean luma, p90-p10) becomes a pinned acceptance metric:
+// 0.401/0.402/0.418 (L/M/S) vs 0.105/0.083/0.207 pre-bake. Percentile convention is the
+// Blender ground-truth dump convention: sorted, q(f) = v[floor(f*len)].
+const ROCK_FACET = {
+  L: { p10: 0.426, p50: 0.628, p90: 0.827, mean: 0.622 },
+  M: { p10: 0.498, p50: 0.705, p90: 0.900, mean: 0.716 },
+  S: { p10: 0.446, p50: 0.621, p90: 0.865, mean: 0.636 },
+};
+function facetLumas({ buf, json, binOff }) {
+  const p = json.meshes[0].primitives[0];
+  const cAcc = json.accessors[p.attributes.COLOR_0];
+  const iAcc = json.accessors[p.indices];
+  const cBase = binOff + (json.bufferViews[cAcc.bufferView].byteOffset || 0) + (cAcc.byteOffset || 0);
+  const iBase = binOff + (json.bufferViews[iAcc.bufferView].byteOffset || 0) + (iAcc.byteOffset || 0);
+  const vL = [];
+  for (let i = 0; i < cAcc.count; i++) {
+    const r = buf.readFloatLE(cBase + i * 12);
+    const g = buf.readFloatLE(cBase + i * 12 + 4);
+    const b = buf.readFloatLE(cBase + i * 12 + 8);
+    vL.push(0.2126 * r + 0.7152 * g + 0.0722 * b);
+  }
+  const readIdx = (i) => (iAcc.componentType === 5123 ? buf.readUInt16LE(iBase + i * 2) : iAcc.componentType === 5125 ? buf.readUInt32LE(iBase + i * 4) : buf.readUInt8(iBase + i)); // I264b: glTF spec 5123=UNSIGNED_SHORT (2B), 5121=UNSIGNED_BYTE (1B)
+  const fl = [];
+  for (let t = 0; t < iAcc.count / 3; t++) {
+    fl.push((vL[readIdx(t * 3)] + vL[readIdx(t * 3 + 1)] + vL[readIdx(t * 3 + 2)]) / 3);
+  }
+  fl.sort((a, b) => a - b);
+  const q = (f) => fl[Math.min(fl.length - 1, Math.floor(f * fl.length))];
+  return { p10: q(0.1), p50: q(0.5), p90: q(0.9), mean: fl.reduce((sm, x) => sm + x, 0) / fl.length };
+}
+test('asteroid L/M/S: COLOR_0 mottling band + warm order + facet luma spread (I257 -> I264)', () => {
   for (const size of ['L', 'M', 'S']) {
     const { buf, json, binOff } = parseGlb('asteroid_' + size + '.glb');
     for (const m of json.meshes || []) for (const p of m.primitives || []) {
@@ -129,12 +160,56 @@ test('asteroid L/M/S: COLOR_0 warm band + R>=G>=B (I257 periwinkle regression pi
         const g = buf.readFloatLE(base + i * stride * 4 + 4);
         const b = buf.readFloatLE(base + i * stride * 4 + 8);
         for (const v of [r, g, b]) {
-          assert.ok(v >= 0.45 - 0.01 && v <= 1.2 + 0.01, size + ' COLOR_0 channel in [0.45,1.2] I209 band: ' + v.toFixed(3));
+          assert.ok(v >= 0.30 - 0.01 && v <= 1.20 + 0.01, size + ' COLOR_0 channel in [0.30,1.20] I264 mottling band: ' + v.toFixed(3));
         }
         assert.ok(r >= g - 1e-4 && g >= b - 1e-4, size + ' COLOR_0 warm order R>=G>=B at vertex ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
         checked++;
       }
       assert.ok(checked > 0, size + ' checked vertices');
+    }
+    // I264 acceptance metric: measured facet luma spread + brightness preservation.
+    const f = facetLumas({ buf, json, binOff });
+    const E = ROCK_FACET[size];
+    assert.ok(f.p90 - f.p10 >= 0.38, size + ' facet luma spread ' + (f.p90 - f.p10).toFixed(3) + ' >= 0.38 (rocky read, was ~0.1-0.2)');
+    for (const k of ['p10', 'p50', 'p90', 'mean']) {
+      assert.ok(Math.abs(f[k] - E[k]) <= 0.005, size + ' facet ' + k + ' ' + f[k].toFixed(3) + ' ~ ' + E[k] + ' (I264 bake pin)');
+    }
+  }
+});
+
+// I264b (ST-253, RULE + correction of the mid-I264 audit misread): glTF componentType is
+// 5120 BYTE / 5121 UNSIGNED_BYTE (1B) / 5122 SHORT (2B) / 5123 UNSIGNED_SHORT (2B) /
+// 5125 UNSIGNED_INT (4B) / 5126 FLOAT (4B). Blender 5.2.3 declares its u16 index data
+// correctly as 5123 - the original GLBs were ALWAYS VALID and three.js r160 rendered
+// their true topology. A mid-I264 audit used an inverted table (5123 as 1B) and
+// "patched" 5123->5121 in every GLB, which BROKE them (u16 data then read as u8 ->
+// scrambled pinwheel topology, caught in the browser A/B; the BEFORE clay-lump shot
+// was the TRUE mesh, so the E19 art diagnoses were real critiques, not a bug).
+// All 18 GLBs restored: 15 to committed bytes, rocks keep the I264 mottling re-bake
+// with the spec-conformant 5123 declaration. RULE: after every Blender GLB export,
+// re-parse in Node and assert the packing below (byteLength == count * compSize);
+test('all GLBs: index accessors spec-conformant (I264b audit-misread correction + RULE)', () => {
+  const COMPSIZE = { 5121: 1, 5123: 2, 5125: 4 }; // glTF spec byte sizes
+  const files = fs.readdirSync(ASSET_DIR).filter((f) => f.endsWith('.glb')).sort();
+  assert.ok(files.length >= 17, 'expected >= 17 GLBs in assets/');
+  for (const file of files) {
+    const { buf, json, binOff } = parseGlb(file);
+    for (const m of json.meshes || []) {
+      for (const p of m.primitives || []) {
+        assert.ok(p.indices !== undefined, file + ' ' + (m.name || '?') + ' primitive is indexed');
+        const acc = json.accessors[p.indices];
+        const bv = json.bufferViews[acc.bufferView];
+        assert.ok(COMPSIZE[acc.componentType] !== undefined, file + ' index compType ' + acc.componentType + ' in {5121,5123,5125}');
+        assert.equal(bv.byteLength, acc.count * COMPSIZE[acc.componentType],
+          file + ' ' + (m.name || '?') + ' index bufferView tightly packed (count ' + acc.count + ' x ' + COMPSIZE[acc.componentType] + ' B)');
+        // data sanity in the DECLARED component: every index within the vertex count
+        const posCount = json.accessors[p.attributes.POSITION].count;
+        const base = binOff + (bv.byteOffset || 0) + (acc.byteOffset || 0);
+        for (let i = 0; i < acc.count; i++) {
+          const v = acc.componentType === 5123 ? buf.readUInt16LE(base + i * 2) : acc.componentType === 5125 ? buf.readUInt32LE(base + i * 4) : buf.readUInt8(base + i);
+          assert.ok(v < posCount, file + ' index ' + i + ' = ' + v + ' < vertCount ' + posCount);
+        }
+      }
     }
   }
 });
@@ -334,9 +409,14 @@ assert.ok(s.matNames.includes('VR_ArenaRing_Ticks'), 'VR_ArenaRing_Ticks materia
     const faceCount = idxAcc ? Math.round(idxAcc.count / 3) : Math.round(acc.count / 3);
     for (let f = 0; f < faceCount; f++) {
       const v = (k) => {
+        // I264: read indices per DECLARED component (spec-conformant). The I254 version
+        // special-cased the unpatched Blender u16-as-u8 exports; now that the accessor is
+        // correctly typed, the conformant read IS the true index.
+        const iBase = binOff + (json.bufferViews[idxAcc.bufferView].byteOffset || 0) + (idxAcc.byteOffset || 0);
         const vi = idxAcc
-          ? (idxAcc.componentType === 5123 ? buf.readUInt16LE(binOff + (json.bufferViews[idxAcc.bufferView].byteOffset || 0) + (idxAcc.byteOffset || 0) + (f * 3 + k) * 2)
-            : buf.readUInt32LE(binOff + (json.bufferViews[idxAcc.bufferView].byteOffset || 0) + (idxAcc.byteOffset || 0) + (f * 3 + k) * 4))
+          ? (idxAcc.componentType === 5123 ? buf.readUInt16LE(iBase + (f * 3 + k) * 2)
+            : idxAcc.componentType === 5125 ? buf.readUInt32LE(iBase + (f * 3 + k) * 4)
+            : buf.readUInt8(iBase + (f * 3 + k)))
           : f * 3 + k;
         return binOff + (bv2.byteOffset || 0) + (acc.byteOffset || 0) + vi * 12;
       };

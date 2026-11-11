@@ -5,7 +5,7 @@
 // The in-code materials are authoritative (the GLB carries no vertex colors).
 //
 // I254/ST-245 v2: two-node GLB - VR_ArenaRing (outer band, 24 plates) renders
-// unchanged (0x4a6cff op 0.55, DoubleSide, depthWrite false, y 0.03) and
+// slim (I264: 0x4059e0 op 0.42; pre-I264 0x4a6cff op 0.55; DoubleSide, depthWrite false, y 0.03) and
 // VR_ArenaRing_Ticks (12 wedge ticks at the major seams, r 0.895-0.93) renders
 // a brighter MeshBasic that CROSSES the 0.72 bloom threshold = the intended
 // neon accent (band luma stays below). Ticks sit 5 mm above the band -
@@ -18,9 +18,9 @@ const TICK_COLOR = 0xdfe9ff;
 
 export function createArenaRing(scene, radius) {
   const mat = new THREE.MeshBasicMaterial({
-    color: 0x4a6cff,
+    color: 0x4059e0, // I264 (ST-253): slimmed darker (0x4a6cff pre-I264)
     transparent: true,
-    opacity: 0.55,
+    opacity: 0.42, // I264 (ST-253): slimmed (0.55 pre-I264); ticks untouched
     side: THREE.DoubleSide,
     depthWrite: false,
   });
