@@ -63,6 +63,12 @@ const app = document.getElementById('app');
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+// ST-236 (I243): renderer color/tone pipeline from config (pre-pass three defaults: NoToneMapping + implicit sRGB output).
+// The composer path applies the curve in the OutputPass (bloom threshold stays in linear space); the Low-tier direct
+// render applies it in the material shaders - same curve on both tiers.
+renderer.toneMapping = CONFIG.render.tone.mapping === 'acesFilmic' ? THREE.ACESFilmicToneMapping : THREE.NoToneMapping;
+renderer.toneMappingExposure = CONFIG.render.tone.exposure;
+renderer.outputColorSpace = THREE.SRGBColorSpace; // explicit - the r152+ default, made visible (the ST-236 contract names it)
 // I36: keep per-frame GPU stats across all composer passes (autoReset would zero them per pass)
 renderer.info.autoReset = false;
 renderer.setSize(window.innerWidth, window.innerHeight);

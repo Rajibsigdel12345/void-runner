@@ -99,3 +99,11 @@ test('config: storage caps and keys are sane (ST-192)', () => {
   for (const k of keys) assert.ok(typeof k === 'string' && k.length > 0, 'key non-empty: ' + k);
   assert.equal(new Set(keys).size, keys.length, 'storage keys are distinct');
 });
+
+
+test('config: render.tone - tone pipeline knobs (ST-236)', () => {
+  const tone = CONFIG.render.tone;
+  assert.ok(tone, 'render.tone exists');
+  assert.ok(['none', 'acesFilmic'].includes(tone.mapping), `mapping in [none, acesFilmic], got ${tone.mapping}`);
+  assert.ok(Number.isFinite(tone.exposure) && tone.exposure > 0 && tone.exposure <= 4, `exposure in (0,4], got ${tone.exposure}`);
+});

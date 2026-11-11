@@ -486,6 +486,12 @@ export const CONFIG = {
   bossZoomDamp: 3,       // zoom ease rate (1/s) - eased in and out
   menuOrbitRate: 0.06    // slow MENU orbit drift (rad/s, ~105 s per revolution; motion-gated)
   },
+  render: {                 // ST-236 (I243): renderer color/tone pipeline (applied at boot by the render layer; pre-pass three defaults)
+    tone: {
+      mapping: 'acesFilmic', // tone mapping operator by name: 'none' (pre-I243 baseline) | 'acesFilmic' (filmic rolloff - shapes sky/rocks/emissives together; the I230 warm-cast note is the acceptance hook)
+      exposure: 1.15         // toneMappingExposure - compensates the ACES midtone dip against the tuned NoToneMapping baseline
+    }
+  },
   storage: {
     bestKey: 'voidrunner.best',
     settingsKey: 'voidrunner.settings',
