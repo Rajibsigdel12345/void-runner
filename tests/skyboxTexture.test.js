@@ -4,8 +4,9 @@
 // within the adopted build budget (<=2 MB raw / <=550 KB gzip). I230 swapped the
 // I212 1024x512 PNG for a 1024x512 JPEG: the layered nebula + dense starfield is
 // high-frequency texture that PNG cannot compress (679 KB at 1024x512), while the
-// JPEG lands at ~73 KB (net +32 KB raw vs the 41.2 KB PNG, within the ST-226
-// budget of net delta <= 40 KB).
+// JPEG landed at ~73 KB (net +32 KB raw vs the 41.2 KB PNG, within the ST-226
+// budget of net delta <= 40 KB). I235 re-encoded the same 1024x512 master at PIL
+// JPEG q80 -> ~59 KB gz (ST-230: restores gzip headroom, readability A/B'd in browser).
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -31,7 +32,7 @@ function jpegSof(buf) {
   throw new Error('no SOF segment found');
 }
 
-test('skybox_equirect.jpg: valid JPEG, 1024x512 (2:1 equirect), under size budget (I212, I230)', () => {
+test('skybox_equirect.jpg: valid JPEG, 1024x512 (2:1 equirect), under size budget (I212, I230, I235)', () => {
   const buf = fs.readFileSync(path.join(ASSET_DIR, 'skybox_equirect.jpg'));
   assert.equal(buf.readUInt32BE(0) >>> 8, 0xffd8ff, 'JPEG SOI magic bytes');
   const sof = jpegSof(buf);
