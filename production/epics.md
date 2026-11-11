@@ -270,7 +270,7 @@ recorded in production/gates.md.
 - Result: PENDING (stories ST-244..246 scheduled I253..I255).
 
 ## E17 Risk Register
-- R-E17-1 (med) asteroid v3 breaks the golden/shielded/belt reads (COLOR_0 consumed by matGold/matBelt - the I209 contract) -> vertexColors:true kept, mottle baked in the same I209 clamp band (0.45..1.2, identity-safe), extent parity vs the jittered-ico fallback envelope, live A/B of golden + shielded + belt rocks at ST-244.
+- R-E17-1 (med) asteroid v3 breaks the golden/shielded/belt reads (COLOR_0 consumed by matGold/matBelt - the I209 contract) -> vertexColors:true kept, mottle baked in the same I209 clamp band (0.45..1.2, identity-safe), extent parity vs the jittered-ico fallback envelope, live A/B of golden + shielded + belt rocks at ST-244. [I253 RESOLVED: COLOR_0 = POINT-domain FLOAT, mottle + rim brighten baked in the I209 band 0.45..1.2 (colR L [0.450,0.945]/M [0.450,0.938]/S [0.550,1.152]); live A/B PASS golden S #ffa018@1.6 + belt M #2f6fd0@0.58 + shielded L shell child, in-code vertexColors:true palette intact, extent parity vs the fallback envelope held.]
 - R-E17-2 (low) demo pin drift -> BY LAYER (render/asset only; no core sim/scoring/replay-data; I217/I235/I240/I244/I248 precedent); real-UI re-verify at ST-246; no daily salt bump.
 - R-E17-3 (low) gzip budget (10.9 KB at open) -> asteroid rebuild NET NEGATIVE raw (L 37.66 KB outlier; lean export + class decimate), ring v2 <= 4 KB raw; floor >= 8 KB after every story.
 - R-E17-4 (low) ring v2 test pin change (exactly 48 -> two-node counts) + +1 draw call -> pin updates intentional with evidence in the iteration log; frame probe delta ~0; bloom-safe bands verified (ticks cross 0.72 = the intended accent; band luma below).
