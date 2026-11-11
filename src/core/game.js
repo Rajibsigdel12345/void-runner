@@ -15,7 +15,7 @@ import { VortexField } from './vortex.js'; // ST-059
 import { bulletHitRock, shipHitRock } from './collision.js';
 import { CONFIG } from './config.js';
 import { v2 } from './math.js';
-import { ScoreKeeper } from './score.js';
+import { ScoreKeeper, capFor } from './score.js';
 import { WaveDirector } from './waves.js';
 import { Lives } from './lives.js';
 import { PowerUpField } from './powerups.js';
@@ -175,6 +175,7 @@ export class World {
       this.spawnDronesForWave(wv.startedWave); // ST-117
       this.spawnStingersForWave(wv.startedWave); // ST-229
       this.spawnFlyersForWave(wv.startedWave); // ST-232
+      this.scoreKeeper.setCap(capFor(wv.startedWave, this.cfg)); // ST-233: combo cap wave-scaling (W1-2 capLow / W3+ capHigh)
     }
     const wl = this.weaponLevel(); // ST-122: weapon progression by wave
     if (wl > this._wlevel) { this._wlevel = wl; this.emit('weaponLevelUp', { level: wl }); }

@@ -324,9 +324,11 @@ export const CONFIG = {
   },
 
   combo: {
-    window: 4.0,        // seconds to keep a chain alive
-    cap: 15,            // max combo (I92: 10->15, raises the mastery ceiling)
-    step: 0.1,          // multiplier per combo step (1.0x .. 2.4x at cap)
+    window: 4.0,         // seconds to keep a chain alive
+    capLow: 15,          // ST-233: W1-2 cap EXACT (onboarding band + demo-pin band; I92: 10->15)
+    capHigh: 20,         // ST-233: W3+ mastery band (multiplier reaches 2.9x at cap)
+    capHighWave: 3,      // ST-233: first wave that grants capHigh
+    step: 0.1,           // multiplier per combo step (1.0x .. 2.4x at capLow / 2.9x at capHigh)
     tierCount: 5        // I111: discrete multiplier tiers for HUD level-up feedback
   },
 

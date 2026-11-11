@@ -1,6 +1,12 @@
 ﻿// Void Runner - score + combo (ST-013). Pure core.
 import { CONFIG } from './config.js';
 
+// ST-233: combo cap wave-scaling (pure). W1-2 stay at capLow (EXACT - onboarding
+// band + demo-pin band); from capHighWave the mastery band opens (capHigh).
+export function capFor(wave, cfg = CONFIG) {
+  return wave >= cfg.combo.capHighWave ? cfg.combo.capHigh : cfg.combo.capLow;
+}
+
 export class ScoreKeeper {
   constructor(cfg = CONFIG) {
     this.cfg = cfg;
@@ -12,21 +18,27 @@ export class ScoreKeeper {
     this.shotsHit = 0; // I152: accuracy numerator
     this.lastKillTime = -Infinity;
     this.overdriveMult = 1; // ST-057: World sets this to the OVERDRIVE mult while active
+    this.cap = this.cfg.combo.capLow; // ST-233: effective combo cap (game.js sets it at wave start)
   }
 
   get multiplier() {
     if (this.combo <= 1) return 1;
-    return 1 + this.cfg.combo.step * (Math.min(this.combo, this.cfg.combo.cap) - 1);
+    return 1 + this.cfg.combo.step * (Math.min(this.combo, this.cap) - 1); // ST-233: effective (wave-scaled) cap
   }
 
   // I111: discrete multiplier tier (0 = no chain, 1..tierCount) for HUD level-up pops.
   get tier() {
-    const cap = this.cfg.combo.cap;
+    const cap = this.cap; // ST-233: tier width follows the effective cap
     const tiers = this.cfg.combo.tierCount;
     if (this.combo <= 1) return 0;
     const width = (cap - 1) / tiers;
     const t = Math.floor((this.combo - 1) / width);
     return Math.min(tiers, t + 1);
+  }
+
+  /** ST-233: set the effective combo cap (game.js calls this at wave start with capFor(wave)). */
+  setCap(cap) {
+    this.cap = Number.isFinite(cap) ? Math.max(1, Math.floor(cap)) : this.cfg.combo.capLow;
   }
 
   // I111: fraction of the combo window still alive at sim time t (1 = just killed, 0 = expired).
@@ -39,7 +51,7 @@ export class ScoreKeeper {
   /** Award a kill at sim time t. Returns points actually added (base * combo multiplier * overdrive, floored). */
   kill(base, t) {
     if (t - this.lastKillTime > this.cfg.combo.window) this.combo = 0;
-    this.combo = Math.min(this.combo + 1, this.cfg.combo.cap);
+    this.combo = Math.min(this.combo + 1, this.cap); // ST-233
     this.maxCombo = Math.max(this.maxCombo, this.combo);
     this.kills++;
     this.lastKillTime = t;
@@ -81,5 +93,6 @@ export class ScoreKeeper {
     this.shotsHit = 0;
     this.lastKillTime = -Infinity;
     this.overdriveMult = 1;
+    this.cap = this.cfg.combo.capLow; // ST-233
   }
 }

@@ -84,11 +84,11 @@ carry as the human-session checklist. No config change -> the deterministic demo
 15) is untouched.
 
 ### Triage table (I202 findings)
-- T1 combo cap (15) reached in ~12 s by an active pilot; flat 2.4x for the rest of the run.
+- T1 combo flatline: cap (15) reached in ~12 s by an active pilot; flat 2.4x for the rest of the run. ADDRESSED (I239/ST-233, late-only): wave-scaled combo cap (capFor: W1-2 cap 15 EXACT, W3+ cap 20 = 2.9x mastery band); the W1-2 flat band remains by design (R-E14-5 onboarding + the demo pin requires cap 15 exact there).
   Bucket BALANCE | Severity Low | Priority P3 | Repro High (bot-measured, 2 runs) | Owner
   senior_game_designer | Disposition: disposition only. I92 already raised the cap 10->15 (F4).
   Raising it further or shortening the 4 s window changes the demo pin (maxCombo 15,
-  tests/replay.test.js:246) - deferred to the E9 feel pass with a human data point.
+  tests/replay.test.js:246) - SUPERSEDED by ST-233 (I239): late-run mastery band, demo-pin-compatible by gating.
 - T2 wave-5 boss kills the naive pilot in 3 hull hits (187.9 s). Bucket BALANCE | Low | P3 |
   High | senior_game_designer | Disposition: accept - 3 lives is arcade-standard, the boss is the
   designed ceiling; human session before any tuning (HUMAN-PENDING #1).
@@ -142,8 +142,9 @@ satisfied by this section + the v3 report.
 ### Risks
 - The 10 HUMAN-PENDING items remain the player-experience evidence gap (non-blocking; the bot
   covered everything bot-verifiable quantitatively).
-- If a human session later flags T1 (combo flatness) as P1, the fix touches config.combo + the
-  demo pin (tests/replay.test.js:246) - the blast radius is documented in advance.
+- If a human session later flags the W1-2 combo flat band as P1, the fix touches config.combo + the
+  demo pin (tests/replay.test.js:246) - the blast radius is documented in advance (the W3+ late-run
+  flatline was already fixed in I239/ST-233 with the wave-scaled cap).
 
 ### Changed files or proposed files
 - production/bug-triage.md (this section).

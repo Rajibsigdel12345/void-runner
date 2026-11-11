@@ -23,7 +23,10 @@ test('config: numeric tunables are positive finite', () => {
   check(CONFIG.weapon.bulletLife, 'weapon.bulletLife');
   assert.ok(CONFIG.weapon.maxBullets >= 1, 'weapon.maxBullets');
   check(CONFIG.combo.window, 'combo.window');
-  assert.ok(CONFIG.combo.cap >= 1, 'combo.cap');
+  assert.ok(CONFIG.combo.capLow >= 1, 'combo.capLow');
+  assert.ok(CONFIG.combo.capHigh >= CONFIG.combo.capLow, 'combo.capHigh >= capLow');
+  assert.ok(CONFIG.combo.capHighWave >= 1, 'combo.capHighWave');
+
   assert.ok(CONFIG.combo.step > 0, 'combo.step');
   assert.ok(CONFIG.powerup.dropChance >= 0 && CONFIG.powerup.dropChance <= 1, 'powerup.dropChance in [0,1]');
   check(CONFIG.powerup.magnetAccel, 'powerup.magnetAccel');

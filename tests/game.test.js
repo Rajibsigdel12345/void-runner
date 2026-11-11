@@ -423,3 +423,22 @@ test('config: bomb power-up is instant (dur 0) with a positive brief invuln', ()
   assert.equal(CONFIG.powerup.types.bomb.dur, 0, 'bomb is an instant power-up (no active timer)');
   assert.ok(CONFIG.powerup.types.bomb.invuln > 0, 'bomb invuln duration positive');
 });
+
+// ST-233: combo cap wave-scaling integration (game.js drives setCap at wave start)
+test('world: combo cap is capLow before wave 3 and capHigh from wave 3 (ST-233)', () => {
+  const w = new World(new RNG(7));
+  w.begin();
+  w.ship.invuln = 1e9;
+  assert.equal(w.scoreKeeper.cap, CONFIG.combo.capLow, 'wave 1 cap');
+  let guard = 0;
+  while (!(w.wave === 3 && w.waves.state === 'active')) {
+    w.field.clear();
+    w.mines.clear();
+    w.waves.toSpawn = 0;
+    w.step(DT, NOINTENT);
+    if (++guard > 5000) break;
+  }
+  assert.ok(guard < 5000, 'reached wave 3 (guard ' + guard + ')');
+  assert.equal(w.wave, 3);
+  assert.equal(w.scoreKeeper.cap, CONFIG.combo.capHigh, 'wave 3 opens the mastery band');
+});

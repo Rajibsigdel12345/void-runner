@@ -1,7 +1,7 @@
 ﻿// ST-013: score + combo tests
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ScoreKeeper } from '../src/core/score.js';
+import { ScoreKeeper, capFor } from '../src/core/score.js';
 import { CONFIG } from '../src/core/config.js';
 
 const W = CONFIG.combo.window;
@@ -22,11 +22,11 @@ test('score: chain within window raises multiplier by step per kill', () => {
   assert.ok(Math.abs(s.multiplier - 1.2) < 1e-9);
 });
 
-test('score: combo caps at configured max', () => {
+test('score: combo caps at the effective (default = capLow) cap', () => {
   const s = new ScoreKeeper();
-  for (let i = 0; i < CONFIG.combo.cap + 5; i++) s.kill(100, i * 0.1);
-  assert.equal(s.combo, CONFIG.combo.cap);
-  const topMult = 1 + CONFIG.combo.step * (CONFIG.combo.cap - 1);
+  for (let i = 0; i < CONFIG.combo.capLow + 5; i++) s.kill(100, i * 0.1);
+  assert.equal(s.combo, CONFIG.combo.capLow);
+  const topMult = 1 + CONFIG.combo.step * (CONFIG.combo.capLow - 1);
   assert.ok(Math.abs(s.multiplier - topMult) < 1e-9);
   assert.equal(s.kill(100, 2), Math.floor(100 * topMult), 'capped kill pays top mult');
 });
@@ -95,7 +95,7 @@ test('score: tier is 0 with no chain and rises with combo', () => {
 test('score: tier is monotonic and capped at tierCount', () => {
   const s = new ScoreKeeper();
   let prev = 0;
-  for (let c = 1; c <= CONFIG.combo.cap; c++) {
+  for (let c = 1; c <= CONFIG.combo.capLow; c++) {
     s.kill(10, c * 0.01);
     assert.ok(s.tier >= prev, 'tier must not decrease at combo ' + c);
     prev = s.tier;
@@ -170,4 +170,72 @@ test('score: reset clears accuracy counters and it restarts fresh', () => {
   assert.equal(s.accuracy(), 0);
   s.onShotFired(1);
   assert.equal(s.accuracy(), 0);
+});
+
+// ST-233: combo cap wave-scaling (capFor pure fn + setCap + 2.9x mastery band)
+test('score: capFor is EXACT capLow for W1-2 and capHigh from W3 (demo-pin band)', () => {
+  assert.equal(capFor(1), CONFIG.combo.capLow, 'wave 1');
+  assert.equal(capFor(2), CONFIG.combo.capLow, 'wave 2');
+  assert.equal(capFor(3), CONFIG.combo.capHigh, 'wave 3');
+  assert.equal(capFor(10), CONFIG.combo.capHigh, 'wave 10');
+  assert.equal(capFor(99), CONFIG.combo.capHigh, 'wave 99');
+});
+
+test('score: capFor honors a custom cfg (pure fn)', () => {
+  const cfg = { combo: { capLow: 7, capHigh: 12, capHighWave: 5 } };
+  assert.equal(capFor(4, cfg), 7);
+  assert.equal(capFor(5, cfg), 12);
+  assert.equal(capFor(50, cfg), 12);
+});
+
+test('score: chain continues from capLow into capHigh after a wave-3 setCap', () => {
+  const s = new ScoreKeeper();
+  for (let i = 0; i < CONFIG.combo.capLow; i++) s.kill(100, i * 0.1);
+  assert.equal(s.combo, CONFIG.combo.capLow, 'capped at the onboarding band');
+  s.setCap(CONFIG.combo.capHigh);
+  for (let i = 0; i < 10; i++) s.kill(100, (CONFIG.combo.capLow + i) * 0.1);
+  assert.equal(s.combo, CONFIG.combo.capHigh, 'chain runs on into the mastery band');
+  assert.equal(s.maxCombo, CONFIG.combo.capHigh);
+  const topMult = 1 + CONFIG.combo.step * (CONFIG.combo.capHigh - 1);
+  assert.ok(Math.abs(s.multiplier - topMult) < 1e-9, 'multiplier at capHigh');
+  assert.ok(Math.abs(topMult - 2.9) < 1e-9, 'capHigh 20 with step 0.1 is exactly 2.9x');
+});
+
+test('score: multiplier stays flat at the effective cap (no growth past it)', () => {
+  const s = new ScoreKeeper();
+  s.setCap(CONFIG.combo.capHigh);
+  for (let i = 0; i < CONFIG.combo.capHigh + 6; i++) s.kill(100, i * 0.1);
+  assert.equal(s.combo, CONFIG.combo.capHigh);
+  const top = 1 + CONFIG.combo.step * (CONFIG.combo.capHigh - 1);
+  assert.ok(Math.abs(s.multiplier - top) < 1e-9);
+  // ST-233: final kill inside the 4 s combo window (previous kill at t=(capHigh+5)*0.1)
+  const lastT = (CONFIG.combo.capHigh + 5) * 0.1;
+  assert.equal(s.kill(100, lastT + 0.1), Math.floor(100 * top), 'extra kills pay the same top mult');
+});
+
+test('score: tier stretches across the capHigh band (5 tiers, top reachable at 20)', () => {
+  const s = new ScoreKeeper();
+  s.setCap(CONFIG.combo.capHigh);
+  const width = (CONFIG.combo.capHigh - 1) / CONFIG.combo.tierCount;
+  for (let t = 0; t < CONFIG.combo.tierCount; t++) {
+    const c = 1 + Math.floor(t * width) + 1; // first combo of tier t+1
+    s.combo = Math.min(c, CONFIG.combo.capHigh);
+    assert.equal(s.tier, t + 1, 'combo ' + s.combo + ' -> tier ' + s.tier);
+  }
+  s.combo = CONFIG.combo.capHigh;
+  assert.equal(s.tier, CONFIG.combo.tierCount, 'capHigh lands on the top tier');
+  s.combo = 2;
+  assert.equal(s.tier, 1, 'low combo stays on tier 1');
+});
+
+test('score: setCap clamps to >= 1, floors, falls back on non-finite; reset restores capLow', () => {
+  const s = new ScoreKeeper();
+  s.setCap(0);
+  assert.equal(s.cap, 1, 'zero clamps to 1');
+  s.setCap(NaN);
+  assert.equal(s.cap, CONFIG.combo.capLow, 'NaN falls back to capLow');
+  s.setCap(12.7);
+  assert.equal(s.cap, 12, 'floors to an integer');
+  s.reset();
+  assert.equal(s.cap, CONFIG.combo.capLow, 'reset restores the onboarding cap');
 });

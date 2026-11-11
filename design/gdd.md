@@ -142,7 +142,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 - Endless (ST-058): from wave 10 the game never ends - wave content caps at 36 rocks, intermissions shrink from 2.2s toward a 1.2s floor (0.08s/wave), and the small-rock share rises from 30% toward 45%; the WAVE banner carries an ENDLESS tag.
 
 ## Combo
-- Kill within 4s of last kill: combo+1 (cap 15). Multiplier = 1 + 0.1*(combo-1) ... 1.0x..2.4x. (I92: cap 10->15 so the top multiplier needs a real 15-kill chain)
+- Kill within 4s of last kill: combo+1 (wave-scaled cap, ST-233: W1-2 cap 15, W3+ cap 20). Multiplier = 1 + 0.1*(combo-1): 1.0x..2.4x in the onboarding band (W1-2), up to 2.9x from wave 3 (a real 20-kill chain = the mastery band). (I92: cap 10->15; ST-233/E14: the T1 late-run flatline is fixed wave-scaled - the demo pin keeps cap 15 because the demo run dies on wave 2.)
 - Combo resets on timer expiry or taking damage.
 
 ## Power-ups (T2) - drop chance 25% from any kill, one at a time
