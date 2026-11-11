@@ -77,3 +77,81 @@ palette, same flat-shaded low-poly language), targeting: (a) ship silhouette
 + recessed canopy (ST-208), (b) rock crater/asymmetry variety (ST-209),
 (c) no restyle of the world. Do not over-engineer: no textures, no rigs,
 no morphs (asset-spec.md stands).
+
+## I271 video grounding (E21 art quality arc, YouTube MCP 2026-11-12)
+
+Sources (2 candidates; 16 frames + chapters captured; transcripts: one bounded
+retry extended the YouTube caption pause to 900 s, so per the over-engineering
+guard they were not retried - the frames + chapters carry the method). These ADD
+to the E9-era levers and the I207
+grounding above; nothing here re-opens a closed arc's decisions.
+
+1. Thomas Brush, "5 Steps To Gorgeous Game Art" (444K views;
+   youtu.be/gTZT8GE5928). 8 frames @ 0:00/1:10/2:21/3:32/4:43/5:53/7:04/8:15.
+   The 5-step pipeline as shown: paint/contrast study (Starry Night with a
+   dark spire silhouette) -> grayscale value blockout BEFORE color (3:32,
+   foggy FPS character - "get the values right first") -> strong color
+   accents against desaturated masses (4:43, "FATHER": red sack + orange HUD
+   reticle on a desaturated ground) -> low-poly bright scene stage (7:04) ->
+   final exposure/tone (8:15, Unity Environment Lighting: Exposure 4.0,
+   Physically Based, tone mapper).
+Transcript: not fetched (caption pause extended to 900 s on the one bounded
+   retry; guard says do not retry sooner - it extends the block). The 8 frames
+   above + the step structure carry the method; grounding is sufficient.
+   Takeaway for E21: value contrast is the FIRST pass, not the last - block
+   the scene to grayscale and fix the value structure before touching any
+   color. One strong accent family against desaturated masses beats a
+   saturated-everywhere scene (our cyan/orange accent language already
+   matches this; the open question is the grayscale structure underneath it).
+
+2. Kyle Banks, "How to Create Beautiful Games in Unity" (229K views, 24:54;
+   youtu.be/1agSNKuAfTM). 8 frames @ 0:00/3:06/9:20/12:27/15:33/18:40/21:47.
+   Chapters: 0:50 Art Direction / 1:56 Base Shading / 3:22 Lighting /
+   11:59 Post Processing / 17:18 Reflections / 18:10 Motion / 21:30
+   Stylization. Key frames: 9:20 bold value-contrast stylized scene (black
+   trees, white sky, saturated red/green canopies - the "visual hook");
+   15:33 Volume Bloom panel (Threshold 0.56, Intensity 1.54, Scattering 0.7,
+   Tint, Clamp, High Quality Filter, Downscale Half); 21:47 dark sci-fi
+   hangar, single practicals + rim = mood via lighting.
+Transcript: not fetched (same rate-limit state as above). The 8 frames +
+   the chapter map carry the method; grounding is sufficient.
+   Takeaway for E21: bloom is a CONTROLLED accent - the Banks panel is the
+   same family as our frozen 0.72 threshold (183.6 linear) + half-res
+   setup, which confirms the E9 choice; mood comes from one strong light +
+   rim, not from adding lights (our key + fill + rim is already that shape
+   - keep it, do not add more lights).
+
+3. Logged, not fetched (rate limit + over-engineering guard): Garbaj "How
+   To Make Low Poly Models (That Don't Suck)" (949K; youtu.be/7s7uSx18DUc -
+   Blender low-poly rules), Juhani Jokinen "How I Design a Spaceship - Hard
+   Surface Concept Art Process" (48K; youtu.be/SIf1VPKm-40 - ship form
+   language, pairs with the I207 Imphenzia notes for the ST-260 pass),
+   lacruzo "Stylized Low Poly Characters in Blender" (1.7M; youtu.be/-XYryP_GU8o),
+   Summer 85 "PS1 Style Graphics in Blender" (youtu.be/5ycmDpYen-4).
+
+Verdict (adds to, does not duplicate, the E9-era levers above): the game
+has palette (E18), hero assets (E19), readability polish (E20); what has
+never been an explicit pass is the WHOLE-SCENE value-contrast audit
+(Brush step 1 / Banks 9:20) - every frozen accent was tuned individually,
+but the grayscale distribution across skybox/arena/rocks/ship/boss is
+unverified as a structure, and the MENU has no hero moment (G4, carried
+from E20). E21 = value-contrast world pass (ST-259) + ship form / G5
+hull-bottom (ST-260) + G4 menu hero (ST-261, cuttable). DO NOT change the
+frozen 183.6 bloom threshold or the protected bands - the Banks parameters
+are grounding for the existing setup, not a change.
+
+## E21 improvement task list (from the I271 grounding)
+1. Whole-scene value-contrast audit + bounded fixes (ST-259): grayscale the
+   scene in-browser, measure per-region luma (skybox/nebula, arena floor +
+   ring, rocks L/M/S, ship, boss), fix only found defects against the frozen
+   bands.
+2. Ship form + G5 hull-bottom fill (ST-260): Imphenzia/Jokinen hard-surface
+   language (I207 + SIf1VPKm-40) - extruded delta volume, recessed faceted
+   canopy, thick swept wing plates, no dark-flat bottom.
+3. Menu hero moment (ST-261, G4, cuttable): MENU-camera hero framing + slow
+   drift (reduced-motion static), in-code only, MENU frame budget intact.
+4. NOT taskable (documented rejections): bloom threshold/parameter change
+   (frozen readability contract; Banks 15:33 = grounding, not a change),
+   new saturated "hook" accents (accent language already cyan/orange;
+   readability rule: accents clarify states, never add noise), extra lights
+   (single practical + rim is the Banks mood recipe we already follow).
