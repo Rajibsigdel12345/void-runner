@@ -36,6 +36,22 @@ export function createShipMesh() {
   cockpit.position.set(0, 0.12, 0.15);
   shipBody.add(cockpit);
 
+// ST-237 (I244) hero pass: engine nozzle + emissive engine mouth at the flame origin (I213 trail
+// origin, z = -0.8). Both sit INSIDE the existing ship box (x +-1.25, y -0.275..0.45,
+// z -0.95..0.85: body-diamond bottom .. fin top) so the Blender GLB matches the procedural
+// fallbacks exact extent (browser-verified parity; tests/assetPerf.test.js pins the sizes).
+const nozzleGeo = new THREE.CylinderGeometry(0.18, 0.3, 0.25, 6);
+nozzleGeo.rotateX(Math.PI / 2); // axis along Z: radiusTop (0.18) faces forward +Z, flare 0.3 at the rear
+const nozzle = new THREE.Mesh(nozzleGeo, bodyMat);
+nozzle.position.set(0, 0, -0.775); // spans z -0.90..-0.65 (flame apex at -0.8 emerges from it)
+shipBody.add(nozzle);
+
+const mouthGeo = new THREE.CircleGeometry(0.16, 8);
+mouthGeo.rotateY(Math.PI); // face -Z (visible from astern)
+const mouth = new THREE.Mesh(mouthGeo, cockpitMat); // the emissive slot - glows like the canopy
+mouth.position.set(0, 0, -0.902); // 2 mm proud of the nozzle flare, no z-fight
+shipBody.add(mouth);
+
   // ST-063: rear engine flame (additive, thrust-reactive). Apex anchored at the
   // hull rear (+Z end toward the body) so it only grows backward (-Z) with
   // thrust. Two cones: orange plume + hot near-white core. No per-frame allocs.
