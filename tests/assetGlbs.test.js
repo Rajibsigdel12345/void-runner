@@ -63,7 +63,7 @@ function meshStats({ buf, json, binOff }) {
         const r = x * x + y * y + z * z;
         if (r > maxR) maxR = r;
       }
-      prims.push({ name: m.name || '?', tris, maxRadius: Math.sqrt(maxR), posAcc, hasColor: p.attributes.COLOR_0 !== undefined }); // I209
+      prims.push({ name: m.name || '?', tris, maxRadius: Math.sqrt(maxR), posAcc, idxAcc, hasColor: p.attributes.COLOR_0 !== undefined }); // I209 (+idxAcc I254)
     }
   }
   return { prims, totalTris, nodeNames: (json.nodes || []).map((n) => n.name).filter(Boolean), matNames: (json.materials || []).map((m) => m.name) };
@@ -218,45 +218,70 @@ test('drone.glb: naming, poly budget, dart dimensions vs procedural parity (I211
   assert.ok(Math.abs(cross - 1.19) / 1.19 <= 0.15, 'drone cross ' + cross.toFixed(3) + ' ~ 1.19');
 });
 
-// I212: arena boundary ring (ST-212, cgs-dev-story).
-test('arena_ring.glb: naming, 48 tris, flat unit ring, +Y normals, no vertex colors (I212)', () => {
+// I212: arena boundary ring (ST-212, cgs-dev-story). I254/ST-245 v2: two-node GLB
+// (VR_ArenaRing band + VR_ArenaRing_Ticks neon accent). The v1 exact-48-tris pin is
+// replaced by the two-node counts (band 48 + ticks 12 = 60), documented here.
+test('arena_ring.glb: 2 nodes (band+ticks), 60 tris, flat unit ring, +Y normals, no vertex colors (I212/I254)', () => {
   const { buf, json, binOff } = parseGlb('arena_ring.glb');
   assert.ok(buf.length < MAX_FILE_BYTES, 'arena_ring.glb under 100 KB');
+assert.ok(buf.length <= 4096, 'arena_ring.glb v2 <= 4 KB raw (' + buf.length + ' B)'); // I254
   const s = meshStats({ buf, json, binOff });
   assert.ok(s.nodeNames.includes('VR_ArenaRing'), 'VR_ArenaRing node');
+assert.ok(s.nodeNames.includes('VR_ArenaRing_Ticks'), 'VR_ArenaRing_Ticks node (I254)');
   assert.ok(s.matNames.includes('VR_ArenaRing'), 'VR_ArenaRing material');
+assert.ok(s.matNames.includes('VR_ArenaRing_Ticks'), 'VR_ArenaRing_Ticks material (I254)');
   for (const p of s.prims) assert.ok(!p.hasColor, 'no vertex colors (in-code material authoritative)');
-  assert.equal(s.totalTris, 48, 'exactly 48 tris (24 plates x 2)');
+  assert.equal(s.totalTris, 60, 'exactly 60 tris (I254 v2: band 48 + ticks 12; v1 was 48)');
   assert.ok(s.totalTris <= BUDGETS.arenaRing, 'ring tris ' + s.totalTris + ' <= ' + BUDGETS.arenaRing);
-  const maxR = Math.max(...s.prims.map((p) => p.maxRadius));
-  assert.ok(Math.abs(maxR - 1.0) <= 0.05, 'max vertex radius ' + maxR.toFixed(4) + ' ~ 1.0');
-  // Flat in XZ (|y| ~ 0), inner radius 0.94, every face normal +Y (outward/up).
-  let maxAbsY = 0, minR = Infinity, up = 0, total = 0;
-  for (const p of s.prims) {
+  // I254 v2: per-primitive flat/+Y/radius checks (band = outer, ticks = inner accent).
+  function primStats(p) {
     const bv = json.bufferViews[p.posAcc.bufferView];
+    let maxAbsY = 0, minR = Infinity, maxRR = 0, up = 0, total = 0;
     for (let i = 0; i < p.posAcc.count; i++) {
       const o = binOff + (bv.byteOffset || 0) + (p.posAcc.byteOffset || 0) + i * 12;
       const x = buf.readFloatLE(o); const y = buf.readFloatLE(o + 4); const z = buf.readFloatLE(o + 8);
       if (Math.abs(y) > maxAbsY) maxAbsY = Math.abs(y);
       const r = Math.sqrt(x * x + z * z);
       if (r < minR) minR = r;
+      if (r > maxRR) maxRR = r;
     }
     const acc = p.posAcc;
+    const idxAcc = p.idxAcc; // I254: v2 GLBs are indexed - face count lives in the index accessor
     const bv2 = json.bufferViews[acc.bufferView];
-    for (let t = 0; t < acc.count; t += 3) {
-      const b = (i2) => binOff + (bv2.byteOffset || 0) + (acc.byteOffset || 0) + i2 * 12;
-      const ax = buf.readFloatLE(b(t + 1)) - buf.readFloatLE(b(t));
-      const az = buf.readFloatLE(b(t + 1) + 8) - buf.readFloatLE(b(t) + 8);
-      const bx = buf.readFloatLE(b(t + 2)) - buf.readFloatLE(b(t));
-      const bz = buf.readFloatLE(b(t + 2) + 8) - buf.readFloatLE(b(t) + 8);
+    const faceCount = idxAcc ? Math.round(idxAcc.count / 3) : Math.round(acc.count / 3);
+    for (let f = 0; f < faceCount; f++) {
+      const v = (k) => {
+        const vi = idxAcc
+          ? (idxAcc.componentType === 5123 ? buf.readUInt16LE(binOff + (json.bufferViews[idxAcc.bufferView].byteOffset || 0) + (idxAcc.byteOffset || 0) + (f * 3 + k) * 2)
+            : buf.readUInt32LE(binOff + (json.bufferViews[idxAcc.bufferView].byteOffset || 0) + (idxAcc.byteOffset || 0) + (f * 3 + k) * 4))
+          : f * 3 + k;
+        return binOff + (bv2.byteOffset || 0) + (acc.byteOffset || 0) + vi * 12;
+      };
+      const ax = buf.readFloatLE(v(1)) - buf.readFloatLE(v(0));
+      const az = buf.readFloatLE(v(1) + 8) - buf.readFloatLE(v(0) + 8);
+      const bx = buf.readFloatLE(v(2)) - buf.readFloatLE(v(0));
+      const bz = buf.readFloatLE(v(2) + 8) - buf.readFloatLE(v(0) + 8);
       total++;
       if (az * bx - ax * bz > 0) up++;
     }
+    return { maxAbsY, minR, maxR: maxRR, up, total };
   }
-  assert.ok(maxAbsY < 1e-4, 'flat ring maxAbsY ' + maxAbsY.toExponential(2));
-  assert.ok(Math.abs(minR - 0.94) <= 0.01, 'inner radius ' + minR.toFixed(4) + ' ~ 0.94');
-  assert.equal(up, total, 'all face normals +Y');
-});
+  const bandP = s.prims.find((p) => p.name === 'VR_ArenaRing');
+  const tickP = s.prims.find((p) => p.name === 'VR_ArenaRing_Ticks');
+  assert.ok(bandP && tickP, 'band + ticks primitives (I254 two-node GLB)');
+  assert.equal(bandP.tris, 48, 'band 24 plates x 2 tris');
+  assert.equal(tickP.tris, 12, 'ticks 12 wedges x 1 tri');
+  const bp = primStats(bandP);
+  assert.ok(bp.maxAbsY < 1e-4, 'band flat maxAbsY ' + bp.maxAbsY.toExponential(2));
+  assert.ok(Math.abs(bp.maxR - 1.0) <= 0.05, 'band max vertex radius ' + bp.maxR.toFixed(4) + ' ~ 1.0');
+  assert.ok(Math.abs(bp.minR - 0.94) <= 0.01, 'band inner radius ' + bp.minR.toFixed(4) + ' ~ 0.94');
+  const tp = primStats(tickP);
+  assert.ok(tp.maxAbsY < 1e-4, 'ticks flat maxAbsY ' + tp.maxAbsY.toExponential(2));
+  assert.ok(tp.maxR < 0.94, 'ticks stay inside the band (maxR ' + tp.maxR.toFixed(4) + ')');
+  assert.ok(tp.minR >= 0.88, 'ticks inner extent ' + tp.minR.toFixed(4) + ' >= 0.88');
+  assert.equal(bp.up, bp.total, 'band all face normals +Y');
+  assert.equal(tp.up, tp.total, 'ticks all face normals +Y');
+  });
 
 // I220: Warden mini-boss (ST-218, cgs-dev-story) - armored sentinel: jagged dodeca
 // hull with spike accents + separate armor-plate mesh (VR_Warden_Armor) that the

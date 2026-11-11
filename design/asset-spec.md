@@ -314,13 +314,19 @@ drone material are authoritative; GLB materials are decorative only.
   before foreach_set (Blender buffer row 0 = bottom, PNG top row = last buffer row) -> north
   pole at the top of the PNG, the orientation three.js EquirectangularReflectionMapping
   expects; verified in-browser (band at the horizon).
-- arena_ring.glb: 24 segmented plates (11-degree plate / 4-degree gap), 48 tris / 144 verts
-  (budget <=120), inner radius 0.94 / outer 1.0 (unit-radius convention, like shield.glb),
-  flat in XZ (|y| = 0), all face normals +Y, no vertex colors (in-code material authoritative),
-  node + material VR_ArenaRing, 4.7 KB. Rendered in-code as a translucent MeshBasic 0x4a6cff
-  (opacity 0.55, DoubleSide, depthWrite false) scaled by CONFIG.arena.radius (26) at y = 0.03
-  above the polar grid: static (reduced-motion safe), +1 draw call, color luma below the
-  bloom threshold (bloom-safe).
+- arena_ring.glb v2 (I254/ST-245; v1 was I212): TWO-NODE GLB, 60 tris total (budget <=120).
+  - VR_ArenaRing (outer band, unchanged from v1): 24 segmented plates (11-degree plate /
+    4-degree gap), 48 tris / 48 shared verts, inner radius 0.94 / outer 1.0 (unit-radius
+    convention, like shield.glb).
+  - VR_ArenaRing_Ticks (I254 neon accent): 12 triangle wedges at the major seams (every
+    30 degrees), 12 tris / 36 verts, r 0.895-0.93 (just inside the band).
+  Both flat in XZ (|y| = 0), all face normals +Y, no vertex colors (in-code materials
+  authoritative), 4032 B (v1 4.7 KB). Rendered in-code as two static (reduced-motion safe)
+  MeshBasic meshes: band 0x4a6cff (opacity 0.55, DoubleSide, depthWrite false) at y = 0.03
+  (unchanged; luma below the bloom threshold) + ticks 0xdfe9ff (opacity 0.9, y = 0.035,
+  no z-fight) whose luma CROSSES the 0.72 bloom threshold = the intended neon accent
+  (FX high: ticks bloom; FX low/off: no bloom). +2 draw calls (was +1); scaled by
+  CONFIG.arena.radius (26).
 - Dist budget status after I212: 1934.9 KB raw / 500.7 KB gzip vs the adopted budget
   <=2048 KB / <=550 KB - still green, but only ~49 KB gzip headroom remains; further E9
   assets must stay tiny or go through a documented budget amendment (I197 precedent).
