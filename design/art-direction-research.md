@@ -155,3 +155,88 @@ are grounding for the existing setup, not a change.
    new saturated "hook" accents (accent language already cyan/orange;
    readability rule: accents clarify states, never add noise), extra lights
    (single practical + rim is the Banks mood recipe we already follow).
+
+
+## I276 video grounding (E22 world readability arc III, YouTube MCP 2026-11-12)
+
+Sources (3 candidates; 18 frames + details captured; transcripts skipped per the
+rate-limit guard - the E21 precedent holds: frames + chapters carry the method).
+These ADD to the E21 grounding (Brush value-first / Banks bloom + mood) and the
+E9-era levers; nothing here re-opens a closed arc's decisions.
+
+1. The Observatory, "Fake Rim Lighting [In Blender]" (43K views, 4:35;
+   youtu.be/N1REz8rpABE). Frames 0:00/0:45/1:31/2:17/3:03/3:49. The
+   material-faked rim recipe: Dot Product node (view direction . normal) ->
+   separate/multiply -> Add Shader onto the base material; 2:17 shows the
+   Bump-node normal option (we stay on flat per-face normals - stable by
+   construction); 3:03/3:49: Dot -> ColorRamp (position = rim threshold,
+   scale = rim width) -> Fac.
+   Takeaway for E22: our pow(1.0 - dot(N,V), power) in bossMesh.js /
+   asteroidRenderer.js is the SAME family (pow = an exponential ColorRamp).
+   The power (ramp position/scale) is THE thickness/softness lever: power 5 ->
+   7/8 gives a thinner, silhouette-hugging rim instead of flooding faces
+   flat-bright-purple (the I272 measured defect at the frozen 0.45 strength).
+   The rim COLOR stays the accent (frozen per-variant colors unchanged).
+
+2. Lightning Boy Studio, "Toon Shader Part 6 - Perfect Rim Lights"
+   (103K views, 22:53; youtu.be/Qc1kQbF-9Gs). Frames 0:00/3:48/7:37/11:26/
+   15:15/19:04. 3:48: strong orange rim reading on a dark toon character
+   (rim = the silhouette read, not a face glow); 7:37/11:26: "Rim Light (2d)"
+   node group = Lerp + power curve shaping (strength and curve are the two
+   levers); 15:15: normal-smoothing/capture pass for a stable rim (flat-shaded
+   low-poly faces already give stable per-face normals - no extra pass);
+   19:04: viewport/lighting setup.
+   Takeaway for E22: rim STRENGTH and rim POWER CURVE are the only two levers;
+   both are already in our shader - strength is data-driven (CONFIG.boss.rim
+   hull 0.45 / crown 0.30), power is hardcoded 5.0. E22 makes the power
+   data-driven too and raises it; strengths are re-tuned only if the A/B
+   shows the silhouette still floods.
+
+3. Game Dev Guide, "5 Skybox Methods Every Unity Dev Needs To Know"
+   (51K views, 21:45, 2025; youtu.be/Yd0xNTYNfss). Chapters 0:00/1:30/2:27/
+   6:36/9:25/14:45/19:14/20:44; frames 0:00/3:37/7:15/10:52/14:30/18:07.
+   Method ladder: flat color (frame 0:00 Hue 0.73/Sat 0.40/Val 0.15 = #1C1324
+   dark violet - the SAME family as our 0x04060f base) -> gradient -> cubemap
+   export (10:52) -> procedural vertex-color sky (14:30/18:07).
+   Takeaway for E22: the skybox must fit the visual style. Our 1024x512
+   equirect (Blender node-bake v5) sits in the gradient/procedural family and
+   its STRUCTURE is healthy (I272: spread 30.4 -> 85.4); the defect is COLOR
+   (15.2% warm-cast pixels, E19 flag). A color re-bake in the violet/teal/
+   magenta nebula family (structure kept) is the bounded fix. DO NOT adopt a
+   new skybox method (cubemap/vertex sky) = over-engineering.
+
+4. Logged, not fetched (rate limit + over-engineering guard): silhouette
+   readability is already grounded at E21 (Thomas Brush "5 Steps To Gorgeous
+   Game Art" 444K + Kyle Banks "How to Create Beautiful Games in Unity"
+   229K) - no extra fetches.
+
+Verdict (adds to, does not duplicate, the E21 grounding): E22 = the three
+named I272/E19 deferrals - skybox 15.2% warm-cast re-bake (ST-263, Blender),
+rim flood shaping: fresnel power data-driven + raised 5.0 -> 7/8 in boss and
+rock shaders (ST-264, in-code, includes the deferred asteroidRenderer
+vViewPosition refactor), rock silhouette/value mottle re-bake (ST-265,
+Blender COLOR_0, cuttable). DO NOT touch the frozen 183.6 bloom threshold,
+the FLOOR 50, or the frozen accent list.
+
+## E22 improvement task list (from the I276 grounding)
+1. Skybox 15.2% warm-cast re-bake (ST-263): Blender node-bake v6 of the
+   1024x512 equirect - remove the E19-flagged warm/red-brown cast, keep the
+   violet/teal/magenta nebula family + existing structure; JPG <= ~64 KB raw;
+   no-bloom audit + value-graded before/after.
+2. Rim flood shaping (ST-264): fresnel power data-driven in CONFIG (boss
+   hull/crown + rock) and raised 5.0 -> 7/8 so the rim hugs the silhouette;
+   strengths re-tuned only per A/B (frozen 0.45/0.30/0.12 start); includes
+   the deferred asteroidRenderer refactor (drop custom vRimViewPos varying +
+   project_vertex injection -> standard vViewPosition fragment-only, the
+   I272 boss pattern) + source-invariant tests + rock luma A/B (I257 look
+   preserved or deliberately re-tuned).
+3. Rock silhouette/value pass (ST-265, CUTTABLE): COLOR_0 mottle re-bake on
+   asteroids L/M/S for distance silhouette read at 10u+ (vertex-color only,
+   geometry/radii net-zero 8956/3764/3188 B) + in-code rock rim A/B after
+   ST-264's shared shaping.
+4. NOT taskable (documented rejections): skybox STRUCTURE change (cubemap /
+   procedural vertex sky from the Game Dev Guide ladder = over-engineering;
+   the color re-bake covers the defect), new rim lights / extra pass
+   (strength + power curve are the only levers per Lightning Boy 3:48/7:37;
+   flat per-face normals are already stable), further research fetching
+   (E21 + I276 grounding is sufficient).
