@@ -1,4 +1,4 @@
-﻿// I207: vendored GLB asset audit (ST-207, cgs-asset-audit). Pure node - no DOM,
+﻿﻿﻿// I207: vendored GLB asset audit (ST-207, cgs-asset-audit). Pure node - no DOM,
 // no three. Validates the Blender-authored GLBs in assets/ (I220: sixteen total) against the
 // container format, the VR_ naming convention, the poly budgets from
 // design/asset-spec.md, and the logical radii in CONFIG (visual/hitbox parity).
@@ -139,38 +139,93 @@ test('asteroid L/M/S: COLOR_0 warm band + R>=G>=B (I257 periwinkle regression pi
   }
 });
 
-test('boss.glb: naming, poly budget, cross-section and height vs spec', () => {
+// I263 (ST-252 boss hero pass): rebuilt in Blender - hull facet mottling re-baked STRONGER
+// (hull 0.33..0.88 vs the old 0.72..1.0, crown 0.49..0.93, core 0.72..1.00) as a single
+// grayscale COLOR_0 per mesh; crown spikes got real volume; core seam sits in FRONT (+Z,
+// the player side, export_yup=True maps Blender -Y -> game +Z). EXPORT RECIPE PIN: the
+// material must stay assigned AND the VERTEX_COLOR node wired into Base Color, because
+// Blender 5.2's glTF exporter writes GARBAGE COLOR_0 data when the attribute is not used
+// by a node tree (I263 incident: export_materials='NONE' produced a zeroed/garbage buffer -
+// the JSON declared the accessor but the BIN held uninitialized memory). Materials remain
+// in the file; bossMesh.js ignores them (in-code palette, I248 pattern).
+test('boss.glb: naming, poly budget, cross-section and height vs spec (ST-252)', () => {
   const { buf, json, binOff } = parseGlb('boss.glb');
-  assert.ok(buf.length < MAX_FILE_BYTES, 'boss.glb under 100 KB');
+  assert.ok(buf.length <= 14 * 1024, 'boss.glb ' + buf.length + ' B <= 14 KB (ST-252 budget)');
   const s = meshStats({ buf, json, binOff });
-  assert.ok(s.nodeNames.includes('VR_Boss_Hull'), 'VR_Boss_Hull node (I248)');
-  assert.ok(s.nodeNames.includes('VR_Boss_Crown'), 'VR_Boss_Crown node (I248)');
-  assert.ok(s.nodeNames.includes('VR_Boss_Core'), 'VR_Boss_Core node (I248)');
-  for (const n of ['VR_Boss_HullMat', 'VR_Boss_CrownMat', 'VR_Boss_CoreMat']) assert.ok(s.matNames.includes(n), n + ' material (I248)');
-  for (const p of s.prims) assert.ok(p.hasColor, 'boss primitive has COLOR_0 vertex colors (I210)');
+  assert.ok(s.nodeNames.includes('VR_Boss_Hull'), 'VR_Boss_Hull node');
+  assert.ok(s.nodeNames.includes('VR_Boss_Crown'), 'VR_Boss_Crown node');
+  assert.ok(s.nodeNames.includes('VR_Boss_Core'), 'VR_Boss_Core node');
+  // The material-present export recipe is what writes real COLOR_0 data (I263 incident).
+  for (const n of ['VR_Boss_HullMat', 'VR_Boss_CrownMat', 'VR_Boss_CoreMat']) assert.ok(s.matNames.includes(n), n + ' material (export recipe)');
   assert.ok(s.totalTris <= BUDGETS.boss, 'boss tris ' + s.totalTris + ' <= 250');
-  // Spec: cross-section ~4.1, height ~8.8 (boss.radius 3.4 * 1.2 / * 2.6), +/-10%.
+  // Exactly one COLOR_0 per primitive - never a COLOR_1 (the duplicate-attribute trap).
+  for (const m of json.meshes || []) for (const p of m.primitives || []) {
+    assert.ok(p.attributes.COLOR_0 !== undefined, m.name + ' primitive has COLOR_0');
+    assert.equal(p.attributes.COLOR_1, undefined, m.name + ' has NO COLOR_1 (single-channel mottling)');
+  }
+  // Spec: same obelisk ring structure as the I248 fallback (rings y -4.35/0/3.30, crown
+  // spike to ~5.2): cross-section ~4.0, height ~9.6 (+/-10%). Per-mesh bounds below also
+  // pin the ST-252 orientation: core seam in FRONT (+Z, player side), crown ON TOP (+Y).
+  const meshB = {};
   let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity, minZ = Infinity, maxZ = -Infinity;
-  for (const p of s.prims) {
-    const bv = json.bufferViews[p.posAcc.bufferView];
-    for (let i = 0; i < p.posAcc.count; i++) {
-      const o = binOff + (bv.byteOffset || 0) + (p.posAcc.byteOffset || 0) + i * 12;
-      const x = buf.readFloatLE(o); const y = buf.readFloatLE(o + 4); const z = buf.readFloatLE(o + 8);
-      if (x < minX) minX = x; if (x > maxX) maxX = x;
-      if (y < minY) minY = y; if (y > maxY) maxY = y;
-      if (z < minZ) minZ = z; if (z > maxZ) maxZ = z;
+  for (const m of json.meshes || []) {
+    for (const p of m.primitives || []) {
+      const b = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity, minZ: Infinity, maxZ: -Infinity };
+      const posAcc = json.accessors[p.attributes.POSITION];
+      const bv = json.bufferViews[posAcc.bufferView];
+      for (let i = 0; i < posAcc.count; i++) {
+        const o = binOff + (bv.byteOffset || 0) + (posAcc.byteOffset || 0) + i * 12;
+        const x = buf.readFloatLE(o); const y = buf.readFloatLE(o + 4); const z = buf.readFloatLE(o + 8);
+        if (x < b.minX) b.minX = x; if (x > b.maxX) b.maxX = x;
+        if (y < b.minY) b.minY = y; if (y > b.maxY) b.maxY = y;
+        if (z < b.minZ) b.minZ = z; if (z > b.maxZ) b.maxZ = z;
+        if (x < minX) minX = x; if (x > maxX) maxX = x;
+        if (y < minY) minY = y; if (y > maxY) maxY = y;
+        if (z < minZ) minZ = z; if (z > maxZ) maxZ = z;
+      }
+      meshB[m.name || '?'] = b;
     }
   }
   const w = Math.max(maxX - minX, maxZ - minZ);
   const h = maxY - minY;
-  assert.ok(Math.abs(w - 4.1) <= 0.41, 'cross-section ' + w.toFixed(3) + ' ~ 4.1');
-  assert.ok(Math.abs(h - 8.8) <= 0.88, 'height ' + h.toFixed(3) + ' ~ 8.8');
+  assert.ok(Math.abs(w - 4.0) <= 0.40, 'cross-section ' + w.toFixed(3) + ' ~ 4.0');
+  assert.ok(Math.abs(h - 9.6) <= 0.96, 'height ' + h.toFixed(3) + ' ~ 9.6');
   // Origin centered (matches the centered BoxGeometry convention, +/-0.5u).
   assert.ok(Math.abs((minX + maxX) / 2) <= 0.5, 'x centered');
   assert.ok(Math.abs((minY + maxY) / 2) <= 0.5, 'y centered');
   assert.ok(Math.abs((minZ + maxZ) / 2) <= 0.5, 'z centered');
+  // ST-252 orientation (export_yup=True: tall along +Y, player-facing front = +Z).
+  const core = meshB['VR_Boss_CoreMesh'] || meshB['VR_Boss_Core'];
+  const crown = meshB['VR_Boss_CrownMesh'] || meshB['VR_Boss_Crown'];
+  assert.ok(core && crown, 'core + crown meshes found (' + Object.keys(meshB).join(',') + ')');
+  assert.ok(core.minZ > 0.3, 'core seam in FRONT of mid-plane (minZ ' + core.minZ.toFixed(3) + ' > 0.3)');
+  assert.ok(core.maxZ > 0.5, 'core reads from the player side (maxZ ' + core.maxZ.toFixed(3) + ' > 0.5)');
+  assert.ok(crown.minY > 0, 'crown on TOP (minY ' + crown.minY.toFixed(3) + ' > 0)');
+  assert.ok(h > w, 'tall along Y (h ' + h.toFixed(2) + ' > w ' + w.toFixed(2) + ')');
+  // ST-252 hull mottling: grayscale, in [0.30,1.00], and STRONGER than the old 0.72..1.0
+  // bake (min below 0.50, max above 0.80 -> facet value spread > 0.8).
+  for (const m of json.meshes || []) {
+    for (const p of m.primitives || []) {
+      const acc = json.accessors[p.attributes.COLOR_0];
+      const bv = json.bufferViews[acc.bufferView];
+      const stride = parseInt(acc.type.replace('VEC', ''), 10); // accessor type, never itemSize (I257)
+      const base = binOff + (bv.byteOffset || 0) + (acc.byteOffset || 0);
+      let cMin = Infinity, cMax = -Infinity;
+      for (let i = 0; i < acc.count; i++) {
+        const r = buf.readFloatLE(base + i * stride * 4);
+        const g = buf.readFloatLE(base + i * stride * 4 + 4);
+        const b = buf.readFloatLE(base + i * stride * 4 + 8);
+        assert.ok(Math.abs(r - g) <= 0.02 && Math.abs(g - b) <= 0.02, m.name + ' COLOR_0 grayscale at ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
+        assert.ok(r >= 0.3 - 0.01 && r <= 1.0 + 0.01, m.name + ' COLOR_0 in [0.30,1.00] at ' + i + ': ' + r.toFixed(3));
+        if (r < cMin) cMin = r; if (r > cMax) cMax = r;
+      }
+      if ((m.name || '').indexOf('Hull') >= 0) {
+        assert.ok(cMin < 0.50, 'hull mottling min ' + cMin.toFixed(3) + ' < 0.50 (stronger than old 0.72 floor)');
+        assert.ok(cMax > 0.80, 'hull mottling max ' + cMax.toFixed(3) + ' > 0.80');
+      }
+    }
+  }
 });
-
 test('shield.glb: naming, poly budget, unit radius (I210)', () => {
   const { buf, json, binOff } = parseGlb('shield.glb');
   assert.ok(buf.length < MAX_FILE_BYTES, 'shield.glb under 100 KB');

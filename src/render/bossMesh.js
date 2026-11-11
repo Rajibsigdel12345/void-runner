@@ -1,4 +1,4 @@
-﻿// ST-055: Monolith boss rendering - obelisk with flared crown + recessed core seam (not pooled).
+﻿﻿// ST-055: Monolith boss rendering - obelisk with flared crown + recessed core seam (not pooled).
 // I248 (E16, ST-240): 3-node hero pass - hull/crown/core geometry comes from
 // assets/boss.glb (VR_Boss_Hull / VR_Boss_Crown / VR_Boss_Core) once the asset
 // loads; the procedural fallback below (jittered hex obelisk + flared cap +
@@ -6,6 +6,10 @@
 // kept (pulsing emissive + vertexColors), so the GLB's own materials are
 // ignored. First visual phase-2 state: the core seam brightens and shifts
 // redder on boss.phase===2 (Splicer: hotter teal).
+// I263 (E19, ST-252): silhouette rim on hull + crown (onBeforeCompile, the proven I257
+// asteroid-rim pattern) - data-driven in CONFIG.boss.rim, variant-colored (Monolith purple /
+// Splicer teal), phase-2 lift. The GLB now carries a stronger grayscale COLOR_0 mottling
+// (hull 0.33..0.88) via the material-wired export recipe (see tests/assetGlbs.test.js).
 import * as THREE from 'three';
 import { RNG } from '../core/rng.js';
 import { CONFIG } from '../core/config.js';
@@ -130,6 +134,34 @@ export function createBossMesh(scene) {
   const core = new THREE.Mesh(bakeCoreGeometry(), coreMat);
   group.add(core);
 
+  // ST-252 (I263): silhouette rim on hull + crown - the obelisk's edges separate from the warm
+  // E18 world at distance. Same proven onBeforeCompile pattern as the asteroid rim (I257); data
+  // driven in CONFIG.boss.rim. rim.color is a shared Color instance (auto-pushed by the uniform);
+  // rim.push() mirrors the per-frame strength once the program has compiled. The core seam
+  // carries NO rim - its pulsing emissive IS the distance read.
+  const rimState = (strength) => ({ color: new THREE.Color(CONFIG.boss.rim.color), strength, push: null });
+  const rimHull = rimState(CONFIG.boss.rim.hull);
+  const rimCrown = rimState(CONFIG.boss.rim.crown);
+  const addRim = (mat, rim) => {
+    let u = null;
+    mat.onBeforeCompile = (shader) => {
+      u = shader.uniforms;
+      shader.uniforms.uRimColor = { value: rim.color };
+      shader.uniforms.uRimStrength = { value: rim.strength };
+      shader.vertexShader = shader.vertexShader
+        .replace('#include <common>', '#include <common>\nvarying vec3 vRimViewPos;')
+        .replace('#include <project_vertex>', '#include <project_vertex>\nvRimViewPos = -mvPosition.xyz;');
+      shader.fragmentShader = shader.fragmentShader
+        .replace('#include <common>', '#include <common>\nvarying vec3 vRimViewPos;\nuniform vec3 uRimColor;\nuniform float uRimStrength;')
+        .replace('#include <opaque_fragment>',
+          'float vRimF = pow(1.0 - clamp(dot(normalize(-vRimViewPos), normal), 0.0, 1.0), 5.0); // ST-252: silhouette-hugging power (I257)' +
+          'outgoingLight += uRimColor * (vRimF * uRimStrength);' +
+          '#include <opaque_fragment>');
+    };
+    rim.push = (s) => { if (u) u.uRimStrength.value = s; };
+  };
+  addRim(hullMat, rimHull);
+  addRim(crownMat, rimCrown);
   group.visible = false;
   scene.add(group);
 
@@ -154,6 +186,14 @@ export function createBossMesh(scene) {
     coreMat.emissiveIntensity = phase2
       ? 1.7 + 0.8 * (0.5 + 0.5 * Math.sin(t * 7.2)) // phase 2: the seam blazes (bloom-threshold cross)
       : 0.85 + 0.45 * (0.5 + 0.5 * Math.sin(t * (isSplicer ? 4.2 : 2.4)));
+    // ST-252: rim follows the variant identity (Monolith purple / Splicer teal) with a phase-2 lift.
+    const rimHex = isSplicer ? CONFIG.boss.rim.splicerColor : CONFIG.boss.rim.color;
+    const rimLift = phase2 ? CONFIG.boss.rim.phase2Lift : 1;
+    rimHull.color.setHex(rimHex);
+    rimCrown.color.setHex(rimHex);
+    rimHull.push(CONFIG.boss.rim.hull * rimLift);
+    rimCrown.push(CONFIG.boss.rim.crown * rimLift);
+
     group.scale.setScalar(Math.max(0.001, (1 - Math.pow(1 - boss.entered, 3))) * sizeScale); // ST-135/143: entrance + variant size
     group.visible = true;
   }

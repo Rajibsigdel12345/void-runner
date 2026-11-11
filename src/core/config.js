@@ -1,4 +1,4 @@
-﻿﻿﻿// ALL tunables live here (balance table). See design/gdd.md for rationale.
+﻿﻿﻿﻿// ALL tunables live here (balance table). See design/gdd.md for rationale.
 export const CONFIG = {
   arena: {
     radius: 26,
@@ -164,6 +164,16 @@ export const CONFIG = {
     splitCount: 4,   // M rocks on death
     fireEvery: 2.2,  // ST-056: seconds between aimed bolts
     enterTime: 1.2,  // ST-135: entrance seconds - no attacks until the intro plays
+    rim: {            // ST-252: silhouette rim (onBeforeCompile, I257 pattern) - the obelisk's edges
+                       // separate from the warm E18 world at distance. Hull + crown only; the core
+                       // seam carries no rim (its pulsing emissive IS the distance read).
+      color: 0x9a5bff,        // Monolith rim - purple identity (B>R>G), harmonizes with body 0x7a4dff
+      splicerColor: 0x2dd4bf, // Splicer rim - teal identity (matches the variant body hex)
+      hull: 0.35,             // hull edge strength (subtle; shader power 5 = silhouette-hugging, I257)
+      crown: 0.25,            // crown edge strength (spike edges a touch softer than the hull)
+      phase2Lift: 1.6         // phase-2 enrage: rim brightens with the body (hull 0.35 -> 0.56 max,
+                              // still under the bloom band - ST-252 bloom-band audit confirms)
+    },
     phase2: {        // ST-133: enrage state below the HP threshold (one-way)
       hpFrac: 0.5,      // enter phase 2 when HP < 50%
       speedMult: 1.45,  // homing speed (1.6 -> 2.32 u/s - still dodgeable)

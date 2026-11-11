@@ -143,3 +143,29 @@ test('ST-251: ship body clears the enemy-bullet luma zone (>= 20 above 0xff4a2a)
   const d = luma(CONFIG.ship.palette.body.color) - luma(CONFIG.fx.enemyBullet.emissive);
   assert.ok(d >= 20, 'body ' + luma(CONFIG.ship.palette.body.color).toFixed(1) + ' vs enemy ' + luma(CONFIG.fx.enemyBullet.emissive).toFixed(1) + ', delta ' + d.toFixed(1) + ' >= 20');
 });
+
+// ST-252 (I263): Monolith boss hero pass - silhouette rim invariants (CONFIG.boss.rim).
+// The rim (onBeforeCompile, I257 pattern) is what separates the obelisk's edges from the
+// warm E18 world at distance. It must stay a SUBTLE edge accent: never cross the bloom
+// band on its own, and keep its cool purple/teal identity vs the warm rock rim (0xd8a878).
+test('ST-252: boss rim is purple (Monolith) / teal (Splicer) - cool identity, not warm', () => {
+  const mon = CONFIG.boss.rim.color;
+  const mr = (mon >> 16) & 255, mg = (mon >> 8) & 255, mb = mon & 255;
+  assert.ok(mb > mr && mr > mg, 'Monolith rim purple B>R>G: R' + mr + ' G' + mg + ' B' + mb);
+  const spl = CONFIG.boss.rim.splicerColor;
+  const sr = (spl >> 16) & 255, sg = (spl >> 8) & 255, sb = spl & 255;
+  assert.ok(sg > sr && sb > sr, 'Splicer rim teal (G,B) > R: R' + sr + ' G' + sg + ' B' + sb);
+  // The boss rim is cool (B>R); the I257 rock rim is warm (R>B) - the two silhouettes stay separable.
+  assert.ok(mb > mr, 'boss rim cool (B>R) vs warm rock rim 0xd8a878 (R>B)');
+});
+
+test('ST-252: boss rim stays subtle and under the bloom band (even with the phase-2 lift)', () => {
+  const rim = CONFIG.boss.rim;
+  assert.ok(rim.hull >= 0.15 && rim.hull <= 0.6, 'hull strength ' + rim.hull + ' in [0.15,0.6]');
+  assert.ok(rim.crown > 0 && rim.crown <= rim.hull, 'crown ' + rim.crown + ' <= hull ' + rim.hull);
+  assert.ok(rim.phase2Lift > 1, 'phase-2 lift ' + rim.phase2Lift + ' > 1 (the rim brightens with the body)');
+  // Isolated rim at max (phase 2) must stay far under the 183.6 bloom luma threshold:
+  // the rim only ever ADDS rimColor * strength to an already-dark silhouette edge.
+  const peak = rim.hull * rim.phase2Lift * luma(rim.color);
+  assert.ok(peak < 100, 'peak rim contribution ' + peak.toFixed(1) + ' luma < 100 (bloom band 183.6, headroom for the audit)');
+});
