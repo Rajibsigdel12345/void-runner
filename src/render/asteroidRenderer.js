@@ -39,17 +39,22 @@ export function createAsteroidRenderer(scene) {
   const mat = new THREE.MeshStandardMaterial({ color: 0x8a7f72, roughness: 0.95, metalness: 0.05, flatShading: true, vertexColors: true }); // I209: GLB-baked shading
   // ST-139: belt rock - dark cold metal so drifting indestructibles read as "unbreakable".
   const matBelt = new THREE.MeshStandardMaterial({ color: 0x2a313d, roughness: 0.42, metalness: 0.9, flatShading: true, emissive: 0x2f6fd0, emissiveIntensity: 0.6, vertexColors: true }); // I209: vertexColors
-  // I60: rim-lit upgrade - cool fresnel edge added on top of the standard lighting.
+  // I60: rim-lit upgrade - fresnel edge added on top of the standard lighting.
+  // I257: the periwinkle incident (ST-247) WAS the cool rim term itself: even desaturated
+  // 0x8fa8d8 @ 0.22 coated whole low-poly rocks blue (A/B: rim-on R112/G111/B133 vs rim-off
+  // R79/G55/B37 - the rim was the ENTIRE cool cast; lights/env were innocent). A WARM rim
+  // (0xd8a878 @ 0.12, ^5 silhouette falloff) keeps the edge accent, harmonizes with the warm
+  // rock palette, and lifts rock-vs-nebula contrast (face luma ~57 no-rim -> ~96).
   mat.onBeforeCompile = (shader) => {
-    shader.uniforms.uRimColor = { value: new THREE.Color(0x5f7fd8) };
-    shader.uniforms.uRimStrength = { value: 0.5 };
+    shader.uniforms.uRimColor = { value: new THREE.Color(0xd8a878) }; // I257 final: warm edge (cool rim was the periwinkle root cause)
+    shader.uniforms.uRimStrength = { value: 0.12 }; // I257 final: 0.5 -> 0.22 -> 0.12 (quantitative screenshot A/B)
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nvarying vec3 vRimViewPos;')
       .replace('#include <project_vertex>', '#include <project_vertex>\nvRimViewPos = -mvPosition.xyz;');
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', '#include <common>\nvarying vec3 vRimViewPos;\nuniform vec3 uRimColor;\nuniform float uRimStrength;')
       .replace('#include <opaque_fragment>',
-        'float vRimF = pow(1.0 - clamp(dot(normalize(-vRimViewPos), normal), 0.0, 1.0), 3.0);\n' +
+        'float vRimF = pow(1.0 - clamp(dot(normalize(-vRimViewPos), normal), 0.0, 1.0), 5.0); // I257: 3 -> 5 (silhouette-hugging)\n' +
         'outgoingLight += uRimColor * (vRimF * uRimStrength);\n' +
         '#include <opaque_fragment>');
   };
@@ -138,5 +143,10 @@ export function createAsteroidRenderer(scene) {
   // I155: shape-cue toggle (settings.shapeCues; on by default for colorblind-friendly play).
   function setShapeCues(on) { shapeCuesOn = on === true; }
 
-  return { sync, pool, setGLB, setShieldGLB, setShapeCues };
+  // I257: rock-specific IBL fill. The I213 boot loop sets CONFIG.fx.env.intensity on EVERY
+  // standard material (ship/belt want the nebula reflection); rocks get a lower fill so the
+  // warm key light reads instead of the blue-violet nebula washing them periwinkle.
+  function setEnvIntensity(v) { if (typeof v === 'number' && isFinite(v)) mat.envMapIntensity = v; }
+
+  return { sync, pool, setGLB, setShieldGLB, setShapeCues, setEnvIntensity };
 }

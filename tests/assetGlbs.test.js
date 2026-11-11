@@ -110,6 +110,34 @@ test('asteroid L/M/S: naming, poly budgets, radii match CONFIG (+/-5%)', () => {
       size + ' max vertex radius ' + maxR.toFixed(4) + ' within 5% of logical ' + logical);
   }
 });
+// I257 (ST-247 periwinkle incident): pin the COLOR_0 band of the I253/I257 warm rock bakes.
+// The renderer-side bug (saturated rim term + blue light wash) is what made these warm bakes
+// read periwinkle; this keeps the DATA side pinned too: I209 clamp band 0.45..1.2 and warm
+// ordering R>=G>=B on every vertex of every rock size.
+test('asteroid L/M/S: COLOR_0 warm band + R>=G>=B (I257 periwinkle regression pin)', () => {
+  for (const size of ['L', 'M', 'S']) {
+    const { buf, json, binOff } = parseGlb('asteroid_' + size + '.glb');
+    for (const m of json.meshes || []) for (const p of m.primitives || []) {
+      assert.ok(p.attributes.COLOR_0 !== undefined, size + ' primitive has COLOR_0');
+      const acc = json.accessors[p.attributes.COLOR_0];
+      const bv = json.bufferViews[acc.bufferView];
+      const stride = parseInt(acc.type.replace('VEC', ''), 10);
+      const base = binOff + (bv.byteOffset || 0) + (acc.byteOffset || 0);
+      let checked = 0;
+      for (let i = 0; i < acc.count; i++) {
+        const r = buf.readFloatLE(base + i * stride * 4);
+        const g = buf.readFloatLE(base + i * stride * 4 + 4);
+        const b = buf.readFloatLE(base + i * stride * 4 + 8);
+        for (const v of [r, g, b]) {
+          assert.ok(v >= 0.45 - 0.01 && v <= 1.2 + 0.01, size + ' COLOR_0 channel in [0.45,1.2] I209 band: ' + v.toFixed(3));
+        }
+        assert.ok(r >= g - 1e-4 && g >= b - 1e-4, size + ' COLOR_0 warm order R>=G>=B at vertex ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
+        checked++;
+      }
+      assert.ok(checked > 0, size + ' checked vertices');
+    }
+  }
+});
 
 test('boss.glb: naming, poly budget, cross-section and height vs spec', () => {
   const { buf, json, binOff } = parseGlb('boss.glb');

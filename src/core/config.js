@@ -463,7 +463,7 @@ export const CONFIG = {
       offset: 1.15,           // puff distance behind the ship (u)
     },
     dpr: { high: 2, low: 1.5 }, // ST-225: per-tier device-pixel-ratio caps (load-reactive DPR)
-    env: { intensity: 0.55 }, // I213: envMapIntensity for PBR-lite IBL from the skybox (bloom-safe)
+    env: { intensity: 0.35, rock: 0.0 }, // I213 (I257 final): envMapIntensity PBR-lite IBL. 0.55 washed rocks periwinkle; final A/B locked rock=0.0 - fully decouples rocks from the blue-violet nebula PMREM (0.18 vs 0 = dRGB <= 1.5, negligible); ship/belt keep 0.35
     bloom: {                  // I35: post-fx, High quality only (GDD: "Low disables bloom")
       strength: 0.6,
       radius: 0.35,

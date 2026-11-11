@@ -87,6 +87,7 @@ const skybox = createSkybox(scene, 'assets/skybox_equirect.jpg', (tex) => { // I
   scene.environment = pmrem.fromEquirectangular(tex).texture;
   pmrem.dispose();
   scene.traverse((o) => { const ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : []; for (const m of ms) if (m.isMeshStandardMaterial) m.envMapIntensity = CONFIG.fx.env.intensity; });
+    rockRenders.setEnvIntensity(CONFIG.fx.env.rock); // I257 final: rock=0.0 decouples rocks from nebula IBL; ship/belt keep the 0.35 fill
 });
 
 const camera = new THREE.PerspectiveCamera(CONFIG.camera.fovBase, window.innerWidth / window.innerHeight, 0.1, 400); // ST-082: base FOV from config
@@ -104,10 +105,14 @@ const dbgParam = new URLSearchParams(window.location.search).get('dbg');
 const debugOverlay = dbgParam === '1' ? createDebugOverlay() : null;
 if (debugOverlay) debugOverlay.show();
 
-scene.add(new THREE.HemisphereLight(0x33437a, 0x04060f, 0.55));
-scene.add(new THREE.AmbientLight(0x8899ff, 0.35));
-const dir = new THREE.DirectionalLight(0xffffff, 1.1);
-dir.position.set(6, 12, 4);
+// I257: warm-key / neutral-fill light set (was cool blue wash: 0x33437a hemi + 0x8899ff ambient +
+// white key). Periwinkle incident (E18/ST-247) final root cause: the COOL RIM TERM alone (rim-off
+// A/B: rocks read warm R79/G55/B37 vs rim-on R112/G111/B133). Key is camera-side (3,9,10) so
+// camera-facing facets get N-L ~0.7 of the warm light (was (6,12,4) ~0.28).
+scene.add(new THREE.HemisphereLight(0x4a4a5e, 0x2e2a26, 0.50)); // neutral-cool sky / warm ground
+scene.add(new THREE.AmbientLight(0x96908a, 0.30)); // warm neutral fill
+const dir = new THREE.DirectionalLight(0xffe2c4, 1.25); // warm key
+dir.position.set(3, 9, 10); // I257 final: camera-side key (see comment above)
 scene.add(dir);
 
 const grid = new THREE.PolarGridHelper(26, 12, 8, 64, 0x1b2a55, 0x101a38);
