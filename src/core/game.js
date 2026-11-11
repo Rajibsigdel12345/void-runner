@@ -33,6 +33,7 @@ export class World {
     this.stingers = new StingerField(rng, cfg); // ST-229
     this.flyers = new FlyerField(rng, cfg); // ST-232
     this.boss = null; // ST-055
+    this.bossRelease = 0; // ST-241: 1 -> 0 over music.intensity.releaseTime after a boss death
     this.enemyBullets = new EnemyBulletField(cfg); // ST-056
     this.vortex = new VortexField(rng, cfg); // ST-059
     this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056
@@ -223,6 +224,7 @@ export class World {
         }
       }
     }
+    if (this.bossRelease > 0) this.bossRelease = Math.max(0, this.bossRelease - edt / this.cfg.music.intensity.releaseTime); // ST-241: release decay on slow-mo-scaled time
     this.resolveBulletMines(); // ST-054
     this.resolveBulletBoss(); // ST-055
     this.resolveBulletWarden(); // ST-136
@@ -470,6 +472,7 @@ export class World {
     for (let i = 0; i < split; i++) this.field.spawn(splitSize, 1, { x: px, y: py });
     this.emit('bossDeath', { pos: { x: px, y: py }, kind: boss.kind }); // ST-143: variant tag
     this.boss = null;
+    this.bossRelease = 1; // ST-241: arm the post-death release decay
   }
 
   /** ST-055: the boss touching the ship costs a life (same flow as a rock hit). The boss survives. */
@@ -780,6 +783,7 @@ export class World {
     this._stingerToasted = false; // ST-229: re-arm the run's first-spawn callout
     this._flyerToasted = false; // ST-232: re-arm the run's first-spawn callout
     this.boss = null; // ST-055
+    this.bossRelease = 0; // ST-241
     this.warden = null; // ST-136
     this.enemyBullets.clear(); // ST-056
     this.vortex.reset(); // ST-059

@@ -10,7 +10,9 @@ export const CONFIG = {
     intensity: {
       waveK: 12,      // exp time-constant in waves (larger = slower build)
       waveCeil: 0.75, // max intensity from wave alone (headroom below 1 for the boss)
-      bossFloor: 0.9  // min intensity while a boss is alive (peak-tension moment)
+      bossFloor: 0.9, // min intensity while a boss is alive (peak-tension moment)
+      phase2Lift: 0.1, // ST-241: extra intensity while the boss is enraged (phase 2), capped at 1
+      releaseTime: 4 // ST-241: s to decay from the boss peak back to wave tension after death (labeled internal choice: YouTube supplementary check found no release-duration pin - see design/audio-music.md)
     },
     warp: {           // I172 (ST-172): bullet-time (slow-mo) audio
       centsMax: 700,  // max pitch drop in cents at full warp (a tritone; slow-mo 0.4x lands at -420)
@@ -88,7 +90,9 @@ export const CONFIG = {
     maxConcurrentCap: 24,
     intermission: 2.2,
     stallTime: 45,       // I42: wave advances after 45s without a clear (leftover rocks carry over)
-    spawnMinPlayerDist: 8 // I34: rim spawn keeps at least this far from the ship
+    spawnMinPlayerDist: 8, // I34: rim spawn keeps at least this far from the ship
+    breatherOpenFrac: 0.5, // ST-242: a breather wave (right after a boss, ST-092) opens with this fraction of the normal open batch
+    breatherMinRocks: 3 // ST-242: floor on a breather open batch
   },
 
   waveEndless: {

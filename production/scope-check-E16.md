@@ -146,3 +146,17 @@ external sources.
 ## Next owner / decision
 - I248: ST-240 (boss hero pass; cgs-dev-story + Blender MCP). E16 stories scheduled
   I248..I251; gate G16.0 at I251.
+
+
+## G16.0 gate - PASS (I251)
+
+All 7 criteria met (cgs-gate-check):
+1. Boss GLB 18/18 + extent parity + assetPerf audit + phase-2 core glow live - I248 (8976 B / 3 nodes / 70 tris / 3 mats; extent w 3.524 / h 9.393 / z 4.059 inside the jittered fallback envelope; Splicer parity exact; forced phase-2 core 0xff4d6d@1.701 crossing the 0.72 bloom threshold).
+2. Music ramp A/B (objective 1-s delta) + unit curves - I249 (entry ramp 0.7267 -> 0.8976 monotone, max 1-s delta 0.1496 <= 0.25 vs the pre-change one-tick 0.3327 spike; phase-2 x 1.0000 exact; release decay lands exactly on waveX; unit suite 756/756 at that iteration).
+3. Breather open-batch counts deterministic + pin unmodified - I250 (wave 6 opens 5 not 10; 1200-tick FNV-1a e1d99a25 bit-identical to the pre-change baseline; march 1->9: only wave 6 changed).
+4. Demo pin EXACT via real UI - I251 (SCORE 11334 / KILLS 57 / WAVE 2 / MAX COMBO 15 / TIME 0:36 / idx 2169/2220 / demoSeed 1909; MENU->REPLAY->GAME_OVER clean; pin test UNMODIFIED and green).
+5. Fresh tests + build + dist in budget - I251 (765/765; build 0; dist 113 files 2033.0 raw / 539.1 canonical gzip KB - headroom 10.9 KB, floor >= 8 HOLDS).
+6. Regression green - I251 (state machine 25-cell matrix + 11 live real-key transitions; persistence exact; FX-off zero-leak + readability floor 8 live; pool caps documented; fresh 1080-tick pilot 0 NaN incl. the full 1536-float particle scan; console 0/0/0 fresh boot).
+7. Log audit sequential 1..251 on disk - I251 (251 headers, no gaps/dups, audited after the patch per the I236 lesson).
+
+Risk register R-E16-1..4 -> CLOSED (I251). E16 CLOSED 4/4 (ST-240..243 over I248..I251).

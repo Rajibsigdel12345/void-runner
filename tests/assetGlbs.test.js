@@ -1,4 +1,4 @@
-// I207: vendored GLB asset audit (ST-207, cgs-asset-audit). Pure node - no DOM,
+﻿// I207: vendored GLB asset audit (ST-207, cgs-asset-audit). Pure node - no DOM,
 // no three. Validates the Blender-authored GLBs in assets/ (I220: sixteen total) against the
 // container format, the VR_ naming convention, the poly budgets from
 // design/asset-spec.md, and the logical radii in CONFIG (visual/hitbox parity).
@@ -115,8 +115,10 @@ test('boss.glb: naming, poly budget, cross-section and height vs spec', () => {
   const { buf, json, binOff } = parseGlb('boss.glb');
   assert.ok(buf.length < MAX_FILE_BYTES, 'boss.glb under 100 KB');
   const s = meshStats({ buf, json, binOff });
-  assert.ok(s.nodeNames.includes('VR_Boss'), 'VR_Boss node');
-  assert.ok(s.matNames.includes('VR_Boss'), 'VR_Boss material');
+  assert.ok(s.nodeNames.includes('VR_Boss_Hull'), 'VR_Boss_Hull node (I248)');
+  assert.ok(s.nodeNames.includes('VR_Boss_Crown'), 'VR_Boss_Crown node (I248)');
+  assert.ok(s.nodeNames.includes('VR_Boss_Core'), 'VR_Boss_Core node (I248)');
+  for (const n of ['VR_Boss_HullMat', 'VR_Boss_CrownMat', 'VR_Boss_CoreMat']) assert.ok(s.matNames.includes(n), n + ' material (I248)');
   for (const p of s.prims) assert.ok(p.hasColor, 'boss primitive has COLOR_0 vertex colors (I210)');
   assert.ok(s.totalTris <= BUDGETS.boss, 'boss tris ' + s.totalTris + ' <= 250');
   // Spec: cross-section ~4.1, height ~8.8 (boss.radius 3.4 * 1.2 / * 2.6), +/-10%.

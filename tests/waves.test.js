@@ -140,3 +140,106 @@ test('waves: repeated stalls keep escalating (I42)', () => {
   assert.equal(dir.wave, 3);
   assert.ok(field.count > 0, 'leftover rocks persist (concurrent cap bounds density)');
 });
+
+// ---- ST-242: breather open density (I250) ----
+
+test('ST-242: isBreatherWave flags exactly the wave right after each boss wave', () => {
+  const { dir } = setup(7);
+  for (const w of [6, 11, 16, 21]) assert.equal(dir.isBreatherWave(w), true, `wave ${w} is a breather`);
+  for (const w of [1, 5, 7, 10, 12, 20]) assert.equal(dir.isBreatherWave(w), false, `wave ${w} is not a breather`);
+});
+
+test('ST-242: openBudgetFor is null on non-breather waves', () => {
+  const { dir } = setup(7);
+  for (const w of [1, 5, 7, 10, 20]) assert.equal(dir.openBudgetFor(w), null, `wave ${w} has no budget`);
+});
+
+test('ST-242: openBudgetFor caps the breather opening batch (0.5, floor 3)', () => {
+  const { dir } = setup(7);
+  // wave 6: content 10, limit 18 -> normal min(16,10,18)=10 -> floor(10*0.5)=5
+  assert.equal(dir.openBudgetFor(6), 5);
+  // wave 11: content 15, limit 24 -> min(16,15,24)=15 -> floor(15*0.5)=7
+  assert.equal(dir.openBudgetFor(11), 7);
+  // wave 16: content 20 (endless cap 36), limit 24 -> min(16,20,24)=16 -> floor(16*0.5)=8
+  assert.equal(dir.openBudgetFor(16), 8);
+});
+
+test('ST-242: openBudgetFor floors at breatherMinRocks on a tiny fraction', () => {
+  const cfg = { ...CONFIG, wave: { ...CONFIG.wave, breatherOpenFrac: 0.05 } };
+  const field = new AsteroidField(new RNG(7));
+  const dir = new WaveDirector(new RNG(107), field, cfg);
+  // floor(10 * 0.05) = 0 -> floored to breatherMinRocks (3)
+  assert.equal(dir.openBudgetFor(6), cfg.wave.breatherMinRocks);
+  assert.equal(dir.openBudgetFor(6), 3);
+});
+
+test('ST-242: missing boss config disables breather detection', () => {
+  const cfg = { ...CONFIG, boss: undefined };
+  const field = new AsteroidField(new RNG(7));
+  const dir = new WaveDirector(new RNG(107), field, cfg);
+  assert.equal(dir.isBreatherWave(6), false);
+  assert.equal(dir.openBudgetFor(6), null);
+});
+
+test('ST-242: wave 6 opens with the reduced batch, rest trickles in (integration)', () => {
+  const { field, dir } = setup(393);
+  dir.wave = 5; dir.state = 'intermission'; dir.intermission = 0.001;
+  dir.toSpawn = 0; dir.waveElapsed = 0; dir.activeMod = 'none'; dir.openGate = null;
+  field.clear();
+  const S = 1 / 60;
+  const e1 = dir.step(S);
+  assert.equal(e1.startedWave, 6);
+  assert.equal(dir.activeMod, 'none', 'breather = no modifier');
+  assert.equal(dir.field.count, 5, 'opening batch capped at 5 (not the full 10)');
+  assert.equal(dir.toSpawn, 5, '5 rocks still queued to trickle in');
+  const e2 = dir.step(S);
+  assert.equal(dir.field.count, 10, 'remaining 5 trickle in on the next tick');
+  assert.equal(dir.toSpawn, 0);
+  assert.equal(dir.openGate, null, 'gate retired after the burst completes');
+  assert.equal(e2.waveCleared, 0);
+});
+
+test('ST-242: a non-breather wave still opens at full density (control)', () => {
+  const { field, dir } = setup(393);
+  dir.wave = 3; dir.state = 'intermission'; dir.intermission = 0.001;
+  dir.toSpawn = 0; dir.waveElapsed = 0; dir.activeMod = 'none'; dir.openGate = null;
+  field.clear();
+  const S = 1 / 60;
+  const e1 = dir.step(S);
+  assert.equal(e1.startedWave, 4);
+  assert.equal(dir.openGate, null, 'no gate on a non-breather wave');
+  assert.equal(dir.field.count, 8, 'wave 4 content 8 all spawn on the first tick');
+  assert.equal(dir.toSpawn, 0);
+});
+
+test('ST-242: a stall-advance into wave 11 also sets the breather gate', () => {
+  const { field, dir } = setup(393);
+  dir.wave = 10; dir.state = 'active'; dir.toSpawn = 0;
+  dir.waveElapsed = CONFIG.wave.stallTime - 0.01; dir.activeMod = 'none'; dir.openGate = null;
+  field.clear();
+  field.spawn('M', 1, null, null, false, null, 0, false); // one leftover so the wave is not cleared this tick
+  const S = 1 / 60;
+  const e1 = dir.step(S);
+  assert.equal(e1.stallAdvance, 11);
+  assert.equal(dir.openGate, 7, 'wave 11 breather gate = floor(15 * 0.5)');
+  const e2 = dir.step(S);
+  assert.equal(dir.field.count, 8, 'leftover 1 + first 7 of content 15');
+  assert.equal(dir.toSpawn, 8);
+  assert.equal(dir.openGate, null);
+});
+
+test('ST-242: wave-6 opening is deterministic across identical stagings (x2)', () => {
+  const sig = () => {
+    const { field, dir } = setup(393);
+    dir.wave = 5; dir.state = 'intermission'; dir.intermission = 0.001;
+    dir.toSpawn = 0; dir.waveElapsed = 0; dir.activeMod = 'none'; dir.openGate = null;
+    field.clear();
+    const S = 1 / 60;
+    dir.step(S); dir.step(S);
+    return { n: field.count, pos: field.rocks.map((r) => `${r.pos.x.toFixed(3)},${r.pos.y.toFixed(3)}`).join('|') };
+  };
+  const a = sig();
+  const b = sig();
+  assert.equal(a.n, b.n);
+  assert.equal(a.pos, b.pos);
+});

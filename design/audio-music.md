@@ -522,8 +522,70 @@ Re-runs on every npm test (565/565 at I180; re-verified on every
 iteration since - the G8.4 gate cites it as the standing synth-layer
 re-verification).
 
+## ST-241 implementation (I249)
+
+E16 finale music pass: the boss arc should read as a composed build,
+not a stepped jump. ST-170 already lifted the drone to bossFloor (0.9)
+the instant a boss spawned; T5's probe measured that as a ONE-TICK step
+(a 0.3327 delta in a single frame at wave-5 entry) - a step, not a build.
+Three levers, all in the pure mapping (src/core/musicIntensity.js; the
+signature musicIntensityX(world, opts) is kept):
+
+(a) Entry ramp - the boss floor now eases in over the boss's own entrance
+    window (boss.entered, 0..1, ST-135, enterTime 1.2 s):
+    e = clamp01(boss.entered), x = waveX + (bossFloor - waveX) * e.
+    No new world state. A legacy fixture without `entered` (or with a
+    non-finite one) is treated as fully entered, so the 8 ST-170 tests and
+    every old call site keep ST-170 behavior EXACT.
+(b) Phase-2 lift - while the boss is enraged (boss.phase === 2, one-way at
+    hpFrac 0.5), x += phase2Lift (0.1), clamped at 1.0 (clamp01 on return).
+    No phase-1 leak: the lift applies only when phase === 2.
+(c) Post-death release - a boss always dies enraged (phase 2 is one-way),
+    so the peak the player heard is min(1, bossFloor + phase2Lift) = 1.0
+    with the shipped tunables. After death (no live boss) the world decays
+    world.bossRelease 1 -> 0 over releaseTime, and the mapping glides
+    x = waveX + (peak - waveX) * bossRelease back to the wave tension:
+    "release after the peak" (I247 YouTube epic grounding - Sobczak +
+    Tawhid finale tension/release).
+
+Tunables (config.js CONFIG.music.intensity): phase2Lift 0.1 (cap 1.0),
+releaseTime 4 s. releaseTime is a LABELED INTERNAL CHOICE: the I249
+supplementary YouTube check (2 queries / 16 unique) found no release-
+duration pin. 4 s decays the ~0.27 peak-to-wave delta across 240 ticks at
+60 Hz, so the release lands as a glide over ~13 change-cache pushes
+(|dx| > 0.02), not a one-frame blip.
+
+Wiring: game.js carries the only new world state - this.bossRelease (ctor
+0; bossDeath() arms 1 after boss = null; step() decays -= edt / releaseTime
+on slow-mo-scaled time; reset() zeroes it). main.js is UNCHANGED: the
+existing syncVisuals call site (line 787) already passes
+CONFIG.music.intensity as opts with the |dx| > 0.02 change-cache, so the
+ramp arrives in ~0.02 steps with no new call path.
+
+Mix target: no perceptible step. Acceptance = max 1-s-window delta of the
+applied x <= 0.25 at entry, phase-2, and release (pre-change entry was a
+one-tick 0.3327 step), monotone in each phase, and release landing exactly
+on waveX when bossRelease hits 0.
+
+QA (browser A/B, ?nocache=i249b, one synchronous evaluate; staged
+115489 ticks to wave 44, 8 bosses killed): baseline x 0.7267 == waveX(44)
+0.7292 within the 0.02 audio cache; Monolith entry (spawn #9): x
+0.7267 -> 0.8976 monotone over 73 ticks (entered 0.083 -> 1.0), max 1-s
+delta 0.1496, maxAbsErr 0.0167 vs analytic; forced phase 2 (direct
+b.phase = 2 - the Monolith's natural check lives in hit(), not step()):
+x 1.0000 EXACT; bossDeath(): monotone release, max 1-s delta 0.0813,
+bossRelease -> 0, x lands exactly on waveX; Splicer parity (spawn #10,
+count 9 odd): entrance 73 ticks, floor 0.881, phase-2 x 1.0, release
+maxAbsErr 0.0136. +14 unit tests (the arc end-to-end: ramp -> peak ->
+decay lands exactly on waveX); 756/756. Audio-only: no render diff, frame
+delta ~0, demo pin untouched BY GATING (boss W5+; the pin run dies wave
+2). The music-quality perception verdict (HUMAN-PENDING #5) stays open
+for the human pass.
+
 ## Next
 E8E arc (ST-169..186) closed at I186. Audio design is frozen for the E8
 milestone: E8F (I187-I206) carries no audio story (robustness / QA only).
-The I202 human playtest can surface mix feedback, but any resulting change
-goes to the post-E8 backlog.
+E16 carried one audio story: ST-241 (I249) - the boss-arc finale music
+pass (entry ramp + phase-2 lift + post-death release). Audio design for
+E16 closes with ST-241; the music-quality perception verdict
+(HUMAN-PENDING #5) remains open for the human pass.
