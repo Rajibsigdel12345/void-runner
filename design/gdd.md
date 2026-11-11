@@ -75,7 +75,7 @@ multipliers, and grab power-ups. Survive as long as you can.
 - 2 S-bullets destroy one (+400, feeds the combo; magenta burst + shake rung 0.65 + kill punch 0.25 + ascending chime + a magenta "FLYER" kill-feed row). The first hit flashes the dome white-hot (FX-tier-independent readability).
 - Two exits, both NO score (the stinger fizzle precedent): the arena rim or its lifetime (9-12 s game-time, so the slot frees before later waves pile up).
 - Reduced motion: the weave amplitude scales to x0.4 with the motion kept - the rescale is continuous (in-flight flyers adapt over ~0.5 s with no position jump; new spawns scale at birth).
-- The run's first flyer toasts "FLYER INBOUND" (callout pattern). Blender GLB model lands in ST-234; procedural hexa-disc + dome fallback.
+- The run's first flyer toasts "FLYER INBOUND" (callout pattern). Blender GLB model (ST-234: assets/flyer.glb, 52 tris / 2 materials, VR_Flyer_Body + VR_Flyer_Dome); procedural hexa-disc + dome fallback if the GLB fails to load.
 ## The Monolith (ST-055)
 
 - Every 5th wave (5, 10, 15, ...) spawns a MONOLITH at the arena rim, in addition to the wave's normal asteroids: a huge, slow-homing boss (base 40 HP, 1.6 u/s - always dodgeable).
@@ -289,4 +289,4 @@ kill feed, and banner render on the same 0-mutation steady-state HUD path
   production/perf-ui-text.md holds the budgets and the measured tables.
 
 ## Non-goals
-No multiplayer, no leaderboards, no account/network, no third-party art assets (the five Blender GLBs in assets/ are first-party, with a procedural fallback), no engine framework.
+No multiplayer, no leaderboards, no account/network, no third-party art assets (the eighteen Blender GLBs in assets/ are first-party, with a procedural fallback), no engine framework.

@@ -1,5 +1,5 @@
 // Void Runner - GLB asset loader (I104). Fire-and-forget async load of the
-// seventeen Blender-pass GLBs in assets/ with procedural fallback: renderers
+// eighteen Blender-pass GLBs in assets/ with procedural fallback: renderers
 // start procedural and each asset swaps in (via onAsset) as it resolves.
 // A failed load warns and keeps the procedural stand-in - no boot gate.
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -23,6 +23,7 @@ const ASSETS = {
   warden: 'assets/warden.glb', // I220: armored sentinel mini-boss (hull + armor plate)
   arenaRing: 'assets/arena_ring.glb', // I212: arena boundary ring
   stinger: 'assets/stinger.glb', // ST-230: charger dart (body + emissive core)
+  flyer: 'assets/flyer.glb', // ST-234: evasive saucer (hull + emissive dome)
 };
 
 export function createAssetLoader() {

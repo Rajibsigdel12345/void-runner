@@ -54,8 +54,8 @@ const BUDGET = {
   perFileMats: 3,      // [max 3 - ship body/wing/cockpit]
 };
 
-test('exactly 17 GLB assets (16 models + arena ring)', () => {
-  assert.equal(glbs.length, 17); // I220: +warden, I235: +stinger
+test('exactly 18 GLB assets (17 models + arena ring)', () => {
+  assert.equal(glbs.length, 18); // I220: +warden, I235: +stinger, I240: +flyer
 });
 
 test('total GLB file size within budget', () => {
