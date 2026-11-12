@@ -533,6 +533,27 @@ let bossZoomFov = 0;
 
 // event drain sink (I16 HUD / I24 fx / I27 audio hook in here)
 const eventTally = {}; const juiceTally = createJuiceTally(); // ST-183: per-run feel-channel tally (probe: __vr.juiceTally())
+
+// I285/ST-270: vendor lowp capability warning guard. three.js r160 (vendor/three.module.js:20618,
+// WebGLPrograms.getParameters) warns when a program compiles in a GL context whose max fragment
+// precision has degraded to 'lowp' (degraded GPU window state - occluded/throttled windows where the
+// driver reports zero range for highp+mediump). Benign: three.js falls back to the max supported
+// precision and rendering stays correct; no project material sets .precision, so only an internal
+// (precision: undefined) material can trigger it; NOT reproducible at HEAD in a healthy window
+// (I285 probe: 6 attempts, 0 reproductions). Disposition: the first occurrence passes through
+// (stays observable once), repeats are suppressed (it re-fires per recompiled program, e.g. after a
+// context restore), and every occurrence is tallied (eventTally.vendorLowpWarn / __vr.vendorLowpWarns).
+const _origConsoleWarn = console.warn;
+let _vendorLowpWarns = 0;
+console.warn = (..._a) => {
+  const _s = _a.join(' ');
+  if (_s.indexOf('THREE.WebGLProgram.getParameters:') !== -1 && _s.indexOf('not supported, using') !== -1) {
+    _vendorLowpWarns += 1;
+    eventTally.vendorLowpWarn = (eventTally.vendorLowpWarn || 0) + 1;
+    if (_vendorLowpWarns > 1) return; // repeat of the same benign capability fallback
+  }
+  return _origConsoleWarn(..._a);
+};
 // Deterministic advance for smoke tests + the I076 harness: runs N fixed substeps
 // (world.step + event drain + visual sync) independent of display rate.
 function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing: false }) {
@@ -541,7 +562,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   syncVisuals(STEP);
 }
 window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shockwaves, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, shipFlameGlow: shipMesh.flameGlow, arenaFloor: grid, // ST-257 (I269)
-  applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+  applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, vendorLowpWarns: () => _vendorLowpWarns, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
