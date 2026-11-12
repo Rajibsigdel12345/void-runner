@@ -55,3 +55,19 @@ export function gridVertexCount(rings, sectors, divisions, spokeSegs) {
 export function gridSegmentCount(rings, sectors, divisions, spokeSegs) {
   return rings * divisions + sectors * spokeSegs;
 }
+
+// ST-277 (I294): radial gradient stops for the floor disc - [t, r, g, b] sRGB triples.
+// t = 0 at the hub, 1 at the arena edge; brighter center -> darker rim (the "arena
+// depth cut"). Pure: the render layer (src/render/floorDisc.js) samples these into a
+// canvas radial gradient.
+export function discGradientStops(disc) {
+  const hex = (h) => [(h >> 16) & 255, (h >> 8) & 255, h & 255];
+  const c = hex(disc.center);
+  const m = hex(disc.mid);
+  const r = hex(disc.rim);
+  return [
+    [0, c[0], c[1], c[2]],
+    [disc.midT, m[0], m[1], m[2]],
+    [1, r[0], r[1], r[2]],
+  ];
+}

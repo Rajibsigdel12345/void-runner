@@ -15,6 +15,18 @@ export const CONFIG = {
       spokeSegs: 8, // spoke subdivisions - per-vertex radial falloff
       falloffPow: 1.6, // mix = dim + (bright - dim) * (1 - t)^pow, t = r / radius
     },
+    // ST-277 (I294): thin radial floor disc UNDER the grid (src/render/floorDisc.js) -
+    // the E25 "arena depth cut" (Dota-2 ladder): a solid warm-neutral base so the v7
+    // lower-hemisphere sky stops showing through the grid-only floor. Procedural canvas
+    // radial gradient (in-code 0 KB - no asset). Brighter center -> darker rim. All
+    // stops warm neutral R>G>B, luma < 50 (floor-ceiling convention, FLOOR-50 family).
+    floorDisc: {
+      center: 0x1c1712, // hub base; sRGB luma 23.7
+      mid: 0x110e0b,    // mid stop; sRGB luma 14.4
+      rim: 0x0b0908,    // edge base; sRGB luma 9.4 - recedes into the boundary ring
+      midT: 0.65,       // mid-stop position along the center->rim radius
+      y: -0.02,         // just below the grid lines (y=0) - no z-fight
+    },
   },
 
   // I170 (ST-170): procedural-music intensity escalation, driven from world state.

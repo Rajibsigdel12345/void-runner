@@ -9,6 +9,7 @@ import {
   ringRadii,
   gridVertexCount,
   gridSegmentCount,
+  discGradientStops,
 } from "../src/core/floorGrid.js";
 
 const A = CONFIG.arena;
@@ -104,4 +105,26 @@ test("ST-257: geometry bookkeeping is exact (5 rings x 48 + 8 spokes x 8 = 304 s
   assert.equal(s, G.rings * G.divisions + G.sectors * G.spokeSegs);
   assert.equal(v, s * 2);
   assert.equal(s, 5 * 48 + 8 * 8, "default config = 304 segments");
+});
+
+// ST-277 (I294): radial floor disc (arena depth cut) - config + stop math.
+const DISC = A.floorDisc;
+
+test("ST-277: disc gradient stops are warm neutral R>G>B, luma center>mid>rim, all under FLOOR 50", () => {
+  const stops = discGradientStops(DISC);
+  assert.equal(stops.length, 3);
+  const lumas = stops.map(([, r, g, b]) => luma([r, g, b]));
+  for (const [t, r, g, b] of stops) {
+    assert.ok(r > g && g > b, "stop t=" + t + " warm neutral R>G>B: " + [r, g, b].join(","));
+    assert.ok(luma([r, g, b]) < 50, "stop luma " + luma([r, g, b]).toFixed(1) + " < 50 (floor-ceiling)");
+  }
+  assert.ok(lumas[0] > lumas[1] && lumas[1] > lumas[2], "luma decreases center->rim: " + lumas.map((l) => l.toFixed(1)).join("/"));
+  assert.equal(stops[0][0], 0, "hub stop at t=0");
+  assert.equal(stops[2][0], 1, "rim stop at t=1");
+  assert.ok(DISC.midT > 0 && DISC.midT < 1, "midT in (0,1): " + DISC.midT);
+});
+
+test("ST-277: disc sits just below the grid lines (y<0, small offset)", () => {
+  assert.ok(DISC.y < 0, "disc y " + DISC.y + " < 0 (grid at y=0 - no z-fight)");
+  assert.ok(Math.abs(DISC.y) < 0.5, "offset small: " + DISC.y);
 });
