@@ -36,7 +36,10 @@ export function createScreens(root, settings = {}) {
     '.vr-start:hover{background:rgba(30,50,100,0.95);border-color:#4a7fd8;animation:none;}',
     '.vr-start:focus-visible{outline:2px solid #ffe08a;outline-offset:2px;}',
     '.vr-reduced .vr-start{animation:none !important;}',
-    '@media (max-width:620px){.vr-menu-grid{grid-template-columns:1fr !important;max-width:100% !important;}.vr-credit{display:none !important;}#screen-menu{justify-content:flex-start !important;overflow-y:auto !important;padding:18px 0 !important;}}',
+    '#screen-menu .vr-settings-groups{grid-template-columns:1fr !important;}', // ST-279: menu settings stack (narrow left column),
+    '#screen-menu .vr-settings{z-index:2;}',
+    '#screen-menu .vr-settings > div > div{background:rgba(6,12,30,0.92);}', // opaque so the corner panel reads over the grid edge,
+    '@media (max-width:620px){.vr-menu-grid{grid-template-columns:1fr !important;max-width:100% !important;}.vr-credit{display:none !important;}#screen-menu .vr-settings{position:static !important;left:auto !important;bottom:auto !important;margin-top:8px !important;z-index:auto !important;}#screen-menu{justify-content:flex-start !important;overflow-y:auto !important;padding:18px 0 !important;}}',
   ].join('');
   overlay.appendChild(style);
 
@@ -64,10 +67,27 @@ export function createScreens(root, settings = {}) {
   // --- MENU ---
   const menu = panel('screen-menu', 'radial-gradient(55% 50% at 30% 30%, rgba(60,110,200,0.22), transparent 70%), radial-gradient(50% 55% at 72% 72%, rgba(140,70,180,0.20), transparent 70%), rgba(2,4,12,0.62)');
   menu.classList.add('vr-menu-anim'); // I65: drifting nebula bg (reduced-motion disables via .vr-reduced)
-  const titleEl = line(menu, 'VOID RUNNER', 'font-size:calc(46px * var(--vr-fs,1));font-weight:800;letter-spacing:10px;'); titleEl.classList.add('vr-title'); // I65: gradient + glow
-  line(menu, 'survive the void, outlast the waves', 'font-size:calc(14px * var(--vr-fs,1));letter-spacing:2px;opacity:0.85;'); // I44 contrast
+  // ST-279: three-zone one-job layout - top (title), center band (start prompt, clear of the
+  // 3D ship hero), bottom zone (cards + actions). DOM only; en text bytes frozen (.evidence/I297).
+  menu.style.justifyContent = 'flex-start';
+  menu.style.padding = '24px 0 18px';
+  const topWrap = document.createElement('div');
+  topWrap.className = 'vr-menu-top';
+  topWrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:6px;';
+  const centerWrap = document.createElement('div');
+  centerWrap.className = 'vr-menu-center';
+  centerWrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:14px;';
+  const spacer = document.createElement('div'); // flex:1 pushes the bottom zone under the ship hero
+  spacer.className = 'vr-menu-spacer';
+  spacer.style.cssText = 'flex:1;min-height:0;';
+  const bottomWrap = document.createElement('div');
+  bottomWrap.className = 'vr-menu-bottom';
+  bottomWrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:8px;padding-bottom:30px;width:100%;';
+  menu.append(topWrap, centerWrap, spacer, bottomWrap);
+  const titleEl = line(topWrap, 'VOID RUNNER', 'font-size:calc(46px * var(--vr-fs,1));font-weight:800;letter-spacing:10px;'); titleEl.classList.add('vr-title'); // I65: gradient + glow
+  line(topWrap, 'survive the void, outlast the waves', 'font-size:calc(14px * var(--vr-fs,1));letter-spacing:2px;opacity:0.85;'); // I44 contrast
   const controls = document.createElement('div');
-  controls.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:8px 22px;font-size:calc(14px * var(--vr-fs,1));margin-top:6px;padding:16px 24px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);'; // I65: controls card
+  controls.style.cssText = 'display:grid;grid-template-columns:auto auto auto auto;gap:5px 16px;font-size:calc(13px * var(--vr-fs,1));padding:10px 16px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);'; // I65: controls card; ST-279: two keycap pairs per row
   const CONTROL_ROWS = settings.touch // I71: touch vs keyboard instructions
     ? [['LEFT ZONE', 'drag to fly'], ['RIGHT ZONE', 'aim + fire'], ['2 FINGERS', 'pause']] // ST-268 dual-zone
     : [['WASD / ARROWS', 'thrust'], ['MOUSE', 'aim'], ['CLICK / SPACE', 'fire'], ['P / ESC', 'pause'], ['M', 'mute'], ['F', 'fx'], ['N', 'music']];
@@ -84,7 +104,7 @@ export function createScreens(root, settings = {}) {
     controls.append(key, val);
   }
   const top5 = document.createElement('div'); // I66: top-5 card
-  top5.style.cssText = 'display:flex;flex-direction:column;gap:4px;font-size:calc(13px * var(--vr-fs,1));padding:14px 22px;min-height:150px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);';
+  top5.style.cssText = 'display:flex;flex-direction:column;gap:4px;font-size:calc(13px * var(--vr-fs,1));padding:10px 18px;min-height:130px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);'; // ST-279: compact
   const top5Head = document.createElement('div');
   top5Head.textContent = 'TOP 5';
   top5Head.style.cssText = 'font-weight:700;letter-spacing:3px;font-size:calc(12px * var(--vr-fs,1));opacity:0.9;margin-bottom:2px;';
@@ -95,8 +115,8 @@ export function createScreens(root, settings = {}) {
   menuGrid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;max-width:640px;';
   menuGrid.classList.add('vr-menu-grid'); // I71: collapse to one column on narrow viewports
   menuGrid.append(controls, top5);
-  menu.appendChild(menuGrid);
-  const menuStatus = line(menu, 'M \u2014 MUTE (OFF)     F \u2014 FX (HIGH)     N \u2014 MUSIC (ON)', 'font-size:calc(12px * var(--vr-fs,1));letter-spacing:2px;opacity:0.65;margin-top:10px;'); // I165: live session status on the menu (I164 finding); I171: + N music
+  bottomWrap.appendChild(menuGrid);
+  const menuStatus = line(bottomWrap, 'M \u2014 MUTE (OFF)     F \u2014 FX (HIGH)     N \u2014 MUSIC (ON)', 'font-size:calc(12px * var(--vr-fs,1));letter-spacing:2px;opacity:0.65;'); // I165: live session status on the menu (I164 finding); I171: + N music
   if (settings.touch && settings.actions && settings.actions.start) { // I71: tappable start on touch
     const startBtn = document.createElement('button');
     startBtn.type = 'button';
@@ -104,37 +124,49 @@ export function createScreens(root, settings = {}) {
     startBtn.textContent = 'TAP TO START';
     startBtn.style.cssText = 'margin-top:14px;';
     startBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.start(); startBtn.blur(); });
-    menu.appendChild(startBtn);
+    centerWrap.appendChild(startBtn);
   } else {
-    line(menu, 'PRESS ENTER TO START', 'font-size:calc(18px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;margin-top:14px;animation:vrPulse 1.6s ease-in-out infinite;');
+    line(centerWrap, 'PRESS ENTER TO START', 'font-size:calc(18px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;animation:vrPulse 1.6s ease-in-out infinite;');
   }
+  const dailyRow = document.createElement('div'); // ST-279: DAILY + REPLAYS side by side
+  dailyRow.style.cssText = 'display:flex;gap:14px;align-items:center;';
   if (settings.actions && typeof settings.actions.startDaily === 'function') { // ST-141: DAILY button (today's seeded board)
     const dailyBtn = document.createElement('button');
     dailyBtn.type = 'button';
     dailyBtn.className = 'vr-pause-btn';
     dailyBtn.textContent = 'DAILY RUN';
-    dailyBtn.style.cssText = 'margin-top:10px;letter-spacing:3px;';
+    dailyBtn.style.cssText = 'letter-spacing:3px;';
     dailyBtn.setAttribute('aria-label', 'Start the daily seeded run');
     dailyBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.startDaily(); dailyBtn.blur(); });
-    menu.appendChild(dailyBtn);
+    dailyRow.appendChild(dailyBtn);
   }
   if (settings.actions && typeof settings.actions.showReplays === 'function') { // ST-190: REPLAYS button (demo pilot + saved runs)
     const replaysBtn = document.createElement('button');
     replaysBtn.type = 'button';
     replaysBtn.className = 'vr-pause-btn';
     replaysBtn.textContent = 'REPLAYS';
-    replaysBtn.style.cssText = 'margin-top:10px;letter-spacing:3px;';
+    replaysBtn.style.cssText = 'letter-spacing:3px;';
     replaysBtn.setAttribute('aria-label', 'Watch a saved replay');
     replaysBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.showReplays(); replaysBtn.blur(); });
-    menu.appendChild(replaysBtn);
+    dailyRow.appendChild(replaysBtn);
   }
-  const menuBest = line(menu, '', 'font-size:calc(13px * var(--vr-fs,1));opacity:0.85;'); // best score lands in I18 (I44 contrast)
-  const menuDaily = line(menu, '', 'font-size:calc(13px * var(--vr-fs,1));opacity:0.85;letter-spacing:1px;color:#9fd8ff;'); // ST-141: daily board line
+  if (dailyRow.children.length) bottomWrap.appendChild(dailyRow);
+  const bestRow = document.createElement('div'); // ST-279: best + daily lines share a row
+  bestRow.style.cssText = 'display:flex;gap:24px;align-items:baseline;';
+  const menuBest = line(bestRow, '', 'font-size:calc(13px * var(--vr-fs,1));opacity:0.85;'); // best score lands in I18 (I44 contrast)
+  const menuDaily = line(bestRow, '', 'font-size:calc(13px * var(--vr-fs,1));opacity:0.85;letter-spacing:1px;color:#9fd8ff;'); // ST-141: daily board line
   const credit = document.createElement('div'); // I65: credits
   credit.className = 'vr-credit';
   credit.textContent = 'a three.js arcade shooter \u25c6 Blender-modeled low-poly assets \u25c6 built with the Codex Game Studio pipeline';
-  menu.appendChild(credit);
-  if (settings.menu) menu.appendChild(settings.menu.el); // ST-026 settings (menu)
+  bestRow.append(menuBest, menuDaily);
+bottomWrap.append(bestRow, credit);
+  if (settings.menu) {
+    // ST-279: demoted to the bottom-left corner (clear of the centered ship hero band).
+    settings.menu.el.style.position = 'absolute';
+    settings.menu.el.style.left = '16px';
+    settings.menu.el.style.bottom = '24px';
+    bottomWrap.appendChild(settings.menu.el);
+  }
 
   // --- PAUSED (I68: deeper dim + RESUME / RESTART / QUIT actions, mouse + keys) ---
   const paused = panel('screen-paused', 'radial-gradient(60% 55% at 50% 45%, rgba(30,60,140,0.16), transparent 70%), rgba(2,4,12,0.74)');

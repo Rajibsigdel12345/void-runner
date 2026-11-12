@@ -140,6 +140,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
 
   const groups = document.createElement('div');
   groups.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:14px;align-items:start;';
+  groups.className = 'vr-settings-groups'; // ST-279: menu scopes this to a single column
   groups.append(audioCard, visCard);
   wrap.appendChild(groups);
 
