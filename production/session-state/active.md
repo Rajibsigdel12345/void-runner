@@ -1,4 +1,4 @@
-# Active session state - Void Runner (I285 done; E23 CLOSED 4/4 - G23.0 PASS at I285; next: new epic - Blender art pass, YouTube MCP grounded research first)
+# Active session state - Void Runner (I286 done; E24 Pickup Emblem Value Pass + Build Minify OPENED - 4 stories ST-271..274 scheduled I287..I290, gate G24.0; next: ST-271 build minify pass (esbuild per-module, src-only, no bundling; pre-grep done: no eval/new Function in src))
 
 - project: Void Runner (E:\Game, three.js, no bundler)
 - epic: E23 - Mobile Fallback + Enemy Art Value Pass + HUD/Probe Hardening (ST-267..270, I282..I285, gate G23.0) - CLOSED at I285 (4/4, G23.0 PASS) (docs-only; 4 evidence-backed inputs: touch-fallback arc carried since E19 (ST-033 single-finger model code review + dual-zone YouTube grounding), enemy art family (LAST un-upgraded; .evidence/I281/ 4 PNGs), FLOOR-50 probe-harden ticket, vendor lowp precision ticket); E22 CLOSED at I280 (4/4, G22.0 PASS); E21 CLOSED at I275 (G21.0 PASS); E20 CLOSED at I270 (G20.0 PASS); E19 CLOSED at I265 (G19.0 PASS)
