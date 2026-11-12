@@ -47,8 +47,8 @@ const totalTris = parsed.reduce((a, p) => a + p.tris, 0);
 
 // I214 budgets (measured baselines in brackets; caps leave headroom for E9 art growth)
 const BUDGET = {
-  totalFilesKB: 160,   // [111.3]
-  totalGeoKB: 130,     // [92.9]
+  totalFilesKB: 160,   // [110.4 I289 re-measure: +warden hull/armor COLOR_0 bake]
+  totalGeoKB: 130,     // [79.6 I289 re-measure]
   perFileKB: 60,       // [max 36.8 - asteroid_L, deliberately the heaviest]
   totalTris: 1500,     // [1021]
   perFileMats: 3,      // [max 3 - ship body/wing/cockpit]
@@ -89,7 +89,7 @@ test('every GLB has POSITION + NORMAL (render layer assumes both)', () => {
   }
 });
 
-test('COLOR_0 only on the mottled rocks + boss + ship + enemy bodies + pickup emblems (in-code materials read it; others must not carry it)', () => { // I282: + enemy value bakes; I288/ST-272: + pickup emblem value bakes
+test('COLOR_0 only on the mottled rocks + boss + ship + enemy bodies + pickup emblems + warden hull/armor (in-code materials read it; others must not carry it)', () => { // I282: + enemy value bakes; I288/ST-272: + pickup emblem value bakes; I289/ST-273: + warden hull/armor value bakes
   const withColor = parsed.filter((p) => p.attrs.has('COLOR_0')).map((p) => p.file).sort();
-  assert.deepEqual(withColor, ['asteroid_L.glb', 'asteroid_M.glb', 'asteroid_S.glb', 'boss.glb', 'drone.glb', 'flyer.glb', 'powerup_bomb.glb', 'powerup_magnet.glb', 'powerup_overdrive.glb', 'powerup_rapid.glb', 'powerup_shield.glb', 'powerup_slowmo.glb', 'powerup_spread.glb', 'ship.glb', 'stinger.glb']); // I288/ST-272: + the 7 pickup emblem value bakes (stinger core + flyer dome stay emissive-driven)
+  assert.deepEqual(withColor, ['asteroid_L.glb', 'asteroid_M.glb', 'asteroid_S.glb', 'boss.glb', 'drone.glb', 'flyer.glb', 'powerup_bomb.glb', 'powerup_magnet.glb', 'powerup_overdrive.glb', 'powerup_rapid.glb', 'powerup_shield.glb', 'powerup_slowmo.glb', 'powerup_spread.glb', 'ship.glb', 'stinger.glb', 'warden.glb']); // I289/ST-273: + the warden hull/armor value bakes (stinger core + flyer dome stay emissive-driven)
 });

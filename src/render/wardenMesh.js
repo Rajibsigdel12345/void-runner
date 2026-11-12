@@ -21,6 +21,10 @@ function bakeDroneGeometry() {
     pos.setXYZ(i, v.x, v.y, v.z);
   }
   geo.computeVertexNormals();
+  { // I289/ST-273: white value identity for the procedural fallback geo (material now uses vertexColors)
+    const col = new Float32Array(geo.attributes.position.count * 3).fill(1);
+    geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  }
   return geo;
 }
 
@@ -30,6 +34,7 @@ export function createWardenMesh(scene) {
 
   const hullMat = new THREE.MeshStandardMaterial({
     color: 0x2c3548, roughness: 0.4, metalness: 0.55, flatShading: true,
+    vertexColors: true, // I289/ST-273: GLB COLOR_0 facet-value bake multiplies on top of the base tint
     emissive: 0x19d3c5, emissiveIntensity: 0.3,
   });
   const hull = new THREE.Mesh(bakeDroneGeometry(), hullMat);
@@ -38,8 +43,14 @@ export function createWardenMesh(scene) {
   const armorMat = new THREE.MeshStandardMaterial({
     color: 0x8fa3c8, roughness: 0.3, metalness: 0.85, flatShading: true,
     emissive: 0x19d3c5, emissiveIntensity: 0.12,
+    vertexColors: true, // I289/ST-273: GLB COLOR_0 facet-value bake multiplies on top of the base tint
   });
-  const armor = new THREE.Mesh(new THREE.CylinderGeometry(r * 1.45, r * 1.55, r * 0.28, 6, 1), armorMat);
+  const armorGeo = new THREE.CylinderGeometry(r * 1.45, r * 1.55, r * 0.28, 6, 1);
+  { // I289/ST-273: white value identity for the procedural fallback geo
+    const col = new Float32Array(armorGeo.attributes.position.count * 3).fill(1);
+    armorGeo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  }
+  const armor = new THREE.Mesh(armorGeo, armorMat);
   armor.rotation.y = Math.PI / 6; // stagger the hex plate from the core facets
   group.add(armor);
 
@@ -96,6 +107,13 @@ export function createWardenMesh(scene) {
       if (nm.indexOf('Armor') >= 0 && !armorG) armorG = n.geometry;
       else if (!hullG) hullG = n.geometry;
     });
+    for (const g of [hullG, armorG]) {
+      if (!g) continue;
+      if (!g.hasAttribute('color')) { // I289/ST-273: keep a GLB without COLOR_0 safe under vertexColors (white identity)
+        const col = new Float32Array(g.attributes.position.count * 3).fill(1);
+        g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+      }
+    }
     if (hullG) hull.geometry = hullG;
     if (armorG) armor.geometry = armorG;
   }

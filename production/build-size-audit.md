@@ -119,3 +119,15 @@ console 0/0 on :4173 serving the minified dist). Files: 117 pre and post, 0 gone
 
 The standing P9 canary is now **1791.5 KB / headroom 256.5 KB** (>= 8 KB floor holds with 32.1x margin).
 src/ and vendor/ are unchanged by this pass - the +7148 B is the 7 powerup GLBs in assets/ only.
+
+## I289 re-measure (ST-273 warden hull/armor value bakes)
+
+| | before I289 | after I289 | delta |
+|---|---|---|---|
+| files | 117 | 117 | 0 |
+| total | 1791.5 KB | 1799.8 KB | +8.3 KB |
+| headroom (vs 2048 KB) | 256.5 KB | 248.2 KB | -8.3 KB |
+
+Single asset moved: assets/warden.glb 11772 -> 19756 B (+7984 B = the two COLOR_0 accessors + corner-domain vertex-split, the rest of the file byte-identical in structure). No src or vendor change (render-only story). src/ + vendor/ untouched. Assets total re-measured (assetPerf method): 110.4 KB files / 79.6 KB parsed geometry / 1387 tris across 18 GLBs (budgets 160/130/1500 hold).
+
+The standing P9 canary is now **1799.8 KB / headroom 248.2 KB** (>= 8 KB floor holds with 31.0x margin).

@@ -565,7 +565,36 @@ assert.ok(s.matNames.includes('VR_ArenaRing_Ticks'), 'VR_ArenaRing_Ticks materia
 // I220: Warden mini-boss (ST-218, cgs-dev-story) - armored sentinel: jagged dodeca
 // hull with spike accents + separate armor-plate mesh (VR_Warden_Armor) that the
 // in-code armor-state animation drives (retract + cyan->orange glow).
-test('warden.glb: naming, poly budget, hull/armor radii vs CONFIG (I220)', () => {
+// I289 (ST-273 warden hull/armor value pass): both prims now carry a grayscale
+// per-face COLOR_0 value bake (Blender 5.2, corner-domain, vertex-split on export)
+// that multiplies the in-code material tint (wardenMesh.js vertexColors:true).
+// Geometry UNCHANGED (tris/radii pins below hold). The 8 in-code spike cones are
+// not part of the GLB.
+const WARDEN_FACET = {
+  VR_Warden_Armor: { p10: 0.5945, p50: 1.0, p90: 1.25 },   // plate ring: up-facing plate tops hit the 1.25 clamp
+  VR_Warden_Hull:  { p10: 0.703, p50: 1.1287, p90: 1.25 }, // 60-tri blob: per-face nZ bakes (bmesh normals)
+};
+function wardenFacetLumas({ buf, json, binOff }, p) {
+  // Per-prim variant of enemyFacetLumas (that reader picks a single primitive; the
+  // warden bakes both hull AND armor with distinct value distributions).
+  const cAcc = json.accessors[p.attributes.COLOR_0];
+  const iAcc = json.accessors[p.indices];
+  const cBase = binOff + (json.bufferViews[cAcc.bufferView].byteOffset || 0) + (cAcc.byteOffset || 0);
+  const iBase = binOff + (json.bufferViews[iAcc.bufferView].byteOffset || 0) + (iAcc.byteOffset || 0);
+  const readIdx = (i) => (iAcc.componentType === 5123 ? buf.readUInt16LE(iBase + i * 2) : iAcc.componentType === 5125 ? buf.readUInt32LE(iBase + i * 4) : buf.readUInt8(iBase + i));
+  const fl = [];
+  for (let t = 0; t < iAcc.count / 3; t++) {
+    const lum = (i) => {
+      const o = cBase + i * 12;
+      return 0.2126 * buf.readFloatLE(o) + 0.7152 * buf.readFloatLE(o + 4) + 0.0722 * buf.readFloatLE(o + 8);
+    };
+    fl.push((lum(readIdx(t * 3)) + lum(readIdx(t * 3 + 1)) + lum(readIdx(t * 3 + 2))) / 3);
+  }
+  fl.sort((a, b) => a - b);
+  const q = (f) => fl[Math.min(fl.length - 1, Math.floor(f * fl.length))];
+  return { p10: q(0.1), p50: q(0.5), p90: q(0.9) };
+}
+test('warden.glb: naming, poly budget, hull/armor radii vs CONFIG, grayscale COLOR_0 value bake (I220 -> I289)', () => {
   const { buf, json, binOff } = parseGlb('warden.glb');
   assert.ok(buf.length <= 40 * 1024, 'warden.glb under 40 KB');
   const s = meshStats({ buf, json, binOff });
@@ -573,7 +602,30 @@ test('warden.glb: naming, poly budget, hull/armor radii vs CONFIG (I220)', () =>
   assert.ok(s.nodeNames.includes('VR_Warden_Armor'), 'VR_Warden_Armor node');
   assert.ok(s.matNames.includes('VR_Warden_Hull'), 'VR_Warden_Hull material');
   assert.ok(s.matNames.includes('VR_Warden_Armor'), 'VR_Warden_Armor material');
-  for (const p of s.prims) assert.ok(!p.hasColor, 'no vertex colors (in-code materials authoritative)');
+  for (const m of json.meshes || []) for (const p of m.primitives || []) {
+    const mn = m.name || 'mesh';
+    assert.ok(p.attributes.COLOR_0 !== undefined, mn + ' primitive has COLOR_0 (I289 value bake)');
+    const acc = json.accessors[p.attributes.COLOR_0];
+    const bv = json.bufferViews[acc.bufferView];
+    const stride = parseInt(acc.type.replace('VEC', ''), 10);
+    assert.equal(acc.componentType, 5126, mn + ' COLOR_0 componentType FLOAT');
+    assert.equal(acc.type, 'VEC3', mn + ' COLOR_0 type VEC3');
+    assert.ok(bv.byteLength >= acc.count * stride * 4, mn + ' COLOR_0 bufferView spec-size');
+    const base = binOff + (bv.byteOffset || 0) + (acc.byteOffset || 0);
+    for (let i = 0; i < acc.count; i++) {
+      const rv = buf.readFloatLE(base + i * stride * 4);
+      const gv = buf.readFloatLE(base + i * stride * 4 + 4);
+      const bv2 = buf.readFloatLE(base + i * stride * 4 + 8);
+      assert.ok(Math.abs(rv - gv) <= 0.02 && Math.abs(gv - bv2) <= 0.02, mn + ' COLOR_0 grayscale at ' + i + ': ' + [rv, gv, bv2].map((x) => x.toFixed(3)).join(','));
+      assert.ok(rv >= 0.30 - 0.01 && rv <= 1.25 + 0.01, mn + ' COLOR_0 in [0.30,1.25] value domain at ' + i + ': ' + rv.toFixed(3));
+    }
+    const f = wardenFacetLumas({ buf, json, binOff }, p);
+    const E = WARDEN_FACET[mn];
+    assert.ok(f.p90 - f.p10 >= 0.35, mn + ' facet luma spread ' + (f.p90 - f.p10).toFixed(3) + ' >= 0.35 (I289 value bake; pre-bake was a flat in-code tint)');
+    for (const k of ['p10', 'p50', 'p90']) {
+      assert.ok(Math.abs(f[k] - E[k]) <= 0.005, mn + ' facet ' + k + ' ' + f[k].toFixed(3) + ' ~ ' + E[k] + ' (I289 bake pin)');
+    }
+  }
   assert.ok(s.totalTris <= BUDGETS.warden, 'warden tris ' + s.totalTris + ' <= 200');
   const hull = s.prims.find((p) => p.name.includes('Hull'));
   const armor = s.prims.find((p) => p.name.includes('Armor'));
