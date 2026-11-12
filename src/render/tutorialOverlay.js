@@ -51,12 +51,12 @@ export function createTutorialOverlay(root, opts = {}) {
   ].join(';');
 
   card.appendChild(line('HOW TO PLAY', 'font-size:calc(28px * var(--vr-fs,1));font-weight:800;letter-spacing:6px;color:#8fd0ff;'));
-  card.appendChild(line(touch ? 'fly, auto-fire, and outlast the waves' : 'fly, aim, fire - and outlast the waves', 'font-size:calc(14px * var(--vr-fs,1));letter-spacing:2px;opacity:0.85;'));
+  card.appendChild(line('fly, aim, fire - and outlast the waves', 'font-size:calc(14px * var(--vr-fs,1));letter-spacing:2px;opacity:0.85;')); // ST-268: both schemes now read the same
 
   const grid = document.createElement('div');
   grid.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:8px 22px;font-size:calc(14px * var(--vr-fs,1));padding:16px 22px;box-sizing:border-box;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);';
   const ROWS = touch
-    ? [['DRAG', 'fly the ship'], ['TOUCH', 'auto-fire'], ['2 FINGERS', 'pause']]
+    ? [['LEFT ZONE', 'drag to fly'], ['RIGHT ZONE', 'aim + fire'], ['2 FINGERS', 'pause']] // ST-268 dual-zone
     : [['WASD / ARROWS', 'thrust'], ['MOUSE', 'aim'], ['CLICK / SPACE', 'fire'], ['P / ESC', 'pause'], ['M', 'mute'], ['N', 'music']];
   for (const [k, v] of ROWS) {
     const key = document.createElement('div');

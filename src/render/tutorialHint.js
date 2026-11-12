@@ -13,7 +13,7 @@ export function createTutorialHint(root, opts = {}) {
     'text-shadow:0 2px 10px rgba(0,0,0,0.9)', 'opacity:0',
   ].join(';');
   el.textContent = touch
-    ? 'DRAG TO FLY   \u00b7   AUTO-FIRE   \u00b7   2-FINGER PAUSE'
+    ? 'LEFT: DRAG TO FLY   \u00b7   RIGHT: AIM + FIRE   \u00b7   2-FINGER PAUSE' // ST-268 dual-zone
     : 'WASD / ARROWS MOVE   \u00b7   MOUSE AIM   \u00b7   HOLD LMB FIRE   \u00b7   P PAUSE';
   root.appendChild(el);
 

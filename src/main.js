@@ -456,7 +456,7 @@ function togglePause() { // ST-033: shared by keyboard and two-finger touch
   else if (st === STATE.REPLAY) world.pause(); // ST-190: P pauses a watched replay too
   else if (st === STATE.PAUSED) world.resume();
 }
-const input = createInput({ onPause: togglePause });
+const input = createInput({ onPause: togglePause, onPauseConfirm: () => toast('PAUSED \u00b7 2-FINGER') }); // ST-268: visual confirmation of the two-finger pause
 // I71: on-screen pause button (touch devices; shown during PLAYING only)
 const pauseBtn = document.createElement('button');
 pauseBtn.type = 'button';
@@ -660,7 +660,12 @@ const clock = createClock({ step: STEP, maxFrameDt: 0.25, maxSubsteps: MAX_SUBST
 let prevState = null; // ST-078: detect PAUSED->PLAYING to reset the clock on resume
 
 function resolveAimPoint() {
-  if (input.touchDrag) { // ST-033: while drag-thrusting, aim along the drag (fire forward)
+  if (input.rightAimActive) { // ST-268: the right-zone finger owns the aim (touch position)
+    raycaster.setFromCamera(input.pointer.ndc, camera);
+    if (raycaster.ray.intersectPlane(groundPlane, aimWorld)) return { x: aimWorld.x, y: aimWorld.z };
+    return null;
+  }
+  if (input.touchDrag) { // ST-268 (ST-033 carryover): while left-drag-thrusting, aim along the drag (fire forward)
     const sp = world.ship.pos;
     return { x: sp.x + input.touchDrag.x * 10, y: sp.y + input.touchDrag.y * 10 };
   }
