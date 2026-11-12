@@ -21,6 +21,7 @@ export function createArenaRing(scene, radius) {
     color: 0x4059e0, // I264 (ST-253): slimmed darker (0x4a6cff pre-I264)
     transparent: true,
     opacity: 0.42, // I264 (ST-253): slimmed (0.55 pre-I264); ticks untouched
+    vertexColors: true, // I299 (ST-281): read the baked COLOR_0 radial value (white fallback added in useGLB)
     side: THREE.DoubleSide,
     depthWrite: false,
   });
@@ -28,6 +29,7 @@ export function createArenaRing(scene, radius) {
     color: TICK_COLOR,
     transparent: true,
     opacity: 0.9,
+    vertexColors: true, // I299 (ST-281): read the baked COLOR_0 (bright neon rim)
     side: THREE.DoubleSide,
     depthWrite: false,
   });
@@ -46,6 +48,19 @@ export function createArenaRing(scene, radius) {
     if (!band && ticks) band = first;      // ticks consumed the first mesh
     if (!band) band = first;               // v1 GLB (single node) fallback
     if (!band) return;
+    // I299 (ST-281): the in-code mats read vertexColors:true. The baked GLB carries
+    // COLOR_0 (GLTFLoader surfaces it as a 'color' attribute). Guard: any geometry
+    // without it (v1 GLB / fallback) gets a white-identity attr so the multiply is a no-op.
+    const ensureColor = (g) => {
+      if (g && !g.attributes.color) {
+        const n = g.attributes.position.count;
+        const arr = new Float32Array(n * 3);
+        arr.fill(1);
+        g.setAttribute("color", new THREE.BufferAttribute(arr, 3));
+      }
+    };
+    ensureColor(band.geometry);
+    if (ticks) ensureColor(ticks.geometry);
     group = new THREE.Group();
     group.name = 'ArenaRing';
     group.scale.setScalar(radius);

@@ -539,16 +539,53 @@ test('drone/stinger/flyer bodies: grayscale COLOR_0 value bake band + facet spre
 // I212: arena boundary ring (ST-212, cgs-dev-story). I254/ST-245 v2: two-node GLB
 // (VR_ArenaRing band + VR_ArenaRing_Ticks neon accent). The v1 exact-48-tris pin is
 // replaced by the two-node counts (band 48 + ticks 12 = 60), documented here.
-test('arena_ring.glb: 2 nodes (band+ticks), 60 tris, flat unit ring, +Y normals, no vertex colors (I212/I254)', () => {
+test('arena_ring.glb: 2 nodes (band+ticks), 60 tris, flat unit ring, +Y normals, COLOR_0 value bake (I212/I254/I299)', () => {
   const { buf, json, binOff } = parseGlb('arena_ring.glb');
   assert.ok(buf.length < MAX_FILE_BYTES, 'arena_ring.glb under 100 KB');
-assert.ok(buf.length <= 4096, 'arena_ring.glb v2 <= 4 KB raw (' + buf.length + ' B)'); // I254
+assert.ok(buf.length <= 5700, 'arena_ring.glb v3 <= 5.7 KB raw (' + buf.length + ' B); I254 4032 -> I299 5544 (COLOR_0 bake)'); // I299
   const s = meshStats({ buf, json, binOff });
   assert.ok(s.nodeNames.includes('VR_ArenaRing'), 'VR_ArenaRing node');
 assert.ok(s.nodeNames.includes('VR_ArenaRing_Ticks'), 'VR_ArenaRing_Ticks node (I254)');
   assert.ok(s.matNames.includes('VR_ArenaRing'), 'VR_ArenaRing material');
 assert.ok(s.matNames.includes('VR_ArenaRing_Ticks'), 'VR_ArenaRing_Ticks material (I254)');
-  for (const p of s.prims) assert.ok(!p.hasColor, 'no vertex colors (in-code material authoritative)');
+  // I299 (ST-281): both prims now carry a grayscale corner-domain COLOR_0 value bake
+  // (band subtle radial darkening 0.92->1.0, ticks bright neon 1.0->1.05) that multiplies
+  // the in-code tint (arenaRing.js vertexColors:true). Geometry invariants below unchanged.
+  for (const p of s.prims) assert.ok(p.hasColor, p.name + ' primitive has COLOR_0 (I299 value bake)');
+  const RING_FACET = { VR_ArenaRing: { p10: 0.92, p50: 1.0, p90: 1.0 }, VR_ArenaRing_Ticks: { p10: 1.0, p50: 1.05, p90: 1.05 } };
+  function ringFacetLumas(p) {
+    // prims entries carry posAcc, not the raw glTF primitive - resolve it by POSITION accessor identity
+    let raw = null;
+    for (const m of json.meshes || []) for (const q of m.primitives || []) {
+      const pa = json.accessors[q.attributes.POSITION];
+      if (pa.bufferView === p.posAcc.bufferView && (pa.byteOffset || 0) === (p.posAcc.byteOffset || 0) && pa.count === p.posAcc.count) raw = q;
+    }
+    assert.ok(raw, p.name + ' raw primitive resolved');
+    const cAcc = json.accessors[raw.attributes.COLOR_0];
+    const cbv = json.bufferViews[cAcc.bufferView];
+    assert.equal(cAcc.componentType, 5126, p.name + ' COLOR_0 componentType FLOAT');
+    assert.equal(cAcc.type, 'VEC3', p.name + ' COLOR_0 type VEC3');
+    assert.equal(cAcc.count, p.posAcc.count, p.name + ' COLOR_0 count == POSITION count');
+    const vals = [];
+    for (let i = 0; i < cAcc.count; i++) {
+      const o = binOff + (cbv.byteOffset || 0) + (cAcc.byteOffset || 0) + i * 12;
+      const r = buf.readFloatLE(o), g = buf.readFloatLE(o + 4), b = buf.readFloatLE(o + 8);
+      assert.ok(Math.abs(r - g) <= 0.02 && Math.abs(g - b) <= 0.02, p.name + ' COLOR_0 grayscale at ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
+      assert.ok(r >= 0.30 - 0.01 && r <= 1.25 + 0.01, p.name + ' COLOR_0 in [0.30,1.25] at ' + i + ': ' + r.toFixed(3));
+      vals.push(r);
+    }
+    vals.sort((a, b) => a - b);
+    const pct = (f) => vals[Math.floor(vals.length * f)];
+    return { p10: pct(0.1), p50: pct(0.5), p90: pct(0.9) };
+  }
+  for (const [mn, spec] of Object.entries(RING_FACET)) {
+    const pp = s.prims.find((p) => p.name === mn);
+    assert.ok(pp, mn + ' primitive present');
+    const lum = ringFacetLumas(pp);
+    assert.ok(Math.abs(lum.p10 - spec.p10) <= 0.005, mn + ' COLOR_0 p10 ' + lum.p10.toFixed(4) + ' ~ ' + spec.p10);
+    assert.ok(Math.abs(lum.p50 - spec.p50) <= 0.005, mn + ' COLOR_0 p50 ' + lum.p50.toFixed(4) + ' ~ ' + spec.p50);
+    assert.ok(Math.abs(lum.p90 - spec.p90) <= 0.005, mn + ' COLOR_0 p90 ' + lum.p90.toFixed(4) + ' ~ ' + spec.p90);
+  }
   assert.equal(s.totalTris, 60, 'exactly 60 tris (I254 v2: band 48 + ticks 12; v1 was 48)');
   assert.ok(s.totalTris <= BUDGETS.arenaRing, 'ring tris ' + s.totalTris + ' <= ' + BUDGETS.arenaRing);
   // I254 v2: per-primitive flat/+Y/radius checks (band = outer, ticks = inner accent).
