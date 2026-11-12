@@ -1,0 +1,55 @@
+﻿# Scope check - E26: Menu Hero Presentation Finale + Final Flat-Family Art (I296)
+
+## Summary
+E25 closed at I295 (G25.0 PASS; 837/837; build exit 0; dist 118 files / 1806.9 KB / headroom 241.1 KB). E26 is the menu hero presentation finale - the game "home screen" (KazooCat gPk3BqZnmis 18:48) currently overflows the viewport at standard 1280x720 (title above the screen; ship hero 125x78 px crowded behind the button column) - plus the final flat-tint GLB family (arena_ring, 60 tris, saturated blue flat band in the top-down shot). Scope: render/DOM layer (screens.js layout), one CONFIG block (camera.menuHero re-tune), one Blender value bake (arena_ring COLOR_0, geometry invariant), and a regression story. BY LAYER - no core sim/scoring/replay-data changes, no salt bump, demo pin structurally untouched (real-UI re-verify at ST-282). Grounded in the 3-shot browser evidence at I296 (.evidence/I296/) + 5 YouTube title-screen studies (metadata + chapters; transcripts rate-limited per guard). KEY CORRECTION vs the checkpoint candidate list: G4 (menu hero) + G5 (hull bottom) ALREADY SHIPPED in E21 (ST-261 I274 menuHero camera / ST-260 I273 belly bake) - this is a REFIT (layout + config), not a rebuild; touch input also shipped I283 (ST-268 dual-zone). 4 stories; ST-281 designated CUTTABLE.
+
+## Evidence (verified at I296)
+- 3-shot probe (.evidence/I296/p_shots.mjs; 2 pages, 1 context, both closed; console 0/0; ship GLB ready; no NaN): 01_menu.png (MENU; orbit cam [1.124,2.3,4.666] fov60 aspect 1.7775, parent null), 02_ingame.png (PLAYING wave 1, 5 rocks), 03_topdown.png (pin (0,16,0) up+Z fov60). Buffer 1279x720 vs window 1422x800 (host IAB CSS scale - I284/I295 lesson; the screenshot is ground truth for DOM<->buffer mapping).
+- MENU: the column OVERFLOWS at standard 1280x720 - the VOID RUNNER title is above the viewport (tagline is the topmost visible line at y~20; title rect ~y -62). Layout (screenshot px): tagline y~20 / controls card y 45-257 / TOP5 y 45-202 / status line y~289 / PRESS ENTER y~336 / DAILY RUN y 364-403 / REPLAYS y 427-467 / daily line y~506 / ST-026 settings y 543-678 / credits y~699. Ship hero box = 125x78 px at center (640,370) (shipGroup world bbox [-0.974,0.076,-1.513]..[1.416,0.843,1.191] projected through the live orbit cam) - crowded between PRESS ENTER + DAILY RUN + REPLAYS + settings; the ship reads as a faint warm glow behind the buttons, not the hero.
+- PLAYING (wave 1, 5 rocks): READABLE as-is (ship small-but-clear, warm rocks, FLOOR-50 floor + blue rim + v7 sky coherent) - no in-play art action for E26.
+- TOPDOWN (pin (0,16,0) up+Z fov60): floor dark + subtle warm grid; rim = saturated blue FLAT band = arena_ring, the LAST flat-tint GLB family (60 tris).
+- KEY CORRECTIONS (stale candidates from the prior analysis): G4 (menu hero) + G5 (hull bottom) already shipped in E21 - ST-261 (I274, the whole CONFIG.camera.menuHero block) + ST-260 (I273 belly bake); the I274 framing predates the E25 ship re-bake (I292) and the grown menu column (DAILY RUN / REPLAYS / settings / credits) -> refit, not rebuild. Touch input shipped I283 (ST-268 dual-zone + I71 detection; src/core/touchZones.js + tests). Music escalation shipped I172. i18n = PLAN ONLY (design/i18n-strings.md, I166).
+- YouTube grounding (3 queries / 29 unique; metadata + chapters; transcripts rate-limited per guard): KazooCat "A Pretty Casual Analysis of Title Screens" gPk3BqZnmis (title = "your home... what you associate strongest with the game" 18:48; "taste of gameplay itself... always the kings" 18:06; taxonomy 1:06/4:11/6:27/12:35/16:12/18:14) / Kole Jain Gfsd8NNuD9g ("One Screen, One Job" 3:30 - our menu does 8 jobs; the one job = START) / Riot "So You Wanna Make Games?? Ep9 UI" sc3h5JXtIzw (fewest necessary actions 1:47; menus are UI 3:49) / Thomas Brush "Make A Gorgeous Start Menu" vqZjZ6yv1lA (scale-with-screen-size 4:06 - our title overflow is exactly this failure class) / WaPo "best video game title screens" 6miqCfruIuM (Halo CE orbital ship camera 4:37, GoW push-in 1:27 - the menuOrbitRate drift already implements the orbital technique; keep drift, re-tune framing).
+
+## Scope Fit
+FIT - YES. The work is render/DOM layer (screens.js layout), one CONFIG block (CONFIG.camera.menuHero re-tune), one Blender value bake (arena_ring COLOR_0, geometry invariant, proven I253/I282/I292 recipe), and a regression story. BY LAYER: no core sim/scoring/replay-data changes; no salt bump; demo pin structurally untouched (real-UI re-verify at ST-282 per the I275/I280/I285/I290 template). The layout refit + hero re-tune are DOM + config only (0 KB dist). The ring bake worst case ~+1 KB. The 8-job menu with an off-screen title at 720p is a presentation defect squarely under the standing art/presentation directive; the in-play scene is already readable, so E26 stays menu-scoped.
+
+## Cut Option
+ST-281 (arena_ring value bake) is the designated cuttable: if the matched A/B shows no perceptible gain, or the invariants (bloom 183.6 / FLOOR-50 B / MENU 21/366 / demo pin) are at risk, cut it and close E26 at 3/4 with a documented deferral to a future art arc.
+
+## Deferral
+- HP#5 human perception session (needs a human play session) - carried over.
+- i18n pass - plan only (design/i18n-strings.md); deferred as its own future 4-story arc (strings.js extraction + t() / en byte-identical wiring of the 8 render modules / second locale (de or es) + language setting + text-expansion audit / regression).
+- PWA manifest + service worker - build complexity with import maps; not this arc.
+
+## Recommendation
+Open E26 "Menu Hero Presentation Finale + Final Flat-Family Art" with 4 stories:
+- ST-279 (I297) menu layout refit "one job" hierarchy - src/render/screens.js DOM only, BY LAYER: anchor title+tagline at TOP (flex-start + top padding); reserve the vertical CENTER band for the 3D ship + single start prompt; demote secondary blocks (controls card + TOP5 + status line + DAILY RUN/REPLAYS + ST-026 settings + credits) to a compact bottom zone. Acceptance: every #screen-menu direct child in-viewport at 1280x720 AND 1366x768 (title rect y >= 0); ship hero box (current menuHero cam) x every DOM rect = 0 intersection; ALL en text byte-identical (frozen DOM text probe - record the #screen-menu text list PRE-change); focus-visible ring + touch (TAP TO START / 2-finger) + reduced-motion (.vr-reduced) + narrow <=620px media-query path preserved (probes); MENU fx=off 21 calls / 366 tris re-verified; console 0/0. Owner: ui_programmer.
+- ST-280 (I298) hero re-tune for the E25 ship - CONFIG.camera.menuHero only, probe-tuned from radius 3.4 / height 1.7 starts at a PINNED orbit angle (rAF-frozen, cam set to config orbit position at fixed angle, lookAt (0, lookY, 0), manual render): ship screen box h >= 110 px (now 78), fully in-frame with >= 40 px margin, zero DOM intersection, front-3/4 cockpit-facing read (Cockpit node screen-visible); menuOrbitRate + rockAmp/rockRate + flameIdle/flameFlicker/flameRate FROZEN; reduced-motion static; 0 new draw calls; demo pin BY LAYER. Owner: ui_programmer.
+- ST-281 (I299) arena_ring value bake (Blender) - DESIGNATED CUTTABLE - last flat-tint GLB family (60 tris): corner-domain FLOAT_COLOR subtle grayscale variation (proven recipe: ShaderNodeAttribute(GEOMETRY,"Color") -> Base Color; values around 1.0 so the in-code blue tint stays authoritative; e.g. faint two-tone / toward-floor-edge darkening); geometry INVARIANT; byte pin updated with evidence (current pin read from tests/assetGlbs.test.js at story time); glTF re-parse (5121:1/5123:2/5125:4; NEVER export_materials NONE); vertexColors wiring (I282 pattern + white fallback attr); blender-asset-qa gate; matched A/B no-bloom luma table on the rim band + invariants: bloom 183.6 no new crosser / FLOOR-50 B 230/59/171/0/0 / MENU 21/366 / demo pin EXACT. Owners: senior_game_artist + ui_programmer.
+- ST-282 (I300) E26 regression + G26.0 + closeout - full 10-probe suite (I275/I280/I285/I290 template) + NEW MENU probes (720p rect-fit; hero clear-zone; hero size h >= 110 px pinned angle) + FLOOR-50 B re-verify + bloom A/B DIFF invariant vs wt-i278 @:5174 + dist canary + log audit 1..300 + G26.0 + milestone review (R-E26-1..5 closure). Owners: qa_playtester + producer.
+
+## Risks
+- R-E26-1 (med) layout refit breaks frozen text / focus / touch / rm paths -> frozen text probe (pre-change byte list) + path probes.
+- R-E26-2 (low) MENU 21/366 shift -> DOM-only change, re-verified per story.
+- R-E26-3 (med) hero re-tune drifts demo pin / orbit -> BY LAYER, rates + flame frozen, real-UI re-verify at ST-282.
+- R-E26-4 (med) ring bake crosses 183.6 / rim / FLOOR -> matched A/B + band invariants + re-parse + pin; designated cuttable.
+- R-E26-5 (low) other-aspect fit -> 1280x720 + 1366x768 + narrow <=620px probes.
+
+## Changed files or proposed files
+- I296 (docs-only): production/scope-check-E26.md (new), production/epics.md, production/stories.md, production/iterations.md, CHANGELOG.md, production/session-state/active.md.
+- I297: src/render/screens.js (+ .evidence/I297/ probes). I298: src/core/config.js (menuHero block only). I299: assets/arena_ring.glb (COLOR_0 bake) + test pins + ring renderer wiring if needed (I282 pattern - the useGLB path exists; wiring verified at story time). I300: docs only.
+
+## Gate G26.0
+Full 10-probe suite (I275/I280/I285/I290 template) + NEW MENU probes (720p rect-fit of all children; hero box x DOM = 0; hero h >= 110 px at pinned angle) + FLOOR-50 B 230/59/171/0/0 re-verified + bloom band 183.6 A/B DIFF invariant vs wt-i278 @:5174 (no new crosser) + 837/837 + build exit 0 + dist headroom >= 8 KB + console 0/0 + no NaN = PASS -> E26 CLOSED 4/4 (ST-279 I297 / ST-280 I298 / ST-281 I299 or documented CUT / ST-282 I300).
+
+## Unverified assumptions (labeled separately from evidence)
+- The h >= 110 px hero target at the radius 3.4 / height 1.7 starts is an estimate from the measured 125x78 px at the current radius ~4.8 / height 2.3; the pinned-angle probe at ST-280 is ground truth (probe-tuned from the starts).
+- The arena_ring COLOR_0 ~+1 KB worst case is an estimate (60 tris / ~180 verts); the actual delta is measured at I299.
+- The 1366x768 fit follows from the 1280x720 rect-fit (taller + wider) and is probe-verified at ST-279.
+
+## Verification evidence
+.evidence/I296/ (gitignored): p_shots.mjs + 01_menu.png + 02_ingame.png + 03_topdown.png. Probe facts: console 0/0; menu cam [1.124,2.3,4.666] fov60 aspect 1.7775 parent null; ship box 125x78 px at (640,370); buf 1279x720 vs window 1422x800; play wave 1 rocks 5; topdown 1280x720 pin. Docs-only quality bar: npm test 837/837 + npm run build exit 0 (re-verified at I296).
+
+## Next owner or decision
+dev-story: I297 executes ST-279 (menu layout refit). First step: record the frozen DOM text (pre-change #screen-menu text list -> .evidence/I297/). No human decision required.
