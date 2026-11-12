@@ -3117,3 +3117,39 @@ Changed files: assets/asteroid_L.glb, assets/asteroid_M.glb, assets/asteroid_S.g
 Evidence: .evidence/I279/ (01_before_{sky,rimon_raw,rimoff_raw,rimon_graded,rimoff_graded}.png + 02_after_*, 01_before.json + 02_after.json).
 
 Next I280: ST-266 closeout - full 10-probe regression (demo pin EXACT via real UI), G22.0 gate, E22 CLOSED in epics.md, log audit 1..280.
+
+## I280 - ST-266 E22 regression + G22.0 gate + closeout (cgs-regression-suite + cgs-gate-check + cgs-milestone-review; docs-only, zero source)
+
+Goal: the E22 closeout gate - re-run the full 10-probe regression suite FRESH on the frozen I279 tree (d1804a5), grade G22.0, close R-E22-5 and E22, audit the log 1..280.
+
+Probes (all fresh this session; evidence .evidence/I280/probes.json 6320 B on disk, untracked per the .evidence gitignore convention established I277-I279):
+
+P1 HEADLINE demo pin EXACT via real UI: REPLAYS -> DEMO PILOT, key 3 = 4x: SCORE 11334 / KILLS 57 / WAVE 2 / MAX COMBO 15 / TIME 0:36 / ACCURACY 29% (57/198 shots); replayView idx 2169/2220; seed 1909 len 2220; localStorage byte-identical after demo + exit (watched runs never write scoreboards - ST-190).
+
+P2 state machine: 11/11 legal edges via real keys + illegal PLAYING->M = Q no-op.
+
+P3 persistence: 4 v1-JSON keys on the fresh probe profile: settings 158 B EXACT I270 pin (fx off), best 24 B {version:1,value:70}, tutorial 25 B, scores 118 B [70,55,45]; daily/replays ABSENT on this profile (profile-specific; the 5-keys pin refers to the full profile set).
+
+P4 FX-off zero-leak via the TRUE off tier: probe finding - applySettings does NOT move the FX tier (ST-225 single-writer applyFxTier); the F hotkey is the single real tier path. Pass 1 (pre-F) measured the LOW tier (fxCount 16: kill 16 + 1 ring) - documented as a valid data point, not the off-tier result. After F: kill -> 0/0 + real L->2M split (2 children); pickup peak EXACTLY 8; nearmiss peak EXACTLY 4 (no hit); drain 0/0.
+
+P5 pool caps EXACT: bullets 64 (+64 trails) / rocks 29 / eb 24 / mines 10 / drones 6 / stingers 4 / flyers 4 / rings 8 / particles 512.
+
+P6 NaN pilots: 1440 ticks / 0 non-finite. Run A rng 2750: 1080-tick evasive survived (3 lives, 24 kills, W1 t=19.5 s), 18 scans maxBad 0. Run B rng 777: 3-hit death -> Enter, invuln 1e6, mines(6)=1 + boss(5): boss {hp 40/40, phase 1, alive:true}; 360 ticks full fire + full scan EVERY tick, maxBad 0; hp 40->14 (checkpoint expected 12 - actual reported); phase 1->2 @ tick 253; maxEb 14 EXACT I265. SPEC DELTA (recorded, not fixed - probe knowledge): the boss object exposes alive, not active.
+
+P7 MENU frame: 20 calls / 318 tris, stable 9/9 frames = EXACT I274/I275 baseline.
+
+P8 console: 0 errors; 1 vendor warning THREE.WebGLProgram.getParameters: undefined not supported, using lowp instead (three.module.js:20618) - PRE-EXISTING at HEAD d1804a5 (fires a few frames after nav at MENU t=0, first background/env internal shader compile; the vendor getParameters path lets material.precision === undefined through -> lowp fallback; benign; every project material has precision null - grep verified; fix/suppression ticket filed for I281+). 1 INFO adaptive FX high->low (background tab ~4 fps - expected class, same as I265). Nuance: the earlier P8a 0/0 sample was taken at the load moment, before the warning surfaced.
+
+FLOOR-50 (headline art gate, both tiers @ PR 1.0, 1280x720): A (frozen method, starfield visible) bullet 229.6 / floor 149.4 / delta 80.2; B (starfield hidden, strictest ST-177 intent) bullet 229.6 / floor 128.0 / delta 101.5. PASS (both >= 50). METHODOLOGY FINDINGS (probe fragility, not a game regression): (a) the frozen annulus metric (star-speck <15-pt union-find exclusion, introduced I275 for exactly this) is star-twinkle-phase-dependent - floorMax observed 149->239->255 across attempts; 3 of 6 attempts failed (delta -134..-9) at twinkle peaks where a star cluster crossed 15 pts; typical phases pass (I269 120-122 / I272 146.1 / I275 150.5 / I278 184.8 / I280-A 80.2). (b) BULLET DRIFT: any advance() during the probe moves the probe bullet ~0.9 px/tick out of the rIn disk (70 ticks -> 61 px; bulletMax 229.6 -> 120.3 and the bullet itself becomes the annulus floor 255) -> the frozen method must pin no-advance. (c) Stars are the only per-object floor contributor (hiding them drops top8 210->128); residual floor 128-136 = skybox nebula + grid, below the I277 V-invariant re-bake. (d) First-attempt bulletMax 139.8 = transient; no-advance runs stable 229.6-235.6. PROBE-HARDEN TICKET for I281+: exclude the starfield for the floor window and/or pin no-advance in the frozen spec.
+
+P9 dist: 116 files / 2022.5 KB raw / headroom 25.5 KB >= 8 (exit 0; docs-only, dist unchanged vs I279).
+
+P10 log audit: 1..280 sequential (verified after this entry appended).
+
+G22.0 gate: PASS. Value-graded before/after from the I277/I279 evidence (skybox warm-cast 19.29% -> 1.13% in-browser; rock trio M-brightest hierarchy, sep |LM| 2.45 -> 9.47 / |MS| 3.76 -> 7.27); no-bloom tables (I277 raw luma max invariant 0.9221; I278 boss rim lumaMax 167.8 < 233 sRGB-eq); silhouette A/B I279; source-invariant tests 820/820; FLOOR-50 A/B fresh; demo pin EXACT real-UI; log audit 1..280.
+
+Closeout: R-E22-5 CLOSED (real-UI demo-pin EXACT). E22 CLOSED 4/4 (ST-263..266 / I277..I280). Milestone: E22 = the third world-readability arc (after E18 palette, E21 value contrast) - the world now reads: purple-free skybox (warm-cast 1.13%), true edge fresnel rims (the I278 sign fix root-caused the power knob as a no-op since I60), M-brightest rock hierarchy, 233 sRGB-eq bloom contract intact, FLOOR 50 intact, demo pin byte-EXACT.
+
+Tests: 820/820 (unchanged, zero source). Build: exit 0. Changed files: docs only (production/stories.md, production/iterations.md, production/epics.md, CHANGELOG.md, production/session-state/active.md); .evidence/I280/probes.json on disk (untracked, per convention).
+
+Next I281: E23 open (cgs-scope-check + cgs-create-stories): touch-fallback input arc + HUD readability (HP-bar id) + Blender art pass (standing user directive) + the 2 tickets filed this session (FLOOR-50 probe hardening; vendor lowp precision warning). HP #5 perception DEFERRED (needs a human play session).
