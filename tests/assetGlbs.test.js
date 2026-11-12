@@ -116,12 +116,18 @@ test('asteroid L/M/S: naming, poly budgets, radii match CONFIG (+/-5%)', () => {
 // band widens 0.45..1.20 -> 0.30..1.20, warm ordering R>=G>=B unchanged, facet means
 // stay at the originals (0.622/0.716/0.636) so brightness is preserved, and the FACET
 // luma spread (per-triangle mean luma, p90-p10) becomes a pinned acceptance metric:
-// 0.401/0.402/0.418 (L/M/S) vs 0.105/0.083/0.207 pre-bake. Percentile convention is the
+// 0.401/0.402/0.418 (L/M/S) vs 0.105/0.083/0.207 pre-bake. I279 (ST-265 rock
+// silhouette/value pass) re-baked the SAME geometry with a sign-boosted tanh contrast
+// of the re-centered per-size Perlin field (base shifted per rock so the facet-mean
+// brightness guard stays solvable): facet means stay within +/-0.005 of the I264
+// originals (0.622/0.716/0.636); spreads widen 0.401/0.402/0.418 -> 0.645/0.427/0.489
+// (L/M/S) for distance silhouette read at 10u+; POSITION/NORMAL bytes unchanged
+// (8956/3764/3188 B). Percentile convention is the
 // Blender ground-truth dump convention: sorted, q(f) = v[floor(f*len)].
 const ROCK_FACET = {
-  L: { p10: 0.426, p50: 0.628, p90: 0.827, mean: 0.622 },
-  M: { p10: 0.498, p50: 0.705, p90: 0.900, mean: 0.716 },
-  S: { p10: 0.446, p50: 0.621, p90: 0.865, mean: 0.636 },
+  L: { p10: 0.319, p50: 0.532, p90: 0.964, mean: 0.6268 },
+  M: { p10: 0.501, p50: 0.726, p90: 0.928, mean: 0.721 },
+  S: { p10: 0.334, p50: 0.572, p90: 0.823, mean: 0.641 },
 };
 function facetLumas({ buf, json, binOff }) {
   const p = json.meshes[0].primitives[0];
@@ -145,7 +151,7 @@ function facetLumas({ buf, json, binOff }) {
   const q = (f) => fl[Math.min(fl.length - 1, Math.floor(f * fl.length))];
   return { p10: q(0.1), p50: q(0.5), p90: q(0.9), mean: fl.reduce((sm, x) => sm + x, 0) / fl.length };
 }
-test('asteroid L/M/S: COLOR_0 mottling band + warm order + facet luma spread (I257 -> I264)', () => {
+test('asteroid L/M/S: COLOR_0 mottling band + warm order + facet luma spread (I257 -> I264 -> I279)', () => {
   for (const size of ['L', 'M', 'S']) {
     const { buf, json, binOff } = parseGlb('asteroid_' + size + '.glb');
     for (const m of json.meshes || []) for (const p of m.primitives || []) {
@@ -170,7 +176,7 @@ test('asteroid L/M/S: COLOR_0 mottling band + warm order + facet luma spread (I2
     // I264 acceptance metric: measured facet luma spread + brightness preservation.
     const f = facetLumas({ buf, json, binOff });
     const E = ROCK_FACET[size];
-    assert.ok(f.p90 - f.p10 >= 0.38, size + ' facet luma spread ' + (f.p90 - f.p10).toFixed(3) + ' >= 0.38 (rocky read, was ~0.1-0.2)');
+    assert.ok(f.p90 - f.p10 >= 0.42, size + ' facet luma spread ' + (f.p90 - f.p10).toFixed(3) + ' >= 0.42 (I279 mottle, was ~0.1-0.2; I264 floor was 0.38)');
     for (const k of ['p10', 'p50', 'p90', 'mean']) {
       assert.ok(Math.abs(f[k] - E[k]) <= 0.005, size + ' facet ' + k + ' ' + f[k].toFixed(3) + ' ~ ' + E[k] + ' (I264 bake pin)');
     }

@@ -3085,3 +3085,35 @@ No test changes (render-layer only - scope-check-E10 notes ST-219 as "the only r
 - Verification: npm test 820/820 PASS (813 + 7 new); npm run build exit 0; dist 116 files / 2022.5 KB (headroom 25.5 KB >= 8; +2.1 KB = the code delta); console 0 errors / 0 warnings (fresh i278sign2 / i278floor1 pages); no NaN (every probe value finite).
 - Unverified assumptions: none - every number measured live this session (browser same-task render+readPixels A/B; rim-off bit-invariance; boss vs skybox; FLOOR 50 in PLAYING).
 - Next I279: ST-265 rock silhouette/value pass (CUTTABLE; cgs-dev-story + Blender MCP): COLOR_0 mottle re-bake on asteroids L/M/S for distance silhouette read (wider within-band value contrast in the existing 0.45..1.2 domain so L/M/S separate at 10u+); geometry/radii UNCHANGED (I253/I264 pattern, byte pins 8956/3764/3188 B); + in-code rock rim A/B after ST-264 shared shaping; value-graded trio at 10u+ (.evidence/I279/); assetGlbs pins green (mottle-range pins updated if the bake shifts ranges, documented).
+## I279 - ST-265 rock silhouette/value pass (cgs-dev-story, E22 3/4)
+
+Goal: L/M/S rock distance-silhouette read at 10u+ (G22.0 silhouette A/B) - wider within-band value contrast in the existing 0.45..1.2 COLOR_0 domain; geometry/radii UNCHANGED (I253/I264 pattern); vertex-color-only = net-zero bytes.
+
+Bake (Blender 5.2.3 MCP, per-rock VR_Rock COLOR_0 re-paint on the I264 meshes): raw value-noise(co*scale+seed) -> zero-mean n0 -> nt = tanh(k*n0)/tanh(k) -> n2 = (1-w)*nt + w*sign(nt) (sign boost widens the mid-band gap) -> re-center n3 = (n2-mean)/max|n2-mean| -> lv = clamp(round((base + A*n3)*100)/100, 0.318, 1.15) -> color (1.04*lv, lv, 0.945*lv) (warm R>=G>=B).
+| rock | scale | k | w | A | base | facet luma p10/p50/p90/mean |
+| L | 0.4 | 2 | 0.8 | 0.3525 | 0.61406 | 0.319/0.532/0.964/0.6268 |
+| M | 1.5 | 4 | 0.0 | 0.485 | 0.70293 | 0.501/0.726/0.928/0.721 |
+| S | 2.5 | 4 | 0.8 | 0.4525 | 0.61831 | 0.334/0.572/0.823/0.641 |
+
+Results (GLB-verified, Node + tests):
+- Facet luma spread (p90-p10): L 0.401 -> 0.645, M 0.402 -> 0.427, S 0.418 -> 0.489 (I264 -> I279); facet means within +/-0.005 of I264 (0.622/0.716/0.636 -> 0.6268/0.721/0.641); M stays the brightest = size hierarchy preserved.
+- Channel band [0.3005, 1.196] inside the [0.29, 1.21] constraint; warm R>=G>=B holds.
+- POSITION and NORMAL byte-identical to I264; GLB sizes 8956/3764/3188 B pins hold (net-zero vertex-color swap).
+- tests/assetGlbs.test.js: ROCK_FACET pins updated (per-vertex-color luma p10/p50/p90/mean), spread floor 0.42; test title now "spread (I257 -> I264 -> I279)" (double-quoted here to stay ASCII-plain in this log).
+
+Browser A/B (.evidence/I279/, 10 PNGs + 2 JSONs; BEFORE = wt-i278 @ 27023ca (I277 code + I264 rocks) on :5174, AFTER = :5173 (I278+I279)):
+- Common: viewport 1280x720 CSS, buffer 1600x900 @ pixelRatio 1.25 (identical both sides), fov 60, cam (0,1.2,24) lookAt (0,0.4,0), dist 24.01u; trio boxes L/M/S centers (671/800/930, 450); fx OFF (no bloom); GLB vert counts 162/54/42 both sides.
+- Rim-off means: BEFORE 37.26/40.52/44.57 (narrow 7.3-luma band, S brightest) -> AFTER 36.10/46.38/38.34 (M clearly brightest = matches the GLB facet-mean hierarchy 0.627/0.721/0.641; L darkest).
+- Separation (rim-on luma deltas): BEFORE |LM| 2.45 / |MS| 3.76 / |LS| 6.21 (S brightest) -> AFTER |LM| 9.47 / |MS| 7.27 / |LS| 2.20 (M brightest) - L/M and M/S now separate by 3x+ where they were sub-4 before.
+- Rim delta (on-off mean): BEFORE +43.58/+42.77/+42.48 = the I277 legacy FLAT COAT (pre-sign-fix; rim-on min 17.19 vs rim-off 2.28) -> AFTER +0.51/-0.30/+0.47 = edge-concentrated fresnel (I278 sign fix confirmed on the new rocks).
+- Grade windows (mask p5/p95): AFTER on 9.99/70.51 (maskN 15360), off 7.85/70.51 (15123); BEFORE on 60.79/102.63 (16240), off 9.06/65.45 (14743).
+- Rendered-spread nuance (documented honestly): L rendered p90-p10 shrank 46.97 -> 34.12 while its GLB facet spread grew - rendered pixel luma mixes flat-shaded facet orientation vs key light with color, and the pairing is noise-field-dependent; L dark floor rose (p10 13.13 -> 20.62) from the lv clamp floor 0.318. M/S rendered spreads grew (46.25 -> 60.60, 41.76 -> 55.32). The design constraint (GLB facet spread + mean preservation) is met and test-pinned; the browser A/B documents the rendered result.
+- Sky PNGs byte-identical both sides (1088918 B) = only the rocks differ.
+- Console 0 errors / 0 warnings on BOTH sides.
+
+Gate/quality: 820/820; build exit 0 (dist 116 files / 2022.5 KB, headroom 25.5 KB >= 8); FLOOR 50 unchanged (zero-code asset swap, no lit-element change); BY LAYER (asset swap only, zero code). E22 3/4.
+
+Changed files: assets/asteroid_L.glb, assets/asteroid_M.glb, assets/asteroid_S.glb, tests/assetGlbs.test.js, production/stories.md, production/iterations.md, CHANGELOG.md, production/session-state/active.md.
+Evidence: .evidence/I279/ (01_before_{sky,rimon_raw,rimoff_raw,rimon_graded,rimoff_graded}.png + 02_after_*, 01_before.json + 02_after.json).
+
+Next I280: ST-266 closeout - full 10-probe regression (demo pin EXACT via real UI), G22.0 gate, E22 CLOSED in epics.md, log audit 1..280.
