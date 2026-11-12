@@ -3448,4 +3448,22 @@ Next I292: ST-275 ship hero readability pass (Blender 5.2 MCP; re-read the blend
 - Quality bar: 837/837 green; build exit 0; 5/5 probes PASS; no Blender this story (2D procedural gradient - documented per the standing Blender directive)
 - Result: DONE
 - Next I295: ST-278 E25 regression (10-probe suite) + G25.0 gate + closeout
-- Next I295: ST-278 E25 regression (10-probe) + G25.0 gate + closeout.
+## I295 - ST-278 E25 regression (10-probe) + G25.0 gate + closeout (cgs-regression-suite + cgs-gate-check + cgs-milestone-review, E25 4/4)
+- Story: ST-278 | Goal: E25 closeout - full 10-probe suite fresh (I275/I280/I285 template) + G25.0 gate; DOCS-ONLY iteration (zero source changes since I294; HEAD 6354716; quality bar 837/837 + build exit 0 re-verified)
+- PROBES (all fresh contexts; each probe opens its own context and closes page+context - the one-tab standing rule; console 0/0 + no NaN every probe; .evidence/I295/):
+  1. P1 demo pin EXACT real-UI (11334/57/W2/combo 15/0:36/shots 57-198/29% / replayView idx 2169-2220 / speed 4) + ST-190 nulls throughout + Q->MENU
+  2. P2 state machine 11/11 legal edges (incl. illegal PLAYING->M Q no-op enforced)
+  3. P3 persistence 5 keys (settings/daily/best/tutorial/scores) version-1 JSON stable
+  4. P4 FX-off zero-leak (real kill -> 0 particles/shockwaves; floor pickups exact)
+  5. P5 pool caps exact (bullets 64 / rocks 29 / eb 24 / mines 10 / drones 6 / stingers 4 / flyers 4 / rings 8 / particles 512)
+  6. P6 0-NaN pilots reseed 2750 + 777 (full core scan, sentinel-excluded scanner rule)
+  7. P7 FLOOR-50 FROZEN variant B PASS (bullet 230 / floor 59 / delta 171 / annulus pts>=150: 0 / clusters 0 = the documented ST-277 spec delta) + MENU fx-off 21 calls/366 tris 60/60 (20/318 + 1/48 disc = documented delta)
+  8. BLOOM A/B (band 183.6, fx HIGH, overhead cam h16 fov 60 up+Z, PR 1.0, buffer 1422x800; wt-i278 :5174 BEFORE vs main :5173 AFTER; 7 emblems + ship + warden staged at r=8; raw vr.render() readPixels 60x60 boxes): px positions IDENTICAL both sides (matched conditions confirmed); ship box IDENTICAL 238/over233 20; crossers before == after == {bomb, overdrive, ship, spread} = NO NEW CROSSERS (DIFF invariant PASS); per-box: rapid 232=232 / spread 238->236 (over233 17->6) / shield 230=230 / bomb 246->250 (over233 81->159 = I294 floor-disc background under the box, mean 131.19->104.2 - documented E25 change; crossed BOTH sides) / magnet 230=230 / overdrive 245=245 (over233 56->41) / slowmo 230=230 / warden bg 86->70 (I294 floor disc now covers the top-down center view - documented, non-crosser both sides)
+  9. P8 console 0/0 folded across all probes + one final fresh page (boot MENU / lowp 0 / no NaN; play PLAYING rocks 5 / no NaN)
+  10. P9 build exit 0 (deterministic x2 rebuilds) + dist 118 files / 1806.9 KB / headroom 241.1 KB (30.1x the 8 KB floor) + sha256 dist/vendor vs vendor/ 13/13 (three.module.js 76dea8151bc9352a) - NOTE: the I294 entry recorded 117 files/1802.3 KB; with zero source changes in I295 the +1 file/+4.6 KB is an I294-counting discrepancy (both I295 rebuilds agree 118)
+  11. P10 log audit: ## I1..I295 strictly sequential (verified by the docs writer after this append)
+- PROBE LESSON (new, standing): the page window in this environment is 1422x800 even when a 1280x720 context viewport is requested (host in-app browser CSS scale - I284 precedent) - the pinCam self-assert (position.y + matrixWorld ty = 16) is necessary but NOT sufficient: ALSO verify the buffer W/H (r.domElement.width) and re-derive box centers from the ACTUAL buffer. diag1.mjs proved the pin EXACT (mw [-1,0,0,0,0,0,1,0,0,1,0,0,0,16,0,1] / fov 60 / aspect 1.7775 / parent null / viewport 0,0,W,H / scissor false / ship bright-centroid (726,334) consistent with proj origin (711,400)) - the pre-compaction 'camera drift' was a buffer-size mismatch, not drift
+- G25.0 GATE: 10-probe suite ALL PASS + FLOOR-50 documented delta + no new bloom crosser + 837/837 + build exit 0 + headroom >= 8 KB + console 0/0 + no NaN = PASS -> E25 CLOSED 4/4 (ST-275 I292 / ST-276 I293 / ST-277 I294 / ST-278 I295)
+- Quality bar: npm test 837/837 green (unchanged since I294 - docs-only); npm run build exit 0 (re-verified x2); manual smoke = the 10 probes above (console 0/0, no NaN)
+- Changed files: none (docs + .evidence only)
+- Next I296: next-epic scope check (cgs-scope-check + cgs-create-stories) with YouTube MCP grounding + Blender art directive; carryover HP#5 human-perception session (deferred - needs a human play session) + touch-friendly input fallback (own arc, input-device work)
