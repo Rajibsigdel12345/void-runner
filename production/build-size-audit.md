@@ -109,3 +109,13 @@ The old "2048 KB / headroom 10.0 KB" canary is replaced by **1784.3 KB / headroo
 standing P9 build canary (the >= 8 KB floor now holds with 32.9x margin). Behavior-preservation
 evidence: .evidence/I287/04_probe_i287.json (DEMO PIN dist==dev exact; 240-tick NaN pilot clean;
 console 0/0 on :4173 serving the minified dist). Files: 117 pre and post, 0 gone/added, 83 src changed.
+
+### I288 re-measure (ST-272 emblem bakes; cgs-dev-story, E24 2/4)
+
+| metric | I287 | I288 | delta |
+|---|---|---|---|
+| dist total | 1784.3 KB / headroom 263.7 KB | 1791.5 KB / headroom 256.5 KB | +7.2 KB (assets only: 7 emblem COLOR_0 bakes) |
+| files | 117 | 117 | 0 |
+
+The standing P9 canary is now **1791.5 KB / headroom 256.5 KB** (>= 8 KB floor holds with 32.1x margin).
+src/ and vendor/ are unchanged by this pass - the +7148 B is the 7 powerup GLBs in assets/ only.

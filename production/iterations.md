@@ -3323,3 +3323,26 @@ Changed files: package.json + package-lock.json (+ esbuild 0.28.2 devDep), scrip
 Result: DONE
 Risk/follow-up: none - per-module minify is deterministic for identical inputs and re-verified on every build; I289/I290 P9 canaries now use 117 files / 1784.3 KB / headroom 263.7 KB.
 Next I288: ST-272 pickup emblem value/shape pass (Blender COLOR_0 per-facet bakes x7 + rapid/spread hue separation + vertexColors:true wiring + facet p10/p50/p90 pins + byte pins + assetPerf whitelist +7).
+## I288 - ST-272 pickup emblem value/shape pass: Blender COLOR_0 facet bakes x7 + rapid gold hue (cgs-dev-story, E24 2/4)
+
+Goal: give the LAST un-upgraded small-prop family (the 7 pickup emblems) per-facet VALUE the way the I257+ rock/boss/enemy bakes have (lit-top / mid / shadowed-bottom around a mid of 1.0), and split the rapid/spread hue collision (0xffe066 yellow vs 0xff9f43 orange) so two pickups never read as one color.
+
+What was done:
+- Blender 5.2 (MCP, collection I288_emblems): imported all 7 powerup GLBs; baked per-face grayscale value v = clamp(1.0 + 0.42 * nz, 0.30, 1.25) (nz = world-space face normal Z, camera-facing-up) as a CORNER-domain FLOAT_COLOR attribute "Color"; wired each emblem material with a ShaderNodeAttribute -> Base Color link so the glTF exporter emits COLOR_0 (I282 recipe, confirmed against the VR_Drone tree); exported to blender/i288_out/.
+- Node re-parse verify (.evidence/I288/01_glb_verify.json): all 7 carry exactly one COLOR_0 (FLOAT VEC3, spec-sized bufferView), grayscale |r-g| and |g-b| <= 0.02, values in [0.30,1.25]; geometry INVARIANT pre/post (tris 16/13/48/36/36/32/20, extents identical, idx 5123 intact); shield +2 verts (vertex-split on export where two differently-valued faces share a vertex); facet spread all >= 0.386 (floor 0.35).
+- assets/: replaced the 7 powerup GLBs with the baked versions (+7148 B total; dist headroom 263.7 KB -> 256.5 KB, still 32x the 8 KB floor).
+- src/render/powerupMesh.js: MeshStandardMaterial + vertexColors:true; white-identity color attr on the 7 procedural fallback geos; setGLB guard adds a white color attr to any no-COLOR_0 GLB; rapid 0xffe066 -> 0xffc300 (distinct gold; emissive 0x8a6d00 -> 0x7a5a00 keeps the family); spread orange 0xff9f43 UNCHANGED (grep-verified: no test pins either hex).
+- src/main.js: + powerupRenders on the __vr probe handle (emblem A/B close-up; no behavior change).
+- tests/assetGlbs.test.js: the I211 emblems test flips "no vertex colors" -> exactly one primitive per emblem carries a grayscale COLOR_0 in [0.30,1.25] (+0.01 tol) with facet luma p10/p50/p90 pins vs new PU_FACET (3-decimal, +/-0.005, shared reader with the I282 enemy test) and spread >= 0.35; node/material/extents/tris pins all retained.
+- tests/assetPerf.test.js: COLOR_0 whitelist +7 powerup files (8 -> 15 entries); budgets unchanged (160 KB total / 130 KB geo still hold: ~118.3 KB / ~98.6 KB).
+
+Verification (quality bar + story acceptance):
+- npm test 835/835 green; npm run build exit 0 (dist 117 files / 1791.5 KB / headroom 256.5 KB).
+- Browser A/B close-up (I282 pattern: rAF freeze, hide-all-but-pool+badges+lights, fx off via the real F-key path, PR 1.25, 1600x900 buffer): two shots stage all 7 emblems (.evidence/I288/02_closeup_*.png) - every emblem shows facet-value variation; rapid (gold, meanRGB 187,144,29) vs spread (orange, edge-on cone) read as two distinct hues; letter badges intact; all 4 pool geometries hasAttribute(color)=true; render 29/21 calls, 451/313 tris.
+- DEMO PIN EXACT (render-only change, sim untouched): REPLAYS -> DEMO PILOT -> key 3 (x4) -> GAME_OVER via real UI: 11334 / 57 / W2 / combo 15 / 0:36 / shots 57/198/29% / replayView idx 2169/2220; localStorage empty after the watched run (ST-190); console 0/0 on both pages.
+- FLOOR-50 unaffected (method untouched; pickup emissiveIntensity 0.9 frozen family, no bloom crossers > 233 sRGB-eq); MENU fx-off baseline unchanged (no new menu objects).
+
+Changed files: assets/powerup_{rapid,spread,shield,bomb,magnet,overdrive,slowmo}.glb, src/render/powerupMesh.js, src/main.js (__vr powerupRenders handle), tests/assetGlbs.test.js, tests/assetPerf.test.js, .evidence/I288/ (disk only, gitignored).
+Result: DONE
+Risk/follow-up: none.
+Next I289: ST-273 warden hull/armor bakes + G23.0-style browser A/B (designated cuttable).

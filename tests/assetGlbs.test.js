@@ -352,7 +352,22 @@ function extents({ buf, json, binOff }) {
   return { x: max[0] - min[0], y: max[1] - min[1], z: max[2] - min[2] };
 }
 
-test('powerup emblems: naming, poly budgets, normalized extents, no vertex colors (I211)', () => {
+// I288 (ST-272 pickup emblem value pass): each emblem now carries a grayscale per-face
+// COLOR_0 value bake (Blender 5.2, corner-domain, vertex-split on export - shield +2 verts)
+// that multiplies the in-code per-type tint (powerupMesh.js TYPES + vertexColors:true):
+// rapid = distinct gold (0xffc300; was 0xffe066 - hue-collided with spread orange), spread =
+// orange (0xff9f43 unchanged). Geometry UNCHANGED (extents/tris pins in this test hold).
+const PU_FACET = {
+  powerup_rapid:     { p10: 0.720, p50: 1.250, p90: 1.250 }, // sRGB-agnostic linear bake domain [0.30, 1.25]
+  powerup_spread:    { p10: 0.712, p50: 0.828, p90: 1.161 },
+  powerup_shield:    { p10: 0.615, p50: 1.250, p90: 1.250 },
+  powerup_bomb:      { p10: 0.703, p50: 1.000, p90: 1.250 },
+  powerup_magnet:    { p10: 0.580, p50: 1.000, p90: 1.250 },
+  powerup_overdrive: { p10: 0.595, p50: 1.000, p90: 1.250 },
+  powerup_slowmo:    { p10: 0.864, p50: 1.000, p90: 1.250 },
+};
+
+test('powerup emblems: naming, poly budgets, normalized extents, grayscale COLOR_0 value bake (I211 -> I288)', () => {
   for (const [file, target] of Object.entries(EMBLEM_TARGETS)) {
     const { buf, json, binOff } = parseGlb(file + '.glb');
     assert.ok(buf.length < MAX_FILE_BYTES, file + '.glb under 100 KB');
@@ -360,12 +375,39 @@ test('powerup emblems: naming, poly budgets, normalized extents, no vertex color
     const node = EMBLEM_NODES[file];
     assert.ok(s.nodeNames.includes(node), node + ' node');
     assert.ok(s.matNames.includes(node), node + ' material');
-    for (const p of s.prims) assert.ok(!p.hasColor, file + ': no vertex colors (in-code materials authoritative)');
     assert.ok(s.totalTris <= BUDGETS.emblem, file + ' tris ' + s.totalTris + ' <= 60');
     const e = extents({ buf, json, binOff });
     const maxExt = Math.max(e.x, e.y, e.z);
     assert.ok(Math.abs(maxExt - target) / target <= 0.15,
       file + ' max extent ' + maxExt.toFixed(3) + ' within 15% of target ' + target);
+    // I288/ST-272: exactly one primitive carries a grayscale COLOR_0 value bake in [0.30,1.25]
+    let bakePrims = 0;
+    for (const m of json.meshes || []) for (const p of m.primitives || []) {
+      if (p.attributes.COLOR_0 === undefined) continue;
+      bakePrims++;
+      const acc = json.accessors[p.attributes.COLOR_0];
+      const bv = json.bufferViews[acc.bufferView];
+      const stride = parseInt(acc.type.replace('VEC', ''), 10);
+      assert.equal(acc.componentType, 5126, file + ' COLOR_0 componentType FLOAT');
+      assert.equal(acc.type, 'VEC3', file + ' COLOR_0 type VEC3');
+      assert.ok(bv.byteLength >= acc.count * stride * 4, file + ' COLOR_0 bufferView spec-size');
+      const base = binOff + (bv.byteOffset || 0) + (acc.byteOffset || 0);
+      for (let i = 0; i < acc.count; i++) {
+        const r = buf.readFloatLE(base + i * stride * 4);
+        const g = buf.readFloatLE(base + i * stride * 4 + 4);
+        const b = buf.readFloatLE(base + i * stride * 4 + 8);
+        assert.ok(Math.abs(r - g) <= 0.02 && Math.abs(g - b) <= 0.02, file + ' COLOR_0 grayscale at ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
+        assert.ok(r >= 0.30 - 0.01 && r <= 1.25 + 0.01, file + ' COLOR_0 in [0.30,1.25] value domain at ' + i + ': ' + r.toFixed(3));
+      }
+    }
+    assert.equal(bakePrims, 1, file + ': exactly one primitive carries the value bake');
+    // facet luma spread + pins (shared reader with the I282 enemy bodies)
+    const f = enemyFacetLumas({ buf, json, binOff });
+    const E = PU_FACET[file];
+    assert.ok(f.p90 - f.p10 >= 0.35, file + ' facet luma spread ' + (f.p90 - f.p10).toFixed(3) + ' >= 0.35 (I288 value bake; pre-bake was a flat in-code tint)');
+    for (const k of ['p10', 'p50', 'p90']) {
+      assert.ok(Math.abs(f[k] - E[k]) <= 0.005, file + ' facet ' + k + ' ' + f[k].toFixed(3) + ' ~ ' + E[k] + ' (I288 bake pin)');
+    }
   }
 });
 

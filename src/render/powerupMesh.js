@@ -1,6 +1,6 @@
 ﻿// Void Runner - power-up rendering (ST-020). Pooled meshes, shared geo/materials per type.
 // Distinct silhouette + color per type (I064 adds colorblind glyph decals):
-//   rapid = octahedron/yellow, spread = cone/orange, shield = torus/cyan,
+//   rapid = octahedron/gold (I288: distinct from spread orange), spread = cone/orange, shield = torus/cyan,
 //   bomb = cube/red, magnet = sphere/green, overdrive = hex prism/magenta (ST-057).
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
@@ -32,7 +32,7 @@ function letterTexture(letter, ringHex) {
 }
 
 const TYPES = {
-  rapid:  { color: 0xffe066, emissive: 0x8a6d00, make: () => new THREE.OctahedronGeometry(0.45) },
+  rapid:  { color: 0xffc300, emissive: 0x7a5a00, make: () => new THREE.OctahedronGeometry(0.45) }, // I288/ST-272: distinct gold (was 0xffe066 - hue-collided with spread orange)
   spread: { color: 0xff9f43, emissive: 0x7a4a00, make: () => new THREE.ConeGeometry(0.4, 0.75, 4) },
   shield: { color: 0x53d8ff, emissive: 0x0e5a75, make: () => new THREE.TorusGeometry(0.38, 0.12, 8, 20) },
   bomb:   { color: 0xff5252, emissive: 0x751414, make: () => new THREE.BoxGeometry(0.58, 0.58, 0.58) },
@@ -49,9 +49,13 @@ export function createPowerupRenderer(scene) {
   const glbGeo = {}; // I211: per-type Blender emblem geometry, swapped in when the asset resolves
   for (const [t, def] of Object.entries(TYPES)) {
     geos[t] = def.make();
+    { // I288/ST-272: white value identity for the procedural fallback geos (material now uses vertexColors)
+      const col = new Float32Array(geos[t].attributes.position.count * 3).fill(1);
+      geos[t].setAttribute('color', new THREE.BufferAttribute(col, 3));
+    }
     mats[t] = new THREE.MeshStandardMaterial({
       color: def.color, emissive: def.emissive, emissiveIntensity: 0.9,
-      roughness: 0.35, metalness: 0.15,
+      roughness: 0.35, metalness: 0.15, vertexColors: true, // I288/ST-272: GLB COLOR_0 facet-value bake multiplies on top of the base tint
     });
   }
   const pool = [];
@@ -108,14 +112,19 @@ export function createPowerupRenderer(scene) {
   }
 
   // I211: swap a type's geometry to its Blender emblem (first mesh of the GLB scene).
-  // In-code per-type materials stay authoritative (GLB materials unused); these assets carry
-  // no vertex colors, so no color-attribute guard is needed (unlike the rocks/boss).
+  // In-code per-type materials stay authoritative (GLB materials unused). I288/ST-272: the emblems carry
+  // a COLOR_0 facet-value bake; the guard below keeps a no-COLOR_0 GLB safe under vertexColors.
   function setGLB(type, obj) {
     let g = null;
     obj.traverse((o) => {
       if (!g && o.isMesh) g = o.geometry;
     });
-    if (g) glbGeo[type] = g;
+    if (!g) return;
+    if (!g.hasAttribute('color')) { // I288/ST-272: keep a GLB without COLOR_0 safe (white identity)
+      const col = new Float32Array(g.attributes.position.count * 3).fill(1);
+      g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    }
+    glbGeo[type] = g;
   }
 
   return { sync, pool, badges, setGLB };

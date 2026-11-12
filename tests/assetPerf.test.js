@@ -89,7 +89,7 @@ test('every GLB has POSITION + NORMAL (render layer assumes both)', () => {
   }
 });
 
-test('COLOR_0 only on the mottled rocks + boss + ship + enemy bodies (in-code materials read it; others must not carry it)', () => { // I282 (ST-267): + enemy value bakes
+test('COLOR_0 only on the mottled rocks + boss + ship + enemy bodies + pickup emblems (in-code materials read it; others must not carry it)', () => { // I282: + enemy value bakes; I288/ST-272: + pickup emblem value bakes
   const withColor = parsed.filter((p) => p.attrs.has('COLOR_0')).map((p) => p.file).sort();
-  assert.deepEqual(withColor, ['asteroid_L.glb', 'asteroid_M.glb', 'asteroid_S.glb', 'boss.glb', 'drone.glb', 'flyer.glb', 'ship.glb', 'stinger.glb']); // I282: enemy bodies carry the value bake; stinger core + flyer dome stay emissive-driven (no COLOR_0)
+  assert.deepEqual(withColor, ['asteroid_L.glb', 'asteroid_M.glb', 'asteroid_S.glb', 'boss.glb', 'drone.glb', 'flyer.glb', 'powerup_bomb.glb', 'powerup_magnet.glb', 'powerup_overdrive.glb', 'powerup_rapid.glb', 'powerup_shield.glb', 'powerup_slowmo.glb', 'powerup_spread.glb', 'ship.glb', 'stinger.glb']); // I288/ST-272: + the 7 pickup emblem value bakes (stinger core + flyer dome stay emissive-driven)
 });
