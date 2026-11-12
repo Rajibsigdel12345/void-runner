@@ -570,9 +570,9 @@ export const CONFIG = {
   // idle. Drift/rock/flicker are motion-gated; reduced motion gets a static pose + a steady flame.
   // Camera transform + existing meshes only (the idle flame lights 3 already-allocated flame meshes).
   menuHero: {
-    radius: 4.8,        // MENU orbit radius (was hardcoded 13) - hero scale in frame
-    height: 2.3,        // MENU camera height (was hardcoded 9) - low 3/4 hero angle
-    lookY: 0.5,         // MENU look-target Y (was 0) - frames the hovering ship, not the floor
+    radius: 2.8,        // MENU orbit radius (was 13, then 4.8) - ST-280 I298 re-tune: closer hero (sweep S5 winner)
+    height: 1.4,        // MENU camera height (was 9, then 2.3) - ST-280 I298 re-tune: closer low 3/4
+    lookY: 0.05,        // MENU look-target Y (was 0, then 0.5) - ST-280 I298 re-tune: clears 720p bottom zone
     yaw: -1.0,           // ship facing (rad, render-only) - nose left-forward 3/4, engine stream reads right
     pitch: -0.10,       // ship pitch (rad) - slight nose-up
     bank: -0.18,        // ship bank (rad) - hero tilt
