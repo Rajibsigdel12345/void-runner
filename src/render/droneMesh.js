@@ -7,6 +7,8 @@ function bakeDroneGeometry() {
   const geo = new THREE.OctahedronGeometry(CONFIG.drone.radius, 0);
   geo.scale(1.6, 0.85, 0.85); // ST-118 tuning: taller cross-section so it reads edge-on, not a flat plate
   geo.computeVertexNormals();
+  const col = new Float32Array(geo.attributes.position.count * 3).fill(1); // I282/ST-267: white value identity (the body material now uses vertexColors; the GLB COLOR_0 bake multiplies on top)
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
   return geo;
 }
 
@@ -15,7 +17,7 @@ export function createDroneRenderer(scene) {
   let geo = bakeDroneGeometry(); // I211: reassigned by useGLB when the drone GLB resolves
   // dark steel body + cold cyan core glow; sync() pulses emissiveIntensity (shared = all blink together)
   const mat = new THREE.MeshStandardMaterial({
-    color: 0x1f3340, roughness: 0.45, metalness: 0.55, flatShading: true,
+    color: CONFIG.drone.palette.body.color, roughness: 0.45, metalness: 0.55, flatShading: true, vertexColors: true, // I282/ST-267: mid-value steel-cyan (was 0x1f3340 dark-on-dark) + the GLB COLOR_0 value bake
     emissive: 0x37d5ff, emissiveIntensity: 0.7,
   });
   const pool = [];
@@ -49,6 +51,10 @@ export function createDroneRenderer(scene) {
       if (!g && o.isMesh) g = o.geometry;
     });
     if (!g) return;
+    if (!g.hasAttribute('color')) { // I282/ST-267: materials use vertexColors; keep a GLB without COLOR_0 safe (white identity)
+      const col = new Float32Array(g.attributes.position.count * 3).fill(1);
+      g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    }
     geo = g;
     for (const m of pool) m.geometry = g;
   }

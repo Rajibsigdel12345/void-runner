@@ -14,6 +14,8 @@ function bakeHullGeometry() {
   const geo = new THREE.CylinderGeometry(CONFIG.flyer.radius, CONFIG.flyer.radius * 1.15, CONFIG.flyer.radius * 0.55, 6, 1);
   geo.scale(1.45, 1, 1);
   geo.computeVertexNormals();
+  const col = new Float32Array(geo.attributes.position.count * 3).fill(1); // I282/ST-267: white value identity (the hull material now uses vertexColors; the GLB COLOR_0 bake multiplies on top)
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
   return geo;
 }
 
@@ -31,7 +33,7 @@ export function createFlyerRenderer(scene) {
   let hullGeo = bakeHullGeometry(); // reassigned by useGLB when the flyer GLB resolves
   let domeGeo = bakeDomeGeometry();
   const hullMat = new THREE.MeshStandardMaterial({
-    color: 0x33202e, roughness: 0.55, metalness: 0.45, flatShading: true,
+    color: CONFIG.flyer.palette.body.color, roughness: 0.55, metalness: 0.45, flatShading: true, vertexColors: true, // I282/ST-267: mauve mid (was 0x33202e dark-on-dark) + the GLB COLOR_0 value bake
     emissive: 0x5c1f4a, emissiveIntensity: 0.3,
   });
   const domeMats = [];
@@ -90,7 +92,13 @@ export function createFlyerRenderer(scene) {
       else if (!hull) hull = o;
     });
     if (!hull) obj.traverse((o) => { if (!hull && o.isMesh && o !== dome) hull = o; });
-    if (hull) { hullGeo = hull.geometry; for (const g of pool) { const m = g.children[0]; if (m) m.geometry = hullGeo; } }
+    if (hull) {
+      if (!hull.geometry.hasAttribute('color')) { // I282/ST-267: materials use vertexColors; keep a GLB without COLOR_0 safe (white identity)
+        const col = new Float32Array(hull.geometry.attributes.position.count * 3).fill(1);
+        hull.geometry.setAttribute('color', new THREE.BufferAttribute(col, 3));
+      }
+      hullGeo = hull.geometry; for (const g of pool) { const m = g.children[0]; if (m) m.geometry = hullGeo; }
+    }
     if (dome) { domeGeo = dome.geometry; for (let i = 0; i < POOL; i++) { const m = pool[i].children[1]; if (m) m.geometry = domeGeo; } }
   }
 

@@ -302,6 +302,7 @@ export const CONFIG = {
     firstWave: 8,       // drones start appearing from this wave (after mines at 5)
     perWave: 1,         // drones added each eligible wave
     maxConcurrent: 6,
+    palette: { body: { color: 0x6f8796 } }, // I282/ST-267: steel-cyan mid (sRGB luma ~131, above the skybox mid-band ~128; the GLB COLOR_0 value bake multiplies on top - bright nose, dark belly)
     radius: 0.7,        // slightly smaller than a mine
     speed: 4.4,         // u/s - agile seeker, faster than mines (3.2), < ship.maxSpeed (14)
     turn: 3.2,          // max heading change rad/s (tighter pursuit than a mine)
@@ -317,6 +318,7 @@ export const CONFIG = {
     firstWave: 7,       // wave 7: one after the W6 breather (boss waves are 5/10)
     perWave: 1,
     maxConcurrent: 2,
+    palette: { body: { color: 0x5a4f73 } }, // I282/ST-267: deep violet (sRGB luma ~84, BELOW the skybox mid-band - a dark needle whose white-hot telegraph tip is the read; GLB COLOR_0 bake multiplies on top)
     radius: 0.8,
     cruiseSpeed: 1.8,   // u/s (dodgeable: ship maxSpeed 14)
     cruiseTurn: 1.4,    // rad/s (gentle homing while cruising)
@@ -337,6 +339,7 @@ export const CONFIG = {
     firstWave: 9,       // W9: after the W8 drone debut (boss waves are 5/10)
     perWave: 1,
     maxConcurrent: 2,   // render pool 4 (maxConcurrent + 2, stinger pattern)
+    palette: { body: { color: 0x7d6878 } }, // I282/ST-267: mauve mid (sRGB luma ~110, below the drone band; the magenta dome carries the hue; GLB COLOR_0 bake multiplies on top)
     radius: 0.9,
     cruiseSpeed: 2.5,   // u/s crossing speed (ship 14 - never a threat, a target)
     weaveAmp: 1.2,      // u: perpendicular weave amplitude (the lead to read)

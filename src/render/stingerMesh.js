@@ -12,6 +12,8 @@ function bakeBodyGeometry() {
   const geo = new THREE.OctahedronGeometry(CONFIG.stinger.radius, 0);
   geo.scale(2.3, 0.55, 0.55);
   geo.computeVertexNormals();
+  const col = new Float32Array(geo.attributes.position.count * 3).fill(1); // I282/ST-267: white value identity (the body material now uses vertexColors; the GLB COLOR_0 bake multiplies on top)
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
   return geo;
 }
 
@@ -30,7 +32,7 @@ export function createStingerRenderer(scene) {
   let bodyGeo = bakeBodyGeometry(); // I230: reassigned by useGLB when the stinger GLB resolves
   let coreGeo = bakeCoreGeometry();
   const bodyMat = new THREE.MeshStandardMaterial({
-    color: 0x2b2136, roughness: 0.5, metalness: 0.5, flatShading: true,
+    color: CONFIG.stinger.palette.body.color, roughness: 0.5, metalness: 0.5, flatShading: true, vertexColors: true, // I282/ST-267: deep-violet mid (was 0x2b2136 dark-on-dark) + the GLB COLOR_0 value bake
     emissive: 0x3c1f5c, emissiveIntensity: 0.35,
   });
   const coreMats = [];
@@ -98,7 +100,13 @@ export function createStingerRenderer(scene) {
       else if (!body) body = o;
     });
     if (!body) obj.traverse((o) => { if (!body && o.isMesh && o !== core) body = o; });
-    if (body) { bodyGeo = body.geometry; for (const g of pool) { const m = g.children[0]; if (m) m.geometry = bodyGeo; } }
+    if (body) {
+      if (!body.geometry.hasAttribute('color')) { // I282/ST-267: materials use vertexColors; keep a GLB without COLOR_0 safe (white identity)
+        const col = new Float32Array(body.geometry.attributes.position.count * 3).fill(1);
+        body.geometry.setAttribute('color', new THREE.BufferAttribute(col, 3));
+      }
+      bodyGeo = body.geometry; for (const g of pool) { const m = g.children[0]; if (m) m.geometry = bodyGeo; }
+    }
     if (core) { coreGeo = core.geometry; for (let i = 0; i < POOL; i++) { const m = pool[i].children[1]; if (m) m.geometry = coreGeo; } }
   }
 

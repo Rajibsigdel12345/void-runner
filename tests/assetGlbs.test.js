@@ -382,6 +382,73 @@ test('drone.glb: naming, poly budget, dart dimensions vs procedural parity (I211
   const cross = Math.max(e.y, e.z);
   assert.ok(Math.abs(cross - 1.19) / 1.19 <= 0.15, 'drone cross ' + cross.toFixed(3) + ' ~ 1.19');
 });
+
+// I282 (ST-267 enemy value/shape art pass): the drone/stinger/flyer BODIES carry a
+// grayscale per-face COLOR_0 value bake (Blender 5.2, corner-domain, vertex-split on
+// export) that multiplies the in-code family tint (CONFIG.{drone,stinger,flyer}.palette.body.color):
+// drone = steel-cyan mid (bright nose / dark belly, clears the skybox mid-band), stinger =
+// deep-violet needle (dark body, white-hot telegraph tip is the read), flyer = mauve saucer
+// (bright deck / dark keel, magenta dome carries the hue). Geometry UNCHANGED (extents/tris
+// pins above hold); only the color attribute was added. Core + dome primitives stay without
+// COLOR_0 (per-instance emissive materials drive them).
+const ENEMY_FACET = {
+  drone:   { p10: 0.570, p50: 0.830, p90: 1.180 }, // sRGB-agnostic linear bake domain [0.30, 1.25]
+  stinger: { p10: 0.580, p50: 0.760, p90: 0.980 },
+  flyer:   { p10: 0.320, p50: 0.820, p90: 1.120 }, // facet-domain p10 (keel faces); the per-corner read was 0.370
+};
+function enemyFacetLumas({ buf, json, binOff }) {
+  // Find the primitive carrying COLOR_0 (the body) and read per-face luma through the
+  // index accessor (vertex-split colors: COLOR_0 count == POSITION count).
+  let p = null;
+  for (const m of json.meshes || []) for (const q of m.primitives || []) if (q.attributes.COLOR_0 !== undefined) p = q;
+  assert.ok(p, 'body primitive with COLOR_0');
+  const cAcc = json.accessors[p.attributes.COLOR_0];
+  const iAcc = json.accessors[p.indices];
+  const cBase = binOff + (json.bufferViews[cAcc.bufferView].byteOffset || 0) + (cAcc.byteOffset || 0);
+  const iBase = binOff + (json.bufferViews[iAcc.bufferView].byteOffset || 0) + (iAcc.byteOffset || 0);
+  const readIdx = (i) => (iAcc.componentType === 5123 ? buf.readUInt16LE(iBase + i * 2) : iAcc.componentType === 5125 ? buf.readUInt32LE(iBase + i * 4) : buf.readUInt8(iBase + i));
+  const fl = [];
+  for (let t = 0; t < iAcc.count / 3; t++) {
+    const i0 = readIdx(t * 3), i1 = readIdx(t * 3 + 1), i2 = readIdx(t * 3 + 2);
+    const lum = (i) => {
+      const o = cBase + i * 12;
+      return 0.2126 * buf.readFloatLE(o) + 0.7152 * buf.readFloatLE(o + 4) + 0.0722 * buf.readFloatLE(o + 8);
+    };
+    fl.push((lum(i0) + lum(i1) + lum(i2)) / 3);
+  }
+  fl.sort((a, b) => a - b);
+  const q = (f) => fl[Math.min(fl.length - 1, Math.floor(f * fl.length))];
+  return { p10: q(0.1), p50: q(0.5), p90: q(0.9) };
+}
+test('drone/stinger/flyer bodies: grayscale COLOR_0 value bake band + facet spread (I282)', () => {
+  for (const name of ['drone', 'stinger', 'flyer']) {
+    const { buf, json, binOff } = parseGlb(name + '.glb');
+    let bodyChecked = 0;
+    for (const m of json.meshes || []) for (const p of m.primitives || []) {
+      if (p.attributes.COLOR_0 === undefined) continue; // core/dome: emissive-driven, no bake
+      bodyChecked++;
+      const acc = json.accessors[p.attributes.COLOR_0];
+      const bv = json.bufferViews[acc.bufferView];
+      const stride = parseInt(acc.type.replace('VEC', ''), 10);
+      const base = binOff + (bv.byteOffset || 0) + (acc.byteOffset || 0);
+      for (let i = 0; i < acc.count; i++) {
+        const r = buf.readFloatLE(base + i * stride * 4);
+        const g = buf.readFloatLE(base + i * stride * 4 + 4);
+        const b = buf.readFloatLE(base + i * stride * 4 + 8);
+        assert.ok(Math.abs(r - g) <= 0.02 && Math.abs(g - b) <= 0.02, name + ' COLOR_0 grayscale at ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
+        assert.ok(r >= 0.30 - 0.01 && r <= 1.25 + 0.01, name + ' COLOR_0 in [0.30,1.25] value domain at ' + i + ': ' + r.toFixed(3));
+      }
+    }
+    assert.equal(bodyChecked, 1, name + ': exactly one body primitive carries the bake (core/dome stay emissive-driven)');
+    const f = enemyFacetLumas({ buf, json, binOff });
+    const E = ENEMY_FACET[name];
+    assert.ok(f.p90 - f.p10 >= 0.35, name + ' facet luma spread ' + (f.p90 - f.p10).toFixed(3) + ' >= 0.35 (I282 value bake; pre-bake was a flat in-code tint)');
+    for (const k of ['p10', 'p50', 'p90']) {
+      assert.ok(Math.abs(f[k] - E[k]) <= 0.005, name + ' facet ' + k + ' ' + f[k].toFixed(3) + ' ~ ' + E[k] + ' (I282 bake pin)');
+    }
+  }
+});
+
 
 // I212: arena boundary ring (ST-212, cgs-dev-story). I254/ST-245 v2: two-node GLB
 // (VR_ArenaRing band + VR_ArenaRing_Ticks neon accent). The v1 exact-48-tris pin is
