@@ -3300,4 +3300,26 @@ Scope check (production/scope-check-E24.md, new - APPROVE):
 Quality bar: npm test 835/835 green (unchanged); npm run build exit 0 (117 files / 2038.0 KB / headroom 10.0 KB unchanged); browser smoke n/a (docs-only).
 Changed files: docs (scope-check-E24.md new, epics.md E24, stories.md ST-271..274, iterations.md I286, active.md, CHANGELOG, .evidence/I286/).
 Next I287: ST-271 build minify pass (cgs-dev-story): pre-grep done (no eval/new Function in src) -> npm i -D esbuild -> scripts/build.mjs per-module src-only minify (format=esm, no bundling; vendor byte-identical) -> full browser smoke + __vr handles + demo pin EXACT real-UI + npm test unaffected + new dist canary (intentional spec delta) + docs.
+## I287 - ST-271 build minify pass: esbuild per-module, src-only, no bundling (cgs-dev-story, E24 1/4)
 
+Goal: relieve the dist budget crisis discovered while scoping E24 (I286: 2038.0 KB / headroom 10.0 KB vs the ST floor of 8 KB = 2.0 KB usable) before the 7-emblem COLOR_0 bake lands (~+6.5 KB), WITHOUT breaking the no-bundler import-map convention (AGENTS.md: import maps + vendored modules).
+
+What was done:
+- npm i -D esbuild (0.28.2; postinstall script policy-blocked but the JS API works - platform binary resolves; node_modules/ gitignored, not committed).
+- scripts/build.mjs: + minifyDir(dist/src) BEFORE the vendor copy - walks dist/src/**, each .js through esbuild.transform(read, {loader:'js', format:'esm', minify:true, keepNames:true, legalComments:'none'}) -> write back in place. Per-module only: NO bundling, NO cross-module tree-shaking - every src module keeps its dist path, the import-map convention is preserved; vendor/ + assets/ are never touched.
+- Pre-grep (I286): no eval( / new Function / Function( in src/**/*.js, so the minify is syntax-level (local identifiers + whitespace); string literals + property names untouched.
+
+Verification (quality bar + story acceptance):
+- npm run build exit 0: "build: dist/src minified (esbuild, per-module, format=esm, no bundling)".
+- dist walk + hash compare vs the I286 dist (sha256 first-16 per file, .evidence/I287/01+02+03): 117 files pre and post (0 gone / 0 added); 0 non-src mismatches (vendor/ + assets/ byte-identical); 83 src files changed (the minified ones). Sizes: total 2038.0 -> 1784.3 KB (headroom 10.0 -> 263.7 KB); src 476.4 -> 222.7 KB (~253.7 KB freed, ~53% of src); vendor 1409.6 KB + other 152.0 KB unchanged.
+- Browser smoke on :4173 (node scripts/serve.mjs 4173 dist, i.e. the MINIFIED build served): load console 0/0, state MENU, fx high, all __vr handles survive (world/bullets/shipGroup/stars/skybox/arenaFloor/renderer/camera/render/liveSettings/advance/eventTally/input).
+- DEMO PIN EXACT and dist==dev: REPLAYS -> DEMO PILOT -> speed x4 -> GAME_OVER (real UI): SCORE 11334 / KILLS 57 / WAVE 2 / MAX COMBO 15 / TIME 0:36 / SHOTS 57/198 / ACCURACY 29% / replayView idx 2169/2220 - byte-identical between :4173 (dist) and :5173 (dev src); lsScores/lsBest null (ST-190 watched runs never write). Proves the minify is behavior-preserving end-to-end.
+- NaN pilot: 240 ticks via __vr.advance(simSeconds, {thrust:{x,y}, aimPoint:null, firing:false}) - no NaN anywhere, ship (0,0), 5 rocks, 0 console logs.
+- keepNames:true confirmed: runtime error stack traces show `at tick` / `at Object.advance`.
+- npm test 835/835 green (tests run from src/; minify only touches dist/).
+- build-size-audit.md: + I287 re-measure section recording the new standing P9 canary 117 files / 1784.3 KB / headroom 263.7 KB (INTENTIONAL SPEC DELTA replacing the 2038.0 / 10.0 canary; the >= 8 KB floor now holds with 32.9x margin).
+
+Changed files: package.json + package-lock.json (+ esbuild 0.28.2 devDep), scripts/build.mjs (minifyDir step), .evidence/I287/ (01 pre-hash snapshot / 02 post-hash snapshot / 03 compare / 04 probe JSON), production/build-size-audit.md (+ I287 section), production/iterations.md (this entry), production/stories.md (ST-271 DONE), CHANGELOG.md, production/session-state/active.md.
+Result: DONE
+Risk/follow-up: none - per-module minify is deterministic for identical inputs and re-verified on every build; I289/I290 P9 canaries now use 117 files / 1784.3 KB / headroom 263.7 KB.
+Next I288: ST-272 pickup emblem value/shape pass (Blender COLOR_0 per-facet bakes x7 + rapid/spread hue separation + vertexColors:true wiring + facet p10/p50/p90 pins + byte pins + assetPerf whitelist +7).

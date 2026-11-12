@@ -1,5 +1,6 @@
 ﻿// "Build": assemble a static dist/ (index.html + src + vendor + public). No bundler, no spawn.
-import { cpSync, rmSync, mkdirSync } from 'node:fs';
+import { cpSync, rmSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { transform } from 'esbuild'; // ST-271 (I287): per-module src minify
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -13,6 +14,31 @@ try { cpSync(join(root, 'assets'), join(dist, 'assets'), { recursive: true }); }
 for (const d of ['src', 'public']) {
   const src = join(root, d);
   try { cpSync(src, join(dist, d), { recursive: true }); } catch { /* optional dir */ }
+}
+// ST-271 (I287): per-module minify of dist/src/**/*.js via esbuild transform -
+// syntax-level only (local identifiers + whitespace; import/export paths and
+// property names untouched; no bundling, no cross-module tree-shaking), so the
+// import-map convention holds and every src path survives in dist. vendor/ +
+// assets/ stay byte-identical (hash-compared in the I287 probe).
+{
+  const minifyDir = async (dir) => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, e.name);
+      if (e.isDirectory()) await minifyDir(p);
+      else if (e.name.endsWith('.js')) {
+        const out = await transform(readFileSync(p, 'utf8'), {
+          loader: 'js',
+          format: 'esm',
+          minify: true,
+          keepNames: true, // console stack traces keep the original function names
+          legalComments: 'none', // project code only; vendor keeps its own comments
+        });
+        writeFileSync(p, out.code);
+      }
+    }
+  };
+  await minifyDir(join(dist, 'src'));
+  console.log('build: dist/src minified (esbuild, per-module, format=esm, no bundling)');
 }
 // Vendor: ship only what the app actually imports (three core + the postprocessing
 // closure of the four passes used by bloom.js) instead of the full ~21MB package.

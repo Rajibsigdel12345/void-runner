@@ -91,3 +91,21 @@ production/build-size-audit.md (this file, NEW).
 ## Next owner or decision
 I198 ST-198 gate G8.5 (cgs-gate-check) - advisory phase gate over the I187-I196
 feel/juice/replay/security/regression arc.
+## I287 re-measure - ST-271 build minify (INTENTIONAL SPEC DELTA)
+
+ST-271 (E24) adds an esbuild minify step to scripts/build.mjs: every dist/src/**/*.js is run
+through `esbuild.transform` (loader js, format esm, minify, keepNames, legalComments none).
+NO bundling - the import-map convention is preserved, every src module keeps its dist path;
+vendor/ and assets/ are byte-identical (sha256-16 per-file compare, .evidence/I287/03_dist_compare.json).
+
+| Section | pre (I286) | post (I287) | delta |
+|---------|-----------|-------------|-------|
+| dist total | 2038.0 KB / headroom 10.0 KB | 1784.3 KB / headroom 263.7 KB | -253.7 KB |
+| src/ | 476.4 KB | 222.7 KB | ~53% |
+| vendor/ | 1409.6 KB | 1409.6 KB | 0 (byte-identical) |
+| other (index/favicon/public) | 152.0 KB | 152.0 KB | 0 (byte-identical) |
+
+The old "2048 KB / headroom 10.0 KB" canary is replaced by **1784.3 KB / headroom 263.7 KB** as the
+standing P9 build canary (the >= 8 KB floor now holds with 32.9x margin). Behavior-preservation
+evidence: .evidence/I287/04_probe_i287.json (DEMO PIN dist==dev exact; 240-tick NaN pilot clean;
+console 0/0 on :4173 serving the minified dist). Files: 117 pre and post, 0 gone/added, 83 src changed.
