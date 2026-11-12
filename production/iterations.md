@@ -3361,3 +3361,41 @@ Probes (.evidence/I289/02_probe_i289.json): MATCHED A/B (same script both sides 
 
 Result: DONE (render-only story; no core logic touched). arena_ring/shield-ring value bakes remain OUT of scope (plain by design, pinned in the arena_ring test).
 Risk/follow-up: none. Next I290: ST-274 E24 regression + G24.0 gate + closeout (10-probe suite + log audit 1..290).
+## I290 - ST-274 E24 regression + G24.0 gate + closeout (cgs-regression-suite + cgs-gate-check + cgs-milestone-review, E24 4/4)
+
+Goal: close out E24 with the full 10-probe regression suite (I275/I280/I285 template) on a source-frozen tree (f5f08f9 = I289; I290 = docs + .evidence only, zero source changes): re-verify FLOOR-50 with the FROZEN method variant B, re-run the bloom band 183.6 A/B against the pre-bake baseline, refresh the dist/minify canary, and audit the iteration log 1..290.
+
+Probes (.evidence/I290/probes.json; :5173 ?nocache=i290*; console 0/0 on every fresh page):
+- P1 DEMO PIN PASS EXACT (real UI REPLAYS -> DEMO PILOT -> key 3 -> GAME_OVER): 11334/57/W2/combo 15/0:36/shots 57/198/29% / replayView idx 2169 len 2220 / speed 4 / wall 8.9 s; localStorage voidrunner.best|scores|replays null throughout (ST-190); Q -> MENU.
+- P2: 11/11 legal state-machine edges key-driven; illegal PLAYING -> MENU rejected.
+- P3: persistence bytes EXACT (settings 158 with fx:off / best 24 / tutorial 25 / scores 118 [70,55,45]); daily + replays ABSENT.
+- P4: FX-off zero-leak via the real F-hotkey tier path (kill 0 particles/0 rings + L->2M; pickup peak 8; nearmiss peak 4 with lives unchanged; drain 0/0).
+- P5: pool caps EXACT (bullets 64 / particles 512 / rings 8 / rockRenders 29 / mineRenders 10 / droneRenders 6 / stingerRenders 4 / flyerRenders 4 / enemyBulletRenders 24).
+- P6: 0-NaN pilots x2 (A reseed 2750 survived to tick 2129, kills 17, lives 1; B reseed 777 natural 3-hit death tick 1140 -> real Enter -> run 2 to tick 1512, kills 13; NaN 0 both).
+- FLOOR-50 FROZEN variant B PASS EXACT (deterministic across fresh pages): bullet 230 (RGB 183,223,230) @ (640,360) / floor 102 @ (612,214) / delta 128 / 0 annulus pts >= 150 / 0 big clusters; fx off. PROBE LESSON (standing): __vr.bullets.trails is an ARRAY of 64 ribbon meshes (I61, TAIL_LEN 1.15 centered at bullet - 0.575*vel) - hiding MUST loop over the array (per-mesh visible=false); a naive visible=false on the array itself is a no-op and the probe bullet's own trail contaminated the annulus (first run read floor 124 @ (596,356) with a 21-px cluster; ribbon ~8 px = TAIL_TH 0.16 wu). Loop-fix -> EXACT. The I44 reticle (line x1->6 ahead of the nose, y 0.35, opacity 0.35, 0x6fb8e8) is visible in PLAYING but reads <= ~101 inside the annulus (below the 102 grid band) - expected, do not chase.
+- P8 MENU fx-off frame PASS EXACT: fresh page, real F until liveSettings().fx === off, stay MENU, rAF frozen, info.autoReset=false + per-frame info.reset() hook: 60/60 frames 20 calls / 318 tris (unique [20/318]) = I274/I275/I280/I285 baseline; __vr.vendorLowpWarns() === 0 natural; console 0/0.
+- P9: build exit 0 -> 117 files / 1799.8 KB / headroom 248.2 KB (31x the 8 KB floor); dist/vendor 13/13 sha256 byte-identical to source vendor/ (three.module.js 1243.1 KB 76dea815... / GLTFLoader 106.0 KB).
+- P10: log audit I1..I290 post-append (strictly sequential, no gaps/dupes).
+
+BLOOM BAND 183.6 RE-CHECK (G24.0): fx HIGH, wt-i278 @:5174 (I278-era pre-bake) BEFORE vs dev :5173 (E24 bakes) AFTER. Method: fresh page per side, PLAYING, real F to fx HIGH, rAF frozen BEFORE staging, one no-advance evaluate = clear all dynamic arrays + sync all pools + loop-hide trails + hide stars + hide letter badges (I70/I288 family) + overhead cam (0,h,0) lookAt origin fov 60 halfV 12.5 + PR 1.0 1280x720 + __vr.render + readPixels maxC. Staging: 7 emblems 2 rounds (pool headroom 4) - AFTER via __vr.powerupRenders.sync({drops:[{type,id,dead:false,life:10,pos:{x,y}}]},0.016), BEFORE via sim w.powerups.drops push + live sync (no powerupRenders handle pre-I288; verified working) - + warden wardenMesh.sync({alive:true,pos,rot:0,armor:6},1.0) both sides. Boxes: emblem +/-30 px / warden +/-85 px around projected centers (proj guard: box maxC must beat the no-prop background 63-106).
+
+  | prop | AFTER | BEFORE | delta |
+  | rapid | 223 | 218 | +5 |
+  | spread | 224 | 207 | +17 |
+  | shield | 164 | 164 | 0 |
+  | bomb | 237 | 226 | +11 |
+  | magnet | 190 | 180 | +10 (STRADDLE) |
+  | overdrive | 244 | 253 | -9 |
+  | slowmo | 203 | 196 | +7 |
+  | warden | 175 | 174 | +1 |
+  | ship frameMax @ (638,364) | 238 | 238 | 0 |
+
+  Crossers (>= 183.6) BEFORE: rapid, spread, bomb, overdrive, slowmo (5 of 7 emblems) + ship. AFTER: + magnet. Deterministic (magnet 190 x2 fresh AFTER pages / 180 x2 BEFORE; rapid control 223-224 / 218; framing matched <= 3 px). FINDING: the stale phrasing "intended crossers: stars + arena tick band only" is DISPROVEN for the pickup family by the pre-E24 baseline itself. DECISION: the G24.0 bloom invariant is the DIFF invariant (the bakes add no new crosser beyond the pre-E24 state); the single membership delta is magnet's marginal 180 -> 190 straddle into the family range (190-244) -> magnet now glows in fx-high like 5 siblings (arcade pickup visibility; family consistency). ACCEPTED as a documented spec delta; NO CODE CHANGE (would perturb the I288-pinned look; frozen probes drop-unaffected).
+
+G24.0 GATE PASS -> E24 CLOSED 4/4 (ST-271 I287 build minify / ST-272 I288 pickup emblem value pass / ST-273 I289 warden hull/armor value pass / ST-274 I290 E24 regression + G24.0 gate + closeout).
+
+Quality bar: npm test 835/835 green; npm run build exit 0 (117 files / 1799.8 KB / headroom 248.2 KB >= 8 KB floor); browser smoke console 0/0 + no NaN on all probes.
+
+Changed files: none (docs + .evidence/I290/ [gitignored] only).
+
+Next I291: next epic via cgs-scope-check (task-list carryover: ship hero re-read + skybox re-bake candidates + art improvement research per user standing directive; YouTube MCP grounding).
