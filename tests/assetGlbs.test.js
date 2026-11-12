@@ -93,6 +93,50 @@ test('ship.glb: container, naming, poly budget, silhouette dimensions', () => {
   const span = maxX - minX; const len = maxZ - minZ;
   assert.ok(Math.abs(span - 2.5) <= 0.25, 'wingspan ' + span.toFixed(3) + ' ~ 2.5');
   assert.ok(Math.abs(len - 1.9) <= 0.19, 'length ' + len.toFixed(3) + ' ~ 1.9');
+
+  // I292 (ST-275 ship hero pass): per-facet grayscale COLOR_0 value bakes on the two
+  // silhouette-carrying nodes (Blender 5.2, corner domain, v = clamp(1.0 + k*nY, 0.30, 1.55),
+  // hull k=0.55 / wings k=0.80 - the flat wing slab's nY range (~0.67) cannot reach the 0.35
+  // p10..p90 floor at k=0.55; hull keeps the I282/I288-style k). The bake multiplies the
+  // in-code body/wing tint (CONFIG.ship.palette). Exactly these two prims carry COLOR_0
+  // (Cockpit/Engine/Fin/Nozzle stay clean - Fin is wingMat-routed and gets the white-identity
+  // attr in code, shipMesh.js ensureWhiteColors).
+  const shipFacet = {};
+  let colorPrims = 0;
+  for (const m of json.meshes || []) for (const p of m.primitives || []) {
+    if (p.attributes.COLOR_0 === undefined) continue;
+    colorPrims++;
+    const acc = json.accessors[p.attributes.COLOR_0];
+    const bv = json.bufferViews[acc.bufferView];
+    assert.equal(acc.componentType, 5126, m.name + ' COLOR_0 componentType FLOAT');
+    assert.equal(acc.type, 'VEC3', m.name + ' COLOR_0 type VEC3');
+    assert.equal(acc.count, json.accessors[p.attributes.POSITION].count, m.name + ' COLOR_0 count == POSITION count');
+    const base = binOff + (bv.byteOffset || 0) + (acc.byteOffset || 0);
+    for (let i = 0; i < acc.count; i++) {
+      const r = buf.readFloatLE(base + i * 12), g = buf.readFloatLE(base + i * 12 + 4), b = buf.readFloatLE(base + i * 12 + 8);
+      assert.ok(Math.abs(r - g) <= 0.02 && Math.abs(g - b) <= 0.02, m.name + ' COLOR_0 grayscale at ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
+      assert.ok(r >= 0.30 - 0.01 && r <= 1.55 + 0.01, m.name + ' COLOR_0 in [0.30,1.55] value domain at ' + i + ': ' + r.toFixed(3));
+    }
+    const iAcc = json.accessors[p.indices];
+    const iBase = binOff + (json.bufferViews[iAcc.bufferView].byteOffset || 0) + (iAcc.byteOffset || 0);
+    const readIdx = (i) => (iAcc.componentType === 5123 ? buf.readUInt16LE(iBase + i * 2) : iAcc.componentType === 5125 ? buf.readUInt32LE(iBase + i * 4) : buf.readUInt8(iBase + i));
+    const lum = (i) => 0.2126 * buf.readFloatLE(base + i * 12) + 0.7152 * buf.readFloatLE(base + i * 12 + 4) + 0.0722 * buf.readFloatLE(base + i * 12 + 8);
+    const fl = [];
+    for (let t = 0; t < iAcc.count / 3; t++) fl.push((lum(readIdx(t * 3)) + lum(readIdx(t * 3 + 1)) + lum(readIdx(t * 3 + 2))) / 3);
+    fl.sort((a, b2) => a - b2);
+    const q = (f) => fl[Math.min(fl.length - 1, Math.floor(f * fl.length))];
+    shipFacet[m.name] = { p10: q(0.1), p50: q(0.5), p90: q(0.9) };
+  }
+  assert.equal(colorPrims, 2, 'exactly hull + wings prims carry the I292 value bake (' + colorPrims + ')');
+  const hullF = shipFacet['VR_Ship_Hull.001'] || shipFacet['VR_Ship_Hull'];
+  const wingF = shipFacet['VR_Ship_Wings.001'] || shipFacet['VR_Ship_Wings'];
+  assert.ok(hullF && wingF, 'hull + wings facet data (' + Object.keys(shipFacet).join(',') + ')');
+  const SHIP_FACET = { hull: { p10: 0.88, p50: 1.0599, p90: 1.55 }, wings: { p10: 0.7702, p50: 1.0, p90: 1.1902 } };
+  assert.ok(hullF.p90 - hullF.p10 >= 0.35, 'hull facet luma spread ' + (hullF.p90 - hullF.p10).toFixed(3) + ' >= 0.35 (I292 value bake; pre-bake was a flat in-code tint)');
+  assert.ok(wingF.p90 - wingF.p10 >= 0.35, 'wings facet luma spread ' + (wingF.p90 - wingF.p10).toFixed(3) + ' >= 0.35 (I292 value bake; pre-bake was a flat in-code tint)');
+  for (const [k, E] of [['hull', hullF], ['wings', wingF]]) {
+    for (const qk of ['p10', 'p50', 'p90']) assert.ok(Math.abs(E[qk] - SHIP_FACET[k][qk]) <= 0.005, 'ship ' + k + ' facet ' + qk + ' ' + E[qk].toFixed(4) + ' ~ ' + SHIP_FACET[k][qk] + ' (I292 bake pin)');
+  }
 });
 
 test('asteroid L/M/S: naming, poly budgets, radii match CONFIG (+/-5%)', () => {

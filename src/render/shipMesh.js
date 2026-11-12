@@ -58,7 +58,7 @@ export function createShipMesh() {
   // tests/paletteHarmony.test.js; retune only via a design pass.
   const P = CONFIG.ship.palette;
   const bodyMat = new THREE.MeshStandardMaterial({ color: P.body.color, metalness: P.body.metalness, roughness: P.body.roughness, flatShading: true, vertexColors: true }); // G5 (I273): reads COLOR_0 hull-bottom fill
-  const wingMat = new THREE.MeshStandardMaterial({ color: P.wing.color, metalness: P.wing.metalness, roughness: P.wing.roughness, flatShading: true });
+  const wingMat = new THREE.MeshStandardMaterial({ color: P.wing.color, metalness: P.wing.metalness, roughness: P.wing.roughness, flatShading: true, vertexColors: true }); // I292/ST-275: reads COLOR_0 (wing/fin per-facet value bake; Fin gets white identity)
   const cockpitMat = new THREE.MeshStandardMaterial({ color: P.cockpit.color, emissive: P.cockpit.emissive, emissiveIntensity: P.cockpit.emissiveIntensity, roughness: P.cockpit.roughness });
 
   const bodyGeo = new THREE.ConeGeometry(0.55, 1.7, 4);
@@ -69,11 +69,13 @@ ensureWhiteColors(bodyGeo); // G5 (I273): bodyMat reads COLOR_0
   shipBody.add(body);
 
   const wingGeo = new THREE.BoxGeometry(2.5, 0.1, 1.0);
+ensureWhiteColors(wingGeo); // I292/ST-275: wingMat reads COLOR_0
   const wings = new THREE.Mesh(wingGeo, wingMat);
   wings.position.set(0, 0, -0.45);
   shipBody.add(wings);
 
   const finGeo = new THREE.BoxGeometry(0.12, 0.5, 0.7);
+ensureWhiteColors(finGeo); // I292/ST-275: wingMat reads COLOR_0 (Fin has no GLB COLOR_0 -> white identity)
   const fin = new THREE.Mesh(finGeo, wingMat);
   fin.position.set(0, 0.2, -0.6);
   shipBody.add(fin);
@@ -156,7 +158,7 @@ shipBody.add(mouth);
       if (!n.isMesh) return;
       const nm = (n.material && n.material.name) || '';
       if (nm.indexOf('Cockpit') !== -1) n.material = cockpitMat;
-      else if (nm.indexOf('Wing') !== -1) n.material = wingMat; // wing + fin
+      else if (nm.indexOf('Wing') !== -1) { n.material = wingMat; ensureWhiteColors(n.geometry); } // wing + fin (I292/ST-275: Fin has no COLOR_0 -> white identity)
       else { n.material = bodyMat; ensureWhiteColors(n.geometry); } // G5 (I273): bodyMat reads COLOR_0
     });
     group.add(obj);
