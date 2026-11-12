@@ -1,13 +1,17 @@
 // ST-055: boss HP bar - minimal DOM (no assets): thin fixed bar under the wave chip.
 export function createBossHealth(root) {
   const wrap = document.createElement('div');
+  wrap.id = 'hud-bossbar'; // ST-269 (I284): probeable DOM ids (wrap/label/bar/fill were id-less = unprobeable)
   wrap.style.cssText = 'position:fixed;top:54px;left:50%;transform:translateX(-50%);width:340px;max-width:60vw;opacity:0;pointer-events:none;transition:opacity 0.25s;z-index:30;text-align:center;';
   const label = document.createElement('div');
+  label.id = 'hud-bossbar-label'; // ST-269 (I284)
   label.textContent = 'MONOLITH';
-  label.style.cssText = 'font:600 calc(10px * var(--vr-fs,1))/1 system-ui,sans-serif;letter-spacing:0.25em;color:rgba(190,160,255,0.9);margin-bottom:4px;'; // I161: font-scale
+  label.style.cssText = 'font:600 calc(12px * var(--vr-fs,1))/1 system-ui,sans-serif;letter-spacing:0.25em;color:rgba(190,160,255,0.9);margin-bottom:4px;'; // I161: font-scale; I284: base 10->12px (800x450 rendered ~9.8px = below legibility floor; the --vr-fs hook stays the only scale path, no font changes)
   const bar = document.createElement('div');
+  bar.id = 'hud-bossbar-bar'; // ST-269 (I284)
   bar.style.cssText = 'height:10px;background:rgba(10,8,20,0.65);border:1px solid rgba(150,110,255,0.5);border-radius:5px;overflow:hidden;';
   const fill = document.createElement('div');
+  fill.id = 'hud-bossbar-fill'; // ST-269 (I284)
   fill.style.cssText = 'height:100%;width:100%;background:linear-gradient(90deg,#8b5cf6,#c084fc);transition:width 0.1s linear;';
   bar.appendChild(fill);
   wrap.appendChild(label);

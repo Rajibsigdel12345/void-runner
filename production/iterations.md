@@ -3234,3 +3234,24 @@ Changed files: src/core/touchZones.js (new), src/render/input.js (dual-zone rewr
 
 Next I284: ST-269 HUD readability + boss-bar DOM ids (cgs-dev-story): DOM ids on the bossHealth.js wrap/label/bar/fill elements (currently NO ids = unprobeable) + lives/score boxes where cheap; probe-verified id resolution; 800x450 small-screen readability pass (the MONOLITH boss-bar label is 10px) via the existing --vr-fs font-scale hook ONLY, NO font changes; acceptance: id-resolution probe green, 800x450 screenshot (.evidence/I284/), no 1280x720 layout regression, console 0/0, BY LAYER (DOM render only - no core/scoring; demo pin structurally untouched).
 
+
+## I284 - ST-269 HUD readability + boss-bar DOM ids (cgs-dev-story, E23 3/4)
+
+Goal: the bossHealth.js bar had NO DOM ids (wrap/label/bar/fill unprobeable) + the MONOLITH boss-bar label rendered ~9.8px at 800x450 (below the legibility floor). Add probeable ids + a small-screen readability pass via the EXISTING --vr-fs font-scale hook ONLY - no font family/weight changes. BY LAYER: DOM render only - no core/scoring; demo pin structurally untouched, re-verified real-UI at ST-270.
+
+Code:
+- src/render/bossHealth.js: DOM ids on the 4 bar elements - hud-bossbar (wrap) / hud-bossbar-label / hud-bossbar-bar / hud-bossbar-fill; label base font 10px -> 12px through the EXISTING calc(12px * var(--vr-fs,1)) hook (the --vr-fs scale path is the only change; no font family/weight change).
+- src/render/hud.js: lives.id = 'hud-lives' (score already had hud-score) so the top-right life readout is probeable.
+
+Browser probe (5/5 PASS + true-800x450 re-probe 4/4, console 0/0/0; .evidence/I284/ probe_i284.json + probe_i284_true800.json + 3 PNGs; ?nocache=i284/i284r :5173; real-UI start = Enter (ST-141) + __vr.dismissTutorial (I151 handle) + world.spawnBossForWave(5) force-spawn of the MONOLITH, bossHealth.sync(world.boss) runs every frame in syncVisuals):
+- ids-resolve: all 6 ids present (hud-bossbar/-label/-bar/-fill, hud-lives, hud-score).
+- bar-visible-monolith: wrap opacity '1', label text 'MONOLITH', fill '100%' == hpFrac 1.
+- 1280x720: --vr-fs = 1 (capped, 1422/820 > 1), label 12px.
+- TRUE 800x450 re-probe (the gap the first 800x450 leg missed): the host IAB forces a 0.9x CSS scale, so a REQUESTED 800x450 viewport lands at inner 889x500 -> --vr-fs = 889/820 = 1 (capped) -> label 12px (the scale-down path was never exercised). Re-probed at requested 720x405 -> inner 800x451: --vr-fs = 800/820 = 0.9756 (scale-down exercised, < 1), label 11.71px >= 11px legibility floor (vs the pre-fix ~9.8px below-floor at the same inner width). Screenshot 03_bossbar_true800x450.png shows the readable MONOLITH label + full bar.
+
+Probe finding (documented, standing): the host in-app browser forces a 0.9x CSS scale (1280 requested -> inner 1422; 800 requested -> inner 889), so any pixel-exact small-screen spec must be probed at requested = spec / 0.9 (true 800x450 = requested 720x405). The earlier I284 800x450 leg (screenshot 02) was captured at inner 889x500, not true 800x450 - the true-800 re-probe (screenshot 03) is the authoritative small-screen evidence.
+
+Quality bar: npm test 835/835 (DOM layer only - no new tests); npm run build exit 0 (117 files / 2036.6 KB / headroom 11.4 KB >= 8; dist unchanged, DOM ids + docs only).
+Changed files: src/render/bossHealth.js (4 ids + 10->12px label), src/render/hud.js (+hud-lives id); evidence .evidence/I284/ (probe JSONs + 3 PNGs, untracked per the .evidence gitignore convention).
+
+Next I285: ST-270 E23 regression + G23.0 gate + closeout (cgs-regression-suite + cgs-gate-check + cgs-milestone-review): full 10-probe suite per the I275/I280 template (demo pin EXACT via real UI = headline; 11/11 state edges; persistence; FX-off zero-leak via the F-hotkey real tier path; pool caps exact; 0-NaN pilots x2; MENU fx=off 20/318; FLOOR-50 with the HARDENED frozen spec (no-advance pin + starfield excluded for the floor window - spec delta documented, past numbers NOT rewritten); vendor lowp ticket resolved (documented + suppressed-or-fixed); console 0/0 (pre-existing vendor warning disposition documented); dist headroom >= 8 KB; log audit 1..285 -> G23.0 PASS, E23 CLOSED 4/4.

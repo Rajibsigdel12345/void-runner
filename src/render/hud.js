@@ -83,6 +83,7 @@ export function createHUD(root) {
 
   const livesBox = box('top:14px;right:18px;text-align:right');
   const lives = document.createElement('div');
+  lives.id = 'hud-lives'; // ST-269 (I284): probeable (score already has hud-score)
   lives.style.cssText = 'font-size:calc(22px * var(--vr-fs,1));letter-spacing:3px;color:#ff6d8a;';
   livesBox.appendChild(lives);
 
