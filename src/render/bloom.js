@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { GradePass } from './gradePass.js'; // ST-308 (I334): L3 level-curve/grade (bit-identical OutputPass + linear-space level curve; same pass count -> zero new draw-call path)
 import { CONFIG } from '../core/config.js';
 
 // ST-217: half-resolution bloom (art research 2026-11-10, lever 1). The composer
@@ -28,11 +28,13 @@ export function createBloom(renderer, scene, camera, cfg = CONFIG) {
     cfg.fx.bloom.threshold
   );
   composer.addPass(bloomPass);
-  composer.addPass(new OutputPass());
+  const gradeRef = new GradePass(cfg); // ST-308 (I334): grade replaces the plain OutputPass (pass count unchanged)
+  composer.addPass(gradeRef);
 
   let enabled = false;
   return {
     setEnabled(on) { enabled = on === true; },
+    get gradePass() { return gradeRef; },
     get enabled() { return enabled; },
     resize(w, h) {
       composer.setPixelRatio(renderer.getPixelRatio());

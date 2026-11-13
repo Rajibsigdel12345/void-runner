@@ -616,6 +616,11 @@ export const CONFIG = {
     tone: {
       mapping: 'acesFilmic', // tone mapping operator by name: 'none' (pre-I243 baseline) | 'acesFilmic' (filmic rolloff - shapes sky/rocks/emissives together; the I230 warm-cast note is the acceptance hook)
       exposure: 1.15         // toneMappingExposure - compensates the ACES midtone dip against the tuned NoToneMapping baseline
+    },
+    grade: {                // ST-308 (I334): L3 level curve / grade (High-tier composer only; applied POST ACES tone-map in display-referred linear space - the RUN.game 7-layer L3 gap found in ST-306)
+      contrast: 1.0,        //   contrast stretch pivoted at 0.5 (1.0 = off). Kept off: on this dark scene it crushes the mid-luma hull (I334 sweep B/C p50 -> 0)
+      lift: 0.0,            //   black/white-point offset in display-referred space (0 = off)
+      gamma: 1.18           //   mid-lift (1.0 = off). 1.18 = I334 sweep sweet spot: contrast 60.98 -> 68.7, crushed blacks 69.6% -> 9.3%, 0 blown highlights; 1.0 is bit-identical to the vendor OutputPass
     }
   },
   storage: {
