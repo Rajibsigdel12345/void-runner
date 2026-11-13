@@ -862,7 +862,15 @@ function syncVisuals(dt) {
   rockRenders.sync(world.field, simT); // ST-139
   mineRenders.sync(world.mines, simT); // ST-054
   droneRenders.sync(world.drones, simT); // ST-117
-  bossMesh.sync(world.boss, simT); // ST-055
+  { // ST-290 (I311): boss attack telegraph state - render-layer only (reads the public game-time
+    // timers; -1 = no window). fx off = none (R-E29-1); entered < 1 = held (the timers are held too).
+    const tb = world.boss;
+    const teleOn = !!(tb && tb.alive && tb.entered >= 1 && liveSettings.fx !== "off");
+    bossMesh.sync(world.boss, simT,
+      teleOn && tb.kind === "monolith" ? tb.ringTimer : -1,
+      teleOn ? world.bossFireTimer : -1,
+      teleOn && tb.kind === "monolith" ? world.bossBurstTimer : -1); // ST-055/290
+  }
   wardenMesh.sync(world.warden, simT); // ST-137
   stingerRenders.sync(world.stingers, simT, motionOff); // ST-229: core glow FX-tier-independent; telegraph wobble motion-gated
   world.flyers.ampScale = motionOff ? CONFIG.flyer.rmAmpScale : 1; // ST-232: RM reduces the weave amplitude (motion kept - identity)

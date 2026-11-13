@@ -226,7 +226,16 @@ export const CONFIG = {
       offsetSpin: 0.45,  // rad of circle rotation added per volley (spiral drift)
       everyMult: 0.65    // phase-2 cadence multiplier (4.0 -> 2.6 s)
     },
-    score: 1000      // kill reward (the big one)
+    score: 1000,     // kill reward (the big one)
+    telegraph: {     // ST-290 (I311): attack anticipation - the player reaction read before each boss
+                    // volley fires. RENDER-LAYER ONLY (reads the public game-time timers; no
+                    // sim/scoring/replay data -> BY LAYER, the demo pin is structurally safe).
+                    // Threat red = the enemy-bullet emissive family (0xff4a2a, ST-248): danger
+                    // reads at distance with no new palette hue; opacities capped sub-bloom.
+      ring:  { window: 0.6, maxRadius: 9.0, opacity: 0.35 },                     // rock ring: expanding warning ring as timer -> 0 (Monolith)
+      aimed: { window: 0.5, coreBoost: 0.9, redLean: 0.6 },                     // aimed bolt: sharp core-seam spike + threat-red lean (both variants)
+      burst: { window: 0.8, coreBoost: 1.4, ringRadius: 10.0, opacity: 0.22 },  // radial burst: long core pulse + fixed-radius pre-flash (Monolith)
+    },
   },
   splicer: {
     // ST-143: boss variant 2 - an alternate pattern to the Monolith. Holds a slow

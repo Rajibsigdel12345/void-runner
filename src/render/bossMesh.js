@@ -1,4 +1,4 @@
-﻿﻿// ST-055: Monolith boss rendering - obelisk with flared crown + recessed core seam (not pooled).
+// ST-055: Monolith boss rendering - obelisk with flared crown + recessed core seam (not pooled).
 // I248 (E16, ST-240): 3-node hero pass - hull/crown/core geometry comes from
 // assets/boss.glb (VR_Boss_Hull / VR_Boss_Crown / VR_Boss_Core) once the asset
 // loads; the procedural fallback below (jittered hex obelisk + flared cap +
@@ -13,6 +13,7 @@
 import * as THREE from 'three';
 import { RNG } from '../core/rng.js';
 import { CONFIG } from '../core/config.js';
+import { teleProgress, teleUrgency } from '../core/bossTelegraph.js';
 
 function bakeWithColors(geo, colorFn) {
   geo.computeVertexNormals();
@@ -134,6 +135,25 @@ export function createBossMesh(scene) {
   const core = new THREE.Mesh(bakeCoreGeometry(), coreMat);
   group.add(core);
 
+  // ST-290 (I311): attack telegraph - anticipation reads for the boss volleys (sweep ground
+  // truth: anticipation IS the player s reaction window). Two scene-level rings (shared unit
+  // geometry, per-mesh material - the shockwave pooling pattern) plus a core-seam pulse that
+  // rides on coreMat inside sync(). Kept OUT of `group` on purpose: the entrance scale shrinks
+  // the obelisk, never the warning, and the rings sit on the arena floor (shockwave height),
+  // not at the obelisk center. Threat red = the enemy-bullet emissive family (ST-248): no new
+  // palette hue; opacities capped sub-bloom (183.6 band, R-E29-3). Hidden unless sync() is fed
+  // a live window (fx off / MENU / no boss / not this variant = never visible - R-E29-1).
+  const teleGeo = new THREE.RingGeometry(0.94, 1.0, 48);
+  teleGeo.rotateX(-Math.PI / 2); // flat in XZ (arena plane), facing up (shockwave pattern)
+  const teleBase = new THREE.Color(CONFIG.fx.enemyBullet.emissive); // threat red (0xff4a2a family)
+  const teleMat0 = new THREE.MeshBasicMaterial({ color: teleBase, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide });
+  const teleMat1 = teleMat0.clone();
+  const teleHeight = (CONFIG.fx.shockwave && Number.isFinite(CONFIG.fx.shockwave.height)) ? CONFIG.fx.shockwave.height : 0.35;
+  const ringWarn = { mesh: new THREE.Mesh(teleGeo, teleMat0), on: false };   // (a) rock-ring warning (expanding)
+  const ringFlash = { mesh: new THREE.Mesh(teleGeo, teleMat1), on: false };  // (b) radial-burst pre-flash (fixed radius)
+  for (const r of [ringWarn, ringFlash]) { r.mesh.visible = false; r.mesh.frustumCulled = false; r.mesh.position.y = teleHeight; scene.add(r.mesh); }
+  const teleRed = new THREE.Color(teleBase); // shared lerp target (no per-frame alloc)
+
   // ST-252 (I263): silhouette rim on hull + crown - the obelisk's edges separate from the warm
   // E18 world at distance. Data-driven in CONFIG.boss.rim. rim.color is a shared Color instance
   // (auto-pushed by the uniform); rim.push() mirrors the per-frame strength once the program has
@@ -174,8 +194,10 @@ export function createBossMesh(scene) {
   group.visible = false;
   scene.add(group);
 
-  /** sync(boss, t): place the obelisk, pulse the glow, show the phase-2 core state. */
-  function sync(boss, t) {
+  /** sync(boss, t, ringT, aimT, burstT): place the obelisk, pulse the glow, show the phase-2 core state,
+   * and (ST-290) the attack telegraphs. ringT/aimT/burstT are the live game-time attack timers
+   * (seconds to fire) fed by main.js; -1 = no window (fx off / not this variant / entrance). */
+  function sync(boss, t, ringT = -1, aimT = -1, burstT = -1) {
     if (!boss || !boss.alive) { group.visible = false; group.scale.setScalar(1); return; }
     const isSplicer = boss.kind === 'splicer'; // ST-143: variant 2 - teal identity
     const r = isSplicer ? CONFIG.splicer.radius : CONFIG.boss.radius;
@@ -203,6 +225,39 @@ export function createBossMesh(scene) {
     rimHull.push(CONFIG.boss.rim.hull * rimLift);
     rimCrown.push(CONFIG.boss.rim.crown * rimLift);
 
+    // ST-290 (I311): telegraph - map the public game-time timers to anticipation progress
+    // (core/bossTelegraph.js). The pulse rides on the core seam the body already drives:
+    // setHex above resets the color each frame, so the red lean below cannot bleed.
+    const tg = CONFIG.boss.telegraph;
+    let corePulse = 0;
+    let redMix = 0;
+    const aimP = tg ? teleProgress(aimT, tg.aimed.window) : 0; // both variants aim (Monolith + Splicer)
+    if (aimP > 0) {
+      corePulse = Math.max(corePulse, aimP * aimP * tg.aimed.coreBoost); // sharp: squared ramp into the fire
+      redMix = Math.max(redMix, aimP * aimP * (tg.aimed.redLean || 0));   // threat-red lean (color-coded sweep)
+    }
+    let burstP = 0;
+    if (tg && boss.kind === "monolith") burstP = teleProgress(burstT, tg.burst.window);
+    if (burstP > 0) corePulse = Math.max(corePulse, burstP * tg.burst.coreBoost); // long: linear over the wider window
+    coreMat.emissiveIntensity += corePulse;
+    if (redMix > 0) coreMat.emissive.lerp(teleRed, redMix);
+    // (a) rock-ring telegraph: expanding warning ring, radius boss.radius -> maxRadius, urgency-eased.
+    const ringP = (tg && boss.kind === "monolith") ? teleProgress(ringT, tg.ring.window) : 0;
+    if (ringP > 0) {
+      const grow = teleUrgency(ringP, 1.6); // slow start, accelerates into the burst
+      const rad = boss.radius + (tg.ring.maxRadius - boss.radius) * grow;
+      ringWarn.mesh.visible = true; ringWarn.on = true;
+      ringWarn.mesh.position.set(boss.pos.x, teleHeight, boss.pos.y);
+      ringWarn.mesh.scale.setScalar(Math.max(0.001, rad));
+      teleMat0.opacity = tg.ring.opacity * Math.min(1, ringP * 3); // quick fade-in, holds to the fire
+    } else if (ringWarn.on) { ringWarn.mesh.visible = false; teleMat0.opacity = 0; ringWarn.on = false; }
+    // (b) radial-burst pre-flash: fixed outer ring, linear rise over the longer window (cadence distinct from (a)).
+    if (burstP > 0) {
+      ringFlash.mesh.visible = true; ringFlash.on = true;
+      ringFlash.mesh.position.set(boss.pos.x, teleHeight, boss.pos.y);
+      ringFlash.mesh.scale.setScalar(tg.burst.ringRadius);
+      teleMat1.opacity = tg.burst.opacity * burstP;
+    } else if (ringFlash.on) { ringFlash.mesh.visible = false; teleMat1.opacity = 0; ringFlash.on = false; }
     group.scale.setScalar(Math.max(0.001, (1 - Math.pow(1 - boss.entered, 3))) * sizeScale); // ST-135/143: entrance + variant size
     group.visible = true;
   }
@@ -231,5 +286,8 @@ export function createBossMesh(scene) {
     }
   }
 
-  return { sync, mesh: group, useGLB };
+  return { sync, mesh: group, useGLB, telestate: () => ({ // ST-290: probe (on-demand alloc, __vr precedent)
+    ringV: ringWarn.mesh.visible, ringS: ringWarn.mesh.scale.x, ringO: teleMat0.opacity, coreI: coreMat.emissiveIntensity, coreHex: coreMat.emissive.getHexString(),
+    flashV: ringFlash.mesh.visible, flashS: ringFlash.mesh.scale.x, flashO: teleMat1.opacity,
+  }) };
 }

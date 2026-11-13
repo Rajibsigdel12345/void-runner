@@ -3701,3 +3701,33 @@ Next I292: ST-275 ship hero readability pass (Blender 5.2 MCP; re-read the blend
 - Blender directive: documented as NOT triggered by this arc (no new asset required - the telegraph reuses the existing ring geometry pattern + the boss core-seam emissive channel; 0 KB; a baked GLB would be overengineered); the conditional GLB branch is documented in the scope-check Deferral (not pre-authorized).
 - Quality bar: npm test 837/837 (re-run this session, docs-only change); npm run build exit 0 (docs-only re-verify)
 - Next I311: ST-290 boss attack telegraph pass (cgs-dev-story)
+## I311 - ST-290 boss attack telegraph pass (cgs-dev-story, E29 1/3, RENDER-LAYER ONLY 0 KB)
+
+**Summary.** Boss attacks (Monolith ring 2.0s / aimed 2.2s / radial 4.0s; Splicer aimed 2.6s) all fired instantly with no anticipation phase - the sweep-grounded gap (Inner Chaos aipti2jj6ek anticipation/hit/recovery, Universal Player Combat color-coded telegraph markers, Helldivers 2 telegraphing FSHlyBfqc4c). Added a pure render-layer telegraph that reads the public attack timers (`world.boss.ringTimer` / `bossFireTimer` / `bossBurstTimer` - no new state, no sim change) and warns the player before each attack lands.
+
+**Story goal.** Every boss attack gets a visible, readable, fx-gated warning in its final window so "sudden death" becomes "readable threat": (1) RING - expanding floor ring at the boss base growing to the blast radius; (2) AIMED - the boss core seam leans red and brightens toward the player; (3) RADIAL BURST - core pulse + ring pre-flash. All three are data-driven in `CONFIG.boss.telegraph` and pooled/reused (no per-frame allocation).
+
+**Acceptance tests (all met).**
+- Ring telegraph: 0.6s window; scale 3.4 + 5.6*teleUrgency(p,1.6) -> measured 5.2473 at p=0.30 and 8.2722 at p=0.05 (near max); opacity 0.35 * min(1, 3p) -> 0.35 peak. Floor ring at teleHeight 0.35.
+- Aimed telegraph: 0.5s window; corePulse = p^2 * 0.9 -> coreIntensity 1.2270 (baseline) to 1.5510 at p=0.20 probe point; red-lean 0.6 confirmed by hex shift 9a6bff -> b665e6 (R 154->182 up, B 255->230 down = red lean).
+- Burst telegraph: 0.8s window; coreBoost 1.4 -> coreIntensity 2.1020 at p=0.30; ring pre-flash scale 10 / opacity 0.1375.
+- Gating: fx-off tier -> zero telegraph leak (F5: ringT 0.233 in window, all hidden). fx-low -> telegraph RETAINED (F6a direct + F6b real-loop: informational, not decorative - stinger precedent keeps telegraph, gates wobble). No boss -> all hidden.
+- No sim impact: by layer only - no sim/scoring/replay data touched; demo pin structurally safe and re-verified exactly.
+
+**Changed files.**
+- `src/core/bossTelegraph.js` (NEW, ~40 LOC) - pure math: teleProgress / teleUrgency helpers (DOM-free, unit-testable).
+- `src/core/config.js` - `CONFIG.boss.telegraph` block: ring{window 0.6, maxRadius 9.0, opacity 0.35}, aimed{window 0.5, coreBoost 0.9, redLean 0.6}, burst{window 0.8, coreBoost 1.4, ringRadius 10.0, opacity 0.22}. Threat red = `CONFIG.fx.enemyBullet.emissive` (0xff4a2a).
+- `src/render/bossMesh.js` - `sync(boss, t, ringP, aimP, burstP)` telegraph pass: ring mesh (pooled torus geometry), core seam red-lean + intensity, burst pre-flash; `telestate()` readback for verification.
+- `src/main.js` - `teleOn` fx-gate (tier-aware: off -> 0, low/med/high -> live timers); passes timer-derived progress into bossMesh.sync each frame.
+- `tests/bossTelegraph.test.js` (NEW) - 6 cases: windows, urgency curve monotonicity, boundary clamps, no-leak at window edges.
+
+**Verification evidence.**
+- A/B probe v2 (`.evidence/I311/teleab_v2.mjs`): all 9 cases PASS, console 0/0, no NaN - F0 no-boss all hidden; F1 5.2473/0.35; F1b 8.2722; F2 coreI 1.5510 + coreHex b665e6 (red-lean confirmed); F3 2.1020/10/0.1375; F4 none all off; F5 fx-off in-window ZERO LEAK; F6a/F6b fx-low ring retained (direct + real rAF loop). Clean visuals: `tg2v_ring_live.png` (red expanding floor ring), `tg2v_aim_live.png` (red/pink-leaned core seam).
+- Frozen invariants, all exact: demo pin 11334/57/W2/combo 15/198 shots 57 hit/acc 0.28787/36.15 s/replay idx 2169 len 2220 speed 4/ls {null}/Q->MENU (.evidence/I309/p1.mjs); FLOOR-50 B 230/59/171/0/0; P8 MENU 60/60 @ 21/366, vendorLowpWarns 0; P4 kill 0/0 pickup 8 nearmiss 4 (nmAfter 1, lives 3).
+- `npm test` 843/843. `npm run build` exit 0.
+- Crash catch: first draft read `fx.palette.enemyBullet` - but `fx.enemyBullet` is a SIBLING of `fx.palette`, not inside it; boot crashed, caught in probe, fixed to `CONFIG.fx.enemyBullet.emissive`.
+- Reduced-motion note: telegraphs are NOT motion-gated - informational cues, stinger precedent keeps them while gating wobble.
+
+**Risks.** Telegraph timing hardwires to attack timers - if a boss attack cadence changes, windows must follow (config-driven, single owner). Red-lean only shifts the core seam color; does not touch the global threat palette. 0 KB shipped (no assets).
+
+**Next.** I312 = ST-291 engine presentation audit (designated cuttable, probe-first 0 KB).
