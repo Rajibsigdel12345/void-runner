@@ -3,6 +3,8 @@
 // Splicer cyan), gold "CLEARED" big line. API unchanged (showWave/showCleared/showBoss/sync).
 // showWave/showCleared start a timed fade envelope; sync() advances it and,
 // while idle, renders the intermission countdown from the wave director.
+// I321: ST-299 - sync() also takes the game state; on GAME_OVER the banner force-hides so the WAVE n bar never overlaps the GAME OVER title.
+import { STATE } from '../core/state.js';
 export function createWaveBanner(root) {
   const el = document.createElement('div');
   el.id = 'wave-banner';
@@ -56,8 +58,22 @@ export function createWaveBanner(root) {
     return 1;
   }
 
-  // waves: WaveDirector state ({state, intermission}); dt for animation advance.
-  function sync(waves, dt, motionOff) {
+  function resetHidden() { // I321: ST-299 - clear to idle hidden state (also force-applied on GAME_OVER)
+    anim = null;
+    el.style.opacity = '0';
+    el.style.fontSize = 'calc(40px * var(--vr-fs,1))'; // I161: font-scale
+    el.style.color = '#9fd0ff';
+    el.style.textShadow = '0 2px 14px rgba(0,0,0,0.9)';
+    el.style.transform = 'translateY(0px) scale(1)';
+    sub.textContent = '';
+    lastSub = '';
+    el.firstChild.nodeValue = '';
+    lastBig = '';
+  }
+
+  // waves: WaveDirector state ({state, intermission}); dt for animation advance; state: game state (I321: ST-299).
+  function sync(waves, dt, motionOff, state) {
+    if (state === STATE.GAME_OVER) { resetHidden(); return; } // I321: ST-299 - no wave banner over the GAME OVER screen
     if (anim) {
       anim.t += dt;
       const big = anim.text ? anim.text : '';
@@ -71,7 +87,7 @@ export function createWaveBanner(root) {
       const inP = Math.min(1, anim.t / 0.4); // ST-088: entry slide-in over 0.4s
       const punch = motionOff ? 1 : 1 + 0.06 * (1 - easeOut(inP)); // I154: scale punch 1.06 -> 1.0
       el.style.transform = 'translateY(' + (motionOff ? 0 : (12 * (1 - easeOut(inP))).toFixed(1)) + 'px) scale(' + punch.toFixed(3) + ')'; // ST-088 + I154
-      if (anim.t >= anim.dur) { anim = null; el.style.opacity = '0'; el.style.fontSize = 'calc(40px * var(--vr-fs,1))'; el.style.color = '#9fd0ff'; el.style.textShadow = '0 2px 14px rgba(0,0,0,0.9)'; el.style.transform = 'translateY(0px) scale(1)'; sub.textContent = ''; lastSub = ''; el.firstChild.nodeValue = ''; lastBig = ''; } // I154: reset glow + scale; I161: font-scale; I167: text cache reset
+      if (anim.t >= anim.dur) resetHidden(); // I154: reset glow + scale; I161: font-scale; I167: text cache reset (I321: resetHidden)
       return;
     }
     // idle: intermission countdown

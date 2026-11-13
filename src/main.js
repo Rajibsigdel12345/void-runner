@@ -894,7 +894,7 @@ function syncVisuals(dt) {
   if (st === STATE.PLAYING) vortexFx.update(dt); // ST-059 (frozen while paused)
   particles.sync(dt);
   shockwaves.sync(dt); // ST-238 (I245)
-  banner.sync(world.waves, dt, motionOff); // ST-028
+  banner.sync(world.waves, dt, motionOff, world.game.state); // ST-028; I321: ST-299 - state passed so the banner force-hides on GAME_OVER
 
   const ship = world.ship;
   const f = ship.forward(shipFwd); // ST-074: scratch reuse (no per-frame alloc)

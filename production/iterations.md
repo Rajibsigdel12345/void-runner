@@ -3882,3 +3882,21 @@ Viewport quirk (noted, not chased): page raster 1280x720 while window.innerWidth
 **Invariants.** Frozen set unchanged (CSS-only delta): npm test 852/852, demo pin EXACT, P2-P8, vendor sha, skybox 67255 B.
 
 **Next.** I321 = ST-299 (hide the wave banner on death - R3 finding #2: banner x GAME OVER title 6804 px^2) -> I322 = ST-298 closeout (full probe suite + G31.0 + milestone review; epics E31 CLOSED).
+## I321 - ST-299 wave banner hidden on GAME_OVER (cgs-dev-story, E31 3/3, BY LAYER, +121 B)
+
+**Goal.** Fix R3 finding #2 from the I319 ST-296 battery: the wave banner ("WAVE n" / "CLEARED" / boss bar) remained visible on the GAME OVER screen, overlapping the GAME OVER title (6804 px^2 at 720p). Render/DOM-only change; no sim/scoring/replay touch (BY LAYER - the demo pin is structurally safe).
+
+**Fix.** src/render/waveBanner.js + src/main.js:897. sync() now takes the game state as a 4th argument and force-hides the banner (clears anim + text, opacity 0) via a new resetHidden() helper when state === STATE.GAME_OVER; the same helper is reused on the natural anim-expiry path (behavior there unchanged). main.js passes world.game.state. Because sync() runs on every syncVisuals (live frame AND probe advance()), the banner is guaranteed hidden by the death-frame render - even when the banner anim is mid-envelope at the instant of death. That mid-envelope hold is exactly the I319 failure state: with rAF frozen, each advance() advances the banner t by only one STEP, so an armed banner stayed at opacity 1 indefinitely.
+
+**Evidence (A/B, .evidence/I321/).**
+- BEFORE: I319 battery2 record (bat2_gameover.png) - banner bar ghosted over the GAME OVER title (6804 px^2, "CLEARED"/"WAVE" text crossing the title at y181-237).
+- AFTER: i321_after_gameover.png - banner deterministically armed before death (WAVE 1 text, opacity 1, rect y145 h62) -> at GAME_OVER: banner text cleared, opacity 0, effective opacity 0, empty rect (h8); title clean; console 0/0.
+- p1 demo pin EXACT: 11334 / 57 / W2 / combo15 / 198-57 / acc 0.2878787878787879 / 36.14999999999923s / replay 2169-2220 / speed4 / ls null / Q->MENU (zero sim drift).
+- dist canary: 119 files / 1879502 B = I320 baseline 1879381 + 121 B (render-layer delta; headroom floor 8 KB - PASS). Vendor three.module.js sha unchanged (76dea815...).
+- Note: first p1 run stalled at replay idx 1482 (background-tab rAF throttling in the probe harness); fixed by adding bringToFront() to the probe script - harness detail, not a game issue.
+
+**Quality bar.** npm test 852/852 green; npm run build exit 0; A/B overlap 0 (banner hidden on GAME_OVER); p1 EXACT; dist +121 B; vendor sha match. Dev server killed after probes; single clean tab.
+
+**Invariants.** Frozen set unchanged (render-layer delta only): npm test 852/852, demo pin EXACT, P2-P8, vendor sha, skybox 67255 B.
+
+**Next.** I322 = ST-298 closeout (full probe suite p1-p8 + perception A/B re-run + invariants + dist canary + vendor sha + log audit I1..I321 + G31.0 gate + E31 milestone review -> epics.md E31 CLOSED).
