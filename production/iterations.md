@@ -4071,3 +4071,18 @@ Viewport quirk (noted, not chased): page raster 1280x720 while window.innerWidth
 - Quality bar: 905/905; build exit 0; dist 122 files / 1888318 B; vendor sha 76DEA8151BC9352AEF3528B4262E249B2604F62543828328DB978D060D61A495 unchanged; browser smoke = n/a (docs-only)
 - Blender directive: TRIGGERED (this IS the art/Blender arc - user standing directive; user hint rocks as asteroids/comets with bumps + craters ONLY if not GPU/compute heavy = satisfied: build-time baked displacement + comet reuses the pooled trail system)
 - Next: ST-306 art audit at I332 (cgs-asset-audit + cgs-balance-check, 0 KB, headless probe)
+
+## I332 - ST-306 E34 art audit + baseline (cgs-asset-audit + cgs-balance-check, docs-only 0 KB)
+
+- Skill: cgs-asset-audit + cgs-balance-check (audit-first; docs-only 0 KB; headless-Chrome probe on dev server :5173, killed after)
+- Probe: .evidence/I332/audit332.mjs (canonical ST-306 probe; v2 -> v3 this iter: surface section rock-isolated + two-pass diff mask (|A-B| > 12 per channel) + canvas-only screenshots w/ DOM hide-restore; v2 threshold >10 was contaminated by fog(15)/floor/menu ambient rocks - M mask bbox hit 2000 px full frame; documented in R306a). v1/v2 evidence preserved (audit332v1.* / audit332v2.*).
+- R306a PASS (rock-only baseline): detail 0.37/0.41/0.43 (L/M/S), wellsPerK 1.11/1.45/1.71, bumpStd 12.01/16.85/14.56, fill 0.652/0.606/0.655, aspect ~1.0 - LOW detail = ST-307 crater-remake rationale holds; constant relative framing (d = 3.6x radius, fov 45, top-down) keeps metrics cross-size comparable; ST-309 re-runs the SAME probe for before/after.
+- R306b PASS w/ finding: byte budgets tabled (per-GLB model bytes ~ V*36 + I*4 + JSON 1.3-3.4 KB; current L 16024 / M 7516 / S 7520 = 31060 B of 45056 cap; L under 24576 cap). Poly targets 1500/1000/700 INFEASIBLE under byte caps -> re-register L~550 / M~180 / S~180 tris (~41.2 KB, ~3.9 KB headroom) at ST-307.
+- R306c PASS: no triple silhouette collapse (closest pair stinger-flyer Hamming 12 > threshold 4; drone-stinger 31, ship-drone 15).
+- R306d PASS: polish gaps enumerated w/ code evidence - L3 level-curve/grade ABSENT (grep none in src/); L2 pipeline PRESENT (ACES 1.15, PR clamp 2, key/fill/ambient); L4 juice PRESENT; L5 rhythmic VFX PRESENT; L6 prod UI PRESENT. Enemy GLB size finding CORRECTED: drone GLB geometry [2.24,1.24,1.19] vs procedural [2.24,1.19,1.19] EXACT (v1 "2x too big" refuted - silhouette inflation was emissive/AA edge); stinger x-section +41% (1.24 vs 0.88); flyer disk X-Y-thin-Z vs X-Z-thin-Y (qualitatively fine - saucer) -> ST-308/E35 minor, NOT blockers.
+- R306e PASS by arithmetic: dist headroom at open 208834 B; worst case (+~14 KB rocks + ~10 KB ship) -> ~184 KB >= 100 KB floor.
+- R306f DEFERRED to ST-309: perception battery re-run after the ST-307 asset swap.
+- Wide/draw: 8 draw calls w/ 3 rocks (2000x1125 @ 1.25 PR); all 18 GLBs all-ready; console 0/0; state MENU.
+- Changed files: 5, DOCS-ONLY 0 KB (production/iterations.md + production/stories.md + production/epics.md + CHANGELOG.md + production/session-state/active.md); probe + evidence in gitignored .evidence/I332/
+- Quality bar: 905/905; build exit 0; dist 122 files / 1888318 B; vendor sha 76DEA8151BC9352AEF3528B4262E249B2604F62543828328DB978D060D61A495 unchanged; browser smoke = the probe itself (headless; console 0/0; no NaN)
+- Next: ST-307 cratered asteroid L/M/S remake in Blender at I333 (cgs-dev-story + blender-core/modeling/hardsurface/export/asset-qa; targets 550/180/180 tris; byte caps L<=24 KB / total<=45 KB; seed-pinned bake scripts (I316 pattern); rockab re-pin w/ causal proof (I317 pattern))
