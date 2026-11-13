@@ -20,13 +20,13 @@
 //     ("perceived stress = count x proximity", WbHMxo11HcU [6:03])
 //
 // Bounded-swing proof (R2d): the worst single event is a lethal hit,
-// dM = wHit + wDeathExtra = 0.8; mapped to P that is 0.8/mMax*0.5 = 0.1333
+// dM = wHit + wDeathExtra = 1.05; mapped to P that is 1.05/mMax*0.5 = 0.175
 // < 0.25, so a single event can never move P across a 0.25-wide band.
 // R2d is bounded by construction, independent of tuning.
 
 const DEFAULTS = {
-  tau: 6, mMax: 3, wKill: 0.6, wKillCombo: 0.05, comboCap: 10,
-  wGraze: 0.15, wHit: 0.5, wDeathExtra: 0.3, wShot: 0.004, sigma: 6,
+  tau: 6, mMax: 3, wKill: 0.35, wKillCombo: 0.05, comboCap: 10,
+  wGraze: 0.15, wHit: 0.75, wDeathExtra: 0.3, wShot: 0.004, sigma: 6,
 };
 
 class SkillModel {
@@ -41,6 +41,19 @@ class SkillModel {
     this.tick = 0; // advanced once per sample()
     this._m = 0; // signed skill momentum (unclamped; clamped in the getter)
     this.load = 0;
+    this.wave = 0;
+    this.kills = 0;
+    this.hits = 0;
+    this.lethalHits = 0;
+    this.nearmisses = 0;
+    this.shots = 0;
+  }
+
+  /** Reset to a fresh-run state (zero momentum, counters, tick, wave). */
+  reset() {
+    this._m = 0;
+    this.load = 0;
+    this.tick = 0;
     this.wave = 0;
     this.kills = 0;
     this.hits = 0;

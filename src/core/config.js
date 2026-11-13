@@ -194,7 +194,11 @@ export const CONFIG = {
     fastSpeedMult: 1.4,   // 'fast': extra spawn-speed multiplier on top of the ramp
     smallSBias: 0.5,      // 'small': spawn rolls S with this probability
     inwardAccel: 2.0,     // 'inward': u/s^2 pull of all rocks toward the arena center
-    bigLBias: 0.5         // ST-228: 'big' (HEAVY ROCKS): spawn rolls L with this probability (mirror of smallSBias)
+    bigLBias: 0.5,        // ST-228: 'big' (HEAVY ROCKS): spawn rolls L with this probability (mirror of smallSBias)
+    modBias: {            // ST-304 (I329): director wave-mod weighting - gentle avoids, hard double-weights
+      gentle: { avoid: ['fast', 'inward'] },
+      hard:   { prefer: ['fast', 'inward'] }
+    }
   },
 
   boss: {
@@ -632,14 +636,36 @@ export const CONFIG = {
 skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adaptive-director arc)
     tau: 6,           // momentum decay time constant (s): M *= exp(-dt/tau) per sample()
     mMax: 3,          // momentum clamp +-mMax -> P in [0,1]; worst single-event swing 0.8/3*0.5 = 0.1333 < 0.25 band (R2d by construction)
-    wKill: 0.6,       // + momentum per kill (before combo scaling)
+    wKill: 0.35,       // + momentum per kill (before combo scaling)
     wKillCombo: 0.05, // + momentum per combo point (min(combo, comboCap))
     comboCap: 10,     // combo points at which the kill bonus is maxed
     wGraze: 0.15,     // + momentum per nearmiss (graze)
-    wHit: 0.5,        // - momentum per hit taken
+    wHit: 0.75,        // - momentum per hit taken
     wDeathExtra: 0.3, // extra - momentum when the hit is lethal (data.lives === 0)
     wShot: 0.004,     // - momentum per shot fired (accuracy rewarded implicitly)
-    sigma: 6          // threat-load distance scale (u): L_raw = SUM w/(1+(gap/sigma)^2)
+    sigma: 6,         // threat-load distance scale (u): L_raw = SUM w/(1+(gap/sigma)^2)
+    weights: {        // ST-304 (I329): threat weights for the director's load sampling (I328 matrix)
+      rock: 1, drone: 1.2, stinger: 1.5, flyer: 1.5, boss: 2
+    }
+  },
+  director: {          // ST-304 (I329, E33): adaptive director - bounded monotone envelope (see src/core/director.js)
+    enabled: true,     // master switch; false -> every wave is NEUTRAL (bit-identical to pre-I329)
+    firstWave: 3,      // waves 1-2 stay fixed (teach the base loop + the demo pin)
+    pressureMin: 0.1,  // low end of the pressure band (t = 0 -> gentle multipliers)
+    pressureMax: 0.9,  // high end (t = 1 -> hard multipliers)
+    pressureStart: 0.3,// starting pressure (a touch above the low end)
+    pressureStep: 0.15,// max |dp| per decide -> recovery after a lull takes >= 1 wave
+    lullWindow: 20,    // s: EMA time-constant for the windowed load (I328: windowed, NOT run-mean)
+    lullLHigh: 0.55,   // sustained windowed load >= this triggers a lull (no hit needed)
+    lullPStruggle: 0.4,// P <= this -> struggling (target the min)
+    lullPHard: 0.65,   // P >= this -> skilled (target the max)
+    density: { min: 0.65, max: 1.2 }, // spawn-density multiplier by pressure (t=0 -> min, t=1 -> max)
+    bullet:  { min: 0.85, max: 1.15 },// enemy-bullet speed multiplier by pressure
+    drop:    { min: 0.9, max: 2.0 },  // pickup-drop multiplier (INVERSE: skilled -> fewer drops)
+    lullDensity: 0.6,  // lull wave density (dips below the min band)
+    lullBullet: 0.9,   // lull wave bullet speed (below the min band)
+    lullDrop: 2.0,     // lull wave drop rate (lifts above the max band)
+    logCap: 256        // per-decision log ring-buffer cap (debug/telemetry only)
   }
 };
 

@@ -61,7 +61,7 @@ test("single lethal hit from neutral: P = 0.5 - 0.13333... and swing <= 0.25 (R2
 
 test("30 s of no events relaxes P back to ~0.5", () => {
   const m = model();
-  for (let i = 0; i < 6; i++) m.onEvent("kill", { combo: 0 }); // M = ~3.6 -> P = 1
+  for (let i = 0; i < 10; i++) m.onEvent("kill", { combo: 0 }); // 10 kills: M = 3.5 > mMax 3 -> P = 1 (I329)
   assert.equal(m.performance, 1);
   for (let i = 0; i < 1800; i++) m.sample({ x: 0, y: 0 }, []); // 30 s at 60 Hz
   assert.ok(Math.abs(m.performance - 0.5) < 0.02);
