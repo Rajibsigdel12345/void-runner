@@ -47,7 +47,7 @@ const totalTris = parsed.reduce((a, p) => a + p.tris, 0);
 
 // I214 budgets (measured baselines in brackets; caps leave headroom for E9 art growth)
 const BUDGET = {
-  totalFilesKB: 160,   // [112.9 I292 re-measure: +ship hull/wings per-facet COLOR_0 bake]
+  totalFilesKB: 160,   // [116.4 I303 re-measure: +rock I303 silhouette re-bake bytes (L 19.3K)]
   totalGeoKB: 130,     // [81.8 I292 re-measure: +ship hull/wings COLOR_0]
   perFileKB: 60,       // [max 36.8 - asteroid_L, deliberately the heaviest]
   totalTris: 1500,     // [1021]

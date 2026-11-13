@@ -171,10 +171,13 @@ test('asteroid L/M/S: naming, poly budgets, radii match CONFIG (+/-5%)', () => {
 // I302 (ST-283): value-ladder re-bake pins, measured file-level through the facet reader below.
 // L darkest / M mid / S lightest inverts the I279 M-brightest identity; per-vertex hue jitter
 // makes (r-b) no longer proportional to value (chroma-variety assertion in the test).
+// I303 (ST-284): pins re-measured on the NEW displacement geometry (crater + ridge
+// silhouette pass; same ST-283 value-ladder scheme with the frange window-bind fix).
+// Blender 5.2.3 exporter now writes COLOR_0 as unclamped FLOAT (5126) - I302 patch obsolete.
 const ROCK_FACET = {
-  L: { p10: 0.1939, p50: 0.3816, p90: 0.7417, mean: 0.4345 },
-  M: { p10: 0.3264, p50: 0.5227, p90: 0.8376, mean: 0.5634 },
-  S: { p10: 0.444, p50: 0.7158, p90: 0.9497, mean: 0.7037 },
+  L: { p10: 0.164, p50: 0.3735, p90: 0.7911, mean: 0.4334 },
+  M: { p10: 0.2879, p50: 0.529, p90: 0.8967, mean: 0.559 },
+  S: { p10: 0.4136, p50: 0.7048, p90: 0.9764, mean: 0.704 },
 };
 function facetLumas({ buf, json, binOff }) {
   const p = json.meshes[0].primitives[0];
@@ -198,7 +201,7 @@ function facetLumas({ buf, json, binOff }) {
   const q = (f) => fl[Math.min(fl.length - 1, Math.floor(f * fl.length))];
   return { p10: q(0.1), p50: q(0.5), p90: q(0.9), mean: fl.reduce((sm, x) => sm + x, 0) / fl.length };
 }
-test('asteroid L/M/S: COLOR_0 mottling band + warm order + facet luma spread (I257 -> I264 -> I279 -> I302)', () => {
+test('asteroid L/M/S: COLOR_0 mottling band + warm order + facet luma spread (I257 -> I264 -> I279 -> I302 -> I303)', () => {
   for (const size of ['L', 'M', 'S']) {
     const { buf, json, binOff } = parseGlb('asteroid_' + size + '.glb');
     for (const m of json.meshes || []) for (const p of m.primitives || []) {
