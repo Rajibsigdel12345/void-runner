@@ -51,3 +51,10 @@ Docs-only open: npm test 852/852 (re-run at I318); npm run build exit 0 (re-veri
 
 ## Next owner or decision
 I319 = ST-296 perception battery + measurement (cgs-dev-story, audit-first, 0 KB). Decision gate G31.0 at I321 (ST-298).
+
+
+
+## Mid-arc note (I319 - ST-296 battery)
+- R2 PASS on all ordered threat pairs (measured + cited puab; details in production/iterations.md I319).
+- R3 FAIL: 3 pairs. (1) adaptive-toast x tutorial-hint 1380 px^2 -> ST-297 (pre-designated cuttable, BY LAYER). (2) wave banner x GAME OVER title 6804 px^2 -> NEW ST-299 (render/DOM BY LAYER micro-fix, pre-authorized by risk R-E31-1; epic scope extended to ST-296..299). (3) menu footer 7px cross + BEST/WPN 280 px^2 -> noted only (E32 candidates, non-blocking).
+- Closeout shift: ST-298 gate + milestone review moves from I321 to I322 (ST-297 at I320, ST-299 at I321). G31.0 unchanged; R5 now also covers ST-299's A/B.

@@ -3836,3 +3836,32 @@ Next I292: ST-275 ship hero readability pass (Blender 5.2 MCP; re-read the blend
 - Blender directive: conditional on ST-297 ONLY (triggered if the battery measures a real art-asset gap; background CLI, reproducible seed, asset-swap only, same filename, dist headroom).
 - Quality bar: npm test 852/852 (re-run this session, docs-only change); npm run build exit 0 (docs-only re-verify)
 - Next I319: ST-296 perception battery + measurement (cgs-dev-story, audit-first, 0 KB)
+## I319 - ST-296 perception battery + measurement (cgs-dev-story, E31 1/3, audit-first 0 KB)
+
+**Goal.** Run the E31 perception battery pre-registered in production/scope-check-E31.md (G31.0 R1..R5): structured screenshot set + quantitative threat-channel separation (R2) + DOM text-overlap audit (R3). Docs-only, 0 KB in code. Evidence in .evidence/I319/ (12 PNGs + battery.mjs/battery2.mjs).
+
+**Battery.** Two phases, one dev server, 12 shots (page raster 1280x720; lab/ship render reads at 1600x900 @1.25, backing 2000x1125). Fresh settings per phase via addInitScript (voidrunner.settings fx=high + voidrunner.tutorial seen - I319 gotcha: the tutorial gates keydown, so the F fx hotkey silently no-ops on first-run PLAYING unless the flag is seeded). battery1: menu / playing / cb+fxlow / lab / ship + first R3 measure. battery2: effOp domScan (ancestor-opacity product - fixes battery1's MENU "MONOLITH" false positive), explicit deterministic lab (reseed 31902; rocks L/M/S pinned via field.spawn('L'/'M'/'S' - I319 gotcha: size keys are strings, not 0/1/2), 7 pickups in a row, 3 player bullets, 3 bolts, stinger+drone repositioned into the WIDE frustum, ship hidden; ship close-up x2 (fov 40, default + cb+fxlow); cause->effect kill under fx-low (reseed 31903, M rock at (0,7.5), advance(0.4) firing loop); live-death GAME_OVER via rock parking (3 chunks of advance(2.0)).
+
+**R1 (clean shots) PASS.** 12/12 shots; console 0 error / 0 warning in every phase; 0 NaN across all JSON; GLB all-ready (11 keys) both batteries; draw calls: lab 37 / 1833 tris, ship close-up 22.
+
+**R2 (channel separation) PASS** - every ordered threat pair separates on >=1 of dHue>=25deg / dLuma>=30 / distinct silhouette (shapeCues ON by default), across two shots (default + cb+fxlow; cb values ~= default = uniform filter shift):
+- bullet (emblem hue 188.7-189.6, luma 207.2-210.4) vs bolt (19.0-21.7, 143.7-154.7): dHue ~169deg + dLuma ~55-66 - PASS on both axes.
+- rock L (38.7/181.0) + S (44.5/176.9) vs bolt: dHue 17-26deg / dLuma 21-38 - PASS on silhouette (large bumpy body vs small elongated bolt). (rock-M sample contaminated by an adjacent player bullet in the dense lab row - documented, not chased.)
+- rock vs each pickup (e.g. rapid 44.9 vs rock 38.7-44.5): dHue 4-6deg - PASS on silhouette (bumpy sphere vs flat emblem).
+- pickup pairwise: cited I317 puab 11/11 (rapid 44.9 / spread 34.8 / shield 189.5 / bomb 9 / magnet 140.7 / overdrive 321.6 / slowmo 194 - pre-registered citation; this shot's drop-row samples are contaminated by neighboring rock/bolt sample boxes).
+- ship cockpit (189.1/216.4, close-up both shots) vs bolt/rock: dHue ~150-170deg - PASS.
+- ship vs stinger/drone: in-scene px samples contaminated by adjacent pickups (stinger box x slowmo drop; drone box x rock S/rapid) - channel identity rests on GLB-baked hex (stinger 0x6f8796, drone 0x7d6878, warden 0x5a4f73) + distinct silhouettes + motion - PASS on silhouette/baked.
+
+**R3 (no overlapping DOM text) FAIL** - 3 pairs:
+1. #adaptive-toast x #tutorial-hint: 1380 px^2 (PLAYING cb+fxlow, "FX LOW" 69x20 on the hint bar) + 1540 px^2 (GAME_OVER, "FX HIGH" 77x20). Root cause: main.js:282-284 toastEl `bottom:64px` z60 sits on #tutorial-hint `bottom:9%` (64.8px at 720p) z9. -> triaged ST-297 (pre-designated cuttable micro-fix, BY LAYER).
+2. wave banner x "GAME OVER" title: 6804 px^2 (324x21) - the wave banner (y215, w1488) remains visible behind the GAME OVER title (y181-237). NEW finding. -> designated ST-299 (render/DOM BY LAYER, pre-authorized by R-E31-1; epic scope now ST-296..299).
+3. Menu footer "a three.js arcade shooter ..." x settings-panel "TAB NAVIGATES..." hint: 2380 px^2 but only a 7px vertical cross (y762-776 x y769-784) - minor crowding, noted (E32 candidate list, non-blocking). Also minor: BEST 90 x WPN 280 px^2 (40x7) in the top-left score stack during PLAYING - noted.
+Viewport quirk (noted, not chased): page raster 1280x720 while window.innerWidth reports 1422x800; overlap math is CSS-anchored so 720p canonical values hold.
+
+**Cause->effect + state (R4-adjacent evidence).** Kill under fx-low: M rock dead in 15 advance(0.4) iters (~6s sim, 20ms wall), score 0 -> 50, shockwaveLive=1. GAME_OVER via rock parking in 3 chunks; board rank #4 written; console 0/0. Q at GAME_OVER = no-op by design (exits the REPLAY view only; restart = Enter) - the battery's Q->MENU expectation was wrong; documented, not a bug. apiProbe: popups/killFeed expose .els (no .el); banner.el = "WAVE 1".
+
+**Invariants (docs-only 0 KB).** Frozen set unchanged: npm test 852/852, demo pin, P2-P8, dist 119 files / 1879370 B, vendor sha 76dea815..., skybox 67255 B.
+
+**Quality bar.** npm test 852/852 green; npm run build exit 0; 12/12 shots; console 0/0; NaN 0. Dev server killed after the battery; single clean tab left.
+
+**Next.** I320 = ST-297 (adaptive-toast anchor fix: 1-line CSS + A/B + p1 EXACT + dist canary) -> I321 = ST-299 (hide wave banner on death) -> I322 = ST-298 closeout (full probe suite + G31.0 + milestone review, epics E31 CLOSED).
