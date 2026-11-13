@@ -540,7 +540,7 @@ export const CONFIG = {
       shield:   [0x53d8ff, 0x7fe8ff, 0x33c4ff],  // cyan shield
       hit:      [0xff6b57, 0xff8f7a, 0xffb4a4],  // ship damage
       bomb:     [0xfff3b0, 0xffd27a, 0xffffff],  // bright blast
-      pickup: { rapid: 0xffe066, spread: 0xff9f43, shield: 0x53d8ff, bomb: 0xff5252, magnet: 0x69f0ae, overdrive: 0xff4dd8, slowmo: 0x9fe8ff }, // ST-177: per-type collect sparkle (matches powerupMesh orb colors)
+      pickup: { rapid: 0xffc300, spread: 0xff9f43, shield: 0x53d8ff, bomb: 0xff5252, magnet: 0x69f0ae, overdrive: 0xff4dd8, slowmo: 0x9fe8ff }, // ST-177: per-type collect sparkle (matches powerupMesh orb colors); I308/ST-288: rapid synced 0xffe066 -> 0xffc300 to the I288/ST-272 mesh orb (collect-sparkle was flashing the pre-I288 yellow)
       power:    [0xff5ad8, 0xff8ae8, 0xffb6f2],   // magenta overdrive
       bulletLevel: [0x7fe4ff, 0x8affc0, 0xffd27a],   // ST-123 weapon L1/L2/L3; ST-248: L1 = cockpit-cyan accent (0x59d8ff family, brighter for the bullet read)
       bulletLevelOverdrive: [0xd2f5ff, 0xd6ffec, 0xfff1e1], // ST-248: overdrive heat shift (white-hot, hue-preserving per level)
