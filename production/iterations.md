@@ -3865,3 +3865,20 @@ Viewport quirk (noted, not chased): page raster 1280x720 while window.innerWidth
 **Quality bar.** npm test 852/852 green; npm run build exit 0; 12/12 shots; console 0/0; NaN 0. Dev server killed after the battery; single clean tab left.
 
 **Next.** I320 = ST-297 (adaptive-toast anchor fix: 1-line CSS + A/B + p1 EXACT + dist canary) -> I321 = ST-299 (hide wave banner on death) -> I322 = ST-298 closeout (full probe suite + G31.0 + milestone review, epics E31 CLOSED).
+## I320 - ST-297 adaptive-toast anchor fix (cgs-dev-story, E31 2/3, BY LAYER, +11 B)
+
+**Goal.** Fix R3 finding #1 from the I319 ST-296 battery: #adaptive-toast overlapped #tutorial-hint (1380 px^2 at 720p). Single-line render/DOM change; no sim/scoring/replay touch (BY LAYER - the demo pin is structurally safe).
+
+**Fix.** src/main.js:283 - toastEl cssText `bottom:64px` -> `bottom:calc(9% + 40px)`. The hint bar (#tutorial-hint) is pinned at bottom:9% (~20px tall, 15px font); anchoring the toast to the same 9% reference keeps the clearance constant at every viewport height (40px anchor - 20px hint = 20px gap at 720p, 800px, 480p alike). Toast stays centered (left:50%, translateX(-50%)), z60, same styling; all 11 toast() call sites share the element, so every callout (FX / MUSIC / RECORDING / PAUSED / INBOUND / WEAPON LEVEL / RUN SAVED) moves with it.
+
+**Evidence (A/B, .evidence/I320/).**
+- BEFORE: I319 battery2 cbfxlow shot - toast y707 h29 x hint y708 h20 = 1380 px^2 (window 1422x800; 720p canonical 69x20). Record shot: I319 batC_playing_cb_fxlow.png.
+- AFTER: i320_after_playing_fxlow.png - toast y659 h29 (y[659,688]) x hint y708 h20 (y[708,728]) = **0 px^2** (ix 69 x iy 0); toast opacity 0.975 (live), hint opacity 1; console 0/0; GLB ready.
+- p1 demo pin EXACT: 11334 / 57 / W2 / combo15 / 198-57 / acc 0.2878787878787879 / 36.14999999999923s / replay 2169-2220 / speed4 / ls null / Q->MENU (zero sim drift).
+- dist canary: 119 files / 1879381 B = baseline + 11 B (the CSS string delta; headroom floor 8 KB - PASS). Vendor three.module.js sha unchanged (76dea815...).
+
+**Quality bar.** npm test 852/852 green; npm run build exit 0; A/B overlap 0; p1 EXACT; dist +11 B; vendor sha match. Dev server killed after probes; single clean tab.
+
+**Invariants.** Frozen set unchanged (CSS-only delta): npm test 852/852, demo pin EXACT, P2-P8, vendor sha, skybox 67255 B.
+
+**Next.** I321 = ST-299 (hide the wave banner on death - R3 finding #2: banner x GAME OVER title 6804 px^2) -> I322 = ST-298 closeout (full probe suite + G31.0 + milestone review; epics E31 CLOSED).

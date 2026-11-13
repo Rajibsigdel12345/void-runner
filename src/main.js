@@ -281,7 +281,7 @@ applySettings(liveSettings);
 const toastEl = document.createElement('div');
 toastEl.id = 'adaptive-toast';
 toastEl.setAttribute('aria-live', 'polite');
-toastEl.style.cssText = 'position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:60;font:calc(12px * var(--vr-fs,1))/1.4 ui-monospace,monospace;letter-spacing:.08em;color:#9fb4d8;background:rgba(4,6,15,0.7);padding:6px 12px;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .25s;';
+toastEl.style.cssText = 'position:fixed;left:50%;bottom:calc(9% + 40px);transform:translateX(-50%);z-index:60;font:calc(12px * var(--vr-fs,1))/1.4 ui-monospace,monospace;letter-spacing:.08em;color:#9fb4d8;background:rgba(4,6,15,0.7);padding:6px 12px;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .25s;';
 document.body.appendChild(toastEl);
 let toastTimer = 0;
 function toast(msg) {
