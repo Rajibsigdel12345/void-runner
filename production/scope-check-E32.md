@@ -81,3 +81,12 @@ APPROVE as scoped: 3 stories, audit-first, config-first tuning, one small new pu
 ## Next owner / decision
 
 ST-300 at I324 (cgs-balance-check, audit-first). No user decision required - deferrals are recorded, not blocking.
+
+## Gate G32.0 Result (I326)
+
+- R1 PASS: bossTally.js (6063 B) + 10 tests green (852 -> 862); baseline324.json 100 runs/condition (100x3, 1.4 s, pure-node - the pre-registered 20-run browser cut was NOT armed); ab325.json 6-variant 100x3 A/B; post325.json frozen-harness re-run, per-run identical to variant E.
+- R2 PASS: all 5 rules verdicted - R1a PASS (w5 TTK 12.7 s in the 12-45 s band); R1b PASS,PASS,PASS (P1 threat vacuum closed by enterTime 0.8 s); R1c PASS x3 (no safe rim camp); R1d-w30 PASS + R1d-w5 ACCEPTED (32.3:1 - the fixed-pilot 3x1.8 s invuln wall makes the R1a floor and R1d-w5 mutually exclusive; documented); R1e ACCEPTED (no cap kills at 88 hp; the cap72 variant proved 3/100 cap kills but regressed R1a to 10.58 s - deferred to E33 with the variant deep-dive per R-E32-4). Tuning applied (variant E) and re-measured.
+- R3 PASS: git diff 4439d17..793f694 -- src assets tests scripts vendor = bossTally.js (A), config.js (M), bossEntrance.test.js (M), bossPhase2.test.js (M), bossTally.test.js (A) - all inside the allowed set; zero asset change (Blender conditional NOT triggered).
+- R4 PASS: p1 demo pin EXACT (11334/57/W2/combo15/acc 0.2878787878787879/36.14999999999923 s); all frozen invariants EXACT; dist canary 120 files / 1882283 B; vendor three.module.js sha 76dea8151bc9352aef3528b4262e249b2604f62543828328db978d060d61a495 unchanged.
+- R5 PASS: npm test 862/862; npm run build exit 0; dist headroom 214869 B (2097152 - 1882283) >= 100 KB floor.
+- G32.0 = PASS; E32 CLOSABLE 3/3 (closed at I326).
