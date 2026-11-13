@@ -32,8 +32,8 @@ test("config: boss.enterTime is a positive number", () => {
 test("entrance: entered starts at 0 and clamps to exactly 1 at the end", () => {
   const m = freshBoss(40);
   assert.equal(m.entered, 0);
-  m.step(0.3, SHIP);
-  assert.equal(m.entered, 0.25, "progress is linear in dt");
+  m.step(CONFIG.boss.enterTime * 0.25, SHIP);
+  assert.ok(Math.abs(m.entered - 0.25) < 1e-9, "progress is linear in dt"); // I325: config-relative (was hardcoded 0.3 s @ enterTime 1.2)
   m.step(CONFIG.boss.enterTime, SHIP);
   assert.equal(m.entered, 1, "clamps to exactly 1");
 });
@@ -56,8 +56,7 @@ test("entrance: a held ring fires immediately once the entrance finishes", () =>
   const m = freshBoss(40);
   m.ringTimer = 0;
   assert.equal(m.step(0.5, SHIP), null, "still inside the entrance");
-  assert.equal(m.step(0.5, SHIP), null, "still inside the entrance");
-  const r = m.step(0.5, SHIP); // 3 x 0.4167 = 1.25 -> clamps to 1, gate opens
+  const r = m.step(0.5, SHIP); // 2 x 0.625 = 1.25 -> clamps to 1, gate opens (I325: enterTime 0.8)
   assert.equal(r, "ring");
   // subtract-then-add refill keeps the overshoot: 0 - 0.5 + 2.0
   assert.ok(Math.abs(m.ringTimer - (CONFIG.boss.ringEvery - 0.5)) < 1e-9);
@@ -80,14 +79,14 @@ test("world: fire + burst timers do not decrement during the entrance, do after"
   assert.ok(w.boss.entered < 1);
   assert.equal(w.bossFireTimer, 100, "fire timer held during entrance");
   assert.equal(w.bossBurstTimer, 100, "burst timer held during entrance");
-  for (let i = 0; i < 11; i++) w.step(0.1, NEUTRAL); // 1.1 s elapsed
+  for (let i = 0; i < 7; i++) w.step(0.1, NEUTRAL); // 0.7 s elapsed (< enterTime 0.8) - I325: was 11 x 0.1 @ enterTime 1.2
   assert.ok(w.boss.entered < 1, "still inside the entrance");
   assert.equal(w.bossFireTimer, 100, "fire timer still held");
   assert.equal(w.bossBurstTimer, 100, "burst timer still held");
-  w.step(0.1, NEUTRAL); // 1.2 s -> entered clamps to 1, gate opens
+  w.step(0.2, NEUTRAL); // 0.9 s >= enterTime -> entered clamps to 1, gate opens
   assert.equal(w.boss.entered, 1, "entrance complete");
-  assert.equal(w.bossFireTimer, 100 - 0.1, "fire timer now decrementing");
-  assert.equal(w.bossBurstTimer, 100 - 0.1, "burst timer now decrementing");
+  assert.equal(w.bossFireTimer, 100 - 0.2, "fire timer now decrementing");
+  assert.equal(w.bossBurstTimer, 100 - 0.2, "burst timer now decrementing");
 });
 
 test("world: bossSpawn event carries wave + hp (banner inputs)", () => {

@@ -202,7 +202,7 @@ export const CONFIG = {
     // multiple of everyWave. Takes 1 damage per bullet; periodically bursts a
     // ring of S rocks; on death splits into 4 M rocks and pays a big score.
     everyWave: 5,    // waves 5, 10, 15, ...
-    maxHp: 40,
+    maxHp: 64,      // I325/ST-301: was 40 (R1a: 7.7 s first-boss TTK < 12 s floor; 64 -> 12.7 s mid-skill kiter TTK)
     hpFirstWave: 10, // ST-064: HP scale engages at the endless-curve wave
     hpStep: 12,      // +HP per 5-wave boss beyond the first
     hpCap: 88,       // ceiling (88 <= 2.2x base, keeps the fight beatable)
@@ -213,7 +213,7 @@ export const CONFIG = {
     ringCount: 8,    // S rocks per burst (capped by the field's maxConcurrent)
     splitCount: 4,   // M rocks on death
     fireEvery: 2.2,  // ST-056: seconds between aimed bolts
-    enterTime: 1.2,  // ST-135: entrance seconds - no attacks until the intro plays
+    enterTime: 0.8,  // I325/ST-301: was 1.2 (R1b: P1 threat vacuum - boss fires from t=0.8 s; ST-135 intro)
     rim: {            // ST-252: silhouette rim (onBeforeCompile, I257 pattern) - the obelisk's edges
                        // separate from the warm E18 world at distance. Hull + crown only; the core
                        // seam carries no rim (its pulsing emissive IS the distance read).
@@ -229,7 +229,7 @@ export const CONFIG = {
     },
     phase2: {        // ST-133: enrage state below the HP threshold (one-way)
       hpFrac: 0.5,      // enter phase 2 when HP < 50%
-      speedMult: 1.45,  // homing speed (1.6 -> 2.32 u/s - still dodgeable)
+      speedMult: 1.3,    // I325/ST-301: was 1.45 (R1b/R1d: P2 contact pressure down - 1.6 -> 2.08 u/s, still dodgeable)
       turnMult: 1.4,    // turn rate (0.8 -> 1.12 rad/s)
       spin: 1.6,        // tumble rad/s in phase 2 (phase 1 is 0.3)
       ringEveryMult: 0.6 // ring + aimed-bolt cadence multiplier (2.0 -> 1.2 s)

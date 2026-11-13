@@ -19,7 +19,7 @@ const P = { x: 0, y: 0 };
 test("config: boss.phase2 shape and values", () => {
   const p2 = CONFIG.boss.phase2;
   assert.equal(p2.hpFrac, 0.5);
-  assert.equal(p2.speedMult, 1.45);
+  assert.equal(p2.speedMult, 1.3); // I325/ST-301: was 1.45
   assert.equal(p2.turnMult, 1.4);
   assert.equal(p2.spin, 1.6);
   assert.equal(p2.ringEveryMult, 0.6);
@@ -60,7 +60,7 @@ test("phase 2 step: speed and spin scale", () => {
   b.phase = 2;
   const r1 = b.rot;
   b.step(0.016, { x: 10, y: 0 });
-  assert.ok(Math.abs(v2Len(b._vel) - CONFIG.boss.speed * 1.45) < 1e-9);
+  assert.ok(Math.abs(v2Len(b._vel) - CONFIG.boss.speed * CONFIG.boss.phase2.speedMult) < 1e-9); // I325: config-relative (was 1.45)
   assert.ok(Math.abs(b.rot - r1 - 1.6 * 0.016) < 1e-12);
 });
 
@@ -96,32 +96,33 @@ test("phase 2 step: ring interval scales", () => {
 test("world: bossPhase2 emitted exactly once at the threshold", () => {
   const w = new World(new RNG(42), CONFIG);
   w.begin();
-  w.spawnBossForWave(5); // bossHpForWave(5) = 40 (below hpFirstWave 10)
+  w.spawnBossForWave(5); // bossHpForWave(5) = 64 (below hpFirstWave 10) - I325/ST-301: was 40
   const boss = w.boss;
   assert.ok(boss);
-  assert.equal(boss.maxHp, 40);
+  assert.equal(boss.maxHp, 64); // I325/ST-301: was 40
   let n = 0;
   const hitBoss = () => {
     w.weapons.bullets.push({ id: "t" + n++, pos: { x: boss.pos.x, y: boss.pos.y }, radius: 2, dead: false });
     w.resolveBulletBoss();
   };
   const phaseEvents = () => w.drainEvents().filter((e) => e.type === "bossPhase2");
-  for (let i = 0; i < 19; i++) hitBoss(); // hp 21 -> frac 0.525
+  const half = Math.floor(boss.maxHp / 2); // I325: threshold-relative (was hardcoded @ maxHp 40)
+  for (let i = 0; i < boss.maxHp - half - 1; i++) hitBoss(); // hp = half + 1 -> frac > 0.5
   assert.equal(boss.phase, 1);
   assert.equal(phaseEvents().length, 0);
-  hitBoss(); // hp 20 -> frac exactly 0.5, not < 0.5
+  hitBoss(); // hp = half -> frac exactly 0.5, not < 0.5
   assert.equal(boss.phase, 1);
   assert.equal(phaseEvents().length, 0);
-  hitBoss(); // hp 19 -> frac 0.475 -> phase 2
+  hitBoss(); // hp = half - 1 -> frac < 0.5 -> phase 2
   assert.equal(boss.phase, 2);
   const evs = phaseEvents();
   assert.equal(evs.length, 1);
-  assert.ok(Math.abs(evs[0].data.hpFrac - 19 / 40) < 1e-9);
+  assert.ok(Math.abs(evs[0].data.hpFrac - (half - 1) / boss.maxHp) < 1e-9);
   assert.ok(Math.abs(evs[0].data.pos.x - boss.pos.x) < 1e-9);
   assert.ok(Math.abs(evs[0].data.pos.y - boss.pos.y) < 1e-9);
   for (let i = 0; i < 3; i++) hitBoss(); // no duplicate events
   assert.equal(phaseEvents().length, 0);
-  for (let i = 0; i < 16; i++) hitBoss(); // hp 16 -> kill
+  for (let i = 0; i < half - 1; i++) hitBoss(); // hp half-1 -> 0 -> kill (I325: was 16 @ maxHp 40)
   assert.equal(boss.alive, false);
   const death = w.drainEvents();
   assert.equal(death.filter((e) => e.type === "bossDeath").length, 1);
