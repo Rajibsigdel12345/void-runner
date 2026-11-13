@@ -10,6 +10,8 @@ import {
   gridVertexCount,
   gridSegmentCount,
   discGradientStops,
+  restFalloff,
+  restGridColorAt,
 } from "../src/core/floorGrid.js";
 
 const A = CONFIG.arena;
@@ -127,4 +129,87 @@ test("ST-277: disc gradient stops are warm neutral R>G>B, luma center>mid>rim, a
 test("ST-277: disc sits just below the grid lines (y<0, small offset)", () => {
   assert.ok(DISC.y < 0, "disc y " + DISC.y + " < 0 (grid at y=0 - no z-fight)");
   assert.ok(Math.abs(DISC.y) < 0.5, "offset small: " + DISC.y);
+});
+
+// ST-293 (I315): two-segment rest-band falloff - the readable mid-arena
+// plateau the I315 floor audit found missing from the single-exponent ramp.
+const RT = G.restT;
+const RH = G.restHold;
+const RA = G.restPowA;
+const RB = G.restPowB;
+
+test("ST-293: restFalloff is 1 at center, 0 at edge, clamped", () => {
+  assert.equal(restFalloff(0, RT, RH, RA, RB), 1);
+  assert.equal(restFalloff(1, RT, RH, RA, RB), 0);
+  assert.equal(restFalloff(-1, RT, RH, RA, RB), restFalloff(0, RT, RH, RA, RB), "clamped below");
+  assert.equal(restFalloff(2, RT, RH, RA, RB), restFalloff(1, RT, RH, RA, RB), "clamped above");
+});
+
+test("ST-293: restFalloff is monotone non-increasing 0->1", () => {
+  let prev = Infinity;
+  for (let t = 0; t <= 1.0001; t += 0.01) {
+    const f = restFalloff(Math.min(t, 1), RT, RH, RA, RB);
+    assert.ok(f <= prev + 1e-12, "monotone at t=" + t.toFixed(2));
+    prev = f;
+  }
+});
+
+test("ST-293: restFalloff is continuous at restT (both segments = restHold)", () => {
+  const at = restFalloff(RT, RT, RH, RA, RB);
+  assert.ok(Math.abs(at - RH) < 1e-9, "f(restT) = restHold: " + at);
+  const e = 1e-4;
+  assert.ok(Math.abs(restFalloff(RT - e, RT, RH, RA, RB) - RH) < 1e-2, "approaches restHold from below");
+  assert.ok(Math.abs(restFalloff(RT + e, RT, RH, RA, RB) - RH) < 1e-2, "approaches restHold from above");
+});
+
+test("ST-293: rest band - mid-arena holds a flat readable plateau", () => {
+  const band = [];
+  for (let t = 0.2; t <= Math.min(0.6, RT) + 1e-9; t += 0.05) {
+    band.push(restFalloff(t, RT, RH, RA, RB));
+  }
+  const spread = Math.max(...band) - Math.min(...band);
+  assert.ok(spread < 0.06, "rest band flat: spread " + spread.toFixed(4) + " < 0.06");
+  assert.ok(band[0] < 1, "rest band below the hub");
+  assert.ok(band[0] > 0.5, "rest band stays readable (f > 0.5): " + band[0].toFixed(3));
+});
+
+test("ST-293: rim depth cut - outer fade is a distinct step below the rest band", () => {
+  const rim = restFalloff(0.8, RT, RH, RA, RB);
+  assert.ok(rim < RH * 0.5, "rim " + rim.toFixed(3) + " < " + (RH * 0.5) + " (clear step)");
+});
+
+test("ST-293: restGridColorAt is warm neutral R>=G>=B at every stop", () => {
+  for (let i = 0; i <= 20; i++) {
+    const c = restGridColorAt(DIM, BRIGHT, i / 20, RT, RH, RA, RB);
+    assert.ok(c[0] >= c[1] && c[1] >= c[2], "stop " + i + " R>=G>=B: " + c.join(","));
+  }
+});
+
+test("ST-293: rendered ring lumas (rest curve) decrease inner->outer, all under FLOOR 50", () => {
+  const radii = ringRadii(A.radius, G.rings);
+  const lumas = radii.map((r) => luma(restGridColorAt(DIM, BRIGHT, r / A.radius, RT, RH, RA, RB)));
+  for (let i = 1; i < lumas.length; i++) {
+    assert.ok(lumas[i] <= lumas[i - 1] + 0.01, "ring " + i + " not brighter than ring " + (i - 1) + ": " + lumas.map((l) => l.toFixed(1)).join("/"));
+  }
+  for (const l of lumas) assert.ok(l < 50, "ring luma " + l.toFixed(1) + " < 50 (FLOOR-50 dim band)");
+  assert.deepEqual(restGridColorAt(DIM, BRIGHT, 1, RT, RH, RA, RB), DIM, "edge = dim anchor");
+  assert.deepEqual(restGridColorAt(DIM, BRIGHT, 0, RT, RH, RA, RB), BRIGHT, "hub = bright anchor");
+});
+
+test("ST-293: spoke ramp (rest curve) is monotone, hub = bright, tip = dim", () => {
+  assert.deepEqual(restGridColorAt(DIM, BRIGHT, 0, RT, RH, RA, RB), BRIGHT, "hub = bright anchor");
+  assert.deepEqual(restGridColorAt(DIM, BRIGHT, 1, RT, RH, RA, RB), DIM, "tip = dim anchor");
+  let prev = Infinity;
+  for (let s = 0; s <= G.spokeSegs; s++) {
+    const l = luma(restGridColorAt(DIM, BRIGHT, s / G.spokeSegs, RT, RH, RA, RB));
+    assert.ok(l <= prev + 0.01, "spoke ramp monotone at " + s);
+    prev = l;
+  }
+});
+
+test("ST-293: rest-band params are data-driven + geometry bookkeeping unchanged (304 segs)", () => {
+  assert.ok(RT > 0 && RT < 1, "restT in (0,1): " + RT);
+  assert.ok(RH > 0 && RH < 1, "restHold in (0,1): " + RH);
+  assert.ok(RA > 0 && RB > 0, "positive powers: " + RA + ", " + RB);
+  assert.equal(gridSegmentCount(G.rings, G.sectors, G.divisions, G.spokeSegs), 5 * 48 + 8 * 8, "304 segs unchanged");
 });

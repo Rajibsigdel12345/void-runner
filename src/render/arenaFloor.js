@@ -1,6 +1,8 @@
 // ST-257 (I269): arena floor grid - one static LineSegments (1 draw call,
 // same as the PolarGridHelper it replaced). Layout + radial-falloff colors
 // come from src/core/floorGrid.js (pure, unit-tested).
+// ST-293 (I315): colors use the two-segment rest-band falloff (restFalloff)
+// - a flat readable mid-arena plateau, then a steeper rim depth cut.
 //
 // Color pipeline: the core returns sRGB triples; this layer converts each
 // UNIQUE stop to linear working space once (setRGB with SRGBColorSpace -
@@ -9,7 +11,7 @@
 // same material shape as the old helper, so ACES/exposure never touch the
 // lines and displayed luma ~ configured sRGB (ST-177 FX-off floor).
 import * as THREE from "three";
-import { ringRadii, gridColorAt, gridVertexCount } from "../core/floorGrid.js";
+import { ringRadii, restGridColorAt, gridVertexCount } from "../core/floorGrid.js";
 
 export function createArenaFloorGrid(scene, arena) {
   const { radius } = arena;
@@ -20,10 +22,10 @@ export function createArenaFloorGrid(scene, arena) {
   // Precompute the (few) unique linear-space color stops - no per-vertex
   // allocation, nothing per-frame (static geometry, like the old helper).
   const radii = ringRadii(radius, g.rings);
-  const ringStops = radii.map((r) => srgbStop(gridColorAt(dim, bright, r / radius, g.falloffPow)));
+  const ringStops = radii.map((r) => srgbStop(restGridColorAt(dim, bright, r / radius, g.restT, g.restHold, g.restPowA, g.restPowB)));
   const spokeStops = [];
   for (let s = 0; s <= g.spokeSegs; s++) {
-    spokeStops.push(srgbStop(gridColorAt(dim, bright, s / g.spokeSegs, g.falloffPow)));
+    spokeStops.push(srgbStop(restGridColorAt(dim, bright, s / g.spokeSegs, g.restT, g.restHold, g.restPowA, g.restPowB)));
   }
 
   const verts = new Float32Array(gridVertexCount(g.rings, g.sectors, g.divisions, g.spokeSegs) * 3);

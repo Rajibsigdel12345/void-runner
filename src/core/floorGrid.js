@@ -37,6 +37,37 @@ export function gridColorAt(dim, bright, t, pow) {
   return mixRGB(dim, bright, falloff(t, pow));
 }
 
+// ST-293 (I315): two-segment radial falloff with a mid-arena REST BAND.
+// The single-exponent (1 - t)^pow ramp (ST-257) read as one smooth monotone
+// fade with no readable plateau (I315 floorab_v3 audit: PLAYING hub->mid
+// drop = 31.5% of the hub->rim total vs the <=15% readability target).
+// This reshapes the curve so the inner arena holds a consistent, readable
+// brightness (the "rest band") and the fade concentrates in the outer
+// region (a sharper rim "depth cut").
+//
+//   t <= restT : 1 - (1 - restHold) * (t / restT)^restPowA
+//                hub (f=1) fades to the plateau level (f=restHold); a small
+//                restPowA fades quickly near the hub, then goes flat.
+//   t >  restT : restHold * (1 - (t - restT) / (1 - restT))^restPowB
+//                the plateau drops to 0 at the rim; larger restPowB = a
+//                steeper depth cut.
+// Continuous at t = restT (both segments equal restHold); f(0) = 1;
+// f(1) = 0; monotone non-increasing. Pure (no three.js, no DOM).
+export function restFalloff(t, restT, restHold, restPowA, restPowB) {
+  const x = Math.min(Math.max(t, 0), 1);
+  if (x <= restT) {
+    const u = restT > 0 ? x / restT : 1;
+    return 1 - (1 - restHold) * Math.pow(u, restPowA);
+  }
+  const v = 1 - restT > 0 ? (x - restT) / (1 - restT) : 1;
+  return restHold * Math.pow(1 - v, restPowB);
+}
+
+// sRGB color at normalized radius t on the two-segment rest-band curve.
+export function restGridColorAt(dim, bright, t, restT, restHold, restPowA, restPowB) {
+  return mixRGB(dim, bright, restFalloff(t, restT, restHold, restPowA, restPowB));
+}
+
 // Ring radii, innermost first: radius/rings * (i+1), i = 0..rings-1.
 export function ringRadii(radius, rings) {
   const out = [];

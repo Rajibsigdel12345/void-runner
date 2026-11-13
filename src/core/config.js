@@ -14,6 +14,21 @@ export const CONFIG = {
       divisions: 48, // per-ring segments (was 64)
       spokeSegs: 8, // spoke subdivisions - per-vertex radial falloff
       falloffPow: 1.6, // mix = dim + (bright - dim) * (1 - t)^pow, t = r / radius
+      // ST-293 (I315): two-segment radial falloff with a mid-arena REST BAND
+      // (restFalloff in src/core/floorGrid.js) replaces the single-exponent
+      // falloffPow ramp for the rendered grid - the I315 floor readability
+      // audit (floorab_v3) found the old ramp read as a smooth monotone fade
+      // with no readable plateau. restT = where the inner segment ends and the
+      // rim fade begins; restHold = the plateau level (its ring luma stays
+      // under the FLOOR-50 ceiling, so the band reads as floor, not a bright
+      // dot); restPowA = hub->rest-band fade shape (small = quick fade then
+      // flat); restPowB = rest-band->rim depth cut (larger = steeper).
+      // falloffPow is retained for the legacy pure fns (falloff/gridColorAt,
+      // still unit-tested); the render (arenaFloor.js) now uses restFalloff.
+      restT: 0.5,    // rest band ends at half radius (r = 13) - rim fade beyond
+      restHold: 0.76, // plateau level; rings 1-2 luma ~48.5, under FLOOR 50
+      restPowA: 0.05, // quick hub->rest-band fade, then a flat readable band
+      restPowB: 2.0,  // steeper rim depth cut than the old single (1 - t)^1.6
     },
     // ST-277 (I294): thin radial floor disc UNDER the grid (src/render/floorDisc.js) -
     // the E25 "arena depth cut" (Dota-2 ladder): a solid warm-neutral base so the v7
