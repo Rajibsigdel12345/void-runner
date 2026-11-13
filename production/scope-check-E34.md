@@ -74,6 +74,7 @@ APPROVE as scoped: 4 stories, audit-first, asteroid-first, zero-core. The arc di
 - R3: changes confined to assets/*.glb (+ assetLoader.js only if keys change) + optional src/render/*.js + config.js levers; ZERO src/core changes (pure art arc; escalate + re-scope if core is needed).
 - R4: full battery - p1 EXACT (causal proof required if it shifts), rockab re-pin documented, perception no new overlaps, all invariants EXACT/in-band, vendor sha unchanged.
 - R5: npm test green + npm run build exit 0 + dist headroom >= 100 KB (canary re-pin with causal proof - assets/ copies into dist).
+- Result (I335): R1 PASS (ST-306 audit + baseline shipped at I332, R306a-f verdicted) / R2 PASS (I333 v4 re-bake: 35444 B <= 45056, L 21116 <= 24576, 490/134/134 tris, clean import, ladder 0.4929<0.5513<0.6307, crater detail 0.37/0.41/0.43 -> 0.65/0.46/0.54) / R3 PASS (I333 assets-only; I334 render-only gradePass.js + bloom.js + config.js levers; ZERO src/core - documented scope note, no core change) / R4 PASS (p1 EXACT 11334/57/W2/combo15/36.14999999999923s; rockab re-pin w/ causal proof - radii EXACT 2.2/1.3/0.7, M over1836 83->8 = I334 grade; perception R306f NO new overlaps; all invariants EXACT/in-band incl. p6 +1-tick flake band; vendor sha unchanged) / R5 PASS (905/905, build exit 0, headroom 202648 B >= 100 KB). G34.0 = PASS; E34 CLOSABLE 4/4.
 
 ## Verification Evidence (I331 itself)
 
