@@ -82,3 +82,12 @@ APPROVE as scoped: 4 stories, audit-first, enemy-first, zero-core. The arc is th
 ## Next owner / decision
 
 ST-310 at I337 (cgs-asset-audit + cgs-balance-check, audit-first). No user decision required - deferrals are recorded, not blocking.
+
+## Gate G35.0 verdict (I340)
+
+- R1 PASS: ST-310 audit shipped at I337 (.evidence/I337/audit337.mjs + baseline JSON; R310a-g all verdicted).
+- R2 PASS: deployed GLBs re-measured at I340 (glbmeasure340.cjs): enemies 39944 B total (drone 7252/52t + stinger 6260/40t + flyer 6676/62t + warden 19756/180t) <= 55 KB [56320 B]; warden 19756 B <= 26 KB; boss 7016 B / 144 tris / 3 meshes <= 12 KB / 250; orbs 37912 B / 262 tris (rapid 6628/48t, spread 6628/48t, shield 3396/20t, bomb 6620/48t, magnet 5256/36t, overdrive 5496/38t, slowmo 3888/24t) <= 40 KB / 80 tris each; class silhouettes distinct (no triple collapse, min Hamming 12 at the I338 A/B; I340 perception probe no new overlaps); orb hues in-band (puab 11/11, max 3.0 deg vs the I322 baseline).
+- R3 PASS: git diff ff4863b..HEAD (I335 close -> HEAD) = assets/*.glb (10 files) + 6 docs; ZERO src/ changes (collision radii untouched).
+- R4 PASS: 13-probe battery EXACT/in-band (p1 structural EXACT, wall_s wall-clock only; p3-p8 + rockab + perception EXACT; p4 counters adjudicated non-blocking with same-build variance proof + git zero-src; puab 11/11 in-band; floorab EXACT canonical); vendor three.module.js sha 76DEA8151BC9352A... unchanged.
+- R5 PASS: npm test 905/905 (re-run I340) + npm run build exit 0 + dist 123 files / 1905584 B -> headroom 191568 B (~187 KB) >= 100 KB floor.
+- G35.0: PASS R1..R5. R-E35-1..5 CLOSED (epics.md). E35 CLOSED 4/4 at I340.
