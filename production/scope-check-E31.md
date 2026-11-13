@@ -58,3 +58,12 @@ I319 = ST-296 perception battery + measurement (cgs-dev-story, audit-first, 0 KB
 - R2 PASS on all ordered threat pairs (measured + cited puab; details in production/iterations.md I319).
 - R3 FAIL: 3 pairs. (1) adaptive-toast x tutorial-hint 1380 px^2 -> ST-297 (pre-designated cuttable, BY LAYER). (2) wave banner x GAME OVER title 6804 px^2 -> NEW ST-299 (render/DOM BY LAYER micro-fix, pre-authorized by risk R-E31-1; epic scope extended to ST-296..299). (3) menu footer 7px cross + BEST/WPN 280 px^2 -> noted only (E32 candidates, non-blocking).
 - Closeout shift: ST-298 gate + milestone review moves from I321 to I322 (ST-297 at I320, ST-299 at I321). G31.0 unchanged; R5 now also covers ST-299's A/B.
+
+
+## Gate G31.0 result (I322 - ST-298 closeout)
+- R1 battery completeness: PASS - I319 12-shot battery all clean (console 0/0, NaN 0 each); I322 perception322 re-scan (MENU 36 elements + PLAYING) clean.
+- R2 channel separation: PASS - every ordered threat pair separated on >=1 of dHue >= 25 deg / dLuma >= 30 / distinct silhouette cue (I319 measured on screen pixels; I322 puab 11/11 re-cited).
+- R3 HUD: PASS - the three I319 failing pairs: (1) adaptive-toast x tutorial-hint 1380 px^2 -> FIXED at I320 (I322 measured: intersection area 0, 20 px gap); (2) wave banner x GAME OVER title 6804 px^2 -> FIXED at I321 (I322 measured: banner opacity 0 on GAME_OVER, zero overlap); (3) menu footer 7 px cross + BEST/WPN 320 px^2 -> noted-only minors per the I319 mid-arc note, carried as E32 candidates (non-blocking).
+- R4 invariants: PASS - all EXACT: p1 demo pin (11334/57/W2/combo15/198-57/acc 0.2878787878787879/36.14999999999923s/replay 2169-2220/speed4/ls null/Q->MENU); p2 15/15; p3 158/24/25/118; p4 kill 0/0 pickup 8 nearmiss 4; p5 caps (rocks 24/5/29, eb 24, trails 64, rings 8, stinger+flyer 4); p6 NaN 0; p7a FLOOR-50 B 230/61/169/0/0; p7b MENU 21/366 @60/60 vendorLowp 0; p8 NaN 0 console 0/0; rockab radii 2.2/1.3/0.7 EXACT + box-p50 ladder 35.6/44.11/47.02 (within 1.0 of pin 36.6/44.24/47.24, AA band); puab 11/11; floor rings 48.47/48.47/39.90/29.41 + rim 55.47 EXACT; 852/852; build 0.
+- R5 fix safety: PASS - I320 toast A/B (+11 B) + I321 banner A/B (6804 -> 0 px^2, +121 B); p1 EXACT after both fixes; vendor sha 76dea8151bc9352a unchanged; dist 119 files / 1879502 B (headroom 212 KB; 8 KB floor holds).
+- VERDICT: G31.0 PASS. E31 CLOSED 4/4 at I322.
