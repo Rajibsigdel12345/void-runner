@@ -168,10 +168,13 @@ test('asteroid L/M/S: naming, poly budgets, radii match CONFIG (+/-5%)', () => {
 // (L/M/S) for distance silhouette read at 10u+; POSITION/NORMAL bytes unchanged
 // (8956/3764/3188 B). Percentile convention is the
 // Blender ground-truth dump convention: sorted, q(f) = v[floor(f*len)].
+// I302 (ST-283): value-ladder re-bake pins, measured file-level through the facet reader below.
+// L darkest / M mid / S lightest inverts the I279 M-brightest identity; per-vertex hue jitter
+// makes (r-b) no longer proportional to value (chroma-variety assertion in the test).
 const ROCK_FACET = {
-  L: { p10: 0.319, p50: 0.532, p90: 0.964, mean: 0.6268 },
-  M: { p10: 0.501, p50: 0.726, p90: 0.928, mean: 0.721 },
-  S: { p10: 0.334, p50: 0.572, p90: 0.823, mean: 0.641 },
+  L: { p10: 0.1939, p50: 0.3816, p90: 0.7417, mean: 0.4345 },
+  M: { p10: 0.3264, p50: 0.5227, p90: 0.8376, mean: 0.5634 },
+  S: { p10: 0.444, p50: 0.7158, p90: 0.9497, mean: 0.7037 },
 };
 function facetLumas({ buf, json, binOff }) {
   const p = json.meshes[0].primitives[0];
@@ -195,7 +198,7 @@ function facetLumas({ buf, json, binOff }) {
   const q = (f) => fl[Math.min(fl.length - 1, Math.floor(f * fl.length))];
   return { p10: q(0.1), p50: q(0.5), p90: q(0.9), mean: fl.reduce((sm, x) => sm + x, 0) / fl.length };
 }
-test('asteroid L/M/S: COLOR_0 mottling band + warm order + facet luma spread (I257 -> I264 -> I279)', () => {
+test('asteroid L/M/S: COLOR_0 mottling band + warm order + facet luma spread (I257 -> I264 -> I279 -> I302)', () => {
   for (const size of ['L', 'M', 'S']) {
     const { buf, json, binOff } = parseGlb('asteroid_' + size + '.glb');
     for (const m of json.meshes || []) for (const p of m.primitives || []) {
@@ -210,7 +213,7 @@ test('asteroid L/M/S: COLOR_0 mottling band + warm order + facet luma spread (I2
         const g = buf.readFloatLE(base + i * stride * 4 + 4);
         const b = buf.readFloatLE(base + i * stride * 4 + 8);
         for (const v of [r, g, b]) {
-          assert.ok(v >= 0.30 - 0.01 && v <= 1.20 + 0.01, size + ' COLOR_0 channel in [0.30,1.20] I264 mottling band: ' + v.toFixed(3));
+          assert.ok(v >= 0.10 - 0.01 && v <= 1.20 + 0.01, size + ' COLOR_0 channel in [0.10,1.20] I302 mottling band: ' + v.toFixed(3));
         }
         assert.ok(r >= g - 1e-4 && g >= b - 1e-4, size + ' COLOR_0 warm order R>=G>=B at vertex ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
         checked++;
@@ -220,10 +223,31 @@ test('asteroid L/M/S: COLOR_0 mottling band + warm order + facet luma spread (I2
     // I264 acceptance metric: measured facet luma spread + brightness preservation.
     const f = facetLumas({ buf, json, binOff });
     const E = ROCK_FACET[size];
-    assert.ok(f.p90 - f.p10 >= 0.42, size + ' facet luma spread ' + (f.p90 - f.p10).toFixed(3) + ' >= 0.42 (I279 mottle, was ~0.1-0.2; I264 floor was 0.38)');
+    assert.ok(f.p90 - f.p10 >= 0.50, size + ' facet luma spread ' + (f.p90 - f.p10).toFixed(3) + ' >= 0.50 (I302 mottle floor; I279 floor was 0.42)');
     for (const k of ['p10', 'p50', 'p90', 'mean']) {
-      assert.ok(Math.abs(f[k] - E[k]) <= 0.005, size + ' facet ' + k + ' ' + f[k].toFixed(3) + ' ~ ' + E[k] + ' (I264 bake pin)');
+      assert.ok(Math.abs(f[k] - E[k]) <= 0.005, size + ' facet ' + k + ' ' + f[k].toFixed(3) + ' ~ ' + E[k] + ' (I302 bake pin)');
     }
+    // I302 (ST-283): per-vertex warm-hue variety. In the I279 bake (r-b) = 0.095*lv exactly, so the
+    // proxy ratio (r-b)/((r+g+b)/3.085) was constant 0.0982 (range ~0.0004). I302 adds a per-vertex
+    // hue jitter h in [0,1]: r = lv*(1.04+0.10h), g = lv*(1.00-0.06h), b = lv*(0.945-0.20h) -> ratio
+    // spans 0.098..0.431 (measured ~0.34). Floor 0.05 discriminates the bakes without coupling to the
+    // exact noise field; warm order R>=G>=B still holds for all h in [0,1].
+    let ratioMin = Infinity, ratioMax = -Infinity;
+    for (const m of json.meshes || []) for (const q of m.primitives || []) {
+      if (q.attributes.COLOR_0 === undefined) continue;
+      const cacc = json.accessors[q.attributes.COLOR_0];
+      const cbv = json.bufferViews[cacc.bufferView];
+      const cbase = binOff + (cbv.byteOffset || 0) + (cacc.byteOffset || 0);
+      for (let i = 0; i < cacc.count; i++) {
+        const r = buf.readFloatLE(cbase + i * 12);
+        const g = buf.readFloatLE(cbase + i * 12 + 4);
+        const b = buf.readFloatLE(cbase + i * 12 + 8);
+        const ratio = (r - b) / ((r + g + b) / 3.085);
+        if (ratio < ratioMin) ratioMin = ratio;
+        if (ratio > ratioMax) ratioMax = ratio;
+      }
+    }
+    assert.ok(ratioMax - ratioMin > 0.05, size + ' chroma variety: (r-b)/value proxy range ' + (ratioMax - ratioMin).toFixed(4) + ' > 0.05 (I302 hue jitter; I279 bake was ~0.0004)');
   }
 });
 
