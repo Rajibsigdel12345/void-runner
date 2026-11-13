@@ -71,6 +71,7 @@ APPROVE as scoped: 3 stories, audit-first, skill-model-first, zero-asset. This i
 - R3: in-code changes confined to skillModel.js / director.js / config.js / waves.js / game.js / tests; zero asset change (Blender NOT armed - system arc).
 - R4: p1 demo pin EXACT (or re-baselined with causal proof) + all frozen invariants re-verified + dist canary + vendor sha.
 - R5: npm test green + npm run build exit 0 + dist headroom >= 100 KB.
+- Result (I330): R1 PASS / R2 PASS / R3 PASS (core-system + zero-asset; documented scope note: the change also touched enemyBullets.js + powerups.js for the director speed/drop levers - both src/core pure-logic; render + assets diff EMPTY; Blender NOT armed) / R4 PASS (p1 EXACT + invariants re-verified + dist 122/1888318 re-pinned [causal +2 vs open-time 120/1882283] + vendor sha unchanged) / R5 PASS (905/905, build exit 0, headroom 208834 B >= 100 KB). G33.0 = PASS; E33 CLOSABLE 3/3.
 
 ## Verification Evidence (I327 itself)
 

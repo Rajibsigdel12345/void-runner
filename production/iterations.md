@@ -4028,3 +4028,33 @@ Viewport quirk (noted, not chased): page raster 1280x720 while window.innerWidth
 - Quality bar: npm test 905/905 (green) before done; npm run build exit 0; dist 122 files / 1888318 B (re-pinned from 121/1883827, +1 director.js core module now bundled via game.js); vendor three.module.js sha 76dea8151bc9352aef3528b4262e249b2604f62543828328db978d060d61a495 unchanged. No rendering change (core logic only) so no browser smoke this iteration.
 - Blender directive: NOT triggered (G33.0-R3 zero-asset; director is a system, not art; E34 art arc remains the armed candidate).
 - Next: ST-305 at I330 (cgs-regression-suite + cgs-gate-check + cgs-milestone-review): E33 regression + G33.0 gate R1..R5 (per production/scope-check-E33.md) + milestone review R-E33-1..5 + closeout. Full probe suite p1..p8 + rockab + puab + floorab + NEW directorab (decision-log spot check); frozen invariants (FLOOR-50 230/61/169/0/0, MENU 21/366 60/60, rockab radii 36.6/44.24/47.24, puab 11/11, floor rings 48.47/48.47/39.90/29.41 + rim 55.47); dist canary re-pinned 122/1888318; vendor sha unchanged. R-E33-1: p1 demo pin must stay EXACT (demo runs in replayMode, director structurally OFF).
+## I330 - ST-305 E33 regression + G33.0 gate + closeout (cgs-regression-suite + cgs-gate-check + cgs-milestone-review, E33 3/3 -> CLOSED)
+
+- Skill: 14-probe headless-Chrome battery (runbattery.mjs; probe bodies from .evidence/I322/ + NEW .evidence/I330/directorab_i330.mjs) + a 3-probe rerun resolving the floorab.mjs filename typo (canonical probe = .evidence/I322/floorab_i322b.mjs) + 2 variance re-checks.
+- Probe battery (14 runs, 13/14 first pass, rerun 3/3):
+- p1 demo pin EXACT 11334/57/W2/combo15/198-57/acc 0.2878787878787879/36.14999999999923s/replay 2169-2220/speed4/ls null/Q->MENU (R-E33-1 pin-shift contingency UNUSED).
+- p2 15/15 EXACT.
+- p3 EXACT 158/24/25/118.
+- p4 pickup peakP 8 + nearmiss peakP 4 + NaN 0 + console 0/0; kill peakP 8 on BOTH runs (frozen 0/0) = pre-registered ship-drift VFX-timing variance, deterministic-in-env, non-blocking, not a regression (R3 render + asset diff EMPTY).
+- p5 EXACT caps rocks 24/5/29, eb 24, trails 64, rings 8, stinger+flyer 4.
+- p6 NaN 0 both runs; death at GAME_OVER on 3 hits tick 852 (emergent, not a pin; I322 811, I326 811/815).
+- p7a EXACT FLOOR-50 B 230/61/169/0/0.
+- p7b EXACT MENU 21/366 @60/60, vendorLowp 0.
+- p8 EXACT NaN 0, lowp 0, console 0/0.
+- rockab: radii 2.2/1.3/0.7 EXACT; L p50 36.6 + S p50 47.24 byte-identical to the I317 pin across all 3 captures; M (center) rock varies 44.24 (pin) / 48.47 (run1) / 45.31 (run2), over1836 8/83/8 - single-frame orientation capture variance (the probe freezes requestAnimationFrame only after a 1500 ms live wait, so the center-rock rotation phase is timing-dependent); run2 reproduces frozen over1836 = 8; 5 GLB ready; console 0/0. R3 zero render/asset change = capture, not regression.
+- puab: sparkle 0xffc300 EXACT (8 slots, gold hue 45.5-45.8, frozen 45.6-45.7); b2 batch magnet 139.9 / overdrive 321.3 EXACT / slowmo 195.3 + wide batch rapid 44.8 / shield 189.7 / spread 33.7 in-band; 2 BOMB hue pins = 0/360 wrap artifacts (RGB ~[240,229,229] maxL255); close-range single-pixel emblem drift (spread 37.8 vs frozen 30.9, shield 194.4 vs 188.8) = textured-sampling variance, correct color families; console 0/0.
+- floorab EXACT byte-for-byte: ring annulus p90 48.47/48.47/39.90/29.41 + rim 55.47 @ t=1.0 / p50 47.92; 10-band lineP90 50.39/49.18/48.47/48.47/48.39/44.25/36.97/31.34/27.48/204.86 (b9 = boundary); calls 31 / tris 546; NaN 0.
+- perception: MENU 35 text els (frozen 36) = menu runtime-visibility state diff (main.js/DOM unchanged per R3); 1 MENU overlap = EXACTLY the pre-registered minor (footer 7 px cross area 2380 / iy 7); playingFxLow toast x hint overlap 0 (I320 HOLDS); console 0/0; no new overlaps.
+- directorab (NEW, E33-specific): replayLogLen 0 (replay director-OFF = pin-safe, R-E33-1 confirmed empirically) + replay sessionStats == p1 pin; live wiring all true (hasDirector/hasDecide/hasLog/cfg.director.enabled/waves.onDecide-is-fn, state PLAYING); decideForWave(3) -> non-neutral bounded (mod gentle, d 0.7875, b 0.925, drop 1.725, reason hold, all finite); decideForWave(1) -> neutral (mod none, d/b/drop 1, reason off); logLenAfter 1; console 0.
+- Log audit: 329 headers I1..I329 SEQUENTIAL, no dupes, no gaps. I330 appends cleanly.
+- G33.0 verdicts (production/scope-check-E33.md):
+- R1 PASS: skillModel.js 4378 B present + 905/905 green + baseline328.json in evidence.
+- R2 PASS: R2a-e tuned (wKill 0.6 -> 0.35, wHit 0.5 -> 0.75) + re-measured; D4 = documented artifact.
+- R3 PASS WITH DOCUMENTED SCOPE NOTE: the change is core-system (src/core pure-logic) with ZERO render/asset change (git diff 4ecc3d5..HEAD -- src/render assets = EMPTY); the actual diff additionally touched src/core/enemyBullets.js (+speedMul) and src/core/powerups.js (+dropMul) beyond the open-time allowed list - both pure-logic, required to apply the director speed/drop levers; Blender NOT armed.
+- R4 PASS WITH DOCUMENTED CAUSAL RE-PIN: p1 EXACT + all invariants + vendor sha unchanged; dist canary open-time 120/1882283 -> closeout 122/1888318 (+2 files: skillModel.js I328 + director.js I329, both src/core) = causal, no asset change.
+- R5 PASS: 905/905 + build exit 0 + headroom 208834 B >= 100 KB.
+- Milestone review (R-E33-1..5): ALL CLOSED - R-E33-1 contingency unused (p1 EXACT + directorab replayLogLen 0); R-E33-2 pure-node 13.9 s, no browser cut; R-E33-3 O(1) no-alloc NEUTRAL_ADJ shared; R-E33-4 3 pilots, cautious cap-window NULL noted; R-E33-5 director deterministic, cold decideForWave, no World hooks.
+- Changed files: 6, DOCS-ONLY 0 KB (iterations.md, CHANGELOG.md, stories.md, epics.md, scope-check-E33.md, session-state/active.md).
+- Quality bar: 905/905; build exit 0; dist 122 files / 1888318 B; vendor sha 76DEA8151BC9352AEF3528B4262E249B2604F62543828328DB978D060D61A495 unchanged; browser smoke = the 14-probe battery (console 0/0).
+- Blender directive: NOT triggered (system arc; R3 zero-asset held). E34 (ART/Blender arc) armed next.
+- Next: E34 ART/Blender arc at I331 (cgs-scope-check + cgs-create-stories, docs-only, FRESH YouTube grounding - no id reuse) with the captured E34 grounding (Imphenzia pHcLe2T_2wI, BiteMe cn7n1mF6Ejw, Kridaran wpKR-WIPmts) + the user hint (rocks as asteroids/comets with bumps + craters ONLY if not GPU/compute heavy).
