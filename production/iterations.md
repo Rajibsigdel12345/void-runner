@@ -3759,3 +3759,44 @@ Next I292: ST-275 ship hero readability pass (Blender 5.2 MCP; re-read the blend
 **Risks.** Ramp only affects trail puffs (o.ramp is opt-in; every other burst keeps the ST-086 random pick). 0 KB shipped (no assets). Setting CONFIG.fx.engineTrail.ramp=false exactly restores the old random-mix behavior.
 
 **Next.** I313 = ST-292 E29 regression + G29.0 gate + closeout.
+## I313 - ST-292 E29 regression + G29.0 gate + closeout (cgs-regression-suite + cgs-gate-check + cgs-milestone-review, E29 3/3 CLOSED, DOCS-ONLY 0 KB)
+
+**Summary.** E29 closeout iteration, no source changes. ST-290 (I311: 3 boss-attack telegraphs - ring / aimed core red-lean / burst core+pre-flash, from public game-time boss timers via CONFIG.boss.telegraph, fx-gated) and ST-291 (I312: engine presentation audit - 3/4 sweep criteria PASS, bright->dim tail was a per-particle random palette pick -> added warm->cool age ramp (particles o.ramp), gated by CONFIG.fx.engineTrail.ramp=true) are both done; I313 verifies neither regressed any frozen invariant, passes the G29.0 gate, and closes E29 (3/3). All 12 evidence items PASS; console 0/0 on every browser probe.
+
+**Story goal.** Full E29 regression against every frozen invariant + G29.0 gate + milestone review R-E29-1..5 + closeout docs (epics Result -> CLOSED, stories ST-290/291/292 DONE).
+
+**Acceptance tests (all met).**
+- npm test: 843/843 green.
+- dist canary (build x2): DETERMINISTIC (diff 0), 119 files / 1871106 B / 1827 KB / headroom 221 KB against the 2048 KB budget (>= 8 KB floor holds), vendor three.module.js sha 76dea8151bc9352aef3528b4262e249b2604f62543828328db978d060d61a495 UNCHANGED.
+- p1 demo pin: EXACT (11334 / 57 / W2 / combo15 / 198-57 / acc 0.2878787878787879 / 36.14999999999923 s / replay idx 2169 len 2220 speed 4 / ls {} null / Q->MENU) - the telegraph + trail changes are replay-data-safe BY LAYER, confirmed by the exact pin.
+- p2 state machine: 15/15 edges (boot->...->12 REPLAY->GAME_OVER, wallMs 8943); illegal PLAYING->MENU = false + stays PLAYING; demoClicked true.
+- p3 persistence: 158/24/25/118 byte-lengths exact (settings/best/tutorial/scores).
+- p4 fx-off zero-leak: kill peakP 0 / peakR 0 / mChildren 2 / lLeft 0; pickup peakP 8; nearmiss peakP 4 (nmAfter 1, lives 3); fx stays off - the telegraphs add no fx-off leak (R-E29-1 closed).
+- p5 caps: rocks 24/5/29, eb 24, trails 64, rings pool 8, stinger/flyer pool 4 - the ring telegraph reuses the pooled ring pool, no new pool.
+- p6 NaN: runA (reseed 2750, 1440 ticks) nan 0; runBdeath 808 ticks -> GAME_OVER hit 3; runB2 nan 0 - no NaN path introduced.
+- p7a FLOOR-50 B: bullet 230 / floor 59 / delta 171 / annulus pts 0 / big clusters 0 = FROZEN 230/59/171/0/0 (the trail ramp is a per-puff color lerp only, count-agnostic).
+- p7b MENU: fx-off 21/366 @ 60/60 frames, vendorLowpWarns 0.
+- rockab (rock A/B vs I307 baseline): all GLBs ready; radii 2.2/1.3/0.7 FROZEN; per-rock over1836: L 0 / M 7 / S 0 (within the I309 1/9/0 envelope - NO new crosser); p50 ladder 34.89 < 40.19 < 45.25 = IDENTICAL to I309. crossDiff_raw (84904 vs I307) recorded as INVALID-as-verdict (pre-existing probe defect: 2000x1125 readPixels vs 1280x720 stretched baseline - same artifact_note convention as I309).
+- puab (pickup A/B): 11/11 GLBs; identities stable - emblem hues rapid 44.7 (gold 0xffc300; sparkle burst 8 slots 45.5-45.7), spread 33, shield 197.5, bomb white-neutral 235.3, magnet 157.4, overdrive 312.8, slowmo 203.7; CB/scoff/fx-high variants consistent.
+- teleab (telegraph A/B, v2 verbatim re-run): F0 no-boss all hidden; F1 ring 5.2473/0.35; F1b 8.2722; F2 coreI 1.5510 + coreHex b665e6 (red-lean); F3 2.1020/10/0.1375; F4 none all off; F5 fx-off in-window ZERO LEAK; F6a/F6b fx-low RETAINED (direct sync + real rAF loop) -> verdict yes/retained, console 0/0, no NaN.
+
+**G29.0 gate.** PASS per production/scope-check-E29.md: the full ST-292 suite (10-probe template + telegraph A/B + engine audit result) ran, every frozen invariant reproduced EXACT, dist headroom 221 KB (>= 8 KB floor), log audit I1..I312 sequential (312 entries; I313 appended here -> 313).
+
+**Milestone review (R-E29-1..5, all CLOSED).**
+1. R-E29-1 (med) telegraph leaks into fx-off / pool invariants -> CLOSED: fx-gated (main passes -1 at fx-off); P4 + MENU + F5 re-verified zero-leak; ring reuses the pooled ring pool (P5 caps unchanged).
+2. R-E29-2 (low) slow-mo desync -> CLOSED: telegraphs read the live game-time timers (ringTimer / bossFireTimer / bossBurstTimer, edt-advanced) each frame - exact by construction; p6 NaN 0 through the slow-mo/death run.
+3. R-E29-3 (low) bloom/palette regression -> CLOSED: rockab + puab no new crossers (L0/M7/S0 within the 1/9/0 envelope; p50 ladder identical; pickup hues stable); threat red 0xff4a2a telegraphs stay sub-bloom (ringO max 0.35).
+4. R-E29-4 (low) demo pin drift -> CLOSED: p1 demo pin EXACT.
+5. R-E29-5 (low) ST-291 trail ramp cost -> CLOSED: p4 + FLOOR-50 B EXACT; the ramp is a per-particle lerp of two pre-set colors, no allocs, non-ramp path unchanged.
+
+**Changed files.**
+- production/iterations.md - this entry.
+- CHANGELOG.md - I313 line.
+- production/session-state/active.md - I313 done / E30 next.
+- production/epics.md - E29 Result: OPENED at I310 -> CLOSED at I313 (3/3) + G29.0 PASS + milestone review closure.
+- production/stories.md - ST-290/291/292 lines marked DONE at I311/I312/I313 with closeout evidence.
+- No src/, tests/, or assets/ changes (DOCS-ONLY iteration; 0 KB).
+
+**Risks.** None new. Known probe artifact carried with artifact_note (crossDiff_raw invalid as verdict; I309 same convention) - not a regression signal.
+
+**Next owner.** I314 = open E30 (cgs-scope-check + cgs-create-stories, docs-only), grounded in a fresh YouTube sweep of comparable 3D arcade space-shooters; candidates from the E29 task list: arena floor/grid micro-pass (needs a human eye first), HP#5 human-perception session, touch-fallback arc, i18n (plan-only), PWA, boss balance tuning.
