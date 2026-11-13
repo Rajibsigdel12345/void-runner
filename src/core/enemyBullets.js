@@ -8,6 +8,7 @@ export class EnemyBulletField {
     this.cfg = cfg;
     this.bullets = []; // { id, pos, vel, life, radius, dead }
     this.nextId = 1;
+    this.speedMul = 1; // ST-304 (I329): director enemy-bolt speed multiplier; 1 = pre-I329 bit-identical
   }
 
   /** Fire one bolt from fromPos along dir (unit) at speed. Returns the bolt or null (at cap). */
@@ -17,7 +18,7 @@ export class EnemyBulletField {
     const b = {
       id: this.nextId++,
       pos: v2(fromPos.x, fromPos.y),
-      vel: v2(dir.x * speed, dir.y * speed),
+      vel: v2(dir.x * speed * this.speedMul, dir.y * speed * this.speedMul), // ST-304 (I329)
       life: e.life,
       radius: e.radius,
       dead: false,

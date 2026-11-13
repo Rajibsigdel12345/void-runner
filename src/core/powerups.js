@@ -45,10 +45,10 @@ export class PowerUpField {
   }
 
   /** Roll a drop at a kill position. Honors maxActiveDrops. Returns drop or null. */
-  maybeDrop(pos) {
+  maybeDrop(pos, dropMul = 1) { // ST-304 (I329): director drop multiplier; 1 = pre-I329 bit-identical
     const p = this.cfg.powerup;
     if (this.drops.length >= p.maxActiveDrops) return null;
-    if (!this.rng.chance(p.dropChance)) return null;
+    if (!this.rng.chance(Math.min(1, p.dropChance * dropMul))) return null; // ST-304: still exactly 1 RNG draw
     const type = this.pickType(); // I130: weighted table (was uniform 1/7)
     const a = this.rng.next() * Math.PI * 2;
     const drop = {

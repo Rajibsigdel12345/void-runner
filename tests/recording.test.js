@@ -70,7 +70,7 @@ function snap(w) {
 test('replay: a live-recorded run replays faithfully and deterministically (ST-191 flow)', () => {
   const SEED = 777;
   // Original run: the main.js flow - fresh seed per run, record the exact intent the sim receives.
-  const w0 = new World(new RNG(1));
+  const w0 = new World(new RNG(1), { ...CONFIG, director: { enabled: false } }); // ST-304 (I329): replay is director-neutral, so the live original must be too
   w0.reset();
   w0.reseed(SEED);
   w0.begin();
@@ -88,7 +88,7 @@ test('replay: a live-recorded run replays faithfully and deterministically (ST-1
 
   // Two replays of the same tape are bit-identical (the determinism guarantee).
   function replayTape() {
-    const w = new World(new RNG(1));
+    const w = new World(new RNG(1), { ...CONFIG, director: { enabled: false } }); // ST-304 (I329): replay is director-neutral
     w.reset();
     w.reseed(SEED); // main.js watch flow: reset -> reseed -> replayBegin
     w.replayBegin();

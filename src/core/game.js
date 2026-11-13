@@ -20,6 +20,8 @@ import { WaveDirector } from './waves.js';
 import { Lives } from './lives.js';
 import { PowerUpField } from './powerups.js';
 import { GameState, STATE } from './state.js';
+import { SkillModel } from './skillModel.js'; // ST-304 (I329)
+import { Director } from './director.js'; // ST-304 (I329)
 
 export class World {
   constructor(rng, cfg = CONFIG) {
@@ -46,6 +48,9 @@ export class World {
     this._eventSpare = [];
     this.scoreKeeper = new ScoreKeeper(cfg);
     this.waves = new WaveDirector(rng, this.field, cfg);
+    this.skill = new SkillModel(this.cfg.skill, 1 / 60); // ST-304 (I329)
+    this.director = new Director(this.cfg.director); // ST-304 (I329)
+    this.waves.onDecide = (wave) => this.director.decideForWave(wave, { replayMode: this.replayMode, performance: this.skill.performance }); // ST-304 (I329)
     this.powerups = new PowerUpField(rng, cfg);
     this.livesMgr = new Lives(cfg.ship.lives);
     this.game = new GameState();
@@ -116,6 +121,17 @@ export class World {
     return true;
   }
 
+  /** ST-304 (I329): the ship takes a hit - lives bookkeeping + adaptive-director telemetry. */
+  shipDamage() {
+    const left = this.livesMgr.damage();
+    this.skill.onEvent('hit', { lives: left });
+    this.director.onEvent('hit', { lives: left });
+    return left;
+  }
+
+  /** ST-304 (I329): the active wave pickup-drop multiplier (1 = no director adjustment). */
+  dropMul() { const a = this.waves.activeAdj; return a ? a.drop : 1; }
+
   /** Full session restart from MENU or GAME_OVER: reset all systems, then begin. */
   restart() { this.reset(); return this.begin(); }
   /** ST-141: reseed the shared RNG so a run can start from a specific seed (daily runs). */
@@ -166,8 +182,14 @@ export class World {
       this.emit('instant', { type: inst });
     }
     this.scoreKeeper.tick(this.time);
+    this.skill.sample(this.ship.pos, this.field.rocks.map(rr => ({ x: rr.pos.x, y: rr.pos.y, r: rr.radius }))); // ST-304 (I329)
+    // NOTE: 0-asset rule G33.0-R3 - uniform threat weight 1 for rocks; per-type weights (cfg.skill.weights)
+    // apply once other enemy types are folded into the load (E34+). Rocks are the dominant threat.
+
+    this.director.sample(dt, this.skill.load); // ST-304 (I329)
     const wv = this.waves.step(dt, this.ship.pos);
     if (wv.startedWave) {
+      this.enemyBullets.speedMul = this.waves.activeAdj ? this.waves.activeAdj.b : 1; // ST-304 (I329)
       this.emit('wave', { n: wv.startedWave, mod: this.waves.activeMod, endless: wv.startedWave >= this.cfg.waveEndless.first }); // ST-051
       this.spawnMinesForWave(wv.startedWave); // ST-054
       this.spawnBossForWave(wv.startedWave); // ST-055
@@ -259,6 +281,7 @@ export class World {
     }
     for (const b of shots) this.emit('fire', { pos: b.pos, level: this.weaponLevel() }); // ST-122: level for render
     if (shots.length) this.scoreKeeper.onShotFired(shots.length); // I152: accuracy denominator
+    if (shots.length) this.skill.onEvent('shot'); // ST-304 (I329)
   }
 
   /** GDD: BOMB shatters all on-screen asteroids; each counts as a kill feeding the
@@ -281,7 +304,8 @@ export class World {
       const base = r.shielded ? this.cfg.asteroid.shielded.score : this.cfg.asteroid.sizes[r.size].score * (r.golden ? this.cfg.asteroid.golden.scoreMult : 1) * gbMul; // ST-052/ST-121/ST-124
       const points = this.scoreKeeper.kill(base, this.time);
       this.emit('kill', { pos: { x: r.pos.x, y: r.pos.y }, size: r.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), golden: !!r.golden });
-      const drop = this.powerups.maybeDrop({ x: r.pos.x, y: r.pos.y });
+      this.skill.onEvent('kill', { combo: this.scoreKeeper.combo }); // ST-304 (I329)
+      const drop = this.powerups.maybeDrop({ x: r.pos.x, y: r.pos.y }, this.dropMul()); // ST-304 (I329)
       if (drop) this.emit('powerupDrop', { type: drop.type, pos: { x: drop.pos.x, y: drop.pos.y } });
     }
     if (targets.length > 0) this.emit('bomb', { count: targets.length });
@@ -310,7 +334,8 @@ export class World {
         : this.cfg.asteroid.sizes[rock.size].score * (rock.golden ? this.cfg.asteroid.golden.scoreMult : 1) * (1 + genBonus); // ST-052/ST-120
       const points = this.scoreKeeper.kill(base, this.time);
       this.emit('kill', { pos: { x: rock.pos.x, y: rock.pos.y }, size: rock.size, points, combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), golden: !!rock.golden, gen: rock.gen || 0, shielded: res.shielded });
-      const drop = this.powerups.maybeDrop({ x: rock.pos.x, y: rock.pos.y });
+      this.skill.onEvent('kill', { combo: this.scoreKeeper.combo }); // ST-304 (I329)
+      const drop = this.powerups.maybeDrop({ x: rock.pos.x, y: rock.pos.y }, this.dropMul()); // ST-304 (I329)
       if (drop) this.emit('powerupDrop', { type: drop.type, pos: { x: drop.pos.x, y: drop.pos.y } });
     }
     this.weapons.compact();
@@ -328,7 +353,7 @@ export class World {
       this.emit('shieldPop', { pos: { x: this.ship.pos.x, y: this.ship.pos.y } });
       return;
     }
-    const livesLeft = this.livesMgr.damage();
+    const livesLeft = this.shipDamage();
     this.scoreKeeper.onDamage();
     this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: hit.nx, y: hit.ny }, lives: livesLeft });
     this.ship.damage(v2(hit.nx, hit.ny));
@@ -373,6 +398,7 @@ export class World {
       const points = this.scoreKeeper.kill(this.cfg.mine.score, this.time);
       this.emit('kill', { pos: { x: hit.pos.x, y: hit.pos.y }, size: 'mine', points,
         combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), mine: true });
+      this.skill.onEvent('kill', { combo: this.scoreKeeper.combo }); // ST-304 (I329)
       this.emit('mineExplode', { pos: { x: hit.pos.x, y: hit.pos.y } });
     }
     this.weapons.compact();
@@ -386,7 +412,7 @@ export class World {
     if (!hit) return;
     this.mines.destroy(hit.id);
     this.emit('mineExplode', { pos: { x: hit.pos.x, y: hit.pos.y } });
-    const livesLeft = this.livesMgr.damage();
+    const livesLeft = this.shipDamage();
     this.scoreKeeper.onDamage();
     const nx = (this.ship.pos.x - hit.pos.x), ny = (this.ship.pos.y - hit.pos.y);
     const n = Math.hypot(nx, ny) || 1;
@@ -469,6 +495,7 @@ export class World {
     const pts = this.scoreKeeper.kill(score, this.time);
     this.emit('kill', { pos: { x: px, y: py }, size: 'boss', points: pts,
       combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), boss: true, kind: boss.kind }); // ST-143: variant tag
+    this.skill.onEvent('kill', { combo: this.scoreKeeper.combo }); // ST-304 (I329)
     for (let i = 0; i < split; i++) this.field.spawn(splitSize, 1, { x: px, y: py });
     this.emit('bossDeath', { pos: { x: px, y: py }, kind: boss.kind }); // ST-143: variant tag
     this.boss = null;
@@ -481,7 +508,7 @@ export class World {
     const boss = this.boss;
     if (!boss || !boss.alive) return;
     if (Math.hypot(boss.pos.x - this.ship.pos.x, boss.pos.y - this.ship.pos.y) < boss.radius + this.cfg.ship.radius) {
-      const livesLeft = this.livesMgr.damage();
+      const livesLeft = this.shipDamage();
       this.scoreKeeper.onDamage();
       const nx = (this.ship.pos.x - boss.pos.x), ny = (this.ship.pos.y - boss.pos.y);
       const n = Math.hypot(nx, ny) || 1;
@@ -585,7 +612,7 @@ export class World {
     const wd = this.warden;
     if (!wd || !wd.alive) return;
     if (Math.hypot(wd.pos.x - this.ship.pos.x, wd.pos.y - this.ship.pos.y) < wd.radius + this.cfg.ship.radius) {
-      const livesLeft = this.livesMgr.damage();
+      const livesLeft = this.shipDamage();
       this.scoreKeeper.onDamage();
       const nx = (this.ship.pos.x - wd.pos.x), ny = (this.ship.pos.y - wd.pos.y);
       const n = Math.hypot(nx, ny) || 1;
@@ -606,7 +633,7 @@ export class World {
       if (Math.hypot(b.pos.x - this.ship.pos.x, b.pos.y - this.ship.pos.y) < b.radius + this.cfg.ship.radius) {
         b.dead = true;
         this.enemyBullets.compact();
-        const livesLeft = this.livesMgr.damage();
+        const livesLeft = this.shipDamage();
         this.scoreKeeper.onDamage();
         const nx = (this.ship.pos.x - b.pos.x), ny = (this.ship.pos.y - b.pos.y);
         const n = Math.hypot(nx, ny) || 1;
@@ -634,6 +661,7 @@ export class World {
         r.nearHot = true;
         const pts = this.scoreKeeper.bonus(nm.points);
         this.emit('nearmiss', { pos: { x: r.pos.x, y: r.pos.y }, points: pts });
+        this.skill.onEvent('graze'); // ST-304 (I329)
       } else if (r.nearHot && d > nm.radius * nm.rearmMult) {
         r.nearHot = false;
       }
@@ -672,7 +700,7 @@ export class World {
     if (!hit) return;
     this.drones.destroy(hit.id);
     this.emit('droneExplode', { pos: { x: hit.pos.x, y: hit.pos.y } });
-    const livesLeft = this.livesMgr.damage();
+    const livesLeft = this.shipDamage();
     this.scoreKeeper.onDamage();
     const nx = (this.ship.pos.x - hit.pos.x), ny = (this.ship.pos.y - hit.pos.y);
     const n = Math.hypot(nx, ny) || 1;
@@ -761,7 +789,7 @@ export class World {
     if (!hit) return;
     this.stingers.destroy(hit.id);
     this.emit('stingerDeath', { pos: { x: hit.pos.x, y: hit.pos.y } });
-    const livesLeft = this.livesMgr.damage();
+    const livesLeft = this.shipDamage();
     this.scoreKeeper.onDamage();
     const nx = (this.ship.pos.x - hit.pos.x), ny = (this.ship.pos.y - hit.pos.y);
     const n = Math.hypot(nx, ny) || 1;
@@ -794,6 +822,9 @@ export class World {
     this.bossSpawnCount = 0; // ST-143
     this.scoreKeeper.reset();
     this.waves.reset();
+    this.skill.reset(); // ST-304 (I329)
+    this.director.reset(); // ST-304 (I329)
+    this.enemyBullets.speedMul = 1; // ST-304 (I329)
     this.powerups.clear();
     this.livesMgr.reset();
     this.game.reset(); // also clears the gameOver getter (it derives from game state)

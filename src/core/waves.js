@@ -14,6 +14,8 @@ export class WaveDirector {
     this.waveElapsed = 0; // I42: active time of the current wave (stall timer)
     this.activeMod = 'none'; // ST-051: none | fast | small | inward | big (ST-228)
     this.openGate = null; // ST-242: opening-batch budget (null = normal trickle, pre-ST-242 bit-identical)
+    this.onDecide = null; // ST-304 (I329): wave start decision hook; null = pre-I329 bit-identical
+    this.activeAdj = null; // ST-304 (I329): the decision applied to the active wave (null or adj)
   }
 
   start() {
@@ -23,9 +25,10 @@ export class WaveDirector {
     this.state = 'intermission';
     this.activeMod = 'none';
     this.openGate = null;
+    this.activeAdj = null; // ST-304 (I329)
   }
 
-  reset() { this.state = 'idle'; this.wave = 0; this.toSpawn = 0; this.intermission = 0; this.waveElapsed = 0; this.activeMod = 'none'; this.openGate = null; }
+  reset() { this.state = 'idle'; this.wave = 0; this.toSpawn = 0; this.intermission = 0; this.waveElapsed = 0; this.activeMod = 'none'; this.openGate = null; this.activeAdj = null; }
 
   get speedMult() {
     let m = Math.min(this.cfg.wave.speedCap, 1 + this.cfg.wave.speedPerWave * this.wave);
@@ -124,10 +127,11 @@ export class WaveDirector {
       this.intermission -= dt;
       if (this.intermission <= 0) {
         this.wave += 1;
-        this.toSpawn = this.contentFor(this.wave); // ST-058
+        this.activeAdj = this.onDecide ? this.onDecide(this.wave) : null; // ST-304 (I329)
+        this.toSpawn = this.activeAdj ? Math.round(this.contentFor(this.wave) * this.activeAdj.d) : this.contentFor(this.wave); // ST-058 / ST-304
         this.waveElapsed = 0;
         this.state = 'active';
-        this.activeMod = this.modifierFor(this.wave); // ST-051
+        this.activeMod = this._modFor(this.wave); // ST-051 / ST-304 (I329)
         this.openGate = this.openBudgetFor(this.wave); // ST-242
         ev.startedWave = this.wave;
       } else {
@@ -166,13 +170,26 @@ export class WaveDirector {
       // I42: stall advance - the wave moves on even if rocks survive. Leftovers
       // carry into the next wave (not deleted, not sped up); no intermission.
       this.wave += 1;
-      this.toSpawn = this.contentFor(this.wave); // ST-058
+      this.activeAdj = this.onDecide ? this.onDecide(this.wave) : null; // ST-304 (I329)
+      this.toSpawn = this.activeAdj ? Math.round(this.contentFor(this.wave) * this.activeAdj.d) : this.contentFor(this.wave); // ST-058 / ST-304
       this.waveElapsed = 0;
-      this.activeMod = this.modifierFor(this.wave); // ST-051
+      this.activeMod = this._modFor(this.wave); // ST-051 / ST-304 (I329)
       this.openGate = this.openBudgetFor(this.wave); // ST-242
       ev.stallAdvance = this.wave;
       ev.startedWave = this.wave; // same "WAVE n" banner flow as a normal start
     }
     return ev;
   }
+  /** ST-304 (I329): the wave mod with the director gentle/hard bias applied. */
+  _modFor(wave) {
+    const base = this.modifierFor(wave);
+    const adj = this.activeAdj;
+    if (!adj || adj.mod === 'none') return base;
+    if (this.isBreatherWave(wave)) return 'none'; // ST-092/ST-242: breather stays mod-free
+    const bias = this.cfg.waveMods.modBias;
+    if (adj.mod === 'gentle') return bias.gentle.avoid.indexOf(base) >= 0 ? 'none' : base;
+    const prefer = bias.hard.prefer;
+    return prefer[wave % prefer.length]; // deterministic alternation (no extra RNG draws)
+  }
+
 }

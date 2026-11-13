@@ -89,7 +89,7 @@ test('endless: small-rock share rises per wave, capped (seed 69)', () => {
 });
 
 test('endless: wave event carries the endless flag (seed 70)', () => {
-  const w = new World(new RNG(70));
+  const w = new World(new RNG(70), { ...CONFIG, director: { enabled: false } }); // ST-304 (I329): pin the content formula with the director off (separate coverage)
   w.begin();
   w.waves.state = 'intermission';
   w.waves.intermission = 0;
