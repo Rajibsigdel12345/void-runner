@@ -4058,3 +4058,16 @@ Viewport quirk (noted, not chased): page raster 1280x720 while window.innerWidth
 - Quality bar: 905/905; build exit 0; dist 122 files / 1888318 B; vendor sha 76DEA8151BC9352AEF3528B4262E249B2604F62543828328DB978D060D61A495 unchanged; browser smoke = the 14-probe battery (console 0/0).
 - Blender directive: NOT triggered (system arc; R3 zero-asset held). E34 (ART/Blender arc) armed next.
 - Next: E34 ART/Blender arc at I331 (cgs-scope-check + cgs-create-stories, docs-only, FRESH YouTube grounding - no id reuse) with the captured E34 grounding (Imphenzia pHcLe2T_2wI, BiteMe cn7n1mF6Ejw, Kridaran wpKR-WIPmts) + the user hint (rocks as asteroids/comets with bumps + craters ONLY if not GPU/compute heavy).
+
+## I331 - E34 ART/Blender Asset Arc (Asteroid-First) opened (cgs-scope-check + cgs-create-stories, docs-only)
+
+- Skill: cgs-scope-check + cgs-create-stories (docs-only arc open; audit-first shape; 0 KB)
+- Probe battery: none (docs-only; no rendering change; browser smoke not required by the quality bar)
+- Grounding: FRESH I331 YouTube sweep (1 round x 8 queries EN -> 80 raw -> 78 unique / 32 shown; 4 deep reads: 9mfSaP2WFfE DeWeese SubD+Displace rocky surface + lattice + bump node, P7OpmpE8xTc CGMatter negative-scale craters with rocky rim, 885HMJS0IW8 Imphenzia decimate 0.01-0.02 + 15-deg auto smooth + vertex-color palette, NrJDBkhRLDs RUN.game 7-layer polish; 0 E31/E32/E33 id reuse; carried I327 trio pHcLe2T_2wI / cn7n1mF6Ejw / wpKR-WIPmts cited not re-shown)
+- Log audit: 330 headers I1..I330 SEQUENTIAL, no dupes, no gaps (verified in-script). I331 appends cleanly.
+- Stories: ST-306 (I332) E34 art audit + baseline (R306a-f pre-registered) / ST-307 (I333+) cratered asteroid L/M/S remake in Blender (comet CUTTABLE) / ST-308 ship art pass + render-layer polish micro-pass (CUTTABLE to no-change) / ST-309 E34 regression + G34.0 gate + closeout
+- Gate: G34.0 R1..R5 pre-registered (production/scope-check-E34.md): R1 audit shipped + R306a-f verdicted / R2 GLB byte + poly + import + silhouette + crater gates / R3 changes confined to assets + optional render + config, ZERO src/core / R4 full battery p1 EXACT + rockab causal re-pin + perception + invariants + vendor sha / R5 tests green + build 0 + headroom >= 100 KB (canary re-pin with causal proof)
+- Changed files: 6, DOCS-ONLY 0 KB (production/scope-check-E34.md new + epics.md + stories.md + iterations.md + CHANGELOG.md + session-state/active.md)
+- Quality bar: 905/905; build exit 0; dist 122 files / 1888318 B; vendor sha 76DEA8151BC9352AEF3528B4262E249B2604F62543828328DB978D060D61A495 unchanged; browser smoke = n/a (docs-only)
+- Blender directive: TRIGGERED (this IS the art/Blender arc - user standing directive; user hint rocks as asteroids/comets with bumps + craters ONLY if not GPU/compute heavy = satisfied: build-time baked displacement + comet reuses the pooled trail system)
+- Next: ST-306 art audit at I332 (cgs-asset-audit + cgs-balance-check, 0 KB, headless probe)
