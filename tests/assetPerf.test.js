@@ -50,7 +50,7 @@ const BUDGET = {
   totalFilesKB: 160,   // [116.4 I303 re-measure: +rock I303 silhouette re-bake bytes (L 19.3K)]
   totalGeoKB: 130,     // [81.8 I292 re-measure: +ship hull/wings COLOR_0]
   perFileKB: 60,       // [max 36.8 - asteroid_L, deliberately the heaviest]
-  totalTris: 1500,     // [1021]
+  totalTris: 1800,     // [1639 I307 re-measure: +rock bump+crater relief (L/M/S 504 -> 756 tris, +252)]
   perFileMats: 3,      // [max 3 - ship body/wing/cockpit]
 };
 

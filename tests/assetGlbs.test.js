@@ -14,8 +14,8 @@ const GLB_MAGIC = 0x46546c67; // 'glTF'
 const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
-// Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105).
-const BUDGETS = { ship: 300, L: 320, M: 120, S: 80, boss: 250, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200 }; // I210 + I211 + I212 + I220
+// Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief)).
+const BUDGETS = { ship: 300, L: 500, M: 140, S: 140, boss: 250, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200 }; // I210 + I211 + I212 + I220 + I307
 const MAX_FILE_BYTES = 100 * 1024;
 
 function parseGlb(file) {
@@ -174,10 +174,12 @@ test('asteroid L/M/S: naming, poly budgets, radii match CONFIG (+/-5%)', () => {
 // I303 (ST-284): pins re-measured on the NEW displacement geometry (crater + ridge
 // silhouette pass; same ST-283 value-ladder scheme with the frange window-bind fix).
 // Blender 5.2.3 exporter now writes COLOR_0 as unclamped FLOAT (5126) - I302 patch obsolete.
+// I307 (ST-287): pins re-measured on the bump+crater relief geometry (488/134/134 tris);
+// same ST-283 value-ladder + warm-order R>=G>=B + per-vertex hue-jitter scheme, denser surface.
 const ROCK_FACET = {
-  L: { p10: 0.164, p50: 0.3735, p90: 0.7911, mean: 0.4334 },
-  M: { p10: 0.2879, p50: 0.529, p90: 0.8967, mean: 0.559 },
-  S: { p10: 0.4136, p50: 0.7048, p90: 0.9764, mean: 0.704 },
+  L: { p10: 0.1934, p50: 0.4603, p90: 0.8239, mean: 0.5013 },
+  M: { p10: 0.2980, p50: 0.6182, p90: 0.9314, mean: 0.6185 },
+  S: { p10: 0.4354, p50: 0.7386, p90: 0.9649, mean: 0.7220 },
 };
 function facetLumas({ buf, json, binOff }) {
   const p = json.meshes[0].primitives[0];

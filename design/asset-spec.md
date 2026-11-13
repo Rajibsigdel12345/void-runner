@@ -331,3 +331,31 @@ drone material are authoritative; GLB materials are decorative only.
   <=2048 KB / <=550 KB - still green, but only ~49 KB gzip headroom remains; further E9
   assets must stay tiny or go through a documented budget amendment (I197 precedent).
 - Assets after I212: 15 GLBs + 1 PNG.
+## I307 rock bump + crater relief amendment (E28 ST-287, cgs-dev-story)
+
+Supersedes the I303 displacement-only rock geometry for SURFACE relief (radii, value
+ladder, warm order, and the 3-shared-geometry / in-code-material scheme are unchanged).
+
+- Geometry: the I303 displaced rocks (L 320 / M 104 / S 80 tris) carry an added bump +
+  crater relief pass - per-rock crater patch with raised rim, scattered convex bumps,
+  and edge chips, all applied as static displacement into the mesh (no new shaders,
+  no new materials, no new draw calls; 3 shared rock geometries still pool across the
+  24-rock cap). Triangulated before export for a deterministic GLB index count.
+  Actuals: L 488 / M 134 / S 134 tris (L 246 / M 69 / S 69 verts).
+- Budget amendment: rock per-size poly caps 320 / 120 / 80 -> 500 / 140 / 140 (measured
+  488 / 134 / 134 + headroom). The all-asset triangle cap in tests/assetPerf.test.js
+  moves 1500 -> 1800 (measured 1639; +252 from the relief, headroom for E9 art growth).
+- Radii unchanged and EXACT: L 2.2 / M 1.3 / S 0.7 (re-normalized after relief).
+- Vertex colors: same ST-283 scheme - value ladder L < M < S, warm order R >= G >= B
+  at every vertex, per-vertex hue jitter, band [0.10, 1.20]. New-vertex colors are
+  edge-mid / loop averages of the surrounding I303 vertices, preserving the ordering.
+  COLOR_0 exported as unclamped FLOAT VEC3 (5126).
+- Export note (Blender 5.2.3): use export_vertex_color='MATERIAL' (the default) to
+  get FLOAT VEC3. export_vertex_color='NAME' forces a VEC4 alpha channel and U16
+  (5123) quantization and must be avoided for these assets to stay consistent with the
+  other COLOR_0 assets (ship / boss / warden / drone / arena ring, all 5126 VEC3).
+- Facet luma pins (per-triangle mean luma, p90 - p10 spread floor 0.50): L 0.1934 /
+  0.4603 / 0.8239 (spread 0.6305), M 0.2980 / 0.6182 / 0.9314 (0.6335), S 0.4354 /
+  0.7386 / 0.9649 (0.5295).
+- Byte impact: rocks 18.06 KB -> 30.33 KB (+12.7 KB); well inside the 2048 KB dist
+  budget. No dist-structure change (same 3 GLBs, same loader path).
