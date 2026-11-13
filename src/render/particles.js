@@ -12,6 +12,8 @@ export function createParticles(scene) {
   const life = new Float32Array(POOL);
   const age = new Float32Array(POOL);
   const base = new Float32Array(POOL * 3);
+const base2 = new Float32Array(POOL * 3); // ST-291 (I312): ramp end color (warm->cool tail)
+const rampFlag = new Uint8Array(POOL); // ST-291: 1 = age-ramp pal[0] -> pal[last]
   for (let i = 0; i < POOL; i++) positions[i * 3 + 1] = -9999; // parked out of view
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -45,7 +47,7 @@ export function createParticles(scene) {
       cursor = (cursor + 1) % POOL;
       if (life[i] <= 0) live += 1; // slot was parked
       const i3 = i * 3;
-      tmp.set(pal[(Math.random() * pal.length) | 0]); // ST-086: pick a palette color per particle
+      if (o.ramp && pal.length >= 2) { tmp.set(pal[0]); } else { tmp.set(pal[(Math.random() * pal.length) | 0]); } // ST-086 random pick / ST-291 (I312) ramp start = warm core
       let vx, vy, vz;
       if (shape === 'ring') { // ST-086: flat even shockwave ring (small angle jitter, near-constant speed)
         const a = (k / n) * Math.PI * 2 + (Math.random() - 0.5) * 0.3;
@@ -66,10 +68,15 @@ export function createParticles(scene) {
       vel[i3] = vx;
       vel[i3 + 1] = vy;
       vel[i3 + 2] = vz;
-      const shade = 0.7 + Math.random() * 0.3;
+      const shade = 0.7 + Math.random() * 0.3; // per-particle brightness jitter (shared by both ramp ends)
       base[i3] = tmp.r * shade;
       base[i3 + 1] = tmp.g * shade;
       base[i3 + 2] = tmp.b * shade;
+      if (o.ramp && pal.length >= 2) { // ST-291 (I312): ramp end = cool tail (same shade; lerped by age in sync)
+        tmp.set(pal[pal.length - 1]);
+        base2[i3] = tmp.r * shade; base2[i3 + 1] = tmp.g * shade; base2[i3 + 2] = tmp.b * shade;
+        rampFlag[i] = 1;
+      } else { rampFlag[i] = 0; }
       life[i] = (o.life ?? 0.5) * (0.7 + Math.random() * 0.6);
       age[i] = 0;
     }
@@ -98,9 +105,16 @@ export function createParticles(scene) {
       positions[i3 + 1] += vel[i3 + 1] * dt;
       positions[i3 + 2] += vel[i3 + 2] * dt;
       const f = 1 - age[i] / life[i];
-      colors[i3] = base[i3] * f;
-      colors[i3 + 1] = base[i3 + 1] * f;
-      colors[i3 + 2] = base[i3 + 2] * f;
+      if (rampFlag[i]) { // ST-291: warm core -> cool tail along the puff lifetime
+        const u = age[i] / life[i];
+        colors[i3] = (base[i3] + (base2[i3] - base[i3]) * u) * f;
+        colors[i3 + 1] = (base[i3 + 1] + (base2[i3 + 1] - base[i3 + 1]) * u) * f;
+        colors[i3 + 2] = (base[i3 + 2] + (base2[i3 + 2] - base[i3 + 2]) * u) * f;
+      } else {
+        colors[i3] = base[i3] * f;
+        colors[i3 + 1] = base[i3 + 1] * f;
+        colors[i3 + 2] = base[i3 + 2] * f;
+      }
     }
     geo.attributes.position.needsUpdate = true;
     geo.attributes.color.needsUpdate = true;

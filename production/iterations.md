@@ -3731,3 +3731,31 @@ Next I292: ST-275 ship hero readability pass (Blender 5.2 MCP; re-read the blend
 **Risks.** Telegraph timing hardwires to attack timers - if a boss attack cadence changes, windows must follow (config-driven, single owner). Red-lean only shifts the core seam color; does not touch the global threat palette. 0 KB shipped (no assets).
 
 **Next.** I312 = ST-291 engine presentation audit (designated cuttable, probe-first 0 KB).
+## I312 - ST-291 engine presentation audit + warm->cool trail ramp (cgs-dev-story, E29 2/3, RENDER-LAYER 0 KB)
+
+**Summary.** The queued ship engine/thrust trail already exists (I213 trail 14 puffs/s + ST-256 layered flame + ST-237 nozzle), so ST-291 was a probe-first audit (designated CUTTABLE). AUDIT: 3 of 4 sweep criteria PASS, 1 PARTIAL - the "bright->dim tail / palette.engine warm->cool" was implemented as a per-particle RANDOM palette pick (particles.js burst() `tmp.set(pal[(Math.random()*pal.length)|0])`), not a warm-core->cool-tail age gradient, so the trail read as a warm/cool sparkle mix rather than a smooth gradient.
+
+**Story goal.** Make the engine trail read as a hot (warm) core fading to a cool tail along the puff lifetime - data-driven, render-layer only, 0 KB, no sim/scoring/replay change.
+
+**Acceptance tests (all met).**
+- Thrust-reactive rate: minThrust 0.12 gate + rate 14 puffs/s (deterministic accumulator) - PASS (no change).
+- World-space lag: puffs spawn at ship.pos - forward*offset(1.15) in WORLD coords, ship moves on, drag exp(-3dt) - PASS (no change).
+- ST-256 core/plume layering: hot white core (0xffffff op0.95 r0.10 len0.70) inside warm orange plume (0xff9a3d op0.65 r0.28 len1.25) + additive glow sprite (0xffb347 op0.40 size1.1) at nozzle root, all data-driven via CONFIG.ship.flame - PASS (no change).
+- bright->dim tail: PARTIAL -> FIXED. particles.burst/sync now honor `o.ramp`: per-particle color lerps pal[0] (warm 0xffa860) -> pal[last] (cool 0x9fd8ff) by normalized age (shared per-particle brightness jitter), then the existing bright->dim fade (color * (1-age/life)). Gated by new CONFIG.fx.engineTrail.ramp (true).
+
+**Changed files.**
+- `src/render/particles.js` - added `base2` (Float32Array POOL*3) + `rampFlag` (Uint8Array POOL); burst() sets base=pal[0]/base2=pal[last] when o.ramp (else the ST-086 random pick, flag 0); sync() lerps base->base2 by age/life when rampFlag (else base*f). No per-frame allocs; non-ramp path behavior unchanged.
+- `src/core/config.js` - `CONFIG.fx.engineTrail.ramp: true` (data-driven toggle, comment cites ST-291).
+- `src/main.js` - engine-trail burst passes `ramp: CONFIG.fx.engineTrail.ramp`.
+- BOM hygiene: an edit-tool artifact dropped one U+FEFF BOM from the leading line of config.js (4->3) and main.js (3->2) during the I312 edits; restored to the committed prefix so the committed diff carries only the intended changes.
+
+**Verification evidence.**
+- T1 A/B (deterministic, rAF frozen, manual sync): ramp 96 puffs @t0.167/life1.0 -> R<B 0/96, meanR 0.6238 > meanB 0.1882, corr(warmth,brightness) +0.842; control (no ramp) -> R<B 28/96, corr -0.546. Confirms the age gradient vs the old random mix.
+- T2 live thrust (PLAYING, fx high, real loop): corr(warmth,brightness) +0.974, corr(warmth,distance-from-ship) -0.885 (older/farther puffs cooler = correct world-space gradient). Screenshot .evidence/I312/trail_live.png.
+- Frozen invariants, all EXACT after the fix: demo pin 11334/57/W2/combo 15/198 shots 57 hit/acc 0.28787/36.15 s/replay idx 2169 len 2220 speed 4/ls null/Q->MENU; FLOOR-50 B 230/59/171/0/0; P8 MENU 60/60 @ 21/366 vendorLowpWarns 0; P4 kill peakP 0/peakR 0, pickup peakP 8, nearmiss peakP 4 (nmAfter 1, lives 3).
+- `npm test` 843/843. `npm run build` exit 0 (dist canary x2 DETERMINISTIC, sha256 walk diff 0): 119 files / 1871106 B / 1827 KB / headroom 221 KB (2048 KB budget, >= 8 KB floor); vendor three.module.js sha 76dea8151bc9352a UNCHANGED (no vendor/ edit); 118->119 file delta = I311 bossTelegraph.js (pre-existing, not I312).
+- Probe notes: first FLOOR-50 run read floor 89/delta 141 (transient live-particle/ship-flame artifact); 2 clean re-runs reproduced 230/59/171/0/0 deterministically. `vr.shipGroup.scene` is undefined - walk `.parent` to the `isScene===true` node; engine pool = Points with vertexColors + AdditiveBlending(2) + position.count 512.
+
+**Risks.** Ramp only affects trail puffs (o.ramp is opt-in; every other burst keeps the ST-086 random pick). 0 KB shipped (no assets). Setting CONFIG.fx.engineTrail.ramp=false exactly restores the old random-mix behavior.
+
+**Next.** I313 = ST-292 E29 regression + G29.0 gate + closeout.

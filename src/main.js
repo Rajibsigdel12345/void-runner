@@ -887,7 +887,7 @@ function syncVisuals(dt) {
       const tx = world.ship.pos.x - tf.x * CONFIG.fx.engineTrail.offset;
       const tz = world.ship.pos.y - tf.y * CONFIG.fx.engineTrail.offset;
       const cnt = liveSettings.fx === 'low' ? CONFIG.fx.engineTrail.countLow : liveSettings.fx === 'high' ? CONFIG.fx.engineTrail.countHigh : CONFIG.fx.engineTrail.countOff; // ST-224: off = silent trail
-      for (let k = 0; k < nEmit; k++) particles.burst(tx, tz, { count: cnt, palette: CONFIG.fx.palette.engine, speed: CONFIG.fx.engineTrail.speed, life: CONFIG.fx.engineTrail.life, shape: 'radial' });
+      for (let k = 0; k < nEmit; k++) particles.burst(tx, tz, { count: cnt, palette: CONFIG.fx.palette.engine, speed: CONFIG.fx.engineTrail.speed, life: CONFIG.fx.engineTrail.life, shape: 'radial', ramp: CONFIG.fx.engineTrail.ramp });
     }
   }
   shieldRing.sync(world, dt, !motionOff); // I62: freeze under reduced motion

@@ -524,6 +524,7 @@ export const CONFIG = {
       minThrust: 0.12,        // thrust fraction below which the trail is silent
       dtMax: 0.25,            // dt clamp (tab restore can't burst a giant puff)
       maxPerUpdate: 4,        // hard cap on puffs per frame
+      ramp: true,             // ST-291 (I312): age-ramp palette warm core -> cool tail (audit finding: random mix was not a gradient)
       countHigh: 2,           // particles per puff at FX High
       countLow: 1,            // particles per puff at FX Low
       countOff: 0,            // particles per puff at FX Off (ST-224: silent trail)
