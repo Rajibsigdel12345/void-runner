@@ -628,6 +628,18 @@ export const CONFIG = {
     maxTapeBytes: 700000, // hard cap on the RLE tape size (truncation trigger)
     demoLen: 2220,      // substeps for the built-in DEMO PILOT (37 s; pilot dies at step 2169 -> GAME_OVER, small tail)
     demoSeed: 1909      // fixed seed for the deterministic demo pilot
+  },
+skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adaptive-director arc)
+    tau: 6,           // momentum decay time constant (s): M *= exp(-dt/tau) per sample()
+    mMax: 3,          // momentum clamp +-mMax -> P in [0,1]; worst single-event swing 0.8/3*0.5 = 0.1333 < 0.25 band (R2d by construction)
+    wKill: 0.6,       // + momentum per kill (before combo scaling)
+    wKillCombo: 0.05, // + momentum per combo point (min(combo, comboCap))
+    comboCap: 10,     // combo points at which the kill bonus is maxed
+    wGraze: 0.15,     // + momentum per nearmiss (graze)
+    wHit: 0.5,        // - momentum per hit taken
+    wDeathExtra: 0.3, // extra - momentum when the hit is lethal (data.lives === 0)
+    wShot: 0.004,     // - momentum per shot fired (accuracy rewarded implicitly)
+    sigma: 6          // threat-load distance scale (u): L_raw = SUM w/(1+(gap/sigma)^2)
   }
 };
 
