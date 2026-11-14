@@ -4814,3 +4814,22 @@ Verification: rockab radii EXACT 2.2/1.3/0.7 (rockab probe reseed; sceneOk; 3 GL
 Result: DONE.
 
 Risk/follow-up: ST-339 (I372) A/B MUST use the CORRECTED method (standalone closeup + real PLAYING + facet pins), NOT the readPixels boxes (R-E41-5 amended). Next I371 = ST-338 comet re-bake (CUTTABLE).
+## I371 - ST-338 Blender comet re-bake (cgs-dev-story + blender-core + blender-asset-qa; ASSETS-ONLY, zero src)
+
+Goal: per the ST-336 Relief Direction, re-bake the comet GLB - lumpy nucleus (4-6 convex bumps + 2-3 shallow craters, static displacement, no subdivision, tris held 180) + brighter ion-tail gradient (base ~0.7 -> tip 0.95-1.15) - keeping radii/shape pins and the in-place same-URL swap.
+
+Changed: assets/asteroid_comet.glb (7096B/135v/180t -> 8356B/170v/180t; Blender mesh = 92 unique verts (I344: 135), GLB POSITION 170 = verts duplicated at the smooth-angle-30 export seams; tris held 180 = displace-only, NO subdivision - the tri cap is the binding constraint, not vertex count); tests/assetGlbs.test.js (COMET_FACET re-pin + I371 block comment only); 6 docs. Zero src, zero sim. Rocks unchanged (I370 v8).
+
+Bake (make_comet_v2.py, Blender 5.2 headless, blender -b --python-exit-code 1, deterministic SEED 55501): I344 teardrop deform kept EXACT (HEAD_R 0.56, AJ -0.15, TIP_X -1.00, subd-4, decimate -> 180) + 4 convex bumps (amp 0.05-0.06 = low end of the spec 0.05-0.10 range; ux [0.30,0.85]) + 2 shallow craters (ux [-0.05,0.70], min-sep 0.28 rad) -> lumpy nucleus. COLOR_0: head = fBm z-score 0.6 + relief z-score 0.4 blend, center search over [0.56..0.64] picked 0.64 -> head_p50 0.6103 (target 0.55-0.68); tail luma = clamp(0.70 + 0.38*s + 0.06*fbm, 0.62, 1.14) with channels r=luma*(1.06-0.14s), g=luma*(0.99-0.03s), b=luma*(0.86+0.30s) -> warm coma base (r>g>b) at ~0.70 -> bright blue-white ion tip (b>r) at ~1.05. Design call: the spec says warm ion-tail but the test asserts warm>0 && cool>0 - resolved with the warm-coma-base + blue-white-ion-tip split (physically correct ion-tail read; satisfies both; tip ~2x brighter than I344 ~0.52 -> ~1.05 = the I336 "brighter ion-tail" goal; warm 156 / cool 14 verts).
+
+Facet re-pin (authoritative; tests/assetGlbs.test.js COMET_FACET, whole-mesh per-tri mean luma): p10 0.4386 -> 0.5073 / p50 0.6379 -> 0.6417 / p90 0.8117 -> 0.8270 / mean 0.6382 -> 0.6541 (lumpy nucleus + brighter tail lift the whole distribution). Shape pins held green with NO re-pin: xspan 1.5488 (pin 1.5828 +/- 0.06), maxperp 0.5839 (pin 0.58 +/- 12%), elong 1.5488 > 2.2 x 0.5839; channel range [0.2916, 1.2755] within [0.10, 1.40].
+
+blender-asset-qa gate (MANDATORY; mesh run): numeric check clean (180 tris, 92 verts, 0 boundary/non-manifold/degenerate/duplicate verts, 1 island, scale 1, 1 material, clean manifold). review_shots random + wire sheets rendered + VIEWED (single connected lumpy teardrop silhouette; no detached, enclosed, or back-to-back parts; clean triangulation, no holes). Explicitly ACCEPTED: (1) no-UV-map error - the rock family is intentionally UV-less (COLOR_0 + flat material; the game never samples UV textures for these assets; consistent with the shipped I370 rocks L/M/S and the I344 comet; the authoritative test contract requires no UVs; adding UVs = ~1.4 KB dead weight per mesh); (2) ground_z -0.5601 warning - free-flying arena prop, not a ground prop.
+
+Verification: p1 demo pin + rockab radii EXACT causal (zero src - asset-only swap, loader key rockComet + URL unchanged; 929/929 green + dist byte-match cover it). 929/929; build 0; dist 131 files / 1910880 B (headroom 186272 B >= 102400 B; comet +1260 B); family GLBs L18592+M6336+S7344+comet8356 = 40634 B <= 64768 B cap; dist asteroid_comet.glb byte-MATCHES src (sha C1E787668FF949D0); vendor sha 76DEA8151BC9352A unchanged (zero src).
+
+GOTCHA: tests/assetGlbs.test.js carries 3 BOMs (committed since I370) - the re-pin script must count and preserve ALL 3 BOMs (strip all before the ASCII guard, re-prepend on write); the I370 script assumed 1.
+
+Result: DONE.
+
+Risk/follow-up: ST-339 (I372) A/B MUST use the CORRECTED method (standalone three.js closeup + real PLAYING screenshot + authoritative facet pins) - NOT the readPixels boxes (R-E41-5 amended at I370). Next I372 = ST-339 apply + A/B + art QA (zero src).

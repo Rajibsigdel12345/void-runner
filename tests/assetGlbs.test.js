@@ -746,11 +746,13 @@ test('warden.glb: naming, poly budget, hull/armor radii vs CONFIG, grayscale COL
     'armor outer radius ' + armor.maxRadius.toFixed(3) + ' ~ r*1.55 (procedural plate-ring parity)');
 });
 
-// I344 (ST-316): comet rock variant (render-only, zero src/core). One mesh/one prim; ion tail
-// baked into the SAME mesh as a COLOR_0 gradient (warm rock head -> cool blue-white neck ->
-// fading cool tip). Renderer swaps it into an existing S pool slot (size S + variant 2) => +0
-// new draw-call path. Node VR_Rock_Comet, mat VR_Rock_Comet.
-const COMET_FACET = { p10: 0.4386, p50: 0.6379, p90: 0.8117, mean: 0.6382 }; // I344 measured file-level
+// I371 (ST-338 E41 comet re-bake; supersedes the I344 note): comet rock variant
+// (render-only, zero src/core). One mesh/one prim; LUMPY nucleus (4 convex bumps + 2 shallow
+// craters, static displacement only, no subdivision) with the ion tail baked into the SAME
+// mesh as a COLOR_0 gradient (warm coma base -> bright blue-white ion tip, brighter than I344).
+// Renderer swaps it into an existing S pool slot (size S + variant 2) => +0 new draw-call path.
+// Node VR_Rock_Comet, mat VR_Rock_Comet.
+const COMET_FACET = { p10: 0.5073, p50: 0.6417, p90: 0.8270, mean: 0.6541 }; // I371 (ST-338 E41 comet re-bake): lumpy nucleus (4 bumps + 2 craters) + brighter warm-coma->blue-white ion-tail; head_p50 0.6103; whole-mesh re-pin
 test('asteroid_comet.glb: naming, poly budget, single mesh/prim, shape, COLOR_0 warm-head/cool-tail gradient (I344)', () => {
   const { buf, json, binOff } = parseGlb('asteroid_comet.glb');
   assert.ok(buf.length <= 12000, 'asteroid_comet.glb ' + buf.length + ' B <= 12 KB (ST-316 comet budget)');
