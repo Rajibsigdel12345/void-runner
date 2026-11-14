@@ -54,4 +54,30 @@ dist at open 131/1,918,997 B; headroom 178,155 B (>= 102400 B); target asset del
 PROCEED: ST-356 first (it defines the measurement all later own-side art will be judged by); ST-357 audit before any fix; ST-358 only with a proven gap and a pre-specified lever.
 
 ## ST-356 re-spec (I392) - tight hull crop + symmetric BEFORE/AFTER
-(to be filled by I392: crop geometry, BEFORE/AFTER numbers, published windows)
+Metric re-spec (G1v2). The defective I387 "body box" (half-width Rpx*1.15, a context crop ~2.3x the ship projected radius) is replaced by a geometry-derived tight hull crop: traverse the ship group, project every vertex of the body meshes (detected by material.color.getHex() === CFG.ship.palette.body.color, 2 meshes, detect=color-exact; an all-meshes fallback path is recorded if color-matching ever regresses), take the projected pixel bounding box, and crop to 75% of that box centered (half-extents 0.375*span per axis). This is exact, deterministic, and symmetric by construction (the identical mesh geometry is measured in both runs, so BEFORE and AFTER sample the same pixels). No color-thresholding. The crop is verified hull-dominated against the in-page closeups cu_high_sky_ship_idle_tight.png / cu_high_floor_ship_idle_tight.png (brass body + cyan cockpit, minimal background) - R-E45-2 mitigation satisfied.
+
+Symmetric BEFORE/AFTER (fx=high, seed 71382, both backdrops, tight hull crop):
+
+backdrop | metric | BEFORE (0x9a8468 m0.45 no-emissive) | AFTER (0xab9374 m0.15 emissive 0xffb347@0.12) | bg p50
+sky | hull tight p50 | 52.16 | 121.53 | 29.12
+sky | hull tight p90 | 62.08 | 130.24 | 76.56
+sky | sep (hull p50 - bg p50) | +23.04 | +92.41 | -
+floor | hull tight p50 | 52.16 | 123.46 | 10.63
+floor | hull tight p90 | 62.51 | 129.46 | 16.41
+floor | sep (hull p50 - bg p50) | +41.53 | +112.83 | -
+
+Both runs: bodyMeshes=2 (detect=color-exact), nvp=137 projected vertices, console 0/0, state MENU, fx=high. Evidence: .evidence/I392/hullprobe_before.json, hullprobe_after.json, cu_high_{sky,floor}_ship_idle_tight.png.
+
+Why the old metric failed (discrimination proof). The I387 body box p50 was 10.63 on floor (== floor bg p50 10.63, sepB 0) and 10.63 on sky (vs sky bg 29.12, sepB -18.49): the context crop's median is background, so it cannot certify hull readability and no material change can move it. The tight crop fixes this - even the dark BEFORE hull now separates (floor +41.53, sky +23.04) and the AFTER hull separates strongly.
+
+Published G1v2 windows (the gate for all future own-side art; fx=high, both backdrops):
+- hull tight p50 in [100, 160]
+- hull tight p90 in [120, 200]
+- separation (hull tight p50 - bg p50) >= 40
+- The accent (cockpit cyan 0x59d8ff @1.4) remains a separate frozen pin and is NOT part of G1v2.
+
+Discrimination test (BEFORE must FAIL, AFTER must PASS with margin):
+- BEFORE: hull p50 52.16 (sky and floor) -> below the [100,160] floor -> FAIL on both backdrops; p90 62.08/62.51 below [120,200] -> FAIL; sep sky +23.04 < 40 FAIL, floor +41.53 >= 40 PASS. The brightness floor is the primary gate (it fails BEFORE on both backdrops; separation alone does not on floor).
+- AFTER: hull p50 sky 121.53 (margin +21.53 above floor, -38.47 below cap) PASS, floor 123.46 (+23.46 / -36.54) PASS; p90 130.24 / 129.46 in [120,200] PASS; sep 92.41 / 112.83 >= 40 PASS.
+
+G1v2 is now a working own-side hull-readability metric: it measures the hull (geometry crop, not context), it discriminates (BEFORE FAIL / AFTER PASS on both backdrops), and it is symmetric (deterministic geometry, identical sampled pixels both runs). The metric is published and now governs ST-357/358 and all later own-side art. Zero src, zero asset delta.
