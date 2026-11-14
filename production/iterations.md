@@ -4748,3 +4748,31 @@ Changed files: 6 docs only (scope-check-E40.md G40.0 result section, stories.md 
 
 Next: new arc per the standing 100-iteration directive - bounded research (CGS skills + YouTube MCP, burned-id list respected) to pick the next unpolished surface, then a fresh scoped arc (do NOT re-open E40 deferrals - full skybox rework / moved band / animated sky / starfield shader upgrade / i18n / gamepad - without a new scoped arc).
 
+## I368 - E41 Asteroid + Comet Surface Relief Pass OPENED (cgs-scope-check + cgs-create-stories; DOCS-ONLY 0 KB)
+
+Goal: open the E41 arc per the user standing request (repeated) to make the rocks read MORE as cratered asteroids/comets (bumps + craters), under the "only if its gpu and compute heavy" constraint interpreted as: STATIC displacement baked into the mesh (same vertex count, near-same tris, no new shaders, no new draw calls, no per-frame deformation) = GPU-cheap. Deepen: crater bowls, raised rims, convex bumps, per-vertex value contrast. Radii re-normalized EXACT 2.2/1.3/0.7 after bake; tri caps 500/140/140 (all-asset 1800) held; facet-luma re-pins documented; in-place GLB swap (same URLs), zero src.
+
+Grounding + BEFORE baseline (captured this session, .evidence/I368; dev server 5173 killed + port free after each run; console 0/0):
+- before_i368.json (PR 1.0, 1280x720 buffer, fx off, audit light boost x2.2, reseed 41414, pool slots 0..3 = L/M/comet/S staged at x -7.5/-2.5/2.5/7.5 y2.5 z2, all other scene objects hidden): radii EXACT 2.2/1.3/1.003 (comet tail)/0.7; tris 490/134/180/134; all COLOR_0; luma boxes (p50/p90/max; mean): L 68.79/72.85/132.65 (68.18), M 71.28/73.28/121.65 (71.54), comet 66.65/75.28/125.15 (67.19), S 66.30/68.58/70.72 (66.31); skyP50 44.18; state MENU; sceneOk true. Deterministic (byte-identical boxes across 2 runs).
+- before_rock_closeup.png 436648 B = exact readPixels output (Y-flip, canvas converted IN THE SAME evaluate) - the staged rock row over the v6 skybox.
+- diag_i368.json (PR 1.25, 1600x900 reference run, same staging): slot p50 86.58/69/58.66/65.09 - REFERENCE ONLY (different PR; NOT the A/B basis).
+- AUTHORITATIVE before facet-luma pins: tests/assetGlbs.test.js (per-tri mean facet luma p10/p50/p90: L 0.1934/0.4603/0.8239, M 0.2980/0.6182/0.9314, S 0.4354/0.7386/0.9649; ladder L<M<S; warm R>=G>=B; band [0.10,1.20]; spread floor 0.50; COLOR_0 FLOAT VEC3 5126).
+- Art bible (design/art-bible): rocks irregular, asymmetric, pitted - no symmetry, no smoothness. Feel FROZEN (E8). No new mechanics (juice/boss/skybox arcs complete).
+
+Headless capture gotchas (NEW this session; future probes MUST follow the before_rock3.mjs pattern):
+- (1) page.screenshot = last-COMPOSITED frame (unstaged menu w/ DOM), NOT the staged renderer.render() output (preserveDrawingBuffer:false + async present) - the 9:50 PM 501 KB closeup was exactly this (invalid). Required path: gl.readPixels raw buffer.
+- (2) cross-evaluate ArrayBuffer round trip (readPixels buffer from evaluate #1 passed as arg to evaluate #2) silently yields a BLANK PNG (27.1 KB blank here; I282 raw PNGs before_closeup_raw.png + after_closeup_raw.png both 31418 B = same latent bug all along). FIX: Y-flip + putImageData + toDataURL in the SAME evaluate as readPixels, return the dataUrl string (436648 B verified, boxes unchanged).
+- (3) single giant evaluate WEDGES under host load (2 stalls: node 1864 pre-handoff; 84272 this session - flat chrome CPU 1.3-1.8 s total over 8+ min). FIX: 2-phase split - Phase A spawn + 800 ms settle (no render; stash scene in window.__bScene); Phase B stage + render + readPixels + stats + canvas->dataURL in the same evaluate; page.evaluate(fn, arg, { timeout: 300000 }) (options = 3rd arg). Completed in <30 s. Working probe = .evidence/I368/before_rock3.mjs; ST-339 AFTER probe = verbatim copy (nocache tag + output paths/names only) = R-E41-5 pipeline identity.
+- Host stall playbook (re-confirmed): chrome CPU sampler = Get-Process chrome | Measure-Object CPU -Sum across sleep windows; RISING = SwiftShader working (wait 5-10 min); FLAT = wedged -> taskkill chrome + kill probe node + retry.
+
+Scope: IN = static-displacement deepening (deeper crater bowls, more prominent raised rims, stronger convex bumps, sharper per-vertex value contrast; per-size crater counts/depths = free params within budget; comet: lumpy nucleus + brighter ion-tail COLOR_0 gradient) + radii re-normalization EXACT + facet-luma re-pin + A/B. OUT = animated/per-frame surface deformation, normal maps, new shaders/draw calls, radius drift, tri/byte bloat over budget, silent test-band widening.
+
+Stories: ST-336 (I369) grounded relief direction docs-only / ST-337 (I370) Blender rock L/M/S re-bake + blender-asset-qa / ST-338 (I371) Blender comet re-bake (CUTTABLE - close 4/5 w/ reason on budget conflict; comet keeps I344 asset) / ST-339 (I372) apply + A/B + re-pin / ST-340 (I373) G41.0 + closeout.
+
+Budget: dist at open 131 files / 1915020 B; headroom 182132 B (>= 102400 B). Family GLBs 44768 B (L 22696 / M 6588 / S 8388 / comet 7096) -> hard cap current + 20 KB (<= 64768 B). Zero src. Vendor sha 76DEA8151BC9352A unchanged (no three bump).
+
+Tests: 929/929. Build: 0 (131 files / 1915020 B; headroom 182132 B >= 102400 B). Vendor sha 76DEA8151BC9352A unchanged. Docs-only: zero source changes, green re-verified this session.
+
+Changed files: 6 docs only (production/scope-check-E41.md NEW, production/stories.md ST-336..340, production/epics.md E41, CHANGELOG.md I368, production/session-state/active.md, production/iterations.md). Zero src. .evidence/I368 untracked + gitignored: before_rock.mjs (wedges - do not use), before_rock2.mjs (blank PNG - do not use), before_rock3.mjs (WORKING probe), diag_rock.mjs (PR 1.25 reference), before_i368.json, diag_i368.json, before_rock_closeup.png, diag_rock.png (compositor frame - reference only), apply_docs_part1.cjs, apply_docs.cjs, msg_raw.txt.
+
+Next: I369 = ST-336 grounded rock/comet relief direction (docs only, zero src).
