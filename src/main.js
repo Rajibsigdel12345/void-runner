@@ -92,6 +92,7 @@ const skybox = createSkybox(scene, 'assets/skybox_equirect.jpg', (tex) => { // I
   pmrem.dispose();
   scene.traverse((o) => { const ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : []; for (const m of ms) if (m.isMeshStandardMaterial) m.envMapIntensity = CONFIG.fx.env.intensity; });
     rockRenders.setEnvIntensity(CONFIG.fx.env.rock); // I257 final: rock=0.0 decouples rocks from nebula IBL; ship/belt keep the 0.35 fill
+    skySettled = true; warmUp(); // E48 (ST-371, I401): env map settled - arm the both-settle warm gate
 });
 
 const camera = new THREE.PerspectiveCamera(CONFIG.camera.fovBase, window.innerWidth / window.innerHeight, 0.1, 400); // ST-082: base FOV from config
@@ -186,7 +187,41 @@ function warmCompile() {
     console.warn('E48 warmCompile: pre-compile failed (non-fatal):', e);
   }
 }
-assetLoader.loadAll().then(warmCompile);
+// E48 (ST-371, I401): W2 hidden warm-up render - one offscreen pass to a 1x1 target with all visible=false
+// objects temporarily force-visible: first geometry buffer uploads + any remaining program compiles happen
+// now (during menu load) instead of on the first PLAYING frame. 1x1 = no screen flash, negligible raster
+// cost. R-E48-3: renderer.info is reset around it so the warm render never pollutes frame stats (boot =
+// MENU, and the adaptive monitor only notes PLAYING/REPLAY frames - double protection).
+function warmRender() {
+  try {
+    const hidden = [];
+    scene.traverse((o) => { if (o.visible === false) hidden.push(o); });
+    for (const o of hidden) o.visible = true;
+    const target = new THREE.WebGLRenderTarget(1, 1);
+    renderer.info.reset();
+    renderer.setRenderTarget(target);
+    renderer.render(scene, camera);
+    renderer.setRenderTarget(null);
+    renderer.info.reset();
+    target.dispose();
+    for (const o of hidden) o.visible = false;
+  } catch (e) {
+    console.warn('E48 warmRender: hidden warm-up render failed (non-fatal):', e);
+  }
+}
+// E48 (ST-371, I401): both-settle gate - the skybox onReady sets scene.environment (PMREM IBL), which
+// changes every MeshStandardMaterial program cache key, so warming before it lands would recompile the
+// env variant at first combat use (I400: programs 43->44 mid-transition). The 4 s fallback covers the
+// skybox-FAILURE path (handle.ready stays false -> no env map ever -> warming without it is correct).
+let assetsSettled = false, skySettled = false, warmDone = false;
+function warmUp() {
+  if (warmDone || !(assetsSettled && skySettled)) return;
+  warmDone = true;
+  warmCompile();
+  warmRender();
+}
+assetLoader.loadAll().then(() => { assetsSettled = true; warmUp(); });
+setTimeout(() => { skySettled = true; warmUp(); }, 4000); // E48 I401: skybox-failure fallback (no env map; warming still correct)
 const bossHealth = createBossHealth(document.body); // ST-055
 const enemyBulletRenders = createEnemyBulletRenderer(scene); // ST-056
 const powerupRenders = createPowerupRenderer(scene);

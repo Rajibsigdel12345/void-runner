@@ -86,3 +86,18 @@ PROCEED - bounded, evidence-backed, render-only surface with two pre-registered 
 - Placement analysis: PLAYING-entry placement would either add ~80 ms input latency (keypress) or move the spike to frame 0 of the CG2 60-frame window (first-frame placement) - neither passes CG2's spike criterion. BOOT placement is the only variant that removes the spike from the transition window entirely -> selected for I401 (a documented refinement within the epic surface: the scope-check's "one hidden warm-up render" was pre-registered, and boot is the I95 surface's original location - during menu load).
 - CG1: NOT triggered (measurement reliable: spike reproducible frame-exact across sessions). R-E48-2 net-zero question: boot placement moves the one-shot cost onto menu load - treated as a different UX moment (waiting for the menu vs mid-combat stutter); the I401 A/B quantifies boot delta (navToReady + first-frame dt) vs transition gain and documents the interpretation if W2 is kept.
 - CG2 operative-criterion note: p90-of-first-60 is insensitive to a single spike (1 slow frame of 60 -> p90 ~ 17 ms); the operative criterion is effectively the spike frame (max of first 60). Documented here as the decision interpretation; both are reported in the A/B.
+
+## I401 Finding (ST-371)
+
+- W2 implemented as designed (both-settle gate: loadAll settle AND skybox ready, 4 s fallback; 1x1 force-visibility hidden render with renderer.info.reset() guards; boot placement). Root cause NAMED by the A/B cacheKey diff: arm A's 4 mid-transition programs are 2x BasicMaterial (srgb variant) + 2x MeshStandardMaterial (the 131079/131075 envMap-on/off flag flip, one = the asteroid-rim onBeforeCompile) - exactly the predicted skybox-PMREM-IBL cache-key change landing AFTER warmCompile.
+- Same-session A/B (.evidence/I401/ab_probe.mjs, headless SwiftShader, 1280x720, 3 arms x 3 pages, VERDICT PASS, console 0/0). s3 MENU->PLAYING transition spike (max of frames 1-60):
+
+  | arm | spike (frame 4) | programs mid-transition | steady p50/p90 (fr 31-90) | CG2 |
+  |---|---|---|---|---|
+  | A (baseline) | 91 ms | 14->18 (+4 new, named above) | 17.7 / 18.7 | ref |
+  | B (W1) | 69 ms | 23->23 (+0) | 17.7 / 18.9 | FAIL (24.2% < 25%) |
+  | C (W1+W2) | 23.3 ms | 44->44 (+0 new) | 17.8 / 18.6 | PASS (74.4%; reg +0.6%/-0.5%) |
+
+- SELECTION: C (W1+W2) KEPT. The env-variant programs compile at boot (44 total), so 0 appear mid-transition - the 91 ms hitch (4 env-variant recompiles) collapses to 23.3 ms ~= steady state.
+- CG2 interpretation notes: (1) the operative criterion is the spike frame (max of first 60), since p90-of-60 is insensitive to a single slow frame (documented in the I400 section); arm C's spike frame 23.3 ms is the pass signal. (2) R-E48-2 (boot placement moves the one-shot cost onto menu load = a different UX moment than a mid-combat stutter): boot navToReady A 2191 / B 937 / C 1942 ms, boot max120 A 26.8 / B 19.4 / C 19.9 ms, programsAtBootEnd C 44 - the C cost is spread over the menu-load frames (no single >20 ms frame after the first) rather than a 91 ms mid-combat spike; documented as the accepted interpretation of the pre-registered net-zero clause. (3) Same-session arm A is the reference baseline (cross-session drift can move unchanged cells up to ~+8.76 ms, so an arm-A vs arm-C comparison within one probe run is the valid CG2 math).
+- Frozen pin held: MENU fx-off 21/366 on all three arms (R-E48-4).
