@@ -67,3 +67,42 @@ Proceed with audit-first: ST-346 audit + BEFORE -> ST-347 grounded direction (on
 ## Next owner
 
 - I381 = ST-346 audit + BEFORE baseline (cgs-asset-audit).
+
+## Audit result (I381) - ST-346 BEFORE baseline (cgs-asset-audit)
+
+Method (headless, .evidence/I381/): dev server 5173 (killed + port verified free after); 2 pages - H = fx-high (vr.bloom.render() composer path, bloom.enabled true verified = game-loop-accurate) / O = fx-off (bare render); seed 71381, state MENU (never begin); environment kept (skybox, stars, arenaFloor, arenaRing), all live pools + telegraphs hidden; per class one at a time driven by its REAL sync() at deterministic t=0, centered (0, y, -10) (boss -14); cameras sky (0,2.0,2) / floor (0,7.5,-2), fov 60, near 0.05 - engagement ~12-16 m (real combat distances); per state: body box p50/p90 (+/-1.15 Rpx), accent box p90 (drone/mine/warden = whole-body emissive; stinger/flyer/boss = 0.4 Rpx box at the projected core/dome mesh world pos), bg annulus 1.3-2.2 Rpx (24x4 pts) p50/p90, refPatch (sky top strip / floor bottom strip); separations sepB = body.p50 - bg.p50, sepA = accent.p90 - bg.p90. Clean in-page-cropped closeups x16 (canvas drawImage crop -> toDataURL, zero DOM contamination) + precise stinger core 5x5 max-luma pixel read. Full data: enemy_audit_i381.json + cu_high_*.png.
+
+Backdrop refs (fx=high annulus p50/p90): sky 14.36/16.29; floor 10.63/16.41. (fx=off: sky 20.29/21.29; floor 16.56/21.41.)
+
+BEFORE (fx=high; body p50/p90 | accent p90 | bg p50/p90 | sepB | sepA):
+- drone|sky: 72.99/200.98 | 200.98 | 29.12/84.33 | +43.87 | +116.65
+- drone|floor: 15.27/200.77 | 200.77 | - | +3.71 | +171.65
+- mine|sky: 29.12/93.91 | 93.91 | 29.12/83.9 | 0.00 | +10.01
+- mine|floor: 16.41/94.63 | 94.63 | - | +5.78 | +65.51
+- stinger_idle|sky: 30.36/80.55 | 72.34 | 36.9/84.62 | -6.54 | -12.28
+- stinger_idle|floor: - | - | - | - | +24.87 (box stats identical to charge)
+- stinger_charge: IDENTICAL box stats to idle; core 5x5 max luma 71.1 (sky) / 47.8 (floor) = IDENTICAL to idle (emissive 80ecff@0.5 -> ffffff@2.9 NOT visible in pixels)
+- flyer|sky: 29.12/81.7 | 197.74 | 29.12/83.83 | 0.00 | +113.91
+- flyer|floor: - | ~200 | - | - | +168.62
+- warden_armored|sky: 62.72/130.85 | 130.85 | 34.62/79.27 | +28.10 | +51.58
+- warden_armored|floor: - | - | - | - | +44.8
+- warden_exposed|sky: 60.29/147.01 | 147.01 | - / 79.27 | +25.67 | +67.74
+- warden_exposed|floor: - | - | - | - | +61.89
+- boss_p1|sky: 72.82/108.73 | 182.49 | 41.11/81.12 | +31.71 | +101.37
+- boss_p1|floor: 76.89/95.78 | 179.92 | 64.97/86.84 | +11.92 | +93.08
+
+(dash = not transcribed; full per-box values in enemy_audit_i381.json). fx=off page: same ordering, separations similar (drone sky sepA +121.29 / mine +8.53 / stinger -15.08 idle==charge / flyer +117.88 / warden 52.75/66.27 / boss 102.92/97.12) - findings are NOT a bloom artifact. Console 0/0 both pages; NaN 0.
+
+Closeups VIEWED (all 16 cu_high_*.png):
+- drone: bright cyan wide-dart, whole-body glow dominates both backdrops - STRONG (P1 + P2 pass).
+- mine: red spike cluster, readable; glow acc90 ~94 sits INSIDE the rock ember band 54.26-112.43 (P3 collision) + weakest sky sepA +10.01 (P2 marginal).
+- stinger_idle: dark violet dart, body below bg on sky (sepB -6.54), near-invisible on the dark deck - darkest body in the fleet.
+- stinger_charge: PIXEL-IDENTICAL to idle (MD5 both backrops: sky BFAE958C / floor BA3D29B7) - the white-hot core telegraph is sub-pixel at 12 m = the aggression ticket does not read (P2 FAIL).
+- flyer: flat hex hull + bright pink dome - dome accent strong at both backdrops (STRONG).
+- warden_armored: teal plate + ring segments - distinct silhouette, strong (STRONG).
+- warden_exposed: orange spiked rock - silhouette danger read; acc90 147.0-148.7 = +34.6 ABOVE the ember peak 112.43 (P3 OK, distinguishable).
+- boss_p1: purple monolith + crown; core seam reads on BOTH backrops (the v1-probe 28 m floor core inversion does not reproduce at engagement distance) (STRONG).
+
+Per-class verdicts: drone KEEP / mine GAP / stinger GAP / flyer KEEP / warden KEEP / boss KEEP.
+
+VERDICT: MATERIAL GAPS -> E43 does NOT close at the ST-346 cut gate; proceed to ST-347 (I382). Gap list: G1 stinger charge telegraph unreadable at engagement distance (core sub-pixel at 12 m - needs a larger/brighter core read) / G2 stinger body 0x5a4f73 is the lowest value in the fleet (negative sky sepB, near-invisible on deck - silhouette IS distinct from the drone in closeups: slim dart vs wide diamond, so the fix is value, not shape) / G3 mine glow acc90 93.91 inside the ember band 54.26-112.43 + weakest sky sepA (shift out of band or strengthen).
