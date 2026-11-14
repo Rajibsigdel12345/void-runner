@@ -572,3 +572,12 @@ recorded in production/gates.md.
   candidate ladder C1 0x802468 / C2 0x8a2e74 (PRIMARY) / C3 0x963880 with pre-registered
   selection rule; A1-A6 bands CONFIRMED unchanged; cut gate #1 NOT triggered (hue risk low:
   same family R > B > low-G, tint 0xff4dd8 untouched) -> PROCEED to ST-367 (I398).
+- Progress: I398 (ST-367) DONE - CUT at cut gate #2 (no-change): full pre-registered ladder
+  measured (C2 0x8a2e74 luma 70.6 -> fx-off floor acc90 39.83 x2 identical; C3 0x963880
+  luma 81.2 -> 39.66; A1 band [55,85] missed at every rung - empirical slope ~0.10 acc90
+  per luma, floor crop p90 is coverage/geometry-dominated for the thin hex disc). A2 PASS
+  (67.71) / A3 clean (run2 within +/-8; run1 bomb-floor +8.76 = cross-session drift,
+  within-session -0.68) / A5 no blowout (maxCh 47.51/65.85 << 245, closeups VIEWED) / A6
+  929/929 + build 0 + dist byte-identical + vendor sha. powerupMesh.js REVERTED to
+  baseline 0x6d0f52 (tree byte-identical to bc591d2). Overdrive stays accepted-minor.
+  E47 closes at I399 (G47.0).

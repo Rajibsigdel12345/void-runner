@@ -161,3 +161,44 @@ overdrive baseline only; bomb shows a +22 pt geometry bonus at equal luma) sugge
 need luma ~86 (C3 territory); the empirical ladder is the decider, not the model.
 
 ### Bands A1-A6: CONFIRMED unchanged (as pre-registered at I396). Cut gate #1: NOT triggered.
+
+## ST-367 One-line emissive lift + A/B (I398) - LADDER MEASURED, CUT at cut gate #2 (no-change)
+
+Verdict: CUT (no-change). The pre-registered ladder was measured in full; no rung reaches
+A1, so overdrive stays at baseline 0x6d0f52 and remains an accepted-minor.
+
+### A/B evidence (headless probe .evidence/I398/ownside_probe.mjs, seed 71382, nocache
+i398v1, both backdrops, fx-off O + fx-high H; C2 run x2 for stability, C3 run x1)
+Ladder (fx-off floor acc90, A1 band [55,85]; I395 baseline = 36.70):
+- C2 0x8a2e74 (luma 70.6): 39.83 (run1) / 39.83 (run2 - identical; O tier deterministic
+  within-session) -> MISS (band floor 55)
+- C3 0x963880 (luma 81.2, top rung, below family max 90.3): 39.66 -> MISS
+Empirical slope ~= 0.10 acc90 per emissive-luma unit (+30.8 luma -> +3.13 floor acc90),
+~5x flatter than the I397 UNVERIFIED model (0.5/luma) - the floor crop p90 is
+coverage/geometry-dominated for the thin hex disc, not emissive-dominated (same pattern
+as the I395 bomb +22 pt facet bonus). The pre-registered selection rule was followed rung
+by rung: C2 miss-low -> C3 -> C3 miss -> CUT.
+
+### Other acceptance bands at C2 (the primary candidate; both runs)
+- A2 sky acc90 67.71 (band [55,120]) PASS
+- A3 other 6 emblems vs I395 baseline: run2 all within +/-8; run1 only bomb-floor +8.76
+  (0.76 over the noise floor - cross-SESSION drift: the within-session run1->run2 delta on
+  that same cell is -0.68, and the edit cannot touch the other 6 per-type materials)
+- A4: probe state=MENU, console 0/0 on all 4 pages, fx tiers + bloom flags correct; the
+  frozen pins (puab tint 0xff4dd8, PU_FACET, 21/366 + 50/1222 playframe, p1 EXACT) are
+  verified at the I399 G47.0 gate R3/R1 - the working tree is byte-identical to bc591d2
+  after the revert (git status clean), so no pin can have moved
+- A5: no fx-high white blowout - overdrive H-floor accent rgb90 max channel 47.51 (C2) /
+  65.85 (C3 H-sky, the max over all C3 cells) << 245; overdrive closeups VIEWED at C2
+  (sky+floor: clean magenta disc + O badge ring, no blowout) and at C3 (floor: clean)
+- A6: 929/929 + build 0 + dist 131/1,918,997 B byte-identical + vendor sha 76DEA8151BC9352A
+
+### Decision (cut gate #2: CUT)
+The one-line emissive lift cannot move the overdrive floor acc90 into [55,85] at any rung
+below the family max - the metric is geometry/coverage-dominated for this emblem shape,
+and the only remaining in-code levers (tint 0xff4dd8 = coupled config.js:590 sparkle +
+7-hue pin cascade; geometry = extent/silhouette pin cascade) are out of scope for a
+one-line change. Overdrive stays an accepted-minor: hue-unmistakable magenta, reads fine
+at the default fx-high (floor acc90 93.92 baseline / 100.14-100.41 C2 runs, sepA +64.5+).
+No-change is the pre-registered, expected outcome (anti-over-engineer). E47 closes at
+I399 (G47.0).

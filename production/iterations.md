@@ -5174,3 +5174,33 @@ Risk/follow-up: I382 = ST-347 grounded direction (docs-only, 2nd cut gate): per-
   unchanged (as pre-registered I396).
 - Result: 929/929 + build 0 + dist 131/1,918,997 B unchanged + vendor sha hold. 6 docs
   (0 src, 0 B asset delta). Next I398 = ST-367 (C2 edit + A/B probe x2, cut gate #2).
+
+## I398 - ST-367 Overdrive Emissive Lift A/B + CUT at cut gate #2 (dev-story)
+- Goal: implement the ST-367 one-line lift at the pre-registered PRIMARY rung (C2) with a
+  two-run A/B probe, step the ladder per the pre-registered selection rule, and rule cut
+  gate #2 (cgs-dev-story).
+- Evidence (headless probe .evidence/I398/ownside_probe.mjs, seed 71382, nocache i398v1,
+  both backdrops, fx-off O + fx-high H, 30 closeups on H tier):
+  Ladder (A1 = fx-off floor acc90, band [55,85]; I395 baseline 36.70):
+  - C2 0x8a2e74 (luma 70.6): floor 39.83 (run1) / 39.83 (run2 - identical; O tier is
+    deterministic within-session) -> MISS
+  - C3 0x963880 (luma 81.2): floor 39.66 -> MISS
+  Empirical slope ~0.10 acc90 per emissive-luma unit (~5x flatter than the I397 UNVERIFIED
+  0.5/luma model): the floor crop p90 for the thin hex disc is coverage/geometry-dominated
+  (same pattern as the I395 bomb +22 pt facet bonus), so no rung below the family max
+  (90.3) can reach 55.
+- Selection rule followed rung by rung: C2 miss-low (< 55) -> C3; C3 miss -> CUT
+  (no-change, pre-registered terminal outcome).
+- Other bands at C2: A2 sky 67.71 in [55,120] PASS; A3 other 6 within +/-8 on run2, run1
+  only bomb-floor +8.76 (cross-session drift - within-session run1->run2 delta -0.68 on
+  the same cell; the edit cannot touch the other 6 per-type materials); A4 probe state
+  MENU, console 0/0 x4 pages, fx/bloom flags correct, frozen pins verified at the I399
+  G47.0 gate (tree byte-identical to bc591d2 after revert); A5 no blowout (overdrive
+  H-floor rgb90 maxCh 47.51 C2 / 65.85 C3-H-sky << 245; overdrive closeups VIEWED at C2
+  sky+floor and C3 floor - clean magenta disc + O badge); A6 929/929 + build 0 + dist
+  131/1,918,997 B byte-identical + vendor sha 76DEA8151BC9352A.
+- Result: CUT at cut gate #2 - powerupMesh.js reverted to 0x6d0f52 (git tree byte-identical
+  to bc591d2), overdrive stays accepted-minor. The only remaining in-code levers (tint
+  0xff4dd8 = coupled config.js:590 + 7-hue pin cascade; geometry = extent/silhouette pin
+  cascade) are out of scope for a one-line change. 6 docs (0 net src, 0 B asset delta).
+  Next I399 = ST-368 (G47.0 gate R1-R5 + close E47 + open E48).

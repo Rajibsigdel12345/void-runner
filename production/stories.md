@@ -511,3 +511,7 @@ E16 closed at I251 (G16.0 PASS). E17 = the asteroid family hero pass + world pol
   scheduled I398). Bounded YouTube grounding (generic UI/UX support only, unverified label
   for this micro-decision) + lever re-verified (per-type emissive hex, un-pinned, one line)
   + ladder C1/C2/C3 + selection rule pre-registered + A1-A6 confirmed unchanged.
+- STATUS (I398): ST-367 DONE - CUT at cut gate #2 (no-change, pre-registered outcome).
+  Ladder measured in full (C2 x2: 39.83/39.83; C3: 39.66; A1 [55,85] missed everywhere);
+  slope ~0.10 acc90/luma proves the one-line lever cannot reach the band below family max;
+  revert to 0x6d0f52 verified byte-identical; overdrive stays accepted-minor.
