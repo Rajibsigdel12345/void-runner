@@ -71,3 +71,10 @@ APPROVED. Open E37 at I346 (this doc + stories, docs-only 0 KB). Execute ST-318 
 ## Next owner / decision
 
 producer: proceed to ST-318 at I347 (cgs-dev-story). Decision: ST-318 is the cuttable slice; ST-319 PWA is the headline.
+## ST-318 result (I347)
+
+- A/B (headless, one tab, fx-off, best seeded {version:1,value:9876}): BEFORE (a) credit {0,689,1280x15} x hint {36.31,681,339.98x15} = 2379.9 px^2 (339.98 x 7 - reproduces I319's noted "2380 px^2, 7px vertical cross" EXACT); (b) scoreBox {18,14,59.34x51} bottom 65 x wpnBox {18,58,40x28} = 280 px^2 (40 x 7 - the I319 note "320 px^2" measured exactly 280). AFTER (a) 0 px^2 + vgap 23 px; (b) 0 px^2 + gap 23 px. Both pairs clear the I320/I322 fix bar (0 px^2 intersection + >= 20 px gap). No new collisions: panel x topWrap 0, panel x centerWrap 0, panel x menu-grid 12027.8 UNCHANGED (pre-existing; I319 audited; out of scope).
+- Changes: screens.js menu settings panel bottom 24px -> 54px; hud.js wpnBox top 58px -> 88px. One line each, raw px, ST-318 comments. BY LAYER, 0 KB, 0 sim.
+- Causal proof: p1 demo pin EXACT (score 11334 / kills 57 / wave 2 / maxCombo 15 / shots 198/57 / acc 0.2878787878787879 / 36.14999999999923 s / replay 2169-2220 speed 4 / Q -> MENU / console 0/0) - .evidence/I347/p1_after.json.
+- R-E37-4 CLOSED. Quality bar held: 906/906; build 0; dist 124/1915299 B (0 B delta); vendor sha 76DEA8151BC9352A unchanged; bar measured at default --vr-fs=1 (FONT_SCALES 1/1.25/1.5 scale-inflation crowding = pre-existing pattern, documented not fixed - anti-over-engineer).
+- Next: ST-319 PWA at I348.

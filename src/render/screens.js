@@ -164,7 +164,7 @@ bottomWrap.append(bestRow, credit);
     // ST-279: demoted to the bottom-left corner (clear of the centered ship hero band).
     settings.menu.el.style.position = 'absolute';
     settings.menu.el.style.left = '16px';
-    settings.menu.el.style.bottom = '24px';
+    settings.menu.el.style.bottom = '54px'; // ST-318 (I347): E31 minor (a) - clears the menu-credit 7px cross (I319); >=20px gap bar
     bottomWrap.appendChild(settings.menu.el);
   }
 

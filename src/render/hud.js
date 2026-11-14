@@ -57,7 +57,7 @@ export function createHUD(root) {
   scoreBox.append(scoreRow, best);
 
   // I123: weapon-level indicator (WPN label + 3 pips) under the score, top-left.
-  const wpnBox = box('top:58px;left:18px');
+  const wpnBox = box('top:88px;left:18px'); // ST-318 (I347): E31 minor (b) - clears the BEST x WPN 280 px^2 cross (I319); >=20px gap bar
   const wpnLabel = document.createElement('div');
   wpnLabel.style.cssText = 'font-size:calc(11px * var(--vr-fs,1));font-weight:800;letter-spacing:2px;opacity:0.85;margin-bottom:3px;';
   wpnLabel.textContent = 'WPN';
