@@ -171,7 +171,22 @@ else if (name === 'flyer') flyerRenders.useGLB(entry.object); // ST-234: Blender
     }
   }
 });
-assetLoader.loadAll();
+// E48 (ST-370, I400): W1 pre-compile - once all asset jobs settle (every GLB swap-in
+// done), compile the shader programs of every in-scene material. r160 renderer.compile
+// traverses the whole scene (not traverseVisible), so hidden pool meshes (bullets,
+// enemy classes, powerups, fx pools) are covered too: no render, +0 draw calls, no
+// pixel change. Moves first-use compile cost off the first gameplay frames (I399 s3:
+// 71.5 ms transition spike) onto boot, while the user waits for the menu. Materials
+// already compiled by the first frame are cheap cache hits. Non-fatal on failure
+// (lazy compile stays the fallback).
+function warmCompile() {
+  try {
+    renderer.compile(scene, camera);
+  } catch (e) {
+    console.warn('E48 warmCompile: pre-compile failed (non-fatal):', e);
+  }
+}
+assetLoader.loadAll().then(warmCompile);
 const bossHealth = createBossHealth(document.body); // ST-055
 const enemyBulletRenders = createEnemyBulletRenderer(scene); // ST-056
 const powerupRenders = createPowerupRenderer(scene);
