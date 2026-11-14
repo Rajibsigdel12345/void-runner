@@ -134,3 +134,35 @@ Companion deviation note: full-ring at 15% was incompatible with the D8 window (
 Smoke (in-game headless, existing fire-and-forget loader, zero src): SMOKE {"skyboxReady":true,"skyboxUrl":"assets/skybox_equirect.jpg","camPos":[0.433,0.500,2.766],"nanPos":0,"frames":112,"framesDelta":31,"hasCanvas":true}, CONSOLE errors 0 warnings 0; MENU screenshot .evidence/I364/smoke_menu.png (structured band in upper third, I360 framing holds, hull IBL re-tint subtle). asset-qa gate (texture run, no mesh): numeric audit + viewed preview + in-game smoke + test-suite re-audit (928/928) - satisfied.
 
 Gates: 928/928 + build 0 + dist 131/1914094 B (-24356 B; headroom 183058 B >= 102400 B) + vendor sha 76DEA8151BC9352A unchanged (zero src). Next I365 = ST-333 verify + art QA + re-pin.
+
+## Verify + Re-pin (ST-333, I365)
+
+P1 - MENU band strip re-pin (strip y180-240 x420-860, n=26400/phase, fx off, 6 fresh-load phases, waits 3/5/7/9/11/13 s post-skybox-ready; camPos orbits ship at r ~2.84, y=0.5; fully deterministic - identical across 3 probe runs):
+
+| waitS | orbitA | p10 | p50 | p90 | mean |
+| 3 | 0.279 | 57.23 | 61.37 | 65.29 | 61.74 |
+| 5 | 0.3342 | 57.02 | 60.80 | 65.01 | 61.33 |
+| 7 | 0.454 | 56.73 | 60.37 | 64.51 | 60.76 |
+| 9 | 0.5739 | 56.23 | 60.01 | 64.22 | 60.84 |
+| 11 | 0.6945 | 55.73 | 59.37 | 63.51 | 60.25 |
+| 13 | 0.8136 | 55.59 | 58.80 | 62.51 | 59.78 |
+
+- camPos [0.74,0.5,2.7] -> [2.013,0.5,1.946] (menuOrbitRate 0.06 rad/s, ~105 s/rev).
+- p50 monotonic 61.37 -> 58.80: camera azimuth crossing the v6 band gradient - structural, not noise.
+- newBase 60.19 (median); delta vs I361 base 56.25 = +3.94 (v6 companion-arc knot + less dust darkening in strip).
+- Tolerance RE-PINNED 0.75 -> +/-1.5: max observed phase dev 1.39 + 0.1 margin (I361 0.75 pre-dates the v6 arc azimuth spread).
+- Floors (I360: p10>=45 / p90>=60 / mean>=50) HOLD per-phase, no re-derive: min p10 55.59, min p90 62.51, min mean 59.78.
+
+P2a - IBL analytic bound (no-bloom-leak): v6 bg (1024x512) lumaMaxSrgb 184.2 -> linear 0.4857 x env.intensity 0.35 = bound 0.17 < bloom threshold 0.72 PASS.
+
+P2b - hull A/B (Box3(shipGroup) projected +/-4px = box (247,157)-(1192,583), n=403942, 25 PBR mats bumped): A (v6) = B (v8) = A2 (restored v6) EXACT - p10 32.2 / p50 32.2 / p90 70.00 / p99 90.86 / max 243.56 / mean 44.11; dmean 0.00, restoreErr 0.00. The v6 vs v8 IBL re-tint is imperceptible in the ship region at envMapIntensity 0.35 (box background-dominated; hull PBR delta below 8-bit quantization).
+- three.js r160 root cause (vendor/three.module.js): swapping scene.environment to a different texture does NOT rebind material envMaps - materialProperties.envMap only updates in getProgram() when needsProgramChange fires; a texture swap does not change the program cache key. Fix used: material.version++ on all PBR materials (scene.traverse, MeshStandardMaterial/MeshPhysicalMaterial) after each env change + one settle render.
+- One-shot bright-tip settling: the first render after an rAF-freeze (and after any PMREM pass) shifts bright tips (mean -0.12, p99 -1.79, max -4.86, one-shot only); subsequent reads bit-identical (p2b_noise.mjs: 6 reads - R1 high-tips, R2-R6 identical). Probe does settle reads before each measured A/B/A2.
+
+P3 - HUD A/B EXACT I347 (best seeded 9876): hudA (menu credit rect (0,689,1280,15) vs hint (36.31,651,339.98,15)): inter 0, vgap 23.00; hudB (play scoreBox (18,14,59.34,51) vs WPN (18,88,40,28)): inter 0, vgap 23.00.
+
+P4 - PLAYING top strip (y0-80 x420-860, n=35200): state PLAYING, fx off, camPos ~[0.0,9.0,13.0] finite, nanPos 0, p50 69.00, p90 72.28 (documented, no hard pin).
+
+Art QA (viewed): shot_menu.png - v6 band structure (knots/dust/filaments) visible in the MENU upper third (feeds G40.0 R3); shot_playing.png - warm band gradient + dust visible, arena + ship + HUD intact, no NaN corruption. Console 0 errors / 0 warnings total across all 8 pages.
+
+Gates: probe 15/15 + 928/928 + build 0 (131/1914094 B) + vendor sha 76DEA8151BC9352A unchanged (zero src).
