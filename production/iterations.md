@@ -4980,3 +4980,11 @@ Risk/follow-up: I382 = ST-347 grounded direction (docs-only, 2nd cut gate): per-
 - Verification: 929/929 npm test + build 0 (fresh) + vendor sha 76DEA8151BC9352A unchanged (docs-only, zero src).
 - Result: ST-347 DONE. 2nd cut gate: NOT cut (G1/G2/G3 material gaps; G1 root-caused to the buried core). Next I383 = ST-348 implementation.
 - Risk: rendered body p50 after the 0x917fb9 lift is an estimate (lighting/tone-map non-linearity; BEFORE ratio 30.36/83.9 ~ 0.36 -> expected ~48.8, inside [45,75] with margin) - I384 A/B measures the real window and trims the single config constant within the iteration if needed.
+
+## I383 - ST-348 enemy readability implementation (cgs-dev-story; config + render-only, zero sim src)
+- Story: ST-348 - apply the I382 direction (G1 core offset + charge scale, G2 body value lift, G3 mine blink lift).
+- Changed: src/core/config.js (stinger body 0x917fb9 + new coreOffset 2.2 + coreChargeScale 1.9), src/render/stingerMesh.js (sync(): core.position.x = cfg.coreOffset; core.scale.setScalar(1+(cfg.coreChargeScale-1)*k)), src/render/mineMesh.js (emissiveIntensity 0.70+0.62 pulse). 5 docs.
+- Test pins: none needed - no test pins the stinger body color or the mine emissive (assetGlbs pins the GLB COLOR_0 bake only; unchanged, asset delta 0 B).
+- Verification: 929/929 npm test + build 0 (fresh). Headless smoke (1 page, server killed + 5173 free): boot + 10/10 GLBs; stinger sync idle -> core world x +2.2, scale 1.0, visible; charge -> scale 1.9, emissiveIntensity 2.9, x +2.2; mine pulse [1.01, 1.32, 1.01] (range 0.70-1.32 as designed); short real PLAYING run (Enter to start): no NaN, console 0/0. Screenshot .evidence/I382/smoke_playing_i383.png (onboarding overlay over live PLAYING state).
+- Result: ST-348 DONE. Budgets unverified (that is ST-349/I384 - corrected A/B).
+- Risk: none open - the A/B window has margin; if G2 p50 or G3 acc90 lands outside window, I384 trims the single constant in-iteration.

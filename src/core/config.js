@@ -373,13 +373,15 @@ export const CONFIG = {
     firstWave: 7,       // wave 7: one after the W6 breather (boss waves are 5/10)
     perWave: 1,
     maxConcurrent: 2,
-    palette: { body: { color: 0x5a4f73 } }, // I282/ST-267: deep violet (sRGB luma ~84, BELOW the skybox mid-band - a dark needle whose white-hot telegraph tip is the read; GLB COLOR_0 bake multiplies on top)
+    palette: { body: { color: 0x917fb9 } }, // I383/E43 G2: violet mid (sRGB luma 135.0; same hue as the I282/ST-267 deep violet 0x5a4f73 luma 83.9, VALUE-only lift - the I381 audit read it darkest-in-fleet at rendered p50 30.36 with negative sky sepB; GLB COLOR_0 bake multiplies on top)
     radius: 0.8,
     cruiseSpeed: 1.8,   // u/s (dodgeable: ship maxSpeed 14)
     cruiseTurn: 1.4,    // rad/s (gentle homing while cruising)
     cruiseMin: 1.5,     // s: rng window for the cruise between charges (min)
     cruiseMax: 3.0,     // s (max)
     telegraph: 0.8,     // s: warning before the dash (the glow is FX-tier-independent)
+    coreOffset: 2.2,      // I383/E43 G1: core offset along the dart local +X (m). The GLB core (1.28 m long) is modeled origin-centered INSIDE the body (3.68 m) - I382 Node-side GLTFLoader measurement; at 2.2 the core rear sits 0.28 m inside the 1.84 m nose and the tip pokes 1.0 m proud (the white-hot telegraph tip the I282 comment always meant)
+    coreChargeScale: 1.9, // I383/E43 G1: core scale at full charge (per-frame scale = 1 + (this-1)*k on the existing telegraph/charge ramp) - render-only, no new mesh/draw call
     chargeSpeed: 7.5,   // u/s (ship 14 - dodgeable with an early read)
     chargeDur: 1.4,     // s: charge length (or until the arena rim)
     recover: 1.2,       // s: vulnerable drift after each charge

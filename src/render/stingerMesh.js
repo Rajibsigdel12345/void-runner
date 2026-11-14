@@ -82,6 +82,11 @@ export function createStingerRenderer(scene) {
       else k = 0;
       mat.emissive.setRGB(CORE_IDLE.r + (1 - CORE_IDLE.r) * k, CORE_IDLE.g + (1 - CORE_IDLE.g) * k, CORE_IDLE.b);
       mat.emissiveIntensity = 0.5 + 2.4 * k; // white-hot charge clears the 0.72 bloom threshold
+      // I383/E43 G1: the GLB core is modeled origin-centered (buried in the body) - offset it
+      // along the dart axis so the white-hot tip pokes out; the scale pulses with the charge ramp.
+      const core = g.children[1];
+      core.position.x = cfg.coreOffset;
+      core.scale.setScalar(1 + (cfg.coreChargeScale - 1) * k);
       g.visible = true;
       i++;
     }
