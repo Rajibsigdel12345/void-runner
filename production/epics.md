@@ -564,7 +564,7 @@ recorded in production/gates.md.
   headroom >= 102400 B + 929/929 + build 0 + hygiene (chrome 0, ports 5173/4173/5199 free,
   node 13).
 - production/scope-check-E47.md = source of truth.
-- Status: OPEN (I396).
+- Status: CLOSED at I399 (G47.0 CUT-branch close; ST-365/366/367 done with ST-367 CUT; overdrive accepted-minor, permanently closed).
 - Progress: I397 (ST-366) DONE - grounded direction (cgs-dev-story; DOCS-only): bounded
   YouTube grounding (1 search / 3 queries / 8 raw; GENERIC UI/UX only, no game-specific
   pickup-glow content - unverified label; local I395 probe = primary evidence) + lever
@@ -581,3 +581,18 @@ recorded in production/gates.md.
   929/929 + build 0 + dist byte-identical + vendor sha. powerupMesh.js REVERTED to
   baseline 0x6d0f52 (tree byte-identical to bc591d2). Overdrive stays accepted-minor.
   E47 closes at I399 (G47.0).
+
+- Progress: I399 (ST-368) DONE - E47 closed via the pre-registered CUT branch (docs-only close per the E46 precedent): R1 p1 EXACT causal fresh (git log bc591d2..HEAD -- src/ EMPTY) / R3 playframe probe fresh (I375 verbatim re-run: A 21/366 EXACT + B 50/1222 EXACT + FLOOR-50 49.04/48.32/38.54/24.41 <50 + rim 52.76 + spot 112.43/54.26 + bands 42.04/38.54/30.55/25.27/21.84 + floor 32.2/72.22 [vs 72.07 = ~0.15 documented noise] + sky 70.14 + hrow 57 + console 0/0 x2) / R5 fresh (929/929 + build 0 + dist 131/1,918,997 B delta 0 + vendor sha + hygiene) / R2 rockab + R4 PWA re-confirmed unchanged (docs-only, cited from the I394 G45.0 fresh run - zero src/asset changes since, causal). Overdrive = accepted-minor, permanently closed (emissive ladder = no-go, slope ~0.10 acc90/luma; tint lever coupled config.js:590 + 7-hue pin cascade; geometry = extent/silhouette pin cascade). Any future overdrive work = a new epic.
+
+## E48 Boot & Transition Shader Compile Warm-up (ST-369..372)
+- Progress: OPENED at I399 (cgs-scope-check + cgs-create-stories, docs-only 0 KB).
+- Context: the I95-deferred "offscreen warm-up render" (production/memory-audit.md "Deferred decision (unchanged): I95 offscreen warm-up render - owner"), unowned since E8. src/main.js has no renderer.compile(), no warm render, no pre-warm anywhere (verified line-by-line) - GLB material shader programs compile lazily on first render use. I399 full sweep: s3 MENU->PLAYING one 71.5 ms frame spike at frame 4 post-Enter (combat-only materials first use = the E48 target signal); s0 boot cost is pre-rAF (the rAF sampler misses the first frame - the boot metric needs in-page performance marks or a boot-timing probe, decided at ST-370).
+- Grounding: I399 sweep (.evidence/I399/full_sweep.mjs + full_sweep.json) + code verification (main.js 1006 lines). Bounded YouTube grounding (3 queries / 20 raw; GENERIC, unverified label for this micro-decision): only relevant signal = STRK Tech "High FPS but Your Game Still Stutters?" (LZmLZFXtsMg) ch 6:06 "Storage & Shaders" - shader compilation named as a stutter cause (generic corroboration).
+- Stories: ST-369 close E47 + before-scan + full sweep + open (I399) / ST-370 warm-up implementation W1/W2 + in-page metric (I400, cgs-dev-story) / ST-371 A/B measure + selection or CUT (I401, cgs-dev-story) / ST-372 regression + G48.0 + close (I402, cgs-regression-suite + cgs-gate-check + cgs-milestone-review).
+- Deferrals: hardware-pending checklist (human/QA owner, out of bot scope) / E12's 3 flags (FX-off tier / DPR / tier-sync) already done in E12 (ST-224/225) / own-side art surface exhausted (E44/E45/E47 closed).
+- Risks: R-E48-1 SwiftShader (headless) distorts compile cost - measured margin may not transfer to real GPUs (CG1 guards) / R-E48-2 compile-at-boot moves cost to page load (net-zero for the user) (CG1) / R-E48-3 the hidden warm render must not be counted by the adaptive-quality monitor as a slow frame (reset info around it, or compile-only) / R-E48-4 no frozen pin re-pin (render-only; no pixel change; no new draw calls at steady state).
+- Budget: I399-I402 (4 iterations); 0 B asset delta (no Blender; no re-bake); few lines of src/main.js; +0 draw calls at steady state; zero sim.
+- Cut gates: CG1 (ST-369/ST-370) - if the boot/transition cost cannot be isolated/measured reliably headless, or compile-at-boot proves net-zero (cost moved to page load) -> CUT docs-only close E48. CG2 (ST-371) - the warm-up must improve the measured transition/boot baseline by the pre-registered margin (>= 25% reduction of the 71.5 ms spike frame, or p90 of the first 60 frames post-transition) AND no steady-state regression > 5% (60-frame dt compare), else revert + CUT.
+- Gate G48.0 (at ST-372): R1 p1 EXACT causal / R2 rockab EXACT 2.2/1.3/0.7 fresh / R3 playframe probe fresh (21/366 + 50/1222 EXACT + FLOOR-50 + floorab) / R4 PWA 11/11 fresh (I348 server on 5199, kill + verify) / R5 929/929 + build 0 + vendor sha 76dea8151bc9352a + dist headroom >= 102400 B + hygiene + (if not CUT) boot/transition metrics in-band.
+- production/scope-check-E48.md = source of truth.
+- Status: OPEN (I399).

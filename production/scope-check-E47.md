@@ -202,3 +202,14 @@ one-line change. Overdrive stays an accepted-minor: hue-unmistakable magenta, re
 at the default fx-high (floor acc90 93.92 baseline / 100.14-100.41 C2 runs, sepA +64.5+).
 No-change is the pre-registered, expected outcome (anti-over-engineer). E47 closes at
 I399 (G47.0).
+
+## Final (I399, G47.0 CUT-branch close)
+DECISION: E47 CLOSED at I399 via the pre-registered CUT branch (cut gate #2 fired at ST-367/I398: the one-line emissive lift is a no-go - the full ladder measured, C2 x2 39.83/39.83, C3 39.66, A1 [55,85] missed at every rung, empirical slope ~0.10 acc90 per luma = the floor crop p90 is coverage/geometry-dominated for the thin hex disc). Overdrive = accepted-minor, permanently closed (hue-unmistakable magenta; reads fine at the default fx-high). The remaining in-code levers (tint 0xff4dd8 = coupled config.js:590 sparkle + 7-hue pin cascade; geometry = extent/silhouette pin cascade) are out of scope for a one-line change; any future overdrive work = a new epic.
+
+Re-confirmed unchanged (docs-only close per the E46 precedent):
+- R1 p1 EXACT causal fresh: git log bc591d2..HEAD -- src/ EMPTY (I397/I398 docs-only net).
+- R3 playframe probe fresh (.evidence/I399/playframe_probe.mjs = I375 probe verbatim, OUT redirected): Part A overhead fx-off 21/366 EXACT (ring p90 49.04/48.32/38.54/24.41 <50 FLOOR-50 held; rim 52.76; spot t0.95 112.43 / t0.985 54.26; bands b4-8 42.04/38.54/30.55/25.27/21.84); Part B PLAYING fx-high 50/1222 EXACT (floor p50 32.2 EXACT / p90 72.22 vs pin 72.07 = ~0.15 documented render noise, consistent with I391/I394; sky 70.14; hrow 57; camFinite; 5 rocks at t=2.5 s).
+- R5 fresh: 929/929 + build 0 + dist 131/1,918,997 B (delta 0) + vendor sha 76DEA8151BC9352A + hygiene (dev server killed + 5173 free + chrome 0 + node 13).
+- R2 rockab + R4 PWA re-confirmed unchanged (cited from the I394 G45.0 fresh run; zero src/asset changes since - causal).
+
+Sweep addendum (I399 full regression sweep, .evidence/I399/full_sweep.mjs): the s2 "drift" 35/380 vs 50/1222 = a probe mis-spec in the new sweep (S2 pinned the MENU fx-high live-loop staging to the I375 Part B PLAYING staging pin; no frozen MENU fx-high pin exists - verified gates.md + iterations.md + all scope-checks). Resolved by the verbatim playframe re-run above (both frozen pins HOLD EXACT). MENU fx-high live-loop 35/380 is recorded as a new informational baseline (NOT frozen). Console 0/0 + NaN 0 across all 7 scenarios (s1 21/366 HOLD 60/60; s3 one 71.5 ms transition spike frame 4 post-Enter = the E48 target signal; s5 GAME_OVER best null->null; s6 REPLAY ST-190 best invariant HOLDS).
