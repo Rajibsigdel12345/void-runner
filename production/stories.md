@@ -476,3 +476,34 @@ E16 closed at I251 (G16.0 PASS). E17 = the asteroid family hero pass + world pol
 - ST-363 | apply + A/B + re-pin guardrail (cgs-dev-story; in-place GLB swap, loader + setGLB unchanged, zero sim): verify overdrive acc90 lifted into the target band at fx-off (both backdrops), the other 6 stable / within noise, puab 7-hue pins held (any re-pin documented, never widened), P4 MD5-differ holds both backdrops, draw calls 21/366 + 50/1222 unchanged, FLOOR-50 / skybox 70.14 / rocks / ring p90 unchanged, no NaN, console 0/0, closeups VIEWED. Cut-to-no-change fallback if the lift would hit the rock ember band or another emblem acc90.
 - ST-364 | G46.0 gate R1-R5 + close (cgs-regression-suite + cgs-gate-check + cgs-milestone-review): R1 p1 EXACT causal (zero sim src) / R2 rockab EXACT 2.2/1.3/0.7 fresh / R3 own-side probe fresh (overdrive acc90 in band + other 6 within noise + 7-hue pins + P4 differ + enemy byte-equal + playframe 21/366 + 50/1222 EXACT) / R4 PWA 11/11 fresh / R5 vendor sha 76DEA8151BC9352A + emblem family cap + dist headroom >= 102400 B + hygiene (ports free, 0 chrome, node 13); close E46 + open E47.
 - STATUS (I395): ST-360 DONE (fresh per-emblem probe + Node GLB bake measurement) -> PREMISE DISPROVEN at cut gate #1: overdrive's GLB COLOR_0 bake (p50 0.987) ~= bomb (0.993) and BRIGHTER than spread (0.825), yet overdrive renders the dimmest on the floor (fx-off 36.70 vs spread 68.32) -> the dimness is the in-code magenta tint 0xff4dd8 (low green) + low-green emissive 0x6d0f52 applied identically to all 7 emblems, NOT the GLB bake. A COLOR_0 re-bake is a NO-OP and would collide with the frozen PU_FACET bake-percentile pin (tests/assetGlbs.test.js). CUT E46 at ST-360 (Cut Option + R-E46-1): overdrive is an accepted-minor (hue-unmistakable magenta; reads fine at the default fx-high, floor acc90 93.92 sepA +64.51). ST-361 / ST-362 / ST-363 / ST-364 DROPPED (premise disproven at ST-360). Full audit + CUT decision: production/scope-check-E46.md "ST-360 BEFORE audit (I395)". Correct in-code lever (overdrive emissive 0x6d0f52 free knob / tint 0xff4dd8 coupled config.js:590) deferred to E47.
+
+## E47 Overdrive Pickup Emissive Readability Lift (ST-365..368)
+- ST-365 | scope-check + open (cgs-scope-check + cgs-create-stories; DOCS-only, zero src; this
+  iteration I396): bound E47 against the I395 finding (the emissive is the only free lever; the GLB
+  re-bake is disproven). Write production/scope-check-E47.md (summary / scope fit / cut option /
+  deferral / recommendation / risks / verification / next) + the epic + stories + acceptance A1-A6 +
+  gate G47.0 + pre-registered cut gates #1 (I397) and #2 (I398). Anti-over-engineer: a clean
+  no-change CUT is an acceptable outcome. 929/929 + build 0 + dist unchanged.
+- ST-366 | grounded overdrive emissive direction (cgs-dev-story; DOCS-only, zero src; CUTTABLE, cut
+  gate #1): bounded YouTube grounding (max 1 search, 2-3 queries, <= 3 new burned ids) on
+  pickup/upgrade readability via emissive/glow in space-arcade and roguelite (Faster Than Light /
+  asteroids-style / roguelite shop-item glow) + local evidence (I395 probe + closeups) -> finalize
+  the candidate emissive ladder (keep the hue family R > B > low-G; mid-family luma ~65-80; 2-3
+  candidate hexes) + confirm the A1-A6 bands; append "## ST-366 Grounded Direction (I397)" to
+  production/scope-check-E47.md. CUT (close E47 as no-change at I397) if grounding + evidence show
+  the lift is low-ROI or hue-risky. Zero src, 0 B asset delta.
+- ST-367 | one-line emissive lift + A/B (cgs-dev-story; render-only, ONE line in
+  src/render/powerupMesh.js; zero sim; CUTTABLE, cut gate #2): set overdrive.emissive to the
+  ST-366-selected hex (same-length 6-digit substitution); re-run .evidence/I395/ownside_probe.mjs
+  (fresh nocache tag) TWICE; verify A1 overdrive fx-off floor acc90 in [55,85] + A2 sky [55,120] +
+  A3 other 6 within +/-8 + A4 all frozen pins (puab tint 0xff4dd8, PU_FACET, 21/366 + 50/1222,
+  FLOOR-50 230/72/158, floor p50 32.2 / p90 72.07, skybox 70.14, rocks 112.43 / 54.26 / 52.76, ring
+  p90 + rim, enemy hierarchy, bullets, cockpit cyan 0x59d8ff @ 1.4) + A5 no NaN + console 0/0 +
+  closeups VIEWED (no fx-high white blowout) + A6 929/929 + build 0 + dist ~unchanged + vendor sha.
+  Revert + CUT (no-change) on any band failure.
+- ST-368 | G47.0 gate R1-R5 + close (cgs-regression-suite + cgs-gate-check + cgs-milestone-review;
+  DOCS-only): R1 p1 EXACT causal (zero sim src) / R2 rockab EXACT 2.2/1.3/0.7 fresh / R3 own-side
+  probe fresh (A1-A6 re-confirmed, two-run stability) / R4 PWA 11/11 fresh (dist:5199, kill + verify
+  free) / R5 vendor sha 76DEA8151BC9352A + dist 131 / headroom >= 102400 B + 929/929 + build 0 +
+  hygiene (chrome 0, ports 5173/4173/5199 free, node 13); close E47 + open E48.
+- STATUS (I396): OPENED (ST-365 done at I396; ST-366..368 pending, I397..I399).

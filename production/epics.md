@@ -531,3 +531,37 @@ recorded in production/gates.md.
 - Gate G46.0 (at ST-364): R1 p1 EXACT causal (zero sim src) / R2 rockab EXACT 2.2/1.3/0.7 fresh / R3 own-side probe fresh (overdrive acc90 in band + other 6 within noise + 7-hue pins + P4 differ + enemy byte-equal + playframe 21/366 + 50/1222 EXACT) / R4 PWA 11/11 fresh / R5 vendor sha 76DEA8151BC9352A + emblem family cap + dist headroom >= 102400 B + hygiene.
 - production/scope-check-E46.md = source of truth.
 - Status: CLOSED (CUT) at I395 / ST-360 (cut gate #1). 1/5 stories completed (ST-360 audit); 4 dropped (ST-361..364; the COLOR_0 re-bake premise was disproven at ST-360 - it is a no-op and would collide with the frozen PU_FACET bake pin). No asset/src/test change; all frozen pins carry. The correct in-code lever (overdrive emissive lift, a free un-pinned knob) is a candidate for E47.
+
+## E47 Overdrive Pickup Emissive Readability Lift (ST-365..368)
+- Progress: OPENED at I396 (scope-check passed, cgs-scope-check + cgs-create-stories).
+- Context: E46 (closed CUT at I395) left exactly one measured own-side minor: the overdrive pickup
+  reads the weakest of the 7 emblems at fx-off (floor acc90 36.70 vs family 59.21-165.52), and I395
+  proved the dimness is in the in-code material, not the GLB COLOR_0 bake (re-bake = no-op + would
+  collide with the frozen PU_FACET bake pin). The free un-pinned lever = the overdrive emissive hex
+  0x6d0f52 in src/render/powerupMesh.js TYPES (family emissive luma I396 audit: overdrive 39.8 +
+  bomb 40.6 bottom pair; all others 73.0-90.3; bomb reads 59.21 via cube facets, overdrive 36.70
+  via the thin hex prism).
+- Grounding: I395 fresh ownside probe (.evidence/I395/ownside_audit_i387.json, seed 71382, 6/7 EXACT
+  vs I393) + I396 family emissive luma audit (powerupMesh.js:35-41). Bounded YouTube grounding at
+  ST-366 (max 1 search, 2-3 queries, <= 3 new burned ids) on pickup readability in space-arcade /
+  roguelite.
+- Stories: ST-365 scope-check + open (I396) / ST-366 grounded direction (I397, cut gate #1) /
+  ST-367 one-line emissive lift + A/B (I398, cut gate #2) / ST-368 G47.0 gate + close (I399).
+- Deferrals: bomb low emissive (40.6; reads 59.21 = accepted) / overdrive geometry + size
+  (silhouette + extent pin cascade) / tint lever 0xff4dd8 (coupled config.js:590 + puab tint pin;
+  riskier) / all-7 re-tune / emissive pulse FX (scale pulse exists) / normal maps (art-bible).
+- Risks: R-E47-1 rock-ember-band collision or family separation loss -> A1/A2 bands + cut /
+  R-E47-2 hue drift -> same hue family + gate re-verify / R-E47-3 fx-high blowout -> A5
+  white-channel check + ladder step-down / R-E47-4 dist byte drift -> same-length hex + gate
+  verify / R-E47-5 over-scope -> overdrive-only / R-E47-6 probe noise masks a miss -> two runs,
+  both in-band.
+- Budget: I396-I399 (4 iterations); 0 B asset delta; ~0 B dist delta; +0 draw calls; +0 tris;
+  zero sim.
+- Gate G47.0 (at ST-368): R1 p1 EXACT causal (zero sim src) / R2 rockab EXACT 2.2/1.3/0.7 fresh /
+  R3 own-side probe fresh (A1 overdrive fx-off floor acc90 in [55,85] + A2 sky [55,120] + A3 other 6
+  within +/-8 + A4 all frozen pins + A5 no NaN + console 0/0 + closeups VIEWED + A6 929/929 + build
+  0 + dist + vendor sha) / R4 PWA 11/11 fresh / R5 vendor sha 76DEA8151BC9352A + dist 131 /
+  headroom >= 102400 B + 929/929 + build 0 + hygiene (chrome 0, ports 5173/4173/5199 free,
+  node 13).
+- production/scope-check-E47.md = source of truth.
+- Status: OPEN (I396).

@@ -1,0 +1,119 @@
+﻿# Scope Check - E47 Overdrive Pickup Emissive Readability Lift (ST-365..368)
+
+Source of truth for E47. Opened at I396 (cgs-scope-check + cgs-create-stories; docs-only).
+
+## Summary
+E46 (I395) proved the one remaining own-side minor - overdrive pickup dimness (fx-off floor acc90
+36.70, weakest of the 7; +4.5 over local bg p90) - is NOT in the GLB COLOR_0 bake (overdrive bake
+p50 0.987 ~= bomb 0.993 and brighter than spread 0.825; a re-bake is a no-op and would collide with
+the frozen PU_FACET bake-percentile pin). The real lever is in-code: `overdrive.emissive 0x6d0f52`
+in src/render/powerupMesh.js TYPES - a free un-pinned knob (not in config.js, not in any test; the
+shared emissiveIntensity 0.9 / roughness 0.35 / metalness 0.15 are identical across all 7). E47 lifts
+that one hex toward the mid-family emissive-luma band, A/B-verifies with the I395 ownside probe, and
+keeps every other pin frozen. One-line change; 0 B asset delta; ~0 B dist delta (same-length hex
+substitution); +0 draw calls; +0 tris; zero sim.
+
+## Scope Fit
+- Evidence (I395 fresh BEFORE, .evidence/I395/ownside_audit_i387.json): fx-off floor acc90 = rapid
+  105.07 / spread 68.32 / shield 164.80 / bomb 59.21 / magnet 139.90 / overdrive 36.70 / slowmo
+  165.52. Overdrive is the single outlier; the other 6 are in-ladder or dim-but-hue-distinct
+  (accepted at I393/I395).
+- Family emissive luma (computed I396 from powerupMesh.js:35-41, luma = 0.2126R+0.7152G+0.0722B):
+  rapid 90.3 / spread 78.8 / slowmo 78.7 / shield 75.8 / magnet 73.0 / bomb 40.6 / overdrive 39.8.
+  Overdrive + bomb are the bottom pair; bomb reads 59.21 (large cube facets), overdrive reads 36.70
+  (thin hex prism 0.42 r x 0.3 h) - so overdrive's gap = lowest family emissive luma + smallest
+  projected facet area. The emissive is the only free lever; a geometry/size change is a
+  silhouette/extent change (EMBLEM_TARGETS extent pins + silhouette) and is out of scope.
+- Fit: one line in one render file; bounded A/B via the existing probe tooling; zero sim; zero
+  asset; fits the current polish stage and the anti-over-engineer rule (the one remaining measured
+  own-side minor; a free knob; pre-registered cut gates).
+
+## Cut Option
+- Cut gate #1 (ST-366, I397): if the grounded direction (cgs-dev-story + bounded YouTube grounding)
+  shows the lift is low-ROI or hue-risky (any hue-preserving candidate drifts overdrive's rendered
+  hue from the puab ~322 deg band, or blows out at fx-high), close E47 as no-change at I397
+  (docs-only).
+- Cut gate #2 (ST-367, I398): if the A/B misses the acceptance bands (overdrive fx-off floor acc90
+  not in [55,85]) or the other 6 emblems drift beyond +/-8 acc90 (documented noise floor) or any
+  frozen pin moves, revert the line and close E47 as no-change (honest: overdrive stays
+  accepted-minor).
+- Anti-over-engineer note: a clean CUT is an acceptable, expected outcome of this epic - it exists
+  to test the one free lever with evidence, not to force a change.
+
+## Deferral
+- Bomb's low emissive luma (40.6, reads 59.21) - accepted (cube facets read; I393/I395).
+- Overdrive geometry/size increase (thin hex prism) - silhouette/extent change = EMBLEM_TARGETS +
+  PU_FACET + silhouette re-pin cascade; not this epic.
+- Tint lever (overdrive 0xff4dd8 -> higher-green magenta) - coupled with the config.js:590 pickup
+  sparkle + the puab tint pin + colorblind distinctness; strictly riskier; only if the emissive lift
+  CUTs and a future epic re-justifies it with fresh evidence.
+- All-7 emblem material re-tune - E47 is overdrive-only.
+- Animated emissive pulse / emblem FX - the scale pulse already exists (powerupMesh.js).
+- Normal maps / PBR upgrade - ruled out by the art-bible (flat faceted, no normal maps).
+
+## Recommendation
+PROCEED (bounded). One-line emissive lift of `overdrive` in powerupMesh.js TYPES, target chosen at
+ST-366 from a candidate ladder (keep the hue family R > B > low-G; lift value to the mid-family
+luma ~65-80). Acceptance (measured at ST-367 via the .evidence/I395/ownside_probe.mjs re-run, fresh
+nocache tag, TWO runs - both must pass):
+- A1 overdrive fx-off floor acc90 in [55, 85] (baseline 36.70; the family dim-accepted band is
+  bomb 59.21 / spread 68.32).
+- A2 overdrive fx-off sky acc90 in [55, 120] (baseline 67.37 - the floor is the binding tier).
+- A3 the other 6 emblems within +/-8 acc90 of the I395 baselines on both backdrops/tiers (noise
+  floor: the documented magnet-sky 7-pt re-measure drift).
+- A4 frozen pins held: puab 7-hue tint pins (overdrive tint 0xff4dd8 unchanged; hue ~322 deg),
+  PU_FACET bake pins (assets untouched), draw calls 21/366 (fx-off) + 50/1222 (fx-high), FLOOR-50
+  230/72/158, floor p50 32.2 / p90 72.07, skybox 70.14, rocks 112.43 / 54.26 / 52.76, ring p90
+  49.04 / 48.32 / 38.54 / 24.41 + rim 52.76, enemy hierarchy (drone 200.98 / stinger_charge 254 /
+  flyer 197.74 / warden_exposed 147.01 / mine 127.0 / boss 182.49), bullets (player 219.99 / enemy
+  152.18), cockpit cyan 0x59d8ff @ 1.4, p1 demo pin EXACT.
+- A5 no NaN, console 0/0, 30 closeups VIEWED (overdrive must NOT blow out white at fx-high: no
+  RGB channel > 245 at emblem-body p90).
+- A6 929/929 tests (no test changes expected - the emissive is un-pinned), build 0, dist 131 files
+  / ~1,918,997 B (+/-0 B expected), vendor sha 76DEA8151BC9352A, headroom >= 102400 B.
+
+## Risks
+- R-E47-1 the lift collides with the rock ember band (54.26-112.43) or erases family separation ->
+  the A1/A2 bands cap the target; A3 guards the other 6; cut to no-change on collision.
+- R-E47-2 overdrive rendered hue drift (puab ~322 deg) -> the emissive stays the same hue family
+  (R > B > low-G, only the value rises); the gate re-verifies the hue; the tint is untouched.
+- R-E47-3 fx-high blowout (overdrive fx-high floor baseline 93.92) -> the A5 white-channel check on
+  closeups; step the candidate ladder down one rung if it blows.
+- R-E47-4 dist byte drift -> same-length 6-digit hex substitution; the gate verifies dist file
+  count + total bytes.
+- R-E47-5 over-scope to bomb or an all-7 re-tune -> E47 is overdrive-only; bomb and the rest stay
+  accepted as-is.
+- R-E47-6 probe re-measure noise masks a real miss -> the A/B probe runs twice; both runs must be
+  in-band (I395's magnet-sky 7-pt drift is the documented noise floor).
+
+## Changed files or proposed files
+Changed (I396, docs-only): production/scope-check-E47.md (NEW), production/epics.md (E47 section),
+production/stories.md (ST-365..368), CHANGELOG.md (I396 line), production/iterations.md (I396 entry),
+production/session-state/active.md (notes line).
+Proposed (later stories): ST-366 appends "## ST-366 Grounded Direction (I397)" to this file
+(candidate ladder + final target). ST-367 edits src/render/powerupMesh.js ONLY (one line: the
+overdrive emissive hex). ST-368 docs-only.
+
+## Verification evidence
+I396 (this iteration): docs-only. npm test 929/929 + npm run build exit 0; dist 131 files /
+1,918,997 B byte-identical; vendor three.module.js sha256[:16] = 76dea8151bc9352a; vendor tree
+13/13 byte-identical source->dist. Carried evidence: .evidence/I395/ownside_audit_i387.json (the
+BEFORE baseline, 877,160 B, 30 closeups) + .evidence/I395/measure_emblems.mjs bake measurement.
+
+## Next owner or decision
+ST-366 (I397) = grounded direction (cgs-dev-story): bounded YouTube grounding (max 1 search, 2-3
+queries, <= 3 new burned ids) on pickup/upgrade readability via emissive/glow in space-arcade and
+roguelite games + finalize the candidate emissive ladder + confirm the A1-A6 bands. Then ST-367
+implement + A/B (I398), ST-368 G47.0 gate + close (I399).
+
+## Epic structure
+- Stories: ST-365 scope-check + open (I396) / ST-366 grounded direction (I397, cut gate #1) /
+  ST-367 one-line emissive lift + A/B (I398, cut gate #2) / ST-368 G47.0 gate + close (I399).
+- Budget: I396-I399 (4 iterations); 0 B asset delta (emblem family 37,912 B unchanged, cap <=
+  45,912 B); ~0 B dist delta; +0 draw calls; +0 tris; zero sim.
+- Gate G47.0 (at ST-368): R1 p1 EXACT causal (zero sim src) / R2 rockab EXACT 2.2/1.3/0.7 fresh /
+  R3 own-side probe fresh (A1-A6, two-run stability) / R4 PWA 11/11 fresh / R5 vendor sha
+  76DEA8151BC9352A + dist 131 / headroom >= 102400 B + 929/929 + build 0 + hygiene (chrome 0,
+  ports 5173/4173/5199 free, node 13).
+- Blender: NOT used in E47 (proven no-op by the I395 bake measurement; the lever is in-code).
+- production/scope-check-E47.md = source of truth.

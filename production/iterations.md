@@ -5117,3 +5117,34 @@ Risk/follow-up: I382 = ST-347 grounded direction (docs-only, 2nd cut gate): per-
   production/session-state/active.md. 0 src, 0 B asset delta, 0 test re-pin.
 - Test result: 929/929 + build 0 + dist unchanged (vendor sha 76DEA8151BC9352A, dist 131/1918997 B).
 - Hygiene: probe dev server killed + 5173 free, 0 chrome, node 13 baseline.
+
+## I396 - E47 Overdrive Pickup Emissive Readability Lift OPENED (scope-check + create-stories)
+- Goal: pick the next bounded, evidence-backed improvement surface after the E46 cut (ST-360) and
+  open it with pre-registered cut gates + acceptance bands (cgs-scope-check + cgs-create-stories).
+- Direction: E47 = the one-line in-code emissive lift of the overdrive pickup - the one remaining
+  own-side minor measured at I395 (fx-off floor acc90 36.70, weakest of 7; I395 proved the dimness
+  is NOT the GLB COLOR_0 bake [re-bake = no-op + frozen PU_FACET pin collision] but the in-code
+  material). overdrive.emissive 0x6d0f52 in src/render/powerupMesh.js TYPES is the free un-pinned
+  knob (not in config.js, not in any test; shared emissiveIntensity 0.9 / roughness 0.35 /
+  metalness 0.15 identical across all 7).
+- Evidence: I395 fresh ownside probe (.evidence/I395/ownside_audit_i387.json, 6/7 EXACT vs I393) +
+  I396 family emissive luma audit from powerupMesh.js:35-41 (rapid 90.3 / spread 78.8 / slowmo 78.7
+  / shield 75.8 / magnet 73.0 / bomb 40.6 / overdrive 39.8 - overdrive + bomb bottom pair; bomb
+  reads 59.21 via cube facets, overdrive 36.70 via the thin hex prism, so overdrive's gap = lowest
+  family emissive + smallest projected facet area; the emissive is the only free lever, geometry =
+  extent/silhouette pin cascade = out of scope).
+- Acceptance A1-A6 pre-registered: A1 overdrive fx-off floor acc90 in [55,85] (baseline 36.70;
+  family dim-accepted band = bomb 59.21 / spread 68.32) / A2 sky in [55,120] / A3 other 6 within
+  +/-8 (noise floor: magnet-sky 7-pt) / A4 all frozen pins (puab tint 0xff4dd8 + PU_FACET + 21/366 +
+  50/1222 + FLOOR-50 230/72/158 + floor p50 32.2/p90 72.07 + skybox 70.14 + rocks 112.43/54.26/52.76
+  + ring p90 + rim + enemy hierarchy + bullets + cockpit 0x59d8ff@1.4 + p1 EXACT) / A5 no NaN +
+  console 0/0 + closeups VIEWED (no fx-high white blowout) / A6 929/929 + build 0 + dist ~131/1918997
+  B + vendor sha 76DEA8151BC9352A.
+- Cut gates: #1 at I397 (direction: low-ROI or hue-risky -> close as no-change) / #2 at I398 (A/B
+  miss -> revert, no-change). A clean no-change CUT is an acceptable outcome (anti-over-engineer).
+- Stories: ST-365 (I396, this) / ST-366 grounded direction I397 (bounded YouTube: max 1 search,
+  2-3 queries, <= 3 new burned ids) / ST-367 one-line lift + A/B I398 / ST-368 G47.0 gate + close
+  I399.
+- Result: DOCS-only (6 changed + 1 new), zero src, 0 B asset delta. 929/929 + build 0 + dist
+  131/1918997 unchanged; vendor three.module.js sha256[:16] 76dea8151bc9352a; vendor 13/13
+  byte-identical. Next = ST-366 at I397.
