@@ -1011,6 +1011,18 @@ function frame() {
   }
 }
 frame();
+// ST-319 (I348): PWA - register the service worker ONLY in production builds. The build
+// stamps <meta name="vr-build" content="prod"> into dist/index.html; the dev server and
+// headless probes serve content="dev" and never register (R-E37-2: no SW staleness in
+// dev/probes). Registration failure is a graceful no-op (R-E37-1 CUT path).
+{
+  const buildMeta = document.querySelector('meta[name="vr-build"]');
+  if (buildMeta && buildMeta.content === 'prod' && 'serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+  }
+}
 
 
 

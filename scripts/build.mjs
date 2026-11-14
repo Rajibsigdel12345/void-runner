@@ -9,11 +9,26 @@ const dist = join(root, 'dist');
 rmSync(dist, { recursive: true, force: true });
 mkdirSync(dist, { recursive: true });
 cpSync(join(root, 'index.html'), join(dist, 'index.html'));
+// ST-319 (I348): stamp the prod build flag. src/main.js registers the service worker ONLY
+// when vr-build=prod, so the dev server + headless probes (repo root, content="dev") never
+// register the SW and can never be served stale modules (R-E37-2).
+{
+  const htmlPath = join(dist, 'index.html');
+  let html = readFileSync(htmlPath, 'utf8');
+  html = html.replace('<meta name="vr-build" content="dev" />', '<meta name="vr-build" content="prod" />');
+  writeFileSync(htmlPath, html);
+  console.log('build: index.html stamped vr-build=prod');
+}
 // I104: Blender-pass GLB assets load at runtime from assets/ (dev + dist).
 try { cpSync(join(root, 'assets'), join(dist, 'assets'), { recursive: true }); } catch { /* optional dir */ }
 for (const d of ['src', 'public']) {
   const src = join(root, d);
   try { cpSync(src, join(dist, d), { recursive: true }); } catch { /* optional dir */ }
+}
+// ST-319 (I348): root-scope service worker copy - dist/sw.js sits at the dist root so its
+// scope covers index.html + src + vendor + assets + public (R-E37-1).
+{
+  try { cpSync(join(root, 'public', 'sw.js'), join(dist, 'sw.js')); console.log('build: dist/sw.js (root scope)'); } catch { /* optional */ }
 }
 // ST-271 (I287): per-module minify of dist/src/**/*.js via esbuild transform -
 // syntax-level only (local identifiers + whitespace; import/export paths and

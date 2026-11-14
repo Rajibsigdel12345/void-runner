@@ -1,0 +1,20 @@
+{
+  "name": "Void Runner",
+  "short_name": "Void Runner",
+  "description": "3D arcade space-asteroid shooter. Installable, offline-ready.",
+  "id": "/",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#04060f",
+  "theme_color": "#04060f",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
