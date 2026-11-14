@@ -5078,3 +5078,11 @@ Risk/follow-up: I382 = ST-347 grounded direction (docs-only, 2nd cut gate): per-
 - Evidence: .evidence/I392/ (ownside_hullprobe.mjs, build_probe.mjs, hullprobe_before.json, hullprobe_after.json, cu_high_sky_ship_idle_tight.png, cu_high_floor_ship_idle_tight.png).
 - Changed files (6 docs, 0 src): CHANGELOG.md, production/iterations.md, production/stories.md (ST-356 DONE), production/epics.md (I392 progress), production/session-state/active.md, production/scope-check-E45.md (ST-356 re-spec filled).
 - Next: I393 = ST-357 (watch-item audit: shield/reticle box artifacts, trail ember band 54.26-112.43 vs rock pin 112.43/54.26, powerups fx-off readability - needs fx-off numbers).
+
+## I393 - ST-357 own-side watch-item audit (docs-only closure; cgs-asset-audit)
+- Goal: quantify + verdict the 3 I387 watch items (shield/reticle box artifacts, engine-trail ember band, powerups fx-off) and decide whether ST-358 (bounded fixes) is needed.
+- Method: DOCS-based audit. The I391 verbatim re-run (.evidence/I391/ownside_audit_i387.json) already has BOTH fx-high + fx-off pages for all elements, both backdrops, with per-element closeups. No new probe. Viewed 5 closeups (shield, reticle, engine_trail, overdrive sky+floor) to ground the visual verdicts.
+- Verdicts: (1) shield/reticle "box artifact" = context-crop MEASUREMENT artifact, not visual (shield = clean cyan torus ring, reticle = bright white glow marker, thin by design) -> KEEP; (2) trail ember band acc90 71.14/88.55 stays below rock bright pin 112.43, thin streaking cyan (closeup) -> KEEP/within tolerance; (3) powerups fx-off 4 strong / 3 dim-but-hue-distinct, overdrive floor fx-off weakest (36.70) but unmistakable magenta diamond+ring -> MINOR, not a hard gap.
+- Outcome: NO proven readability gap -> ST-358 DROPPED, E45 closes at ST-357. Overdrive-floor-fx-off documented honestly as a minor watch item for any future low-fx readability pass.
+- Changed: 6 docs (scope-check-E45.md ST-357 section, CHANGELOG, iterations, stories ST-357 DONE + ST-358 CUT, epics E45 progress, active). 0 src, 0 B asset delta.
+- Quality bar: npm test 929/929 + npm run build 0. All frozen pins hold.

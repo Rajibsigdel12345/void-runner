@@ -81,3 +81,34 @@ Discrimination test (BEFORE must FAIL, AFTER must PASS with margin):
 - AFTER: hull p50 sky 121.53 (margin +21.53 above floor, -38.47 below cap) PASS, floor 123.46 (+23.46 / -36.54) PASS; p90 130.24 / 129.46 in [120,200] PASS; sep 92.41 / 112.83 >= 40 PASS.
 
 G1v2 is now a working own-side hull-readability metric: it measures the hull (geometry crop, not context), it discriminates (BEFORE FAIL / AFTER PASS on both backdrops), and it is symmetric (deterministic geometry, identical sampled pixels both runs). The metric is published and now governs ST-357/358 and all later own-side art. Zero src, zero asset delta.
+
+## ST-357 audit (I393) - Own-Side Watch-Items Verdicts (CUTTABLE story; cgs-asset-audit, docs-only, zero src)
+
+Evidence base: the I391 verbatim re-run (.evidence/I391/ownside_audit_i387.json) already carries BOTH fx-high (H) and fx-off (O) pages for shield, reticle, engine_trail, and all 7 powerups, both backdrops (sky/floor), plus per-element closeups. ST-357 is therefore a DOCS-BASED audit: no new probe is launched; the existing numbers + closeup viewing ground the per-item KEEP / FIX verdicts. This is the CUTTABLE story - if no proven readability gap, E45 closes here and ST-358 (bounded fixes) is DROPPED.
+
+Metric note: the per-element "whole element" luma (acc50/acc90) uses the context crop, so p50 is background-contaminated (acc50 often equals bg50 on floor). p90 + hue (rgb) are the meaningful signals for a small/thin element; the tight-hull geometry crop from ST-356 (G1v2) is the readable-element metric and is NOT what these three watch items are about (they are accent/shield/trail/pickup elements, not the hull).
+
+Watch item 1 - shield + reticle ("box artifact"):
+- Shield closeup (cu_high_sky_shield.png) is a clean cyan/teal TORUS RING, not a boxy blob. The "box artifact" is a MEASUREMENT defect of the context crop (same class as the G1 body box ST-356 fixed), not a visual defect.
+- Reticle closeup (cu_high_sky_reticle.png) is a bright white glow TARGET MARKER on the arena floor - a clearly identifiable thin indicator. It is intentionally faint/thin (0.35 opacity by design for a targeting cue); the low acc90 (38.5 sky off / 21.4 floor off; 40.1 sky high / 16.4 floor high) reflects a small element inside a large context crop, not a rendering fault.
+- VERDICT: KEEP. No actionable gap. A tighter geometry-derived shield crop would be a future nicety, not an E45 gap.
+
+Watch item 2 - engine-trail ember band vs rock ember pin (rock bright ember pin = 112.43):
+- Trail closeups (cu_high_{sky,floor}_engine_trail.png) show a THIN STREAKING cyan line behind the ship, not a solid body or blob.
+- Numbers: trail acc90 71.14 (sky off) / 88.55 (sky high) stays BELOW the rock bright-ember pin 112.43; only the trail mid-band (54-88) overlaps the rock mid-band (54.26). Shape differs (streaking particles vs solid rock body) and spatial position differs (trail behind the ship, rocks in the arena field).
+- VERDICT: KEEP / within tolerance. Rocks remain the dominant, brightest ember source; the trail does not compete with or mask them. No fix.Watch item 3 - powerup fx-off readability (the key item):
+- Under fx-OFF (the user's explicit low-fx choice), acc90 by type (sky / floor), hue:
+  - rapid: 93.25 / 105.07 - warm amber (r60 g45 b29) - READS STRONG
+  - shield: 190.18 / 164.80 - white/cyan (r60 g58 b56) - READS STRONG
+  - slowmo: 136.26 / 165.52 - cyan/white (r58 g57 b56) - READS STRONG
+  - magnet: 134.69 / 139.97 - green (r54 g57 b44) - READS STRONG
+  - spread: 67.79 / 68.32 - orange (r54 g38 b29) - dim but hue-distinct
+  - bomb: 67.79 / 59.21 - red (r62 g35 b31) - dim but hue-distinct
+  - overdrive: 67.37 / 36.70 - magenta (r55 g34 b36, R&B >> G) - weakest, hue-distinct
+- Closeup confirmation (cu_high_{sky,floor}_powerup_overdrive.png): overdrive is an UNMISTAKABLE magenta diamond + ring pickup. The magenta hue (R&B >> G) is distinct from the cool/greenish floor background even when dim; it reads fine at the default fx-high (acc90 83/91).
+- 4/7 read strong under fx-off, 3 read dim-but-hue-distinct; at the DEFAULT fx-high all 7 read clearly (acc90 rapid 144/152, spread 99, shield 177/200, bomb 87/93, magnet 152/162, overdrive 83/91, slowmo 150/173).
+- VERDICT: MINOR watch item, not a hard gap. The weakest case (overdrive, floor, fx-off: acc90 36.70, +4.5 over bg p90) is hue-distinct and clearly a recognizable colored pickup. A fix (boost dim-powerup emissive under fx-off) would risk the frozen pins and is NOT justified by a proven readability failure.
+
+OVERALL VERDICT: all 3 watch items = within-tolerance / measurement-artifact / minor-and-hue-distinct. NO proven readability gap. ST-358 (bounded fixes) is DROPPED and E45 closes at ST-357. The overdrive-floor-fx-off number is documented honestly as a minor watch item for any future low-fx readability pass, not an E45 blocker.
+
+Frozen pins hold (zero src, zero asset delta): 21/366 (fx-off) + 50/1222 (fx-high) draw calls; FLOOR-50 230/72/158; floor 32.2/72.07; skybox 70.14; rocks 112.43/54.26/52.76; ring p90 49.04/48.32/38.54/24.41 + rim 52.76; enemy hierarchy (drone 200.98 / stinger 254 / flyer 197.74 / warden 147.01 / mine 127.0 / boss 182.49); cockpit cyan 0x59d8ff @1.4; player bullet 219.99 / enemy 152.18; vendor sha 76DEA8151BC9352A; asset delta 0 B. G1v2 windows (ST-356) unchanged.
