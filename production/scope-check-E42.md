@@ -134,3 +134,20 @@ ANOMALY RESOLVED (with data): the Blender-authored bake (.evidence/I377/floor_su
 Staged (NOT swapped this iteration - swap is ST-344/I378): .evidence/I377/floor_surface_v2_final.png = 16382 B (old 8586 B; cap ~25000 B; soft target <16500 B), sha256 03355dbce13c9db732d050b08411e2798d619834d45e7a8c24148682c6141ac8. Old PNG backed up + hash-verified (39E469B88E1367DD). audit_v2.json = full band/ring/hub/chunk/verify record.
 Acceptance (ST-343, this iteration): re-bake authored + audited + QA PASS + staged; FLOOR-50-safe by construction; p1/rockab EXACT causal preserved by construction (zero sim-relevant file changed - docs + .evidence only, no src touched); asset byte cap PASS (16382 B). swap + A/B + floorab re-pin = ST-344/I378.
 Verification + hygiene: 929/929 + build 0 (docs-only commit; assets/ unchanged this iteration); dist 131/1910880 B (headroom 186272 B); vendor sha 76DEA8151BC9352A unchanged; 0 chrome; no server running (5173 free).
+
+## I378 - ST-344 apply + A/B + art QA (cgs-dev-story; ASSET-ONLY in-place floor PNG swap, zero src)
+
+Deliverable: applied the I377-staged luma-neutral floor re-bake by in-place swap of assets/floor_surface.png (old 8586 B sha 39E469B8 -> new 16382 B sha 03355dbc = .evidence/I377/floor_surface_v2_final.png; same URL, no loader change; dist +7796 B) and re-pinned the floorab browser values under the I375 A/B CORRECTED method.
+A/B method (corrected, per R-E42-2/I370/I372): re-ran the I375 probe verbatim (.evidence/I378/probe.mjs + probe_a2.mjs) under identical conditions vs the pre-swap I375 baseline - Part A overhead freeze fx=off reseed 71200 (per-band + ring luma), Part A2 I322b conditions (no reseed, pool visible), Part B real PLAYING fx=high reseed 71201 (begin + advance(2.5), hrow 57). Read via in-page drawImage->getImageData on the raw WebGL canvas (NOT post-FX readPixels) + 2 full-frame screenshots.
+floorab RE-PIN (documented deltas vs the I359/I375 pins):
+- 4 interior ring p90: 49.04 / 48.32 / 38.54 / 24.41 = IDENTICAL (d 0.00). Grid-LINE-driven (floorGrid rest curve), so the texture swap cannot move them; all remain < 50 => FLOOR-50 ceiling HELD.
+- rim (rr=26) p90: 52.98 -> 52.76 (d -0.22) - the cool rim strip, exempt from the <50 rule (sole horizon separation).
+- hub spot t0.05 p90: 57.53 = the canonical hub pin = gridBright 0x483728 luma 57.5 (<= 59.8 cap). The t0.05 ring is off-center (r=1.3); it now reads the hub-glow peak (was 53.97, d +3.56); the center peak itself is unchanged.
+- spot t0.95 p90: 111.35 -> 112.43 (d +1.08); spot t0.985 p90: 54.40 -> 54.26 (d -0.14).
+- mid/outer band p50 lifted by the new deck micro-structure: band4 40.83->42.04 / band5 37.62->38.54 / band6 30.34->30.55 / band7 24.41->25.27 / band8 21.05->21.84; bands 0-3 d 0.
+- B PLAYING region (floor 32.2/72.07, sky 70.14, hrow 57): d 0.
+FLOOR-50 battery 230/72/158/0/0 UNCHANGED (config-driven rest curve; 929/929 green). No test band widened.
+LUMA-NEUTRAL PROOF: the asset-only swap moved zero grid-line p90s, zero draw calls/tris (overhead 21/366, PLAYING 50/1222, both d 0), zero visible-rock count (2), and zero B-region lumas - only the texture-structure band p50s + rim/spot moved, exactly as the ST-342 luma-neutral spec predicted.
+p1/rockab EXACT causal: zero src-relevant file changed -> RNG untouched. p1 = 11334/57/W2/combo 15/shots 198/acc 0.2878787878787879/36.14999999999923 s/replay 2169-2220/speed 4 seed 9876; rockab radii [2.2,1.3,0.7].
+Art QA (2 screenshots VIEWED): overhead fx-off (menu-overlaid; numeric reads from the raw canvas) + real PLAYING fx-high WAVE 1 (deck rings + 8-sector seams + outer panel ellipses clearly visible, floor stays dark so the low-poly rocks + cool rim strip pop, ship/engine/HUD intact, no artifacts/NaN). Console 0/0 x2, camFinite true.
+Verification + hygiene: 929/929 + build 0 (ASSET-ONLY swap; zero src touched) + dist 131/1918676 B (headroom 178476 B >= 102400 B; dist floor png sha 03355dbc 16382 B) + vendor sha 76DEA8151BC9352A unchanged + dev server 5173 killed + port free + 0 chrome. Next I379 = ST-345 E42 G42.0 gate + closeout.
