@@ -615,8 +615,8 @@ export const CONFIG = {
   // Camera transform + existing meshes only (the idle flame lights 3 already-allocated flame meshes).
   menuHero: {
     radius: 2.8,        // MENU orbit radius (was 13, then 4.8) - ST-280 I298 re-tune: closer hero (sweep S5 winner)
-    height: 1.4,        // MENU camera height (was 9, then 2.3) - ST-280 I298 re-tune: closer low 3/4
-    lookY: 0.05,        // MENU look-target Y (was 0, then 0.5) - ST-280 I298 re-tune: clears 720p bottom zone
+    height: 0.5,        // MENU camera height (was 9, then 2.3, 1.4) - ST-329 I360: near-level view (aim +horizon) lifts the orange nebula band (e +1.5..+10.5 deg) into the y 180-240 strip behind the title/ship; old -25.8 deg aim left the frame top at +4.2 deg (band mostly out of frame)
+    lookY: 0.28,        // MENU look-target Y (was 0, then 0.5, 0.05) - ST-329 I360: aims ~4.5 deg below camera level (view center -4.5 deg) so the band fills the upper third while the ship stays ~56 px above center (clears the y 415 DOM panel line)
     yaw: -1.0,           // ship facing (rad, render-only) - nose left-forward 3/4, engine stream reads right
     pitch: -0.10,       // ship pitch (rad) - slight nose-up
     bank: -0.18,        // ship bank (rad) - hero tilt

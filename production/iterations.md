@@ -4494,3 +4494,31 @@ Changed files: src/core/config.js, src/core/floorGrid.js, src/render/arenaFloor.
 Tests: 928/928. Build: 0 (131 files / 1938451 B / +586 B / headroom 158701 B >= 102400 B). vendor sha 76DEA8151BC9352A unchanged.
 
 Next I360: ST-329 MENU backdrop polish (cgs-dev-story; CUTTABLE per R-E39-5): render-only - reposition the MENU camera to frame the nebula band (match gameplay sky richness) or a subtle MENU glow; HUD A/B must stay EXACT I347 baseline (0 px^2 + 23 px gap); zero sim; p1 EXACT.
+## I360 - ST-329 MENU backdrop polish (cgs-dev-story; render-only, zero sim)
+
+Goal: bring the orange equirect nebula band into the MENU frame so the menu backdrop matches the gameplay sky richness - render-only (one camera transform in config), zero sim, and HUD A/B must stay EXACT I347 baseline (R-E39-5: cut if it shifts).
+
+What shipped:
+- src/core/config.js camera.menuHero: height 1.4 -> 0.5, lookY 0.05 -> 0.28 (radius 2.8 unchanged). Geometry: view center -25.8 deg -> -4.5 deg below camera level; frame top +4.2 deg -> +25.5 deg above. The orange equirect band (elevation +1.5..+10.5 deg) now sits in the MENU upper third (strip y 180-240 at 1280x720) behind the title + ship silhouette; the ship stays ~56 px above frame center with its body bottom ~y 400 (~15 px clear of the y 415 DOM panel line).
+
+R-E39-5 NOT triggered (NOT cut): HUD A/B re-measured EXACT I347 baseline - pair A (credit x hint) 0 px^2 intersection + 23 px vgap; pair B (scoreBox x wpnBox) 0 px^2 + 23 px gap.
+
+NEW band pin (I360, 26400 px strip y 180-240 x 420-860, fx off, rAF frozen): p50 56.25 (stable across 2 runs - pinned EXACT) / p10 50.25 / p90 65.37 / mean 58.13. Checks: p50 56.25 exact, p10 >= 45, p90 >= 60, mean >= 50 (absolute warm-band pins).
+
+Modeling note (documented): the first probe version compared the new sky strip against the I359 screenshot s same strip - but that old strip was FLOOR (old view elevation -10.8..-1.8 deg, p50 28.84), not sky. The ratio-to-baseline check (1.95) was therefore a modeling error and was replaced with the absolute warm-band pins above. Do NOT restore the ratio check.
+
+Re-pins / regression (probe 57/57, deterministic x2, ONE headless Chrome launch, dev server 5173 started + killed, port verified free):
+- floorab ring p90: 49.04/48.32/38.54/24.41 (main) + ring5 52.98 EXACT (I359).
+- hub p90 57.53/57.53 + rim p90 40.76 EXACT (I359).
+- floorab spot: 49.11/49.32/53.97 - 44.76/44.76/49.32 - 30.55/40.83/48.11 - 20.77/40.83/111.35 EXACT (I359).
+- FLOOR-50 230/72/158/0/0 EXACT (I359).
+- calls 31 / tris 546 EXACT (zero scene-graph change). fxSweep (MENU): high/low/off calls 42, mid finite, no NaN.
+- p1 causal EXACT: 11334/57/W2/combo15/shots198/57/acc 0.2878787878787879/36.14999999999923s/replay 2169-2220 speed4/Q->MENU. rockab EXACT 2.2/1.3/0.7. GLB all-ready (incl floorSurface: map 512x512 sRGB non-canvas toneMapped false).
+- 7/7 pages console 0/0.
+- Art check (shot_menu + shot_playing, headless SwiftShader): the warm band frames the ship silhouette behind the title; matches gameplay sky richness; PLAYING shot pixel-identical framing (follow cam untouched).
+
+Changed files: src/core/config.js, production/stories.md, production/epics.md, CHANGELOG.md, production/session-state/active.md, production/iterations.md.
+
+Tests: 928/928. Build: 0 (131 files / 1938450 B / -1 B / headroom 158702 B >= 102400 B). vendor sha 76DEA8151BC9352A unchanged.
+
+Next I361: ST-330 E39 regression + G39.0 gate + closeout (cgs-dev-story + cgs-regression-suite + cgs-gate-check): R1 p1 EXACT / R2 rockab EXACT / R3 floor-art probe (46/46-pin pattern = I359 probe; FLOOR-50 230/72/158) / R4 PWA 11/11 via I348 baseline server (port 5199, kill after + verify free) / R5 928 tests + build 0 + headroom >= 102400 B + vendor sha 76DEA8151BC9352A + servers killed -> E39 CLOSED 5/5 -> then open E40 (cgs-scope-check + cgs-create-stories).
