@@ -163,5 +163,7 @@ None.
 
 ### Next owner or decision
 
-ST-186 (E8E docs + changelog). Deferred decision (unchanged): I95 offscreen
-warm-up render - owner.
+ST-186 (E8E docs + changelog). Deferred decision (CLOSED at I402): I95 offscreen
+warm-up render - owned + closed by E48 (ST-372): W2 IS the offscreen
+warm-up render (1x1 WebGLRenderTarget force-visibility hidden render,
+both-settle gated, non-fatal; G48.0 PASS).

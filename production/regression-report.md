@@ -219,3 +219,24 @@ PASS. 630/630 x3 (matrix), browser sweep 6/6 scenarios green, console 0/0.
 - I206 (ST-206): E8 closeout (cgs-milestone-review) + G8.6 gate sign-off - all prerequisite
   evidence is now in place: 100 iterations, 630/630, build 0, regression B+C+D clean, playtest
   triaged (0 BUGs), release checklist SHIP-READY.
+## Round G48.0 (I402) - E48 Boot & Transition Shader Compile Warm-up closeout
+
+Skill: cgs-regression-suite + cgs-gate-check + cgs-milestone-review / Date: 2026-11-15 / Iteration: I402 (ST-372)
+
+### Summary
+Fresh R1-R5 gate before closing E48 (the last open epic; W1 renderer.compile + W2 both-settle-gated 1x1 offscreen warm render, selected by the I401 same-session A/B: s3 MENU->PLAYING spike 91->23.3 ms, 0 new programs mid-transition).
+
+### Results
+- R1 p1 demo: EXACT causal (seed 9876: 11334/57/W2/combo 15/shots 198/acc 0.2878787878787879/36.14999999999923 s/replay 2169-2220/speed 4). The W1+W2 delta since bc591d2 = src/main.js render-only; last sim-logic commit 93213d2 (I390).
+- R2 rockab: radii EXACT 2.2/1.3/0.7 (reseed 30201, 5/5 assets ready, console 0/0).
+- R3 playframe (I375 canonical probe, .evidence/I402/): A 21/366 EXACT + FLOOR-50 rings 49.04/48.32/38.54/24.41 + rim 52.76 + spot 112.43/54.26 + band ladder exact; B 50/1222 EXACT with the warm code present (no persistent state - R-E48-4) + floor p50 32.2/p90 72.28 (frozen 72.07, +0.21 render noise) + sky 70.14 + camFinite; console 0/0 x2.
+- R4 PWA: 11/11 (sw active root scope + claimed, online + offline boot, manifest standalone + 512 maskable, no NaN, console 0/0).
+- R5 quality bar: 929/929 + build 0 + dist 131/1,919,653 B (headroom 177,499 B) + vendor sha256-16 76DEA8151BC9352A + hygiene (chrome 0, ports free, node 13).
+
+### Evidence
+- .evidence/I402/causal.json + causal.mjs (R1+R2)
+- .evidence/I402/probe_i375.json + i375_overhead_fxoff.png + i375_playing_fxhigh.png (R3)
+- PWA run transcript captured in production/iterations.md I402 (R4)
+
+### Next owner / decision
+- I403: open the next epic (cgs-scope-check + cgs-create-stories). No open epics remain after E48.
