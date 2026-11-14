@@ -37,7 +37,7 @@ export function createMineRenderer(scene) {
 
   /** sync(mines, t): place the pool, pulse the core blink. */
   function sync(mineField, t) {
-    mat.emissiveIntensity = 0.70 + 0.62 * (0.5 + 0.5 * Math.sin(t * 5)); // I383/E43 G3: armed blink x~1.55 (range 0.70-1.32) - lifts the red glow out of the rock ember band (BEFORE acc90 93.91, target 125-145); same phase/period, hue stays red 0xff2a2a
+    mat.emissiveIntensity = 0.74 + 0.62 * (0.5 + 0.5 * Math.sin(t * 5)); // I384/E43 G3: armed blink (range 0.74-1.36) - I384 sweep: t=0 acc90 127.0 sky / 127.7 floor in [125,145] (was 124.71/125.5, 0.29 under on sky); peak ~144.7 stays at-or-below warden exposed 147.01; same phase/period, hue stays red 0xff2a2a
     let i = 0;
     for (const mine of mineField.mines) {
       if (mine.dead || i >= max) continue;

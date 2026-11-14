@@ -81,7 +81,7 @@ export function createStingerRenderer(scene) {
       else if (s.state === 'recover') k = Math.max(0, 1 - s.t / cfg.recover) * 0.35;
       else k = 0;
       mat.emissive.setRGB(CORE_IDLE.r + (1 - CORE_IDLE.r) * k, CORE_IDLE.g + (1 - CORE_IDLE.g) * k, CORE_IDLE.b);
-      mat.emissiveIntensity = 0.5 + 2.4 * k; // white-hot charge clears the 0.72 bloom threshold
+      mat.emissiveIntensity = cfg.coreIdleGlow + (2.9 - cfg.coreIdleGlow) * k; // I384/E43 G1: dim idle base (coreIdleGlow 0.09) so the un-buried core does not pre-charge; charge end stays 2.9 (white-hot clears the 0.72 bloom threshold)
       // I383/E43 G1: the GLB core is modeled origin-centered (buried in the body) - offset it
       // along the dart axis so the white-hot tip pokes out; the scale pulses with the charge ramp.
       const core = g.children[1];

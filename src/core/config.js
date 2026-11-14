@@ -382,6 +382,7 @@ export const CONFIG = {
     telegraph: 0.8,     // s: warning before the dash (the glow is FX-tier-independent)
     coreOffset: 2.2,      // I383/E43 G1: core offset along the dart local +X (m). The GLB core (1.28 m long) is modeled origin-centered INSIDE the body (3.68 m) - I382 Node-side GLTFLoader measurement; at 2.2 the core rear sits 0.28 m inside the 1.84 m nose and the tip pokes 1.0 m proud (the white-hot telegraph tip the I282 comment always meant)
     coreChargeScale: 1.9, // I383/E43 G1: core scale at full charge (per-frame scale = 1 + (this-1)*k on the existing telegraph/charge ramp) - render-only, no new mesh/draw call
+    coreIdleGlow: 0.09,    // I384/E43 G1: dim idle-core emissive base (k=0) so the UN-BURIED core does NOT pre-charge - I384 sweep: idle core acc90 94.9 sky / 95.2 floor <= body p90+25 (106.9/101.6) with margin; charge end stays 2.9 (coreChargeScale unchanged); render-only, no new draw call
     chargeSpeed: 7.5,   // u/s (ship 14 - dodgeable with an early read)
     chargeDur: 1.4,     // s: charge length (or until the arena rim)
     recover: 1.2,       // s: vulnerable drift after each charge
