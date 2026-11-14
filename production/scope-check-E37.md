@@ -86,3 +86,22 @@ producer: proceed to ST-318 at I347 (cgs-dev-story). Decision: ST-318 is the cut
 - R-E37-1/2/3/5 CLOSED (R-E37-4 already closed at I347). R3 ZERO src/core (git diff 5a7c303 -- src/core empty; main.js is the boot/render layer, not core).
 - Quality bar held: 914/914 (906 + 8 pwa.test.js); build 0; dist 128/1924616 B (+9317 B: icon 4871 + manifest 452 + sw 1755 x 2 + index/main minified ~484); headroom 172536 B >= 102400 B floor; vendor sha 76DEA8151BC9352A unchanged.
 - Next: ST-320 closeout at I349 (E37 regression battery + PWA probe re-run + HUD A/B re-measure + G37.0 R1..R5 + R-E37-1..5 all closed -> E37 CLOSED 3/3).
+
+## ST-320 result (I349)
+
+- Files: docs-only (production/iterations.md, production/stories.md, production/epics.md, CHANGELOG.md, production/session-state/active.md, this file). Zero code changes; 0 KB dist.
+- Verification (all headless; dev server 5173 + dist server 5199 each started, used, killed, ports confirmed free after):
+  - Full 13-probe battery (.evidence/I349_runner.mjs, one chrome launch, 13 fresh contexts): 13/13 OK.
+    - p1 demo pin EXACT: score 11334, kills 57, wave 2, maxCombo 15, shots 198/57, acc 0.2878787878787879, time 36.14999999999923 s, replay idx 2169 len 2220 speed 4, Q -> MENU, console 0/0.
+    - p7a FLOOR-50: 230/61/169/0/0 (bullet/floor/delta/annulus>=150/big_clusters).
+    - p7b MENU: 60 frames over 21..366 (60/60 unique), vendorLowpWarns 0.
+    - rockab: GLB radii EXACT L 2.2 / M 1.3 / S 0.7.
+    - puab: all 7 powerup emblem hues in-band (rapid ~44, spread ~34, shield ~187, bomb ~357, magnet ~140, overdrive ~322, slowmo ~194; gold 45.6); fx restored off; errors 0.
+    - floorab: rings p90 48.47 / 48.47 / 39.90 / 29.41 + rim 55.47 (EXACT to I322 pin).
+    - p2-p6, p8, perception: OK.
+  - PWA probe re-run (.evidence/I348/pwa_probe.mjs + serve.mjs over dist:5199, fresh profile): 11/11 - SW active at root scope http://127.0.0.1:5199/ + claimed; online boot __vr; offline-nav boots __vr from cache, no NaN; manifest GET 200 application/manifest+json display standalone icon 512 any maskable start_url+scope "."; console 0/0.
+  - HUD A/B re-measure (.evidence/I347/hud_ab.mjs + hud_ab_run.mjs): identical to I347 baseline - pairA credit x hint 0 px^2 + 23 px gap, credit x panel 0 px^2; pairB scoreBox x wpnBox 0 px^2 + 23 px gap, best x wpnBox 0 px^2; console 0/0.
+- G37.0: R1 fit PASS (3 slices owner-sized, independent, gated; no scope creep). R2 assets PASS (icon-512.png 4871 B 512x512 <= 45 KB; manifest icon entry valid). R3 ZERO src/core PASS (git diff 5a7c303..HEAD -- src/core EMPTY). R4 regression PASS (battery 13/13 + PWA 11/11; p1 EXACT; NaN 0; console 0/0; vendor sha 76DEA8151BC9352A unchanged). R5 quality bar PASS (914/914 + build 0 + headroom 172536 B >= 102400 B).
+- R-E37-1..5: all CLOSED (I347/I348 evidence; re-verified I349).
+- Quality bar: 914/914; build 0; dist 128/1924616 B (0 B delta, docs-only); headroom 172536 B >= 102400 B; vendor sha unchanged.
+- E37 CLOSED 3/3 at I349 (state 57c8b92 verified). Next: E38 touch-fallback arc at I350 (top platform; grounding captured E23: GDevelop ypu-huHz2P0, griffpatch 9TK8x2nSMPI / cI1mdVVvCWY).
