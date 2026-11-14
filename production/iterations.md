@@ -4853,3 +4853,21 @@ Verification: npm test 929/929 (0 fail); npm run build exit 0; dist 131 files / 
 Result: DONE. ST-339 complete; the I371 comet bake is confirmed live in the running game with the corrected A/B evidence + clean (benign-favicon-only) console + EXACT radii + zero new draw-call paths.
 
 Risk/follow-up: I373 = ST-340 E41 G41.0 gate + closeout (docs only; R1 p1 pin EXACT causal cite I370/I371 battery; R2 rockab FRESH headless; R3 rock+comet art probe; R4 PWA 11/11 FRESH; R5 quality bar + hygiene). After E41 close -> open E42 per the standing 100-iteration directive (bounded research + scope-check for the next unpolished surface).
+## I373 - ST-340 E41 G41.0 gate + closeout (cgs-regression-suite + cgs-gate-check + cgs-milestone-review; DOCS-only, zero src)
+
+Goal: run the G41.0 acceptance gate (R1-R5), close E41 5/5, and leave the tree clean + ports free.
+
+Changed: 6 docs only (scope-check-E41 G41.0 result, stories ST-340 DONE, epics E41 CLOSED 5/5, CHANGELOG I373, active.md, iterations) + .evidence/I373/{rockab_run.mjs,rockab_i373.json}. Zero src.
+
+G41.0 results:
+- R1 (p1 demo pin EXACT causal, CITE): I370/I371 battery - 11334 / 57 / W2 / combo 15 / shots 198 / acc 0.2878787878787879 / 36.14999999999923 s / replay 2169-2220 / speed 4 (seed 9876). Causal: since the pin only in-place asset swaps at identical URLs (I370 rocks, I371 comet) with unchanged loader keys and zero src -> sim/replay RNG streams untouched.
+- R2 (rockab radii EXACT, FRESH): .evidence/I373/rockab_run.mjs (dev server started for the probe, killed after, 5173 verified free): reseed 30201, spawn L/M/S at [-3.5,-4]/[0,-4]/[3.5,-4] -> [2.2, 1.3, 0.7] EXACT; state MENU; 4/4 GLB ready (rockL/rockM/rockS/rockComet); console 0/0.
+- R3 (rock+comet art probe, CITE I372 - same tree, zero src since): 4/4 GLB loaded+ready with loaded-geo identity (comet posHash 05b189fe == I371 node-sig); tris L490 <= 500 / M134 <= 140 / S134 <= 140 / comet 180, all-asset sum within 1800 (test-enforced, green); radii EXACT (R2 fresh); facet re-pins green (rocks I370: ladder p50 strict L<M<S, spreads 0.6375/0.6159/0.5703, band [0.10,1.20]; comet I371: p10 0.5073 / p50 0.6417 / p90 0.8270 / mean 0.6541); A/B CORRECTED method (3 screenshots VIEWED at I372: closeup 47745 B sha 9c7eaa3e old-vs-new, staged 541002 B real-scene ion tail, playing 407519 B camFinite); no NaN; console 0 real errors (1 benign favicon 404 characterized via CDP); no new draw calls (poolMatShared true, +0 paths / +0 programs).
+- R4 (PWA 11/11, FRESH): .evidence/I348/pwa_probe.mjs against the fresh production build served at 5199 by the CANONICAL .evidence/I348/serve.mjs -> 11/11 PASS (sw registration active + scope root + controller claimed on reload; online boots __vr; manifest GET 200 + application/manifest+json + standalone + 512 png any maskable + start_url/scope "."; offline boots from cache + no NaN; console 0/0). Server killed + 5199 verified free. NEW GOTCHA: scripts/serve.mjs has no .webmanifest MIME entry and serves the manifest as application/octet-stream (probe then fails 10/11) - PWA probes MUST use .evidence/I348/serve.mjs.
+- R5: npm test 929/929 (0 fail); npm run build exit 0 (fresh); dist 131 files / 1910880 B (headroom 186272 B >= 102400 B); family GLBs = 40628 B <= 64768 B cap; dist comet sha C1E787668FF949D0 byte-MATCHES src; vendor three.module.js sha 76DEA8151BC9352A unchanged; ports 5173/5199 free; 0 chrome; node process audit = 13 MCP baseline, no strays.
+
+Verification: gate battery above; docs diff = 6 files only.
+
+Result: DONE. G41.0 PASS (R1-R5) -> E41 (Asteroid + Comet Surface Relief Pass) CLOSED 5/5 (ST-336..340). Ship state: v8 rock relief + I371 lumpy comet with bright ion tail live in the running game, all pins green, no new draw calls, 929/929.
+
+Risk/follow-up: (1) NEW GOTCHA recorded - scripts/serve.mjs lacks the .webmanifest MIME; either fix serve.mjs in a future tooling story or always use the I348 canonical server for PWA probes. (2) Next I374 = open E42 per the standing 100-iteration directive: bounded research + scope-check for the next unpolished surface (cgs-scope-check + cgs-create-stories, docs only; feel remains FROZEN - no mechanics re-open).
