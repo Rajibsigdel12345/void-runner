@@ -141,3 +141,79 @@ bake cannot lift overdrive acc90 into the target band without disturbing the pua
   (I393 audit + art-bible, no new probe at open) and anti-over-engineer (cut-to-no-change
   fallback + a CUTTABLE ladder pass), and it matches the user standing order (Blender asset work
   + art improvement). Open E46 now; ST-360 (BEFORE audit) is cut gate #1.
+
+## ST-360 BEFORE audit (I395) - CUT decision (premise disproven at cut gate #1)
+
+Verdict: CUT E46 at ST-360 (cut gate #1). The scoped lever (an in-place Blender COLOR_0
+facet-value re-bake) is a NO-OP for the actual overdrive dimness, which is the in-code magenta
+hue, not the GLB bake. Overdrive is confirmed an accepted-minor (hue-unmistakable; reads fine at
+the default fx-high). ST-361..364 DROPPED. Docs-only, zero src, 0 B asset delta.
+
+### Method (fresh, headless)
+- Per-emblem probe .evidence/I395/ownside_probe.mjs (seed 71382; both backdrops sky/floor; fx-off O
+  + fx-high H; 30 closeups + full MD5) re-run clean -> .evidence/I395/ownside_audit_i387.json. Matched
+  the I393 ownside audit 6/7 emblems EXACT; only magnet-sky drifted 135->142.25 (minor re-measurement
+  variance on a reads-strong emblem, not the subject).
+- Node-side GLB COLOR_0 bake measurement .evidence/I395/measure_emblems.mjs (vendored three +
+  GLTFLoader.parseAsync, no browser): per-emblem grayscale bake min/mean/p50/p90 + tri + verts.
+
+### Per-emblem BEFORE (acc90 = accent p90, full emblem element; sepA = acc90 - local bg p90)
+FX-OFF (O):
+  emblem     sky acc90  sepA     floor acc90  sepA     calls/tris
+  rapid        93.25    +22.1     105.07      +72.9     12 / 230
+  spread       67.79     -3.4      68.32      +36.1     12 / 230
+  shield      190.18   +119.0     164.80     +132.6     12 / 202
+  bomb         67.79     -3.4      59.21      +27.0     12 / 230
+  magnet      142.25    +71.1     139.90     +107.7     12 / 218
+  overdrive    67.37     -3.8      36.70       +4.5     12 / 220   <- weakest (floor)
+  slowmo      136.26    +65.1     165.52     +133.3     12 / 206
+FX-HIGH (H) floor acc90 (the default in-game setting): rapid 148.97 / spread 88.22 / shield 177.07 /
+  bomb 74.00 / magnet 157.74 / overdrive 93.92 / slowmo 175.37 (all read strong; overdrive floor
+  fx-high sepA +64.51). Local bg (probe env_baseline): O sky p90 70.43 / floor p90 32.2; H sky p90
+  83.05 / floor p90 29.12. Frozen playframe env bands (context): sky p50 70.14 / floor p50 32.2;
+  rock ember 54.26-112.43.
+
+### The scope-safety check - the GLB COLOR_0 bake is NOT the lever
+Node GLB bake (grayscale facet value, [0.30,1.25] domain) mean / p50 / p90:
+  rapid 1.084/1.237/1.250 | spread 0.889/0.825/1.156 | shield 1.032/1.210/1.250 | bomb
+  0.980/0.993/1.246 | magnet 0.940/0.986/1.250 | overdrive 0.946/0.987/1.245 | slowmo 1.029/0.993/1.250
+overdrive's bake (p50 0.987) ~= bomb (0.993) and is BRIGHTER than spread (0.825); its p90 sits at
+the domain ceiling (1.25). Yet overdrive renders the DIMMEST on the floor (fx-off 36.70 vs spread
+68.32 whose bake is LOWER). => the overdrive dimness is NOT the GLB COLOR_0 bake.
+The rendered dimness is the in-code magenta tint 0xff4dd8 (low green, G~0.30, luma~125) + the
+low-green emissive 0x6d0f52 (luma~40, the lowest of the 7), applied identically to all emblems via
+powerupMesh.js material.color + material.emissive (emissiveIntensity 0.9 / roughness 0.35 /
+metalness 0.15 identical across all 7). Magenta is inherently low-luma; the emissive adds little green.
+Re-baking the GLB COLOR_0 would (a) be a NO-OP for the render dimness and (b) collide with the
+frozen PU_FACET bake-percentile pin in tests/assetGlbs.test.js (overdrive p10 0.595 / p50 1.000 /
+p90 1.250 = the current values). The bake ladder is fine (all means 0.89-1.08); NO emblem has a
+bake-driven gap.
+### CUT decision (per scope-check Cut Option + R-E46-1)
+The Cut Option: "if a clean in-band lift is not achievable ... CUT to no-change and close E46 ...
+documenting overdrive as an accepted-minor (already hue-unmistakable per I393)." The scoped lever is
+not merely unachievable - it is a NO-OP (the premise is disproven), so R-E46-1 applies a fortiori.
+overdrive is an accepted-minor: hue-unmistakable magenta (R&B >> G, closeup-confirmed I393); it reads
+FINE at the default fx-high (floor acc90 93.92, sepA +64.51 - strong); only the fx-off floor is the
+weak spot (36.70, still +4.5 over the local bg p90). Anti-over-engineer (hard user directive): the
+real lever is a hue-risky in-code re-tune of a MINOR item that reads fine at default - not worth the
+puab tint-pin + colorblind-distinctness risk this epic.
+DECISION: CUT E46 at ST-360 (cut gate #1). ST-361..364 DROPPED (premise disproven at ST-360). Close
+E46 docs-only; 1/5 stories completed (ST-360), 4 dropped (ST-361..364).
+
+### Correct lever (deferred to E47 consideration - NOT done here)
+If overdrive readability is ever prioritized, the correct lever is IN-CODE (not Blender):
+(a) lift overdrive's emissive 0x6d0f52 (a FREE un-pinned knob - only in powerupMesh.js, not in
+config.js, not in any test) toward a brighter magenta, keeping the tint 0xff4dd8 intact (puab tint
+pin held), A/B-verified; or (b) a tint lift 0xff4dd8 -> a higher-green magenta (coupled: config.js:590
+pickup sparkle + powerupMesh.js TYPES must stay in sync; touches the tint pin + colorblind
+distinctness - higher risk). The E47 scope-check decides whether to pursue (a) or target another
+evidence-backed surface.
+
+### Re-confirmed unchanged (docs-only)
+Zero src, zero asset, zero test re-pin. Frozen pins carry: p1 / rockab 2.2/1.3/0.7 / 21/366 + 50/1222
+/ FLOOR-50 / skybox 70.14 / rocks 112.43/54.26/52.76 / ring p90 / enemy hierarchy drone 200.98 /
+stinger 254 / flyer 197.74 / warden exposed 147.01 / mine 127.0 / boss 182.49 / cockpit cyan
+0x59d8ff@1.4 / player bullet 219.99 / enemy 152.18 / vendor sha 76DEA8151BC9352A / dist 131 files /
+1,918,997 B / 929 tests green.
+Evidence: .evidence/I395/ (ownside_probe.mjs, ownside_audit_i387.json, 30 closeups, measure_emblems.mjs
++ its JSON output).

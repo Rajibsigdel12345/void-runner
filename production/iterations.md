@@ -5094,3 +5094,26 @@ Risk/follow-up: I382 = ST-347 grounded direction (docs-only, 2nd cut gate): per-
 - E45 CLOSED (ST-359; ST-358 CUT at I393). E46 OPENED: Power-up (Pickup) Emblem Value & Silhouette Coherence Pass (ST-360..364).
 - Changed: 1 toolchain line [scripts/serve.mjs, not in dist] + docs (scope-check-E46.md NEW, CHANGELOG, iterations, stories [ST-359 DONE + E46 section], epics [E45 I394 progress + E46 section], active). 0 sim src, 0 B asset delta.
 - Quality bar: npm test 929/929 + npm run build 0 + dist unchanged. All frozen pins hold.
+
+## I395 - ST-360 pickup emblem BEFORE audit + E46 CUT (cut gate #1)
+- Goal: run the ST-360 BEFORE audit (cgs-asset-audit) - confirm overdrive is the only material VALUE
+  gap and establish the COLOR_0 facet-value ladder target; cut gate #1.
+- Method: fresh headless per-emblem probe (.evidence/I395/ownside_probe.mjs, seed 71382, both
+  backdrops sky/floor, fx-off + fx-high, 30 closeups + MD5) + a Node-side GLB COLOR_0 bake measurement
+  (.evidence/I395/measure_emblems.mjs, vendored three + GLTFLoader.parseAsync, no browser).
+- Finding: the probe matched I393 6/7 EXACT (only magnet-sky 135->142.25 re-measure variance on a
+  reads-strong emblem). The Node bake measurement DISPROVES the E46 premise: overdrive's GLB COLOR_0
+  bake (p50 0.987, p90 1.245) ~= bomb (0.993) and is BRIGHTER than spread (0.825), yet overdrive
+  renders the dimmest on the floor (fx-off 36.70 vs spread 68.32). The dimness is the in-code magenta
+  tint 0xff4dd8 (low green) + low-green emissive 0x6d0f52 applied identically to all 7 emblems, NOT the
+  GLB bake. A COLOR_0 re-bake would be a NO-OP and would collide with the frozen PU_FACET
+  bake-percentile pin (tests/assetGlbs.test.js: overdrive p10 0.595/p50 1.000/p90 1.250).
+- Decision: CUT E46 at ST-360 (cut gate #1; Cut Option + R-E46-1). Overdrive is an accepted-minor
+  (hue-unmistakable magenta; reads fine at the default fx-high, floor acc90 93.92 sepA +64.51). The real
+  lever is in-code (emissive 0x6d0f52 = free un-pinned knob, or tint 0xff4dd8 = coupled config.js:590),
+  a hue-risky re-tune of a MINOR item - deferred to E47 per anti-over-engineer. ST-361..364 DROPPED.
+- Changed files: production/scope-check-E46.md (ST-360 section appended), CHANGELOG.md, iterations.md,
+  production/stories.md (E46 status), production/epics.md (E46 progress + status),
+  production/session-state/active.md. 0 src, 0 B asset delta, 0 test re-pin.
+- Test result: 929/929 + build 0 + dist unchanged (vendor sha 76DEA8151BC9352A, dist 131/1918997 B).
+- Hygiene: probe dev server killed + 5173 free, 0 chrome, node 13 baseline.
