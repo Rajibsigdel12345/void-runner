@@ -81,3 +81,34 @@ E41 deepens the rock L/M/S + comet surface relief so the rocks read MORE as crat
 
 ## Next owner
 I369 = ST-336 grounded relief direction (docs only, zero src).
+
+## Relief Direction (ST-336, I369)
+
+Grounding: BEFORE baseline (.evidence/I368, PR 1.0 raw readPixels, reseed 41414) + authoritative facet-luma pins (tests/assetGlbs.test.js: per-tri mean facet luma p10/p50/p90 = L 0.1934/0.4603/0.8239 [spread 0.6305], M 0.2980/0.6182/0.9314 [spread 0.6334], S 0.4354/0.7386/0.9649 [spread 0.5295]; ladder L<M<S; warm R>=G>=B; band [0.10,1.20]; spread floor 0.50; COLOR_0 FLOAT VEC3 5126) + art bible (irregular, asymmetric, pitted; no symmetry, no smoothness) + I307 baseline (current crater-patch + raised-rim + convex-bump relief = the relief this pass deepens) + user GPU-cheap constraint (static displacement only, no per-frame deformation).
+
+KEEP (invariant across the re-bake):
+- Radii EXACT 2.2/1.3/0.7 (re-normalized after bake; rockab verify) + comet tail maxR ~1.003 structure unchanged.
+- Tri counts held: L 488 (cap 500) / M 134 (cap 140) / S 134 (cap 140) / comet 180; all-asset 1800. Displace-only at the SAME vertex count (no subdivision).
+- COLOR_0 FLOAT VEC3 (componentType 5126) via export_vertex_color=MATERIAL (NEVER NAME).
+- Warm palette R>=G>=B per vertex; ladder L<M<S on p50; band [0.10,1.20]; spread floor 0.50 (test values re-pinned in ST-339 with documented deltas; bands NEVER widened).
+- No new shaders / draw calls / programs; material code untouched (asteroidRenderer.js 0x8a7f72 flatShading vertexColors + I257 warm rim onBeforeCompile).
+- In-place GLB swap, same URLs (assetLoader.js keys rockL/rockM/rockS/rockComet), zero src.
+
+ADD (the deepening; all static displacement along existing vertex normals):
+- L (r 2.2): craters 6 (5-7) bowl radius 0.30-0.50, bowl depth 0.22-0.34 (40-60% deeper than I307 bowls); raised rim ring around EVERY crater, rim height 0.5-0.7 x bowl depth, ring half-width 0.35-0.55 x bowl radius; convex bumps 4 (3-5) radius 0.25-0.45 amplitude 0.14-0.24.
+- M (r 1.3): craters 4-5 radius 0.17-0.28 depth 0.11-0.17; rims same ratios (0.5-0.7 x depth, 0.35-0.55 x radius); bumps 3-4 radius 0.15-0.26 amplitude 0.08-0.13.
+- S (r 0.7): craters 3-4 radius 0.09-0.15 depth 0.06-0.10; rims same ratios; bumps 3-4 radius 0.08-0.14 amplitude 0.05-0.09.
+- Sharper per-vertex value contrast: bowl bottoms = local value floor (0.10-0.18), rim crests + bump tops = local value ceiling (1.10-1.18), mid-slopes in between; displacement AND COLOR_0 re-baked together so the value map tracks the new relief.
+- Per-size value ladder targets (per-tri mean facet luma, after bake): L p50 0.42-0.50 + spread p90-p10 >= 0.60; M p50 0.58-0.66 + spread >= 0.55; S p50 0.70-0.78 + spread >= 0.55; ladder strict L<M<S; all values in [0.10,1.20].
+- Comet (asteroid_comet.glb, 180 tris, same vertex count): lumpy nucleus (bumps 4-6 radius 0.06-0.12 amplitude 0.05-0.10 + shallow craters 2-3 depth 0.04-0.08) + brighter ion-tail COLOR_0 gradient (tail base ~0.7 -> tip 0.95-1.15, warm); nucleus p50 0.55-0.68.
+
+AVOID:
+- Subdivision / new verts or tris over caps; byte bloat over family cap 64768 B (44768 before).
+- Smoothness or symmetry: crater/bump placement jittered + asymmetric (art bible); no mirrored layouts, no perfect rings.
+- Value band violations (no facet value < 0.10 or > 1.20); ladder violation (L must stay darkest); spread under floor.
+- Animated/per-frame surface deformation, normal maps, new draw calls.
+- Radius drift (re-normalize EXACT after bake); URL or loader changes; scene material/lighting changes.
+
+Budget (re-stated): family GLBs 44768 B -> <= 64768 B; dist headroom 182132 B >= 102400 B floor (zero src, dist unchanged); vendor sha 76DEA8151BC9352A unchanged.
+
+Acceptance (ST-336): this direction section present in scope-check-E41.md (DONE); 6 docs committed; p1 demo pin EXACT + rockab EXACT 2.2/1.3/0.7 causal (cite - zero src this iteration).

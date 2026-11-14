@@ -4776,3 +4776,24 @@ Tests: 929/929. Build: 0 (131 files / 1915020 B; headroom 182132 B >= 102400 B).
 Changed files: 6 docs only (production/scope-check-E41.md NEW, production/stories.md ST-336..340, production/epics.md E41, CHANGELOG.md I368, production/session-state/active.md, production/iterations.md). Zero src. .evidence/I368 untracked + gitignored: before_rock.mjs (wedges - do not use), before_rock2.mjs (blank PNG - do not use), before_rock3.mjs (WORKING probe), diag_rock.mjs (PR 1.25 reference), before_i368.json, diag_i368.json, before_rock_closeup.png, diag_rock.png (compositor frame - reference only), apply_docs_part1.cjs, apply_docs.cjs, msg_raw.txt.
 
 Next: I369 = ST-336 grounded rock/comet relief direction (docs only, zero src).
+## I369 - ST-336 grounded rock/comet relief direction (cgs-dev-story; DOCS-ONLY 0 KB)
+
+Goal: ground the E41 relief direction (ST-336) - turn the user bumps+craters request (GPU-cheap) into a bake-ready spec: KEEP/ADD/AVOID + tri/byte/value budgets + per-size crater/rim/bump numbers + value-ladder targets, appended to production/scope-check-E41.md. Zero src.
+
+Approach: pure grounding from already-captured evidence (no new probes needed - zero src):
+- BEFORE baseline .evidence/I368 (radii EXACT 2.2/1.3/1.003/0.7; tris 490/134/180/134; box p50 68.79/71.28/66.65/66.30; skyP50 44.18; console 0/0).
+- Authoritative facet-luma pins (tests/assetGlbs.test.js): L 0.1934/0.4603/0.8239 spread 0.6305, M 0.2980/0.6182/0.9314 spread 0.6334, S 0.4354/0.7386/0.9649 spread 0.5295; ladder L<M<S; warm R>=G>=B; band [0.10,1.20]; spread floor 0.50; COLOR_0 FLOAT VEC3 5126.
+- Art bible (irregular/asymmetric/pitted; no symmetry, no smoothness) + I307 baseline (current crater-patch + raised-rim + convex-bump relief = the baseline this pass deepens 40-60% on bowl depth) + user GPU-cheap constraint (static displacement only).
+
+Direction (full text in scope-check-E41.md Relief Direction section):
+- KEEP: radii EXACT 2.2/1.3/0.7 + tri caps (L488/M134/S134, comet 180, all-asset 1800, displace-only same vertex count) + COLOR_0 FLOAT VEC3 (export_vertex_color=MATERIAL) + warm R>=G>=B + ladder L<M<S + band [0.10,1.20] + spread floor 0.50 + no new shaders/draw calls + in-place same-URL swap.
+- ADD (per size): L 6 craters (bowl r0.30-0.50, depth 0.22-0.34 = 40-60% deeper than I307) + rims 0.5-0.7x depth / 0.35-0.55x radius + 4 convex bumps (amp 0.14-0.24); M 4-5 craters (depth 0.11-0.17) + rims + 3-4 bumps (amp 0.08-0.13); S 3-4 craters (depth 0.06-0.10) + rims + 3-4 bumps (amp 0.05-0.09); sharper per-vertex contrast (bowl-floor 0.10-0.18 / crest 1.10-1.18); ladder targets L p50 0.42-0.50 spread>=0.60, M 0.58-0.66, S 0.70-0.78 spread>=0.55 (strict L<M<S, band [0.10,1.20]); comet lumpy nucleus (4-6 bumps + 2-3 shallow craters) + ion-tail COLOR_0 gradient (base ~0.7 -> tip 0.95-1.15, warm).
+- AVOID: subdivision, smoothness, symmetry, band/ladder/spread violations, animated deformation, radius drift, URL/loader changes.
+
+Acceptance: direction section present (DONE); 6 docs committed; p1 demo pin EXACT + rockab EXACT 2.2/1.3/0.7 causal (cite - zero src).
+
+Tests: 929/929. Build: 0 (131 files / 1915020 B; headroom 182132 B >= 102400 B). Vendor sha 76DEA8151BC9352A unchanged. Docs-only: zero source changes.
+
+Changed files: 6 docs only (scope-check-E41.md Relief Direction section, stories.md ST-336 DONE, epics.md E41 Progress, CHANGELOG.md I369, active.md, iterations.md). Zero src.
+
+Next: I370 = ST-337 Blender rock L/M/S re-bake per the direction + blender-asset-qa (assets only, zero src).
