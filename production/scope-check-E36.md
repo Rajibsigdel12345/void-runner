@@ -69,3 +69,37 @@ Draw-call attribution table (attr342, camera pinned, per-rock delta vs the 5-cal
 Reproducibility learning (record for future probes): the game loop CANNOT be frozen from a probe - window.requestAnimationFrame = () => 0 is a no-op because src/main.js captured requestAnimationFrame at boot; the world keeps ticking between page.evaluate calls. Consequence: (a) wide-phase luma boxes are TICK-DEPENDENT and must NOT be pinned (I342 L mean 13.37 / p90 48.45 / max 74.71 / over1836 0 vs I333 L 13.52 / 48.52 / 199.01 / 8 - the difference is the world advancing, not a regression); (b) anything measured inside ONE synchronous evaluate (spawn -> sync -> render -> readPixels) is deterministic - the surface and sig64 phases above are bit-exact across runs. The first I342 attribution run was confounded by inheriting the surface phase's close-up camera (fov 45 @ 2.52 u from the S rock), which put the golden/shielded test rocks outside the frustum (false delta 0); the camera-pinned re-probe above is the clean, decisive result.
 
 Verdict: ST-314 SHIPPED - all R314a-f verdicted (a/b/c PASS, d SHIP, e PASS, f adjudicated non-blocking with documented exception). Docs-only, 0 KB, no dist delta.
+
+## ST-315 verdict (I343 - Blender bump + crater deep re-bake L/M/S; ASSETS-ONLY, zero src/core)
+
+Pre-registered acceptance (R314b, I333 baseline as floor): detail >= 0.65/0.46/0.54 (L/M/S), wellsPerK >= 3.11/1.78/3.5 (L/M/S), bumpStd reported; value-bake gates (facet luma spread >= 0.50, channel band [0.10,1.20], warm order R>=G>=B, chroma (r-b)/value ratioRange > 0.05); caps L <= 550 t / 24576 B, M/S <= 180 t, family <= 45056 B.
+
+**L v5 - PASS, SHIP.** 21116 -> 22696 B / 490 tris (unchanged). detail 0.70 (>= 0.65), wellsPerK 3.69 (>= 3.11), bumpStd 16.11.
+
+**S v5 - PASS, SHIP.** 7740 -> 8388 B / 134 tris (unchanged). detail 0.62 (>= 0.54), wellsPerK 4.08 (>= 3.5), bumpStd 16.59.
+
+**M - CUT to the I333 v4 baseline (6588 B / 134 t).** No deep variant clears BOTH M metrics (deterministic I333 v4 pipeline, same seeds; surface probe surfp343.mjs, spawn -> sync -> render -> readPixels):
+
+| variant | craters | amp/chip | rim | detail (>= 0.46) | wellsPerK (>= 1.78) | GLB |
+|---|---|---|---|---|---|---|
+| v4 (I333 baseline) | 1.0x | 0.12/0.05 | .45-.55 | **0.46** | **1.78** | 6588 B / 134 t |
+| v5 deep | 1.4x | 0.145/0.075 | .50-.62 | 0.40 | 1.47 | 7416 B / 134 t |
+| v6a | 1.15x | 0.145/0.075 | .475-.585 | 0.42 | 1.47 | 6984 B |
+| v6b | 1.15x | 0.12/0.05 | .475-.585 | 0.46 | 1.09 | 7092 B |
+| v6c | 1.0x | 0.145/0.075 | .45-.55 | 0.40 | 1.65 | 6480 B |
+| v7 (180-t lever) | 1.4x | 0.145/0.075 | .50-.62 | 0.42 | 1.33 | 9096 B / 180 t |
+
+**FINDING (recorded for E36 closeout):** M's tri budget is the binding constraint. v4 is the only configuration clearing both M metrics; any ruggedness increase (deeper craters OR stronger bump) drops wellsPerK below 1.78. The 180-t lever (the E36 re-registered M cap) made M WORSE (v7 0.42/1.33) - the deep re-bake trades distinct small wells for fewer deeper ones. L (490 t) and S pass on tri headroom with the same v5 recipe.
+
+**Causal proof (zero sim delta):** spawned EXACT vs I342 - L rot 3.389157600269239 / M rot 4.9999567928869215 / S rot 4.938716897450894; x/y/radius -3.5,-4/2.2, 0,-4/1.3, 3.5,-4/0.7. glbWait all-ready, state MENU, console 0/0, NaN [].
+
+**Facet repin (tests/assetGlbs.test.js):** ROCK_FACET L/S re-pinned to v5 (L p10/p50/p90/mean 0.2183/0.4857/0.7956/0.4929; S 0.3916/0.7028/0.9479/0.6807), M unchanged (I333 v4). BUDGETS 500/140/140 unchanged (tri counts unchanged 490/134/134). Value-bake gates PASS: facet spread L 0.5773 / M 0.5509 / S 0.5564 (>= 0.50); channel band in [0.10,1.20]; warm order 0 violations; chroma ratioRange > 0.05.
+
+**Family:** 35444 -> 37672 B (+2228 B) <= 45056 B (+7384 B headroom).
+
+**Quality bar:** 905/905; build exit 0; dist 123 files / 1907812 B (+2228 B = L +1580 + S +648, matches the GLB delta prediction); headroom 2097152 - 1907812 = 189340 B (~185 KB >= 100 KB floor); vendor three.module.js sha 76DEA8151BC9352A unchanged.
+
+**Disposition:** rockab re-pin deferred to I345 (ST-317: L/S surface changed - re-pin from .evidence/I322/rockab.mjs accounting for the L/S surface delta; all other frozen invariants unchanged). G36.0 R1..R5 + R-E36-1..5 closeout at I345.
+
+Verdict: ST-315 SHIPPED - L v5 + S v5 SHIP, M CUT to the I333 v4 baseline (binding-constraint finding documented). ASSETS-ONLY +2228 B, zero src/core.
+

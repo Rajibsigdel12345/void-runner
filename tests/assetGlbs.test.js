@@ -177,10 +177,10 @@ test('asteroid L/M/S: naming, poly budgets, radii match CONFIG (+/-5%)', () => {
 // I307 (ST-287): pins re-measured on the bump+crater relief geometry (488/134/134 tris);
 // same ST-283 value-ladder + warm-order R>=G>=B + per-vertex hue-jitter scheme, denser surface.
 const ROCK_FACET = {
-  L: { p10: 0.2148, p50: 0.4821, p90: 0.7835, mean: 0.4929 },
+  L: { p10: 0.2183, p50: 0.4857, p90: 0.7956, mean: 0.4929 },
   M: { p10: 0.2987, p50: 0.5454, p90: 0.8496, mean: 0.5513 },
-  S: { p10: 0.3576, p50: 0.6478, p90: 0.9315, mean: 0.6307 },
-}; // I333 (ST-307): v4 coverage re-bake (j 0/20/1; L byte-identical) file-level re-measure (same ST-283 value-ladder + warm-order + hue-jitter scheme, per-triangle mean-luma convention)
+  S: { p10: 0.3916, p50: 0.7028, p90: 0.9479, mean: 0.6807 },
+}; // I343 (ST-315): L/S v5 deep re-bake repin (L 22696B/490t, S 8388B/134t SHIP; M CUT to I333 v4 6588B/134t - deep re-bake fails 0.46/1.78 surface floor at both 134t and 180t); same ST-283 value-ladder + warm-order + hue-jitter scheme, per-triangle mean-luma convention
 function facetLumas({ buf, json, binOff }) {
   const p = json.meshes[0].primitives[0];
   const cAcc = json.accessors[p.attributes.COLOR_0];
