@@ -4311,3 +4311,24 @@ Tests: 918/918. Build: exit 0 (129 files / 1926790 B / headroom 170362 B). vendo
 Changed files: src/core/touchZones.js, src/render/input.js, src/render/touchStick.js (new), src/main.js, tests/touchZones.test.js.
 
 Next I352: ST-322 aim offset above the finger (cgs-dev-story; src/render/input.js ONLY): the right-zone touch writes pointer.ndc from (x, y - 48 px) via a new aimFromTouch() seam (local const AIM_OFFSET_PX = 48, tier of DEADZONE/MAX_PX/FIRE_TAIL) so the aim point + the reticle render ABOVE the fingertip (closes I281 gap #3); mouse + keyboard byte-identical; ST-268 probe contract updated ('ndc == touch position < 3.6e-4' -> 'ndc == f(x, y-48) < 1e-3') = documented spec delta, updated in the same iteration; p1 demo pin EXACT (causal); 918+ tests; build 0; dist delta <= ~1 KB; commit.
+
+## I352 - ST-322 E38 aim offset 48 px above the fingertip (cgs-dev-story; src/render/input.js ONLY, +50 B dist)
+
+Goal: ship ST-322 - the right-zone touch now aims 48 px ABOVE the fingertip (G2: the finger sits ON the aim point, so the 3D reticle ended under the finger which physically covered the target - I281 gap #3).
+
+Scope: src/render/input.js ONLY (render/input device layer). BY LAYER - zero src/core, zero three.js. Mouse + keyboard byte-identical: the offset applies only to the right-zone touch writes. The demo pin is structurally untouched (causally re-verified: p1 EXACT).
+
+What shipped:
+- src/render/input.js: new local const AIM_OFFSET_PX = 48 (same tier as DEADZONE 24 / MAX_PX 90 / FIRE_TAIL 0.22); new seam aimFromTouch(cx, cy) = aimFromPoint(cx, cy - 48) (screen up = smaller clientY). Both right-zone writes (onMove + onDown) now call aimFromTouch; the mouse path (onMove non-touch aimFromPoint) stays byte-identical.
+- tests/touchZones.test.js: the ST-268 right-zone test updated to the documented spec delta - ndc.y after down = 1 - 2*((100 - 48)/450), ndc.y after move = 1 - 2*((120 - 48)/450) (x unaffected).
+
+Verification:
+- npm test = 918/918. Build exit 0.
+- dist = 129 files / 1926840 B (was 129/1926790; +50 B, within the <= ~1 KB budget). vendor sha 76DEA8151BC9352A unchanged; headroom 170312 B >= 102400 B floor.
+- Headless aim probe (.evidence/I352/aim_probe.mjs, playwright chromium headless) = 21/21, console 0/0: A1 touch-down ndc.x EXACT + ndc.y = f(y-48) EXACT + offset meaningful; A2 touch-move ndc = f(y-48) + firing bullets + release clears aim; A3 mouse ndc = f(y) EXACT (no offset); ST-268 re-run under the updated contract (silent-thrust / auto-centre / T3 aim down+move updated / cross-zone no-pause / same-zone pause / resume / keyboard-outranks-stick); final sim-advancing + render-alive + no-NaN.
+- p1 demo pin re-run = EXACT: score 11334 / kills 57 / wave 2 / maxCombo 15 / shots 198/57 / acc 0.2878787878787879 / time 36.14999999999923 s / replay 2169-2220 speed 4 / Q -> MENU / console 0/0 (causal proof: the touch-only aim offset is causally orthogonal to the scripted demo pilot which uses no touch - zero sim delta).
+
+Tests: 918/918. Build: exit 0 (129 files / 1926840 B / headroom 170312 B). vendor sha 76DEA8151BC9352A unchanged.
+Changed files: src/render/input.js, tests/touchZones.test.js.
+
+Next I353: ST-323 E38 haptics (cgs-dev-story; NEW src/render/haptics.js, CUTTABLE): navigator.vibrate, coarse + feature-gated (coarse && 'vibrate' in navigator; iOS Safari no-op by design). Four short pulses wired at the existing SFX dispatch branches in main.js (coarse-gated): hit 20 ms / death [40,30,60] / bomb 50 ms / pickup 15 ms. No settings toggle (deferred). Probe: vibrate-mock fires in a coarse context, desktop no-op, console 0/0, no NaN; p1 demo pin EXACT (causal); 918+ tests; build 0; dist delta <= ~1 KB; commit.

@@ -16,6 +16,7 @@ const TRACKED = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowL
 //  - Extra (3rd+) fingers ignored; onBlur clears all. Keyboard/mouse paths untouched (BY LAYER).
 export const DEADZONE = 24; // px (the ST-033 DRAG_THRESH); ST-321 (I351): shared with the on-screen stick visual
 export const MAX_PX = 90; // px of drag for full-thrust magnitude; ST-321 (I351): shared with the on-screen stick visual
+const AIM_OFFSET_PX = 48; // ST-322 (I352): the right-zone touch aims 48 px ABOVE the fingertip (fingertip occlusion ~30-50 px) so the reticle renders above the finger (closes I281 gap #3); touch-only - mouse/keyboard byte-identical
 const FIRE_TAIL = 0.22; // s of firing kept after right-zone release so a tap always launches >=1 bullet (fire interval ~0.18s)
 const PAUSE_COOLDOWN = 0.45;
 
@@ -73,6 +74,10 @@ export function createInput(opts = {}) {
     pointer.active = true;
   }
 
+  function aimFromTouch(cx, cy) { // ST-322 (I352): the right-zone FINGER sits on the aim point, so aim 48 px ABOVE it (screen up = smaller clientY); the mouse path keeps aimFromPoint (byte-identical)
+    aimFromPoint(cx, cy - AIM_OFFSET_PX);
+  }
+
   const onKeyDown = (e) => {
     if (!TRACKED.includes(e.code)) return;
     keys.add(e.code);
@@ -86,7 +91,7 @@ export function createInput(opts = {}) {
         leftTouch.x = e.clientX; leftTouch.y = e.clientY;
       } else if (rightTouch && e.pointerId === rightTouch.id) {
         rightTouch.x = e.clientX; rightTouch.y = e.clientY;
-        aimFromPoint(e.clientX, e.clientY); // ST-268: the right-zone finger owns the aim (left drags never write pointer.ndc)
+        aimFromTouch(e.clientX, e.clientY); // ST-268: the right-zone finger owns the aim (left drags never write pointer.ndc); ST-322 (I352): 48 px above the fingertip
       }
       refresh();
       return;
@@ -117,7 +122,7 @@ export function createInput(opts = {}) {
         rightTouch = { id: e.pointerId, x: e.clientX, y: e.clientY };
         touches.set(e.pointerId, rightTouch);
         rightFiring = true;
-        aimFromPoint(e.clientX, e.clientY);
+        aimFromTouch(e.clientX, e.clientY); // ST-322 (I352): 48 px above the fingertip
       }
       // else: that zone already has a tracked finger -> the extra finger is ignored
       refresh();

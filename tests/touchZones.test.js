@@ -154,9 +154,10 @@ test('ST-268 right zone = aim + fire; tap tail keeps the release shot alive', ()
   assert.equal(input.state.firing, true);
   assert.equal(input.rightAimActive, true);
   assert.ok(Math.abs(input.pointer.ndc.x - 0.5) < 1e-12);
-  assert.ok(Math.abs(input.pointer.ndc.y - (1 - 2 * (100 / 450))) < 1e-12);
+  assert.ok(Math.abs(input.pointer.ndc.y - (1 - 2 * ((100 - 48) / 450))) < 1e-12); // ST-322 (I352): aim 48 px ABOVE the fingertip (documented spec delta vs the ST-268 touch-position contract)
   h.pointermove(T(2, 650, 120));
-  assert.ok(Math.abs(input.pointer.ndc.x - 0.625) < 1e-12); // aim follows the right finger
+  assert.ok(Math.abs(input.pointer.ndc.x - 0.625) < 1e-12); // aim follows the right finger (x is unaffected by the offset)
+  assert.ok(Math.abs(input.pointer.ndc.y - (1 - 2 * ((120 - 48) / 450))) < 1e-12); // ST-322: still 48 px above after the move
   h.pointerup(T(2, 650, 120));
   assert.equal(input.rightAimActive, false);
   assert.equal(input.state.firing, true); // FIRE_TAIL: a tap still launches >=1 bullet
