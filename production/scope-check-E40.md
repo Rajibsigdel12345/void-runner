@@ -185,3 +185,19 @@ Results (probe 22/22):
 - P5 HUD A/B EXACT I347: hudA (credit/hint) inter 0 vgap 23.00; hudB (scoreBox/WPN) inter 0 vgap 23.00.
 - Console 0 errors / 0 warnings across all 10 pages. 929/929. Build 0 (131/1915020 B, +926 B vs I365, headroom 182132 B >= 102400 B). Vendor sha 76DEA8151BC9352A unchanged.
 - Changed: src/core/config.js (starfield section), src/render/starfield.js (sampler rewrite; render API behavior-identical), tests/config.test.js (+ST-334 schema test) + 6 docs.
+
+## G40.0 Result (ST-335, I367) - E40 gate + closeout (cgs-regression-suite + cgs-gate-check + cgs-milestone-review; docs only, zero src)
+
+G40.0 PASS R1..R5. E40 CLOSED 5/5 (ST-331..335 all done).
+
+R1 p1 demo pin EXACT (causal - zero sim, asset-only arc): cite I366 p1 pin battery (.evidence/I361/battery_runner.mjs + match.cjs) 13/13 probes OK + MATCH PASS (all assertions): p1 EXACT 11334 / 57 / W2 / combo 15 / shots 198 / acc 0.2878787878787879 / 36.14999999999923 s / replay 2169-2220 frames / speed 4 (seed 9876); console 0/0 x13. The starfield RNG stream is isolated to the starfield (I366) so the sim/replay RNG is untouched -> the pin is causally unchanged by the E40 asset + starfield-Points arc.
+
+R2 rockab radii EXACT 2.2/1.3/0.7: FRESH headless probe this session (.evidence/I367/rockab_run.mjs, dev server 5173, killed + port free after): reseed 30201, field.rocks cleared, spawn L/M/S at [-3.5,-4]/[0,-4]/[3.5,-4] -> spawned radii [2.2, 1.3, 0.7] EXACT; state MENU; all 3 rock GLBs ready (rockL/rockM/rockS); console 0 errors / 0 warnings.
+
+R3 skybox art probe (CITE - no new sky-dependent probe needed; the v6 asset is byte-identical since I364 and verified at I365 + I366): v6 = assets/skybox_equirect.jpg 42899 B (<= 123557 B cap PASS, sha256-prefix12 8BD9E59EC4EA). Band structure (core knot u0.65 + 3 secondary knots + dominant rift + 3 lanes + fBm filaments + companion arc + correlated stars) present in the MENU strip: I365 P1 newBase 60.19 (tolerance +/-1.5) + P2a IBL bound 0.17 < 0.72 + P3 HUD A/B EXACT I347 + art QA screenshots viewed (console 0/0, no NaN); I366 P1 deltaVsI365 0.00 (starfield-Points arc did not shift the band strip) + I366 P5 HUD A/B EXACT I347 + console 0/0 across 10 pages.
+
+R4 PWA 11/11: FRESH this session (.evidence/I348/pwa_probe.mjs against the production build served on 5199, server killed + port free after): sw registration active + scope root + controller set on the reloaded (claimed) client; online page boots (__vr); manifest GET 200 + manifest+json + display standalone + 512 png icon (any maskable) + start_url/scope "."; offline reload boots from cache (__vr) + no NaN in world/camera; console 0 errors / 0 page errors. 11/11 PASS.
+
+R5: 929/929 tests + build 0 + dist 131 files / 1915020 B (headroom 182132 B >= 102400 B) + skybox 42899 B <= 123557 B + vendor sha 76DEA8151BC9352A unchanged + servers killed + ports free (5173/5199 = 0 listeners) + stray audit clean (0 chrome, node at 13 MCP baseline).
+
+Closeout: E40 (Nebula Skybox Art Pass) CLOSED 5/5 at I367. The skybox v6 (structured nebula band: dominant core knot + secondary knots + Great-Rift-style dust + filaments + correlated stars) shipped as an in-place 1024x512 JPEG (42899 B) with zero sim / zero src (existing fire-and-forget loader + IBL hook I213); the twinkling Points starfield (I366) correlates with the v6 knots while keeping the p1 pin EXACT. No re-resolution, no moved band, no animated sky (E39/E40 deferrals preserved).

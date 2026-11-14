@@ -4723,3 +4723,28 @@ Changed files: src/core/config.js (starfield section: knot {u 0.65, latDeg 4, si
 
 Next I367 = ST-335 E40 regression + G40.0 gate + closeout (docs only): R1 p1 EXACT causal (battery reuse) / R2 rockab EXACT 2.2/1.3/0.7 (reseed 30201, L/M/S spawn at [-3.5,-4]/[0,-4]/[3.5,-4]) / R3 skybox art probe (cite I365 probe.json + I366 P1 delta 0.00) / R4 PWA 11/11 (server killed after) / R5 929 tests + build 0 + headroom >= 102400 B + skybox 42899 B <= 123557 B + vendor sha + hygiene. Close E40 5/5.
 
+## I367 - ST-335 E40 regression + G40.0 gate + closeout: E40 (Nebula Skybox Art Pass) closes 5/5 (cgs-regression-suite + cgs-gate-check + cgs-milestone-review; docs only, zero src)
+
+Goal: close the E40 arc at gate G40.0 (R1..R5) - confirm the v6 structured nebula skybox + the I366 starfield-Points arc are fully green (tests, build, budget, causal p1 pin, rockab radii, PWA, hygiene) with NO regressions, then close E40 5/5.
+
+Approach: two pieces of FRESH evidence (the only two that cannot be cited) + citations for the rest, per the scope doc:
+- R2 rockab radii (FRESH): headless probe .evidence/I367/rockab_run.mjs against the dev server (5173): reseed 30201, clear field.rocks, spawn L/M/S at [-3.5,-4]/[0,-4]/[3.5,-4], read spawned radii. Result [2.2, 1.3, 0.7] = EXACT baseline. state MENU, all 3 rock GLBs ready, console 0 errors / 0 warnings. Dev server killed + port free after.
+- R4 PWA 11/11 (FRESH): production build served on 5199 (.evidence/I348/serve.mjs) + .evidence/I348/pwa_probe.mjs. 11/11 PASS: sw registration active + scope root + controller claimed on the reloaded client; online boots; manifest 200 + manifest+json + standalone + 512 png (any maskable) + start_url/scope "."; offline boots from cache + no NaN; console 0/0. Server killed + port free after.
+- R1 p1 pin (CITE): I366 battery 13/13 + MATCH PASS - p1 EXACT 11334/57/W2/combo 15/shots 198/acc 0.2878787878787879/36.14999999999923 s/replay 2169-2220/speed 4 (seed 9876), console 0/0 x13. Causal: the arc is asset-only + an isolated starfield-Points RNG stream, so sim/replay RNG is untouched.
+- R3 skybox art (CITE): v6 byte-identical since I364 (42899 B, sha 8BD9E59EC4EA); verified at I365 (newBase 60.19 +/-1.5, IBL bound 0.17 < 0.72, HUD A/B EXACT I347, art QA, console 0/0, no NaN) + I366 (P1 deltaVsI365 0.00, HUD A/B EXACT I347, console 0/0).
+
+G40.0 RESULTS:
+- R1 p1 demo pin EXACT (causal): PASS (cite I366 battery 13/13 + MATCH PASS).
+- R2 rockab radii EXACT 2.2/1.3/0.7: PASS (fresh probe, EXACT).
+- R3 skybox art probe (v6 loads + 1024x512 + <= 123557 B + band structure + re-pins documented + HUD A/B EXACT I347 + no NaN + console 0/0): PASS (42899 B, cite I365+I366).
+- R4 PWA 11/11 re-run: PASS (fresh, 11/11, server killed + port free).
+- R5 928+ tests + build 0 + headroom >= 102400 B + skybox <= 123557 B + vendor sha unchanged + servers killed + ports free + stray audit clean: PASS (929/929, build 0, dist 131/1915020 B headroom 182132 B, skybox 42899 B, vendor sha 76DEA8151BC9352A, ports 0, 0 chrome, node 13).
+
+G40.0 = PASS R1..R5. E40 (Nebula Skybox Art Pass) CLOSED 5/5 (ST-331 research -> ST-332 Blender skybox v6 bake -> ST-333 apply + re-pin -> ST-334 starfield-Points correlation -> ST-335 gate + closeout).
+
+Tests: 929/929. Build: 0 (131 files / 1915020 B; headroom 182132 B >= 102400 B). Vendor sha 76DEA8151BC9352A unchanged. Skybox 42899 B (sha 8BD9E59EC4EA).
+
+Changed files: 6 docs only (scope-check-E40.md G40.0 result section, stories.md ST-335 DONE, epics.md E40 CLOSED 5/5, CHANGELOG.md I367, active.md, iterations.md). Zero src, zero tests, zero assets. .evidence/I367/ untracked + gitignored (rockab_run.mjs, rockab_i367.json, r5_measure.mjs, r5_hash.mjs, apply_docs.cjs).
+
+Next: new arc per the standing 100-iteration directive - bounded research (CGS skills + YouTube MCP, burned-id list respected) to pick the next unpolished surface, then a fresh scoped arc (do NOT re-open E40 deferrals - full skybox rework / moved band / animated sky / starfield shader upgrade / i18n / gamepad - without a new scoped arc).
+
