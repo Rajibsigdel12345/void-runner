@@ -9,6 +9,7 @@ const ASSETS = {
   rockL: 'assets/asteroid_L.glb',
   rockM: 'assets/asteroid_M.glb',
   rockS: 'assets/asteroid_S.glb',
+  rockComet: 'assets/asteroid_comet.glb', // I344 (ST-316): comet rock variant (S slot 2; render-only, +0 draw path)
   boss: 'assets/boss.glb',
   shield: 'assets/shield.glb', // I210: energy armor plates
   // I211: seven powerup emblems + drone (Blender, silhouette-matched to procedural fallbacks)

@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief)).
-const BUDGETS = { ship: 300, L: 500, M: 140, S: 140, boss: 250, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200 }; // I210 + I211 + I212 + I220 + I307
+const BUDGETS = { ship: 300, L: 500, M: 140, S: 140, comet: 200, boss: 250, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200 }; // I210 + I211 + I212 + I220 + I307 + I344 (comet)
 const MAX_FILE_BYTES = 100 * 1024;
 
 function parseGlb(file) {
@@ -744,4 +744,54 @@ test('warden.glb: naming, poly budget, hull/armor radii vs CONFIG, grayscale COL
   assert.ok(hull.maxRadius <= r * 1.25, 'hull max radius ' + hull.maxRadius.toFixed(3) + ' <= r*1.25 (spike accents stay inside the armor ring)');
   assert.ok(Math.abs(armor.maxRadius - r * 1.55) / (r * 1.55) <= 0.10,
     'armor outer radius ' + armor.maxRadius.toFixed(3) + ' ~ r*1.55 (procedural plate-ring parity)');
+});
+
+// I344 (ST-316): comet rock variant (render-only, zero src/core). One mesh/one prim; ion tail
+// baked into the SAME mesh as a COLOR_0 gradient (warm rock head -> cool blue-white neck ->
+// fading cool tip). Renderer swaps it into an existing S pool slot (size S + variant 2) => +0
+// new draw-call path. Node VR_Rock_Comet, mat VR_Rock_Comet.
+const COMET_FACET = { p10: 0.4386, p50: 0.6379, p90: 0.8117, mean: 0.6382 }; // I344 measured file-level
+test('asteroid_comet.glb: naming, poly budget, single mesh/prim, shape, COLOR_0 warm-head/cool-tail gradient (I344)', () => {
+  const { buf, json, binOff } = parseGlb('asteroid_comet.glb');
+  assert.ok(buf.length <= 12000, 'asteroid_comet.glb ' + buf.length + ' B <= 12 KB (ST-316 comet budget)');
+  const s2 = meshStats({ buf, json, binOff });
+  assert.ok(s2.nodeNames.includes('VR_Rock_Comet'), 'VR_Rock_Comet node');
+  assert.ok(s2.matNames.includes('VR_Rock_Comet'), 'VR_Rock_Comet material');
+  assert.equal((json.meshes || []).length, 1, 'single mesh');
+  assert.equal(json.meshes[0].primitives.length, 1, 'single primitive (no tail mesh, +0 draw path)');
+  assert.ok(s2.totalTris <= BUDGETS.comet, 'comet tris ' + s2.totalTris + ' <= 200');
+  const p = json.meshes[0].primitives[0];
+  assert.ok(p.attributes.COLOR_0 !== undefined, 'primitive has COLOR_0 (ion-tail gradient)');
+  const acc = json.accessors[p.attributes.COLOR_0];
+  assert.equal(acc.componentType, 5126, 'COLOR_0 componentType FLOAT');
+  assert.equal(acc.type, 'VEC3', 'COLOR_0 type VEC3');
+  assert.equal(acc.count, json.accessors[p.attributes.POSITION].count, 'COLOR_0 count == POSITION count');
+  const pbv = json.bufferViews[json.accessors[p.attributes.POSITION].bufferView];
+  let minx = Infinity, maxx = -Infinity, maxperp = 0;
+  for (let i = 0; i < json.accessors[p.attributes.POSITION].count; i++) {
+    const o = binOff + (pbv.byteOffset || 0) + (json.accessors[p.attributes.POSITION].byteOffset || 0) + i * 12;
+    const x = buf.readFloatLE(o), y = buf.readFloatLE(o + 4), z = buf.readFloatLE(o + 8);
+    if (x < minx) minx = x; if (x > maxx) maxx = x;
+    const perp = Math.sqrt(y * y + z * z); if (perp > maxperp) maxperp = perp;
+  }
+  const xspan = maxx - minx;
+  assert.ok(xspan > 2.2 * maxperp, 'comet elongated: x-span ' + xspan.toFixed(3) + ' > 2.2x head ' + maxperp.toFixed(3));
+  assert.ok(Math.abs(maxperp - 0.58) / 0.58 <= 0.12, 'head perpendicular radius ' + maxperp.toFixed(3) + ' ~ 0.58 (S-scale)');
+  assert.ok(Math.abs(xspan - 1.5828) <= 0.06, 'comet x-span ' + xspan.toFixed(4) + ' ~ 1.5828 (I344 bake)');
+  const cbv = json.bufferViews[acc.bufferView]; const cbase = binOff + (cbv.byteOffset || 0) + (acc.byteOffset || 0);
+  let warm = 0, cool = 0;
+  for (let i = 0; i < acc.count; i++) {
+    const r = buf.readFloatLE(cbase + i * 12), g = buf.readFloatLE(cbase + i * 12 + 4), b = buf.readFloatLE(cbase + i * 12 + 8);
+    for (const v of [r, g, b]) assert.ok(v >= 0.09 && v <= 1.41, 'comet COLOR_0 channel in [0.10,1.40]: ' + v.toFixed(3));
+    if (r >= b - 1e-4) warm++; else cool++;
+  }
+  assert.ok(warm > 0 && cool > 0, 'comet has warm-head (' + warm + ') and cool ion-tail (' + cool + ') verts');
+  const iAcc = json.accessors[p.indices];
+  const iBase = binOff + (json.bufferViews[iAcc.bufferView].byteOffset || 0) + (iAcc.byteOffset || 0);
+  const readIdx = (i) => (iAcc.componentType === 5123 ? buf.readUInt16LE(iBase + i * 2) : iAcc.componentType === 5125 ? buf.readUInt32LE(iBase + i * 4) : buf.readUInt8LE(iBase + i));
+  const vL = []; for (let i = 0; i < acc.count; i++) vL.push(0.2126 * buf.readFloatLE(cbase + i * 12) + 0.7152 * buf.readFloatLE(cbase + i * 12 + 4) + 0.0722 * buf.readFloatLE(cbase + i * 12 + 8));
+  const fl = []; for (let t = 0; t < iAcc.count / 3; t++) fl.push((vL[readIdx(t * 3)] + vL[readIdx(t * 3 + 1)] + vL[readIdx(t * 3 + 2)]) / 3);
+  fl.sort((a, b2) => a - b2); const q = (f) => fl[Math.min(fl.length - 1, Math.floor(f * fl.length))];
+  const f = { p10: q(0.1), p50: q(0.5), p90: q(0.9), mean: fl.reduce((sm, x) => sm + x, 0) / fl.length };
+  for (const k of ['p10', 'p50', 'p90', 'mean']) assert.ok(Math.abs(f[k] - COMET_FACET[k]) <= 0.005, 'comet facet ' + k + ' ' + f[k].toFixed(3) + ' ~ ' + COMET_FACET[k]);
 });

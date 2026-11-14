@@ -50,12 +50,12 @@ const BUDGET = {
   totalFilesKB: 160,   // [116.4 I303 re-measure: +rock I303 silhouette re-bake bytes (L 19.3K)]
   totalGeoKB: 130,     // [81.8 I292 re-measure: +ship hull/wings COLOR_0]
   perFileKB: 60,       // [max 36.8 - asteroid_L, deliberately the heaviest]
-  totalTris: 1800,     // [1639 I307 re-measure: +rock bump+crater relief (L/M/S 504 -> 756 tris, +252)]
+  totalTris: 2000,     // [I344: 1930 (I343 1750 + comet 180), cap 2000 w/ margin]
   perFileMats: 3,      // [max 3 - ship body/wing/cockpit]
 };
 
-test('exactly 18 GLB assets (17 models + arena ring)', () => {
-  assert.equal(glbs.length, 18); // I220: +warden, I235: +stinger, I240: +flyer
+test('exactly 19 GLB assets (18 models + arena ring)', () => {
+  assert.equal(glbs.length, 19); // I220: +warden, I235: +stinger, I240: +flyer, I344: +comet
 });
 
 test('total GLB file size within budget', () => {
@@ -91,5 +91,5 @@ test('every GLB has POSITION + NORMAL (render layer assumes both)', () => {
 
 test('COLOR_0 only on the mottled rocks + boss + ship + enemy bodies + pickup emblems + warden hull/armor + arena ring (in-code materials read it; others must not carry it)', () => { // I282: + enemy value bakes; I288/ST-272: + pickup emblem value bakes; I289/ST-273: + warden hull/armor value bakes; I299/ST-281: + arena ring value bake
   const withColor = parsed.filter((p) => p.attrs.has('COLOR_0')).map((p) => p.file).sort();
-  assert.deepEqual(withColor, ['arena_ring.glb', 'asteroid_L.glb', 'asteroid_M.glb', 'asteroid_S.glb', 'boss.glb', 'drone.glb', 'flyer.glb', 'powerup_bomb.glb', 'powerup_magnet.glb', 'powerup_overdrive.glb', 'powerup_rapid.glb', 'powerup_shield.glb', 'powerup_slowmo.glb', 'powerup_spread.glb', 'ship.glb', 'stinger.glb', 'warden.glb']); // I299/ST-281: + arena ring value bake (16 -> 17); I289/ST-273 warden (stinger core + flyer dome stay emissive-driven)
+  assert.deepEqual(withColor, ['arena_ring.glb', 'asteroid_L.glb', 'asteroid_M.glb', 'asteroid_S.glb', 'asteroid_comet.glb', 'boss.glb', 'drone.glb', 'flyer.glb', 'powerup_bomb.glb', 'powerup_magnet.glb', 'powerup_overdrive.glb', 'powerup_rapid.glb', 'powerup_shield.glb', 'powerup_slowmo.glb', 'powerup_spread.glb', 'ship.glb', 'stinger.glb', 'warden.glb']); // I299/ST-281: + arena ring value bake (16 -> 17); I289/ST-273 warden (stinger core + flyer dome stay emissive-driven)
 });

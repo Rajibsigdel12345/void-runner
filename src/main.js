@@ -146,6 +146,7 @@ assetLoader.onAsset((name, entry) => {
   else if (name === 'rockL') rockRenders.setGLB('L', entry.object);
   else if (name === 'rockM') rockRenders.setGLB('M', entry.object);
   else if (name === 'rockS') rockRenders.setGLB('S', entry.object);
+  else if (name === 'rockComet') rockRenders.setCometGLB(entry.object); // I344 (ST-316): comet variant
   else if (name === 'boss') bossMesh.useGLB(entry.object);
   else if (name === 'shield') rockRenders.setShieldGLB(entry.object); // I210: armor plates
   else if (name === 'puRapid') powerupRenders.setGLB('rapid', entry.object); // I211

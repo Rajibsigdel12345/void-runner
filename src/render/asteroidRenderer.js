@@ -36,6 +36,7 @@ export function createAsteroidRenderer(scene) {
   // procedural 3-variant bakes are used.
   const glbGeo = {};
   let glbShellGeo = false; // I210: shield GLB loaded flag
+  let glbComet = false; // I344 (ST-316): comet variant GLB loaded flag
   const mat = new THREE.MeshStandardMaterial({ color: 0x8a7f72, roughness: 0.95, metalness: 0.05, flatShading: true, vertexColors: true }); // I209: GLB-baked shading
   // ST-139: belt rock - dark cold metal so drifting indestructibles read as "unbreakable".
   const matBelt = new THREE.MeshStandardMaterial({ color: 0x2a313d, roughness: 0.42, metalness: 0.9, flatShading: true, emissive: 0x2f6fd0, emissiveIntensity: 0.6, vertexColors: true }); // I209: vertexColors
@@ -103,7 +104,7 @@ export function createAsteroidRenderer(scene) {
     for (const r of field.rocks) {
       if (r.dead || i >= max) continue;
       const m = pool[i++];
-      m.geometry = glbGeo[r.size] || geos[r.size][r.variant]; // I104: GLB when loaded
+      m.geometry = (r.size === 'S' && r.variant === 2 && glbComet) ? glbComet : (glbGeo[r.size] || geos[r.size][r.variant]); // I104: GLB when loaded; I344 (ST-316): comet variant on S slot 2 (render-only, +0 draw path)
       m.material = r.belt ? matBelt : (r.golden ? matGold : mat); // ST-052/ST-139
       const shell = m.children[0]; // ST-127: shield shell tracks armor (dim = 1 hit away)
       if (r.shielded) {
@@ -148,6 +149,22 @@ export function createAsteroidRenderer(scene) {
     if (g) { glbShellGeo = true; shellGeo = g; for (const m of pool) m.children[0].geometry = g; }
   }
 
+  // I344 (ST-316): comet variant geometry (render-only rock variant; zero src/core). The
+  // ion tail is baked into the SAME mesh as a COLOR_0 gradient, so setCometGLB swaps it into
+  // an existing S pool slot (+0 new draw-call path; the slot already drew as a rock).
+  function setCometGLB(obj) {
+    if (!obj || glbComet) return;
+    let g = null;
+    obj.traverse((n) => { if (n.isMesh && !g) g = n.geometry; });
+    if (g) {
+      if (!g.hasAttribute("color")) {
+        const col = new Float32Array(g.attributes.position.count * 3).fill(1);
+        g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+      }
+      glbComet = g;
+    }
+  }
+
   // I155: shape-cue toggle (settings.shapeCues; on by default for colorblind-friendly play).
   function setShapeCues(on) { shapeCuesOn = on === true; }
 
@@ -156,5 +173,5 @@ export function createAsteroidRenderer(scene) {
   // warm key light reads instead of the blue-violet nebula washing them periwinkle.
   function setEnvIntensity(v) { if (typeof v === 'number' && isFinite(v)) mat.envMapIntensity = v; }
 
-  return { sync, pool, setGLB, setShieldGLB, setShapeCues, setEnvIntensity, setRim };
+  return { sync, pool, setGLB, setCometGLB, setShieldGLB, setShapeCues, setEnvIntensity, setRim };
 }
