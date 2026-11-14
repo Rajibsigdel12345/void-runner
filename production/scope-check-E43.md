@@ -106,3 +106,26 @@ Closeups VIEWED (all 16 cu_high_*.png):
 Per-class verdicts: drone KEEP / mine GAP / stinger GAP / flyer KEEP / warden KEEP / boss KEEP.
 
 VERDICT: MATERIAL GAPS -> E43 does NOT close at the ST-346 cut gate; proceed to ST-347 (I382). Gap list: G1 stinger charge telegraph unreadable at engagement distance (core sub-pixel at 12 m - needs a larger/brighter core read) / G2 stinger body 0x5a4f73 is the lowest value in the fleet (negative sky sepB, near-invisible on deck - silhouette IS distinct from the drone in closeups: slim dart vs wide diamond, so the fix is value, not shape) / G3 mine glow acc90 93.91 inside the ember band 54.26-112.43 + weakest sky sepA (shift out of band or strengthen).
+
+## Direction (I382)
+
+ST-347 (cgs-dev-story; DOCS-ONLY, zero src). Per-class KEEP/ADD/AVOID from the I381 audit. Budgets are AFTER targets measured by the CORRECTED method (fx=high, both backdrops, engagement 12-16 m; I381 probe re-run in I384 as the AFTER; acc90 = accent-box luma p90; bg = annulus p90/p50 as noted).
+
+New root-cause facts (I382, Node-side GLB measurement - .evidence/I382/measure*.mjs, vendored three + GLTFLoader.parseAsync, no browser):
+- assets/stinger.glb: VR_Stinger_Body raw geometry 3.68 x 0.88 x 0.88 m, origin-centered; VR_Stinger_Core raw geometry 1.28 x 0.8 x 0.8 m, origin-centered, node position (0,0,0), no COLOR_0 (emissive-driven, as pinned in assetPerf.test.js). useGLB() swaps geometries only and leaves the core mesh at the group origin -> the core is FULLY BURIED inside the body (core half-extents 0.64/0.4 < body 1.84/0.44 on every axis). The "white-hot telegraph tip" never pokes out of the hull: G1 is a missing-OFFSET bug, not merely a size/brightness issue. This is the missing render knob the audit suspected.
+- GLB COLOR_0 value bakes are pinned in tests/assetGlbs.test.js (stinger p10/p50/p90 = 0.580/0.760/0.980) -> E43 does NO Blender re-bake (these are value gaps, not bake gaps); config color + render knobs only.
+
+Budgets (AFTER, fx=high, both backdrops):
+| gap | change (I383) | AFTER budget |
+|---|---|---|
+| G1 stinger telegraph (P2 FAIL) | render-only stingerMesh.js sync(): new CONFIG.stinger.coreOffset = 2.2 (m along dart local +X; core rear 1.56 = 0.28 m inside the 1.84 m nose, tip 1.0 m proud) + new CONFIG.stinger.coreChargeScale = 1.9 (per-frame core scale = 1 + (1.9-1)*k on the existing telegraph/charge ramp k; no new mesh/draw call; tip at full charge 3.42 m) | charge acc90 >= bg p90 + 60 (sky >= 144.3, floor >= 154.6); charge acc90 >= idle acc90 + 80; idle core acc90 <= body p90 + 25 (no pre-charge); idle-vs-charge closeup MD5 must DIFFER |
+| G2 stinger body (P1 FAIL) | CONFIG.stinger.palette.body.color 0x5a4f73 (sRGB luma 83.9) -> 0x917fb9 (luma 135.0; same violet hue, VALUE-only lift; no cyan = drone collision, no warm = ember collision) | body p50 window [45, 75] both backdrops (BEFORE 30.36 sky / 15.27 floor); body p50 >= sky bg p50 36.9 + 8 (sepB >= +8; BEFORE -6.54) |
+| G3 mine glow (P3 + weakest P2) | render-only mineMesh.js: emissiveIntensity pulse 0.45 + 0.4*sin -> 0.70 + 0.62*sin (range 0.70-1.32, x~1.55; same phase/period = FEEL frozen); hue stays red 0xff2a2a (danger identity; brightness resolves the ember-band collision) | acc90 window [125, 145] (above ember peak 112.43 with +12 margin; below drone 200.98 / flyer 197.74 / boss core 182.49; at-or-below warden exposed 147.01 -> hierarchy drone > flyer > boss core > mine >= warden holds) |
+
+KEEP (PASS at I381, untouched): drone (sepB +43.87 / sepA +116.65 sky, +171.65 floor) / flyer (sepA +113.91 sky, +168.62 floor; dome 197.74) / warden armored (+28.10/+51.58) + exposed (+25.67/+67.74; +34.6 above ember peak) / boss (+31.71/+101.37 sky, +93.08 floor; core 182.49).
+
+AVOID: any value change on the 4 passing classes; new draw calls/meshes/particle/pool entries (pins 21/366 fx-off + 50/1222 fx-high); stinger hue shift (violet family stays); mine acc90 > ~170 (would outrank the boss core); strong stinger body emissive (would pre-charge the telegraph); any sim src (src/core/* logic) - config knobs + render-only touches only; skybox/HUD/feel; vendor bump; any asset delta (target 0 B; no Blender re-bake).
+
+No new grounding: P1-P3 grounded at I380 (burned ids KotQ48nrteg _4xEilK2eNA Gwrpw1YtuGo RJ5goMBD6oc); the I381 audit data IS the budget grounding (measured current frame, not invented targets). Anti-over-engineer: no research pass in I382.
+
+2nd cut gate verdict: NOT CUT. Material gaps proven (G1 root-caused to a buried GLB core = a real missing render knob; G2 value gap; G3 in-band collision). Proceed to ST-348 (I383) implementation.
