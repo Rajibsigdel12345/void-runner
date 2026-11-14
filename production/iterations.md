@@ -4833,3 +4833,23 @@ GOTCHA: tests/assetGlbs.test.js carries 3 BOMs (committed since I370) - the re-p
 Result: DONE.
 
 Risk/follow-up: ST-339 (I372) A/B MUST use the CORRECTED method (standalone three.js closeup + real PLAYING screenshot + authoritative facet pins) - NOT the readPixels boxes (R-E41-5 amended at I370). Next I372 = ST-339 apply + A/B + art QA (zero src).
+## I372 - ST-339 apply + A/B + art QA (cgs-dev-story; DOCS + .evidence, zero src)
+
+Goal: confirm the I371 comet bake is actually LOADED + rendered in-page, A/B it against I344 with the corrected method, art-gate it (all 3 screenshots viewed), verify radii EXACT + no new draw calls, characterize the 1 console 404, re-run the quality bar.
+
+Changed: 6 docs only (scope-check-E41 ST-339 result, stories ST-339 DONE, epics E41 progress, CHANGELOG I372, active.md, iterations) + .evidence/I372/{probe.mjs,probe_404.mjs,rockab_run.mjs,cometab.html,probe_i372.json,rockab_i372.json,cometab_closeup.png,comet_staged.png,comet_playing.png}. Zero src.
+
+Bake: none (asset-only arc; the comet GLB is the I371 bake, sha C1E787668FF949D0).
+
+A/B + loaded-geo evidence (headless playwright-core, swiftshader, Network.setCacheDisabled):
+- Loaded-geo: assetLoader.get(rockComet) geometry POSITION 170 verts posHash 05b189fe == I371 node-side GLB sig (old I344 = 05ee61c8/135v); VERDICT I371-NEW; hasColor true; 4/4 GLB ready.
+- No new draw calls/programs: staged comet Mesh built on the rock pool material (poolMatShared true) -> +0 draw-call paths, +0 programs.
+- A/B corrected method, 3 screenshots all VIEWED: (1) cometab_closeup.png 47745 B sha 9c7eaa3e - standalone three.js, old I344 left vs new I371 right, same orientation/lights: new clearly lumpy (convex bumps + facet variation) vs smooth old; (2) comet_staged.png 541002 B - new comet staged in the real game scene (lights x2.2, all else hidden): lumpy nucleus + bright warm coma fading to a bright blue-white ion tip, no NaN/black/missing; (3) comet_playing.png 407519 B - real PLAYING state: camFinite true, state PLAYING, arena ring/HUD/3 wave-1 rocks/ship intact, no artifacts.
+- rockab radii EXACT (reseed 30201; spawn L/M/S at [-3.5,-4]/[0,-4]/[3.5,-4]): [2.2, 1.3, 0.7]; state MENU; 4/4 GLB ready; probe console 0/0.
+- Console 404 characterization: CDP Network.responseReceived status-404 log across cometab.html + game page -> the ONLY 404 is http://localhost:5173/favicon.ico (the static dev server serves no favicon; not a game asset; all GLB/vendor/script requests 200). Verdict: at most 1 benign favicon 404, 0 real asset errors, 0 warnings.
+
+Verification: npm test 929/929 (0 fail); npm run build exit 0; dist 131 files / 1910880 B (headroom 186272 B >= 102400 B); family GLBs L18592 + M6336 + S7344 + comet8356 = 40628 B <= 64768 B cap; dist comet sha C1E787668FF949D0 byte-MATCHES src; vendor three.module.js sha 76DEA8151BC9352A unchanged (zero src -> structurally unchanged).
+
+Result: DONE. ST-339 complete; the I371 comet bake is confirmed live in the running game with the corrected A/B evidence + clean (benign-favicon-only) console + EXACT radii + zero new draw-call paths.
+
+Risk/follow-up: I373 = ST-340 E41 G41.0 gate + closeout (docs only; R1 p1 pin EXACT causal cite I370/I371 battery; R2 rockab FRESH headless; R3 rock+comet art probe; R4 PWA 11/11 FRESH; R5 quality bar + hygiene). After E41 close -> open E42 per the standing 100-iteration directive (bounded research + scope-check for the next unpolished surface).
