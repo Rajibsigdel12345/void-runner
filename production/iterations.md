@@ -4332,3 +4332,25 @@ Tests: 918/918. Build: exit 0 (129 files / 1926840 B / headroom 170312 B). vendo
 Changed files: src/render/input.js, tests/touchZones.test.js.
 
 Next I353: ST-323 E38 haptics (cgs-dev-story; NEW src/render/haptics.js, CUTTABLE): navigator.vibrate, coarse + feature-gated (coarse && 'vibrate' in navigator; iOS Safari no-op by design). Four short pulses wired at the existing SFX dispatch branches in main.js (coarse-gated): hit 20 ms / death [40,30,60] / bomb 50 ms / pickup 15 ms. No settings toggle (deferred). Probe: vibrate-mock fires in a coarse context, desktop no-op, console 0/0, no NaN; p1 demo pin EXACT (causal); 918+ tests; build 0; dist delta <= ~1 KB; commit.
+
+## I353 - ST-323 E38 haptics (cgs-dev-story; NEW src/render/haptics.js, +746 B dist)
+
+Goal: ship ST-323 - touch play gets the arcade feedback loop it lacks (E38 G3: navigator.vibrate = 0 hits in src/) - four short, coarse + feature-gated pulses fired at the exact moments the player already gets SFX.
+
+Scope: render layer only (NEW src/render/haptics.js + 4 main.js wiring points + tests). BY LAYER - zero src/core, zero three.js. The pulses are pure side effects of the existing SFX dispatch, so a sim delta is structurally impossible. CUTTABLE story - no settings toggle (deferred per the E38 scope).
+
+What shipped:
+- NEW src/render/haptics.js: HAPTIC_PATTERNS { hit 20 ms / death [40,30,60] / bomb 50 ms / pickup 15 ms }; patternFor(kind) pure (null for unknown kinds); createHaptics(coarse) -> { pulse(kind), enabled } with enabled = coarse && 'vibrate' in navigator (Android yes; iOS Safari has no vibrate -> no-op by design); pulse() no-ops (returns false) when disabled or for an unknown kind, and wraps navigator.vibrate in try/catch (some contexts throw).
+- src/main.js (4 edits): import createHaptics (L40); const haptics = createHaptics(coarse) (L235, the I71 coarse detector); at the existing SFX dispatch (L721-722) the event->pulse map verified against the game.js emit sites (hit = ship damage -> 'hit', gameover = ship destroyed -> 'death', bomb = detonation -> 'bomb', powerup = collected -> 'pickup'); window.__vr.haptics probe (L676).
+- tests/haptics.test.js (7 tests): patternFor known/unknown; table shape (4 kinds, ms values); coarse + fire records the pattern; coarse + unknown kind -> no vibrate; fine pointer -> disabled no-op; coarse-but-no-vibrate -> disabled no-op. navigator stubbed via Object.defineProperty (verified working in Node v26).
+
+Verification:
+- npm test = 925/925 (+7). Build exit 0.
+- dist = 130 files / 1927586 B (was 129/1926840; +746 B, within the <= ~1 KB budget). vendor sha 76DEA8151BC9352A unchanged; headroom 169566 B >= 102400 B floor.
+- Headless haptic probe (.evidence/I353/haptic_probe.mjs, playwright chromium headless, one launch, 3 contexts) = 12/12, console A 0/0 + B 0/0: A0 coarse + enabled true; A1-A4 the vibrate mock records the EXACT patterns hit [20] / death [[40,30,60]] / bomb [50] / pickup [15]; A5 unknown kind -> false + zero vibes; A6 render alive (35 calls / 380 tris, ship finite, MENU, no NaN); A7 console 0/0; B0 fine pointer enabled false; B1 fine pulse false + zero vibes; B2 console 0/0.
+- p1 demo pin re-run = EXACT: score 11334 / kills 57 / wave 2 / maxCombo 15 / shots 198/57 / acc 0.2878787878787879 / time 36.14999999999923 s / replay 2169-2220 speed 4 / Q -> MENU / console 0/0 (causal proof: haptics are side-effects only, zero sim delta).
+
+Tests: 925/925 (+7). Build: exit 0 (130 files / 1927586 B / headroom 169566 B). vendor sha 76DEA8151BC9352A unchanged.
+Changed files: src/render/haptics.js (new), tests/haptics.test.js (new), src/main.js.
+
+Next I354: ST-324 E38 touch-target audit+fix (cgs-dev-story; CUTTABLE to a 0 KB pass): measure every interactive element in MENU / PAUSED / GAME_OVER / REPLAY at 390x844 (portrait) + 740x360 (landscape) via getBoundingClientRect over the live DOM (headless probe, one context per state x viewport); fix ONLY real < 44 px hits with coarse-gated CSS (media (pointer:coarse) - desktop layout untouched); the desktop HUD A/B must stay EXACT at the I347 baseline (pairA credit x hint 0 px^2 + 23 px gap, credit x panel 0 px^2; pairB scoreBox/best x wpnBox 0 px^2 + 23 px gap); no new DOM; p1 EXACT (causal); 925+ tests; build 0; dist delta <= ~1 KB (a 0 KB pass is acceptable - CUTTABLE); commit.

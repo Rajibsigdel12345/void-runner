@@ -37,6 +37,7 @@ import { createTouchStick } from './render/touchStick.js'; // ST-321 (I351): on-
 import { createScreens } from './render/screens.js';
 import { createSettingsPanel } from './render/settingsPanel.js';
 import { createAudio } from './render/audio.js';
+import { createHaptics } from './render/haptics.js'; // ST-322 (I353): touch haptics (coarse + feature-gated; iOS Safari no-op)
 import { createWaveBanner } from './render/waveBanner.js';
 import { createScorePopups } from './render/scorePopups.js';
 import { createTutorialHint } from './render/tutorialHint.js';
@@ -231,6 +232,7 @@ function markAudioReady() {
   audio.init();
   audio.setMuted(muted);
 }
+const haptics = createHaptics(coarse); // ST-322 (I353): touch haptics - coarse + feature-gated; pulse() is a no-op on fine pointers and where navigator.vibrate is absent
 // I71: responsive UI scale (fontScale x viewport -> --vr-fs); coarse detected above (I71)
 function uiVwScale() { return Math.min(1, Math.max(0.6, window.innerWidth / 820)); }
 function setUiScale() { document.documentElement.style.setProperty('--vr-fs', String((liveSettings.fontScale || 1) * uiVwScale())); }
@@ -671,6 +673,7 @@ window.__vr.magnetPullCount = () => world.powerups.drops.filter((d) => !d.dead &
 window.__vr.weaponFanfareN = () => _weaponFanfareN; // ST-178: probe (fanfires fired; increments only in the motion-ON branch)
 window.__vr.lastShare = () => screens.lastShare(); // I159: probe
 window.__vr.replayView = () => replayView && { idx: replayView.idx, length: replayView.player.length, speed: replayView.speed, meta: replayView.data.meta }; // ST-190: probe
+window.__vr.haptics = haptics; // ST-322 (I353): probe (coarse + feature-gated; pulse('hit'|'death'|'bomb'|'pickup'))
 window.__vr.startReplay = (d) => startReplayView(d); // ST-190: probe
 window.__vr.exitReplay = () => exitReplayView(); // ST-190: probe
 window.__vr.demoReplay = () => demoReplay(CONFIG.replay.demoSeed, CONFIG.replay.demoLen); // ST-190: probe
@@ -715,6 +718,8 @@ function tick(dt, intent) {
     eventTally[e.type] = (eventTally[e.type] || 0) + 1;
     const cue = e.type === 'powerup' && e.data && e.data.type === 'slowmo' ? 'slowmo' : e.type === 'powerup' && e.data && e.data.type === 'overdrive' ? 'overdrive' : SFX_CUES[e.type]; // ST-057, I173: slow-mo pickup gets the cold shimmer
     if (cue) audio.sfx(cue, e.data && e.data.pos ? e.data.pos : null);
+    const haptic = e.type === 'hit' ? 'hit' : e.type === 'gameover' ? 'death' : e.type === 'bomb' ? 'bomb' : e.type === 'powerup' ? 'pickup' : null; // ST-322 (I353): touch haptics at the SFX dispatch (coarse + feature-gated inside haptics)
+    if (haptic) haptics.pulse(haptic);
     if (e.type === 'wave') banner.showWave(e.data.n, e.data.mod, e.data.endless);
     else if (e.type === 'waveCleared') banner.showCleared(e.data.n);
     else if (e.type === 'bossSpawn') { banner.showBoss(e.data.wave, e.data.hp, e.data.kind === 'splicer' ? 'THE SPLICER' : 'THE MONOLITH', e.data.kind); if (e.data.kind === 'splicer') toast('SPLICER INBOUND'); } // I154: kind for variant glow // ST-135/143: boss intro (+ Splicer callout)
