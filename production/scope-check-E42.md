@@ -89,3 +89,37 @@ Findings - where the cross-arc gap is:
 Verdict: KEEP - a material cross-arc gap exists (outer-floor structure + cast separation). NOT CUT. ST-342 direction: luma-neutral re-bake of floor_surface.png - (a) replace blotch noise with intentional deck structure (concentric panel bands aligned to the grid rings + radial sector seams aligned to the 8 sectors), (b) outer micro-contrast (band spread ~3.4 -> 8-12, within the per-band [p10,p90] envelope; peaks at ring radii must not push ring p90 above 50), (c) subtle cool/neutral cast shift in the outer region (R/B ~1.76 -> ~1.3-1.4) to separate from the warm sky + extend the cool family (rim, engine glow, reticle), (d) hub region unchanged; 512x512 kept, hard cap ~25 KB (target floor family < 16.5 KB); +0 draw calls/programs; zero sim src.
 
 Verification + hygiene: 929/929 + build 0 (docs only, zero src touched); dist 131/1910880 B (headroom 186272 B); vendor sha 76DEA8151BC9352A unchanged; servers killed + 5173 free; 0 chrome; console 0/0; NaN 0.
+
+## I376 - ST-342 grounded direction (cgs-dev-story; docs-only; 0 KB)
+
+Story Goal: turn the I375 audit (ST-341, VERDICT KEEP) into an implementation-ready direction for ST-343 (I377) - the exact luma-neutral re-bake spec for assets/floor_surface.png, the envelope guardrails it must satisfy, and the R-E42-1 re-pin plan. Owner: gameplay-programmer (asset + config only, zero sim src). Dependencies: I375 audit + BEFORE baseline (this file, I375 section), the I359 pin set (authoritative after the I375 pin correction), blender-core + blender-asset-qa for I377.
+
+KEEP (frozen):
+- FLOOR-50 ceiling: all rendered ring lumas < 50 (ST-293); hub cap <= 59.8.
+- floorab pins = the I359 values (authoritative after the I375 pin correction): ring annulus p90 49.04/48.32/38.54/24.41 + rim 52.98 (p50 51.12); hub ring p90 57.53; spot t0.05 p50 49.32 (rgb 62.8/48.1/35.6); spot t0.95 p90 111.35; FLOOR-50 battery 230/72/158/0/0 (post-I359 re-pin; supersedes the 230/61/169/0/0 cited in the I374 section).
+- skybox v6 frozen (42899 B sha 8BD9E59EC4EA); HUD A/B I347 frozen; HUD layout frozen; feel frozen.
+- No new draw calls/programs; no sim/src/replay/vendor changes (vendor sha 76DEA8151BC9352A).
+
+ADD (only what the I375 audit justified):
+- Luma-neutral re-bake of assets/floor_surface.png - spec:
+  (a) structure: replace the blotch noise with intentional deck structure - concentric panel bands aligned to the 5 grid rings (config: rings 5, hubRings 0.10/0.18, rimRing 0.92) + radial sector seams aligned to the 8 sectors (divisions 48).
+  (b) micro-contrast: outer band spread ~3.4 -> 8-12, strictly within the per-band [p10,p90] envelope measured at I375; peaks at ring radii must not push any ring p90 above 50.
+  (c) cast: outer region R/B ~1.76 -> ~1.3-1.4 (subtly cool/neutral) to separate from the warm sky (rgb 99/63.6/53.9) and extend the cool family (rim, engine glow, reticle).
+  (d) hub: the t < 0.2 region stays unchanged.
+- Constraints: 512x512 kept; PNG hard cap ~25 KB (target floor family < 16.5 KB); deterministic seed documented; +0 draw calls/programs; zero sim src.
+- Rejected ADD candidates (documented; revisit only if a future arc re-opens FLOOR-50): grid-brightness rest-curve contrast and the bounded floor-only secondary fill / grade micro-knob - both are luma changes and I375 measured zero luma headroom (ring 1 p90 49.04 at the ceiling 50; hub p90 57.53 at the 59.8 cap).
+
+AVOID:
+- Brightening past FLOOR-50 (no luma gain anywhere in the envelope).
+- New draw calls / materials / texture paths beyond the existing floorDisc (CircleGeometry + unlit MeshBasic, toneMapped false, y=-0.02).
+- Mechanics/feel changes; skybox re-bake; HUD layout; animated or deformable floor geometry; per-frame floor deformation; three/vendor bumps.
+
+R-E42-1 re-pin plan (executed at I378, after the I377 bake):
+- Re-run the Part A overhead-freeze probe under the exact I375-A conditions (fx off, reseed 71200, cam (0,48,0.001) up (0,0,-1) fov 60, rAF frozen, pool/ship/particles hidden) + Part B real PLAYING (fx high, reseed 71201, begin + advance(2.5), freeze + single render + read).
+- Re-pin ALL floorab ring/rim/spot/hub values with the documented delta vs the I359 pins (values-only re-pin; "re-tune in-bake, never widen a test band silently").
+- FLOOR-50 battery must hold all ring lumas < 50 + hub <= 59.8; if a pin moves, the documented delta becomes the new pin (target: near-zero move = the luma-neutral proof).
+- ST-343 acceptance: FLOOR-50 ceiling held + p1/rockab EXACT causal (asset-only swap keeps RNG untouched; current battery 11334/57/W2/combo 15/shots 198/acc 0.2878787878787879/36.14999999999923 s/replay 2169-2220/speed 4 seed 9876) + PNG cap + dist headroom >= 102400 B.
+
+Acceptance (ST-342, this iteration): direction section appended (this section); p1 + rockab EXACT causal preserved by construction (zero src touched - no sim-relevant file changed; current pins cited above). No new risks beyond R-E42-1..5.
+
+Verification + hygiene: 929/929 + build 0 (docs only, zero src touched); dist 131/1910880 B (headroom 186272 B); vendor sha 76DEA8151BC9352A unchanged; 0 chrome; no server running (5173 free). Next I377 = ST-343 Blender headless re-bake of assets/floor_surface.png v2 per spec a-d (blender-asset-qa mandatory).

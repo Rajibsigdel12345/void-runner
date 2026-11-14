@@ -4918,3 +4918,17 @@ Verification: 929/929 (fresh; docs only, zero src touched) + build 0 + dist 131/
 Result: DONE. ST-341 complete; E42 continues (NOT CUT).
 
 Risk/follow-up: next I376 = ST-342 grounded direction (cgs-dev-story, docs-only): write KEEP/ADD/AVOID into production/scope-check-E42.md from the I375 audit (the luma-neutral re-bake spec above + envelope guardrails + the R-E42-1 re-pin plan against the I359 pins).
+
+## I376 - ST-342 grounded floor/field direction (cgs-dev-story; DOCS-ONLY, zero src)
+
+Goal: turn the I375 audit (ST-341, VERDICT KEEP) into an implementation-ready direction for ST-343 (I377): the exact luma-neutral re-bake spec for assets/floor_surface.png, the envelope guardrails, and the R-E42-1 re-pin plan - all pinned to the I359 pin set (authoritative after the I375 pin correction).
+
+Changed: 6 docs only (scope-check-E42 + I376 direction section [KEEP/ADD/AVOID + re-bake spec a-d + I359 envelope guardrails + R-E42-1 re-pin plan], stories ST-342 DONE, epics E42 progress, CHANGELOG I376, active.md, iterations). Zero src, zero assets.
+
+Direction summary: ADD narrowed to the single I375-justified item = luma-neutral re-bake of assets/floor_surface.png (512x512, cap ~25 KB, deterministic seed): (a) deck structure aligned to the 5 grid rings + 8 sector seams, (b) outer band spread ~3.4 -> 8-12 within the per-band [p10,p90] envelope (ring p90 never above 50), (c) outer cast R/B ~1.76 -> ~1.3-1.4, (d) hub t<0.2 unchanged. Rejected with documented reason (zero luma headroom): grid-brightness rest-curve contrast + bounded floor-only grade micro-knob. AVOID: brightening past FLOOR-50, new draw calls/materials, mechanics/skybox/HUD/feel changes, animated or deformable floor geometry, three/vendor bumps. R-E42-1: I378 re-runs the I375 A/B probe under identical conditions, re-pins ALL floorab values with documented deltas vs the I359 pins, FLOOR-50 battery < 50 all rings + hub <= 59.8 (target: near-zero move = the luma-neutral proof).
+
+Verification: 929/929 (fresh; docs only, zero src touched) + build 0 + dist 131/1910880 B (headroom 186272 B) + vendor sha 76DEA8151BC9352A unchanged + p1/rockab EXACT causal preserved by construction (zero src; battery 11334/57/W2/combo 15/shots 198/acc 0.2878787878787879/36.14999999999923 s/replay 2169-2220/speed 4 seed 9876 cited) + 0 chrome + 5173 free.
+
+Result: DONE. ST-342 complete; ST-343 (I377) unblocked.
+
+Risk/follow-up: I377 = ST-343: Blender headless re-bake of assets/floor_surface.png v2 per spec a-d (blender-core + blender-asset-qa mandatory; sRGB byte-space gotcha I357 - Blender 8-bit PNG save is raw bytes, verify with a Node PNG-decode luma audit BEFORE swap; backup the old PNG + hash-verify).
