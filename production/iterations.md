@@ -5148,3 +5148,29 @@ Risk/follow-up: I382 = ST-347 grounded direction (docs-only, 2nd cut gate): per-
 - Result: DOCS-only (6 changed + 1 new), zero src, 0 B asset delta. 929/929 + build 0 + dist
   131/1918997 unchanged; vendor three.module.js sha256[:16] 76dea8151bc9352a; vendor 13/13
   byte-identical. Next = ST-366 at I397.
+
+## I397 - ST-366 Overdrive Emissive Grounded Direction (dev-story)
+- Goal: finalize the ST-367 change direction with bounded external grounding + a
+  pre-registered candidate ladder and rule cut gate #1 (cgs-dev-story).
+- Direction: PROCEED to ST-367. Bounded YouTube grounding (1 search / 3 queries / 8 raw,
+  0 extra transcript pulls) returned GENERIC UI/UX content only (EcbgbKtOELY, psyw2_j_5jk,
+  LAGn9pITWjw, Apple icon composer) - no game-specific pickup-glow evidence; two supporting
+  highlights used (consistency/repetition keeps the lift in-family; relative in-frame
+  contrast carries readability). UNVERIFIED label: local I395 probe = primary evidence for
+  this micro-decision.
+- Evidence: lever re-verified in code (powerupMesh.js:50-60 per-type MeshStandardMaterial
+  with emissiveIntensity 0.9 / roughness 0.35 / metalness 0.15 / vertexColors true; GLB
+  COLOR_0 facet bake multiplies on top; line 40 overdrive emissive 0x6d0f52 = free un-pinned
+  knob, one line). Family emissive luma (I396 audit): overdrive 39.8 + bomb 40.6 bottom
+  pair, rest 73.0-90.3.
+- Ladder (pre-registered for I398 A/B): C1 0x802468 (luma 60.4) / C2 0x8a2e74 (luma 70.6,
+  PRIMARY) / C3 0x963880 (luma 81.2, below family max 90.3). Selection rule: apply C2,
+  probe x2; A1 floor acc90 < 55 -> C3; A1 > 85 or A2 sky > 120 or A5 fx-high blowout -> C1;
+  C3 still misses A1 -> CUT (no-change, overdrive stays accepted-minor). Model caveat
+  (UNVERIFIED): acc90 ~= 0.5*luma + 17 (overdrive-baseline fit; bomb +22 pt facet bonus)
+  suggests C3 territory may be needed - the empirical probe is the decider.
+- Cut gate #1: NOT triggered (bounded one-line free-knob change; hue risk low - same family
+  R > B > low-G, tint 0xff4dd8 untouched; no counter-evidence). A1-A6 bands CONFIRMED
+  unchanged (as pre-registered I396).
+- Result: 929/929 + build 0 + dist 131/1,918,997 B unchanged + vendor sha hold. 6 docs
+  (0 src, 0 B asset delta). Next I398 = ST-367 (C2 edit + A/B probe x2, cut gate #2).

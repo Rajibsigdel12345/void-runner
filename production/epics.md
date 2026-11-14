@@ -565,3 +565,10 @@ recorded in production/gates.md.
   node 13).
 - production/scope-check-E47.md = source of truth.
 - Status: OPEN (I396).
+- Progress: I397 (ST-366) DONE - grounded direction (cgs-dev-story; DOCS-only): bounded
+  YouTube grounding (1 search / 3 queries / 8 raw; GENERIC UI/UX only, no game-specific
+  pickup-glow content - unverified label; local I395 probe = primary evidence) + lever
+  re-verified in code (powerupMesh.js:40 per-type emissive = free un-pinned knob, one line) +
+  candidate ladder C1 0x802468 / C2 0x8a2e74 (PRIMARY) / C3 0x963880 with pre-registered
+  selection rule; A1-A6 bands CONFIRMED unchanged; cut gate #1 NOT triggered (hue risk low:
+  same family R > B > low-G, tint 0xff4dd8 untouched) -> PROCEED to ST-367 (I398).

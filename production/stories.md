@@ -507,3 +507,7 @@ E16 closed at I251 (G16.0 PASS). E17 = the asteroid family hero pass + world pol
   free) / R5 vendor sha 76DEA8151BC9352A + dist 131 / headroom >= 102400 B + 929/929 + build 0 +
   hygiene (chrome 0, ports 5173/4173/5199 free, node 13); close E47 + open E48.
 - STATUS (I396): OPENED (ST-365 done at I396; ST-366..368 pending, I397..I399).
+- STATUS (I397): ST-366 DONE (grounded direction; cut gate #1 NOT triggered -> ST-367
+  scheduled I398). Bounded YouTube grounding (generic UI/UX support only, unverified label
+  for this micro-decision) + lever re-verified (per-type emissive hex, un-pinned, one line)
+  + ladder C1/C2/C3 + selection rule pre-registered + A1-A6 confirmed unchanged.

@@ -117,3 +117,47 @@ implement + A/B (I398), ST-368 G47.0 gate + close (I399).
   ports 5173/4173/5199 free, node 13).
 - Blender: NOT used in E47 (proven no-op by the I395 bake measurement; the lever is in-code).
 - production/scope-check-E47.md = source of truth.
+
+## ST-366 Grounded Direction (I397) - candidate ladder + bands confirmed (cut gate #1: NOT cut)
+
+Verdict: PROCEED to ST-367. Not cut: the lift remains a bounded one-line free-knob change, hue
+risk is low (same hue family R > B > low-G, tint 0xff4dd8 untouched), and no counter-evidence
+surfaced.
+
+### Grounding (bounded YouTube: 1 search / 3 queries / 8 raw; 0 extra transcript pulls)
+Queries: "Faster Than Light item icons UI design analysis" / "game pickup item readability glow
+emissive art direction" / "roguelite game UI item icon contrast readability". Results were
+GENERIC UI/UX (no game-specific pickup-glow content): EcbgbKtOELY (UI/UX concepts; color
+theory + dark mode moments, no extracted passage), psyw2_j_5jk (2026 UI trends), LAGn9pITWjw
+(7 UI tips), Apple icon composer, career/trend videos. Two usable supporting highlights:
+(a) LAGn9pITWjw 10:43 - consistency/repetition as a core design principle (the lift keeps
+overdrive INSIDE the family luma distribution, not a unique value); (b) psyw2_j_5jk 4:05 -
+readability rides on RELATIVE contrast inside a coherent frame ("accessibility issues... non
+issues if the entire rest of the interface has proper contrast, proper hierarchy") - a
+single in-family lift is legitimate. UNVERIFIED-ASSUMPTION LABEL: no game-specific external
+evidence for this micro-decision; the local I395 probe measurement is the primary evidence
+base.
+
+### Lever (re-verified in code, I397)
+powerupMesh.js:50-60 creates a PER-TYPE MeshStandardMaterial (mats[t]) with {color:
+def.color, emissive: def.emissive, emissiveIntensity 0.9, roughness 0.35, metalness 0.15,
+vertexColors true}; the GLB COLOR_0 facet bake multiplies on top (I288/ST-272). Line 40:
+overdrive { color 0xff4dd8, emissive 0x6d0f52, CylinderGeometry(0.42, 0.42, 0.3, 6) }. The
+emissive hex is per-type and un-pinned (not in config.js, not in any test). ONE line changes.
+
+### Family emissive luma (I396 audit)
+rapid 0x7a5a00 90.3 / spread 0x7a4a00 78.8 / slowmo 0x1a5a7a 78.7 / shield 0x0e5a75 75.8 /
+magnet 0x0f5c37 73.0 / bomb 0x751414 40.6 / overdrive 0x6d0f52 39.8.
+
+### Candidate ladder (ST-367 A/B; start at C2)
+- C1 0x802468 (R128 G36 B104, luma 60.4) - step-down
+- C2 0x8a2e74 (R138 G46 B116, luma 70.6) - PRIMARY (mid)
+- C3 0x963880 (R150 G56 B128, luma 81.2) - step-up (still below family max 90.3)
+Selection rule (pre-registered): apply C2; run the A/B probe twice; if A1 floor acc90 < 55 ->
+C3; if A1 > 85 or A2 sky > 120 or A5 fx-high white blowout -> C1; if C3 still misses A1 ->
+CUT to no-change (overdrive stays accepted-minor).
+Model caveat (UNVERIFIED): rough linear fit acc90 ~= 0.5*emissiveLuma + 17 (fit on the
+overdrive baseline only; bomb shows a +22 pt geometry bonus at equal luma) suggests A1 may
+need luma ~86 (C3 territory); the empirical ladder is the decider, not the model.
+
+### Bands A1-A6: CONFIRMED unchanged (as pre-registered at I396). Cut gate #1: NOT triggered.
