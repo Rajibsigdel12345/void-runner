@@ -4591,3 +4591,41 @@ Changed files (DOCS-ONLY): production/scope-check-E40.md, production/stories.md,
 
 Tests: 928/928. Build: 0 (131 files / 1938450 B / 0 B delta / headroom 158702 B). vendor sha 76DEA8151BC9352A unchanged. Next I364 = ST-332 Blender skybox v6 node-bake (ASSETS-ONLY, zero src; blender-core + blender-export + blender-asset-qa MANDATORY before shipping).
 
+## I364 - ST-332 Blender skybox v6 bake (cgs-dev-story + blender-core + blender-asset-qa; ASSETS-ONLY, zero src)
+
+Goal: bake the ST-331 art direction into the shipped skybox - replace assets/skybox_equirect.jpg in place with the v6 structured nebula (core knot + secondary knots + dominant rift + dust lanes + filaments + companion band + correlated stars), keeping the equirect 1024x512 JPEG loader pin and the band elevation invariant. ASSETS-ONLY: zero src change; the existing fire-and-forget skybox.js loader loads the new file unchanged.
+
+Pipeline: numpy-in-Blender headless bake (make_sky_v6.py, blender -b --factory-startup --python-exit-code 1; SEED 33201 deterministic): analytic 2048x1024 field (2x) -> 2x2 downsample -> 1024x512 equirect JPEG q90 ladder (q90 -> q75, HARD_CAP 122880 B). ~16-18 s per bake.
+
+Bake iteration log (5 bakes):
+- (1) initial: D8 -0.78 pass, luma_max 250.8 FAIL (star blowout), drift -21.
+- (2) star caps (b clip 0.80 -> 0.72; 6 brights 1.0 -> 0.82) + companion amp 0.10 -> 0.05: luma_max 222.2, drift -18.
+- (3) companion sigma 16 -> 7.5: drift unchanged (companion not the drift driver).
+- (4) DBG per-term row-mean decomposition (2x rows 424-528 = 1x 212-264): bandcol row-mean 50.40 @ row 226 vs 44.59 @ row 244 - the DUST (dominant rift 0.50 + 3 lanes 0.35/0.30/0.32) darkens core rows ~6-10 luma; companion/nebula/star/base each < 2 luma in-window. DUST identified as the driver.
+- (5) companion -> partial azimuthal arc: final stats below.
+
+Shipped structure (v6 = 42899 B, hash 8BD9E59EC4EA; replaced v8 = 67255 B hash 0FC2CE411CCA; backup .evidence/I364/skybox_pre_e40_backup.jpg hash-verified identical pre-swap):
+- base_band v8-exact: exp(-0.5*((lat-4deg)/20deg)^2)*0.55 (elevation invariant preserved by construction; bandC = 4 deg).
+- core knot u0.65 (sz12/slat8 deg, amp 0.16) veiled x(1-rift*0.7) (D1).
+- 3 secondary knots: u0.18 (sz5/slat3.5), u0.42 (sz4/slat3), u0.86 (sz5.5/slat4), amp 0.07.
+- dominant rift: ribbon sz 4.5 deg centered bandC+(rn-0.5)*8 deg, core win sz 28 deg azimuth, darkening 0.50; + 3 lanes (u0.30/u0.78/u0.12; 0.35/0.30/0.32); dust clip 0-0.60.
+- fBm filaments: (filam-0.5)*2 x (base_band*0.9) x 0.10.
+- companion arc: knot(u0.35, e +5 deg [spec +4-6 deg], sz 35/slat 6 deg), amp 0.08 = 14.5% of band amp (~D5 ~15%), tint (0.48,0.40,0.34) slightly cooler, still R>G>B; az-mean factor ~0.24 keeps row-mean lift small.
+- nebula: violet (0.40,0.22,0.60)*0.06 + cyan (0.18,0.42,0.52)*0.04 x depth; halo = zeros.
+- color ramp: (0.62,0.34,0.14)*clip(bandB,0,0.55) + (0.92,0.78,0.59)*clip(bandB-0.55,0); base navy [0.034+0.040h, 0.036+0.044h, 0.062+0.072h].
+- stars 1112: density 0.4 + 1.2*band + 1.6*knot, 13% cool, 6 brights 0.82, clip 0.72.
+
+Companion deviation note: full-ring at 15% was incompatible with the D8 window (+14 luma) and the argmax; a one-sided clip ramp was the biggest argmax offender. Final form = partial azimuthal arc (balances the core knot at u0.65); D5 amplitude restored (14.5% ~ spec ~15%).
+
+Elevation hold - DOCUMENTATION (drift -18 is DUST-driven, not geometry): row-mean argmax cur 244 -> cand 226 (drift -18, ACCEPTED + documented). The DUST darkens the dust-occluded core rows ~6-10 luma, so the row-mean peak shifts toward the brighter flank - correct Great-Rift behavior (flanks brighter than the dust-occluded core). Geometry preserved by construction (bandC 4 deg, v8-exact base_band). Spec elevation hold = same band-center parameter (satisfied) + MENU strip verified before/after at ST-333 (pending I365). The make_sky_v6.py "abs drift <= 6" print is self-imposed, not spec.
+
+Final A/B audit (measured): D8 p50 @ cur center (rows 236-252): cur 72.21 / cand 71.58, delta -0.63 (<= +/-5 PASS); p10 57.95 / p90 79.70 (cur 69.06/80.06). warmfrac 1.000 (R>G>B everywhere in band). luma_max 225.3 (<245 PASS); luma_mean 32.92. stars 1112. q90 42899 B <= 122880 B D7 cap (under the 90-115 KB soft target - smooth gradients compress cheap, the cap is the binding constraint).
+
+asset-qa gate (texture run, no mesh - blender-asset-qa MANDATORY before shipping): numeric audit (above) + viewed preview (skybox_v6_preview.png; note: the preview .png is JPEG bytes - bpy save_render used the scene JPEG format; candidate .jpg verified genuine JPEG, SOI 255,216) + in-game headless smoke + test-suite re-audit. Gate satisfied.
+
+Smoke (in-game headless, existing loader, zero src): SMOKE {"skyboxReady":true,"skyboxUrl":"assets/skybox_equirect.jpg","camPos":[0.433,0.500,2.766],"nanPos":0,"frames":112,"framesDelta":31,"hasCanvas":true}, CONSOLE errors=0 warnings=0; MENU screenshot .evidence/I364/smoke_menu.png (structured band in upper third, I360 framing holds, hull IBL re-tint subtle).
+
+Changed files: assets/skybox_equirect.jpg (replaced in place) + 6 docs (production/scope-check-E40.md, production/stories.md, production/epics.md, CHANGELOG.md, production/session-state/active.md, production/iterations.md). Zero src. .evidence/I364/ untracked + gitignored (make_sky_v6.py with DBG block, smoke.mjs, smoke_menu.png, skybox_v6_candidate.jpg, skybox_v6_preview.png, skybox_pre_e40_backup.jpg).
+
+Tests: 928/928. Build: 0 (131 files / 1914094 B / -24356 B delta / headroom 183058 B >= 102400 B). vendor sha 76DEA8151BC9352A unchanged (zero src). Next I365 = ST-333 verify + art QA + re-pin (MENU band strip orbit-phase tolerance form, IBL no-bloom-leak vs 0.72, HUD A/B EXACT I347, console 0/0, no NaN, PLAYING top-of-frame backdrop).
+
