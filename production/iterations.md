@@ -4797,3 +4797,20 @@ Tests: 929/929. Build: 0 (131 files / 1915020 B; headroom 182132 B >= 102400 B).
 Changed files: 6 docs only (scope-check-E41.md Relief Direction section, stories.md ST-336 DONE, epics.md E41 Progress, CHANGELOG.md I369, active.md, iterations.md). Zero src.
 
 Next: I370 = ST-337 Blender rock L/M/S re-bake per the direction + blender-asset-qa (assets only, zero src).
+## I370 - ST-337 Blender rock L/M/S relief re-bake v8 (cgs-dev-story + blender-core + blender-asset-qa; ASSETS-ONLY, zero src)
+
+Goal: re-bake the rock L/M/S low-poly GLBs to v8 per the ST-336 Relief Direction - deeper crater bowls, prominent raised rims, stronger NEW convex bumps, sharper per-vertex value contrast (relief-tracking COLOR_0), radii re-normalized EXACT, facet-luma re-pin + A/B - as GPU-cheap STATIC displacement (no per-frame deformation).
+
+Changed: assets/asteroid_L.glb (22696B/517v/490t -> 18592B/403v/490t), assets/asteroid_M.glb (6588B -> 6336B/122v/134t), assets/asteroid_S.glb (8388B -> 7344B/150v/134t); tests/assetGlbs.test.js (ROCK_FACET v8 re-pins only); 6 docs. Zero src, zero sim. Comet unchanged (7096B/135v/180t, I344).
+
+Bake (make_rock_v8.py, Blender 5.2 headless, blender -b --python-exit-code 1, deterministic): 5/4/4 craters (L/M/S; bowl r0.30-0.50 on L; depth x1.4-1.6 vs I343) + raised rims (rim sigma 0.35-0.55x radius, 0.5-0.7x depth) + 4/3/3 NEW convex bumps + relief-tracking COLOR_0 (relief z-score |v|/r-1 blended 0.7/0.3 with fbm into the tanh value-ladder; wh=0.7 k=2.4 gain=1.75; per-size centers L0.46/M0.62/S0.8137; warm R>=G>=B + per-vertex hue-jitter; export_vertex_color=MATERIAL -> COLOR_0 FLOAT VEC3 5126). Displace-only: tri counts held 490/134/134 (no subdivision).
+
+Facet-luma re-pins (authoritative; tests/assetGlbs.test.js ROCK_FACET, per-tri mean luma): L 0.1410/0.4621/0.7785 [spread 0.6375] / M 0.2610/0.6347/0.8769 [0.6159] / S 0.4387/0.7144/1.0090 [0.5703]. Ladder p50 strict L<M<S (targets L 0.42-0.50 / M 0.58-0.66 / S 0.70-0.78 - all PASS); spread floors 0.60/0.55/0.55 - all PASS; band [0.10,1.20] min 0.1410 / max 1.0090 - PASS. Deltas vs I343 pins: spread L +0.0602 / M +0.0650 / S +0.0139 (relief deepened); p50 L -0.0236 / M +0.0893 / S +0.0116 (ladder preserved).
+
+A/B (CORRECTION to the readPixels pipeline - amends R-E41-5): the raw readPixels closeup is FLAWED for this scene - the game renders the main scene to a POST-FX framebuffer, so a one-shot vr.render() + gl.readPixels on the DEFAULT framebuffer captures ONLY the deterministic nebula BACKGROUND, never the rocks. The ab2 boxes (mean ~68) were background; pngSha 08fb24ed byte-identical old vs v8. Valid rock A/B = (a) standalone three.js closeup page.screenshot (v8_relief_closeup.png, viewed: craggy lumpy silhouettes, faceted bumpy surface, visible darker bowls esp M/S, warm baked color) + (b) real PLAYING screenshot (v8_playing.png, viewed: craggy asteroids in-game) + (c) authoritative facet-luma test pins (re-pinned + green). In-page loaded-geo identity (pos-hash vs Node GLB parse): rockL/M/S verts 403/122/150 posHash 4c4acc6f/486593da/f81d2015 all == v8 (old L 517/342d222d, M 129/d603c4e8, S 179/7a7385e0); dist byte-MATCHES src for all three.
+
+Verification: rockab radii EXACT 2.2/1.3/0.7 (rockab probe reseed; sceneOk; 3 GLBs ready; console 0/0). 929/929; build 0; dist 131 files / 1909620 B (headroom 187532 B >= 102400 B); family GLBs 39368 B <= 64768 B cap; vendor sha 76DEA8151BC9352A unchanged (zero src). blender-asset-qa gate PASS.
+
+Result: DONE.
+
+Risk/follow-up: ST-339 (I372) A/B MUST use the CORRECTED method (standalone closeup + real PLAYING + facet pins), NOT the readPixels boxes (R-E41-5 amended). Next I371 = ST-338 comet re-bake (CUTTABLE).

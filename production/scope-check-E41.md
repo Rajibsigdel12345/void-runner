@@ -34,7 +34,7 @@ E41 deepens the rock L/M/S + comet surface relief so the rocks read MORE as crat
 
 ## Stories
 - ST-336 (I369): grounded rock/comet relief direction (cgs-dev-story; DOCS-ONLY, zero src).
-- ST-337 (I370): Blender rock L/M/S relief re-bake + blender-asset-qa MANDATORY (ASSETS-ONLY).
+- ST-337 (I370): Blender rock L/M/S relief re-bake + blender-asset-qa MANDATORY (ASSETS-ONLY). [DONE I370]
 - ST-338 (I371): Blender comet re-bake (CUTTABLE - close 4/5 with reason if budget conflict; comet keeps I344 asset).
 - ST-339 (I372): apply + art QA + A/B + re-pin (in-place GLB swap same URLs; zero src).
 - ST-340 (I373): E41 regression + G41.0 gate + closeout (docs only).
@@ -52,6 +52,7 @@ E41 deepens the rock L/M/S + comet surface relief so the rocks read MORE as crat
 - dist at open: 131 files / 1915020 B; headroom 182132 B (>= 102400 B floor).
 - Current GLBs: asteroid_L.glb 22696 B / asteroid_M.glb 6588 B / asteroid_S.glb 8388 B / asteroid_comet.glb 7096 B (family 44768 B).
 - HARD CAP: new GLB family <= current + 20 KB (<= 64768 B); zero src changes.
+- I370 result: family GLBs now L 18592 B / M 6336 B / S 7344 B / comet 7096 B = family 39368 B (was 44768 B at open; UNDER the 64768 B cap - the v8 re-bake is byte-smaller than I343 because relief-tracking color + displace-only kept tri counts flat 490/134/134).
 - Vendor sha 76DEA8151BC9352A UNCHANGED (no three bump).
 
 ## Risks
@@ -59,7 +60,7 @@ E41 deepens the rock L/M/S + comet surface relief so the rocks read MORE as crat
 - R-E41-2 tri bloat: displacement with subdivision adds tris -> caps 500/140/140 + all-asset 1800 are HARD (displace-only bake at the SAME vertex count).
 - R-E41-3 byte bloat: GLB family over +20 KB cap -> reduce float precision / quantize colors to fit.
 - R-E41-4 radii drift: displacement pushes maxR off 2.2/1.3/0.7 -> re-normalize EXACT after bake; verify with the rockab probe (reseed 30201).
-- R-E41-5 A/B pipeline mismatch: BEFORE = PR 1.0 1280x720 raw readPixels same-evaluate capture (this session); ST-339 AFTER MUST reuse the identical pipeline (same PR, size, staging, light boost x2.2, camera (0,3.1,13) lookAt (0,2.5,2), fx off, reseed 41414) or the A/B is invalid.
+- R-E41-5 A/B pipeline - **AMENDED I370 (ST-337): the raw readPixels closeup is FLAWED for this scene.** The game renders the main scene to a POST-FX framebuffer; a one-shot vr.render() + gl.readPixels on the DEFAULT framebuffer captures ONLY the deterministic nebula BACKGROUND (the skybox composites straight to the default FB), NEVER the rocks. Every readPixels "closeup" produced byte-identical 08fb24ed (background only) regardless of geometry, and the box stats (mean ~68) sampled the nebula, not the rocks - so the I368 before_i368.json box values were BACKGROUND, mislabeled as rocks. **Valid rock A/B = (a) standalone three.js closeup page.screenshot of a controlled scene loading the GLBs (v8_relief_closeup.png) + (b) real PLAYING screenshot (v8_playing.png) + (c) the AUTHORITATIVE facet-luma test pins (tests/assetGlbs.test.js) which re-pin the exact per-tri luma from the GLB bytes. ST-339 A/B MUST use (a)+(b)+(c), NOT the readPixels boxes.** In-page loaded-geo identity (pos-hash vs Node GLB parse) is the deterministic load proof (I370: rockL/M/S verts 403/122/150 posHash 4c4acc6f/486593da/f81d2015 all == v8).
 - R-E41-6 host stall: headless SwiftShader stalls under host load (observed this session: 2 single-evaluate probe stalls, flat chrome CPU). Playbook: chrome CPU rising = SwiftShader working (wait 5-8 min); flat = wedged -> taskkill chrome + kill probe node + retry; never WMI (tasklist/taskkill only).
 
 ## Gate G41.0 (at ST-340)
@@ -112,3 +113,14 @@ AVOID:
 Budget (re-stated): family GLBs 44768 B -> <= 64768 B; dist headroom 182132 B >= 102400 B floor (zero src, dist unchanged); vendor sha 76DEA8151BC9352A unchanged.
 
 Acceptance (ST-336): this direction section present in scope-check-E41.md (DONE); 6 docs committed; p1 demo pin EXACT + rockab EXACT 2.2/1.3/0.7 causal (cite - zero src this iteration).
+## ST-337 result (I370)
+
+Rock L/M/S relief re-baked to **v8** per the ST-336 Relief Direction (Blender 5.2 headless, make_rock_v8.py, deterministic, blender -b --python-exit-code 1). ASSETS-ONLY, zero src.
+
+- Assets replaced in place (same URLs; loader keys rockL/rockM/rockS unchanged): L 22696B/517v -> 18592B/403v (490t held), M 6588B -> 6336B/122v (134t held), S 8388B -> 7344B/150v (134t held). Displace-only = same tri counts (no subdivision). Comet unchanged (7096B/135v/180t, I344).
+- Bake: 5/4/4 craters (L/M/S) with raised rims (rim sigma 0.35-0.55x radius, 0.5-0.7x depth) + 4/3/3 NEW convex bumps; crater depths x1.4-1.6 vs I343; relief-tracking COLOR_0 (relief z-score |v|/r-1 blended 0.7/0.3 with fbm into the tanh value-ladder; wh=0.7 k=2.4 gain=1.75; per-size centers L0.46/M0.62/S0.8137); warm R>=G>=B + per-vertex hue-jitter; export_vertex_color=MATERIAL (COLOR_0 FLOAT VEC3 5126).
+- Radii re-normalized EXACT 2.2/1.3/0.7 (rockab probe; sceneOk; 3 GLBs ready; console 0/0).
+- Facet-luma re-pins (authoritative; tests/assetGlbs.test.js ROCK_FACET, per-tri mean luma): L 0.1410/0.4621/0.7785 [spread 0.6375] / M 0.2610/0.6347/0.8769 [0.6159] / S 0.4387/0.7144/1.0090 [0.5703]. Ladder p50 strict L<M<S (targets L 0.42-0.50 / M 0.58-0.66 / S 0.70-0.78 - all PASS); spread floors 0.60/0.55/0.55 - all PASS; band [0.10,1.20] min 0.1410 / max 1.0090 - PASS. Deltas vs I343 pins: spread L +0.0602 / M +0.0650 / S +0.0139 (relief deepened), p50 L -0.0236 / M +0.0893 / S +0.0116 (ladder preserved).
+- **A/B method (correction, amends R-E41-5):** the raw readPixels closeup captures only the nebula background (post-FX framebuffer), never the rocks - the ab2 boxes (mean ~68) were background; pngSha 08fb24ed byte-identical old vs v8. Valid A/B = standalone three.js closeup (v8_relief_closeup.png: craggy lumpy silhouettes, faceted bumpy surface, visible darker bowls esp M/S, warm baked color) + real PLAYING screenshot (v8_playing.png: craggy asteroids in-game) + authoritative facet-luma test pins (re-pinned, green). In-page loaded-geo proof: verts 403/122/150 posHash 4c4acc6f/486593da/f81d2015 all == v8 (old L 517 / M 129 / S 179). dist byte-MATCHES src for all three.
+- blender-asset-qa gate (mesh run, MANDATORY): numeric audit + viewed preview + in-game smoke + test-suite re-audit - PASS.
+- Gates: 929/929 + build 0 + dist 131/1909620 B (headroom 187532 B >= 102400 B) + family 39368 B <= 64768 B cap + vendor sha 76DEA8151BC9352A unchanged (zero src).

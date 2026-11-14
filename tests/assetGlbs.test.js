@@ -177,10 +177,10 @@ test('asteroid L/M/S: naming, poly budgets, radii match CONFIG (+/-5%)', () => {
 // I307 (ST-287): pins re-measured on the bump+crater relief geometry (488/134/134 tris);
 // same ST-283 value-ladder + warm-order R>=G>=B + per-vertex hue-jitter scheme, denser surface.
 const ROCK_FACET = {
-  L: { p10: 0.2183, p50: 0.4857, p90: 0.7956, mean: 0.4929 },
-  M: { p10: 0.2987, p50: 0.5454, p90: 0.8496, mean: 0.5513 },
-  S: { p10: 0.3916, p50: 0.7028, p90: 0.9479, mean: 0.6807 },
-}; // I343 (ST-315): L/S v5 deep re-bake repin (L 22696B/490t, S 8388B/134t SHIP; M CUT to I333 v4 6588B/134t - deep re-bake fails 0.46/1.78 surface floor at both 134t and 180t); same ST-283 value-ladder + warm-order + hue-jitter scheme, per-triangle mean-luma convention
+  L: { p10: 0.1410, p50: 0.4621, p90: 0.7785, mean: 0.4830 },
+  M: { p10: 0.2610, p50: 0.6347, p90: 0.8769, mean: 0.6098 },
+  S: { p10: 0.4387, p50: 0.7144, p90: 1.0090, mean: 0.7092 },
+}; // I370 (ST-337 E41 relief re-bake v8): L 18592B/490t 5cr+4bump / M 6336B/134t 4cr+3bump / S 7344B/134t 4cr+3bump - deeper craters (depth x1.4-1.6 vs I343), rim sigma 0.35-0.55, NEW convex bumps, relief-tracking COLOR_0 (relief z-score |v|/r-1 blended 0.7/0.3 with fbm into the tanh value-ladder; wh=0.7 k=2.4 gain=1.75; centers L 0.46 M 0.62 S 0.8137); deltas vs I343 pins: L p10 -0.0773 p50 -0.0236 p90 -0.0171 mean -0.0099 spread +0.0602; M p10 -0.0377 p50 +0.0893 p90 +0.0273 mean +0.0585 spread +0.0650; S p10 +0.0471 p50 +0.0116 p90 +0.0611 mean +0.0285 spread +0.0139; same warm-order R>=G>=B + per-vertex hue-jitter + per-triangle mean-luma convention
 function facetLumas({ buf, json, binOff }) {
   const p = json.meshes[0].primitives[0];
   const cAcc = json.accessors[p.attributes.COLOR_0];
