@@ -4548,3 +4548,23 @@ E39 CLOSED 5/5 (ST-326..330, I357..I361). Next I362 = open E40 (cgs-scope-check 
 Changed files (DOCS-ONLY): production/stories.md, production/epics.md, CHANGELOG.md, production/session-state/active.md, production/iterations.md.
 
 Tests: 928/928. Build: 0 (131 files / 1938450 B / 0 B delta / headroom 158702 B >= 102400 B). vendor sha 76DEA8151BC9352A unchanged.
+## I362 - E40 Nebula Skybox Art Pass OPENED (cgs-scope-check + cgs-create-stories; DOCS-ONLY 0 KB)
+
+Goal: open the next 100-iteration improvement arc (E40) - grounded, bounded, evidence-first (user standing orders: keep improving; use Blender for assets; ground on research, do not over-engineer; revisit the CGS skill library if unsure). Skills revisited this session: cgs-scope-check + cgs-create-stories (read in full).
+
+Scope (decision, evidence-grounded): give the nebula skybox real structure - the band currently reads as a flat 1-D amber stripe (no knots, no dust, no filaments) behind an uncorrelated uniform starfield, and it is now the MENU hero (I360 frames the band in the upper third) + the PLAYING top-of-frame backdrop. Add STRUCTURE (1 dominant + 2-3 secondary bright knots, dark dust lanes, filamentary clouds, star clusters correlated with knots, faint far companion band) while KEEPING equirect geometry, the band elevation (I360 framing) and the warm amber family (R>G>B). In-place asset swap (same URL, fire-and-forget loader) - zero src, zero sim. 5 stories: ST-331..335 scheduled I363..I367. ST-334 CUTTABLE.
+
+What shipped (docs + evidence, 0 KB source delta):
+- production/scope-check-E40.md (new, source of truth): summary, evidence, scope fit, cut options, deferrals, recommendation, risks R-E40-1..5, gate G40.0, files, verification, next.
+- Evidence captured this session:
+  - Asset viewed: assets/skybox_equirect.jpg (1024x512 JPEG, 67255 B) - horizontal amber band at the equator, smooth vertical falloff, uniform dot starfield; no knots / dust lanes / filaments / clusters.
+  - Render path read in full: skybox.js (fire-and-forget TextureLoader, in-place scene.background swap, SRGB + EquirectangularReflectionMapping, flat 0x04060f fallback, no boot gate) + main.js L86-96 (PMREM IBL hook I213: scene.environment baked from the skybox; MeshStandard envMapIntensity CONFIG.fx.env; rock env 0.0 decoupled per I257; ship/belt 0.35 fill; bloom threshold 0.72).
+  - MENU framing (I360, preserved): view center -4.5 deg, frame top +25.5 deg, band e +1.5..+10.5 deg in the upper third (strip y 180-240 x 420-860); band pin = orbit-phase tolerance (|p50 - 56.25| <= 0.75; p10 >= 45 / p90 >= 60 / mean >= 50) per I361.
+  - Budget: dist 131 files / 1,938,450 B; headroom 158,702 B; floor 102,400 B; max addable 56,302 B; current skybox 67,255 B -> new skybox HARD CAP 123,557 B (~120.6 KB), target 90-115 KB.
+- Preserved invariants (NOT re-pinned higher): p1 demo pin EXACT / rockab radii EXACT 2.2/1.3/0.7 (rock GLBs untouched) / vendor sha 76DEA8151BC9352A / dist 2 MB cap + 102,400 B headroom floor / I360 MENU framing (band elevation) / I347 HUD A/B baseline / band strip tolerance form (not exact).
+
+Changed files: production/epics.md (E40 block), production/stories.md (ST-331..335), CHANGELOG.md (I362 line), production/session-state/active.md, production/iterations.md, production/scope-check-E40.md (new). No src/, no tests/.
+
+Tests: 928/928 (docs-only). Build: 0 (131 files / 1,938,450 B / headroom 158,702 B unchanged). vendor sha 76DEA8151BC9352A unchanged.
+
+Next I363: ST-331 grounded nebula art direction (cgs-dev-story + research; DOCS-ONLY, zero src): bounded YouTube MCP research (burned-id list respected) + local evidence -> art direction section in production/scope-check-E40.md: KEEP equirect geometry + band elevation + warm amber R>G>B; ADD knots / dust lanes / filaments / correlated star clusters / faint far band; AVOID blown-out knots + elevation shift + cool drift; JPEG size strategy under the 123557 B hard cap; decisions recorded.
