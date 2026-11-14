@@ -4443,3 +4443,29 @@ Changed files: assets/floor_surface.png (NEW), production/stories.md, production
 Tests: 925/925 (zero src change). Build: 0 (131 files / 1937192 B / +8586 B / headroom 159960 B >= 102400 B). vendor sha 76DEA8151BC9352A unchanged.
 
 Next I358: ST-327 apply floor texture (cgs-dev-story; render + loader, zero sim): read src/render/assetLoader.js + src/render/floorDisc.js; add assetLoader key floorSurface (TextureLoader PNG branch); floorDisc.js applies it with the procedural canvas as fallback (missing/corrupt = today look), unlit MeshBasic toneMapped false, static (no per-frame cost), FX-tier-aware; re-pin floorab + FLOOR-50 (documented delta, values-only, ceiling is a hard cap); p1 EXACT causal; console 0/0.
+## I358 - ST-327 apply Blender floor surface texture (cgs-dev-story; render-only, zero sim delta)
+
+Goal: wire the ST-326 asset (assets/floor_surface.png, shipped I357) into the running scene via the existing assetLoader pipeline, with the procedural canvas as fallback, zero sim delta, and re-pinned visual probes.
+
+What shipped:
+- src/render/assetLoader.js: header comment updated (nineteen GLBs + one PNG); import { TextureLoader, SRGBColorSpace } from three; NEW const TEXTURES = { floorSurface: assets/floor_surface.png } with ST-327 comment block; NEW const texLoader = new TextureLoader(); NEW loadTexture(name, url) mirroring loadOne (entry {texture, ready}, tex.colorSpace = SRGBColorSpace, never rejects); loadAll() concats texture jobs; names = Object.keys(ASSETS).concat(Object.keys(TEXTURES)).
+- src/main.js onAsset chain (after the arenaRing branch): else if (name === floorSurface) { if (floorDisc) { dispose oldFloorTex; floorDisc.material.map = entry.texture; } } - the handler-top `if (!entry.ready) return;` keeps the procedural canvas on load failure = zero visual regression by construction.
+- src/core/config.js: 4-line ST-327 (I358) budget note in the floorDisc comment (8,586 B, max luma 48.757 < 50, R-E39-3 hard cap 28,672 B, fallback semantics). floorDisc.js UNTOUCHED (all asset swaps live in the main.js onAsset chain per project convention).
+
+Re-pins (probe 45/45, ONE headless Chrome launch, server started + killed, port free):
+- floorab ringCheck p90: 48.47/48.47/39.90/29.41/55.47 = I322b EXACT (no delta). TUPLE CORRECTION: the old handoff note "rings 48.47/48.47/39.90/29.41/25.27 + rim 55.47" was a transcription error - the TRUE I322b pin (.evidence/I322/floorab_i322b.json) is rings = 48.47/48.47/39.9/29.41/55.47; 25.27 is the 5th GRID-ring luma from the I322a ringLumas probe, a different probe.
+- floorab spot NEW PIN (the ONLY documented floorab delta - texture under the semi-transparent arena ring / brighter base, parked-pool basis): t=0.05 48.18/48.47/52.39; t=0.3 44.11/44.11/48.47; t=0.65 31.62/40.83/47.04; t=0.95 24.27/40.83/112.64 (was 23.13/40.9/110.71 - tick p90 +1.93: opacity-0.9 ticks over the brighter floor base).
+- calls 31, tris 546 EXACT (zero scene-graph change). FLOOR-50: 230/61/169/0/0 EXACT (texture max luma 48.757 < grid-line annulus max 61).
+- p1 causal EXACT (zero sim delta): 11334/57/W2/combo15/shots198/57/acc 0.2878787878787879/36.14999999999923 s/replay 2169-2220 speed4/Q->MENU. rockab EXACT 2.2/1.3/0.7.
+- floorSurface runtime: assetLoader ready true; floorDisc material.map = Texture (NOT CanvasTexture), 512x512, colorSpace srgb, toneMapped false. FX sweep high/low/off all finite. 6/6 pages console 0/0.
+- Art check (headless SwiftShader screenshots, faithful): hub ring, 16-unit mottle bands, and rim read correctly in context; UV concentric with the arena (no rotation/seams); texture stays subtle (max luma 48.757 < 50 = below bloom threshold, grid lines stay crisp on top).
+
+PROBE HYGIENE (2 findings, both now enforced in probe.mjs page A):
+1. An FX tier sweep (esp. high) on the same page before a calls/tris pin leaves +14 calls in renderer.info - pin shots need a fresh page or f-to-off first (page A now runs an f-key FX-off loop after the asset-ready wait; page A2 is the dedicated sweep page).
+2. Ship idle engine particles live on the MENU (observed 6-16, clustered within r<1.3 at the arena center, additive white size 0.32) and particles.sync(0) is sync(dt=0) = freeze, not clear - they polluted the t=0.05 spot p90 across runs (52.39 vs 84.74 vs 116.5 on identical code). The floorab probe now parks the 512 pool (y=-9999) before the pin shot; the spot pin is on a parked-pool basis (coincides with the historical I322b values).
+
+Changed files: src/render/assetLoader.js, src/main.js, src/core/config.js, production/stories.md, production/epics.md, CHANGELOG.md, production/session-state/active.md, production/iterations.md. No tests/.
+
+Tests: 925/925. Build: 0 (131 files / 1937865 B / +673 B / headroom 159287 B >= 102400 B). vendor sha 76DEA8151BC9352A unchanged.
+
+Next I359: ST-328 arena grid refine (cgs-dev-story; render + core constants, zero sim): read src/render/arenaFloor.js + src/core/floorGrid.js; stronger tasteful bright/dim ring contrast, a defined center-hub ring (1-2 rings, no in-texture rings), richer rim; stay within FLOOR-50 (ceiling never re-pinned higher - values-only re-pins); floorab re-pin; zero sim; p1 EXACT.

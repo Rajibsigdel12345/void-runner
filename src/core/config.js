@@ -35,6 +35,10 @@ export const CONFIG = {
     // lower-hemisphere sky stops showing through the grid-only floor. Procedural canvas
     // radial gradient (in-code 0 KB - no asset). Brighter center -> darker rim. All
     // stops warm neutral R>G>B, luma < 50 (floor-ceiling convention, FLOOR-50 family).
+    // ST-327 (I358): assets/floor_surface.png (Blender, 8,586 B, 512x512 sRGB bytes,
+    // max luma 48.757 < 50) replaces the canvas map at load time via assetLoader key
+    // floorSurface (swap in main.js onAsset); these stops stay the fallback if the
+    // PNG is missing/corrupt. Asset budget R-E39-3: hard cap 28,672 B (0 KB in-code).
     floorDisc: {
       center: 0x1c1712, // hub base; sRGB luma 23.7
       mid: 0x110e0b,    // mid stop; sRGB luma 14.4

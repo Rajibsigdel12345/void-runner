@@ -1,8 +1,10 @@
-// Void Runner - GLB asset loader (I104). Fire-and-forget async load of the
-// eighteen Blender-pass GLBs in assets/ with procedural fallback: renderers
-// start procedural and each asset swaps in (via onAsset) as it resolves.
-// A failed load warns and keeps the procedural stand-in - no boot gate.
+// Void Runner - asset loader (I104). Fire-and-forget async load of the
+// nineteen Blender-pass GLBs + the one floor-surface PNG (ST-327) in assets/
+// with procedural fallback: renderers start procedural and each asset swaps
+// in (via onAsset) as it resolves. A failed load warns and keeps the
+// procedural stand-in - no boot gate.
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { TextureLoader, SRGBColorSpace } from 'three';
 
 const ASSETS = {
   ship: 'assets/ship.glb',
@@ -27,8 +29,18 @@ const ASSETS = {
   flyer: 'assets/flyer.glb', // ST-234: evasive saucer (hull + emissive dome)
 };
 
+// ST-327 (I358): the one PNG texture asset (Blender floor surface, 8,586 B,
+// 512x512 sRGB bytes, max luma 48.757 < 50, FLOOR-50 family). Same
+// fire-and-forget + fallback contract as the GLBs: the floor disc keeps its
+// procedural canvas gradient until this resolves (missing/corrupt PNG =
+// pre-ST-327 look, no visual regression).
+const TEXTURES = {
+  floorSurface: 'assets/floor_surface.png',
+};
+
 export function createAssetLoader() {
   const loader = new GLTFLoader();
+  const texLoader = new TextureLoader(); // ST-327: PNG branch
   const ready = {};
   const listeners = [];
 
@@ -58,8 +70,32 @@ export function createAssetLoader() {
     });
   }
 
+  function loadTexture(name, url) {
+    return new Promise((resolve) => {
+      texLoader.load(
+        url,
+        (tex) => {
+          tex.colorSpace = SRGBColorSpace;
+          const entry = { texture: tex, ready: true };
+          ready[name] = entry;
+          notify(name, entry);
+          resolve(entry);
+        },
+        undefined,
+        (err) => {
+          console.warn('assetLoader: failed to load ' + url, err);
+          const entry = { texture: null, ready: false };
+          ready[name] = entry;
+          notify(name, entry);
+          resolve(entry); // never reject: procedural fallback stays
+        },
+      );
+    });
+  }
+
   function loadAll() {
     const jobs = Object.keys(ASSETS).map((n) => loadOne(n, ASSETS[n]));
+    jobs.push(...Object.keys(TEXTURES).map((n) => loadTexture(n, TEXTURES[n])));
     return Promise.all(jobs);
   }
 
@@ -72,5 +108,5 @@ export function createAssetLoader() {
     return ready[name] || null;
   }
 
-  return { loadAll, onAsset, get, names: Object.keys(ASSETS) };
+  return { loadAll, onAsset, get, names: Object.keys(ASSETS).concat(Object.keys(TEXTURES)) };
 }

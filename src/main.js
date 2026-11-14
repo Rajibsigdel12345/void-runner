@@ -163,6 +163,13 @@ assetLoader.onAsset((name, entry) => {
 else if (name === 'stinger') stingerRenders.useGLB(entry.object); // ST-230: Blender stinger (pre-wired hook)
 else if (name === 'flyer') flyerRenders.useGLB(entry.object); // ST-234: Blender flyer (pre-wired hook)
   else if (name === 'arenaRing') arenaRing.useGLB(entry.object); // I212
+  else if (name === 'floorSurface') { // ST-327 (I358): Blender floor texture over the procedural canvas (unlit MeshBasic, toneMapped false, tier-independent)
+    if (floorDisc) {
+      const oldFloorTex = floorDisc.material.map;
+      floorDisc.material.map = entry.texture;
+      if (oldFloorTex) oldFloorTex.dispose();
+    }
+  }
 });
 assetLoader.loadAll();
 const bossHealth = createBossHealth(document.body); // ST-055
