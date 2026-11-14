@@ -6,8 +6,8 @@ export const CONFIG = {
     // the cool PolarGridHelper (ST-248). gridBright = center-hub / brightest
     // line; its luma is the ST-177 FX-off floor bg proxy (tests/paletteHarmony
     // .test.js), so it must stay <= bomb pickup luma (118.8) - 59.
-    gridBright: 0x463529, // ST-257: warm neutral hub (was 0x1b2a55 cool blue); sRGB luma 55.7
-    gridDim: 0x201812, // ST-257: dim edge band (was 0x101a38); sRGB luma 25.3 < FLOOR 50
+    gridBright: 0x483728, // ST-328 (I359): hub luma 55.7->57.5 (richer hub; < bomb luma 118.8 - 59 = 59.8)
+    gridDim: 0x1a130d, // ST-328 (I359): dim edge band luma 25.3->20.1 (stronger bright/dim contrast; < FLOOR 50)
     grid: {
       rings: 5, // was 8
       sectors: 8, // was 12
@@ -29,6 +29,17 @@ export const CONFIG = {
       restHold: 0.76, // plateau level; rings 1-2 luma ~48.5, under FLOOR 50
       restPowA: 0.05, // quick hub->rest-band fade, then a flat readable band
       restPowB: 2.0,  // steeper rim depth cut than the old single (1 - t)^1.6
+      // ST-328 (I359): defined center hub + one richer rim ring, data-driven via
+      // fullRingLayout (src/core/floorGrid.js). hubRings = fractions of arena.radius
+      // (r 2.6 / 4.68) at hubF (full bright anchor); rimRing (r 23.92) at rimF. No
+      // in-texture rings (floor_surface.png hub ring stays the only texture-level
+      // ring; the separate arenaRing.js neon band 23.3-24.2 is untouched). Values-
+      // only re-pin: floorab ring p90 + f50.floor (<= 61), zero sim (p1 EXACT),
+      // draw calls / tris unchanged (all rings share one LineSegments; lines add 0 tris).
+      hubRings: [0.10, 0.18], // defined center hub (r 2.6 / 4.68)
+      hubF: 1.0, // full bright anchor (57.5 luma; main rings stay < FLOOR 50)
+      rimRing: 0.92, // r 23.92 - warm edge ring under the arenaRing band (23.3-24.2)
+      rimF: 0.55, // moderate warm edge (mix level, raw line luma ~40.8)
     },
     // ST-277 (I294): thin radial floor disc UNDER the grid (src/render/floorDisc.js) -
     // the E25 "arena depth cut" (Dota-2 ladder): a solid warm-neutral base so the v7

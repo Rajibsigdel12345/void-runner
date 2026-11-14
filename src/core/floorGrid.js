@@ -75,6 +75,32 @@ export function ringRadii(radius, rings) {
   return out;
 }
 
+// ST-328 (I359): full ring layout = main rings + hub rings + one rim ring.
+// The main rings keep the ST-293 rest-band falloff (restFalloff); hub rings
+// (config hubRings, fractions of radius) render at hubF (default 1 = full bright
+// anchor); the rim ring (config rimRing) renders at rimF (default 0.5, moderate).
+// Pure: the render layer (arenaFloor.js) maps each entry to one colored ring loop.
+// kind is a label for tests/probes only (the render does not read it).
+export function totalRingCount(grid) {
+  const hub = grid.hubRings ? grid.hubRings.length : 0;
+  const rim = grid.rimRing != null ? 1 : 0;
+  return grid.rings + hub + rim;
+}
+
+export function fullRingLayout(radius, grid) {
+  const out = [];
+  const main = ringRadii(radius, grid.rings);
+  for (let i = 0; i < main.length; i++) {
+    const r = main[i];
+    out.push({ r, f: restFalloff(r / radius, grid.restT, grid.restHold, grid.restPowA, grid.restPowB), kind: "main" });
+  }
+  const hub = grid.hubRings || [];
+  const hubF = grid.hubF != null ? grid.hubF : 1;
+  for (let i = 0; i < hub.length; i++) out.push({ r: radius * hub[i], f: hubF, kind: "hub" });
+  if (grid.rimRing != null) out.push({ r: radius * grid.rimRing, f: grid.rimF != null ? grid.rimF : 0.5, kind: "rim" });
+  return out;
+}
+
 // Vertex/segment bookkeeping (tests + budget). Each ring is a closed loop
 // of divisions segments (2 verts each). Each spoke is split into spokeSegs
 // linear segments (2 verts each) so the pow-falloff reads smoothly instead

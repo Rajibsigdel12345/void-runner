@@ -12,6 +12,8 @@ import {
   discGradientStops,
   restFalloff,
   restGridColorAt,
+  totalRingCount,
+  fullRingLayout,
 } from "../src/core/floorGrid.js";
 
 const A = CONFIG.arena;
@@ -212,4 +214,56 @@ test("ST-293: rest-band params are data-driven + geometry bookkeeping unchanged 
   assert.ok(RH > 0 && RH < 1, "restHold in (0,1): " + RH);
   assert.ok(RA > 0 && RB > 0, "positive powers: " + RA + ", " + RB);
   assert.equal(gridSegmentCount(G.rings, G.sectors, G.divisions, G.spokeSegs), 5 * 48 + 8 * 8, "304 segs unchanged");
+});
+
+// ST-328 (I359): full ring layout - main + hub + rim rings (data-driven,
+// render-only; the render keeps one LineSegments draw call, zero sim).
+test("ST-328: totalRingCount = main + hub + rim", () => {
+  const hub = (G.hubRings || []).length;
+  const rim = G.rimRing != null ? 1 : 0;
+  assert.equal(totalRingCount(G), G.rings + hub + rim, "main + hub + rim: " + totalRingCount(G));
+  assert.ok(totalRingCount(G) > G.rings, "hub/rim add rings to the main set");
+});
+
+test("ST-328: fullRingLayout - main radii/curve unchanged, hub near center, rim near edge, f in [0,1]", () => {
+  const layout = fullRingLayout(A.radius, G);
+  assert.equal(layout.length, totalRingCount(G), "one entry per ring");
+  for (const ring of layout) {
+    assert.ok(ring.f >= 0 && ring.f <= 1, "f in [0,1] for " + ring.kind + " r=" + ring.r.toFixed(2));
+  }
+  const mains = layout.filter((r) => r.kind === "main");
+  assert.equal(mains.length, G.rings, "five main rings");
+  for (let i = 0; i < mains.length; i++) {
+    assert.ok(Math.abs(mains[i].r - (A.radius / G.rings) * (i + 1)) < 1e-9, "main ring " + i + " radius");
+    assert.ok(Math.abs(mains[i].f - restFalloff(mains[i].r / A.radius, RT, RH, RA, RB)) < 1e-12, "main ring " + i + " keeps the rest-band curve");
+  }
+  const hubs = layout.filter((r) => r.kind === "hub");
+  assert.equal(hubs.length, (G.hubRings || []).length, "one hub ring per config entry");
+  for (const h of hubs) {
+    assert.ok(h.r < A.radius * 0.25, "hub ring near center: r=" + h.r.toFixed(2));
+    assert.ok(Math.abs(h.f - (G.hubF != null ? G.hubF : 1)) < 1e-12, "hub at hubF");
+  }
+  const rims = layout.filter((r) => r.kind === "rim");
+  if (G.rimRing != null) {
+    assert.equal(rims.length, 1, "one rim ring");
+    assert.ok(Math.abs(rims[0].r - A.radius * G.rimRing) < 1e-9, "rim at rimRing fraction");
+    assert.ok(rims[0].r < A.radius, "rim inside the arena edge");
+  }
+});
+
+test("ST-328: main rings under FLOOR 50, hub rings are the bright anchor, bookkeeping scales", () => {
+  const mixed = (f) => [
+    Math.round(DIM[0] + (BRIGHT[0] - DIM[0]) * f),
+    Math.round(DIM[1] + (BRIGHT[1] - DIM[1]) * f),
+    Math.round(DIM[2] + (BRIGHT[2] - DIM[2]) * f),
+  ];
+  for (const ring of fullRingLayout(A.radius, G)) {
+    if (ring.kind === "main") assert.ok(luma(mixed(ring.f)) < 50, "main ring luma " + luma(mixed(ring.f)).toFixed(1) + " < 50");
+  }
+  for (const h of fullRingLayout(A.radius, G).filter((r) => r.kind === "hub")) {
+    assert.ok(Math.abs(luma(mixed(h.f)) - luma(BRIGHT)) < 0.01, "hub ring = bright anchor luma");
+  }
+  const total = totalRingCount(G);
+  assert.equal(gridSegmentCount(total, G.sectors, G.divisions, G.spokeSegs), total * G.divisions + G.sectors * G.spokeSegs, "segment bookkeeping scales with totalRingCount");
+  assert.equal(gridVertexCount(total, G.sectors, G.divisions, G.spokeSegs), gridSegmentCount(total, G.sectors, G.divisions, G.spokeSegs) * 2, "vertex = 2 x segment");
 });

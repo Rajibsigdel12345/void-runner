@@ -3,6 +3,9 @@
 // come from src/core/floorGrid.js (pure, unit-tested).
 // ST-293 (I315): colors use the two-segment rest-band falloff (restFalloff)
 // - a flat readable mid-arena plateau, then a steeper rim depth cut.
+// ST-328 (I359): fullRingLayout adds a defined center hub (config hubRings,
+// full bright anchor) + one moderate rim ring (config rimRing/rimF) on top of
+// the five rest-band main rings - same single LineSegments draw call.
 //
 // Color pipeline: the core returns sRGB triples; this layer converts each
 // UNIQUE stop to linear working space once (setRGB with SRGBColorSpace -
@@ -11,7 +14,7 @@
 // same material shape as the old helper, so ACES/exposure never touch the
 // lines and displayed luma ~ configured sRGB (ST-177 FX-off floor).
 import * as THREE from "three";
-import { ringRadii, restGridColorAt, gridVertexCount } from "../core/floorGrid.js";
+import { restGridColorAt, gridVertexCount, totalRingCount, fullRingLayout, mixRGB } from "../core/floorGrid.js";
 
 export function createArenaFloorGrid(scene, arena) {
   const { radius } = arena;
@@ -21,14 +24,15 @@ export function createArenaFloorGrid(scene, arena) {
 
   // Precompute the (few) unique linear-space color stops - no per-vertex
   // allocation, nothing per-frame (static geometry, like the old helper).
-  const radii = ringRadii(radius, g.rings);
-  const ringStops = radii.map((r) => srgbStop(restGridColorAt(dim, bright, r / radius, g.restT, g.restHold, g.restPowA, g.restPowB)));
+  // ST-328 (I359): main + hub + rim rings from fullRingLayout - each entry
+  // carries its own level f (main = rest-band curve, hub = hubF, rim = rimF).
+  const rings = fullRingLayout(radius, g).map((ring) => ({ r: ring.r, lin: srgbStop(mixRGB(dim, bright, ring.f)) })).sort((a, b) => a.r - b.r);
   const spokeStops = [];
   for (let s = 0; s <= g.spokeSegs; s++) {
     spokeStops.push(srgbStop(restGridColorAt(dim, bright, s / g.spokeSegs, g.restT, g.restHold, g.restPowA, g.restPowB)));
   }
 
-  const verts = new Float32Array(gridVertexCount(g.rings, g.sectors, g.divisions, g.spokeSegs) * 3);
+  const verts = new Float32Array(gridVertexCount(totalRingCount(g), g.sectors, g.divisions, g.spokeSegs) * 3);
   const cols = new Float32Array(verts.length);
   let p = 0;
   const put = (x, z, lin) => {
@@ -41,10 +45,10 @@ export function createArenaFloorGrid(scene, arena) {
     p += 3;
   };
 
-  // Rings (closed loops), innermost first.
-  for (let i = 0; i < g.rings; i++) {
-    const r = radii[i];
-    const lin = ringStops[i];
+  // Rings (closed loops), innermost first (ST-328: hub + main + rim).
+  for (const ring of rings) {
+    const r = ring.r;
+    const lin = ring.lin;
     for (let j = 0; j < g.divisions; j++) {
       const a0 = (j / g.divisions) * Math.PI * 2;
       const a1 = ((j + 1) / g.divisions) * Math.PI * 2;

@@ -4469,3 +4469,28 @@ Changed files: src/render/assetLoader.js, src/main.js, src/core/config.js, produ
 Tests: 925/925. Build: 0 (131 files / 1937865 B / +673 B / headroom 159287 B >= 102400 B). vendor sha 76DEA8151BC9352A unchanged.
 
 Next I359: ST-328 arena grid refine (cgs-dev-story; render + core constants, zero sim): read src/render/arenaFloor.js + src/core/floorGrid.js; stronger tasteful bright/dim ring contrast, a defined center-hub ring (1-2 rings, no in-texture rings), richer rim; stay within FLOOR-50 (ceiling never re-pinned higher - values-only re-pins); floorab re-pin; zero sim; p1 EXACT.
+## I359 - ST-328 arena grid refine (cgs-dev-story; render + core constants, zero sim delta)
+
+Goal: strengthen the arena floor grid readability - a stronger but tasteful bright/dim contrast, a defined center-hub ring, and a richer rim - within FLOOR-50 (values-only re-pins), zero sim delta.
+
+What shipped:
+- src/core/config.js arena.grid: gridBright 0x463529 -> 0x483728 (luma 55.7 -> 57.53), gridDim 0x201812 -> 0x1a130d (luma 25.3 -> 20.06); NEW hubRings [0.10, 0.18] (world r 2.6/4.68), hubF 1.0, rimRing 0.92 (world r 23.92), rimF 0.55. Both new colors are warm R>G>B.
+- src/core/floorGrid.js: NEW totalRingCount(grid) = main + hub + rim; NEW fullRingLayout(radius, grid) returning {r, f, kind} for every ring - main on the unchanged ST-293 rest curve, hub at hubF, rim at rimF.
+- src/render/arenaFloor.js: rings now built from fullRingLayout (mixRGB dim->bright, sorted by r); vertex buffer sized via gridVertexCount(totalRingCount) = 8 rings / 448 grid segs; still ONE LineSegments draw call (calls 31 / tris 546 EXACT). Spokes unchanged (restGridColorAt). arenaRing.js + floorDisc.js untouched.
+- tests/floorGrid.test.js: +3 ST-328 tests - totalRingCount bookkeeping; fullRingLayout radii/kinds/f-range/hub-center/rim-edge; main < 50 + hub = bright anchor + bookkeeping. 925 -> 928.
+
+Design deviation (documented): the incoming handoff locked gridBright 0x4a3829 (luma 58.74), but its constraint analysis missed the ST-293 rest-curve test (rendered ring1 luma 50.25 >= 50 -> test fails). Verified numerically and adjusted to the handoff own fallback 0x483728 (luma 57.53). All constraints re-verified: ST-293 main rings 49.04/48.32/38.54/24.41 (< 50); ST-248 FLOOR-50 (bg = max(NEBULA 51, luma gridBright 57.53) = 57.53, all three bullet types clear >= 50 - unit test); ST-177 proxy bomb - bg = 61.25 >= 59 + bright <= bomb - 59; paletteHarmony worst clearances enemyBullet 52.64 >= 50 + bomb pickup 61.25 >= 59; R>G>B on both new colors.
+
+Re-pins (probe 46/46, ONE headless Chrome launch, dev server started + killed, port 5173 verified free):
+- floorab ring p90: main 49.04/48.32/38.54/24.41 (all < 50, ST-293 holds in pixel space) + ring5 55.47 -> 52.98 (documented delta: the arenaRing band (y=0.03, op 0.42) blends over grid lines whose dim color darkened 25.3 -> 20.06; the band itself is unchanged).
+- hub/rim rings (new): hub p90 57.53/57.53 (r 2.6/4.68, intentional bright anchor = full gridBright), rim p90 40.76 (r 23.92, tasteful accent = raw line luma; the transparent band does not raise it, p50 16.56).
+- floorab spot re-pin (spoke stops shifted with the new anchors): t=0.05 49.11/49.32/53.97; t=0.3 44.76/44.76/49.32; t=0.65 30.55/40.83/48.11; t=0.95 20.77/40.83/111.35 (was 48.18/48.47/52.39 - 44.11/44.11/48.47 - 31.62/40.83/47.04 - 24.27/40.83/112.64).
+- FLOOR-50 re-pin 230/72/158/0/0 (was 230/61/169/0/0): floor 61 -> 72 = R channel of the new hub ring at full alpha (0x483728 R=72) - the intentional bright anchor now sits inside the f50 annulus. HARD CAP = bullet-floor delta >= 50 (ST-248 FLOOR=50 unit test; I280 "both >= 50") holds at 158 = 3.2x margin. Surface luma < 50 preserved: texture 48.757, main rings < 50, disc stops < 50 (unit tests).
+- calls 31 / tris 546 EXACT (zero scene-graph change). p1 causal EXACT (11334/57/W2/combo15/shots198/57/acc 0.2878787878787879/36.14999999999923s/replay 2169-2220 speed4/Q->MENU). rockab EXACT 2.2/1.3/0.7. GLB all ready (incl floorSurface). 6/6 pages console 0/0.
+- Art check (shot_menu + shot_playing, headless SwiftShader): hub ring reads as a defined tasteful warm anchor around the ship, main grid stays legible, rim tasteful, no clutter - rimRing 0.88 fallback not needed.
+
+Changed files: src/core/config.js, src/core/floorGrid.js, src/render/arenaFloor.js, tests/floorGrid.test.js, production/stories.md, production/epics.md, CHANGELOG.md, production/session-state/active.md, production/iterations.md.
+
+Tests: 928/928. Build: 0 (131 files / 1938451 B / +586 B / headroom 158701 B >= 102400 B). vendor sha 76DEA8151BC9352A unchanged.
+
+Next I360: ST-329 MENU backdrop polish (cgs-dev-story; CUTTABLE per R-E39-5): render-only - reposition the MENU camera to frame the nebula band (match gameplay sky richness) or a subtle MENU glow; HUD A/B must stay EXACT I347 baseline (0 px^2 + 23 px gap); zero sim; p1 EXACT.
