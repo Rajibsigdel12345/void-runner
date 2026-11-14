@@ -5009,3 +5009,14 @@ Risk/follow-up: I382 = ST-347 grounded direction (docs-only, 2nd cut gate): per-
 - Verification: npm test 929/929 + npm run build 0 + 3 headless pages (rockab, enemy, playframe) + 1 PWA page; all servers killed, ports free, 0 chrome.
 - Result: G43.0 PASS (R1-R5). E43 CLOSED 5/5 (ST-346..350).
 - Risk: none open. Next arc E44 opens at I386 (standing 100-iteration directive).
+
+## I386 - E44 open: Player-Side & Feedback Coherence Pass (cgs-scope-check + cgs-create-stories; DOCS-only, zero src)
+- Story: none (arc open) - scope check + story split.
+- Changed: production/scope-check-E44.md (new), production/stories.md (E44 ST-351..355), production/epics.md (E44 section), CHANGELOG.md, production/session-state/active.md, production/iterations.md.
+- Surface choice (audit logic): E43 (closed I385) re-audited the ENEMY fleet against the current post-E42 frame and closed 3 material gaps. The OWN side - ship (ship.glb), player bullets vs enemy bullets, shield, reticle, engine trail, power-ups (7 GLBs), hit/kill feedback (shockwave/particles) - was tuned against the PRE-E34 frame; E34-E42 re-armed sky (70.14), floor (32.2/72.07, FLOOR-50), rocks (ember 112.43/54.26, rim 52.76) and lighting -> same 're-audit against current frame' logic applies. Last dominant un-audited surface in the PLAYING frame.
+- Grounding: carried P1/P2/P3 from E43 (grounded I380, burned ids already burned) + NEW P4 own/enemy unambiguity (bullet-identity mistakes are survivability issues). Bounded grounding deferred to ST-352, only if gaps found (max 1 search / 2-3 queries / max 3 new burned ids; audit data is the budget grounding; anti-over-engineer).
+- Plan: 5 stories (ST-351 audit + BEFORE CUT gate -> ST-352 direction + budgets + 2nd CUT gate [Blender re-bake scoped only if a bake gap is proven, Node-side GLTFLoader.parseAsync measurement per E43 pattern; asset delta cap ~15 KB total, assetGlbs re-pin, vendor sha unchanged] -> ST-353 config + render-only impl -> ST-354 corrected A/B [re-run I387 script verbatim; enemy hierarchy pins must not shift] -> ST-355 G44.0 gate R1-R5 + close).
+- Constraints: FEEL FROZEN; zero sim src (p1 causal; rockab); no new draw calls (21/366 + 50/1222); FLOOR-50/skybox v6/rocks/floor v2 frozen; E43 enemy pins fixed (drone 200.98 / stinger charge 254 / flyer 197.74 / warden 147.01 / mine 127.0 / boss 182.49); vendor sha 76DEA8151BC9352A; asset delta 0 B target.
+- Verification: docs-only - no build impact; 929/929 + build 0 carried from I385 (no src touched); dist 131/1918851 B headroom 178301 B.
+- Result: E44 OPENED. Next I387 = ST-351 headless per-element BEFORE audit.
+- Risk: R-E44-1 NO-GAP cut likely (acceptable by design - cuttable at both gates).
