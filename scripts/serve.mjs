@@ -12,7 +12,8 @@ const MIME = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
   '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg',
-  '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.md': 'text/markdown'
+  '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.md': 'text/markdown',
+    '.webmanifest': 'application/manifest+json'
 };
 
 const server = createServer((req, res) => {
