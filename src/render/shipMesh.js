@@ -57,7 +57,7 @@ export function createShipMesh() {
   // The cockpit cyan emissive stays the FROZEN identity accent - pinned in
   // tests/paletteHarmony.test.js; retune only via a design pass.
   const P = CONFIG.ship.palette;
-  const bodyMat = new THREE.MeshStandardMaterial({ color: P.body.color, metalness: P.body.metalness, roughness: P.body.roughness, flatShading: true, vertexColors: true }); // G5 (I273): reads COLOR_0 hull-bottom fill
+  const bodyMat = new THREE.MeshStandardMaterial({ color: P.body.color, metalness: P.body.metalness, roughness: P.body.roughness, emissive: P.body.emissive !== undefined ? P.body.emissive : 0x000000, emissiveIntensity: P.body.emissiveIntensity !== undefined ? P.body.emissiveIntensity : 0, flatShading: true, vertexColors: true }); // G5 (I273): reads COLOR_0 hull-bottom fill
   const wingMat = new THREE.MeshStandardMaterial({ color: P.wing.color, metalness: P.wing.metalness, roughness: P.wing.roughness, flatShading: true, vertexColors: true }); // I292/ST-275: reads COLOR_0 (wing/fin per-facet value bake; Fin gets white identity)
   const cockpitMat = new THREE.MeshStandardMaterial({ color: P.cockpit.color, emissive: P.cockpit.emissive, emissiveIntensity: P.cockpit.emissiveIntensity, roughness: P.cockpit.roughness });
 
