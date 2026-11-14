@@ -4666,3 +4666,60 @@ Changed files: 6 docs only (production/scope-check-E40.md, production/stories.md
 
 Tests: 928/928. Build: 0 (131 files / 1914094 B). vendor sha 76DEA8151BC9352A unchanged (zero src). Next I366 = ST-334 starfield Points-layer correlation with v6 knots (render-only, zero sim; cuttable to docs-only closure if risk).
 
+## I366 - ST-334 starfield-knot correlation: correlate the twinkling Points starfield with the v6 knots (cgs-dev-story; probe 22/22, battery 13/13 MATCH PASS)
+
+Goal: denser / slightly brighter twinkling stars over the dominant core knot (u=0.65, lat 4 deg) + a soft secondary knot (u=0.18, lat 4 deg), sparser elsewhere - star count, per-star RNG call budget (fixed 7) and the isolated starfield RNG stream preserved so the p1 demo pin stays EXACT.
+
+Design (final): 3-way mix sampler, count-preserving, fixed 7 RNG calls/star:
+- Per star: t = rng.next(); t < 0.25 -> core knot; t < 0.30 -> secondary; else uniform (byte-identical to the pre-I366 stream: u = rng.next()*2-1, theta = rng.next()*2*PI).
+- Knot draw (Box-Muller, 2 calls): Gaussian in u_tex (sigma = sizeUDeg/360) + latitude (sigma = sizeLatDeg*D2R); u_tex wrapped with floor; azimuth = (ut - 0.5) * 2*PI (equirect convention: az = (u_tex - 0.5) * 360 deg, +x toward +z); pre-flatten u back-solved from latitude: v = sin^2(latC), u = sign(latC) * sqrt(v / (0.49 + 0.51*v)) (derived from the rendered y*0.7 flatten: sin(lat) = 0.7u/sqrt(1-0.51u^2)).
+- Brightness boost: core 1.15x, secondary 1.12x (aScale = rng.range(0.7, 1.4) * bright).
+- Render (src/render/starfield.js): shaders, geometry layout, materials, group.update, createStarfield API behavior-identical; only the direction draw inside makeShell changed. Two bugs found + fixed pre-probe: wrap must be floor (round is only right for differences), and theta = (ut - 0.5) * 2*PI (not ut * 2*PI - u_tex 0.5 is +z... the equirect 0.5 center maps to az 0 = +x).
+
+DEVIATION from the handoff plan (documented): the previous plan was rejection sampling (per-star accept = base + boost*w, count-preserving bias of uniform draws toward the knot). Pre-sim (.evidence/I366/presim.mjs) proved it invisible: the 12x8 deg core knot covers ~0.46% of the sphere; with 800 stars a count-preserving rejection bias (boost <= 1-base) adds only ~2 stars into the knot region - pre-sim core/antipode ratio 1.0, bright stars 0 (design expected 1.3-1.8) - so the acceptance "correlation visible in screenshots" would have failed. The mix sampler allocates 25%/5% of stars directly to the clumps (same count, same 7-call budget) -> measured core 11/5 + 128/61.
+
+P1 - MENU band strip regression (strip y180-240 x420-860, n=26400/phase, fx off, 6 fresh-load phases, waits 3/5/7/9/11/13 s post-skybox-ready; camPos orbits at r ~2.84, y=0.5):
+
+| waitS | orbitA | p10 | p50 | p90 | mean |
+| 3 | 0.2818 | 57.23 | 61.51 | 65.51 | 63.15 |
+| 5 | 0.3366 | 57.02 | 61.09 | 65.29 | 62.35 |
+| 7 | 0.4528 | 56.73 | 60.37 | 64.51 | 61.89 |
+| 9 | 0.572 | 56.23 | 60.01 | 64.29 | 61.07 |
+| 11 | 0.699 | 55.66 | 59.37 | 63.51 | 60.37 |
+| 13 | 0.8231 | 55.59 | 58.80 | 62.51 | 59.85 |
+
+- camPos [0.748,0.5,2.698] -> [2.031,0.5,1.927] (menuOrbitRate 0.06 rad/s, ~105 s/rev; I365 regime confirmed).
+- newBase 60.19; deltaVsI365 = 0.00 - NO re-pin (tolerance +/-1.5 holds; max phase dev 1.05). The strip window grazes the secondary clump top but the 68 clump stars are too few to move the p50 of 26400 samples.
+- Floors (I360: p10>=45 / p90>=60 / mean>=50) HOLD per-phase: min 55.59 / 62.51 / 59.85.
+
+P2 - star density correlation (in-page read of vr.stars geometry: 800 positions + aScale; must + DOES match the pre-sim EXACTLY, pre-sim deterministic x2):
+
+| window (az +/- half, lat +/- half) | knot | antipode | ratio |
+| core 1-sigma (54 +/-24, 4 +/-16) | 128 | 61 | 2.10 |
+| core core (54 +/-6, 4 +/-4) | 11 | 5 | 2.20 |
+| secondary 1-sigma (244.8 +/-10, 4 +/-7) | 31 | 28 | 1.11 |
+| secondary core (244.8 +/-2.5, 4 +/-1.75) | 2 | 2 | 1.00 |
+
+- Bright stars (aScale > 1.4): 68 of 800 (8.5%); brightIn1.5sFrac 0.824 (82.4% of bright stars within 1.5-sigma of a knot).
+
+P3 - screenshots (3, viewed; fx off, frozen render before capture):
+- shot_menu_core.png (orbitA 3.7752, viewAz 53.69 - core knot centered): visibly denser bright star clump over the core-knot region; v6 band + knots intact.
+- shot_menu_sec.png (orbitA 0.3324, viewAz 250.96): soft secondary clump ~6.2 deg left of center.
+- shot_playing.png (chase cam, spawn viewAz ~270 deg): secondary-knot clump visible left; core knot structurally invisible under PLAYING (fixed chase cam) - as designed. No NaN, no artifacts; HUD/ship/arena intact.
+
+P4 - PLAYING top strip (y0-80 x420-860, n=35200, fx off): state PLAYING, camPos [0.000, 8.998, 12.998] finite, nanPos 0, p50 69.08 (I365: 69.00, +0.08 = phase noise), p90 72.28 (EXACT I365).
+
+P5 - HUD A/B EXACT I347 (best seeded 9876): hudA (menu credit (0,689,1280,15) vs hint (36.31,651,339.98,15)): inter 0, vgap 23.00; hudB (play scoreBox (18,14,59.34,51) vs WPN (18,88,40,28)): inter 0, vgap 23.00.
+
+Console: 0 errors / 0 warnings total across all 10 pages (6 strip + density + 2 menu shots + HUD/playing).
+
+p1 pin battery (.evidence/I361/battery_runner.mjs + match.cjs): 13/13 probes OK + MATCH PASS (all assertions) - p1 EXACT causal (11334 / 57 / W2 / combo 15 / shots 198 / acc 0.2878787878787879 / 36.14999999999923 s / replay 2169-2220 frames / speed 4, seed 9876) - starfield RNG isolation verified; rockab EXACT 2.2/1.3/0.7 (also required for I367); puab hues stable, floorab ring pins + draw calls/tris unchanged.
+
+Tests: 929/929 (new ST-334 test in tests/config.test.js: starfield schema - seed, near/far counts/radii/size/opacity/parallax, knot + secondary u/latDeg/sizes/p/bright, knot.p + secondary.p <= 1).
+
+Build: 0 (131 files / 1915020 B; +926 B vs I365 1914094 B; headroom 182132 B >= 102400 B). Vendor sha 76DEA8151BC9352A unchanged.
+
+Changed files: src/core/config.js (starfield section: knot {u 0.65, latDeg 4, sizeUDeg 24, sizeLatDeg 16, p 0.25, bright 1.15}, secondary {u 0.18, latDeg 4, sizeUDeg 10, sizeLatDeg 7, p 0.05, bright 1.12}), src/render/starfield.js (sampler rewrite; render API behavior-identical), tests/config.test.js (+ST-334 test) + 6 docs. .evidence/I366/ untracked + gitignored (probe.mjs, probe.json, presim.mjs, diag.mjs, patch1.cjs, shot_menu_core.png, shot_menu_sec.png, shot_playing.png, w1-w5.cjs, fix-fix5.cjs).
+
+Next I367 = ST-335 E40 regression + G40.0 gate + closeout (docs only): R1 p1 EXACT causal (battery reuse) / R2 rockab EXACT 2.2/1.3/0.7 (reseed 30201, L/M/S spawn at [-3.5,-4]/[0,-4]/[3.5,-4]) / R3 skybox art probe (cite I365 probe.json + I366 P1 delta 0.00) / R4 PWA 11/11 (server killed after) / R5 929 tests + build 0 + headroom >= 102400 B + skybox 42899 B <= 123557 B + vendor sha + hygiene. Close E40 5/5.
+

@@ -166,3 +166,22 @@ P4 - PLAYING top strip (y0-80 x420-860, n=35200): state PLAYING, fx off, camPos 
 Art QA (viewed): shot_menu.png - v6 band structure (knots/dust/filaments) visible in the MENU upper third (feeds G40.0 R3); shot_playing.png - warm band gradient + dust visible, arena + ship + HUD intact, no NaN corruption. Console 0 errors / 0 warnings total across all 8 pages.
 
 Gates: probe 15/15 + 928/928 + build 0 (131/1914094 B) + vendor sha 76DEA8151BC9352A unchanged (zero src).
+
+## ST-334 (I366) - Starfield-knot correlation (final design + results)
+
+Design (final, shipped): 3-way mix sampler, count-preserving, fixed 7 RNG calls/star (seed 1337 stream ISOLATED to the starfield -> p1 demo pin stays EXACT; battery 13/13 + MATCH PASS verified):
+- Per star: t = rng.next(); t < 0.25 -> core-knot clump; t < 0.30 -> secondary clump; else uniform (pre-I366 byte stream: u = rng.next()*2-1, theta = rng.next()*2*PI).
+- Knot draw (Box-Muller, 2 calls): u_tex ~ N(u, sizeUDeg/360), lat ~ N(latDeg*D2R, sizeLatDeg*D2R); u_tex wrapped with floor; az = (ut - 0.5) * 360 deg (equirect convention, +x toward +z); pre-flatten u back-solved: v = sin^2(latC), u = sign(latC)*sqrt(v/(0.49+0.51*v)) (from the rendered y*0.7 flatten: sin(lat) = 0.7u/sqrt(1-0.51u^2)).
+- Brightness: core 1.15x, secondary 1.12x (aScale = rng.range(0.7,1.4)*bright).
+- config.js starfield: knot {u 0.65, latDeg 4, sizeUDeg 24, sizeLatDeg 16, p 0.25, bright 1.15}; secondary {u 0.18, latDeg 4, sizeUDeg 10, sizeLatDeg 7, p 0.05, bright 1.12}; test enforces knot.p + secondary.p <= 1.
+
+DEVIATION (documented): the handoff plan was rejection sampling (per-star accept = base + boost*w, count-preserving). Pre-sim proved it invisible: the 12x8 deg core knot is ~0.46% of the sphere; with 800 stars the bias adds only ~2 stars inside the knot (core/antipode 1.0, bright stars 0 vs expected 1.3-1.8) - the acceptance "correlation visible in screenshots" would fail. The mix sampler allocates 25%/5% of stars directly to the clumps (same count, same RNG budget) -> measured core 128/61 (2.10) + 11/5 (2.20).
+
+Results (probe 22/22):
+- P1 MENU band strip: newBase 60.19, deltaVsI365 0.00 - NO re-pin (tolerance +/-1.5 holds, max phase dev 1.05); floors hold (min p10 55.59 / p90 62.51 / mean 59.85); p50s 61.51/61.09/60.37/60.01/59.37/58.80 (I365: 61.37/60.80/60.37/60.01/59.37/58.80); orbitA 0.2818 -> 0.8231.
+- P2 in-page density (800 positions + aScale from vr.stars geometry): EXACT vs pre-sim (determinism x2 runs): core 1s 128/61 (2.10), core 11/5 (2.20), sec 1s 31/28 (1.11), sec 2/2 (1.00), bright (aScale>1.4) 68, brightIn1.5sFrac 0.824.
+- P3 screenshots viewed: core knot centered (orbitA 3.7752, viewAz 53.69 - dense bright clump visible), secondary (orbitA 0.3324, viewAz 250.96 - soft clump ~6.2 deg left of center), PLAYING (sec clump left; core knot structurally invisible under the fixed chase cam); no NaN, no artifacts.
+- P4 PLAYING top strip: p50 69.08 (+0.08 vs I365 69.00, phase noise), p90 72.28 EXACT, nanPos 0, camPos finite.
+- P5 HUD A/B EXACT I347: hudA (credit/hint) inter 0 vgap 23.00; hudB (scoreBox/WPN) inter 0 vgap 23.00.
+- Console 0 errors / 0 warnings across all 10 pages. 929/929. Build 0 (131/1915020 B, +926 B vs I365, headroom 182132 B >= 102400 B). Vendor sha 76DEA8151BC9352A unchanged.
+- Changed: src/core/config.js (starfield section), src/render/starfield.js (sampler rewrite; render API behavior-identical), tests/config.test.js (+ST-334 schema test) + 6 docs.

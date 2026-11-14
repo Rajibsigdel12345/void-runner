@@ -597,6 +597,24 @@ export const CONFIG = {
     enemyBullet: { base: 0x5a1410, emissive: 0xff4a2a, emissiveIntensity: 1.2 }, // ST-248: hot red-orange threat bolt (data-driven; values unchanged)
   },
 
+  // I366/ST-334: starfield correlating with the v6 skybox knots (assets/
+  // skybox_equirect.jpg): 3-way mix per star (fixed RNG count) - p_knot
+  // stars drawn from a Gaussian clump at the dominant knot, p_sec from
+  // the secondary, the rest uniform (as before). Total count unchanged;
+  // non-knot sky sparser; clump stars also get a bright scale boost.
+  // u = equirect width fraction (az = (u-0.5)*360 deg, from +x toward
+  // +z); latDeg = sky latitude (compared post-flatten, starfield y*0.7);
+  // sizeUDeg/sizeLatDeg = clump sigma in deg (~2x the bake sigma, matching
+  // the knot bright/FWHM extent); p = mix weight (sum <= 1). seed drives
+  // ONLY the starfield RNG (isolated; sim stream untouched).
+  starfield: {
+    seed: 1337,                 // I04-era seed; drives only the starfield RNG
+    near: { count: 280, rMin: 90, rMax: 130, size: 3.2, color: 0xe8f1ff, opacity: 0.95, parallax: 0.25 },
+    far:  { count: 520, rMin: 140, rMax: 230, size: 2.2, color: 0x9db4ff, opacity: 0.7, parallax: 0.6 },
+    knot: { u: 0.65, latDeg: 4, sizeUDeg: 24, sizeLatDeg: 16, p: 0.25, bright: 1.15 },
+    secondary: { u: 0.18, latDeg: 4, sizeUDeg: 10, sizeLatDeg: 7, p: 0.05, bright: 1.12 } // v6 secondary knot
+  },
+
   camera: {                // ST-082: dynamic camera feel (fovBase 60 = pre-ST-082 hardcode)
     fovBase: 60,           // resting vertical FOV (degrees)
     fovSpeed: 4,           // extra FOV at full ship speed (speed-line feel)

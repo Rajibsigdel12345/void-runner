@@ -107,3 +107,30 @@ test('config: render.tone - tone pipeline knobs (ST-236)', () => {
   assert.ok(['none', 'acesFilmic'].includes(tone.mapping), `mapping in [none, acesFilmic], got ${tone.mapping}`);
   assert.ok(Number.isFinite(tone.exposure) && tone.exposure > 0 && tone.exposure <= 4, `exposure in (0,4], got ${tone.exposure}`);
 });
+
+
+test('config: starfield - v6 knot-correlation tunables (ST-334)', () => {
+  const sf = CONFIG.starfield;
+  assert.ok(sf, 'starfield exists');
+  assert.ok(Number.isInteger(sf.seed) && sf.seed >= 0, 'seed is a non-negative int');
+  for (const name of ['near', 'far']) {
+    const sh = sf[name];
+    assert.ok(Number.isInteger(sh.count) && sh.count > 0, name + '.count positive int');
+    assert.ok(sh.rMin > 0 && sh.rMin < sh.rMax, name + '.rMin < rMax');
+    assert.ok(sh.size > 0, name + '.size > 0');
+    assert.ok(sh.opacity > 0 && sh.opacity <= 1, name + '.opacity in (0,1]');
+    assert.ok(sh.parallax >= 0 && sh.parallax <= 1, name + '.parallax in [0,1]');
+  }
+  const kn = sf.knot;
+  assert.ok(kn.u >= 0 && kn.u < 1, 'knot.u in [0,1)');
+  assert.ok(Math.abs(kn.latDeg) < 90, 'knot.latDeg in (-90,90)');
+  assert.ok(kn.sizeUDeg > 0 && kn.sizeLatDeg > 0, 'knot sizes > 0');
+  assert.ok(kn.p > 0 && kn.p < 1, 'knot.p in (0,1)');
+  assert.ok(kn.bright > 1 && kn.bright <= 1.5, 'knot.bright in (1,1.5]');
+  const sec = sf.secondary;
+  assert.ok(sec.u >= 0 && sec.u < 1, 'secondary.u in [0,1)');
+  assert.ok(Math.abs(sec.latDeg) < 90, 'secondary.latDeg in (-90,90)');
+  assert.ok(sec.p >= 0 && sec.p < 1, 'secondary.p in [0,1)');
+  assert.ok(sec.bright > 1 && sec.bright <= 1.5, 'secondary.bright in (1,1.5]');
+  assert.ok(kn.p + sec.p <= 1, 'mix weights sum <= 1');
+});
