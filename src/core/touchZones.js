@@ -18,3 +18,14 @@ export function thrustFromDrag(dx, dy, thresh, maxPx) {
   return { x: (dx / m) * f, y: (dy / m) * f, mag: f };
 }
 
+// ST-321 (I351): the on-screen stick KNOB offset (pure, no DOM). The knob mirrors the
+// finger drag but is clamped to the full-thrust radius (maxPx) so it never leaves the ring.
+// mag = displacement as a fraction of maxPx (0..1); active = the drag is OUTSIDE the dead-zone
+// (matches thrustFromDrag's boundary: |d| <= deadzone -> not active -> the knob stays faint).
+export function knobOffset(dx, dy, deadzone, maxPx) {
+  const m = Math.hypot(dx, dy);
+  let x, y, mag;
+  if (m <= maxPx) { x = dx; y = dy; mag = maxPx > 0 ? m / maxPx : 0; }
+  else { const s = maxPx / m; x = dx * s; y = dy * s; mag = 1; }
+  return { x, y, mag, active: m > deadzone };
+}

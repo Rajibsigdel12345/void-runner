@@ -14,8 +14,8 @@ const TRACKED = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowL
 //    + visual-confirmation callback). Cross-zone fingers (left thrust + right fire) are the core
 //    dual-zone loop and must NOT pause (ST-268 spec delta vs the ST-033 any-second-finger rule).
 //  - Extra (3rd+) fingers ignored; onBlur clears all. Keyboard/mouse paths untouched (BY LAYER).
-const DEADZONE = 24;    // px (the ST-033 DRAG_THRESH)
-const MAX_PX = 90;      // px of drag for full-thrust magnitude
+export const DEADZONE = 24; // px (the ST-033 DRAG_THRESH); ST-321 (I351): shared with the on-screen stick visual
+export const MAX_PX = 90; // px of drag for full-thrust magnitude; ST-321 (I351): shared with the on-screen stick visual
 const FIRE_TAIL = 0.22; // s of firing kept after right-zone release so a tap always launches >=1 bullet (fire interval ~0.18s)
 const PAUSE_COOLDOWN = 0.45;
 
@@ -32,6 +32,7 @@ export function createInput(opts = {}) {
   let fireTail = 0;        // seconds of post-release firing (tap guarantee)
   let pauseCd = 0;         // two-finger pause cooldown
   const touches = new Map(); // pointerId -> tracked touch object (leftTouch/rightTouch)
+  const leftStickOut = { active: false, sx: 0, sy: 0, dx: 0, dy: 0 }; // ST-321 (I351): reused per-frame (no alloc) for the on-screen stick visual
 
   function leftThrust() {
     if (!leftTouch) return v2(0, 0);
@@ -169,6 +170,11 @@ export function createInput(opts = {}) {
     pointer,
     get touchDrag() { return leftDragDir(); },          // ST-268: left-zone drag direction (null inside the dead-zone)
     get rightAimActive() { return rightTouch !== null; }, // ST-268: the right-zone finger owns the aim + fire
+    get leftStick() { // ST-321 (I351): the floating-stick geometry for the on-screen visual (read-only; origin sx/sy + drag dx/dy)
+      if (!leftTouch) { leftStickOut.active = false; leftStickOut.sx = 0; leftStickOut.sy = 0; leftStickOut.dx = 0; leftStickOut.dy = 0; }
+      else { leftStickOut.active = true; leftStickOut.sx = leftTouch.sx; leftStickOut.sy = leftTouch.sy; leftStickOut.dx = leftTouch.x - leftTouch.sx; leftStickOut.dy = leftTouch.y - leftTouch.sy; }
+      return leftStickOut;
+    },
     tick,
     dispose() {
       window.removeEventListener('keydown', onKeyDown);

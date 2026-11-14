@@ -33,6 +33,7 @@ import { flashEnergy } from './core/flashTable.js'; // ST-179: unified white-fla
 import { dangerVignetteX } from './core/dangerVignette.js'; // ST-176: reduced-motion damage vignette envelope
 import { createHUD } from './render/hud.js';
 import { createReticle } from './render/reticle.js';
+import { createTouchStick } from './render/touchStick.js'; // ST-321 (I351): on-screen thrust stick (coarse-only)
 import { createScreens } from './render/screens.js';
 import { createSettingsPanel } from './render/settingsPanel.js';
 import { createAudio } from './render/audio.js';
@@ -470,6 +471,7 @@ pauseBtn.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:30;displ
 pauseBtn.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
 pauseBtn.addEventListener('click', (e) => { e.stopPropagation(); togglePause(); pauseBtn.blur(); });
 document.body.appendChild(pauseBtn);
+const touchStick = coarse ? createTouchStick() : { sync: function () {} }; // ST-321 (I351): on-screen thrust stick - created ONLY on touch (zero DOM on mouse/keyboard)
 
 // Session keys (ST-017): Enter start/restart, P/Esc pause, M mute.
 window.addEventListener('keydown', (e) => {
@@ -844,6 +846,7 @@ function syncVisuals(dt) {
   replayHud.update({ visible: st === STATE.REPLAY, meta: replayView ? replayView.data.meta : null, idx: replayView ? replayView.idx : 0, length: replayView ? replayView.player.length : 0, speed: replayView ? replayView.speed : 1, reducedMotion: motionOff }); // ST-190
   hud.render(world, hudOpts);
   if (coarse && st === STATE.PLAYING) { if (pauseBtn.style.display !== 'flex') pauseBtn.style.display = 'flex'; } else if (pauseBtn.style.display !== 'none') pauseBtn.style.display = 'none'; // I71: on-screen pause button (touch, PLAYING only)
+  touchStick.sync(input, dt, st === STATE.PLAYING); // ST-321 (I351): on-screen thrust stick (fades out on non-PLAYING / pointercancel / blur)
   screens.update(st, world, screenOpts);
   const thrustFrac = Math.min(1, Math.hypot(input.state.thrust.x, input.state.thrust.y));
   const mh = CONFIG.camera.menuHero; // ST-261: MENU hero block (framing + pose + idle flame)

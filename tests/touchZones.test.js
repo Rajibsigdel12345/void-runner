@@ -6,7 +6,7 @@
 // stub exists only in this file; the production build never sees it).
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ZONE, zoneFor, thrustFromDrag } from '../src/core/touchZones.js';
+import { ZONE, zoneFor, thrustFromDrag, knobOffset } from '../src/core/touchZones.js';
 import { createInput } from '../src/render/input.js';
 
 // --- zoneFor ---------------------------------------------------------------
@@ -58,6 +58,46 @@ test('ST-268 thrustFromDrag: diagonal keeps unit direction with radial magnitude
 
 test('ST-268 thrustFromDrag: degenerate maxPx <= thresh ramps straight to full', () => {
   assert.deepEqual(thrustFromDrag(100, 0, 24, 24), { x: 1, y: 0, mag: 1 });
+});
+
+// --- knobOffset (ST-321) ---------------------------------------------------
+test('ST-321 knobOffset: zero + dead-zone (boundary inclusive) -> not active', () => {
+  assert.deepEqual(knobOffset(0, 0, 24, 90), { x: 0, y: 0, mag: 0, active: false });
+  assert.deepEqual(knobOffset(10, 10, 24, 90), { x: 10, y: 10, mag: Math.hypot(10, 10) / 90, active: false });
+  assert.deepEqual(knobOffset(24, 0, 24, 90), { x: 24, y: 0, mag: 24 / 90, active: false }); // at the dead-zone
+});
+
+test('ST-321 knobOffset: within the ring, displacement = the raw drag, mag = |d|/maxPx', () => {
+  const k = knobOffset(25, 0, 24, 90); // just past the dead-zone -> active
+  assert.equal(k.x, 25);
+  assert.equal(k.y, 0);
+  assert.ok(Math.abs(k.mag - 25 / 90) < 1e-12);
+  assert.equal(k.active, true);
+  const up = knobOffset(0, -50, 24, 90);
+  assert.equal(up.x, 0);
+  assert.equal(up.y, -50);
+  assert.ok(Math.abs(up.mag - 50 / 90) < 1e-12);
+  assert.equal(up.active, true);
+});
+
+test('ST-321 knobOffset: clamps to maxPx beyond the ring, keeps unit direction', () => {
+  assert.deepEqual(knobOffset(90, 0, 24, 90), { x: 90, y: 0, mag: 1, active: true }); // exactly at maxPx
+  assert.deepEqual(knobOffset(0, 90, 24, 90), { x: 0, y: 90, mag: 1, active: true });
+  assert.deepEqual(knobOffset(200, 0, 24, 90), { x: 90, y: 0, mag: 1, active: true }); // clamped
+  assert.deepEqual(knobOffset(0, -200, 24, 90), { x: 0, y: -90, mag: 1, active: true });
+  const diag = knobOffset(64, 64, 24, 90); // m = 90.51 > 90 -> clamped, direction preserved
+  assert.equal(diag.mag, 1);
+  assert.equal(diag.active, true);
+  assert.ok(Math.abs(Math.hypot(diag.x, diag.y) - 90) < 1e-9);
+  assert.ok(Math.abs(diag.x - diag.y) < 1e-12);
+});
+
+test('ST-321 knobOffset: degenerate maxPx (<= drag) clamps to the ring', () => {
+  const k = knobOffset(100, 0, 24, 24);
+  assert.equal(k.x, 24);
+  assert.equal(k.y, 0);
+  assert.equal(k.mag, 1);
+  assert.equal(k.active, true);
 });
 
 // --- input.js dual-zone behaviour ------------------------------------------

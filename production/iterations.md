@@ -4288,3 +4288,26 @@ Tests: 914/914 (unchanged, docs-only). Build: exit 0 (128 files / 1924616 B / he
 Changed files: production/epics.md, production/stories.md, CHANGELOG.md, production/session-state/active.md, production/iterations.md, production/scope-check-E38.md (new).
 
 Next I351: ST-321 floating-stick visual (cgs-dev-story): new src/render/touchStick.js (DOM ring + knob ~0.35 alpha, coarse only; spawns at the left-zone down-point; knob = drag clamped to MAX_PX 90 px via the new pure src/core/touchZones.js knobOffset(dx,dy,deadzone,maxPx) -> {x,y,mag,active} + unit tests; faint in the dead-zone; fade-in ~120 ms / fade-out ~200 ms; hidden on non-PLAYING + pointercancel + blur) + main.js coarse-gated wiring (zero DOM on mouse/keyboard); probe = stick DOM at the touch point + knob offset EXACT vs knobOffset math (incl. MAX_PX clamp) + hidden <= 200 ms after release + zero stick DOM on mouse input + all non-PLAYING states; p1 demo pin EXACT (causal - zero sim delta); 914+ tests; build 0; dist delta <= ~2 KB; commit.
+
+## I351 - ST-321 E38 floating-stick visual (cgs-dev-story; render/DOM + 1 pure core extension)
+
+Goal: ship ST-321 - the on-screen floating thrust-stick visual so the player can see the LEFT-zone stick's origin and how much thrust is applied (G1: it was purely virtual - no ring, no knob anywhere).
+
+Scope: render/DOM layer + exactly one PURE src/core extension (knobOffset) + its unit tests. BY LAYER - zero src/core sim/scoring/replay logic touched, zero three.js in core, the demo pin is structurally untouched (causally re-verified).
+
+What shipped:
+- src/core/touchZones.js: new PURE knobOffset(dx, dy, deadzone, maxPx) -> {x, y, mag, active}. Mirrors the finger drag, clamps to the full-thrust radius (maxPx) keeping the unit direction, mag = |d|/maxPx (0..1), active = |d| > deadzone. No DOM, no three (unit-testable).
+- src/render/input.js: export DEADZONE 24 / MAX_PX 90 (now shared with the visual); new read-only get leftStick() returning the reused leftStickOut {active, sx, sy, dx, dy} (no per-frame alloc) derived from the existing leftTouch.
+- src/render/touchStick.js (NEW, 3648 B): createTouchStick() builds #vr-touch-stick (position:fixed, z-index 29, pointer-events none) + a 180 px ring (border rgba(207,228,255,0.35)) + a 48 px knob (bg rgba(207,228,255,0.55)). sync(input, dt, visible) reads input.leftStick each frame, positions the root at the origin via translate3d and the knob via knobOffset; knob opacity 1 when active / 0.45 faint inside the dead-zone; fade-in 0.12 s / fade-out 0.20 s; display none at fade 0; returns the reused out readout. dispose() removes the node. Geometry is 1:1 with viewport px (NOT --vr-fs scaled) so the knob always sits exactly under the finger.
+- src/main.js: createTouchStick() only when coarse (zero DOM on mouse/keyboard); touchStick.sync(input, dt, st === STATE.PLAYING) in syncVisuals - fades out on non-PLAYING, and input.js clears leftTouch on pointercancel/blur so the stick hides for free.
+
+Verification:
+- npm test = 918/918 (was 914; +4 knobOffset unit tests). Build exit 0.
+- dist = 129 files / 1926790 B (was 128/1924616; +2174 B, within the <= ~2 KB budget). vendor sha 76DEA8151BC9352A unchanged; headroom 170362 B >= 102400 B floor.
+- Headless stick probe (.evidence/I351/stick_probe.mjs, playwright chromium headless, two contexts) = 14/14, console A 0/0 B 0/0. A (coarse-forced via addInitScript matchMedia stub): A1 DOM present + hidden at MENU; A2 enter PLAYING / no touch -> still hidden; A3 ring at origin + knob centered faint (opacity 0.45) on a dead-zone drag; A4 drag 50 px -> knob follows + bright (1); A5 drag 150 px -> knob clamps to EXACTLY 90 px; A6 diag 64/64 -> clamps mag 90 with direction preserved; A7 release -> hidden <= 200 ms; A8 mouse input -> no stick DOM; A9 paused -> hidden; A10 render alive (no crash). B (default fine-pointer desktop): B1 zero stick DOM.
+- p1 demo pin re-run (.evidence/I351/p1_only.mjs) = EXACT: score 11334 / kills 57 / wave 2 / maxCombo 15 / shots 198/57 / acc 0.2878787878787879 / time 36.14999999999923 s / replay 2169-2220 speed 4 / Q -> MENU / console 0/0 (causal proof: zero sim delta - the stick is presentation-only).
+
+Tests: 918/918. Build: exit 0 (129 files / 1926790 B / headroom 170362 B). vendor sha 76DEA8151BC9352A unchanged.
+Changed files: src/core/touchZones.js, src/render/input.js, src/render/touchStick.js (new), src/main.js, tests/touchZones.test.js.
+
+Next I352: ST-322 aim offset above the finger (cgs-dev-story; src/render/input.js ONLY): the right-zone touch writes pointer.ndc from (x, y - 48 px) via a new aimFromTouch() seam (local const AIM_OFFSET_PX = 48, tier of DEADZONE/MAX_PX/FIRE_TAIL) so the aim point + the reticle render ABOVE the fingertip (closes I281 gap #3); mouse + keyboard byte-identical; ST-268 probe contract updated ('ndc == touch position < 3.6e-4' -> 'ndc == f(x, y-48) < 1e-3') = documented spec delta, updated in the same iteration; p1 demo pin EXACT (causal); 918+ tests; build 0; dist delta <= ~1 KB; commit.
