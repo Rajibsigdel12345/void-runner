@@ -4568,3 +4568,26 @@ Changed files: production/epics.md (E40 block), production/stories.md (ST-331..3
 Tests: 928/928 (docs-only). Build: 0 (131 files / 1,938,450 B / headroom 158,702 B unchanged). vendor sha 76DEA8151BC9352A unchanged.
 
 Next I363: ST-331 grounded nebula art direction (cgs-dev-story + research; DOCS-ONLY, zero src): bounded YouTube MCP research (burned-id list respected) + local evidence -> art direction section in production/scope-check-E40.md: KEEP equirect geometry + band elevation + warm amber R>G>B; ADD knots / dust lanes / filaments / correlated star clusters / faint far band; AVOID blown-out knots + elevation shift + cool drift; JPEG size strategy under the 123557 B hard cap; decisions recorded.
+## I363 - ST-331 grounded nebula art direction (cgs-dev-story + research; DOCS-ONLY 0 KB, zero src)
+
+Goal: ground the v6 nebula skybox art direction in real galactic structure (bounded YouTube MCP research) + local evidence, and append it as a KEEP/ADD/AVOID + size strategy + decisions section to production/scope-check-E40.md (the E40 source of truth). Docs-only; zero src; no dist delta.
+
+Research evidence (bounded; burned-id list respected):
+- YouTube MCP: 1 search call / 3 queries / 24 raw results; 2 transcript pulls. New burned ids: HhCRAJIUq6E, I-DNl36mNqw, ZoL6Em5OZl4 (never reuse).
+- Grounding found: (a) the Milky Way band reads as a STRAIGHT BAND with HEAVY CENTRAL CONCENTRATION - one dominant off-center bright knot (the galactic-center region), not a uniform stripe; (b) the band is LAYERED: a dense thin-disk stripe + a puffier faint thick-disk envelope + bulge + halo; (c) dust forms DARK CONSTELLATIONS - Great-Rift-style rifts that occlude the core, so the bright center is seen through/around a dark abyss; (d) gas + dust condense into star formation, so STAR CLUSTERS correlate with the bright knots (star density follows the knots).
+- Local evidence (I362): current v5 skybox = flat structureless amber band + uniform starfield (1024x512 JPEG 67255 B); I360 MENU framing invariant (band e +1.5..+10.5 deg in the upper third, strip y 180-240 x 420-860, orbit-phase tolerance p50 56.25 +/- 0.75).
+
+Art direction (appended to production/scope-check-E40.md as "## Art Direction (ST-331, I363 - grounded)"):
+- KEEP: equirect 1024x512 JPEG; band elevation (e=0 plane, k=100, boost 0.5 scaffold); warm amber R>G>B band + dark navy 0x04060f field; band base brightness A/B vs installed v5 (D8: p50 within +/-5 luma).
+- ADD: dominant core knot (~65% map-width azimuth [free param D4], radius 8-10 deg, +35-45 luma, luma < 245, partially veiled by the dominant rift [D1]); 2-3 secondary knots (3-5 deg, +15-25 luma); layered band (core stripe + 2.5x envelope ~40% amp + far companion ~15% amp 4x width at e +4-6 deg [D5]); 1 dominant broad rift (darkening 0.35-0.55, 25-35% band width, soft noise-displaced edges) + 2-4 minor dust lanes (0.25-0.45); fBm filaments (3-4 octaves, domain-warped, 3-4x along-band anisotropic stretch, asymmetric wisps); sparse correlated stars (density 0.4*base + 1.2*band + 1.6*knot; 1-2 px Gaussian dots; ~12-15% cool-white; few 2-3 px brights in knots only [D2]).
+- AVOID: luma >= 245; elevation/width change; cool band drift; 1 px dust edges; uniform fine noise.
+- Palette ramp (D6): deep amber (R 120-150, G 70-90, B 40-55) -> bright amber-white (R 235, G 200, B 150); field (4-8, 6-10, 15-25); R>G>B everywhere in band.
+- Size strategy: bake 2048x1024 linear (tree.update_tag commit) -> downsample 1024x512 4x4 (D3) -> JPEG q90, q85 if > 115 KB, then reduce far-band then filament amplitude (never core structure); hard stop 122880 B (D7 - the tests/skyboxTexture.test.js cap, tighter than budget-derived 123557 B); target 90-115 KB.
+- Decisions D1-D8 recorded (see section).
+
+I230 Blender 5.2 gotchas re-listed for ST-332 (I230-verified): math-only unit direction (VectorMath LENGTH/NORMALIZE broken); Math EXPONENT = 2^x; Noise node has no vector offset (per-channel ADD on U); bake-target node select must commit tree.update_tag(); 8-bit PNG save writes stored bytes as-is (sRGB byte space - the I357 linear-as-bytes bug made it ~6x too dark); 8-bit R<<G green cast on faint wisps (warm R>G>B avoids); dense 1 px stars kill PNG compression (skybox stars stay sparse; dense twinkling stays in the in-game Points layer).
+
+Changed files (DOCS-ONLY): production/scope-check-E40.md, production/stories.md, production/epics.md, CHANGELOG.md, production/session-state/active.md, production/iterations.md.
+
+Tests: 928/928. Build: 0 (131 files / 1938450 B / 0 B delta / headroom 158702 B). vendor sha 76DEA8151BC9352A unchanged. Next I364 = ST-332 Blender skybox v6 node-bake (ASSETS-ONLY, zero src; blender-core + blender-export + blender-asset-qa MANDATORY before shipping).
+

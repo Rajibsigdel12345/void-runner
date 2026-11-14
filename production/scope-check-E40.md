@@ -78,3 +78,43 @@ PROCEED as scoped. The sky is now the dominant remaining unpolished surface (MEN
 ## Next owner / decision
 
 ST-331 (grounded nebula art direction) at I363 - cgs-dev-story + research; docs-only.
+
+## Art Direction (ST-331, I363 - grounded)
+
+Grounded in real galactic structure (bounded YouTube MCP research: 1 search / 3 queries / 24 raw, 2 transcript pulls; new burned ids HhCRAJIUq6E I-DNl36mNqw ZoL6Em5OZl4): the band is a straight band with HEAVY CENTRAL CONCENTRATION (one dominant off-center knot, not uniform brightness); it is LAYERED (dense thin-disk stripe + puffier faint thick-disk envelope + bulge + halo); dust forms DARK CONSTELLATIONS (Great-Rift-style rifts occluding the core - the center reads as a dark abyss); and gas + dust condense into star formation, so STAR CLUSTERS correlate with the bright knots.
+
+KEEP:
+- Equirect 1024x512 JPEG (loader + tests/skyboxTexture.test.js pin unchanged).
+- Band elevation: e=0 plane, k=100, boost 0.5 scaffold (I360 MENU framing strip y 180-240 x 420-860 still lands; orbit-phase tolerance kept).
+- Warm amber R>G>B band + dark navy field (0x04060f family).
+- Band base brightness A/B vs installed v5: p50 family within +/-5 luma (D8).
+
+ADD (v6 structure):
+1. Dominant core knot: azimuth ~65% map width (free param, D4), radius 8-10 deg, +35-45 luma over band base, luma < 245, partially veiled: glow x (1 - riftMask*0.7) (D1).
+2. 2-3 secondary knots: radius 3-5 deg, +15-25 luma; one may be a slightly cooler warm-white.
+3. Layered band: core stripe + wider envelope (2.5x width, ~40% amplitude) + faint far companion (~15% amplitude, 4x width, e +4-6 deg, slightly cooler; D5).
+4. Dust: 1 dominant broad rift near the core knot (darkening 0.35-0.55, 25-35% band width, soft noise-displaced edges) + 2-4 minor lanes (0.25-0.45).
+5. fBm filaments: 3-4 octaves, domain-warped, anisotropic 3-4x along-band stretch, asymmetric wisps.
+6. Sparse correlated stars: density = 0.4*base + 1.2*bandBrightness + 1.6*knotProximity; 1-2 px Gaussian dots; warm-white majority, ~12-15% cool-white; few 2-3 px brights in knots only (D2).
+
+AVOID:
+- luma >= 245 (blown-out knots).
+- Elevation or band-width change (I360 framing invariant).
+- Cool drift in the band (palette is amber-locked, R>G>B).
+- High-freq 1 px dust edges; uniform fine noise (bake at 2x, downsample 4x4; D3).
+
+Palette ramp (D6): deep amber (R 120-150, G 70-90, B 40-55) -> bright amber-white (R 235, G 200, B 150) at peaks; field (4-8, 6-10, 15-25); R>G>B everywhere in the band.
+
+Size strategy: bake 2048x1024 linear (bake-target node select must commit tree.update_tag()) -> downsample 1024x512 4x4 (D3) -> JPEG q90 -> if > 115 KB then q85 -> then reduce far-band then filament amplitude (never core structure); hard stop 122880 B (D7: the test cap, tighter than the budget-derived 123557 B); target 90-115 KB.
+
+Decisions:
+- D1: core knot veiled by the dominant rift (real look + anti-blowout).
+- D2: skybox stars stay sparse; the dense twinkling layer stays in the in-game Points starfield.
+- D3: bake at 2x and downsample (anti-aliasing; kills 1 px dust edges).
+- D4: knot azimuth is free; band elevation is the invariant.
+- D5: far companion band ~15% amplitude at e +4-6 deg.
+- D6: palette ramp as above.
+- D7: effective hard cap 122880 B (tests/skyboxTexture.test.js; tighter than budget 123557 B).
+- D8: band base brightness A/B vs v5, p50 within +/-5 luma.
+
+Blender 5.2 gotchas re-listed for ST-332 (I230-verified): math-only unit direction (VectorMath LENGTH/NORMALIZE broken); Math EXPONENT = 2^x; Noise node has no vector offset (per-channel ADD on U); bake-target node select must commit tree.update_tag(); 8-bit PNG save writes stored bytes as-is (sRGB byte space - the I357 linear-as-bytes bug made it ~6x too dark); 8-bit R<<G green cast on faint wisps (warm R>G>B avoids); dense 1 px stars kill PNG compression (skybox stars stay sparse).
