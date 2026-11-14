@@ -4871,3 +4871,22 @@ Verification: gate battery above; docs diff = 6 files only.
 Result: DONE. G41.0 PASS (R1-R5) -> E41 (Asteroid + Comet Surface Relief Pass) CLOSED 5/5 (ST-336..340). Ship state: v8 rock relief + I371 lumpy comet with bright ion tail live in the running game, all pins green, no new draw calls, 929/929.
 
 Risk/follow-up: (1) NEW GOTCHA recorded - scripts/serve.mjs lacks the .webmanifest MIME; either fix serve.mjs in a future tooling story or always use the I348 canonical server for PWA probes. (2) Next I374 = open E42 per the standing 100-iteration directive: bounded research + scope-check for the next unpolished surface (cgs-scope-check + cgs-create-stories, docs only; feel remains FROZEN - no mechanics re-open).
+## I374 - E42 Play-Frame Coherence Pass OPENED (cgs-scope-check + cgs-create-stories; DOCS-ONLY, zero src)
+
+Goal: open the next 100-iteration arc (E42) on the last dominant unpolished surface in the PLAYING frame - the arena FLOOR + field lighting - with a bounded scope-check + story plan, after E41 CLOSED 5/5 at I373.
+
+Changed: 6 docs only (production/scope-check-E42.md NEW, stories ST-341..345 appended, epics E42 block appended, CHANGELOG I374, active.md, iterations). Zero src, zero asset, 0 KB dist.
+
+Surface selection (why the floor): every other PLAYING-frame surface has converged - sky (E40 v6, frozen I364), rocks+comet (E41 v8, frozen I370/I371), ship/hull (prior arcs), HUD (I347 A/B frozen), boss (E36). The floor occupies ~60% of the play frame and was last tuned in E39 (I359 grid refine) BEFORE the E40 v6 skybox + E41 v8 rocks landed, so it is the one surface with a cross-arc coherence gap: a dark, low-structure floor now sitting under a richer sky + craggier rocks.
+
+Direction (within the frozen FLOOR-50 dark budget): the floor is dark BY DESIGN (FLOOR-50, ST-177) so rocks/bullets pop. E42 ADDS STRUCTURE, NOT brightness - a floor-texture radial re-bake (legible concentric + radial structure), grid-brightness rest-curve contrast, and a bounded floor-only secondary fill / grade micro-knob (per the YouTube contrast principle) - all inside the existing per-pixel dark budget, NO new draw calls/programs, NO sim/src/replay/vendor changes.
+
+Grounding: FLOOR-50 pin 230/61/169/0/0 (p7a); floorab rendered rings 48.47/48.47/39.90/29.41/25.27 + rim 55.47 (I322b/I359; calls 31 tris 546); gridBright 0x483728 (hub luma 57.5, cap <= 59.8) / gridDim 0x1a130d (luma 20.1) / ST-293 all ring lumas < 50; floor path floorDisc.js + arenaFloor.js + floorGrid.js + config.js arena block; floor_surface.png 512x512 8586 B. Bounded YouTube grounding (1 search / 3 queries / 16 raw, STOP on noise per anti-over-engineer): yQMywArQfyY (single-minded-ryan Unity post-processing: "add a secondary light to light up the dark area... warm color to create contrast" + "Lift/Gamma/Gain... the general rule is to create contrast") grounds ADD = structure/contrast in the dark, NOT global brightening; DgBBCRcm_EU (low-poly stylized sci-fi rendering) as a lighting/post reference; remaining 14 = noise (VODs/manhwa/general tutorials), 16 ids recorded as burned.
+
+Stories scheduled: ST-341 (I375) audit + BEFORE baseline (CUTTABLE) / ST-342 (I376) grounded direction docs-only / ST-343 (I377) floor re-bake + config (asset+config, zero sim src) / ST-344 (I378) apply + A/B + art QA / ST-345 (I379) G42.0 + closeout. Gate G42.0 at ST-345 (R1 p1 EXACT causal / R2 rockab FRESH / R3 play-frame art probe FRESH / R4 PWA 11/11 I348 server / R5 quality bar + hygiene). Risks R-E42-1..5. Budget: dist 131/1910880 B headroom 186272 B (max addable ~83872 B); floor re-bake cap ~25000 B.
+
+Verification: 929/929 (fresh this session) + build 0 + dist 131/1910880 B (headroom 186272 B >= 102400 B) + vendor sha 76DEA8151BC9352A unchanged (zero src -> structurally unchanged) + docs diff = 6 files only.
+
+Result: DONE. E42 OPENED (docs only, zero src). Ship state unchanged from I373 (v8 rocks + I371 comet live; all pins green).
+
+Risk/follow-up: next I375 = ST-341 audit + BEFORE baseline (cgs-asset-audit): build .evidence/I375/ headless probe (fresh deterministic reseed 71200, fx=high, all 4 GLBs ready, fixed-camera PLAYING frame), capture per-region luma boxes (sky band / horizon / floor hub+mid+outer rings / rim strip / rock boxes L/M/S / ship box) + per-region color-cast R/G/B + a full PLAYING screenshot (VIEW it), console 0/0 + no NaN, deliver the verdict (where exactly is the cross-arc gap vs the frozen FLOOR-50 budget). CUTTABLE: if no material gap, close E42 docs-only with reason.
