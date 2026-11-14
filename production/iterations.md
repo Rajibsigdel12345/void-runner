@@ -4890,3 +4890,31 @@ Verification: 929/929 (fresh this session) + build 0 + dist 131/1910880 B (headr
 Result: DONE. E42 OPENED (docs only, zero src). Ship state unchanged from I373 (v8 rocks + I371 comet live; all pins green).
 
 Risk/follow-up: next I375 = ST-341 audit + BEFORE baseline (cgs-asset-audit): build .evidence/I375/ headless probe (fresh deterministic reseed 71200, fx=high, all 4 GLBs ready, fixed-camera PLAYING frame), capture per-region luma boxes (sky band / horizon / floor hub+mid+outer rings / rim strip / rock boxes L/M/S / ship box) + per-region color-cast R/G/B + a full PLAYING screenshot (VIEW it), console 0/0 + no NaN, deliver the verdict (where exactly is the cross-arc gap vs the frozen FLOOR-50 budget). CUTTABLE: if no material gap, close E42 docs-only with reason.
+
+## I375 - ST-341 E42 audit + BEFORE baseline (cgs-asset-audit; DOCS-ONLY, zero src)
+
+Goal: the ST-341 cut gate - measure the BEFORE state of the floor + play frame (per-region luma + color cast), locate exactly where the cross-arc gap sits vs the frozen FLOOR-50 budget, and decide KEEP/CUT for E42.
+
+Probe: .evidence/I375/probe.mjs + probe_a2.mjs (playwright-core chromium headless, 1280x720, CDP cache off). Part A: overhead freeze (rAF frozen, fx=off, reseed 71200, pool/ship/particles hidden) - 10 radial bands p10/p50/p90 + per-band R/G/B cast + 5-ring annulus + spots + structure metrics. Part A2: identical overhead under I322b conditions (no reseed, pool visible) to rule out probe-condition drift. Part B: real PLAYING (fx=high, reseed 71201, world.begin() + advance(2.5) deterministic sim step, freeze + single render) - region boxes (sky band / horizon row / floor region / ship box / rock boxes) + cast + full-frame screenshot. Hygiene: dev server 5173 started + killed after each run, port free verified (connect exit 1), 0 chrome at rest, console 0/0 both parts, NaN 0, camFinite true, state PLAYING (5 rocks at t=2.5 s). Screenshots VIEWED: i375_overhead_fxoff.png (WebGL drawImage read clean; compositor screenshot shows the MENU DOM overlay) + i375_playing_fxhigh.png (WAVE 1, ship centered, 5 warm rocks, cool rim strip, warm sky).
+
+PIN CORRECTION (documented, values-only): the floorab pin cited at I374 open (rings 48.47/48.47/39.90/29.41 + rim 55.47) was the canonical I317/I322 pin, superseded by the I359 (ST-328) values-only re-pin. I375 Part A + A2 both reproduce .evidence/I359/probe.json ringCheck byte-for-byte: ring annulus p90 49.04/48.32/38.54/24.41 + rim 52.98 (p50 51.12), hub ring p90 57.53, spot t=0.95 p90 111.35. The floor renders with zero drift since I359 (as expected: no floor changes in E40/E41). All E42 work pins to the I359 values from here on.
+
+BEFORE baseline (I375 measurements):
+- Overhead 10 bands (fx off): p50 ladder 51.18/45.90/44.76/40.83/40.83/37.62/30.34/24.41/21.05 (t 0.0-0.9) + rim band p50 53.98; per-band spread 10.56/8.42/8.42/15.98/15.98/13.56/9.42/5.29/3.36 (rim 185.95); cast R/G/B hub 60.9/46.4/33.9 (R/B 1.79) -> outer 27.3/20.7/14.0 (R/B 1.95).
+- Ring annulus p50 32.2/16.56/16.56/16.56 + rim 51.12; spot t0.05 p50 49.32 rgb 62.8/48.1/35.6; t0.95 p90 111.35.
+- PLAYING (fx high): horizon row 57/720 (floor ~92% of frame height); sky band p50 70.14 rgb 99.0/63.6/53.9; floor region p10 16.56 / p50 32.2 / p90 72.07 rgb 46.1/33.5/27.2 (R/B 1.69); ship box p50 32.2 rgb 51.4/40.2/30.1; rock boxes p50 48.52 rgb 58.8/40.5/27.1 + 21.69 rgb 37.6/24.9/14.7 (warm r>g>b, consistent with E41 v8).
+
+Findings (where the cross-arc gap is):
+1. Cast coherence (primary): the floor is warm across all bands (R/B 1.69-1.95, strengthening outward), the same hue family as the skybox v6 warm nebula (sky rgb 99/63.6/53.9). The floor-sky boundary depends solely on the cool-blue rim strip (rim rgb b 85-100) + the arena ring silhouette. The mid/outer floor (p50 16.6-21) is a muddy warm darkness that blends into the sky warm dark near the horizon = the "muddy" read.
+2. Structural flatness of the outer 60%: band spread collapses from 8.4-16 (t<0.6) to 3.36-9.4 (t 0.7-1.0); the only detail in the outer region is the low-contrast blotch noise of floor_surface.png (8586 B). The inner 40% (hub + inner grid rings) reads as structured.
+3. Luminance envelope = the constraint: ring 1 p90 49.04 sits at the FLOOR-50 ceiling of 50; hub p90 57.5 sits at the 59.8 cap. No luma headroom on rings/hub -> the only free dimension is texture structure / micro-contrast / cast within the current envelope (a luma-neutral re-bake).
+
+Verdict: KEEP - a material cross-arc gap exists (outer-floor structure + cast separation). NOT CUT. ST-342 direction: luma-neutral re-bake of floor_surface.png - (a) replace blotch noise with intentional deck structure (concentric panel bands aligned to the grid rings + radial sector seams aligned to the 8 sectors), (b) outer micro-contrast (band spread ~3.4 -> 8-12, within the per-band [p10,p90] envelope; peaks at ring radii must not push ring p90 above 50), (c) subtle cool/neutral cast shift in the outer region (R/B ~1.76 -> ~1.3-1.4) to separate from the warm sky + extend the cool family (rim, engine glow, reticle), (d) hub region unchanged; 512x512 kept, hard cap ~25 KB (target floor family < 16.5 KB); +0 draw calls/programs; zero sim src.
+
+Changed: 6 docs only (scope-check-E42 + I375 section, stories ST-341 DONE, epics E42 progress, CHANGELOG I375, active.md, iterations). Zero src, zero asset, 0 KB dist.
+
+Verification: 929/929 (fresh; docs only, zero src touched) + build 0 + dist 131/1910880 B (headroom 186272 B) + vendor sha 76DEA8151BC9352A unchanged + servers killed + 5173 free + 0 chrome + console 0/0 + NaN 0.
+
+Result: DONE. ST-341 complete; E42 continues (NOT CUT).
+
+Risk/follow-up: next I376 = ST-342 grounded direction (cgs-dev-story, docs-only): write KEEP/ADD/AVOID into production/scope-check-E42.md from the I375 audit (the luma-neutral re-bake spec above + envelope guardrails + the R-E42-1 re-pin plan against the I359 pins).
