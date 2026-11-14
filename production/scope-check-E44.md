@@ -52,4 +52,35 @@ E39-E42 deferrals untouched, incl. scripts/serve.mjs .webmanifest MIME (PWA prob
 ## Recommendation
 Proceed: ST-351 audit next (I387). Low cost, high coherence value (the last un-audited dominant surface), fully verifiable, zero sim src, cuttable at either gate.
 
+## ST-351 audit (I387) - BEFORE baseline
+Method: .evidence/I387/ownside_probe.mjs (seed 71382), 2 pages (H = fx-high bloom-verified / O = fx-off), state MENU, 16 states x 2 backdrops (sky 0,2,2 / floor 0,7.5,-2), env kept, all live pools hidden via hideAllQuick(), real sync() per element, in-page toDataURL closeups + MD5; 30 closeups captured + VIEWED (15 states x 2 backdrops). JSON: .evidence/I387/ownside_audit_i387.json. Console 0/0 both pages, no NaN, server 5173 killed + port free.
+Probe bug found + fixed: hideAllQuick() initially missed shieldRing.ring -> the shield state leaked the ring into reticle/shockwave/powerup/trail states (first run DISCARDED: shockwave sky read 172.94 ~ ring, reticle 50.03); patch added a per-state ring hide; values below are the clean re-run. Lesson: every state-showing element needs a per-state hide.
+BEFORE (fx=high; sky then floor; calls = H sky, delta vs env 24):
+- env_baseline: 24 calls (fx-off 10)
+- ship_idle: body p50 10.63 sky (sepB -17.78 vs bg p50 28.41) / 10.63 floor (sepB 0.00); cockpit accent 58.37 sky (sepA -18.19) / 59.59 floor; 30 calls (+6); fx-off body 16.56, sepB -15.64
+- ship_thrust: flame accent 67.79 sky / 97.28 floor; 35 calls (+5)
+- player_bullet: head acc90 219.99 both (sepA +190.87 sky / +209.36 floor); 27 calls (+3)
+- enemy_bullet: acc90 152.18 both (sepA +77.26 sky / +135.77 floor); 25 calls (+1)
+- shield: acc90 78.86 sky (sepA -2.98 vs bg90 81.84) / 16.41 floor (box artifact); 25 calls (+1)
+- reticle: acc90 40.11 sky (sepA -32.67) / 16.41 floor (box artifact); 25 calls (+1)
+- shockwave: acc90 50.03 sky (sepA -27.74) / 155.06 floor (+126.65) - flat ring collapses to a faint sliver from the low in-game camera; 26 calls (+2)
+- powerups acc90 sky/floor: rapid 140.97/149.83, spread 91.85/85.22, shield 200.53/177.07, bomb 89.22/82.22, magnet 161.6/155.75, overdrive 83.35/94.22 (weakest), slowmo 148.54/174.72; 26 calls each (+2); fx-off sky weakest sepA ~ -3.4 (badge carries ID)
+- engine_trail: acc90 89.69 sky (inside ember band 54.26-112.43) / 51.43 floor; 24 calls (+0)
+
+GAPS (E44 NOT cut):
+- G1 (ship body value, P1/P2): body p50 10.63 = darkest major solid in the frame (enemy drone body p50 = 46.28 under same lighting); sky body p90 29.12 ~ bg p50; cockpit accent 58.37 is INSIDE the env band (floor 32.2 - sky 70.14), sky sepA -18.19. The ship is the most important own-side silhouette. Candidate fix: material value lift (CONFIG.ship.palette.body 0x9a8468 luma 134.6 - palette is authoritative over GLB COLOR_0 multiply, powerup pattern) -> no re-bake needed, but ST-352 decides.
+- G4 (shockwave low-angle visibility, P2): sky acc90 50.03 (sepA -27.74) vs floor 155.06 (+126.65) - the in-game low tracking camera (sky-like) is the representative one; kill feedback is a faint sliver there.
+
+Watch items (documented honestly, NOT gaps):
+- shield: closeup visible both backdrops; floor measurement = vScale-0.5 box undersampling the near-circular top-down projection; sky 78.86 vs bg p50 29.12 fine.
+- reticle: faint but present both; 0.35 opacity by design.
+- engine_trail inside ember band: position + motion disambiguate; warm by design.
+- powerups: overdrive weakest (83.35); fx-off spread/bomb/overdrive weak (badge carries ID).
+
+P4 PASS: closeup MD5s differ both backdrops - sky player 40f457c2fa9852d88ade49e242edc309 / enemy e63583e3fb292d82c09fa2936ebb85c7; floor player 296bd8c3faa71d9c13a6e1612b36342d / enemy 81ef8ead65880055231349c0a7e530fb; hue pale-cyan 219.99 + ribbon trail vs hot red-orange 152.18 larger bare orb. Player vs enemy bullets distinguishable by hue AND shape.
+
+Risk R-E44-1 (NO-GAP cut likely) was wrong - gaps found (G1 + G4), which is fine/expected (the surface WAS tuned against a stale pre-E34 frame).
+
+VERDICT: GAPS FOUND (G1 + G4) -> E44 NOT cut -> ST-352 next (I388).
+
 - production/scope-check-E44.md = source of truth.
