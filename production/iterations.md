@@ -4354,3 +4354,30 @@ Tests: 925/925 (+7). Build: exit 0 (130 files / 1927586 B / headroom 169566 B). 
 Changed files: src/render/haptics.js (new), tests/haptics.test.js (new), src/main.js.
 
 Next I354: ST-324 E38 touch-target audit+fix (cgs-dev-story; CUTTABLE to a 0 KB pass): measure every interactive element in MENU / PAUSED / GAME_OVER / REPLAY at 390x844 (portrait) + 740x360 (landscape) via getBoundingClientRect over the live DOM (headless probe, one context per state x viewport); fix ONLY real < 44 px hits with coarse-gated CSS (media (pointer:coarse) - desktop layout untouched); the desktop HUD A/B must stay EXACT at the I347 baseline (pairA credit x hint 0 px^2 + 23 px gap, credit x panel 0 px^2; pairB scoreBox/best x wpnBox 0 px^2 + 23 px gap); no new DOM; p1 EXACT (causal); 925+ tests; build 0; dist delta <= ~1 KB (a 0 KB pass is acceptable - CUTTABLE); commit.
+
+## I354 - ST-324 E38 touch-target audit+fix (cgs-dev-story; CSS-only, +1020 B dist)
+
+Goal: ship ST-324 - every onscreen interactive target in touch play is >= 44 px (coarse-pointer discipline) without touching the desktop layout, so a finger does not miss the button it reaches for.
+
+Scope: render/DOM CSS only (src/render/screens.js, one <style> block, 2 edits). BY LAYER - zero src/core, zero three.js, zero new DOM, no new asset. Coarse-gated via @media (pointer:coarse) so fine/desktop is byte-untouched. A bonus short-viewport scroll fix makes landscape-tall (740x360) PAUSED/GAME_OVER/REPLAYS targets reachable. CUTTABLE story - the strict 44 px contract is satisfied by the coarse block alone.
+
+What shipped:
+- src/render/screens.js (2 edits, both in the createScreens() <style> string):
+  (A) NEW coarse-gated 44 px block @media (pointer:coarse){...}: .vr-start/.vr-pause-btn min-height 44 px; #vr-pause-btn 44x44; .vr-settings checkbox re-skinned to a 44x44 box with a 20 px inline-SVG checkmark (appearance:none + data-URI, no new asset); .vr-settings range height 44 px; .vr-settings select min-height 44 px.
+  (B) short-viewport scroll fix: the pre-existing @media (max-width:620px){...} is widened to (max-width:620px),(max-height:480px) and its body now also targets #screen-paused/#screen-gameover/#screen-replays with justify-content:flex-start + overflow-y:auto + padding 18px 0 (top-aligned + scrollable), so landscape-tall offscreen targets become reachable.
+
+Verification:
+- Target probe (.evidence/I354/target_probe.mjs, headless, hasTouch contexts so (pointer:coarse)=true) = 6/6, 0 violations:
+  390x844 portrait: every onscreen target 44-46 px (TAP TO START 44, daily/replays 44, Volume 46, checkboxes 44x44, selects 44, pause-btn 44x44);
+  740x360 landscape: PAUSED RESUME 115x44 / RESTART 120x44 / QUIT 170x44 now ONSCREEN (previously offscreen/untappable - the (B) fix); below-fold settings rows scrollable;
+  1280x720 fine UNCHANGED (pause buttons 41 px, checkboxes 18 px, ranges 18 px, selects 21 px - coarse gate holds, F1/F2/F3 pass);
+  REPLAY-VIEW 0 interactive (G1).
+- HUD A/B (.evidence/I347/hud_ab_run.mjs -> .evidence/I354/hud_ab.json) BYTE-IDENTICAL to the I347 baseline (pairA credit x hint 0 px^2 + 23 px gap, credit x panel 0 px^2; pairB scoreBox/best x wpnBox 0 px^2 + 23 px gap; console 0/0).
+- p1 demo pin = EXACT (11334 / 57 / W2 / combo 15 / shots 198/57 / acc 0.2878787878787879 / 36.14999999999923 s / replay 2169-2220 speed 4 / Q -> MENU / console 0/0) - causal proof zero sim delta (CSS-only).
+- npm test = 925/925 (no new unit tests - CSS-only). Build exit 0.
+- dist = 130 files / 1928606 B (was 130/1927586; +1020 B, within the <= ~1 KB budget). vendor sha 76DEA8151BC9352A unchanged; headroom 168546 B >= 102400 B floor.
+
+Tests: 925/925 (CSS-only, no new unit tests). Build: exit 0 (130 files / 1928606 B / headroom 168546 B). vendor sha 76DEA8151BC9352A unchanged.
+Changed files: src/render/screens.js (CSS-only, 2 insertions / 1 deletion).
+
+Next I355: ST-325 E38 regression + G38.0 gate + closeout (cgs-regression-suite + cgs-gate-check + cgs-milestone-review; DOCS-ONLY 0 KB): full 13-probe battery (p1 demo pin EXACT + FLOOR-50 230/61/169/0/0 + MENU 60@60/60 vendorLowp 0 + rockab radii EXACT 2.2/1.3/0.7 + puab all 7 emblem hues + floorab rings 48.47/48.47/39.90/29.41 rim 55.47); PWA probe re-run 11/11; HUD A/B == I347 baseline; G38.0 R1..R5 (R1 ST-268 dual-zone suite green w/ updated offset contract; R2 stick visual probe; R3 aim offset probe + p1 EXACT; R4 haptics; R5 targets >= 44 px + desktop HUD A/B == I347 baseline); 925+ tests; build 0; headroom >= 102400 B; vendor sha unchanged -> E38 CLOSED 5/5; then open the next 100-iteration improvement arc.
