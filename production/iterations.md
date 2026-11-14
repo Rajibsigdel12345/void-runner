@@ -4381,3 +4381,28 @@ Tests: 925/925 (CSS-only, no new unit tests). Build: exit 0 (130 files / 1928606
 Changed files: src/render/screens.js (CSS-only, 2 insertions / 1 deletion).
 
 Next I355: ST-325 E38 regression + G38.0 gate + closeout (cgs-regression-suite + cgs-gate-check + cgs-milestone-review; DOCS-ONLY 0 KB): full 13-probe battery (p1 demo pin EXACT + FLOOR-50 230/61/169/0/0 + MENU 60@60/60 vendorLowp 0 + rockab radii EXACT 2.2/1.3/0.7 + puab all 7 emblem hues + floorab rings 48.47/48.47/39.90/29.41 rim 55.47); PWA probe re-run 11/11; HUD A/B == I347 baseline; G38.0 R1..R5 (R1 ST-268 dual-zone suite green w/ updated offset contract; R2 stick visual probe; R3 aim offset probe + p1 EXACT; R4 haptics; R5 targets >= 44 px + desktop HUD A/B == I347 baseline); 925+ tests; build 0; headroom >= 102400 B; vendor sha unchanged -> E38 CLOSED 5/5; then open the next 100-iteration improvement arc.
+
+## I355 - ST-325 E38 regression + G38.0 gate + closeout (cgs-regression-suite + cgs-gate-check + cgs-milestone-review; DOCS-ONLY 0 KB, no dist delta)
+
+Goal: close the E38 Touch-Fallback Arc (5/5) - re-run the full regression battery + the four E38-specific probes + PWA, confirm the G38.0 gate R1..R5 all PASS, and lock the frozen invariants.
+
+Scope: verification + docs only. Zero source change (the arc code shipped at I351-I354). DOCS-ONLY 0 KB (no dist delta).
+
+What shipped (verification):
+- Battery 13/13 (.evidence/I349_runner.mjs, one chrome launch, 13 fresh contexts): p1 demo pin EXACT (11334 / 57 / W2 / combo 15 / shots 198/57 / acc 0.2878787878787879 / 36.14999999999923 s / replay 2169-2220 speed 4 / Q -> MENU / console 0/0) + p2-p6 + p7a FLOOR-50 230/61/169/0/0 + p7b MENU 60@60/60 vendorLowp 0 + p8 + rockab radii EXACT 2.2/1.3/0.7 (glbWait all-ready, console 0/0) + puab in-band + floorab rings 48.47/48.47/39.90/29.41 + rim 55.47 (calls 31 tris 546, console 0/0) + perception.
+- E38 probes: R2 stick visual 14/14 (console A/B 0/0); R3 aim offset 21/21 (right-zone touch ndc == f(x, y-48) < 1e-3, mouse ndc == f(x, y) EXACT; console 0/0) + p1 OK; R4 haptics 12/12 (console A/B 0/0, p1 exact); R5 touch-targets 6/6, 0 violations (390x844 + 740x360 onscreen targets 44-46 px; 1280x720 fine UNCHANGED 41/18/18/21) + desktop HUD A/B byte-identical to I347 baseline (0 px^2 + 23 px gap both pairs, console 0/0).
+- PWA probe re-run 11/11 (.evidence/I348/pwa_probe.mjs over dist:5199 via the I348 baseline server [correct .webmanifest MIME]; SW active at root scope + claimed; offline-nav boots __vr from cache, no NaN; manifest GET 200 application/manifest+json display standalone icon 512 any maskable; console 0/0).
+- R1 dual-zone regression: ST-268 suite green (tests/touchZones.test.js, part of npm test) with the updated offset contract (I352).
+
+G38.0 gate R1..R5 (all PASS):
+- R1 dual-zone regression PASS (touchZones suite green, updated offset contract).
+- R2 stick visual PASS (14/14; ring + knob appears at left-zone touch, knob offset EXACT vs knobOffset() incl MAX_PX clamp, faint in dead-zone, hidden <= 200 ms after release, zero DOM on mouse + non-PLAYING).
+- R3 aim offset PASS (21/21; right-zone touch ndc == f(x, y-48) < 1e-3; mouse ndc == f(x, y) EXACT; p1 EXACT causal).
+- R4 haptics PASS (12/12; coarse fires hit/death/bomb/pickup EXACT patterns; desktop no-op; console 0/0).
+- R5 touch targets PASS (>= 44 px at 390x844 + 740x360; desktop HUD A/B == I347 baseline).
+- Battery 13/13 + PWA 11/11 + 925/925 + build 0 + headroom 168546 B >= 102400 B + vendor sha 76DEA8151BC9352A unchanged -> E38 CLOSED 5/5.
+
+Tests: 925/925 (no new unit tests - verification only). Build: exit 0 (130 files / 1928606 B / headroom 168546 B, 0 B delta - docs-only). vendor sha 76DEA8151BC9352A unchanged.
+Changed files: production/epics.md, production/stories.md, CHANGELOG.md, production/session-state/active.md, production/iterations.md, production/scope-check-E38.md (closeout section).
+
+Next I356: open the next 100-iteration improvement arc (E39) (cgs-scope-check + cgs-create-stories, docs-only 0 KB): ground the arc against the current state (5 Blender GLB assets + boss + powerups + replay + PWA + touch + haptics + daily runs; 925 tests; dist 130/1928606 B headroom 168546 B) + user standing orders (Blender for art/asset work, YouTube MCP for grounding, anti-over-engineer); pick a bounded arc, pre-schedule its stories, write production/scope-check-E39.md.
