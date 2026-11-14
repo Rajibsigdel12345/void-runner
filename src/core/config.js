@@ -91,7 +91,7 @@ export const CONFIG = {
     knockback: 7,     // knockback impulse on hit
     lives: 3,
     palette: { // ST-251 (I262): E19 warm-world hero pass; read by src/render/shipMesh.js
-      body:    { color: 0x9a8468, metalness: 0.45, roughness: 0.4 },   // warm brass-steel (luma 134.6; above the warm rocks ~96)
+      body:    { color: 0x9a8468, metalness: 0.15, roughness: 0.4 },   // warm brass-steel (luma 134.6; above the warm rocks ~96)
       wing:    { color: 0x54402e, metalness: 0.3, roughness: 0.55 },    // dark umber - the ship shadow tone (luma 67)
       cockpit: { color: 0x0b1830, emissive: 0x59d8ff, emissiveIntensity: 1.4, roughness: 0.2 } // FROZEN identity (pinned in tests/paletteHarmony.test.js)
     },

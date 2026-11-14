@@ -3,8 +3,8 @@
 // rocks). One shared ring geometry, a fixed pool of meshes with per-entry
 // materials; spawn() reuses the pool in ring-buffer order (oldest parked slot
 // first, overwrite when all busy) - zero per-kill allocation (R-E15-3).
-// The ring lies flat in the arena plane (XZ), expands from 30% of its class
-// radius to 100% and fades to 0 over its life. Additive + depthWrite off so it
+// The ring stands vertical (faces the low tracking camera), expands from 30%
+// of its class radius to 100% and fades to 0 over its life. Additive + depthWrite off so it
 // layers over the floor and under the particle burst without z-fighting.
 import * as THREE from 'three';
 
@@ -14,8 +14,7 @@ export function createShockwaves(scene, cfg) {
   const op0 = cfg && Number.isFinite(cfg.baseOpacity) && cfg.baseOpacity > 0 ? cfg.baseOpacity : 0.85;
   const height = cfg && Number.isFinite(cfg.height) ? cfg.height : 0.35;
 
-  const geo = new THREE.RingGeometry(0.82, 1.0, 40);
-  geo.rotateX(-Math.PI / 2); // flat in XZ (arena plane), facing up
+  const geo = new THREE.TorusGeometry(0.9, 0.10, 8, 40); // ST-353 (I389): vertical torus - full ring face to the low tracking camera (flat XZ ring was an edge-on hairline)
 
   const rings = [];
   for (let i = 0; i < poolSize; i++) {
