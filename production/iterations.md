@@ -4406,3 +4406,24 @@ Tests: 925/925 (no new unit tests - verification only). Build: exit 0 (130 files
 Changed files: production/epics.md, production/stories.md, CHANGELOG.md, production/session-state/active.md, production/iterations.md, production/scope-check-E38.md (closeout section).
 
 Next I356: open the next 100-iteration improvement arc (E39) (cgs-scope-check + cgs-create-stories, docs-only 0 KB): ground the arc against the current state (5 Blender GLB assets + boss + powerups + replay + PWA + touch + haptics + daily runs; 925 tests; dist 130/1928606 B headroom 168546 B) + user standing orders (Blender for art/asset work, YouTube MCP for grounding, anti-over-engineer); pick a bounded arc, pre-schedule its stories, write production/scope-check-E39.md.
+## I356 - E39 Arena Floor & Hub Art Pass OPENED (cgs-scope-check + cgs-create-stories; DOCS-ONLY 0 KB)
+
+Goal: open the next 100-iteration improvement arc (E39) - grounded, bounded, evidence-first (user standing orders: keep improving; use Blender for assets; ground on research, do not over-engineer; revisit the CGS skill library if unsure).
+
+Scope (decision, evidence-grounded): give the arena floor (the dominant gameplay surface, ~60% of the gameplay frame) visible, intentional structure - defined center hub, refined ring/spoke grid, richer rim, subtle surface texture - so it reads as a designed arena instead of an empty void, WITHOUT raising floor luma above the FLOOR-50 ceiling (add structure inside the dark budget, do not brighten). Zero sim change. 5 stories: ST-326..330 scheduled I357..I361. ST-329 CUTTABLE.
+
+What shipped (docs + evidence, 0 KB source delta):
+- production/scope-check-E39.md (new, source of truth): summary, evidence, scope fit, cut options, deferrals, recommendation, risks R-E39-1..5, gate G39.0, files, verification, next.
+- Evidence captured this session:
+  - 3 headless screenshots (.evidence/I356/{menu,play_early,play_mid}.png; artshot.mjs; one launch; all 19 GLBs ready; fx=high; console 0/0): MENU polished but dark sparse backdrop; gameplay skybox/stars/rim/asteroids good; CLEAR WEAKNESS = near-black flat floor disc with a barely-visible grid.
+  - Floor code audit (read in full): floorDisc.js = CircleGeometry + procedural 256x256 canvas radial gradient, unlit MeshBasic, toneMapped false, y = -0.02; arenaFloor.js = static LineSegments warm grid (gridBright 0x463529 luma 55.7, gridDim 0x201812 luma 25.3, two-segment rest falloff); core/floorGrid.js = grid math + discGradientStops(); config.js = floor tunables.
+  - Floor probe pins (floor-luma dependent -> RE-PIN with documented delta, values-only, ceiling is a hard cap): FLOOR-50 (p7a) 230/61/169/0/0; floorab (floorab_i322b) rings 48.47/48.47/39.90/29.41/25.27 + hub/rest/rim spots + rim 55.47 (calls 31, tris 546).
+  - Budget: dist 130 files / 1,928,606 B; headroom 168,546 B; floor 102,400 B; max addable ~66,146 B (~64.6 KB) -> texture ~20-28 KB + code ~1-3 KB fits (expected headroom ~140 KB).
+  - YouTube grounding (bounded: 1 search / 3 queries / 11 raw) = NOISE (manwha/GameMaker/Godot/anime; no arcade-playfield reference) -> stopped per anti-over-engineer; 11 ids burned; grounded in local evidence + genre principle instead.
+- Preserved invariants (NOT re-pinned higher): FLOOR-50 design ceiling (floor dark so rocks/bullets pop) / p1 demo pin EXACT / rockab radii EXACT 2.2/1.3/0.7 (rock GLBs untouched) / vendor sha 76DEA8151BC9352A / dist 2 MB cap + 102,400 B headroom floor.
+
+Changed files: production/epics.md (E39 block), production/stories.md (ST-326..330), CHANGELOG.md (I356 line), production/session-state/active.md, production/iterations.md, production/scope-check-E39.md (new). No src/, no tests/.
+
+Tests: 925/925 (docs-only). Build: 0 (130 files / 1,928,606 B / headroom 168,546 B unchanged). vendor sha 76DEA8151BC9352A unchanged.
+
+Next I357: ST-326 Blender floor surface texture (cgs-dev-story + blender-core / blender-modeling / blender-export / blender-asset-qa; ASSETS-ONLY, zero src/core): author assets/floor_surface.png - 512x512 PNG ~20 KB or less (hard cap 28 KB), displayed luma under 50, warm-neutral base R>G>B, fine concentric ring texture, defined center-hub glow, rim accent, subtle speckle; luma audit + p1/rockab EXACT causal re-pin before any code touch.
