@@ -129,3 +129,12 @@ AVOID: any value change on the 4 passing classes; new draw calls/meshes/particle
 No new grounding: P1-P3 grounded at I380 (burned ids KotQ48nrteg _4xEilK2eNA Gwrpw1YtuGo RJ5goMBD6oc); the I381 audit data IS the budget grounding (measured current frame, not invented targets). Anti-over-engineer: no research pass in I382.
 
 2nd cut gate verdict: NOT CUT. Material gaps proven (G1 root-caused to a buried GLB core = a real missing render knob; G2 value gap; G3 in-band collision). Proceed to ST-348 (I383) implementation.
+
+## G43.0 gate (I385, ST-350)
+- R1: p1 demo pin EXACT by causality - last sim-logic commit = I366 (starfield, RNG-isolated); I383/I384 touched config knobs + render-only emissive/offset, zero sim src -> p1 untouched; demo/replay battery re-verified FRESH inside 929/929.
+- R2: rockab radii EXACT [2.2,1.3,0.7] FRESH headless (reseed 30201, spawn L/M/S at state MENU, 4/4 GLB ready, console 0/0, server killed + 5173 free).
+- R3: enemy readability probe FRESH (.evidence/I385/enemy_probe.mjs = I384 script verbatim) reproduced I384 values EXACT (fx=high seed 71381 both backdrops: mine 127.0/127.72 in [125,145]; stinger idle 81.83/82.97 <= body p90+25, charge 254/254 >= idle+80 and >= bg p90+60; sky body p50 46.28 in [45,75]; drone/flyer/warden/boss byte-equal) + playframe probe FRESH (.evidence/I385/playframe_probe.mjs = I379 script verbatim) = I379 pins EXACT (calls 21/366 + 50/1222 -> no new draw calls; FLOOR-50 ring p90 49.04/48.32/38.54/24.41 <50; rim 52.76; spot 112.43/54.26; bands b4-8 42.04/38.54/30.55/25.27/21.84; floorab floor 32.2/72.07, sky 70.14, hrow 57); 3 headless pages console 0/0, no NaN, camFinite.
+- R4: PWA 11/11 FRESH (prod build on 5199 via canonical .evidence/I348/serve.mjs: sw active + root scope + claimed, online boots, manifest 200 + manifest+json + standalone + 512 maskable, offline boots from cache + no NaN, console 0/0; server killed + 5199 free). GOTCHA (carried): scripts/serve.mjs lacks the .webmanifest MIME -> PWA probes MUST use .evidence/I348/serve.mjs.
+- R5: 929/929 + build 0 (fresh) + dist 131/1918851 B (headroom 178301 B >= 102400 B; +175 B vs I384-open = coreIdleGlow knob) + vendor sha 76DEA8151BC9352A unchanged + ports 5173/5199 free + 0 chrome + node 13 MCP baseline (no strays).
+
+G43.0: PASS (R1-R5). E43 CLOSED 5/5 (ST-346..350 all done).

@@ -4997,3 +4997,15 @@ Risk/follow-up: I382 = ST-347 grounded direction (docs-only, 2nd cut gate): per-
 - Verification: 929/929 npm test + build 0. Headless A/B (2 pages, server 5173 killed + port free): console 0/0 x2, no NaN.
 - Result: ST-349 DONE. All G1/G2/G3 budgets pass; KEPT classes byte-identical in probe output; no new draw calls.
 - Risk: floor backdrop stinger body p50 (12.77) is deck-dominated - accepted and documented; the charge telegraph (254) + silhouette carry the floor read. If a future floor re-bake lifts the deck, re-audit in that arc.
+
+## I385 - ST-350 E43 regression + G43.0 gate + closeout (cgs-regression-suite + cgs-gate-check + cgs-milestone-review; DOCS-only, zero src)
+- Story: ST-350 - G43.0 gate R1-R5 + E43 closeout.
+- Changed: 6 docs (stories, epics, scope-check-E43, CHANGELOG, active, iterations). Zero src, zero assets.
+- R1 p1: EXACT by causality - last sim-logic commit I366 (starfield, RNG-isolated); I383/I384 = config knobs + render-only emissive/offset -> p1 untouched. Demo/replay battery re-verified FRESH inside the 929/929 run (p1 demo 11334/57/W2/combo 15/shots 198/acc 0.2878787878787879/36.14999999999923 s/replay 2169-2220/speed 4 seed 9876).
+- R2 rockab: FRESH headless reseed 30201 (.evidence/I385/rockab_run.mjs = I379 script) -> radii EXACT [2.2,1.3,0.7], state MENU, 4/4 GLB ready, console 0/0, server killed + 5173 free.
+- R3: enemy probe FRESH (.evidence/I385/enemy_probe.mjs = I384 script verbatim, fx=high seed 71381, both backdrops, bloom.enabled verified) -> I384 values EXACT: mine 127.0/127.72 in [125,145]; stinger idle 81.83/82.97 (<= body p90+25, margin 25.08/18.58), charge 254/254 (>= idle+80, >= bg p90+60: sky 144.3 / floor 154.6); sky body p50 46.28 in [45,75]; KEPT classes byte-equal (drone 200.98/200.77, flyer 197.74/197.74, warden 130.77/131.63 + 147.01/148.72, boss 182.49/179.92). Playframe probe FRESH (.evidence/I385/playframe_probe.mjs = I379 script verbatim) -> I379 pins EXACT: A calls 21 / tris 366, B calls 50 / tris 1222 (no new draw calls), FLOOR-50 ring p90 49.04/48.32/38.54/24.41 (<50), rim 52.76, spot t0.95 112.43 / t0.985 54.26, bands b4-8 42.04/38.54/30.55/25.27/21.84, floorab floor 32.2/72.07, sky 70.14, hrow 57, camFinite, rocks 0->5. 3 headless pages console 0/0, no NaN.
+- R4: PWA 11/11 FRESH (prod build on 5199 via canonical .evidence/I348/serve.mjs: sw active + root scope + claimed, online boots, manifest 200 + manifest+json + standalone + 512 maskable, offline boots from cache + no NaN, console 0/0). Server killed + 5199 free. GOTCHA (carried): scripts/serve.mjs lacks the .webmanifest MIME.
+- R5: 929/929 + build 0 (fresh) + dist 131/1918851 B (headroom 178301 B >= 102400 B; +175 B vs E43-open = coreIdleGlow knob) + vendor sha 76DEA8151BC9352A unchanged + ports 5173/5199 free + 0 chrome + node 13 MCP baseline (no strays).
+- Verification: npm test 929/929 + npm run build 0 + 3 headless pages (rockab, enemy, playframe) + 1 PWA page; all servers killed, ports free, 0 chrome.
+- Result: G43.0 PASS (R1-R5). E43 CLOSED 5/5 (ST-346..350).
+- Risk: none open. Next arc E44 opens at I386 (standing 100-iteration directive).
