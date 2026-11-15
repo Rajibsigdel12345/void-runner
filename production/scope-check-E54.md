@@ -225,3 +225,12 @@ No sim/palette/feel/identity risk; renderer untouched (names/colors/extent prese
 - Playframe L 21/366 + P 10/180 + B 50/1222: NOT re-measured this iter (deferred to ST-402/I432 per the pre-registration; B will move ~1222 - 112 + 818 ballpark); causal p1 (seed 9876) + rockab (2.2/1.3/0.7) + PWA 11/11 render-invariant -> untouched.
 - CG A/B SHIP gate: PASS, no rollback (clay old vs new + in-game tint x3 + fresh smoke, all VIEWED; the tint_2 "black fin" = tail fin in shadow = lighting artifact, documented, out of scope).
 - Quality bar: 972/972 + build 0 + vendor sha256-16 76DEA8151BC9352A unchanged + hygiene.
+
+## Executed at I430 (ST-400 boss remaster) - re-pin actuals + verdicts
+- Chosen asset: BOSS (not arena).
+- BUDGETS.boss: 250 -> 750 (actual 650 tris) + boss.glb file cap 14 -> 84 KB (actual 77,068 B).
+- assetPerf: totalTris 3500 -> 4000 (actual 3948 = 3442 + 650 new - 144 old) / perFileKB 65 -> 85 (max 75.26 = boss) / totalFilesKB 235 -> 320 (300.67) / totalGeoKB 200 -> 280 (264.43); perFileMats 3 + exactly-24-GLBs unchanged.
+- dist ceiling: 2,200,000 B -> 2,260,000 B (new dist 138/2,110,034 B; headroom 149,966 B >= 102,400 B floor; the old 2,200,000 B ceiling would leave 89,966 B < floor -> raise REQUIRED). Doc-only (no test asserts either value).
+- Playframe L 21/366 + P 10/180 + B 50/1222: NOT re-measured this iter (boss appears only in later waves, NOT in any playframe; B re-measure stays deferred to ST-402/I432 per the pre-registration); causal p1 (seed 9876) + rockab (2.2/1.3/0.7) + PWA 11/11 render-invariant -> untouched.
+- CG A/B SHIP gate: PASS, no rollback (clay old-vs-new + in-game tint x2 angles [34 + front], all VIEWED; new = multi-spike crystal crown + full-height emissive core column + per-facet value + rim). The earlier phantom invisible-boss reading = test-harness artifact (real render = bloom.render() EffectComposer, not vr.render(); a pending frame() overwrote the harness-cam shot with the chase cam, and multi-shot same-canvas made every shot identical) - fixed harness .evidence/I430/boss_tint2.mjs; NOT a real bug.
+- Quality bar: 972/972 + build 0 + dist 138/2,110,034 B (boss byte-identical 77,068 B) + vendor sha256-16 76DEA8151BC9352A (subset 13/13 bad=0) + hygiene (server 5173 killed).

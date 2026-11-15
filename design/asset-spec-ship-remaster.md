@@ -127,6 +127,10 @@ silent) - ALL EXECUTED at I429 (measured values, not estimates):
   RAISED 2,097,152 B -> 2,200,000 B (new dist 138 files / 2,039,982 B; headroom 160,018 B
   >= 102,400 B floor; the old ceiling would have left 57,170 B < floor, so the raise was
   required per the pre-registration).
+- dist ceiling I430 (ST-400 boss remaster, DOC-ONLY; no test asserts it): RAISED
+  2,200,000 B -> 2,260,000 B (new dist 138 files / 2,110,034 B; headroom 149,966 B >=
+  102,400 B floor; the 2,200,000 B ceiling would have left 89,966 B < floor, so the raise
+  was required).
 
 ## Facet value-bake plan
 - After the remaster geometry is joined + triangulated, run the per-facet grayscale bake
@@ -218,6 +222,12 @@ Contract (ALL must hold, else ROLL BACK to the b819fc1 ship.glb):
   CG A/B SHIP gate PASS (no rollback to b819fc1 needed), and every pre-registered
   re-pin above was executed explicitly with measured values (incl. the dist-ceiling
   raise to 2,200,000 B).
-- I430 = ST-400 (CUTTABLE other-asset realism, boss or arena): re-read cgs-dev-story +
-  blender-asset-qa FIRST (standing order); CG A/B old vs new gate; explicit re-pins only
-  if a cap is crossed; CUT (docs-only) if not clearly improved.
+- ST-400 (I430) is COMPLETE (boss chosen): boss.glb remastered to the 650-tri crystal
+  monolith (77,068 B), CG A/B SHIP gate PASS (no rollback; the earlier invisible-boss
+  reading was a test-harness artifact - a chase-cam render overwrote the harness shot -
+  NOT a real bug), re-pins executed explicitly (BUDGETS.boss 250 -> 750, file cap
+  14 -> 84 KB; assetPerf totalTris 3500 -> 4000 / perFileKB 65 -> 85 / totalFilesKB
+  235 -> 320 / totalGeoKB 200 -> 280; dist ceiling 2,200,000 -> 2,260,000 B).
+- I431 = ST-401 (WebGPU feasibility writeup, DOCS-only; KEEP WebGL2): formalize the
+  scope-check-E54.md WebGPU section into design/webgpu-feasibility.md (re-read
+  cgs-reverse-document FIRST).

@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief); ship 300 -> 850 at I429 (ST-399 remaster, 818-tri fighter; design/asset-spec-ship-remaster.md)).
-const BUDGETS = { ship: 850, L: 500, M: 140, S: 140, comet: 200, boss: 250, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200, chunk: 60, sliver: 50 }; // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200)
+const BUDGETS = { ship: 850, L: 500, M: 140, S: 140, comet: 200, boss: 750, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200, chunk: 60, sliver: 50 }; // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650)
 const MAX_FILE_BYTES = 100 * 1024;
 
 function parseGlb(file) {
@@ -388,14 +388,14 @@ test('all GLBs: index accessors spec-conformant (I264b audit-misread correction 
 // in the file; bossMesh.js ignores them (in-code palette, I248 pattern).
 test('boss.glb: naming, poly budget, cross-section and height vs spec (ST-252)', () => {
   const { buf, json, binOff } = parseGlb('boss.glb');
-  assert.ok(buf.length <= 14 * 1024, 'boss.glb ' + buf.length + ' B <= 14 KB (ST-252 budget)');
+  assert.ok(buf.length <= 84 * 1024, 'boss.glb ' + buf.length + ' B <= 84 KB (ST-252 budget)');
   const s = meshStats({ buf, json, binOff });
   assert.ok(s.nodeNames.includes('VR_Boss_Hull'), 'VR_Boss_Hull node');
   assert.ok(s.nodeNames.includes('VR_Boss_Crown'), 'VR_Boss_Crown node');
   assert.ok(s.nodeNames.includes('VR_Boss_Core'), 'VR_Boss_Core node');
   // The material-present export recipe is what writes real COLOR_0 data (I263 incident).
   for (const n of ['VR_Boss_HullMat', 'VR_Boss_CrownMat', 'VR_Boss_CoreMat']) assert.ok(s.matNames.includes(n), n + ' material (export recipe)');
-  assert.ok(s.totalTris <= BUDGETS.boss, 'boss tris ' + s.totalTris + ' <= 250');
+  assert.ok(s.totalTris <= BUDGETS.boss, 'boss tris ' + s.totalTris + ' <= 750');
   // Exactly one COLOR_0 per primitive - never a COLOR_1 (the duplicate-attribute trap).
   for (const m of json.meshes || []) for (const p of m.primitives || []) {
     assert.ok(p.attributes.COLOR_0 !== undefined, m.name + ' primitive has COLOR_0');
