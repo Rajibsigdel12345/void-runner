@@ -707,6 +707,39 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
     lullBullet: 0.9,   // lull wave bullet speed (below the min band)
     lullDrop: 2.0,     // lull wave drop rate (lifts above the max band)
     logCap: 256        // per-decision log ring-buffer cap (debug/telemetry only)
-  }
+  },
+  // ST-381 (E50): transient 3D debris shatter on death (render-only, motion-gated,
+  // additive juice - src/render/debrisField.js). One SHARED shard set (assets/
+  // debris_chunk.glb + debris_sliver.glb, luma-neutral COLOR_0) tinted per class
+  // with the existing burst palette color CONFIG.fx.palette[class][1] - no new hues.
+  // Scripted motion (no physics engine): impulse +/- speedJitter (y x yBias =
+  // outward spray), exponential damping, random-axis tumble, pop 0.4 -> 1.0,
+  // fade = scale -> 0 over the final fadeFrac + tint dim to tintDim. 0 live at
+  // rest -> meshes visible=false -> +0 steady-state draw calls (playframe pins).
+  debris: {
+    pool: 24,          // shared live-shard cap (boss 14 + warden 10 = 24 worst case)
+    height: 0.35,      // spawn plane offset above the arena (the particle burst rides 0.4)
+    damping: 0.90,     // velocity retention per 1/60 s (exponential in dt)
+    spinMin: 2,        // tumble rad/s (random axis per shard)
+    spinMax: 8,
+    yBias: 0.5,        // impulse y-scale (shards spray outward, not straight up)
+    speedJitter: 0.25, // +/-25% per-shard speed
+    popTime: 0.15,     // s: pop-in 0.4 -> 1.0 (easeOut)
+    fadeFrac: 0.4,     // final 40% of life: scale -> 0
+    tintDim: 0.15,     // tint dim factor at end of life (full-life linear)
+    lowTierScale: 0.5, // FX Low: ceil(count * lowTierScale) shards (FX Off: 0 - fxCount gate)
+    perEvent: {        // class -> {count, speed, life, scaleMin, scaleMax} (per-class tint = palette[class][1])
+      rockS: { count: 4, speed: 5, life: 0.45, scaleMin: 0.35, scaleMax: 0.60 },
+      rockM: { count: 5, speed: 6, life: 0.50, scaleMin: 0.50, scaleMax: 0.80 },
+      rockL: { count: 6, speed: 6, life: 0.55, scaleMin: 0.70, scaleMax: 1.10 },
+      golden: { count: 6, speed: 5, life: 0.45, scaleMin: 0.35, scaleMax: 0.60 }, // rockS +2
+      drone: { count: 5, speed: 6.5, life: 0.45, scaleMin: 0.40, scaleMax: 0.70 },
+      mine: { count: 5, speed: 7, life: 0.50, scaleMin: 0.40, scaleMax: 0.65 },
+      stinger: { count: 6, speed: 8, life: 0.55, scaleMin: 0.45, scaleMax: 0.75 },
+      flyer: { count: 6, speed: 8.5, life: 0.60, scaleMin: 0.45, scaleMax: 0.75 },
+      warden: { count: 10, speed: 9, life: 0.70, scaleMin: 0.80, scaleMax: 1.20 },
+      boss: { count: 14, speed: 10, life: 0.80, scaleMin: 1.20, scaleMax: 1.80 }
+    }
+  },
 };
 

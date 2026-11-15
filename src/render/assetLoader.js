@@ -1,5 +1,5 @@
 // Void Runner - asset loader (I104). Fire-and-forget async load of the
-// nineteen Blender-pass GLBs + the one floor-surface PNG (ST-327) in assets/
+// twenty-one Blender-pass GLBs + the one floor-surface PNG (ST-327) in assets/
 // with procedural fallback: renderers start procedural and each asset swaps
 // in (via onAsset) as it resolves. A failed load warns and keeps the
 // procedural stand-in - no boot gate.
@@ -27,6 +27,8 @@ const ASSETS = {
   arenaRing: 'assets/arena_ring.glb', // I212: arena boundary ring
   stinger: 'assets/stinger.glb', // ST-230: charger dart (body + emissive core)
   flyer: 'assets/flyer.glb', // ST-234: evasive saucer (hull + emissive dome)
+  debrisChunk: 'assets/debris_chunk.glb', // ST-381 (I411): death-shatter shard (angular chunk, 48 tris)
+  debrisSliver: 'assets/debris_sliver.glb', // ST-381 (I411): death-shatter shard (thin plate, 48 tris)
 };
 
 // ST-327 (I358): the one PNG texture asset (Blender floor surface, 8,586 B,

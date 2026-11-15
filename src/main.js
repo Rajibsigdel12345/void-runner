@@ -24,6 +24,7 @@ import { createShieldRing } from './render/shieldRing.js';
 import { createVortexFx } from './render/vortexFx.js'; // ST-059
 import { createParticles } from './render/particles.js';
 import { createShockwaves } from './render/shockwave.js'; // ST-238 (I245): pooled additive shockwave ring
+import { createDebrisField } from './render/debrisField.js'; // ST-381 (I411): transient 3D death-shatter pool
 import { createShake, createPunch, createFovKick } from './core/fx.js'; // ST-081/ST-082
 import { createJuiceTally } from './core/juiceTally.js'; // ST-183: per-run juice-channel tally (feel telemetry)
 import { killPunchEnergy, killPunchDir } from './core/killPunch.js'; // ST-221 (I224): class-scaled kill punch (T4)
@@ -164,6 +165,8 @@ assetLoader.onAsset((name, entry) => {
   else if (name === 'warden') wardenMesh.useGLB(entry.object); // I220: armored sentinel (hull + armor plate)
 else if (name === 'stinger') stingerRenders.useGLB(entry.object); // ST-230: Blender stinger (pre-wired hook)
 else if (name === 'flyer') flyerRenders.useGLB(entry.object); // ST-234: Blender flyer (pre-wired hook)
+   else if (name === 'debrisChunk') debris.setGeometry('chunk', entry.object); // ST-381 (I411): GLB over the procedural fallback
+   else if (name === 'debrisSliver') debris.setGeometry('sliver', entry.object);
   else if (name === 'arenaRing') arenaRing.useGLB(entry.object); // I212
   else if (name === 'floorSurface') { // ST-327 (I358): Blender floor texture over the procedural canvas (unlit MeshBasic, toneMapped false, tier-independent)
     if (floorDisc) {
@@ -490,6 +493,33 @@ const screens = createScreens(document.body, {
 });
 const particles = createParticles(scene);
 const shockwaves = createShockwaves(scene, CONFIG.fx.shockwave); // ST-238 (I245): one shared geometry + fixed mesh pool
+const debris = createDebrisField(scene, CONFIG.debris); // ST-381 (I411): transient shatter pool (0 live at rest = +0 draw calls)
+// ST-381 (I411): per-class shatter dispatch - the 3D cousin of the particle burst (same class
+// tint, same death point). Tint = the existing burst palette color, no new hues. FX Low halves
+// the count (ceil); FX Off is gated by fxCount > 0 at the call site; reduced motion by !motionOff.
+function debrisTint(cls) {
+  const p = CONFIG.fx.palette;
+  if (cls === 'golden') return p.golden[1];
+  if (cls === 'drone') return p.drone[1];
+  if (cls === 'mine') return p.mine[1];
+  if (cls === 'stinger') return p.stinger[1];
+  if (cls === 'flyer') return p.flyer[1];
+  if (cls === 'warden') return p.boss[1]; // warden reads on the boss palette (mirrors its bursts)
+  if (cls === 'boss') return p.bossKill[1];
+  return p.rock[1]; // rockS/rockM/rockL
+}
+function shatter(x, y, cls) {
+  const ev = CONFIG.debris.perEvent[cls];
+  if (!ev) return;
+  const count = liveSettings.fx === 'low' ? Math.ceil(ev.count * CONFIG.debris.lowTierScale) : ev.count;
+  debris.spawnShatter(x, y, { count, speed: ev.speed, life: ev.life, scaleMin: ev.scaleMin, scaleMax: ev.scaleMax, tint: debrisTint(cls) });
+}
+function shatterKill(d) {
+  // Rock-family kills only - the other classes ride their own events below; the boss = bossDeath.
+  if (d.golden) { shatter(d.pos.x, d.pos.y, 'golden'); return; }
+  const cls = d.size === 'L' ? 'rockL' : d.size === 'M' ? 'rockM' : d.size === 'S' ? 'rockS' : null;
+  if (cls) shatter(d.pos.x, d.pos.y, cls);
+}
 const engineTrail = createEngineTrail(CONFIG.fx.engineTrail); // I213: throttled trail emission (pure core, unit-tested)
 fxPreviewFn = (tier) => { // ST-067: show the new tier immediately (arena center, behind the panel)
   const n = tier === 'high' ? CONFIG.fx.particleHigh : tier === 'low' ? CONFIG.fx.particleLow : CONFIG.fx.particleOff; // ST-224: off preview = no burst
@@ -628,7 +658,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, (replayView && world.game.in(STATE.REPLAY)) ? replayIntent() : intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shockwaves, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, shipFlameGlow: shipMesh.flameGlow, arenaFloor: grid, // ST-257 (I269)
+window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shockwaves, debris, debrisLive: () => debris.live, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, shipFlameGlow: shipMesh.flameGlow, arenaFloor: grid, // ST-257 (I269)
   floorDisc, // ST-277 (I294)
   applySettings, liveSettings: () => liveSettings,
   locale: () => getLocale(), setLocale, // ST-375: locale probe + drive (boot applied in applySettings; live via the settings panel)
@@ -845,6 +875,15 @@ else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, 
         juiceTally.record('bomb', { shake: 1, flash: 1, hitStop: 1, punch: 1, fovKick: 1 }); // ST-183
       } else if (e.type === 'vortexTelegraph') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 0.4), palette: CONFIG.fx.palette.boss, speed: 2, life: 0.8 }); // ST-059 telegraph wisp
     }
+    if (!motionOff && fxCount > 0) { // ST-381 (I411): 3D debris shatter - the 3D cousin of the bursts above (same class tint + death point); 0 live at rest = +0 draw calls
+      if (e.type === 'kill') shatterKill(e.data);
+      else if (e.type === 'droneExplode') shatter(e.data.pos.x, e.data.pos.y, 'drone');
+      else if (e.type === 'mineExplode') shatter(e.data.pos.x, e.data.pos.y, 'mine');
+      else if (e.type === 'stingerDeath') shatter(e.data.pos.x, e.data.pos.y, 'stinger');
+      else if (e.type === 'flyerDeath') shatter(e.data.pos.x, e.data.pos.y, 'flyer');
+      else if (e.type === 'wardenDeath') shatter(e.data.pos.x, e.data.pos.y, 'warden');
+      else if (e.type === 'bossDeath') shatter(e.data.pos.x, e.data.pos.y, 'boss');
+    }
     if (e.type === 'vortexTelegraph') { vortexFx.onTelegraph(e.data.pos); } // ST-059 (state always advances; particles above are motion-gated)
     else if (e.type === 'vortexStart') { vortexFx.onStart(e.data.pos); }
     else if (e.type === 'vortexEnd') { vortexFx.onEnd(); }
@@ -975,6 +1014,7 @@ function syncVisuals(dt) {
   if (st === STATE.PLAYING) vortexFx.update(dt); // ST-059 (frozen while paused)
   particles.sync(dt);
   shockwaves.sync(dt); // ST-238 (I245)
+  debris.update(dt); // ST-381 (I411): shatter pool (early-out at 0 live)
   banner.sync(world.waves, dt, motionOff, world.game.state); // ST-028; I321: ST-299 - state passed so the banner force-hides on GAME_OVER
 
   const ship = world.ship;
