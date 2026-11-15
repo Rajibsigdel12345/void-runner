@@ -654,4 +654,4 @@ recorded in production/gates.md.
 - Deferrals: per-hit impact SFX / E49 i18n tail + touch / flyer decay constant unification (flyer.js:74) / AGENTS.md five-GLBs doc-drift note.
 - production/scope-check-E53.md = source of truth.
 - Gate G53.0 (at ST-396): R1 p1 EXACT causal / R2 rockab EXACT 2.2/1.3/0.7 fresh / R3 playframe EXACT + +0 draw calls + particle-sprite A/B view / R4 PWA 11/11 fresh / R5 971+N/N + build 0 + dist headroom >= 102,400 B + vendor sha256-16 76DEA8151BC9352A + hygiene.
-- Status: OPEN (ST-393 opened at I423; ST-394..396 queued).
+- Status: OPEN (ST-393 done at I423; ST-394 done at I424 [+0 draw calls, +557 B, 972/972]; ST-395..396 queued).

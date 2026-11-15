@@ -494,7 +494,7 @@ const screens = createScreens(document.body, {
     watchRun: () => { const saved = storage.getReplays(); if (saved.length > 0) startReplayView(saved[0].data); }, // ST-191: watch the just-saved run (always index 0 - newest first)
   },
 });
-const particles = createParticles(scene);
+const particles = createParticles(scene, CONFIG.fx.particleSprite);
 const shockwaves = createShockwaves(scene, CONFIG.fx.shockwave); // ST-238 (I245): one shared geometry + fixed mesh pool
 const debris = createDebrisField(scene, CONFIG.debris); // ST-381 (I411): transient shatter pool (0 live at rest = +0 draw calls)
 // ST-381 (I411): per-class shatter dispatch - the 3D cousin of the particle burst (same class

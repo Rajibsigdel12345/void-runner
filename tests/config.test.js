@@ -71,6 +71,14 @@ test('config: fx.bloom values are sane (I35)', () => {
   assert.ok(Number.isFinite(b.radius) && b.radius > 0, 'radius positive finite');
   assert.ok(b.threshold >= 0 && b.threshold <= 1, 'threshold in [0,1]');
 });
+
+test('config: fx.particleSprite values are sane (ST-394 / E53)', () => {
+  const s = CONFIG.fx.particleSprite;
+  assert.ok(s, 'CONFIG.fx.particleSprite present');
+  assert.equal(typeof s.enable, 'boolean', 'enable is a boolean');
+  assert.ok(Number.isFinite(s.size) && s.size > 0, 'size positive finite');
+  assert.ok(s.size <= 2, 'size within a sane soft-point range (not a billboard)');
+});
 import { createRecorder, decodeReplay } from '../src/core/replay.js';
 
 test('config: replay section is decoder-compatible (I191/ST-192)', () => {

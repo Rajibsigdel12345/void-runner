@@ -5,7 +5,27 @@ import * as THREE from 'three';
 
 const POOL = 512;
 
-export function createParticles(scene) {
+// ST-394 (E53): procedural soft radial sprite (white core -> transparent edge), 64x64.
+// Shared by the whole particle pool (kill/hit bursts + the engine trail, both drive burst());
+// set as the PointsMaterial map so the no-map default (a flat hard-edged SQUARE point, the I423
+// ground-truth gap) becomes a soft glowing disc. +0 draw calls: the same single THREE.Points
+// object, only a texture is added.
+function makeSoftSprite() {
+  const S = 64;
+  const cv = document.createElement('canvas');
+  cv.width = S; cv.height = S;
+  const g = cv.getContext('2d');
+  const grad = g.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+  grad.addColorStop(0.0, 'rgba(255,255,255,1)');
+  grad.addColorStop(0.25, 'rgba(255,255,255,0.85)');
+  grad.addColorStop(0.5, 'rgba(255,255,255,0.32)');
+  grad.addColorStop(1.0, 'rgba(255,255,255,0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, S, S);
+  return new THREE.CanvasTexture(cv);
+}
+
+export function createParticles(scene, spriteCfg = {}) {
   const positions = new Float32Array(POOL * 3);
   const colors = new Float32Array(POOL * 3);
   const vel = new Float32Array(POOL * 3);
@@ -18,12 +38,18 @@ const rampFlag = new Uint8Array(POOL); // ST-291: 1 = age-ramp pal[0] -> pal[las
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  // ST-394 (E53): soft radial sprite on the shared pool. Default (no cfg / enable !== true) = the
+  // legacy flat square point at size 0.32 (the I423 gap). enable + size come from
+  // CONFIG.fx.particleSprite (main.js passes it in).
+  const spriteOn = spriteCfg && spriteCfg.enable === true;
+  const spriteSize = spriteCfg && typeof spriteCfg.size === 'number' && spriteCfg.size > 0 ? spriteCfg.size : 0.32;
   const mat = new THREE.PointsMaterial({
-    size: 0.32,
+    size: spriteSize,
     vertexColors: true,
     transparent: true,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
+    map: spriteOn ? makeSoftSprite() : null,
   });
   const points = new THREE.Points(geo, mat);
   points.frustumCulled = false;

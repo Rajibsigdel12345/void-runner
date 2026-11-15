@@ -5594,3 +5594,9 @@ zero tests, zero assets, zero dist delta.
 Test result: 971/971 green (fresh) + build 0 + dist byte-identical (138 files / 1,985,979 B)
 + vendor sha256-16 76DEA8151BC9352A. Hygiene at iteration end: 5173/4173/5199 free, chrome 0,
 no orphan serve.mjs.
+## I424 - ST-394 soft particle sprite (E53)
+- Story: ST-394 | Goal: close the prime glow gap - flat square particle points -> one shared soft radial sprite on the existing PointsMaterial (+0 draw calls).
+- Changed: src/render/particles.js (makeSoftSprite() 64x64 CanvasTexture + createParticles(scene, spriteCfg): map + size), src/core/config.js (fx.particleSprite {enable: true, size: 0.52} commented sub-block), src/main.js:497 (pass CONFIG.fx.particleSprite), tests/config.test.js (+1 test)
+- Verification: 972/972 green (971 + 1 EXPLICIT); build 0 (dist 138/1,986,536 B, +557 B, headroom 110,616 B >= floor 102,400 B); A/B headless SwiftShader same seed/params one build: soft round glowing dots vs flat square (particles_soft.png + particles_square_i424.png VIEWED); crosser vs frozen 0.72 bloom threshold both directions: samePeak 255 + noNewCrossers (soft o221 2161<=7014, o233 1965<=7014); draw calls +0 proven by focused probe (info.autoReset=false => CUMULATIVE counter; the 42 vs 50 A/B = one cumulative frame apart; 6 interleaved renders: per-frame delta EXACTLY +8 calls/+180 tris/+512 pts both states, visible draw objects constant 44); .evidence/I424/ (ab_sprite.mjs, probe_drawcalls.mjs, 3 pngs)
+- Result: DONE
+- Risk/follow-up: sprite applies to the whole shared particle pool (kill/hit bursts AND engine trail) - one material, no sim change. Size 0.52 A/B-tuned, not a frozen pin.

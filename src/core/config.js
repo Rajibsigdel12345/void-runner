@@ -560,6 +560,10 @@ export const CONFIG = {
     particleHigh: 48,         // burst size at FX quality High
     particleLow: 16,          // burst size at FX quality Low
     particleOff: 0,           // burst size at FX quality Off (ST-224: zero FX-tier-gated particles)
+    particleSprite: {         // ST-394 (E53): soft radial sprite for the shared particle pool (was flat square points)
+      enable: true,           // false = the legacy flat square point (the I423 ground-truth gap)
+      size: 0.52,             // point size (world u, size-attenuated) - UP from 0.32 (the soft core is smaller than the full point)
+    },
     engineTrail: {           // I213: engine trail emission (ST-213; core/engineTrail.js)
       rate: 14,               // puffs/s at full thrust
       minThrust: 0.12,        // thrust fraction below which the trail is silent
