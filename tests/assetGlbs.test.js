@@ -1,4 +1,4 @@
-﻿﻿﻿// I207: vendored GLB asset audit (ST-207, cgs-asset-audit). Pure node - no DOM,
+﻿﻿﻿﻿﻿﻿﻿// I207: vendored GLB asset audit (ST-207, cgs-asset-audit). Pure node - no DOM,
 // no three. Validates the Blender-authored GLBs in assets/ (I220: sixteen total; I410: 21 incl. debris shards; I420: 24 incl. B-variant rocks) against the
 // container format, the VR_ naming convention, the poly budgets from
 // design/asset-spec.md, and the logical radii in CONFIG (visual/hitbox parity).
@@ -14,8 +14,8 @@ const GLB_MAGIC = 0x46546c67; // 'glTF'
 const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
-// Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief)).
-const BUDGETS = { ship: 300, L: 500, M: 140, S: 140, comet: 200, boss: 250, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200, chunk: 60, sliver: 50 }; // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake)
+// Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief); ship 300 -> 850 at I429 (ST-399 remaster, 818-tri fighter; design/asset-spec-ship-remaster.md)).
+const BUDGETS = { ship: 850, L: 500, M: 140, S: 140, comet: 200, boss: 250, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200, chunk: 60, sliver: 50 }; // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200)
 const MAX_FILE_BYTES = 100 * 1024;
 
 function parseGlb(file) {
@@ -101,6 +101,10 @@ test('ship.glb: container, naming, poly budget, silhouette dimensions', () => {
   // in-code body/wing tint (CONFIG.ship.palette). Exactly these two prims carry COLOR_0
   // (Cockpit/Engine/Fin/Nozzle stay clean - Fin is wingMat-routed and gets the white-identity
   // attr in code, shipMesh.js ensureWhiteColors).
+  // I429 (ST-399 ship remaster): re-baked on the new 818-tri fighter geometry with the
+  // domain formula v = clamp(1.0 + k*dot(n, L), 0.30, 1.55), fixed light L = (-0.45, -0.55,
+  // 0.70).normalized() (supersedes the I292 nY-only bake), k = 0.55 hull / 0.80 wings; still
+  // exactly these 2 prims (Cockpit/Engine/Fin/Nozzle stay clean).
   const shipFacet = {};
   let colorPrims = 0;
   for (const m of json.meshes || []) for (const p of m.primitives || []) {
@@ -131,7 +135,7 @@ test('ship.glb: container, naming, poly budget, silhouette dimensions', () => {
   const hullF = shipFacet['VR_Ship_Hull.001'] || shipFacet['VR_Ship_Hull'];
   const wingF = shipFacet['VR_Ship_Wings.001'] || shipFacet['VR_Ship_Wings'];
   assert.ok(hullF && wingF, 'hull + wings facet data (' + Object.keys(shipFacet).join(',') + ')');
-  const SHIP_FACET = { hull: { p10: 0.88, p50: 1.0599, p90: 1.55 }, wings: { p10: 0.7702, p50: 1.0, p90: 1.1902 } };
+  const SHIP_FACET = { hull: { p10: 0.5477, p50: 0.9802, p90: 1.4414 }, wings: { p10: 0.4329, p50: 0.9696, p90: 1.55 } }; // I429 (ST-399 ship remaster) EXPLICIT re-pin: old I292 hull {0.88/1.0599/1.55} + wings {0.7702/1.0/1.1902} -> measured on the 818-tri fighter re-bake
   assert.ok(hullF.p90 - hullF.p10 >= 0.35, 'hull facet luma spread ' + (hullF.p90 - hullF.p10).toFixed(3) + ' >= 0.35 (I292 value bake; pre-bake was a flat in-code tint)');
   assert.ok(wingF.p90 - wingF.p10 >= 0.35, 'wings facet luma spread ' + (wingF.p90 - wingF.p10).toFixed(3) + ' >= 0.35 (I292 value bake; pre-bake was a flat in-code tint)');
   for (const [k, E] of [['hull', hullF], ['wings', wingF]]) {

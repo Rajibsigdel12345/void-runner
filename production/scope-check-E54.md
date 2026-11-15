@@ -1,4 +1,4 @@
-﻿# Scope Check - E54 Ship Remaster & Asset Realism (cgs-scope-check, I427)
+﻿﻿# Scope Check - E54 Ship Remaster & Asset Realism (cgs-scope-check, I427)
 
 ## Summary
 Bounded art epic answering the user's I427 directive: remaster the player ship from the
@@ -215,3 +215,13 @@ No sim/palette/feel/identity risk; renderer untouched (names/colors/extent prese
 ## Next owner or decision
 - I428 = ST-398 (cgs-asset-spec: ship-remaster design spec). Re-read cgs-asset-spec FIRST
   (standing order).
+
+## Executed at I429 (ST-399 ship remaster) - re-pin actuals + verdicts
+- BUDGETS.ship: 300 -> 850 (actual 818 tris; tighter than pre-registered ~1200).
+- assetPerf totalTris: 3000 -> 3500 (actual 3442 = 2736 pre-remaster [I420 2784 + I425 emblem re-bake -48] - 112 old ship + 818 new; pre-registered ~4000).
+- SHIP_FACET: hull {0.88/1.0599/1.55} -> {0.5477/0.9802/1.4414}; wings {0.7702/1.0/1.1902} -> {0.4329/0.9696/1.55} (spread 0.8937/1.1171, both >= 0.35).
+- assetPerf perFileKB 60 -> 65 (max 62.41 = ship) / totalFilesKB 205 -> 235 (232.26) / totalGeoKB 165 -> 200 (196.08); perFileMats 3 + exactly-24-GLBs unchanged.
+- dist ceiling: 2,097,152 B -> 2,200,000 B (new dist 138 files / 2,039,982 B; headroom 160,018 B >= 102,400 B floor; the old ceiling would leave 57,170 B < floor -> the pre-registered raise was REQUIRED). Doc-only (no test asserts either value).
+- Playframe L 21/366 + P 10/180 + B 50/1222: NOT re-measured this iter (deferred to ST-402/I432 per the pre-registration; B will move ~1222 - 112 + 818 ballpark); causal p1 (seed 9876) + rockab (2.2/1.3/0.7) + PWA 11/11 render-invariant -> untouched.
+- CG A/B SHIP gate: PASS, no rollback (clay old vs new + in-game tint x3 + fresh smoke, all VIEWED; the tint_2 "black fin" = tail fin in shadow = lighting artifact, documented, out of scope).
+- Quality bar: 972/972 + build 0 + vendor sha256-16 76DEA8151BC9352A unchanged + hygiene.

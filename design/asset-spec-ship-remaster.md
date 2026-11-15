@@ -1,4 +1,4 @@
-# Void Runner - Ship Remaster Asset Spec (I428 / cgs-asset-spec)
+# Void Runner - Ship Remaster Asset Spec (I428 / cgs-asset-spec) - ST-399 COMPLETE at I429
 
 ## Summary
 This spec is the ST-399 (I429) contract for the Blender remaster of assets/ship.glb:
@@ -113,16 +113,20 @@ Poly budget (per node; sweet spot ~1000 total; total within the re-pinned BUDGET
 - Total ~904 tris (inside the 800-1400 band; sweet spot ~1000).
 
 Re-pins (pre-registered in scope-check-E54.md; ALL explicit old -> new at I429, NEVER
-silent):
-- BUDGETS.ship (assetGlbs.test.js:18): 300 -> ~1200.
-- assetPerf BUDGET.totalTris (assetPerf.test.js:53): 3000 -> ~4000 (2784 - 112 + ~1000).
-- SHIP_FACET (assetGlbs.test.js:134): old hull {p10 0.88, p50 1.0599, p90 1.55} + wings
-  {p10 0.7702, p50 1.0, p90 1.1902} -> new values measured from the I429 bake.
-- assetPerf perFileKB (60) / totalFilesKB (205) / totalGeoKB (165): re-pin ONLY if the
-  new ship file pushes them past; finalize at I429 from the measured file.
-- dist ceiling (DOC-ONLY, currently 2,097,152 B; VERIFIED no test asserts it or the
-  102,400 B headroom floor): raise to ~2,200,000 B if the new ship drops headroom below
-  the 102,400 B floor. Keep unchanged if headroom stays >= 102,400 B.
+silent) - ALL EXECUTED at I429 (measured values, not estimates):
+- BUDGETS.ship (assetGlbs.test.js:18): 300 -> 850 (actual 818; tighter than the
+  pre-registered ~1200).
+- assetPerf BUDGET.totalTris: 3000 -> 3500 (actual 3442 = 2736 pre-remaster [I420 2784
+  + I425 emblem re-bake -48] - 112 old ship + 818 new; tighter than pre-registered ~4000).
+- SHIP_FACET (assetGlbs.test.js): old hull {p10 0.88, p50 1.0599, p90 1.55} + wings
+  {p10 0.7702, p50 1.0, p90 1.1902} -> hull {p10 0.5477, p50 0.9802, p90 1.4414} + wings
+  {p10 0.4329, p50 0.9696, p90 1.55} (spread 0.8937/1.1171, both >= the 0.35 floor).
+- assetPerf perFileKB 60 -> 65 (max 62.41 = ship) / totalFilesKB 205 -> 235 (232.26) /
+  totalGeoKB 165 -> 200 (196.08). perFileMats 3 + exactly-24-GLBs unchanged.
+- dist ceiling (DOC-ONLY; VERIFIED no test asserts it or the 102,400 B headroom floor):
+  RAISED 2,097,152 B -> 2,200,000 B (new dist 138 files / 2,039,982 B; headroom 160,018 B
+  >= 102,400 B floor; the old ceiling would have left 57,170 B < floor, so the raise was
+  required per the pre-registration).
 
 ## Facet value-bake plan
 - After the remaster geometry is joined + triangulated, run the per-facet grayscale bake
@@ -210,7 +214,10 @@ Contract (ALL must hold, else ROLL BACK to the b819fc1 ship.glb):
     verified across tests/, src/core/, scripts/; those are documentation-only.
 
 ## Next owner or decision
-- I429 = ST-399 (cgs-dev-story + blender-asset-qa: Blender remaster of ship.glb into a
-  detailed low-poly fighter; CG A/B SHIP gate w/ rollback to b819fc1; EXPLICIT re-pins
-  old -> new, incl. the dist-ceiling raise if headroom < 102,400 B). Re-read
-  cgs-dev-story + blender-asset-qa FIRST (standing order).
+- ST-399 (I429) is COMPLETE: ship.glb remastered to the 818-tri fighter (63,908 B),
+  CG A/B SHIP gate PASS (no rollback to b819fc1 needed), and every pre-registered
+  re-pin above was executed explicitly with measured values (incl. the dist-ceiling
+  raise to 2,200,000 B).
+- I430 = ST-400 (CUTTABLE other-asset realism, boss or arena): re-read cgs-dev-story +
+  blender-asset-qa FIRST (standing order); CG A/B old vs new gate; explicit re-pins only
+  if a cap is crossed; CUT (docs-only) if not clearly improved.

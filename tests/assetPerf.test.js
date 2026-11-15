@@ -47,10 +47,10 @@ const totalTris = parsed.reduce((a, p) => a + p.tris, 0);
 
 // I214 budgets (measured baselines in brackets; caps leave headroom for E9 art growth)
 const BUDGET = {
-  totalFilesKB: 205,   // [190.44 I420 re-measure: 24 GLBs incl. B-variant rocks; I410 was 158.9 (21 GLBs)]
-  totalGeoKB: 165,     // [153.95 I420 re-measure: 24 GLBs incl. B-variant rocks; I410 was 125.8 (21 GLBs)]
-  perFileKB: 60,       // [max 36.8 - asteroid_L, deliberately the heaviest]
-  totalTris: 3000,     // [I420: 2784 (I410 2026 + B rocks 758), cap 3000 w/ margin]
+  totalFilesKB: 235,   // [232.26 I429 re-measure: 24 GLBs, ship remaster 14.1 -> 62.4 KB; I420 was 190.44; I410 158.9]
+  totalGeoKB: 200,     // [196.08 I429 re-measure: 24 GLBs, ship corner-domain COLOR_0 growth; I420 was 153.95; I410 125.8]
+  perFileKB: 65,       // [max 62.41 - ship.glb I429 remaster; pre-I429 max was asteroid_L 36.8]
+  totalTris: 3500,     // [I429: 3442 (2736 pre-remaster = I420 2784 + I425 emblem re-bake -48; then -112 old ship + 818 new); cap 3500 w/ margin]
   perFileMats: 3,      // [max 3 - ship body/wing/cockpit]
 };
 
