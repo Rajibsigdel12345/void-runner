@@ -264,3 +264,25 @@ Fresh R1-R5 gate before closing E49 (the Localization & Language Selector epic: 
 
 ### Next owner / decision
 - I408: open the next epic (cgs-scope-check). No open epics remain after E49.
+
+## Round G50.0 (I413) - E50 Enemy Death Shatter & 3D Debris Fragments closeout
+
+Skill: cgs-regression-suite + cgs-gate-check + cgs-milestone-review / Date: 2026-11-15 / Iteration: I413 (ST-383)
+
+### Summary
+Fresh R1-R5 gate before closing E50 (the shatter/debris epic: 2 Blender shard GLBs + instanced debris pool + 9-event death dispatch, all render-only/motion-gated). Zero source change this iteration - the R1-R3 pins staying EXACT under the shipped debris code is the sim-inert proof (R-E50-4).
+
+### Results
+- R1 p1 demo: EXACT causal fresh (seed 9876: 11334/57/W2/combo 15/shots 198/acc 0.2878787878787879/36.14999999999923 s/replay 2169-2220/speed 4; afterQ MENU; console 0/0) = byte-identical to the I402/I407 pin.
+- R2 rockab: radii EXACT 2.2/1.3/0.7 (reseed 30201; all GLB incl. rockComet + debrisChunk/debrisSliver ready; console 0/0).
+- R3 playframe: EXACT fresh, 3/3 stable, with the I412 re-pin semantics - L 21/366 (menu-loop frame; legacy A pin attribution) + P 10/180 (overhead probe frame) + B 50/1222 (PLAYING fx-high, rocks 0->5, camFinite) + fresh debris at-rest at BOTH measure points (debrisLive 0, both meshes visible=false, counts [0,0] -> +0 steady-state draw calls) + console 0/0 x2.
+- R4 PWA: 11/11 fresh on :5199 (sw active root scope + claimed, online + offline boot no NaN, manifest standalone + 512 maskable + start_url/scope ".", console 0/0).
+- R5 quality bar: 953/953 + build 0 + dist 135/1,963,204 B (rebuild byte-identical; headroom 133,948 B) + vendor sha256-16 76DEA8151BC9352A + hygiene (one server at a time: 5199 then 5173, both killed CommandLine-verified; 5173/4173/5199 listeners 0, chrome 0, no orphan node). NOTE: the ST-383 spec's "947/947" is stale - the baseline moved to 953 at I410/I411; the gate asserts the current baseline.
+
+### Evidence
+- .evidence/I413/causal.mjs + causal.json + causal_run.txt (R1+R2)
+- .evidence/I413/playframe.mjs + playframe_r1/r2/r3.json + playframe_r1/r2/r3.txt (R3, 3/3 stable)
+- .evidence/I413/pwa_probe.mjs + pwa.txt (R4)
+
+### Next owner / decision
+- I414: open the next epic (cgs-scope-check + cgs-create-stories). No open epics remain after E50.
