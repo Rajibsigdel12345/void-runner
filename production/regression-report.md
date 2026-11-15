@@ -314,3 +314,31 @@ Fresh R1-R5 gate before closing E51 (the multi-hit enemy hit-flash epic: warden 
 
 ### Next owner / decision
 - I418: open the next epic (cgs-scope-check + cgs-create-stories). Carryover candidates in priority order: (a) art-improvement research + task list (user-suggested; may use Blender for new assets); (b) per-hit impact SFX audio epic (warden/boss HP hits verified silent; SFX_CUES in main.js, WebAudio synth in src/render/audio.js); (c) E49 i18n tail + touch fallback; (d) flyer decay constant unification (flyer.js hardcoded 3/s -> CONFIG.fx.enemyHitFlash.decay).
+
+## Round G52.0 (I422) - E52 Asteroid Silhouette Variety in the GLB Path closeout
+
+Skill: cgs-regression-suite + cgs-gate-check + cgs-milestone-review / Date: 2026-11-15 / Iteration: I422 (ST-392)
+
+### Summary
+Fresh R1-R5 gate before closing E52 (the asteroid silhouette variety epic: B silhouettes per size I420 - same icosphere base => same tris 490/134/134, distinct displace seed + anisotropic scale + crater insets, setGLB per-variant with the comet ternary FIRST - plus the I421 comet re-bake: elongated icy nucleus + 8-seg cone ion tail, 96t was 180t, with the pre-registered explicit re-pins xspan 1.5828 -> 2.464 and COMET_FACET -> {0.7312/0.7413/0.8075/0.7547} (maxperp 0.5481 absorbed by the 0.58+/-12% band)). Zero source change this iteration - the sim pins staying EXACT under the shipped I420/I421 asset work is the regression-locked proof. Playframe B stayed EXACT 50/1222 (the reseed-71201 live-5 set contains no comet, so the pre-registered conditional re-pin was not triggered).
+
+### Results
+- R1 p1 demo: EXACT causal fresh (seed 9876: 11334/57/W2/combo 15/shots 198/acc 0.2878787878787879/36.14999999999923 s/replay 2169-2220/speed 4; afterQ MENU; console 0/0) = byte-identical to the I402/I407/I413/I416/I417 pin.
+- R2 rockab: radii EXACT 2.2/1.3/0.7 (reseed 30201; all GLB incl. rockComet ready; console 0/0).
+- R3 playframe: EXACT fresh - L 21/366 (menu-loop frame) + P 10/180 (overhead probe frame) + B 50/1222 (PLAYING fx-high, rocks 0->5, camFinite) + debris 0 live at both measure points + console 0/0 x2 = +0 steady-state draw calls under the shipped I420/I421 assets. A/B silhouette re-confirm: CITE I420 (ALL_DIFFERENT 0.4027/0.3992/0.5464) - same tree, zero src since I420 (I421 touched only assets/asteroid_comet.glb + tests + docs; the B silhouette GLBs and the asteroidRenderer setGLB path are byte-unchanged).
+- R4 PWA: 11/11 fresh on :5199 (sw active root scope + claimed, online + offline boot no NaN, manifest standalone + 512 maskable + start_url/scope ".", console 0/0) = identical to the I413/I417 reference (probe verbatim).
+- R5 quality bar: 971/971 + build 0 + dist 138/1,985,979 B (rebuild byte-identical; headroom 111,173 B >= 102,400 B floor) + vendor sha256-16 76DEA8151BC9352A + hygiene (5173 then 5199 killed CommandLine-verified; 5173/4173/5199 listeners 0, chrome 0, no orphan node). NOTE: the ST-392 story text's "969+N/N" is stale - the baseline moved to 971 at I414+; the gate asserts the current baseline (same stale-baseline pattern as G50.0/G51.0).
+
+### Evidence
+- .evidence/I422/causal.mjs + causal.json (R1+R2; retagged from I417 - OUT/nocache only)
+- .evidence/I422/rockab_run.mjs + rockab_i422.json (R2; retagged from I391)
+- .evidence/I422/playframe.json (R3; harness from I417)
+- .evidence/I417/pwa_probe.mjs (R4; probe verbatim from I413, served on :5199 over dist)
+- .evidence/I421/playframe.json + comet_bake.png (I421 comet re-bake evidence, CITED in R3)
+
+### Verdict
+- G52.0 gate verdict: PASS - all five rounds green fresh; E52's shipped behavior (I420 B silhouettes + setGLB per-variant wire + I421 comet re-bake with the pre-registered explicit re-pins) is regression-locked at I422.
+- Milestone transition verdict: E52 CLOSED at I422 (ST-388..392, 4/4 stories shipped). Headroom arc: 133,197 B (I418) -> 106,629 B (I420) -> 111,173 B (I421) >= 102,400 B floor.
+
+### Next owner / decision
+- I423: open the next epic (cgs-scope-check + cgs-create-stories). Carryover candidates in priority order: (a) art-improvement research + task list (user-suggested; may use Blender for new assets); (b) per-hit impact SFX audio epic; (c) E49 i18n tail + touch fallback; (d) flyer decay constant unification (flyer.js hardcoded 3/s -> CONFIG.fx.enemyHitFlash.decay); (e) AGENTS.md five-GLBs doc-drift note.

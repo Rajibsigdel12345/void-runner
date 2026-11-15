@@ -5524,3 +5524,32 @@ Test result: 971/971 (no count change; 2 values re-pinned) + build 0 + dist
 76DEA8151BC9352A unchanged) + hygiene (0 listeners 5173/4173/5199, chrome 0,
 no orphan serve.mjs).
 Next: I422 (ST-392) regression R1-R5 + G52.0 gate + close E52.
+
+## I422 - ST-392: E52 regression + G52.0 gate + close (cgs-regression-suite + cgs-gate-check + cgs-milestone-review; DOCS-only, zero src)
+Goal: fresh R1-R5 regression gate before closing E52 (asteroid silhouette variety in the GLB
+path: B silhouettes I420 + comet differentiation I421), per production/scope-check-E52.md.
+R1 (causal, .evidence/I422/causal.mjs, retagged from I417 - OUT/nocache only): p1 demo
+seed 9876 EXACT - 11334/57/W2/combo 15/shots 198/acc 0.2878787878787879/
+36.14999999999923 s/replay 2169-2220/speed 4/afterQ MENU; console 0/0 both pages.
+R2 (rockab, .evidence/I422/rockab_run.mjs, retagged from I391): radii EXACT 2.2/1.3/0.7
+(reseed 30201; all GLB incl. rockComet ready; console 0/0).
+R3 (playframe, .evidence/I422/playframe.json): EXACT fresh - L 21/366 + P 10/180 +
+B 50/1222 (PLAYING fx-high, rocks 0->5, camFinite); debris 0 live at both measure points
+=> +0 steady-state draw calls; console 0/0 x2. B stayed EXACT under the I421 comet
+re-bake (reseed-71201 live-5 set contains no comet; the pre-registered conditional re-pin
+was not triggered). A/B silhouette re-confirm: CITE I420 (ALL_DIFFERENT 0.4027/0.3992/
+0.5464) - same tree, zero src since I420 (I421 touched only the comet GLB + tests + docs).
+R4 (PWA, .evidence/I417/pwa_probe.mjs verbatim on dist): 11/11 fresh on :5199.
+R5: 971/971 + build 0 + dist 138/1,985,979 B (headroom 111,173 B >= 102,400 B floor;
+rebuild byte-identical) + vendor sha256-16 76DEA8151BC9352A + hygiene (5173 then 5199
+servers killed CommandLine-verified; 5173/4173/5199 listeners 0, chrome 0, no orphan
+serve.mjs).
+Verdict: G52.0 gate PASS - all five rounds green fresh (regression-report.md Round G52.0).
+Milestone transition: E52 CLOSED 4/4 at I422 (ST-388..392). scope-check-E52.md closed
+with per-story verification evidence (I419..I422).
+Changed: production/regression-report.md (Round G52.0), production/scope-check-E52.md
+(close evidence), 6 bookkeeping docs.
+Next: I423 - open the next epic (cgs-scope-check + cgs-create-stories). Carryover priority
+per G51.0: (a) art-improvement research + task list (user-suggested) / (b) per-hit impact
+SFX / (c) E49 i18n tail + touch / (d) flyer decay unification / (e) AGENTS.md five-GLBs
+doc-drift note.
