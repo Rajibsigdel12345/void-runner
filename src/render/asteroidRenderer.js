@@ -33,7 +33,9 @@ export function createAsteroidRenderer(scene) {
     ];
   }
   // I104: GLB geometries (Blender pass) swap in as they load; until then the
-  // procedural 3-variant bakes are used.
+  // procedural 3-variant bakes are used. I420 (ST-390 E52): per-VARIANT arrays
+  // (index = rock variant % variantCount) so the GLB path keeps A/B silhouette
+  // variety instead of collapsing to one shape per size.
   const glbGeo = {};
   let glbShellGeo = false; // I210: shield GLB loaded flag
   let glbComet = false; // I344 (ST-316): comet variant GLB loaded flag
@@ -104,7 +106,7 @@ export function createAsteroidRenderer(scene) {
     for (const r of field.rocks) {
       if (r.dead || i >= max) continue;
       const m = pool[i++];
-      m.geometry = (r.size === 'S' && r.variant === 2 && glbComet) ? glbComet : (glbGeo[r.size] || geos[r.size][r.variant]); // I104: GLB when loaded; I344 (ST-316): comet variant on S slot 2 (render-only, +0 draw path)
+      m.geometry = (r.size === 'S' && r.variant === 2 && glbComet) ? glbComet : ((glbGeo[r.size] && glbGeo[r.size][r.variant % glbGeo[r.size].length]) || geos[r.size][r.variant]); // I104 GLB when loaded; I344 (ST-316) comet on S slot 2; I420 (ST-390 E52) per-variant A/B by r.variant%len (comet ternary first; || fallback for load-order holes)
       m.material = r.belt ? matBelt : (r.golden ? matGold : mat); // ST-052/ST-139
       const shell = m.children[0]; // ST-127: shield shell tracks armor (dim = 1 hit away)
       if (r.shielded) {
@@ -124,11 +126,14 @@ export function createAsteroidRenderer(scene) {
     for (; i < max; i++) pool[i].visible = false;
   }
 
-  // I104: setGLB(size, obj) - extract the first mesh geometry from a loaded
-  // GLB and use it for every rock of that size (1 geometry per size per
-  // design/asset-spec.md; per-rock rotation gives the visual variety).
-  function setGLB(size, obj) {
-    if (!obj || !size || glbGeo[size]) return;
+  // I104: setGLB(size, obj, variant) - extract the first mesh geometry from a
+  // loaded GLB and store it PER-VARIANT (variant 0 = primary A, variant 1 =
+  // silhouette-variant B, I420 ST-390 E52). sync() picks by r.variant%len.
+  function setGLB(size, obj, variant) {
+    if (!obj || !size) return;
+    const v = (typeof variant === 'number' && variant >= 0) ? variant : 0;
+    if (!glbGeo[size]) glbGeo[size] = [];
+    if (glbGeo[size][v]) return;
     let g = null;
     obj.traverse((n) => { if (n.isMesh && !g) g = n.geometry; });
     if (g) {
@@ -136,7 +141,7 @@ export function createAsteroidRenderer(scene) {
         const col = new Float32Array(g.attributes.position.count * 3).fill(1);
         g.setAttribute("color", new THREE.BufferAttribute(col, 3));
       }
-      glbGeo[size] = g;
+      glbGeo[size][v] = g;
     }
   }
 

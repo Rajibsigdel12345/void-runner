@@ -1,5 +1,5 @@
 ﻿﻿﻿// I207: vendored GLB asset audit (ST-207, cgs-asset-audit). Pure node - no DOM,
-// no three. Validates the Blender-authored GLBs in assets/ (I220: sixteen total; I410: 21 incl. debris shards) against the
+// no three. Validates the Blender-authored GLBs in assets/ (I220: sixteen total; I410: 21 incl. debris shards; I420: 24 incl. B-variant rocks) against the
 // container format, the VR_ naming convention, the poly budgets from
 // design/asset-spec.md, and the logical radii in CONFIG (visual/hitbox parity).
 import test from 'node:test';
@@ -181,6 +181,15 @@ const ROCK_FACET = {
   M: { p10: 0.2610, p50: 0.6347, p90: 0.8769, mean: 0.6098 },
   S: { p10: 0.4387, p50: 0.7144, p90: 1.0090, mean: 0.7092 },
 }; // I370 (ST-337 E41 relief re-bake v8): L 18592B/490t 5cr+4bump / M 6336B/134t 4cr+3bump / S 7344B/134t 4cr+3bump - deeper craters (depth x1.4-1.6 vs I343), rim sigma 0.35-0.55, NEW convex bumps, relief-tracking COLOR_0 (relief z-score |v|/r-1 blended 0.7/0.3 with fbm into the tanh value-ladder; wh=0.7 k=2.4 gain=1.75; centers L 0.46 M 0.62 S 0.8137); deltas vs I343 pins: L p10 -0.0773 p50 -0.0236 p90 -0.0171 mean -0.0099 spread +0.0602; M p10 -0.0377 p50 +0.0893 p90 +0.0273 mean +0.0585 spread +0.0650; S p10 +0.0471 p50 +0.0116 p90 +0.0611 mean +0.0285 spread +0.0139; same warm-order R>=G>=B + per-vertex hue-jitter + per-triangle mean-luma convention
+// I420 (ST-390 E52): B-variant silhouette GLBs (asteroid_{L,M,S}_B.glb) - same topology as A
+// (490/134/134 tris), distinct displacement lobes + anisotropic scale, relief-tracking
+// COLOR_0 with a B-specific mottle seed. Same value ladder (L<M<S), same warm order
+// R>=G>=B, same [0.10,1.20] band + >= 0.50 facet-spread floor.
+const ROCK_FACET_B = {
+  L: { p10: 0.1598, p50: 0.4465, p90: 0.7913, mean: 0.4622 },
+  M: { p10: 0.2842, p50: 0.6402, p90: 0.9153, mean: 0.6297 },
+  S: { p10: 0.3791, p50: 0.7133, p90: 0.9625, mean: 0.6849 },
+}; // I420 (ST-390): B bake pins, measured file-level through facetLumas below
 function facetLumas({ buf, json, binOff }) {
   const p = json.meshes[0].primitives[0];
   const cAcc = json.accessors[p.attributes.COLOR_0];
@@ -256,6 +265,77 @@ test('asteroid L/M/S: COLOR_0 mottling band + warm order + facet luma spread (I2
   }
 });
 
+// I420 (ST-390 E52): B-variant silhouette GLBs - distinct low-poly silhouette per size,
+// SAME tri count as primary A (zero re-pin), same radii (visual/hitbox parity), VR_ naming.
+test('asteroid L/M/S _B: naming, poly budgets, radii match CONFIG (+/-5%) (I420)', () => {
+  const A_TRIS = { L: 490, M: 134, S: 134 };
+  for (const size of ['L', 'M', 'S']) {
+    const { buf, json, binOff } = parseGlb('asteroid_' + size + '_B.glb');
+    assert.ok(buf.length < MAX_FILE_BYTES, 'asteroid_' + size + '_B.glb under 100 KB');
+    const s = meshStats({ buf, json, binOff });
+    assert.ok(s.nodeNames.includes('VR_Rock_' + size + '_B'), 'VR_Rock_' + size + '_B node');
+    assert.ok(s.matNames.includes('VR_Rock'), 'VR_Rock material');
+    for (const p of s.prims) assert.ok(p.hasColor, size + '_B primitive has COLOR_0 vertex colors (I420)');
+    assert.ok(s.totalTris <= BUDGETS[size], size + '_B tris ' + s.totalTris + ' <= ' + BUDGETS[size]);
+    assert.equal(s.totalTris, A_TRIS[size], size + '_B tris ' + s.totalTris + ' == A tris ' + A_TRIS[size] + ' (same topology -> zero re-pin)');
+    const logical = CONFIG.asteroid.sizes[size].radius;
+    const maxR = Math.max(...s.prims.map((p) => p.maxRadius));
+    assert.ok(Math.abs(maxR - logical) / logical <= 0.05,
+      size + '_B max vertex radius ' + maxR.toFixed(4) + ' within 5% of logical ' + logical);
+  }
+});
+
+test('asteroid L/M/S _B: COLOR_0 mottling band + warm order + facet luma spread (I420 E52)', () => {
+  for (const size of ['L', 'M', 'S']) {
+    const { buf, json, binOff } = parseGlb('asteroid_' + size + '_B.glb');
+    for (const m of json.meshes || []) for (const p of m.primitives || []) {
+      assert.ok(p.attributes.COLOR_0 !== undefined, size + '_B primitive has COLOR_0');
+      const acc = json.accessors[p.attributes.COLOR_0];
+      const bv = json.bufferViews[acc.bufferView];
+      const stride = parseInt(acc.type.replace('VEC', ''), 10);
+      const base = binOff + (bv.byteOffset || 0) + (acc.byteOffset || 0);
+      let checked = 0;
+      for (let i = 0; i < acc.count; i++) {
+        const r = buf.readFloatLE(base + i * stride * 4);
+        const g = buf.readFloatLE(base + i * stride * 4 + 4);
+        const b = buf.readFloatLE(base + i * stride * 4 + 8);
+        for (const v of [r, g, b]) {
+          assert.ok(v >= 0.10 - 0.01 && v <= 1.20 + 0.01, size + '_B COLOR_0 channel in [0.10,1.20] band: ' + v.toFixed(3));
+        }
+        assert.ok(r >= g - 1e-4 && g >= b - 1e-4, size + '_B COLOR_0 warm order R>=G>=B at vertex ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
+        checked++;
+      }
+      assert.ok(checked > 0, size + '_B checked vertices');
+    }
+    const f = facetLumas({ buf, json, binOff });
+    const E = ROCK_FACET_B[size];
+    assert.ok(f.p90 - f.p10 >= 0.50, size + '_B facet luma spread ' + (f.p90 - f.p10).toFixed(3) + ' >= 0.50 (I302 mottle floor)');
+    for (const k of ['p10', 'p50', 'p90', 'mean']) {
+      assert.ok(Math.abs(f[k] - E[k]) <= 0.005, size + '_B facet ' + k + ' ' + f[k].toFixed(3) + ' ~ ' + E[k] + ' (I420 B bake pin)');
+    }
+    let ratioMin = Infinity, ratioMax = -Infinity;
+    for (const m of json.meshes || []) for (const q of m.primitives || []) {
+      if (q.attributes.COLOR_0 === undefined) continue;
+      const cacc = json.accessors[q.attributes.COLOR_0];
+      const cbv = json.bufferViews[cacc.bufferView];
+      const cbase = binOff + (cbv.byteOffset || 0) + (cacc.byteOffset || 0);
+      for (let i = 0; i < cacc.count; i++) {
+        const r = buf.readFloatLE(cbase + i * 12);
+        const g = buf.readFloatLE(cbase + i * 12 + 4);
+        const b = buf.readFloatLE(cbase + i * 12 + 8);
+        const ratio = (r - b) / ((r + g + b) / 3.085);
+        if (ratio < ratioMin) ratioMin = ratio;
+        if (ratio > ratioMax) ratioMax = ratio;
+      }
+    }
+    assert.ok(ratioMax - ratioMin > 0.05, size + '_B chroma variety: (r-b)/value proxy range ' + (ratioMax - ratioMin).toFixed(4) + ' > 0.05 (I420 hue jitter)');
+  }
+  // I420 E52 value ladder: L darkest < M mid < S lightest (matches the A ladder).
+  for (const k of ['p10', 'p50', 'p90', 'mean']) {
+    const Lv = ROCK_FACET_B.L[k], Mv = ROCK_FACET_B.M[k], Sv = ROCK_FACET_B.S[k];
+    assert.ok(Lv < Mv && Mv < Sv, 'B value ladder ' + k + ': L ' + Lv + ' < M ' + Mv + ' < S ' + Sv);
+  }
+});
 // I264b (ST-253, RULE + correction of the mid-I264 audit misread): glTF componentType is
 // 5120 BYTE / 5121 UNSIGNED_BYTE (1B) / 5122 SHORT (2B) / 5123 UNSIGNED_SHORT (2B) /
 // 5125 UNSIGNED_INT (4B) / 5126 FLOAT (4B). Blender 5.2.3 declares its u16 index data
@@ -270,7 +350,7 @@ test('asteroid L/M/S: COLOR_0 mottling band + warm order + facet luma spread (I2
 test('all GLBs: index accessors spec-conformant (I264b audit-misread correction + RULE)', () => {
   const COMPSIZE = { 5121: 1, 5123: 2, 5125: 4 }; // glTF spec byte sizes
   const files = fs.readdirSync(ASSET_DIR).filter((f) => f.endsWith('.glb')).sort();
-  assert.ok(files.length >= 17, 'expected >= 17 GLBs in assets/');
+  assert.ok(files.length >= 24, 'expected >= 24 GLBs in assets/ (I410: 21; I420: 24 incl. B-variant rocks)');
   for (const file of files) {
     const { buf, json, binOff } = parseGlb(file);
     for (const m of json.meshes || []) {

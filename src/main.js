@@ -151,6 +151,9 @@ assetLoader.onAsset((name, entry) => {
   else if (name === 'rockL') rockRenders.setGLB('L', entry.object);
   else if (name === 'rockM') rockRenders.setGLB('M', entry.object);
   else if (name === 'rockS') rockRenders.setGLB('S', entry.object);
+  else if (name === 'rockL_B') rockRenders.setGLB('L', entry.object, 1); // I420 (ST-390 E52): silhouette-variant B
+  else if (name === 'rockM_B') rockRenders.setGLB('M', entry.object, 1);
+  else if (name === 'rockS_B') rockRenders.setGLB('S', entry.object, 1);
   else if (name === 'rockComet') rockRenders.setCometGLB(entry.object); // I344 (ST-316): comet variant
   else if (name === 'boss') bossMesh.useGLB(entry.object);
   else if (name === 'shield') rockRenders.setShieldGLB(entry.object); // I210: armor plates

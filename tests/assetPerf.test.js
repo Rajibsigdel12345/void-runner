@@ -47,15 +47,15 @@ const totalTris = parsed.reduce((a, p) => a + p.tris, 0);
 
 // I214 budgets (measured baselines in brackets; caps leave headroom for E9 art growth)
 const BUDGET = {
-  totalFilesKB: 175,   // [158.9 I410 re-measure: 21 GLBs incl. debris; 160 cap left 1.1 KB - too thin for the headroom convention]
-  totalGeoKB: 130,     // [125.8 I410 re-measure: 21 GLBs; cap held (4.3 KB headroom)]
+  totalFilesKB: 205,   // [190.44 I420 re-measure: 24 GLBs incl. B-variant rocks; I410 was 158.9 (21 GLBs)]
+  totalGeoKB: 165,     // [153.95 I420 re-measure: 24 GLBs incl. B-variant rocks; I410 was 125.8 (21 GLBs)]
   perFileKB: 60,       // [max 36.8 - asteroid_L, deliberately the heaviest]
-  totalTris: 2100,     // [I410: 2026 (I344 1930 + debris 96), cap 2100 w/ margin]
+  totalTris: 3000,     // [I420: 2784 (I410 2026 + B rocks 758), cap 3000 w/ margin]
   perFileMats: 3,      // [max 3 - ship body/wing/cockpit]
 };
 
-test('exactly 21 GLB assets (20 models + arena ring)', () => {
-  assert.equal(glbs.length, 21); // I220: +warden, I235: +stinger, I240: +flyer, I344: +comet, I410: +debris chunk+sliver
+test('exactly 24 GLB assets (23 models + arena ring) (I420)', () => {
+  assert.equal(glbs.length, 24); // I220: +warden, I235: +stinger, I240: +flyer, I344: +comet, I410: +debris chunk+sliver, I420: +B-variant rocks L/M/S (21 -> 24)
 });
 
 test('total GLB file size within budget', () => {
@@ -91,5 +91,5 @@ test('every GLB has POSITION + NORMAL (render layer assumes both)', () => {
 
 test('COLOR_0 only on the mottled rocks + boss + ship + enemy bodies + pickup emblems + warden hull/armor + arena ring + debris shards (in-code materials read it; others must not carry it)', () => { // I282: + enemy value bakes; I288/ST-272: + pickup emblem value bakes; I289/ST-273: + warden hull/armor value bakes; I299/ST-281: + arena ring value bake
   const withColor = parsed.filter((p) => p.attrs.has('COLOR_0')).map((p) => p.file).sort();
-  assert.deepEqual(withColor, ['arena_ring.glb', 'asteroid_L.glb', 'asteroid_M.glb', 'asteroid_S.glb', 'asteroid_comet.glb', 'boss.glb', 'debris_chunk.glb', 'debris_sliver.glb', 'drone.glb', 'flyer.glb', 'powerup_bomb.glb', 'powerup_magnet.glb', 'powerup_overdrive.glb', 'powerup_rapid.glb', 'powerup_shield.glb', 'powerup_slowmo.glb', 'powerup_spread.glb', 'ship.glb', 'stinger.glb', 'warden.glb']); // I299/ST-281: + arena ring value bake (16 -> 17); I289/ST-273 warden (stinger core + flyer dome stay emissive-driven); I410: + debris chunk/sliver (18 -> 20)
+  assert.deepEqual(withColor, ['arena_ring.glb', 'asteroid_L.glb', 'asteroid_L_B.glb', 'asteroid_M.glb', 'asteroid_M_B.glb', 'asteroid_S.glb', 'asteroid_S_B.glb', 'asteroid_comet.glb', 'boss.glb', 'debris_chunk.glb', 'debris_sliver.glb', 'drone.glb', 'flyer.glb', 'powerup_bomb.glb', 'powerup_magnet.glb', 'powerup_overdrive.glb', 'powerup_rapid.glb', 'powerup_shield.glb', 'powerup_slowmo.glb', 'powerup_spread.glb', 'ship.glb', 'stinger.glb', 'warden.glb']); // I299/ST-281: + arena ring value bake (16 -> 17); I289/ST-273 warden (stinger core + flyer dome stay emissive-driven); I410: + debris chunk/sliver (18 -> 20); I420: + B-variant rocks L/M/S (20 -> 23)
 });

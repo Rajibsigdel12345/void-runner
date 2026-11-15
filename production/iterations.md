@@ -5445,3 +5445,38 @@ Changed files: design/art-direction-research.md (+ I419 slice) + 6 bookkeeping d
 Test result: 969/969 + build 0 + dist byte-identical 135/1,963,955 B + vendor sha 76DEA8151BC9352A.
 Next: I420 (ST-390) = Blender-model asteroid_L_B/_M_B/_S_B + wire setGLB per-variant + assetLoader
 + B test entries + re-measure playframe EXACT.
+
+## I420 - ST-390: E52 Blender 2nd silhouette per size + setGLB per-variant wire (cgs-dev-story; assets + render + tests)
+Goal: author a 2nd clearly-distinct low-poly silhouette per asteroid size (asteroid_L_B/_M_B/_S_B.glb)
+per the I419 A/B brief and wire setGLB to alternate A/B by r.variant, restoring the silhouette
+variety the 1-geo-per-size GLB path dropped. No sim change, +0 draw calls, no palette change.
+Method (Blender 5.2.3, .evidence/I420_buildB.py re-runnable): same icosphere base + subdivision as
+A (=> same tri count 490/134/134), a DIFFERENT displace noise seed + scale (crater/ridge layout not
+a copy of A), a per-size anisotropic scale (L lopsided chunky, M squat bar, S elongated), crater
+insets placed differently, the SAME value-ladder COLOR_0 bake (L darkest / M mid / S lightest, warm
+R>=G>=B, per-vertex hue jitter, same I370 bands), flat-shaded, same radii 2.2/1.3/0.7. A frozen.
+Wire: setGLB stores per-size variant arrays (glbGeo[size][variant % len], variant 0 = A, 1 = B);
+the comet ternary stays FIRST in sync (S/variant-2 comet override untouched). assetLoader:
+rockL_B/rockM_B/rockS_B (+3 GLBs). main.js: sync-path pick only (setGLB per-variant call shape).
+Tests: 2 new assetGlbs groups (B naming/budget/radii/facet band+spread+chroma mirroring A); auto-
+scan floor 17->24; NEW ROCK_FACET_B pins L{0.1598,0.4465,0.7913,0.4622} M{0.2842,0.6402,0.9153,
+0.6297} S{0.3791,0.7133,0.9625,0.6849} (p10/p50/p90/mean, +-0.005). assetPerf re-measured over the
+full 24-GLB set (caps 205/165/3000 unchanged; the per-GLB CT map now includes 5121).
+Headroom restore (honest, pre-registered R5 floor 102,400 B): first bake dist 1,996,595 B ->
+headroom 100,557 B, 1,843 B BELOW the floor. Fixed by quantizing B NORMALs f32->int8 (BYTE 5121,
+/127) via a deterministic Node GLB rebuild (.evidence/I420/quant_normals.mjs: JSON+BIN chunks, 4-
+byte align, per-prim POSITION/COLOR_0 byte-identity + tri + radius asserts): L_B 18,596->14,972,
+M_B 6,340->5,244, S_B 7,352->6,000 (-6,072 B total). Render-inert (rock material flatShading: true;
+no test asserts NORMAL type). Zero re-pins: pos/color/index bytes identical, ALL pins EXACT.
+Dead end documented: the Blender 5.2.3 glTF exporter exposes NO quantization RNA props (positions_
+quantization etc. all False) - the Node rebuild was the right call.
+Evidence: playframe EXACT (L 21/366 + P 10/180 + B 50/1222, debris 0+hidden, console 0/0); headless
+A/B silhouette gate ALL_DIFFERENT (L maskDiff 0.4027 fill 0.315/0.174, M 0.3992 0.225/0.234, S
+0.5464 0.624/0.136; 16 calls / 1,696 tris; console 0/0); ab_sheet.png + ab_full.png viewed (row A
+vs B per size) - visually distinct silhouettes per size.
+Changed files: assets/asteroid_{L,M,S}_B.glb (new) + src/render/asteroidRenderer.js +
+src/render/assetLoader.js + src/main.js + tests/assetGlbs.test.js + tests/assetPerf.test.js +
+6 bookkeeping docs.
+Test result: 971/971 + build 0 + dist 138 files/1,990,523 B (headroom 106,629 B >= 102,400 B) +
+vendor sha 76DEA8151BC9352A.
+Next: I421 (ST-391) comet differentiation (CUTTABLE) + I422 (ST-392) regression + G52.0 gate + close.

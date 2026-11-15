@@ -1,5 +1,5 @@
 // Void Runner - asset loader (I104). Fire-and-forget async load of the
-// twenty-one Blender-pass GLBs + the one floor-surface PNG (ST-327) in assets/
+// twenty-four Blender-pass GLBs + the one floor-surface PNG (ST-327) in assets/
 // with procedural fallback: renderers start procedural and each asset swaps
 // in (via onAsset) as it resolves. A failed load warns and keeps the
 // procedural stand-in - no boot gate.
@@ -12,6 +12,9 @@ const ASSETS = {
   rockM: 'assets/asteroid_M.glb',
   rockS: 'assets/asteroid_S.glb',
   rockComet: 'assets/asteroid_comet.glb', // I344 (ST-316): comet rock variant (S slot 2; render-only, +0 draw path)
+  rockL_B: 'assets/asteroid_L_B.glb', // I420 (ST-390 E52): L silhouette-variant B
+  rockM_B: 'assets/asteroid_M_B.glb', // I420 (ST-390 E52): M silhouette-variant B
+  rockS_B: 'assets/asteroid_S_B.glb', // I420 (ST-390 E52): S silhouette-variant B
   boss: 'assets/boss.glb',
   shield: 'assets/shield.glb', // I210: energy armor plates
   // I211: seven powerup emblems + drone (Blender, silhouette-matched to procedural fallbacks)
