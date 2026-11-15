@@ -5658,3 +5658,14 @@ no orphan serve.mjs.
 - Verification: DOCS-only so the code gate is unchanged - npm test 972/972 + npm run build 0 re-run; dist unchanged from I430 (138 files / 2,110,034 B) + vendor sha256-16 76DEA8151BC9352A unchanged; every Observed Behavior / Evidence Path line re-read from the tree this session; research claims labeled separately from tree-verified facts (reverse-document quality gate).
 - Result: DONE
 - Risk/follow-up: this doc is the single source of truth that the renderer is WebGL2 (do not plan future tasks on WebGPU being available). Revisit ONLY if the vendor is upgraded past r160 (a separate ADR re-examining the frozen vendor sha) AND the frozen FX identity is de-frozen AND a real WebGL2 perf ceiling is hit (none is, at 3,948 tris). playframe re-measure stays at ST-402/I432; p1/rockab/PWA render-invariant EXACT.
+
+## I432 - ST-402 E54 fresh R1-R5 + G54.0 gate + close (cgs-regression-suite + cgs-gate-check + cgs-milestone-review; DOCS-only, zero src)
+- Story: ST-402 (fresh R1-R5 + G54.0 gate + close E54).
+- Changed: production/regression-report.md (Round G54.0), production/scope-check-E54.md (Executed at I432), production/stories.md (ST-402 DONE + STATUS I432 CLOSED), production/epics.md (E54 Status CLOSED at I432), CHANGELOG.md (I432), production/iterations.md, production/timeline.md, production/session-state/active.md. Zero src / asset / test changes.
+- R1 causal: EXACT (seed 9876: 11334/57/W2/combo 15/shots 198/acc 0.2878787878787879/36.14999999999923 s/replay 2169-2220/speed 4/afterQ MENU; console 0/0).
+- R2 rockab: EXACT 2.2/1.3/0.7 (all GLB ready; console 0/0).
+- R3 playframe RE-MEASURED: P 10/180 unchanged + L 21/366 -> 21/1072 + B 50/1222 -> 50/2634 (debris 0 live; console 0/0 x2). The B +1412 is DECOMPOSED + DOCUMENTED (NOT a bug): renderer.info.autoReset=false => CUMULATIVE counter; part B does not reset => reads a cumulative 2-render window (last loop composer PLAYING frame + probe plain render) BOTH containing the 818-tri ship => the +706 ship delta appears twice = +1412; draw calls stay 50 (ship 6 calls x 2 = 12 unchanged); non-ship tris byte-identical (decomp .evidence/I432/decomp.mjs; sOn/sOff toggle proves ship = 6 calls/818 tris per render).
+- R4 PWA: 11/11 fresh on :5199 over dist (probe copied verbatim from I426).
+- R5 quality bar: 972/972 + build 0 + dist 138/2,110,034 B (byte-identical to I431; headroom 149,966 B >= 102,400 B floor vs 2,260,000 B ceiling) + vendor sha256-16 76DEA8151BC9352A (subset 13/13 bad=0) + hygiene (5173 then 5199 killed; ports free; chrome 0; node MCP-only).
+- Result: DONE
+- Risk/follow-up: the ONLY re-pin this round is playframe L + B (documented-cause; NEVER silent). E54 CLOSED 5/5 at I432. Headroom arc 160,018 B (I429) -> 149,966 B (I430/I431/I432). Next: I433 open E55 (remaster the player ship into a more detailed realistic real-airship + make other assets more realistic in Blender; keep WebGL2 - do NOT switch to WebGPU).

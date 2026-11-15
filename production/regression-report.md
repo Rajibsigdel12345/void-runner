@@ -370,3 +370,34 @@ Fresh R1-R5 gate before closing E53 (the VFX-glow + pickup-read art epic: ST-394
 
 ### Next owner / decision
 - I427: open the next epic per the NEW user directive (cgs-scope-check + cgs-create-stories): remaster the player ship into a detailed "real airship" (more detail, more polygons), make the other assets more realistic (Blender), and probe a WebGL->WebGPU switch if needed - grounded in reference samples (YouTube/web research) rather than invented. Pre-register any SHIP_FACET / playframe L/P/B re-pins the ship-geometry change would force.
+
+## Round G54.0 (I432) - E54 Ship Remaster & Asset Realism closeout
+
+Skill: cgs-regression-suite + cgs-gate-check + cgs-milestone-review / Date: 2026-11-16 / Iteration: I432 (ST-402)
+
+### Summary
+Fresh R1-R5 gate before closing E54 (the Ship Remaster & Asset Realism epic: ST-398 ship-remaster asset spec; ST-399 Blender ship remaster 112 -> 818-tri detailed low-poly fighter 63,908 B; ST-400 Blender boss remaster 144 -> 650-tri crystal monolith 77,068 B; ST-401 WebGPU feasibility writeup KEEP WebGL2; ST-402 this gate). The ONLY re-pin this round is playframe L + B, and its cause is fully decomposed + documented (NOT a bug): renderer.info.autoReset=false makes renderer.info a CUMULATIVE counter, and part B of the playframe probe does not reset, so it reads a cumulative 2-render window (the last loop composer PLAYING frame + the probe own plain render) BOTH of which contain the 818-tri ship -> the ship +706 tri delta appears twice = +1412. Draw calls stayed 50 (ship = 6 draw calls x 2 renders = 12, unchanged). Non-ship tris are byte-identical old->new. Part A (L/P) resets per frame, so L moves +706 (ship once) and P is an overhead frame with no ship (10/180, unchanged).
+
+### Results
+- R1 p1 demo: EXACT causal fresh (seed 9876: 11334/57/W2/combo 15/shots 198/acc 0.2878787878787879/36.14999999999923 s/replay 2169-2220/speed 4; afterQ MENU; console 0/0) = byte-identical to the I402/I407/I413/I416/I417/I422/I426 pin.
+- R2 rockab: radii EXACT 2.2/1.3/0.7 (all GLB incl. rockComet ready; console 0/0).
+- R3 playframe: RE-MEASURED fresh - P 10/180 (unchanged, overhead probe frame has no ship) + L 21/1072 (menu-loop single-reset frame; ship 112 -> 818 = +706 once) + B 50/2634 (cumulative 2-render window, ship x2 = +1412; draw calls 50 unchanged; debris 0 live at measure; camFinite; console 0/0 x2). The B +1412 is DECOMPOSED + DOCUMENTED (see .evidence/I432/decomp.mjs): autoReset=false cumulative counter; the sOn/sOff toggle proves ship = 6 draw calls/818 tris per render; non-ship tris byte-identical. A/B ship CITE I429 (render-only; ship IS in the playframe so L+B moved by design).
+- R4 PWA: 11/11 fresh on :5199 over dist (sw active root scope + claimed, online + offline boot no NaN, manifest standalone + 512 maskable + start_url/scope ".", console 0/0) = identical to the I413/I417/I422/I426 reference (probe copied verbatim from I426).
+- R5 quality bar: 972/972 + build 0 + dist 138/2,110,034 B (byte-identical to I431; headroom 149,966 B >= 102,400 B floor vs 2,260,000 B ceiling) + vendor sha256-16 76DEA8151BC9352A (vendor subset 13/13 bad=0) + hygiene (5173 then 5199 killed; 5173/4173/5199 listeners 0, chrome 0, node = MCP infra only).
+
+### Evidence
+- .evidence/I432/causal.mjs + causal.json + causal.out.txt (R1+R2)
+- .evidence/I432/playframe.mjs + playframe.json + playframe.out.txt (R3; RE-PINNED L 21/1072 + B 50/2634, documented-cause)
+- .evidence/I432/decomp.mjs + decomp.json + decomp.out.txt (R3 B-decomposition: autoReset=false, sOn/sOff ship delta 6 calls/818 tris, non-ship byte-identical)
+- .evidence/I432/rockab_run.mjs + rockab.out.txt (R2)
+- .evidence/I432/pwa_probe.mjs + pwa.out.txt (R4; copied from I426, served on :5199 over dist)
+- .evidence/I432/npmtest.out.txt + build.out.txt + vendor_subset.out.txt (R5)
+- .evidence/I429 ship A/B (CITED - ship IS in the playframe so L+B moved)
+- .evidence/I430/boss_tint2.mjs (I430 boss A/B, CITED - boss not in wave-1 playframe)
+
+### Verdict
+- G54.0 gate verdict: PASS - all five rounds green fresh. The ONLY re-pin this round is playframe L 21/366 -> 21/1072 + B 50/1222 -> 50/2634, and BOTH are decomposed + documented (cumulative 2-render window, autoReset=false; draw calls unchanged; non-ship byte-identical) - zero SILENT re-pins. causal p1 / rockab / PWA all EXACT.
+- Milestone transition verdict: E54 CLOSED at I432 (ST-397 opener + ST-398..402, 5/5 scope stories shipped; ST-400 boss remaster + ST-399 ship remaster both CG A/B gate PASS, no rollback). Headroom arc: 160,018 B (I429) -> 149,966 B (I430) -> 149,966 B (I431) -> 149,966 B (I432) >= 102,400 B floor.
+
+### Next owner / decision
+- I433: open E55 per the user directive (cgs-scope-check + cgs-create-stories): remaster the player SHIP into a more detailed, more realistic real-airship (more detail + polygon count; the current 818-tri fighter still reads small), make the OTHER assets more realistic in Blender, use polys/GPU as needed; DO NOT switch to WebGPU (ST-401/I431 frozen verdict KEEP WebGL2); asteroids get asteroid/comet-shaped bumps+craters only if not GPU/compute-heavy. Ground in internet + YouTube reference samples (do not overengineer). Pre-register the BUDGETS.ship / SHIP_FACET / assetPerf / playframe L+B re-pins the new ship geometry will force.
