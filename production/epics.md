@@ -631,3 +631,15 @@ recorded in production/gates.md.
 - Gate G51.0 (at ST-387): R1 p1 EXACT causal / R2 rockab EXACT 2.2/1.3/0.7 fresh / R3 playframe EXACT 21/366 + 10/180 + 50/1222 fresh + flash-at-rest probe (hitFlash 0, +0 draw calls) / R4 PWA 11/11 fresh / R5 953+N/N + build 0 + dist headroom >= 102,400 B + vendor sha256-16 76DEA8151BC9352A + hygiene.
 - production/scope-check-E51.md = source of truth.
 - Status: CLOSED at I417 (4/4 shipped; G51.0 PASS; regression-report.md Round G51.0).
+
+## E52 - Asteroid Silhouette Variety in the GLB Path (Blender; opened I418)
+- Goal: give the tumbling rocks visual variety (a distinct 2nd low-poly silhouette per size class), restoring in the GLB path the silhouette diversity the procedural fallback already bakes. Grounded in genre-comp video research. GPU-cheap; no sim / palette / feel changes.
+- Problem (why now): the Blender GLB rock path (asteroidRenderer.setGLB -> glbGeo[size], ONE geometry per size) dropped the 3-variant silhouette variety the procedural fallback (bakeVariant seeds 101/211/321) bakes. When the assets load, the player sees one rock shape per size - regressing the many-different-rocks-tumbling read real asteroid games carry.
+- Scope: ST-389 research + art-bible slice; ST-390 model asteroid_{L,M,S}_B.glb (2nd silhouette each, same radii 2.2/1.3/0.7, same tri count as primary A 490/134/134, same value-ladder COLOR_0 bake, flat-shaded, < ~100 KB) + wire setGLB per-variant + assetLoader + tests + re-pin; ST-391 comet differentiation (CUTTABLE); ST-392 regression + G52.0 + close.
+- Budget gate (user only-if-cheap): per-size B tri ceiling = primary A count (490/134/134) so per-rock tris are byte-identical; +0 draw calls (pool shared, same rock count); 1 material per rock family; 3 new GLBs < ~100 KB each; dist headroom (133,197 B) survives with ~80 KB+ to spare.
+- Re-pin (pre-registered, never silent): expected ZERO re-pin of existing pins if every B tri count == its primary A (p1 sim EXACT, rockab EXACT, playframe EXACT); 3 new B files get NEW ROCK_FACET entries; playframe re-measured EXACT. If a B tri count drifts, re-pin playframe + BUDGETS at I420 with a delta note (I307/I370 precedent) + re-measure in R3.
+- Cut option (pre-registered): any B silhouette failing parity/budget/facet/visual QA -> procedural fallback for that size (assetLoader ready:false) + drop it; epic still closes. Comet (ST-391) independently cuttable.
+- Deferrals: per-hit impact SFX audio epic / E49 i18n tail + touch / flyer decay constant unification (flyer.js:74) / AGENTS.md five-GLBs doc-drift note.
+- production/scope-check-E52.md = source of truth.
+- Gate G52.0 (at ST-392): R1 p1 EXACT causal / R2 rockab EXACT 2.2/1.3/0.7 fresh / R3 playframe RE-MEASURED EXACT + +0 draw calls / R4 PWA 11/11 fresh / R5 969+N/N + build 0 + dist headroom >= 102,400 B + vendor sha256-16 76DEA8151BC9352A + hygiene.
+- Status: OPEN (ST-388 opened at I418; ST-389..392 queued).
