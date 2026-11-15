@@ -5747,3 +5747,19 @@ R5: npm test 972/972 / npm run build 0 / distcheck: dist 2,251,526 B (ceiling 2,
 G55.0 gate (cgs-gate-check): PASS - all 5 regression runs green (R1/R2 EXACT zero-change, R3 re-pinned + decomposed + airtight, R4 11/11, R5 quality bar green); docs booked; E55 milestone review (cgs-milestone-review): scope met 5/5 (ship "real airship" v2 delivered in I435; cuttable other-asset realism delivered in I436; regression clean). E55 CLOSED 5/5.
 
 Next: E56 (new user directive - ship remaster v3: more detail + higher poly, a real airship; other assets more realistic, use polygons/GPU as needed; honest WebGPU re-evaluation). DOCS-first: cgs-scope-check + cgs-create-stories with all re-pins pre-registered.
+
+## I438 - ST-408 open E56: scope-check + grounding + stories (cgs-scope-check + cgs-create-stories; DOCS-only, zero src)
+
+Story: E56 opens with the user's new directive (post-E55): the main character (the I435 3,254-tri "real airship" v2) needs MORE detailing + MORE polygon count - "a real airship"; other assets (L/L_B, comet) more realistic; polygons/GPU as needed; WebGPU switch re-considered.
+
+Changed: production/scope-check-E56.md (NEW, source of truth) + production/epics.md (E56 block) + production/stories.md (ST-408..413 + STATUS I438) + CHANGELOG.md + production/iterations.md + production/timeline.md + production/session-state/active.md. No src/, no assets, no tests.
+
+Scope (bounded): ST-409 asset spec v3 (I439, cgs-asset-spec) -> ST-410 Blender ship remaster v3 (I440, MAIN: ~10,000-13,000 tris cap 14,000; displacement hyper-detail + non-boolean panels/greebles; CG A/B gate with rollback to the I435 ship) -> ST-411 CUTTABLE L+L_B+comet (I441; ladder L<M<S amplitude cap) -> ST-412 WebGPU re-eval docs (I442, cgs-reverse-document, expected KEEP WebGL2 + flip criteria) -> ST-413 fresh R1-R5 + G56.0 + close (I443).
+
+Grounding (I438, 4 queries 32 raw; UNVERIFIED-BY-PLAY): CPwTrMi4nRk "Create Spaceships with TONS OF DETAIL" (displacement-based hyper-detail - the primary "more polys" technique) + xUDwvLeL7vM "Create Sci-Fi Panels and Greebles (No Paid Addons)" (random-select + bubble/solidify non-boolean panels) + hSo1EE0pZnc "Custom Airship From Zeppelins and a River Boat" (real airship detail language: catwalks, staying cables, antennas, filler pieces) + DX36hit2g0s "Quick & Easy Megastructures" (detail-without-overwork guard) + I433 refs still applicable (zit7UmzcSgU greebles-as-function / k2vTtHj0MME non-boolean insets).
+
+Re-pins PRE-REGISTERED (never silent; applied at the build stories): BUDGETS.ship 4500 -> 14000 (sweet ~11,800; byte model 38.85 B/vert from the v2 190,544 B / 4,905 verts -> ~310-380 KB) / BUDGETS.L 500 -> 2100 + BUDGETS.comet 200 -> 650 (ST-411) / MAX_FILE_BYTES 262,144 -> 393,216 / SHIP_FACET hull+wings re-bake (tol 0.005, spread >= 0.35) / ROCK_FACET.L + _B.L re-bake (L p50 MUST stay < M 0.6118/0.5984 - the facet ladder L<M<S is load-bearing) / assetPerf totalTris 8000 -> 20000 + totalFilesKB 560 -> 768 + totalGeoKB 520 -> 700 + perFileKB 256 -> 400 (perFileMats 3 + exactly-24-GLBs UNCHANGED) / dist ceiling 2,460,000 -> 2,700,000 B (DOC-ONLY, one-time; floor 102,400 B kept; projected post-E56 ~2,500,000-2,550,000 B) / playframe L 21/3508 + B 50/7872 WILL MOVE (L + (newShip-3254); B + 2x(newShip-3254) + 4x(newL-490); P 10/180 expect unchanged) -> re-measure + decompose at ST-413.
+
+Quality bar (DOCS-only): 972/972 + build 0 + dist 2,251,526 B byte-identical (headroom 208,474 B) + vendor sha 76DEA8151BC9352A + hygiene (node-only, no servers, no chrome).
+
+Next: I439 = ST-409 ship-remaster-v3 asset spec (cgs-asset-spec; design/asset-spec-ship-remaster-3.md).
