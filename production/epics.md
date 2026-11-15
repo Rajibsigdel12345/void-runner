@@ -665,4 +665,4 @@ recorded in production/gates.md.
 - Deferrals: per-hit impact SFX / E49 i18n tail + touch / flyer decay unification (flyer.js:74) / AGENTS.md five-GLBs doc-drift / any WebGPU migration (deferred by ST-401 verdict).
 - production/scope-check-E54.md = source of truth.
 - Gate G54.0 (at ST-402): R1 p1 EXACT causal / R2 rockab EXACT 2.2/1.3/0.7 fresh / R3 playframe RE-MEASURED EXACT + ship A/B view / R4 PWA 11/11 fresh / R5 972+N/N + build 0 + dist within re-negotiated ceiling w/ >= 102,400 B floor + vendor sha256-16 76DEA8151BC9352A + hygiene.
-- Status: OPEN at I427 - ST-397 OPEN (scope-check + YouTube/WebGPU grounding + stories + 6 docs; DOCS-only; source of truth production/scope-check-E54.md). Next ST-398 (asset spec) at I428.
+- Status: OPEN at I428 - ST-397 DONE at I427 (scope-check + grounding + stories + 6 docs; source of truth production/scope-check-E54.md) / ST-398 DONE at I428 (cgs-asset-spec: design/asset-spec-ship-remaster.md). Next: ST-399 (Blender ship remaster) at I429.
