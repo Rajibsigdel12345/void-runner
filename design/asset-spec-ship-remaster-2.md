@@ -165,8 +165,8 @@ old -> new at I435, NEVER silent; measured values fill the "actual" column):
   (assetPerf.test.js:57-58) UNCHANGED (ship stays exactly 1 file; the COLOR_0
   withColor list at :94 already includes ship.glb).
 - dist ceiling (DOC-ONLY; VERIFIED no test asserts it or the 102,400 B headroom
-  floor): RAISED 2,260,000 B -> ~2,460,000 B (new ship +~120-190 KB over the
-  current 2,110,034 B dist; headroom must stay >= 102,400 B).
+  floor): RAISED 2,260,000 B -> 2,460,000 B (FINALIZED at I435: measured dist
+  138/2,236,670 B; headroom 223,330 B >= 102,400 B floor; also covers the ST-406 asset growth).
 - playframe (PROBE-ONLY, .evidence/I*/playframe.mjs, NOT in tests/): L 21/1072 +
   B 50/2634 WILL MOVE (the ship IS in the playframe; expect L +~2482 once and
   B +~4964 in the cumulative 2-render window) -> RE-MEASURE + decompose +
@@ -297,7 +297,7 @@ Contract (ALL must hold, else ROLL BACK to the b015642 ship.glb):
     totalGeoKB 280 / perFileKB 85 / totalTris 4000 / perFileMats 3 (:49-55);
     exactly 24 GLBs (:57-58); POSITION+NORMAL hard rule (:85-93); withColor list
     includes ship.glb (:94).
-  - No test asserts the dist ceiling (2,260,000) or headroom floor (102,400) -
+  - No test asserts the dist ceiling (2,460,000 as of I435) or headroom floor (102,400) -
     grep-verified (I429/I430 precedent); those are documentation-only.
 
 ## Next owner or decision

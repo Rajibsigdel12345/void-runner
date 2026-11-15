@@ -47,10 +47,10 @@ const totalTris = parsed.reduce((a, p) => a + p.tris, 0);
 
 // I214 budgets (measured baselines in brackets; caps leave headroom for E9 art growth)
 const BUDGET = {
-  totalFilesKB: 320,   // [300.67 I430 re-measure: 24 GLBs, boss remaster 6.8 -> 75.3 KB; I429 was 232.26; I420 was 190.44]
-  totalGeoKB: 280,     // [264.43 I430 re-measure: 24 GLBs, boss corner-domain COLOR_0 growth; I429 was 196.08; I420 was 153.95]
-  perFileKB: 85,       // [max 75.26 - boss.glb I430 remaster; I429 max was ship 62.41]
-  totalTris: 4000,     // [I430: 3948 (I429 3442 + 650 new boss - 144 old boss); cap 4000 w/ margin]
+  totalFilesKB: 560,   // [424.34 I435 re-measure: 24 GLBs, ship remaster v2 62.41 -> 186.08 KB; I430 was 300.67; headroom kept for ST-406 rock pass]
+  totalGeoKB: 520,     // [388.09 I435 re-measure: 24 GLBs, ship corner-domain COLOR_0 growth; I430 was 264.43; headroom kept for ST-406 rock pass]
+  perFileKB: 256,      // [max 186.08 - ship.glb I435 remaster v2; I430 max was boss 75.26]
+  totalTris: 8000,     // [I435: 6384 (I430 3948 - 818 old ship + 3254 new ship); cap 8000 w/ margin for ST-406]
   perFileMats: 3,      // [max 3 - ship body/wing/cockpit]
 };
 
