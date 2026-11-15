@@ -359,3 +359,113 @@ ladder, warm order, and the 3-shared-geometry / in-code-material scheme are unch
   0.7386 / 0.9649 (0.5295).
 - Byte impact: rocks 18.06 KB -> 30.33 KB (+12.7 KB); well inside the 2048 KB dist
   budget. No dist-structure change (same 3 GLBs, same loader path).
+## Debris shards (E50 / ST-380) - assets/debris_chunk.glb + assets/debris_sliver.glb
+
+Purpose: on enemy/asteroid death, a short burst of tumbling 3D debris shards - the
+shatter pass (E50; production/scope-check-E50.md is the source of truth). Shards are
+a GENERIC SHARED SET: one geometry set, tinted per class in code (never a unique set
+per enemy - documented rejection). They read as the 3D cousin of the existing 2D
+particles.burst (same palette, same death color) on top of the existing flash +
+shake. Render-only, motion-gated, additive. Two shapes (not one, not three): one
+shape risks the CG2 "reads as noise/confetti" failure (identical silhouettes); a
+third shape buys no marginal read (anti-over-engineer).
+
+Assets:
+- assets/debris_chunk.glb  (node VR_Debris_Chunk) - angular polyhedral chunk
+- assets/debris_sliver.glb (node VR_Debris_Sliver) - thin flat plate
+
+Shared technical constraints:
+- Export: glTF Binary (.glb), glTF 2.0. No rig, no animation clips, no morph
+  targets, no textures. 1 Blender unit = 1 three.js world unit, Y-up, origin at
+  the geometric center.
+- Geometry (deterministic bake script, fixed seed):
+  - Chunk: cube subdivided once (24 faces = 48 tris), per-vertex seeded
+    displacement amplitude ~0.18, rescaled so the bounding radius = 0.5.
+  - Sliver: cube subdivided once (48 tris), scaled (0.55, 0.07, 0.35), per-vertex
+    seeded jitter ~0.05, rescaled so the bounding radius = 0.5.
+- Shading: flat (shade flat / no smooth normals). Low-poly faceted look per the
+  art bible. No normal maps, no PBR (documented rejection).
+- Material in the GLB: single material VR_Debris (base 0xffffff, metallic 0,
+  roughness 0.9). NON-AUTHORITATIVE: the code applies its own MeshLambertMaterial
+  (color 0xffffff, vertexColors: true, flatShading: true) and tints per instance
+  via InstancedMesh instanceColor (tint = the existing per-class burst palette
+  color, CONFIG.fx.palette[class][1]).
+- COLOR_0 vertex-color bake (per corner, corner domain under flat shading):
+  grayscale v = clamp(1.0 + 0.25 * nY, 0.90, 1.10), nY = flat face normal Y.
+  LUMA-NEUTRAL BY DESIGN: the bake multiplies the in-code tint, so rendered shard
+  brightness = tint brightness x ~1.0. The per-class tint carries the read; no
+  new hue is introduced against the frozen env bands (sky 70.14 / floor 32.2 /
+  rock ember 54.26-112.43 / drone accent 200.98). Component type must be FLOAT
+  VEC3 (5126) - export_vertex_color='MATERIAL' (default); never 'NAME' (VEC4
+  U16, the I333 gotcha).
+- Poly budget: chunk <= 60 tris (bake = 48), sliver <= 50 tris (bake = 48).
+- File size: expected ~8-12 KB each; hard cap 100 KB (MAX_FILE_BYTES in
+  tests/assetGlbs.test.js).
+- Test additions (ST-380, tests/assetGlbs.test.js): BUDGETS.chunk = 60,
+  BUDGETS.sliver = 50; one test per GLB - container + VR_ naming (node + VR_Debris
+  material) + tri budget + bounding radius 0.5 +/- 10% + COLOR_0 (FLOAT VEC3,
+  count == POSITION count, grayscale within 0.02, values within [0.89, 1.11]).
+  Existing per-asset pins unchanged.
+
+In-code pool contract (ST-381, new src/render/debrisField.js):
+- Two InstancedMesh (one per shape), capacity 24 each; shared live cap 24 total
+  (oldest shard stolen at the cap). mesh.count = live count per shape;
+  visible = false at 0 live -> +0 steady-state draw calls (the frozen playframe
+  pins 21/366 + 50/1222 stay EXACT); transient draw-call peak +2.
+- Worst-case live geometry: 24 shards x 60 tris = 1,440 tris (GPU-negligible).
+- Per-shard scripted motion (no physics engine - documented rejection):
+  - spawn at the death point + 0.15 jitter, y +0.1
+  - velocity: random unit direction, y-component x 0.5 (hemisphere bias - shards
+    stay near the plane), speed +/- 25% jitter
+  - damping 0.90 per 1/60 s step
+  - tumble: random axis, 2-8 rad/s
+  - scale: pop 0.4 -> 1.0 over the first 150 ms (easeOut), fade to 0 over the
+    final 40% of the life
+  - fade: instanceColor dims tint -> tint x 0.15 linearly over the full life
+- Randomness is render-layer Math.random (same contract as particles.js bursts);
+  debris is never part of any sim pin.
+
+Per-class dispatch table (FX high tier; low tier = ceil(count x 0.5); off tier = 0
+shards; reduced motion (motionOff) = 0 shards - the same two gates the juice chain
+already uses). Tint is always CONFIG.fx.palette[class][1].
+
+  event (main.js juice chain)     palette key        count  speed  life(s)  scale
+  asteroid kill size S            rock (golden*)         4    5.0   0.45   0.35-0.60
+  asteroid kill size M            rock (golden*)         5    6.0   0.50   0.50-0.80
+  asteroid kill size L            rock (golden*)         6    6.0   0.55   0.70-1.10
+  golden kill (any size)          +2 shards              -      -      -        -
+  droneExplode                    drone                  5    6.5   0.45   0.40-0.70
+  mineExplode                     mine                   5    7.0   0.50   0.40-0.65
+  stingerDeath                    stinger                6    8.0   0.55   0.45-0.75
+  flyerDeath                      flyer                  6    8.5   0.60   0.45-0.75
+  wardenDeath                     bossKill              10    9.0   0.70   0.80-1.20
+  bossDeath                       bossKill              14   10.0   0.80   1.20-1.80
+
+  (* golden rocks use the golden palette instead of rock)
+
+Worst-case simultaneous: boss 14 + warden 10 = 24 = exactly the live cap
+(oldest-steal absorbs it).
+
+Config (ST-381): a new CONFIG.debris block in src/core/config.js holds pool (24),
+damping (0.90), spin [2, 8], yBias (0.5), speedJitter (0.25), lowTierScale (0.5),
+and the perEvent table above. config.js stays DOM/three-free (core); the pool
+reads it.
+
+Blender bake plan (ST-380):
+- D:/Blender/blender.exe --background --factory-startup --python-exit-code 1
+  --python <script>.py - deterministic, fixed seed, both shapes in one script.
+- Build per the geometry rules above; shade flat; bake COLOR_0; single material
+  VR_Debris; nodes VR_Debris_Chunk / VR_Debris_Sliver; export GLB (glTF 2.0
+  binary, export_vertex_color='MATERIAL') to assets/.
+- blender-asset-qa MANDATORY before swap: three.js import probe (console 0/0),
+  tri count, bounding radius 0.5 +/- 10%, flat-shade check, COLOR_0 domain check,
+  file size.
+
+Acceptance criteria (per asset):
+- Loads via GLTFLoader with 0 console errors/warnings.
+- 48 tris (<= 60 / <= 50 budgets), bounding radius 0.5 +/- 10%.
+- Flat-shaded look (no smoothness); COLOR_0 grayscale within [0.90, 1.10].
+- File < 100 KB (expected ~8-12 KB).
+- Tint read (verified in the ST-382 A/B): under the in-code Lambert material +
+  instanceColor, a palette-mid tint renders at ~ the palette-mid luma
+  (luma-neutral check) and reads as a shatter, not confetti noise.
