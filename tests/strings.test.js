@@ -91,12 +91,14 @@ test('strings: ST-375 LOCALES + LOCALE_NAMES are frozen, complete, native names 
   assert.ok(Object.isFrozen(LOCALE_NAMES));
   for (const l of LOCALES) assert.ok(typeof LOCALE_NAMES[l] === 'string' && LOCALE_NAMES[l].length > 0);
 });
-test('strings: ST-375 setLocale switches; empty zh table falls back to en for t() and kc()', () => {
+test('strings: ST-375 setLocale switches; zh table resolves for t() and kc() (ST-376 content)', () => {
   setLocale('zh');
   try {
     assert.equal(getLocale(), 'zh');
-    assert.equal(t('menu.board'), STRINGS.en['menu.board']);
-    assert.equal(kc('mouse'), KEYCAPS.en['mouse']);
+    assert.equal(t('menu.board'), STRINGS.zh['menu.board']);
+    assert.notEqual(t('menu.board'), STRINGS.en['menu.board']);
+    assert.equal(kc('mouse'), KEYCAPS.zh['mouse']);
+    assert.notEqual(kc('mouse'), KEYCAPS.en['mouse']);
   } finally { setLocale('en'); }
 });
 test('strings: ST-375 onLocale fires only on actual change; unsubscribe stops delivery', () => {
@@ -119,4 +121,38 @@ test('strings: ST-375 setLocale(unknown) ignored: locale unchanged, no fire', ()
   assert.equal(getLocale(), 'en');
   assert.deepEqual(seen, []);
   off();
+});
+
+// ST-376 (I406): zh + ja locale tables + keycap localization maps
+const phSet = (v) => [...String(v).matchAll(/\{([a-zA-Z0-9_]+)\}/g)].map((m) => m[1]).sort().join(',');
+test('strings: ST-376 zh + ja tables are key-identical to en (no missing, no extra)', () => {
+  const enKeys = Object.keys(STRINGS.en).sort();
+  for (const l of ['zh', 'ja']) {
+    assert.deepEqual(Object.keys(STRINGS[l]).sort(), enKeys, l + ' key set matches en');
+  }
+});
+test('strings: ST-376 every zh + ja template keeps the same {placeholders} as en', () => {
+  for (const l of ['zh', 'ja']) {
+    for (const k of Object.keys(STRINGS.en)) {
+      assert.equal(phSet(STRINGS[l][k]), phSet(STRINGS.en[k]), l + ' ' + k);
+    }
+  }
+});
+test('strings: ST-376 boss names stay English in zh + ja (plan locale rule)', () => {
+  for (const l of ['zh', 'ja']) {
+    assert.equal(STRINGS[l]['banner.boss.splicer'], 'THE SPLICER');
+    assert.equal(STRINGS[l]['banner.boss.monolith'], 'THE MONOLITH');
+    assert.equal(STRINGS[l]['boss.splicer'], 'THE SPLICER');
+    assert.equal(STRINGS[l]['boss.monolith'], 'THE MONOLITH');
+    assert.equal(STRINGS[l]['feed.warden'], 'WARDEN');
+  }
+});
+test('strings: ST-376 KEYCAPS zh + ja complete; single-letter hardware keys stay Latin', () => {
+  const enKeys = Object.keys(KEYCAPS.en).sort();
+  for (const l of ['zh', 'ja']) {
+    assert.deepEqual(Object.keys(KEYCAPS[l]).sort(), enKeys, l + ' keycap set matches en');
+    for (const k of ['m', 'f', 'n', 'p', 'r', 'q']) assert.equal(KEYCAPS[l][k], KEYCAPS.en[k]);
+  }
+  setLocale('ja');
+  try { assert.equal(kc('wasd_arrows'), KEYCAPS.ja['wasd_arrows']); } finally { setLocale('en'); }
 });
