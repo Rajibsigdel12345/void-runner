@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief)).
-const BUDGETS = { ship: 300, L: 500, M: 140, S: 140, comet: 200, boss: 250, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200, chunk: 60, sliver: 50 }; // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris)
+const BUDGETS = { ship: 300, L: 500, M: 140, S: 140, comet: 200, boss: 250, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200, chunk: 60, sliver: 50 }; // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake)
 const MAX_FILE_BYTES = 100 * 1024;
 
 function parseGlb(file) {
@@ -831,9 +831,10 @@ test('warden.glb: naming, poly budget, hull/armor radii vs CONFIG, grayscale COL
 // craters, static displacement only, no subdivision) with the ion tail baked into the SAME
 // mesh as a COLOR_0 gradient (warm coma base -> bright blue-white ion tip, brighter than I344).
 // Renderer swaps it into an existing S pool slot (size S + variant 2) => +0 new draw-call path.
+// I421 (ST-391 E52 comet re-bake; supersedes the I371 note): ELONGATED icy nucleus (icosphere 42v/80t, 1.35x X-elongation, fbm icy lumps) + 8-seg open cone ion tail (16t) = 96t; warm nucleus -> bright blue-white ion tip; head maxperp 0.5481 (S-scale).
 // Node VR_Rock_Comet, mat VR_Rock_Comet.
-const COMET_FACET = { p10: 0.5073, p50: 0.6417, p90: 0.8270, mean: 0.6541 }; // I371 (ST-338 E41 comet re-bake): lumpy nucleus (4 bumps + 2 craters) + brighter warm-coma->blue-white ion-tail; head_p50 0.6103; whole-mesh re-pin
-test('asteroid_comet.glb: naming, poly budget, single mesh/prim, shape, COLOR_0 warm-head/cool-tail gradient (I344)', () => {
+const COMET_FACET = { p10: 0.7312, p50: 0.7413, p90: 0.8075, mean: 0.7547 }; // I421 (ST-391 E52 comet re-bake): elongated icy nucleus + ion-tail; whole-mesh re-pin (I371: p10 0.5073/p50 0.6417/p90 0.8270/mean 0.6541 -> I421: 0.7312/0.7413/0.8075/0.7547, brighter icy scheme; explicit old->new, not silent)
+test('asteroid_comet.glb: naming, poly budget, single mesh/prim, shape, COLOR_0 warm-head/cool-tail gradient (I344, re-baked I421)', () => {
   const { buf, json, binOff } = parseGlb('asteroid_comet.glb');
   assert.ok(buf.length <= 12000, 'asteroid_comet.glb ' + buf.length + ' B <= 12 KB (ST-316 comet budget)');
   const s2 = meshStats({ buf, json, binOff });
@@ -859,7 +860,7 @@ test('asteroid_comet.glb: naming, poly budget, single mesh/prim, shape, COLOR_0 
   const xspan = maxx - minx;
   assert.ok(xspan > 2.2 * maxperp, 'comet elongated: x-span ' + xspan.toFixed(3) + ' > 2.2x head ' + maxperp.toFixed(3));
   assert.ok(Math.abs(maxperp - 0.58) / 0.58 <= 0.12, 'head perpendicular radius ' + maxperp.toFixed(3) + ' ~ 0.58 (S-scale)');
-  assert.ok(Math.abs(xspan - 1.5828) <= 0.06, 'comet x-span ' + xspan.toFixed(4) + ' ~ 1.5828 (I344 bake)');
+  assert.ok(Math.abs(xspan - 2.464) <= 0.06, 'comet x-span ' + xspan.toFixed(4) + ' ~ 2.464 (I421 re-bake; I344 was 1.5828)');
   const cbv = json.bufferViews[acc.bufferView]; const cbase = binOff + (cbv.byteOffset || 0) + (acc.byteOffset || 0);
   let warm = 0, cool = 0;
   for (let i = 0; i < acc.count; i++) {

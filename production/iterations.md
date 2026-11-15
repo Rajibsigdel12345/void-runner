@@ -5480,3 +5480,47 @@ src/render/assetLoader.js + src/main.js + tests/assetGlbs.test.js + tests/assetP
 Test result: 971/971 + build 0 + dist 138 files/1,990,523 B (headroom 106,629 B >= 102,400 B) +
 vendor sha 76DEA8151BC9352A.
 Next: I421 (ST-391) comet differentiation (CUTTABLE) + I422 (ST-392) regression + G52.0 gate + close.
+
+## I421 - ST-391: E52 comet differentiation (cgs-dev-story; assets + tests, zero src)
+Goal: refresh assets/asteroid_comet.glb to an elongated icy body with a baked ion-tail
+COLOR_0 gradient, clearly differentiated from the S rocks, per the ST-391 brief in
+production/scope-check-E52.md. Re-pin explicitly (pre-registered, never silent).
+Method (Blender 5.2.3, .evidence/I421_buildComet.py re-runnable): head = icosphere
+(subdivisions=2 => 42v/80t) r 0.50 with 1.35x X-elongation + fbm icy lumps (amp 0.07,
+SEED 41107) at x=+0.30; tail = 8-seg cone (r1 0.30, r2 0.02, depth 1.70, open, no cap)
+base hidden inside the head at x=+0.15, tip at x=-1.55 (tail trails -X, same axis
+convention as the I344/I371 bakes); joined + tri-converted = 58v/96t. COLOR_0 gradient
+in X: x>=+0.10 warm (0.74,0.71,0.67) -> coma -0.50 (0.82,0.86,0.94) -> tip -1.55 ion
+(0.52,0.72,1.28), hash jitter, clamped [0.10,1.40]; mat VR_Rock_Comet (VertexColor ->
+Base Color); node no transform; identical exporter args.
+Blender 5.2 exporter gotchas (reconfirmed, reusable): subdivisions is off-by-one (0/1
+=> 12v/20t, 2 => 42v/80t); flat-shaded (normal-bearing) mesh => exporter unshares
+verts (a 42v sphere exports as 240v) -> use_smooth=True before export (NORMAL is
+render-inert under the shared flatShading:true material; three.js recomputes); 5.2
+primitives auto-generate UVs (calc_uvs) -> strip uv_layers + export_texcoords=False;
+export_materials enum has no 'SKIP' (use 'NONE'/'EXPORT').
+Shape (measured, .evidence/I421_measure.mjs replicates the test math exactly):
+3,812 B (was 8,356 B; -4,544 B), 58v/96t (was 170v/180t), minx -1.55, maxx 0.914,
+xspan 2.464, maxperp 0.5481, warm 47 / cool 11, channels 0.548..1.341,
+COMET_FACET {p10 0.7312, p50 0.7413, p90 0.8075, mean 0.7547}.
+Re-pin (explicit old->new, never silent): xspan pin 1.5828 -> 2.464 (band +/-0.06 kept);
+COMET_FACET {0.5073/0.6417/0.8270/0.6541} (I371) -> {0.7312/0.7413/0.8075/0.7547}
+(brighter icy scheme). NO re-pin needed: maxperp 0.5481 in the 0.58+/-12% band
+[0.5104,0.6496]; ratio 4.495 > 2.2; warm 47 / cool 11; channels in [0.09,1.41];
+tris 96 <= 200 (BUDGETS.comet unchanged); 3,812 B <= 12,000 B.
+Playframe (re-measured, .evidence/I421/playframe.json): A L 21/366 + P 10/180 EXACT
+unchanged; B 50/1222 EXACT unchanged - the reseed-71201 live-5 rock set contains no
+comet, so the pre-registered conditional B re-pin (180->96 tris per comet, dT -84)
+was NOT triggered; pins carried unchanged into I422 R3.
+Visual (one-shot, .evidence/I421/comet_bake.png): elongated bright icy nucleus +
+tapering blue-white ion tail reads as a comet against the S rocks; console 0/0.
+Evidence: .evidence/I421_buildComet.py (re-runnable), I421_measure.mjs, I421_scan.cjs,
+I421_testpatch.cjs, I421/{playframe.json, comet_bake.png, docstats_pre.json}.
+Changed: assets/asteroid_comet.glb (8,356 B -> 3,812 B), tests/assetGlbs.test.js
+(COMET_FACET + xspan re-pins + I421 note line + test title + BUDGETS comment,
+61,962 -> 62,352 B), 6 bookkeeping docs.
+Test result: 971/971 (no count change; 2 values re-pinned) + build 0 + dist
+138 files / 1,985,979 B (headroom 111,173 B >= 102,400 B floor; vendor sha
+76DEA8151BC9352A unchanged) + hygiene (0 listeners 5173/4173/5199, chrome 0,
+no orphan serve.mjs).
+Next: I422 (ST-392) regression R1-R5 + G52.0 gate + close E52.
