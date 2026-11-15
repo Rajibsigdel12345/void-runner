@@ -1,6 +1,7 @@
 ﻿// Void Runner - menu / pause / game-over screens (ST-017). DOM only; text change-cached.
 import { STATE } from '../core/state.js';
 import { encodeResult } from '../core/share.js'; // ST-159: shareable result code
+import { t as tr, kc as kcap } from '../core/strings.js'; // I404: ST-374 strings
 
 export function createScreens(root, settings = {}) {
   const overlay = document.createElement('div');
@@ -86,12 +87,12 @@ export function createScreens(root, settings = {}) {
   bottomWrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:8px;padding-bottom:30px;width:100%;';
   menu.append(topWrap, centerWrap, spacer, bottomWrap);
   const titleEl = line(topWrap, 'VOID RUNNER', 'font-size:calc(46px * var(--vr-fs,1));font-weight:800;letter-spacing:10px;'); titleEl.classList.add('vr-title'); // I65: gradient + glow
-  line(topWrap, 'survive the void, outlast the waves', 'font-size:calc(14px * var(--vr-fs,1));letter-spacing:2px;opacity:0.85;'); // I44 contrast
+  line(topWrap, tr('menu.tagline'), 'font-size:calc(14px * var(--vr-fs,1));letter-spacing:2px;opacity:0.85;'); // I44 contrast
   const controls = document.createElement('div');
   controls.style.cssText = 'display:grid;grid-template-columns:auto auto auto auto;gap:5px 16px;font-size:calc(13px * var(--vr-fs,1));padding:10px 16px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);'; // I65: controls card; ST-279: two keycap pairs per row
   const CONTROL_ROWS = settings.touch // I71: touch vs keyboard instructions
-    ? [['LEFT ZONE', 'drag to fly'], ['RIGHT ZONE', 'aim + fire'], ['2 FINGERS', 'pause']] // ST-268 dual-zone
-    : [['WASD / ARROWS', 'thrust'], ['MOUSE', 'aim'], ['CLICK / SPACE', 'fire'], ['P / ESC', 'pause'], ['M', 'mute'], ['F', 'fx'], ['N', 'music']];
+    ? [[kcap('left_zone'), tr('ctrl.drag_fly')], [kcap('right_zone'), tr('ctrl.aim_fire')], [kcap('two_fingers'), tr('ctrl.pause')]] // ST-268 dual-zone
+    : [[kcap('wasd_arrows'), tr('ctrl.thrust')], [kcap('mouse'), tr('ctrl.aim')], [kcap('click_space'), tr('ctrl.fire')], [kcap('p_esc'), tr('ctrl.pause')], [kcap('m'), tr('ctrl.mute')], [kcap('f'), tr('ctrl.fx')], [kcap('n'), tr('ctrl.music')]];
   for (const [k, v] of CONTROL_ROWS) {
     const key = document.createElement('div');
     key.style.cssText = 'text-align:right;';
@@ -107,7 +108,7 @@ export function createScreens(root, settings = {}) {
   const top5 = document.createElement('div'); // I66: top-5 card
   top5.style.cssText = 'display:flex;flex-direction:column;gap:4px;font-size:calc(13px * var(--vr-fs,1));padding:10px 18px;min-height:130px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);'; // ST-279: compact
   const top5Head = document.createElement('div');
-  top5Head.textContent = 'TOP 5';
+  top5Head.textContent = tr('menu.board');
   top5Head.style.cssText = 'font-weight:700;letter-spacing:3px;font-size:calc(12px * var(--vr-fs,1));opacity:0.9;margin-bottom:2px;';
   const top5Body = document.createElement('div');
   top5Body.style.cssText = 'display:flex;flex-direction:column;gap:3px;white-space:pre-line;font-variant-numeric:tabular-nums;';
@@ -117,17 +118,17 @@ export function createScreens(root, settings = {}) {
   menuGrid.classList.add('vr-menu-grid'); // I71: collapse to one column on narrow viewports
   menuGrid.append(controls, top5);
   bottomWrap.appendChild(menuGrid);
-  const menuStatus = line(bottomWrap, 'M \u2014 MUTE (OFF)     F \u2014 FX (HIGH)     N \u2014 MUSIC (ON)', 'font-size:calc(12px * var(--vr-fs,1));letter-spacing:2px;opacity:0.65;'); // I165: live session status on the menu (I164 finding); I171: + N music
+  const menuStatus = line(bottomWrap, tr('menu.status_line',{mute:tr('state.off'),fx:tr('state.high'),music:tr('state.on')}), 'font-size:calc(12px * var(--vr-fs,1));letter-spacing:2px;opacity:0.65;'); // I165: live session status on the menu (I164 finding); I171: + N music
   if (settings.touch && settings.actions && settings.actions.start) { // I71: tappable start on touch
     const startBtn = document.createElement('button');
     startBtn.type = 'button';
     startBtn.className = 'vr-start';
-    startBtn.textContent = 'TAP TO START';
+    startBtn.textContent = tr('menu.start_tap');
     startBtn.style.cssText = 'margin-top:14px;';
     startBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.start(); startBtn.blur(); });
     centerWrap.appendChild(startBtn);
   } else {
-    line(centerWrap, 'PRESS ENTER TO START', 'font-size:calc(18px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;animation:vrPulse 1.6s ease-in-out infinite;');
+    line(centerWrap, tr('menu.start_key'), 'font-size:calc(18px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;animation:vrPulse 1.6s ease-in-out infinite;');
   }
   const dailyRow = document.createElement('div'); // ST-279: DAILY + REPLAYS side by side
   dailyRow.style.cssText = 'display:flex;gap:14px;align-items:center;';
@@ -135,9 +136,9 @@ export function createScreens(root, settings = {}) {
     const dailyBtn = document.createElement('button');
     dailyBtn.type = 'button';
     dailyBtn.className = 'vr-pause-btn';
-    dailyBtn.textContent = 'DAILY RUN';
+    dailyBtn.textContent = tr('menu.daily');
     dailyBtn.style.cssText = 'letter-spacing:3px;';
-    dailyBtn.setAttribute('aria-label', 'Start the daily seeded run');
+    dailyBtn.setAttribute('aria-label', tr('menu.daily_aria'));
     dailyBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.startDaily(); dailyBtn.blur(); });
     dailyRow.appendChild(dailyBtn);
   }
@@ -145,9 +146,9 @@ export function createScreens(root, settings = {}) {
     const replaysBtn = document.createElement('button');
     replaysBtn.type = 'button';
     replaysBtn.className = 'vr-pause-btn';
-    replaysBtn.textContent = 'REPLAYS';
+    replaysBtn.textContent = tr('menu.replays');
     replaysBtn.style.cssText = 'letter-spacing:3px;';
-    replaysBtn.setAttribute('aria-label', 'Watch a saved replay');
+    replaysBtn.setAttribute('aria-label', tr('menu.replays_aria'));
     replaysBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.showReplays(); replaysBtn.blur(); });
     dailyRow.appendChild(replaysBtn);
   }
@@ -158,7 +159,7 @@ export function createScreens(root, settings = {}) {
   const menuDaily = line(bestRow, '', 'font-size:calc(13px * var(--vr-fs,1));opacity:0.85;letter-spacing:1px;color:#9fd8ff;'); // ST-141: daily board line
   const credit = document.createElement('div'); // I65: credits
   credit.className = 'vr-credit';
-  credit.textContent = 'a three.js arcade shooter \u25c6 Blender-modeled low-poly assets \u25c6 built with the Codex Game Studio pipeline';
+  credit.textContent = tr('menu.credit');
   bestRow.append(menuBest, menuDaily);
 bottomWrap.append(bestRow, credit);
   if (settings.menu) {
@@ -171,7 +172,7 @@ bottomWrap.append(bestRow, credit);
 
   // --- PAUSED (I68: deeper dim + RESUME / RESTART / QUIT actions, mouse + keys) ---
   const paused = panel('screen-paused', 'radial-gradient(60% 55% at 50% 45%, rgba(30,60,140,0.16), transparent 70%), rgba(2,4,12,0.74)');
-  line(paused, 'PAUSED', 'font-size:calc(36px * var(--vr-fs,1));font-weight:800;letter-spacing:8px;');
+  line(paused, tr('pause.title'), 'font-size:calc(36px * var(--vr-fs,1));font-weight:800;letter-spacing:8px;');
   const pauseSnap = line(paused, '', 'font-size:calc(15px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;opacity:0.9;'); // I44: session snapshot
   const pauseActions = (settings.actions && typeof settings.actions.resume === 'function') ? settings.actions : null; // I68
   if (pauseActions) {
@@ -179,9 +180,9 @@ bottomWrap.append(bestRow, credit);
     actionsRow.style.cssText = 'display:flex;gap:14px;margin-top:2px;';
     const actionButtons = [];
     for (const [label, keyHint, fn] of [
-      ['RESUME', 'P', pauseActions.resume],
-      ['RESTART', 'R', pauseActions.restart],
-      ['QUIT TO MENU', 'Q', pauseActions.quit],
+      [tr('pause.resume'), kcap('p'), pauseActions.resume],
+      [tr('pause.restart'), kcap('r'), pauseActions.restart],
+      [tr('pause.quit'), kcap('q'), pauseActions.quit],
     ]) {
       const b = document.createElement('button');
       b.type = 'button';
@@ -212,14 +213,14 @@ bottomWrap.append(bestRow, credit);
       }
     });
   }
-  const muteLabel = line(paused, 'M — MUTE (OFF)', 'font-size:calc(13px * var(--vr-fs,1));letter-spacing:2px;opacity:0.7;');
-    const fxLabel = line(paused, 'F \u2014 FX (HIGH)', 'font-size:calc(13px * var(--vr-fs,1));letter-spacing:2px;opacity:0.7;'); // I157
+  const muteLabel = line(paused, tr('pause.label_mute',{mute:tr('state.off')}), 'font-size:calc(13px * var(--vr-fs,1));letter-spacing:2px;opacity:0.7;');
+    const fxLabel = line(paused, tr('pause.label_fx',{fx:tr('state.high')}), 'font-size:calc(13px * var(--vr-fs,1));letter-spacing:2px;opacity:0.7;'); // I157
   if (settings.pause) paused.appendChild(settings.pause.el); // ST-026 settings (pause)
 
   // --- GAME OVER ---
   const gameOver = panel('screen-gameover', 'rgba(8,2,6,0.72)');
-  line(gameOver, 'GAME OVER', 'font-size:calc(42px * var(--vr-fs,1));font-weight:800;letter-spacing:8px;color:#ff6d8a;');
-  const finalScore = line(gameOver, 'SCORE 0', 'font-size:calc(26px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;');
+  line(gameOver, tr('over.title'), 'font-size:calc(42px * var(--vr-fs,1));font-weight:800;letter-spacing:8px;color:#ff6d8a;');
+  const finalScore = line(gameOver, tr('over.score',{score:0}), 'font-size:calc(26px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;');
   const overBest = line(gameOver, '', 'font-size:calc(13px * var(--vr-fs,1));opacity:0.7;');
   const newBestLine = line(gameOver, '', 'font-size:calc(16px * var(--vr-fs,1));font-weight:800;letter-spacing:3px;color:#ffe08a;');
   const statsLine1 = line(gameOver, '', 'font-size:calc(15px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#cfe4ff;margin-top:10px;'); // ST-031
@@ -234,12 +235,12 @@ bottomWrap.append(bestRow, credit);
     const reBtn = document.createElement('button');
     reBtn.type = 'button';
     reBtn.className = 'vr-start';
-    reBtn.textContent = 'TAP TO RESTART';
+    reBtn.textContent = tr('over.restart_tap');
     reBtn.style.cssText = 'margin-top:10px;';
     reBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.restart(); reBtn.blur(); });
     gameOver.appendChild(reBtn);
   } else {
-    goPrompt = line(gameOver, 'PRESS ENTER TO RESTART', 'font-size:calc(16px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;margin-top:10px;animation:vrPulse 1.6s ease-in-out infinite;'); // ST-190
+    goPrompt = line(gameOver, tr('over.restart_key'), 'font-size:calc(16px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;margin-top:10px;animation:vrPulse 1.6s ease-in-out infinite;'); // ST-190
   }
 
   // ST-159: shareable result - copy the reproducible result code (ST-142 codec) to the clipboard.
@@ -248,8 +249,8 @@ bottomWrap.append(bestRow, credit);
   shareBtn.type = 'button';
   shareBtn.className = 'vr-pause-btn';
   shareBtn.id = 'vr-share-btn';
-  shareBtn.setAttribute('aria-label', 'Copy result code');
-  shareBtn.textContent = 'COPY RESULT';
+  shareBtn.setAttribute('aria-label', tr('over.copy_aria'));
+  shareBtn.textContent = tr('over.copy');
   shareBtn.style.cssText = 'margin-top:4px;pointer-events:auto;';
   function legacyCopy(text) {
     try {
@@ -263,9 +264,9 @@ bottomWrap.append(bestRow, credit);
   }
   function copyShare() {
     const feedback = (ok) => {
-      shareBtn.textContent = ok ? 'COPIED!' : 'COPY FAILED';
+      shareBtn.textContent = ok ? tr('over.copied') : tr('over.copy_failed');
       shareBtn.disabled = true;
-      setTimeout(() => { shareBtn.textContent = 'COPY RESULT'; shareBtn.disabled = false; }, 1400);
+      setTimeout(() => { shareBtn.textContent = tr('over.copy'); shareBtn.disabled = false; }, 1400);
     };
     if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
       navigator.clipboard.writeText(goShare).then(() => feedback(true), () => feedback(legacyCopy(goShare)));
@@ -273,22 +274,22 @@ bottomWrap.append(bestRow, credit);
   }
   shareBtn.addEventListener('click', (e) => { e.stopPropagation(); if (goShare) copyShare(); shareBtn.blur(); });
   gameOver.appendChild(shareBtn);
-  line(gameOver, 'copies a reproducible result code', 'font-size:calc(11px * var(--vr-fs,1));opacity:0.6;letter-spacing:1px;margin-top:-8px;');
+  line(gameOver, tr('over.copy_caption'), 'font-size:calc(11px * var(--vr-fs,1));opacity:0.6;letter-spacing:1px;margin-top:-8px;');
   let watchRunBtn = null; // ST-191: WATCH THIS RUN (only for the just-saved run)
   if (settings.actions && settings.actions.watchRun) {
     watchRunBtn = document.createElement('button');
     watchRunBtn.type = 'button';
     watchRunBtn.className = 'vr-pause-btn';
-    watchRunBtn.textContent = 'WATCH THIS RUN';
+    watchRunBtn.textContent = tr('over.watch_run');
     watchRunBtn.style.cssText = 'display:none;margin-top:10px;letter-spacing:3px;';
-    watchRunBtn.setAttribute('aria-label', 'Watch this run as a replay');
+    watchRunBtn.setAttribute('aria-label', tr('over.watch_run_aria'));
     watchRunBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.watchRun(); watchRunBtn.blur(); });
     gameOver.appendChild(watchRunBtn);
   }
   // --- REPLAYS (ST-190: demo pilot + saved runs; a row starts a watched run) ---
   const replaysPanel = panel('screen-replays', 'radial-gradient(55% 50% at 30% 30%, rgba(60,110,200,0.22), transparent 70%), radial-gradient(50% 55% at 72% 72%, rgba(140,70,180,0.20), transparent 70%), rgba(2,4,12,0.62)');
-  line(replaysPanel, 'REPLAYS', 'font-size:calc(30px * var(--vr-fs,1));font-weight:800;letter-spacing:8px;');
-  line(replaysPanel, 'watch the demo pilot or a saved run', 'font-size:calc(13px * var(--vr-fs,1));letter-spacing:2px;opacity:0.85;');
+  line(replaysPanel, tr('replays.title'), 'font-size:calc(30px * var(--vr-fs,1));font-weight:800;letter-spacing:8px;');
+  line(replaysPanel, tr('replays.sub'), 'font-size:calc(13px * var(--vr-fs,1));letter-spacing:2px;opacity:0.85;');
   const replaysList = document.createElement('div');
   replaysList.style.cssText = 'display:flex;flex-direction:column;gap:8px;width:min(560px,86vw);max-height:52vh;overflow-y:auto;padding:6px 2px;';
   replaysPanel.appendChild(replaysList);
@@ -301,7 +302,7 @@ bottomWrap.append(bestRow, credit);
     while (replaysList.children.length > 1) replaysList.removeChild(replaysList.lastChild);
     const hasSaved = replaysRows.some((r) => r.isDemo !== true);
     replaysEmpty.style.display = hasSaved ? 'none' : 'block';
-    replaysEmpty.textContent = hasSaved ? '' : '\u2014 no saved replays yet \u2014';
+    replaysEmpty.textContent = hasSaved ? '' : tr('replays.empty');
     for (const row of replaysRows) {
       const b = document.createElement('button');
       b.type = 'button';
@@ -313,9 +314,9 @@ bottomWrap.append(bestRow, credit);
       const t = row.time || 0;
       const stat = document.createElement('span');
       stat.style.cssText = 'opacity:0.75;white-space:pre;font-variant-numeric:tabular-nums;';
-      stat.textContent = 'SCORE ' + row.score + '    WAVE ' + row.wave + '    ' + row.kills + ' KILLS    ' + Math.floor(t / 60) + ':' + String(Math.floor(t) % 60).padStart(2, '0');
+      stat.textContent = tr('replays.row_stat',{score:row.score,wave:row.wave,kills:row.kills,time:Math.floor(t / 60)+':'+String(Math.floor(t) % 60).padStart(2,'0')});
       b.append(lbl, stat);
-      b.setAttribute('aria-label', row.label + ', score ' + row.score);
+      b.setAttribute('aria-label', tr('replays.row_aria',{label:row.label,score:row.score}));
       b.addEventListener('click', (e) => { e.stopPropagation(); if (settings.actions && settings.actions.startReplay) settings.actions.startReplay(row.key); b.blur(); });
       replaysList.appendChild(b);
     }
@@ -324,9 +325,9 @@ bottomWrap.append(bestRow, credit);
     const backBtn = document.createElement('button');
     backBtn.type = 'button';
     backBtn.className = 'vr-pause-btn';
-    backBtn.textContent = 'BACK';
+    backBtn.textContent = tr('replays.back');
     backBtn.style.cssText = 'margin-top:10px;letter-spacing:3px;';
-    backBtn.setAttribute('aria-label', 'Back to the menu');
+    backBtn.setAttribute('aria-label', tr('replays.back_aria'));
     backBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.closeReplays(); backBtn.blur(); });
     replaysPanel.appendChild(backBtn);
   }
@@ -361,32 +362,32 @@ bottomWrap.append(bestRow, credit);
     overlay.classList.toggle('vr-reduced', !!opts.reducedMotion); // I65: gate menu animations
     showPanel(state);
     if (state === STATE.GAME_OVER) {
-      set('finalScore', finalScore, `SCORE ${world.score}`);
-      if (goPrompt) set('goPrompt', goPrompt, opts.replayMode ? 'PRESS Q TO QUIT TO MENU' : 'PRESS ENTER TO RESTART'); // ST-190: a finished replay quits to the menu
+      set('finalScore', finalScore, tr('over.score',{score:world.score}));
+      if (goPrompt) set('goPrompt', goPrompt, opts.replayMode ? tr('over.restart_replay') : tr('over.restart_key')); // ST-190: a finished replay quits to the menu
       if (watchRunBtn) watchRunBtn.style.display = opts.watchRun ? 'block' : 'none'; // ST-191: only for the just-saved run
-      set('overBest', overBest, opts.best > 0 ? `BEST ${opts.best}` : '');
-      set('newBest', newBestLine, opts.newBest ? 'NEW BEST!' : '');
+      set('overBest', overBest, opts.best > 0 ? tr('over.best',{best:opts.best}) : '');
+      set('newBest', newBestLine, opts.newBest ? tr('over.new_best') : '');
       newBestLine.classList.toggle('vr-newbest', !!opts.newBest); // I69: celebration pulse
-      set('overRank', rankLine, opts.scoreRank > 0 ? 'BOARD RANK #' + opts.scoreRank : ''); // I69
+      set('overRank', rankLine, opts.scoreRank > 0 ? tr('over.rank',{rank:opts.scoreRank}) : ''); // I69
       const mm = Math.floor(world.time / 60); // ST-031: session stats
       const ss = String(Math.floor(world.time) % 60).padStart(2, '0');
-      set('stats1', statsLine1, "KILLS " + world.scoreKeeper.kills + "    WAVE " + Math.max(1, world.wave));
-      set('stats2', statsLine2, "MAX COMBO " + world.scoreKeeper.maxCombo + "    TIME " + mm + ":" + ss);
-      const st = world.sessionStats(); set('stats3', statsLine3, "ACCURACY " + Math.round(st.accuracy * 100) + "%    SHOTS " + st.shotsHit + "/" + st.shotsFired); // I152
+      set('stats1', statsLine1, tr('over.stats_kills',{kills:world.scoreKeeper.kills,wave:Math.max(1, world.wave)}));
+      set('stats2', statsLine2, tr('over.stats_combo_time',{combo:world.scoreKeeper.maxCombo,time:mm+':'+ss}));
+      const st = world.sessionStats(); set('stats3', statsLine3, tr('over.stats_accuracy',{acc:Math.round(st.accuracy * 100),hit:st.shotsHit,fired:st.shotsFired})); // I152
       goShare = encodeResult({ seed: world.rng.seed, score: world.score, wave: Math.max(1, world.wave), kills: world.scoreKeeper.kills }); // ST-159
-      if (opts.dailyMode) { dailyBadge.style.display = 'inline-block'; set('dailyBadge', dailyBadge, 'DAILY RUN' + (opts.dailyKey ? '  \u00b7  ' + opts.dailyKey : '') + (opts.dailyNewBest ? '   NEW DAILY BEST' : '')); } // ST-141
+      if (opts.dailyMode) { dailyBadge.style.display = 'inline-block'; set('dailyBadge', dailyBadge, tr('over.daily_badge',{key_seg:opts.dailyKey ? '  \u00b7  ' + opts.dailyKey : '',new_seg:opts.dailyNewBest ? '   ' + tr('over.new_daily') : ''})); } // ST-141
       else dailyBadge.style.display = 'none';
     }
     if (state === STATE.MENU) {
-      set('menuStatus', menuStatus, 'M \u2014 MUTE (' + (opts.muted ? 'ON' : 'OFF') + ')     F \u2014 FX (' + (opts.fx === 'low' ? 'LOW' : 'HIGH') + ')     N \u2014 MUSIC (' + (opts.music !== false ? 'ON' : 'OFF') + ')'); // I165: live mute + fx state; I171: + N music
-      set('menuBest', menuBest, opts.best > 0 ? `BEST ${opts.best}` : '');
-      set('top5', top5Body, opts.scoresText ? opts.scoresText : '\u2014 no scores yet \u2014'); // I66
-      set('menuDaily', menuDaily, opts.dailyMenu ? ('DAILY ' + opts.dailyMenu.key + '  \u00b7  ' + (opts.dailyMenu.value > 0 ? 'BEST ' + opts.dailyMenu.value : 'NO BEST YET')) : ''); // ST-141
+      set('menuStatus', menuStatus, tr('menu.status_line',{mute:opts.muted?tr('state.on'):tr('state.off'),fx:opts.fx==='low'?tr('state.low'):tr('state.high'),music:opts.music!==false?tr('state.on'):tr('state.off')})); // I165: live mute + fx state; I171: + N music
+      set('menuBest', menuBest, opts.best > 0 ? tr('menu.best',{best:opts.best}) : '');
+      set('top5', top5Body, opts.scoresText ? opts.scoresText : tr('menu.no_scores')); // I66
+      set('menuDaily', menuDaily, opts.dailyMenu ? (tr('menu.daily_line',{key:opts.dailyMenu.key,best:opts.dailyMenu.value>0?tr('menu.best',{best:opts.dailyMenu.value}):tr('menu.no_best')})) : ''); // ST-141
     }
     if (state === STATE.PAUSED) {
-      set('mute', muteLabel, `M — MUTE (${opts.muted ? 'ON' : 'OFF'})`);
-      set('fx', fxLabel, 'F \u2014 FX (' + (opts.fx === 'low' ? 'LOW' : 'HIGH') + ')'); // I157
-      set('pauseSnap', pauseSnap, `SCORE ${world.score}    WAVE ${Math.max(1, world.wave)}    KILLS ${world.scoreKeeper.kills}`); // I44
+      set('mute', muteLabel, tr('pause.label_mute',{mute:opts.muted?tr('state.on'):tr('state.off')}));
+      set('fx', fxLabel, tr('pause.label_fx',{fx:opts.fx==='low'?tr('state.low'):tr('state.high')})); // I157
+      set('pauseSnap', pauseSnap, tr('pause.snap',{score:world.score,wave:Math.max(1, world.wave),kills:world.scoreKeeper.kills})); // I44
     }
     if (state !== STATE.MENU) replaysOpenFlag = false; // ST-190: leaving the menu closes the list
     const rp = state === STATE.MENU && replaysOpenFlag;

@@ -54,6 +54,7 @@ import { createAdaptiveQuality } from './core/adaptiveQuality.js'; // ST-073
 import { dprForTier } from './core/dprTier.js'; // ST-225: load-reactive DPR (pure core)
 import { createClock } from './core/clock.js'; // ST-078
 import { visibilityAction } from './core/visibilityPause.js'; // I189: pure visibility-pause decision (unit-tested)
+import { t as tr } from './core/strings.js'; // I404: ST-374 strings
 import { STATE } from './core/state.js';
 import { Storage, toggleFxQuality } from './core/storage.js';
 import { CONFIG } from './core/config.js';
@@ -319,7 +320,7 @@ function applyColorblindPreview(on) {
 const slowmoHintEl = document.createElement('div');
 slowmoHintEl.id = 'slowmo-hint';
 slowmoHintEl.setAttribute('aria-hidden', 'true');
-slowmoHintEl.textContent = 'SLOWMO \u00b7 enemies slow to 40% \u2014 you stay at full speed';
+slowmoHintEl.textContent = tr('toast.slowmo');
 slowmoHintEl.style.cssText = 'position:fixed;left:50%;bottom:104px;transform:translateX(-50%);z-index:40;pointer-events:none;font:calc(12px * var(--vr-fs,1))/1.4 ui-monospace,monospace;letter-spacing:.06em;color:#9fe8ff;background:rgba(6,20,30,0.66);padding:5px 12px;border-radius:5px;border:1px solid rgba(159,232,255,0.35);opacity:0;transition:opacity .2s;';
 document.body.appendChild(slowmoHintEl);
 
@@ -356,7 +357,7 @@ const adaptive = createAdaptiveQuality(CONFIG.adaptive, (info) => {
   if (info.type === 'autoDowngrade') {
     applyFxTier(info.tier, 'auto-downgrade'); // ST-225: particles + bloom + DPR + marker in one place
     console.info('[voidrunner] adaptive quality: FX high -> low (rolling ' + CONFIG.adaptive.windowSec + 's avg ' + Math.round(info.fps) + ' fps < ' + CONFIG.adaptive.thresholdFps + ')');
-    toast('FX AUTO-SET TO LOW (LOW FPS)');
+    toast(tr('toast.fx_auto_low'));
   }
 }, liveSettings.fx); // I255: reconcile the ladder to the stored FX tier - a stored 'off'/'low' is a locked prior choice, never overridden by a phantom high->low auto-downgrade
 // ST-026: settings panels (menu + pause) - after storage/applySettings (TDZ order).
@@ -381,7 +382,7 @@ function applyDprForTier(label) {
 }
 function updateFxMarker() {
   const st = adaptive.state();
-  const marker = st.autoLow ? 'AUTO: LOW' : null; // automation chose the tier; user choice untouched
+  const marker = st.autoLow ? tr('settings.fx_auto') : null; // automation chose the tier; user choice untouched
   menuSettings.setFxMarker(marker);
   pauseSettings.setFxMarker(marker);
 }
@@ -421,8 +422,8 @@ function toggleRecording() { // ST-191: O key + __vr.toggleRecording drive this 
   const act = recordingAction(st, !!recorder, recStopped);
   if (act === 'start') {
     recorder = createRecorder(runSeed, { quant: CONFIG.replay.quant, maxSteps: CONFIG.replay.maxSteps, maxTapeBytes: CONFIG.replay.maxTapeBytes });
-    recStopped = false; recChip.show(); toast('RECORDING - O TO STOP');
-  } else if (act === 'stop') { recStopped = true; recChip.hide(); toast('RECORDING STOPPED'); }
+    recStopped = false; recChip.show(); toast(tr('toast.recording'));
+  } else if (act === 'stop') { recStopped = true; recChip.hide(); toast(tr('toast.recording_stopped')); }
 }
 
 function startRun(mode) {
@@ -479,7 +480,7 @@ const screens = createScreens(document.body, {
     resume: () => { world.resume(); },
     restart: () => { if (replayView) restartReplay(); else restartRun(); }, // ST-190: restart the watched replay
     quit: () => { if (replayView) exitReplayView(); else { newBest = false; popups.clear(); vortexFx.hide(); recorder = null; recStopped = false; watchSavedRun = false; recChip.hide(); world.quitToMenu(); } }, // ST-190/ST-191
-    showReplays: () => { const saved = storage.getReplays(); const list = [{ key: 'demo', label: 'DEMO PILOT', score: 0, wave: 0, kills: 0, time: 0, isDemo: true }]; saved.forEach((r2, i) => list.push({ key: i, label: 'SAVED RUN', score: r2.data.meta.score, wave: r2.data.meta.wave, kills: r2.data.meta.kills, time: r2.data.meta.time })); screens.openReplays(list); }, // ST-190
+    showReplays: () => { const saved = storage.getReplays(); const list = [{ key: 'demo', label: tr('replays.demo_pilot'), score: 0, wave: 0, kills: 0, time: 0, isDemo: true }]; saved.forEach((r2, i) => list.push({ key: i, label: tr('replays.saved_run'), score: r2.data.meta.score, wave: r2.data.meta.wave, kills: r2.data.meta.kills, time: r2.data.meta.time })); screens.openReplays(list); }, // ST-190
     startReplay: (k) => { if (k === 'demo') { startReplayView(demoReplay(CONFIG.replay.demoSeed, CONFIG.replay.demoLen)); return; } const saved = storage.getReplays(); if (saved[k]) startReplayView(saved[k].data); }, // ST-190
     closeReplays: () => screens.closeReplays(), // ST-190
     watchRun: () => { const saved = storage.getReplays(); if (saved.length > 0) startReplayView(saved[0].data); }, // ST-191: watch the just-saved run (always index 0 - newest first)
@@ -519,12 +520,12 @@ function togglePause() { // ST-033: shared by keyboard and two-finger touch
   else if (st === STATE.REPLAY) world.pause(); // ST-190: P pauses a watched replay too
   else if (st === STATE.PAUSED) world.resume();
 }
-const input = createInput({ onPause: togglePause, onPauseConfirm: () => toast('PAUSED \u00b7 2-FINGER') }); // ST-268: visual confirmation of the two-finger pause
+const input = createInput({ onPause: togglePause, onPauseConfirm: () => toast(tr('toast.paused_two_finger')) }); // ST-268: visual confirmation of the two-finger pause
 // I71: on-screen pause button (touch devices; shown during PLAYING only)
 const pauseBtn = document.createElement('button');
 pauseBtn.type = 'button';
 pauseBtn.id = 'vr-pause-btn'; // I161: focus-ring selector
-pauseBtn.setAttribute('aria-label', 'Pause');
+pauseBtn.setAttribute('aria-label', tr('pause.aria_btn'));
 pauseBtn.textContent = '\u275A\u275A';
 pauseBtn.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:30;display:none;pointer-events:auto;cursor:pointer;box-sizing:border-box;align-items:center;justify-content:center;width:calc(46px * var(--vr-fs,1));height:calc(46px * var(--vr-fs,1));border-radius:50%;border:1px solid #2b4a8a;background:rgba(10,18,40,0.82);color:#cfe4ff;font-size:calc(14px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;padding:0;';
 pauseBtn.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
@@ -573,14 +574,14 @@ window.addEventListener('keydown', (e) => {
     if (fxPreviewFn) fxPreviewFn(next); // ST-067: live particle preview
     menuSettings.sync();
     pauseSettings.sync();
-    toast('FX ' + next.toUpperCase());
+    toast(tr('toast.fx',{level:next.toUpperCase()}));
   } else if (e.key === 'n' || e.key === 'N') { // I171 (ST-171): music bed hotkey - PERSISTED (mirrors F), not session-only like M
     const next = !storage.getSettings().music;
     const merged = storage.setSettings({ music: next });
     applySettings(merged);
     menuSettings.sync();
     pauseSettings.sync();
-    toast('MUSIC ' + (next ? 'ON' : 'OFF'));
+    toast(tr('toast.music',{onoff:next?tr('state.on'):tr('state.off')}));
   }
 });
 const raycaster = new THREE.Raycaster();
@@ -657,14 +658,14 @@ ctxOverlay.id = 'ctx-overlay';
 ctxOverlay.style.cssText = 'position:fixed;inset:0;z-index:80;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(2,3,10,0.94);color:#c8d4ee;font:calc(14px * var(--vr-fs,1))/1.6 ui-monospace,monospace;text-align:center;padding:24px;';
 const ctxTitle = document.createElement('div');
 ctxTitle.style.cssText = 'font-size:calc(22px * var(--vr-fs,1));letter-spacing:.2em;color:#9fb4d8;';
-ctxTitle.textContent = 'RENDERING INTERRUPTED';
+ctxTitle.textContent = tr('ctxlost.title');
 const ctxStatus = document.createElement('div');
 ctxStatus.id = 'ctx-status';
-ctxStatus.textContent = 'The browser dropped the 3D rendering context. It usually comes back on its own - please wait.';
+ctxStatus.textContent = tr('ctxlost.message');
 const ctxBtn = document.createElement('button');
 ctxBtn.type = 'button';
 ctxBtn.id = 'vr-ctx-btn'; // I161: focus-ring selector
-ctxBtn.textContent = 'RELOAD GAME';
+ctxBtn.textContent = tr('ctxlost.reload');
 ctxBtn.style.cssText = 'margin-top:8px;font:calc(14px * var(--vr-fs,1))/1 ui-monospace,monospace;letter-spacing:.12em;color:#0a0f1e;background:#9fb4d8;border:0;border-radius:4px;padding:10px 22px;cursor:pointer;';
 ctxBtn.addEventListener('click', () => { location.reload(); });
 ctxOverlay.appendChild(ctxTitle);
@@ -683,10 +684,10 @@ function onCtxLost(e) {
   ctxLost = true; // I187: the loop guard below skips sim + render until restored
   if (world.game.state === STATE.PLAYING) world.pause();
   ctxOverlay.style.display = 'flex'; // I75
-  ctxStatus.textContent = 'The browser dropped the 3D rendering context. It usually comes back on its own - please wait.';
+  ctxStatus.textContent = tr('ctxlost.message');
   clearTimeout(ctxRestoreTimer);
   ctxRestoreTimer = setTimeout(() => { // I75: no restore yet - escalate
-    ctxStatus.textContent = 'Still no signal after 10s. If it does not come back, reload the game.';
+    ctxStatus.textContent = tr('ctxlost.timeout');
   }, 10000);
 }
 function onCtxRestored() {
@@ -779,13 +780,13 @@ function tick(dt, intent) {
     if (haptic) haptics.pulse(haptic);
     if (e.type === 'wave') banner.showWave(e.data.n, e.data.mod, e.data.endless);
     else if (e.type === 'waveCleared') banner.showCleared(e.data.n);
-    else if (e.type === 'bossSpawn') { banner.showBoss(e.data.wave, e.data.hp, e.data.kind === 'splicer' ? 'THE SPLICER' : 'THE MONOLITH', e.data.kind); if (e.data.kind === 'splicer') toast('SPLICER INBOUND'); } // I154: kind for variant glow // ST-135/143: boss intro (+ Splicer callout)
-    else if (e.type === 'wardenSpawn') toast('WARDEN INBOUND'); // ST-137: mini-boss callout
-    else if (e.type === 'stingerSpawn') toast('STINGER INBOUND'); // ST-229: first spawn of the run calls out the charger
-else if (e.type === 'flyerSpawn') toast('FLYER INBOUND'); // ST-232: first spawn of the run calls out the evasive target
+    else if (e.type === 'bossSpawn') { banner.showBoss(e.data.wave, e.data.hp, e.data.kind === 'splicer' ? tr('banner.boss.splicer') : tr('banner.boss.monolith'), e.data.kind); if (e.data.kind === 'splicer') toast(tr('toast.splicer')); } // I154: kind for variant glow // ST-135/143: boss intro (+ Splicer callout)
+    else if (e.type === 'wardenSpawn') toast(tr('toast.warden')); // ST-137: mini-boss callout
+    else if (e.type === 'stingerSpawn') toast(tr('toast.stinger')); // ST-229: first spawn of the run calls out the charger
+else if (e.type === 'flyerSpawn') toast(tr('toast.flyer')); // ST-232: first spawn of the run calls out the evasive target
     else if (e.type === 'kill') { popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 || e.data.golden || e.data.boss, gold: !!e.data.golden, od: !!e.data.overdrive }); killFeed.add(e.data); } // ST-030/052, I153
     else if (e.type === 'nearmiss') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points); // ST-053 (plain small popup)
-    else if (e.type === 'weaponLevelUp') toast('WEAPON LEVEL ' + e.data.level); // ST-123
+    else if (e.type === 'weaponLevelUp') toast(tr('toast.weapon',{level:e.data.level})); // ST-123
     if (!motionOff) {
       if (e.type === 'kill') { particles.burst(e.data.pos.x, e.data.pos.y, { count: e.data.golden ? Math.ceil(fxCount * 1.5) : fxCount, palette: e.data.golden ? CONFIG.fx.palette.golden : CONFIG.fx.palette.rock, speed: 9, life: 0.5 }); const _ke = killPunchEnergy(e.data.size, !!e.data.overdrive, CONFIG.fx.killPunch); const _swr = fxCount > 0 ? shockwaveRadius(e.data.size, CONFIG.fx.shockwave) : 0; _killCh.punch = 0; _killCh.ring = 0; if (_ke > 0) { punch.trigger(killPunchDir(world.ship.pos, e.data.pos, 0.35, _kpd), _ke); _killCh.punch = 1; } if (_swr > 0) { shockwaves.spawn(e.data.pos.x, e.data.pos.y, { radius: _swr, color: e.data.golden ? CONFIG.fx.palette.golden[0] : (SW_COLORS[e.data.size] || CONFIG.fx.palette.killRing) }); _killCh.ring = 1; } if (_killCh.punch || _killCh.ring) juiceTally.record('kill', _killCh); } // ST-052, ST-221 (I224): class-scaled kill punch (T4); ST-238 (I245): pooled shockwave ring on class-scaled plain kills (no flash/hit-stop)
       else if (e.type === 'nearmiss') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.max(4, Math.ceil(fxCount * 0.25)), palette: CONFIG.fx.palette.graze, speed: 5, life: 0.3 }); // ST-053 subtle graze wisp
@@ -854,7 +855,7 @@ else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, 
         }
         if (shouldSaveOnGameOver(!!recorder, recorder ? recorder.length : 0, !!replayView)) { // ST-191: save the recorded run (a watched replay never saves)
           const meta = { score: e.data.score, wave: Math.max(1, world.wave), kills: world.scoreKeeper.kills, time: Math.round(world.time), mode: dailyMode ? 'daily' : 'normal', dailyKey: dailyMode ? dailyKey : '' };
-          if (storage.saveReplay(recorder.finish(meta)).saved) { watchSavedRun = true; toast('RUN SAVED TO REPLAYS'); }
+          if (storage.saveReplay(recorder.finish(meta)).saved) { watchSavedRun = true; toast(tr('toast.run_saved')); }
         }
         recorder = null; recStopped = false; recChip.hide(); // ST-191: end-of-run cleanup (no-op when never recording)
       }

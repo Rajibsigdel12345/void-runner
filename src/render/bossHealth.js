@@ -1,11 +1,12 @@
 // ST-055: boss HP bar - minimal DOM (no assets): thin fixed bar under the wave chip.
+import { t } from '../core/strings.js'; // I404: ST-374 strings
 export function createBossHealth(root) {
   const wrap = document.createElement('div');
   wrap.id = 'hud-bossbar'; // ST-269 (I284): probeable DOM ids (wrap/label/bar/fill were id-less = unprobeable)
   wrap.style.cssText = 'position:fixed;top:54px;left:50%;transform:translateX(-50%);width:340px;max-width:60vw;opacity:0;pointer-events:none;transition:opacity 0.25s;z-index:30;text-align:center;';
   const label = document.createElement('div');
   label.id = 'hud-bossbar-label'; // ST-269 (I284)
-  label.textContent = 'MONOLITH';
+  label.textContent = t('boss.monolith');
   label.style.cssText = 'font:600 calc(12px * var(--vr-fs,1))/1 system-ui,sans-serif;letter-spacing:0.25em;color:rgba(190,160,255,0.9);margin-bottom:4px;'; // I161: font-scale; I284: base 10->12px (800x450 rendered ~9.8px = below legibility floor; the --vr-fs hook stays the only scale path, no font changes)
   const bar = document.createElement('div');
   bar.id = 'hud-bossbar-bar'; // ST-269 (I284)
@@ -27,7 +28,7 @@ export function createBossHealth(root) {
     if (_kind !== boss.kind) {
       _kind = boss.kind;
       const sp = boss.kind === 'splicer';
-      label.textContent = sp ? 'SPLICER' : 'MONOLITH';
+      label.textContent = sp ? t('boss.splicer') : t('boss.monolith');
       label.style.color = sp ? 'rgba(120,235,220,0.9)' : 'rgba(190,160,255,0.9)';
       bar.style.borderColor = sp ? 'rgba(45,212,191,0.5)' : 'rgba(150,110,255,0.5)';
       fill.style.background = sp ? 'linear-gradient(90deg,#14b8a6,#5eead4)' : 'linear-gradient(90deg,#8b5cf6,#c084fc)';

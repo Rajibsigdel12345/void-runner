@@ -2,20 +2,21 @@
 // change; drain bars quantized (chips 1/20, combo 1/40) so style writes stop
 // once the displayed value is unchanged.
 import { CONFIG } from '../core/config.js';
+import { t as tr } from '../core/strings.js'; // I404: ST-374 strings
 
 // I44: power-up indicator chips (GDD: top-right "active power-up timers").
 // Accessibility (GDD): shape + color + label - never color alone. Palette
 // matches the GDD power-up colors.
 const PU_STYLE = {
-  rapid:  { label: 'RAPID',  letter: 'R', color: '#ffe08a' },
-  spread: { label: 'SPREAD', letter: 'S', color: '#ffa657' },
-  shield: { label: 'SHIELD', letter: 'H', color: '#53d8ff' },
-  magnet: { label: 'MAGNET', letter: 'M', color: '#7dff9e' },
-  overdrive: { label: 'OVERDRIVE', letter: 'O', color: '#ff6ae2' },
-  slowmo: { label: 'SLOW-MO', letter: 'T', color: '#9fe8ff' }, // ST-116
+  rapid:  { letter: 'R', color: '#ffe08a' },
+  spread: { letter: 'S', color: '#ffa657' },
+  shield: { letter: 'H', color: '#53d8ff' },
+  magnet: { letter: 'M', color: '#7dff9e' },
+  overdrive: { letter: 'O', color: '#ff6ae2' },
+  slowmo: { letter: 'T', color: '#9fe8ff' }, // ST-116
 };
 
-const MOD_TAG = { fast: ['FAST ROCKS', '#ff9a6b'], small: ['SMALL ROCKS', '#6fe3ff'], inward: ['INWARD DRIFT', '#8bff9e'], big: ['HEAVY ROCKS', '#c99eff'] }; // I93: persistent active-modifier tag; ST-228: big
+const MOD_TAG = { fast: '#ff9a6b', small: '#6fe3ff', inward: '#8bff9e', big: '#c99eff' }; // I93: persistent active-modifier tag (labels -> strings.js I404); ST-228: big
 
 // I112: combo text brightens as the chain climbs multiplier tiers (index = tier, 0..tierCount).
 const TIER_COLOR = ['#ffe08a', '#ffe08a', '#fff0b0', '#fff6cf', '#fffdf2', '#ffffff'];
@@ -60,7 +61,7 @@ export function createHUD(root) {
   const wpnBox = box('top:88px;left:18px'); // ST-318 (I347): E31 minor (b) - clears the BEST x WPN 280 px^2 cross (I319); >=20px gap bar
   const wpnLabel = document.createElement('div');
   wpnLabel.style.cssText = 'font-size:calc(11px * var(--vr-fs,1));font-weight:800;letter-spacing:2px;opacity:0.85;margin-bottom:3px;';
-  wpnLabel.textContent = 'WPN';
+  wpnLabel.textContent = tr('hud.wpn');
   wpnBox.appendChild(wpnLabel);
   const pipRow = document.createElement('div');
   pipRow.style.cssText = 'display:flex;gap:5px;';
@@ -99,7 +100,7 @@ export function createHUD(root) {
     const letter = document.createElement('span'); // I70: letter badge (R/S/H/B/M/O)
     letter.style.cssText = `display:inline-flex;align-items:center;justify-content:center;width:1em;height:1em;margin-right:7px;font-size:calc(13px * var(--vr-fs,1));font-weight:800;line-height:1;color:#08101f;background:${s.color};border-radius:0.18em;`;
     letter.textContent = s.letter;
-    top.append(letter, document.createTextNode(s.label));
+    top.append(letter, document.createTextNode(tr('hud.pu.' + t)));
     const track = document.createElement('div');
     track.style.cssText = 'height:3px;margin-top:2px;background:rgba(255,255,255,0.15);';
     const fill = document.createElement('div');
@@ -115,7 +116,7 @@ export function createHUD(root) {
   const heatWrap = box('bottom:26px;left:50%;transform:translateX(-50%);text-align:center;transition:opacity 0.15s linear');
   const comboLabel = document.createElement('div');
   comboLabel.id = 'hud-combo-label';
-  comboLabel.textContent = 'COMBO';
+  comboLabel.textContent = tr('hud.combo');
   comboLabel.style.cssText = 'font-size:calc(10px * var(--vr-fs,1));font-weight:800;letter-spacing:3px;margin-bottom:4px;color:#ffe08a;opacity:0.9;';
   const comboTrack = document.createElement('div');
   comboTrack.id = 'hud-combo-track';
@@ -142,12 +143,12 @@ export function createHUD(root) {
   let lastModTag = ''; // I93: cache for the persistent modifier tag
   function render(world, opts = {}) {
     set('score', score, String(world.score));
-    set('best', best, opts.best > 0 ? `BEST ${opts.best}` : '');
-    set('wave', wave, world.wave > 0 ? `WAVE ${world.wave}` : '');
+    set('best', best, opts.best > 0 ? tr('hud.best',{best:opts.best}) : '');
+    set('wave', wave, world.wave > 0 ? tr('hud.wave',{wave:world.wave}) : '');
     const modTag = (world.waves && world.waves.activeMod && MOD_TAG[world.waves.activeMod]) ? world.waves.activeMod : 'none'; // I93
     if (modTag !== lastModTag) {
       lastModTag = modTag;
-      if (modTag !== 'none') { waveMod.textContent = MOD_TAG[modTag][0]; waveMod.style.color = MOD_TAG[modTag][1]; waveMod.style.display = 'block'; }
+      if (modTag !== 'none') { waveMod.textContent = tr('hud.mod.' + modTag); waveMod.style.color = MOD_TAG[modTag]; waveMod.style.display = 'block'; }
       else { waveMod.textContent = ''; waveMod.style.display = 'none'; }
     }
     // I123: weapon-level pips - fill by level, recolor by level; write only on change.

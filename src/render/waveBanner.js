@@ -5,6 +5,7 @@
 // while idle, renders the intermission countdown from the wave director.
 // I321: ST-299 - sync() also takes the game state; on GAME_OVER the banner force-hides so the WAVE n bar never overlaps the GAME OVER title.
 import { STATE } from '../core/state.js';
+import { t } from '../core/strings.js'; // I404: ST-374 strings
 export function createWaveBanner(root) {
   const el = document.createElement('div');
   el.id = 'wave-banner';
@@ -26,22 +27,22 @@ export function createWaveBanner(root) {
   let lastCountdown = '';
   let lastBig = null; // I167: per-frame same-value text writes committed 3 DOM mutations/frame during banner holds
   let lastSub = null; // I167
-  const MOD_LABELS = { fast: 'FAST ROCKS', small: 'SMALL ROCKS', inward: 'INWARD DRIFT', big: 'HEAVY ROCKS' }; // ST-051; ST-228: big
+  const MOD_KEYS = ['fast', 'small', 'inward', 'big']; // ST-051; I404: labels via strings.js hud.mod.*; ST-228: big
 
   function startWave(n, mod, endless) {
     const parts = []; // ST-058: ENDLESS tag, then the wave modifier label
-    if (endless) parts.push('ENDLESS');
-    if (mod && MOD_LABELS[mod]) parts.push(MOD_LABELS[mod]);
-    anim = { t: 0, dur: 1.8, text: 'WAVE ' + n, subText: parts.join(' \u00b7 ') };
+    if (endless) parts.push(t('banner.endless'));
+    if (mod && MOD_KEYS.includes(mod)) parts.push(t('hud.mod.' + mod));
+    anim = { t: 0, dur: 1.8, text: t('banner.wave',{n}), subText: parts.join(' \u00b7 ') };
     el.style.fontSize = 'calc(40px * var(--vr-fs,1))'; // I161: font-scale
   }
   function startCleared(n) { // I154: gold big "CLEARED" + wave sub
-    anim = { t: 0, dur: 1.2, text: 'CLEARED', subText: 'WAVE ' + n, tint: '#ffe08a', glow: '0 0 22px rgba(255,224,138,0.35), 0 2px 14px rgba(0,0,0,0.9)' };
+    anim = { t: 0, dur: 1.2, text: t('banner.cleared'), subText: t('banner.wave',{n}), tint: '#ffe08a', glow: '0 0 22px rgba(255,224,138,0.35), 0 2px 14px rgba(0,0,0,0.9)' };
     el.style.fontSize = 'calc(40px * var(--vr-fs,1))'; // I161: font-scale
   }
   function startBoss(n, maxHp, name, kind) { // ST-135/143: boss intro (bigger, variant-tinted); I154: per-variant glow
     const splicer = kind === 'splicer';
-    anim = { t: 0, dur: 2.2, text: name || 'THE MONOLITH', subText: 'WAVE ' + n + ' \u00b7 ' + maxHp + ' HP',
+    anim = { t: 0, dur: 2.2, text: name || t('banner.boss.monolith'), subText: t('banner.boss_sub',{n, hp:maxHp}),
       tint: splicer ? '#7ff0e0' : '#c9a8ff',
       glow: splicer ? '0 0 26px rgba(127,240,224,0.5), 0 2px 14px rgba(0,0,0,0.9)' : '0 0 26px rgba(201,168,255,0.55), 0 2px 14px rgba(0,0,0,0.9)' };
     el.style.fontSize = 'calc(52px * var(--vr-fs,1))'; // I161: font-scale
@@ -92,7 +93,7 @@ export function createWaveBanner(root) {
     }
     // idle: intermission countdown
     if (waves && waves.state === 'intermission') {
-      const txt = 'NEXT WAVE IN ' + Math.max(0, waves.intermission).toFixed(1);
+      const txt = t('banner.countdown',{n:Math.max(0, waves.intermission).toFixed(1)});
       if (lastCountdown !== txt) {
         lastCountdown = txt;
         el.firstChild.nodeValue = '';

@@ -3,6 +3,7 @@
 // points, multiplier, overdrive). DOM only; mirrors the panel style of screens.js.
 // Reduced motion is honored via the vr-reduced class (no slide-in, no fade).
 // aria-hidden: decorative HUD - score popups + game-over stats already carry the data.
+import { t } from '../core/strings.js'; // I404: ST-374 strings
 export function createKillFeed(root) {
   const MAX = 5;
   const LIFE = 3.0; // seconds an entry stays on screen
@@ -29,15 +30,15 @@ export function createKillFeed(root) {
   let visible = false;
 
   function label(d) {
-    if (d.size === 'boss' || d.boss) return d.kind === 'splicer' ? 'THE SPLICER' : 'THE MONOLITH';
-    if (d.size === 'warden') return 'WARDEN';
-    if (d.size === 'mine') return 'MINE';
-    if (d.size === 'drone') return 'SEEKER';
-    if (d.size === 'stinger') return 'STINGER';
-    if (d.size === 'flyer') return 'FLYER';
-    if (d.golden) return 'GOLDEN ROCK';
+    if (d.size === 'boss' || d.boss) return d.kind === 'splicer' ? t('banner.boss.splicer') : t('banner.boss.monolith');
+    if (d.size === 'warden') return t('feed.warden');
+    if (d.size === 'mine') return t('feed.mine');
+    if (d.size === 'drone') return t('feed.seeker');
+    if (d.size === 'stinger') return t('feed.stinger');
+    if (d.size === 'flyer') return t('feed.flyer');
+    if (d.golden) return t('feed.golden_rock');
     const s = String(d.size || 'M').toUpperCase();
-    return s + ' ROCK';
+    return t('feed.rock',{size:s});
   }
   function color(d) {
     if (d.size === 'boss' || d.boss) return '#ffe08a';

@@ -4,6 +4,7 @@
 // screens.js. Session keys (Enter/Space/Esc/p/P) are owned by main.js, which calls
 // dismiss(); the overlay owns its button. Reduced-motion is applied via the vr-reduced
 // class toggled from syncVisuals.
+import { t, kc as kcap } from '../core/strings.js'; // I404: ST-374 strings
 export function createTutorialOverlay(root, opts = {}) {
   const touch = opts.touch === true; // touch vs keyboard instructions
   const onDismiss = typeof opts.onDismiss === 'function' ? opts.onDismiss : () => {};
@@ -50,14 +51,14 @@ export function createTutorialOverlay(root, opts = {}) {
     'box-shadow:0 20px 60px rgba(0,0,0,0.6)',
   ].join(';');
 
-  card.appendChild(line('HOW TO PLAY', 'font-size:calc(28px * var(--vr-fs,1));font-weight:800;letter-spacing:6px;color:#8fd0ff;'));
-  card.appendChild(line('fly, aim, fire - and outlast the waves', 'font-size:calc(14px * var(--vr-fs,1));letter-spacing:2px;opacity:0.85;')); // ST-268: both schemes now read the same
+  card.appendChild(line(t('tutorial.title'), 'font-size:calc(28px * var(--vr-fs,1));font-weight:800;letter-spacing:6px;color:#8fd0ff;'));
+  card.appendChild(line(t('tutorial.sub'), 'font-size:calc(14px * var(--vr-fs,1));letter-spacing:2px;opacity:0.85;')); // ST-268: both schemes now read the same
 
   const grid = document.createElement('div');
   grid.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:8px 22px;font-size:calc(14px * var(--vr-fs,1));padding:16px 22px;box-sizing:border-box;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);';
   const ROWS = touch
-    ? [['LEFT ZONE', 'drag to fly'], ['RIGHT ZONE', 'aim + fire'], ['2 FINGERS', 'pause']] // ST-268 dual-zone
-    : [['WASD / ARROWS', 'thrust'], ['MOUSE', 'aim'], ['CLICK / SPACE', 'fire'], ['P / ESC', 'pause'], ['M', 'mute'], ['N', 'music']];
+    ? [[kcap('left_zone'), t('ctrl.drag_fly')], [kcap('right_zone'), t('ctrl.aim_fire')], [kcap('two_fingers'), t('ctrl.pause')]] // ST-268 dual-zone
+    : [[kcap('wasd_arrows'), t('ctrl.thrust')], [kcap('mouse'), t('ctrl.aim')], [kcap('click_space'), t('ctrl.fire')], [kcap('p_esc'), t('ctrl.pause')], [kcap('m'), t('ctrl.mute')], [kcap('n'), t('ctrl.music')]];
   for (const [k, v] of ROWS) {
     const key = document.createElement('div');
     key.style.cssText = 'text-align:right;';
@@ -69,19 +70,19 @@ export function createTutorialOverlay(root, opts = {}) {
   }
   card.appendChild(grid);
 
-  card.appendChild(line('survive the waves - bosses arrive on wave 5 and beyond', 'font-size:calc(13px * var(--vr-fs,1));letter-spacing:1px;opacity:0.7;'));
+  card.appendChild(line(t('tutorial.boss_note'), 'font-size:calc(13px * var(--vr-fs,1));letter-spacing:1px;opacity:0.7;'));
 
   const go = document.createElement('button');
   go.type = 'button';
   go.className = 'vr-tut-go';
-  go.appendChild(document.createTextNode((touch ? 'TAP TO LAUNCH' : 'LAUNCH') + '  '));
+  go.appendChild(document.createTextNode((touch ? t('tutorial.go_tap') : t('tutorial.go_key')) + '  '));
   if (!touch) {
     const ks = document.createElement('span');
     ks.className = 'vr-key';
-    ks.textContent = 'ENTER';
+    ks.textContent = kcap('enter');
     go.appendChild(ks);
   }
-  go.setAttribute('aria-label', 'Dismiss the tutorial and start playing');
+  go.setAttribute('aria-label', t('tutorial.dismiss_aria'));
   go.addEventListener('click', (e) => { e.stopPropagation(); dismiss(); go.blur(); });
   card.appendChild(go);
 

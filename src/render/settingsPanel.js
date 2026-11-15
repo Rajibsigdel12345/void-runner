@@ -1,4 +1,5 @@
 import { FONT_SCALES } from '../core/storage.js'; // I70
+import { t } from '../core/strings.js'; // I404: ST-374 strings
 
 // ST-026 settings panel, polished in ST-067: grouped (AUDIO / VISUALS),
 // keyboard-operable (Tab + arrow focus moves on the plain controls, game
@@ -52,35 +53,35 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   }
 
   // AUDIO group
-  const audioCard = card('AUDIO');
-  row('VOLUME', audioCard);
+  const audioCard = card(t('settings.audio'));
+  row(t('settings.volume'), audioCard);
   const vol = document.createElement('input');
   vol.type = 'range'; vol.min = '0'; vol.max = '1'; vol.step = '0.05';
   vol.value = String(s0.volume);
   vol.style.width = 'calc(170px * var(--vr-fs,1))';
-  vol.setAttribute('aria-label', 'Volume');
+  vol.setAttribute('aria-label', t('settings.volume_aria'));
   vol.addEventListener('input', () => emit({ volume: Number(vol.value) }));
   audioCard.appendChild(styleCtl(vol));
 
-  row('SFX', audioCard);
+  row(t('settings.sfx'), audioCard);
   const sfx = document.createElement('input');
   sfx.type = 'checkbox'; sfx.checked = s0.sfx;
-  sfx.setAttribute('aria-label', 'Sound effects');
+  sfx.setAttribute('aria-label', t('settings.sfx_aria'));
   sfx.addEventListener('change', () => emit({ sfx: sfx.checked }));
   audioCard.appendChild(sfx);
 
-  row('MUSIC', audioCard); // I158: generative ambient music bed (on by default)
+  row(t('settings.music'), audioCard); // I158: generative ambient music bed (on by default)
   const music = document.createElement('input');
   music.type = 'checkbox'; music.checked = s0.music;
-  music.setAttribute('aria-label', 'Music');
+  music.setAttribute('aria-label', t('settings.music_aria'));
   music.addEventListener('change', () => emit({ music: music.checked }));
   audioCard.appendChild(music);
 
   // VISUALS group
-  const visCard = card('VISUALS');
-  const fxRow = row('FX QUALITY', visCard);
+  const visCard = card(t('settings.visuals'));
+  const fxRow = row(t('settings.fx'), visCard);
   const fxAuto = document.createElement('span'); // ST-225: AUTO tier marker (effective tier chosen by automation)
-  fxAuto.textContent = ' AUTO: LOW';
+  fxAuto.textContent = ' ' + t('settings.fx_auto');
   fxAuto.style.cssText = 'margin-left:8px;padding:1px 6px;border-radius:3px;background:rgba(255,224,138,0.15);border:1px solid rgba(255,224,138,0.4);color:#ffe08a;font-size:calc(10px * var(--vr-fs,1));letter-spacing:1px;opacity:0;transition:opacity .2s;';
   fxRow.appendChild(fxAuto);
   function setFxMarker(text) { // ST-225(b): null hides; text shows e.g. 'AUTO: LOW'
@@ -89,52 +90,52 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   const fxSel = document.createElement('select');
   for (const opt of ['high', 'low', 'off']) { // ST-224: off tier
     const o = document.createElement('option');
-    o.value = opt; o.textContent = opt.toUpperCase();
+    o.value = opt; o.textContent = t('settings.fx.' + opt);
     fxSel.appendChild(o);
   }
   fxSel.value = s0.fx;
-  fxSel.setAttribute('aria-label', 'FX quality');
+  fxSel.setAttribute('aria-label', t('settings.fx_aria'));
   fxSel.addEventListener('change', () => emit({ fx: fxSel.value }, true)); // ST-067: live preview
   visCard.appendChild(styleCtl(fxSel));
 
-  row('REDUCED MOTION', visCard);
+  row(t('settings.reduced_motion'), visCard);
   const rm = document.createElement('input');
   rm.type = 'checkbox'; rm.checked = s0.reducedMotion;
-  rm.setAttribute('aria-label', 'Reduced motion');
+  rm.setAttribute('aria-label', t('settings.reduced_motion_aria'));
   rm.addEventListener('change', () => emit({ reducedMotion: rm.checked }));
   visCard.appendChild(rm);
 
-  row('FONT SCALE', visCard); // I70: UI text scale (applied as --vr-fs)
+  row(t('settings.font_scale'), visCard); // I70: UI text scale (applied as --vr-fs)
   const fontSel = document.createElement('select');
   for (const sc of FONT_SCALES) {
     const o = document.createElement('option');
     o.value = String(sc);
-    o.textContent = sc === 1 ? 'NORMAL' : sc === 1.25 ? 'LARGE' : 'XL';
+    o.textContent = t('settings.font_scale.' + (sc === 1 ? 'normal' : sc === 1.25 ? 'large' : 'xl'));
     fontSel.appendChild(o);
   }
   fontSel.value = String(s0.fontScale);
-  fontSel.setAttribute('aria-label', 'Font scale');
+  fontSel.setAttribute('aria-label', t('settings.font_scale_aria'));
   fontSel.addEventListener('change', () => emit({ fontScale: Number(fontSel.value) }));
   visCard.appendChild(styleCtl(fontSel));
 
-  row('SHAPE CUES', visCard); // I155: colorblind-friendly silhouette markers (on by default)
+  row(t('settings.shape_cues'), visCard); // I155: colorblind-friendly silhouette markers (on by default)
   const cues = document.createElement('input');
   cues.type = 'checkbox'; cues.checked = s0.shapeCues;
-  cues.setAttribute('aria-label', 'Shape cues');
+  cues.setAttribute('aria-label', t('settings.shape_cues_aria'));
   cues.addEventListener('change', () => emit({ shapeCues: cues.checked }));
   visCard.appendChild(cues);
 
-  row('COLORBLIND', visCard); // I158: deuteranopia (Machado 2009) preview on the canvas
+  row(t('settings.colorblind'), visCard); // I158: deuteranopia (Machado 2009) preview on the canvas
   const cbPreview = document.createElement('input');
   cbPreview.type = 'checkbox'; cbPreview.checked = s0.colorblindPreview;
-  cbPreview.setAttribute('aria-label', 'Colorblind preview');
+  cbPreview.setAttribute('aria-label', t('settings.colorblind_aria'));
   cbPreview.addEventListener('change', () => emit({ colorblindPreview: cbPreview.checked }));
   visCard.appendChild(cbPreview);
 
-  row('SLOW-MO HINT', visCard); // I158: short caption when the slow-mo pickup is on screen / active
+  row(t('settings.slowmo_hint'), visCard); // I158: short caption when the slow-mo pickup is on screen / active
   const smHint = document.createElement('input');
   smHint.type = 'checkbox'; smHint.checked = s0.slowmoHint;
-  smHint.setAttribute('aria-label', 'Slow-mo hint');
+  smHint.setAttribute('aria-label', t('settings.slowmo_hint_aria'));
   smHint.addEventListener('change', () => emit({ slowmoHint: smHint.checked }));
   visCard.appendChild(smHint);
 
@@ -145,7 +146,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   wrap.appendChild(groups);
 
   const hint = document.createElement('div'); // ST-067: key-nav hint
-  hint.textContent = 'TAB NAVIGATES - ARROWS MOVE - SPACE TOGGLES';
+  hint.textContent = t('settings.kbd_hint');
   hint.style.cssText = 'font-size:calc(11px * var(--vr-fs,1));letter-spacing:2px;opacity:0.55;';
   wrap.appendChild(hint);
 
