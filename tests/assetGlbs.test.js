@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief); ship 300 -> 850 at I429 (ST-399 remaster, 818-tri fighter; design/asset-spec-ship-remaster.md)).
-const BUDGETS = { ship: 4500, L: 500, M: 140, S: 140, comet: 200, boss: 750, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200, chunk: 60, sliver: 50 }; // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254)
+const BUDGETS = { ship: 4500, L: 500, M: 520, S: 140, comet: 200, boss: 750, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200, chunk: 60, sliver: 50 }; // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology)
 const MAX_FILE_BYTES = 262144; // I435 (ST-405 ship remaster v2) EXPLICIT re-pin: 100*1024 -> 262144 (ship 63,908 B/818t -> 190,544 B/3254t; max non-ship stays boss 75.26 KB)
 
 function parseGlb(file) {
@@ -182,18 +182,19 @@ test('asteroid L/M/S: naming, poly budgets, radii match CONFIG (+/-5%)', () => {
 // same ST-283 value-ladder + warm-order R>=G>=B + per-vertex hue-jitter scheme, denser surface.
 const ROCK_FACET = {
   L: { p10: 0.1410, p50: 0.4621, p90: 0.7785, mean: 0.4830 },
-  M: { p10: 0.2610, p50: 0.6347, p90: 0.8769, mean: 0.6098 },
+  M: { p10: 0.2915, p50: 0.6118, p90: 0.9056, mean: 0.6044 },
   S: { p10: 0.4387, p50: 0.7144, p90: 1.0090, mean: 0.7092 },
-}; // I370 (ST-337 E41 relief re-bake v8): L 18592B/490t 5cr+4bump / M 6336B/134t 4cr+3bump / S 7344B/134t 4cr+3bump - deeper craters (depth x1.4-1.6 vs I343), rim sigma 0.35-0.55, NEW convex bumps, relief-tracking COLOR_0 (relief z-score |v|/r-1 blended 0.7/0.3 with fbm into the tanh value-ladder; wh=0.7 k=2.4 gain=1.75; centers L 0.46 M 0.62 S 0.8137); deltas vs I343 pins: L p10 -0.0773 p50 -0.0236 p90 -0.0171 mean -0.0099 spread +0.0602; M p10 -0.0377 p50 +0.0893 p90 +0.0273 mean +0.0585 spread +0.0650; S p10 +0.0471 p50 +0.0116 p90 +0.0611 mean +0.0285 spread +0.0139; same warm-order R>=G>=B + per-vertex hue-jitter + per-triangle mean-luma convention
+}; // I370 (ST-337 E41 relief re-bake v8): L 18592B/490t 5cr+4bump / M 6336B/134t 4cr+3bump / S 7344B/134t 4cr+3bump - deeper craters (depth x1.4-1.6 vs I343), rim sigma 0.35-0.55, NEW convex bumps, relief-tracking COLOR_0 (relief z-score |v|/r-1 blended 0.7/0.3 with fbm into the tanh value-ladder; wh=0.7 k=2.4 gain=1.75; centers L 0.46 M 0.62 S 0.8137); deltas vs I343 pins: L p10 -0.0773 p50 -0.0236 p90 -0.0171 mean -0.0099 spread +0.0602; M p10 -0.0377 p50 +0.0893 p90 +0.0273 mean +0.0585 spread +0.0650; S p10 +0.0471 p50 +0.0116 p90 +0.0611 mean +0.0285 spread +0.0139; same warm-order R>=G>=B + per-vertex hue-jitter + per-triangle mean-luma convention;
+// I436 (ST-406) M v9 subdivided realism pass re-pin: 134t/122v 4cr+3bump 6336B -> 500t/252v 8cr+10bump 13216B (deterministic .evidence/I436/build_rock_m_v9.py; denser relief, welded file); M 0.2610/0.6347/0.8769/0.6098 -> 0.2915/0.6118/0.9056/0.6044 (deltas +0.0305/-0.0229/+0.0287/-0.0054; measured file-level); ladder L<M<S holds (L p50 0.4621 < M 0.6118 < S 0.7144)
 // I420 (ST-390 E52): B-variant silhouette GLBs (asteroid_{L,M,S}_B.glb) - same topology as A
 // (490/134/134 tris), distinct displacement lobes + anisotropic scale, relief-tracking
 // COLOR_0 with a B-specific mottle seed. Same value ladder (L<M<S), same warm order
 // R>=G>=B, same [0.10,1.20] band + >= 0.50 facet-spread floor.
 const ROCK_FACET_B = {
   L: { p10: 0.1598, p50: 0.4465, p90: 0.7913, mean: 0.4622 },
-  M: { p10: 0.2842, p50: 0.6402, p90: 0.9153, mean: 0.6297 },
+  M: { p10: 0.2863, p50: 0.5984, p90: 0.9427, mean: 0.6075 },
   S: { p10: 0.3791, p50: 0.7133, p90: 0.9625, mean: 0.6849 },
-}; // I420 (ST-390): B bake pins, measured file-level through facetLumas below
+}; // I420 (ST-390): B bake pins, measured file-level through facetLumas below; I436 (ST-406) M_B v9 re-pin: 0.2842/0.6402/0.9153/0.6297 -> 0.2863/0.5984/0.9427/0.6075 (deltas +0.0021/-0.0418/+0.0274/-0.0222; B built from NEW M v9 via I420 recipe, same 500t topology; ladder L<M<S holds: L 0.4465 < M 0.5984 < S 0.7133 p50)
 function facetLumas({ buf, json, binOff }) {
   const p = json.meshes[0].primitives[0];
   const cAcc = json.accessors[p.attributes.COLOR_0];
@@ -272,7 +273,7 @@ test('asteroid L/M/S: COLOR_0 mottling band + warm order + facet luma spread (I2
 // I420 (ST-390 E52): B-variant silhouette GLBs - distinct low-poly silhouette per size,
 // SAME tri count as primary A (zero re-pin), same radii (visual/hitbox parity), VR_ naming.
 test('asteroid L/M/S _B: naming, poly budgets, radii match CONFIG (+/-5%) (I420)', () => {
-  const A_TRIS = { L: 490, M: 134, S: 134 };
+  const A_TRIS = { L: 490, M: 500, S: 134 }; // I436 (ST-406): M 134 -> 500 (v9 subdivided pass; M_B same topology -> equal-tris assert holds)
   for (const size of ['L', 'M', 'S']) {
     const { buf, json, binOff } = parseGlb('asteroid_' + size + '_B.glb');
     assert.ok(buf.length < MAX_FILE_BYTES, 'asteroid_' + size + '_B.glb under 100 KB');

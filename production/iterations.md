@@ -5706,3 +5706,21 @@ no orphan serve.mjs.
 - Quality bar: npm test 972/972 (re-pin values only; test count unchanged) + npm run build 0 + dist 138/2,236,670 B + dist ship.glb byte-identical to assets/ (190,544 B) + vendor sha256-16 76DEA8151BC9352A (vendor/three.module.js, I295 convention; dist/vendor subset byte-identical 13/13 bad=0) + hygiene (ports 5173/4173/5199 free; chrome 0; node MCP-only).
 - Rollback target preserved: .evidence/I435/ship_old.glb (63,908 B / 818 tris, the b015642 ship).
 - Risk/follow-up: ST-406 (CUTTABLE other-asset Blender realism pass; assetPerf headroom: 560/520/256/8000 vs measured 424.34/388.09/186.08/6384). Next: I436 = ST-406 (re-read cgs-dev-story + blender-asset-qa + blender-hardsurface-modeling FIRST; CG A/B old-vs-new gate; CUT if not clearly improved).
+
+## I436 - ST-406 rock M+M_B remaster v9 (Blender; cgs-dev-story + blender-asset-qa + blender-hardsurface-modeling + blender-export)
+
+Story: E55 CUTTABLE other-asset realism pass - remaster ONE other asset in Blender (asteroid M + M_B, one logical asset, the mid-size rock seen most across waves), bumps/craters/shape only if not GPU/compute-heavy (user constraint).
+
+Changed: assets/asteroid_M.glb (134t/122v 4cr+3bump 6,336 B -> 500t/252v 8cr+10bump+chip 13,216 B; deterministic .evidence/I436/build_rock_m_v9.py, welded manifold, static displacement only per E41 - no per-frame deformation / no normal maps / no new draw calls) + assets/asteroid_M_B.glb (5,244 B -> 13,220 B; built from the NEW M via the I420 recipe: scale 1.06/0.90/1.06 + distinct B mottle seed, same 500t topology) + tests/assetGlbs.test.js (re-pins only). No src/ changes.
+
+The asset: denser subdivision pass (134 -> 500 tris), 8 craters + 10 convex bumps + a fine chip on M; M_B inherits the A topology with a B-specific displacement + mottle seed. maxR 1.30000002 (rockab 1.3 band holds). Ladder L<M<S holds: A p50 0.4621 < 0.6118 < 0.7144, B 0.4465 < 0.5984 < 0.7133. Blender 5.2.3 pitfall hit + fixed: shade_auto_smooth + export_apply split verts at 30-deg creases (252 -> 297 verts cracked import) -> exported all-polygons use_smooth=True with NO auto-30 modifier.
+
+Gates: CG A/B clay gate PASS 6 PNGs viewed (rock_clay_m_34 / m_front / mb_34 / mb_front / close / close2; old 134-t vs new 500-t - clearly denser facets, visible crater bowls, rounder silhouette; no rollback). In-game tint gate PASS 3 PNGs viewed (tint_rock_wide / mid / close; harness battles root-caused: #wave-banner is an ID not a class; shipMesh.js:190 re-sets ship.visible every frame so the ship-hide must go inside each shot's evaluate; whitelist-keep traversal from arenaFloor up to root kills pool strays; freeze + 500ms settle + double-render defeats compositor staleness).
+
+Re-pins (EXPLICIT, old -> new, measured - NEVER silent): BUDGETS.M 140 -> 520 (actual 500) / A_TRIS.M 134 -> 500 (test comment updated) / ROCK_FACET.M {0.2610/0.6347/0.8769/0.6098} -> {0.2915/0.6118/0.9056/0.6044} (deltas +0.0305/-0.0229/+0.0287/-0.0054) + ROCK_FACET_B.M {0.2842/0.6402/0.9153/0.6297} -> {0.2863/0.5984/0.9427/0.6075} (deltas +0.0021/-0.0418/+0.0274/-0.0222) / assetPerf.test.js UNCHANGED (headroom pre-registered at I435 covered this growth) / perFileMats 3 + exactly-24-GLBs unchanged.
+
+Quality bar: npm test 972/972 + npm run build 0 + dist 2,251,526 B (headroom 208,474 B >= 102,400 B floor vs 2,460,000 B ceiling) + dist rocks BYTE-IDENTICAL to assets/ (13,216 / 13,220 B) + vendor sha256-16 76DEA8151BC9352A (subset 13/13 bad=0) + hygiene (dev server 5173 killed, ports free, chrome 0, node MCP-only).
+
+Risk / follow-up: playframe L 21/1072 + B 50/2634 WILL MOVE (rocks are in the playframe) -> re-measure + decompose EXACT at ST-407 (I437). causal p1 (seed 9876) / rockab (2.2/1.3/0.7) / PWA 11/11 render-invariant, expect ZERO. Backups .evidence/I436/backup/asteroid_M_old.glb 6,336 B + asteroid_M_B_old.glb 5,244 B.
+
+Next: I437 = ST-407 regression R1-R5 (cgs-regression-suite + cgs-gate-check + cgs-milestone-review) + G55.0 gate + close E55.
