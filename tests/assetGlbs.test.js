@@ -510,12 +510,16 @@ function extents({ buf, json, binOff }) {
 // that multiplies the in-code per-type tint (powerupMesh.js TYPES + vertexColors:true):
 // rapid = distinct gold (0xffc300; was 0xffe066 - hue-collided with spread orange), spread =
 // orange (0xff9f43 unchanged). Geometry UNCHANGED (extents/tris pins in this test hold).
+// I425/ST-395: powerup_spread/shield/magnet re-baked in Blender 5.2 (trident prism / hex ring + hex core / horseshoe U-prism)
+// with fresh silhouette-matched value bakes; their PU_FACET pins below re-pinned EXPLICITLY old -> new (never silent).
+// rapid/bomb/overdrive/slowmo GLBs untouched, pins hold. The I288 "Geometry UNCHANGED" note above is historical and no longer
+// holds for the three re-baked emblems (their extent pins are 15% bands, still satisfied).
 const PU_FACET = {
   powerup_rapid:     { p10: 0.720, p50: 1.250, p90: 1.250 }, // sRGB-agnostic linear bake domain [0.30, 1.25]
-  powerup_spread:    { p10: 0.712, p50: 0.828, p90: 1.161 },
-  powerup_shield:    { p10: 0.615, p50: 1.250, p90: 1.250 },
+  powerup_spread:    { p10: 0.3271, p50: 0.6364, p90: 1.1556 }, // I425/ST-395 re-bake (trident prism; old pins 0.712/0.828/1.161)
+  powerup_shield:    { p10: 0.3374, p50: 0.3911, p90: 1.1793 }, // I425/ST-395 re-bake (hex ring + core; old pins 0.615/1.250/1.250)
   powerup_bomb:      { p10: 0.703, p50: 1.000, p90: 1.250 },
-  powerup_magnet:    { p10: 0.580, p50: 1.000, p90: 1.250 },
+  powerup_magnet:    { p10: 0.3271, p50: 0.7265, p90: 1.250 }, // I425/ST-395 re-bake (horseshoe U-prism; old pins 0.580/1.000/1.250)
   powerup_overdrive: { p10: 0.595, p50: 1.000, p90: 1.250 },
   powerup_slowmo:    { p10: 0.864, p50: 1.000, p90: 1.250 },
 };

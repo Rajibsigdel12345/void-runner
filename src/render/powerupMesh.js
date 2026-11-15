@@ -1,7 +1,8 @@
 ﻿// Void Runner - power-up rendering (ST-020). Pooled meshes, shared geo/materials per type.
 // Distinct silhouette + color per type (I064 adds colorblind glyph decals):
-//   rapid = octahedron/gold (I288: distinct from spread orange), spread = cone/orange, shield = torus/cyan,
-//   bomb = cube/red, magnet = sphere/green, overdrive = hex prism/magenta (ST-057).
+//   rapid = octahedron/gold (I288: distinct from spread orange), spread = trident cone/orange, shield = hex ring/cyan,
+//   bomb = cube/red, magnet = horseshoe/green, overdrive = hex prism/magenta (ST-057; I425/ST-395: spread/shield/magnet
+//   fallbacks silhouette-match the re-baked Blender emblems).
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 
@@ -33,10 +34,10 @@ function letterTexture(letter, ringHex) {
 
 const TYPES = {
   rapid:  { color: 0xffc300, emissive: 0x7a5a00, make: () => new THREE.OctahedronGeometry(0.45) }, // I288/ST-272: distinct gold (was 0xffe066 - hue-collided with spread orange)
-  spread: { color: 0xff9f43, emissive: 0x7a4a00, make: () => new THREE.ConeGeometry(0.4, 0.75, 4) },
-  shield: { color: 0x53d8ff, emissive: 0x0e5a75, make: () => new THREE.TorusGeometry(0.38, 0.12, 8, 20) },
+  spread: { color: 0xff9f43, emissive: 0x7a4a00, make: () => new THREE.ConeGeometry(0.35, 0.85, 3) }, // I425/ST-395: 3-sided trident fallback
+  shield: { color: 0x53d8ff, emissive: 0x0e5a75, make: () => new THREE.TorusGeometry(0.34, 0.13, 3, 6) }, // I425/ST-395: hex-ring fallback
   bomb:   { color: 0xff5252, emissive: 0x751414, make: () => new THREE.BoxGeometry(0.58, 0.58, 0.58) },
-  magnet: { color: 0x69f0ae, emissive: 0x0f5c37, make: () => new THREE.SphereGeometry(0.42, 16, 12) },
+  magnet: { color: 0x69f0ae, emissive: 0x0f5c37, make: () => new THREE.TorusGeometry(0.29, 0.13, 6, 10, Math.PI) }, // I425/ST-395: horseshoe fallback (half-torus, arch opens -Y)
   overdrive: { color: 0xff4dd8, emissive: 0x6d0f52, make: () => new THREE.CylinderGeometry(0.42, 0.42, 0.3, 6) },
   slowmo: { color: 0x9fe8ff, emissive: 0x1a5a7a, make: () => new THREE.IcosahedronGeometry(0.45) }, // ST-115: ice-blue icosahedron (safety entry; tint lands in I116)
 };
