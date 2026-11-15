@@ -77,6 +77,7 @@ export function createWardenMesh(scene) {
 
   const ARMORED = new THREE.Color(0x19d3c5);
   const EXPOSED = new THREE.Color(0xff7a3c);
+  const FLASH_WHITE = new THREE.Color(1, 1, 1); // ST-385/E51: hit-flash lerp target (white, not a hue)
 
   /** sync(warden, t): place the drone, pulse the glow, show the armor state. */
   function sync(warden, t) {
@@ -88,6 +89,14 @@ export function createWardenMesh(scene) {
     hullMat.emissive.copy(c);
     hullMat.emissiveIntensity = (armored ? 0.26 : 0.5) + 0.18 * (0.5 + 0.5 * Math.sin(t * (armored ? 2.2 : 5.0)));
     armorMat.emissive.copy(c);
+    const k = warden.hitFlash || 0; // ST-385/E51: white hit-flash (sim scalar; 0 at rest)
+    if (k > 0) {
+      const sfx = CONFIG.fx.enemyHitFlash.spike;
+      hullMat.emissive.lerp(FLASH_WHITE, k);
+      hullMat.emissiveIntensity += sfx * k;
+      armorMat.emissive.lerp(FLASH_WHITE, k);
+      armorMat.emissiveIntensity += sfx * k; // armor base stays its 0.12 (sync never rewrites it)
+    }
     armor.scale.setScalar(armored ? 1 : 0.62); // spent armor retracts to a thin skirt
     spikes.visible = shapeCuesOn && !armored; // I155: silhouette cue for the exposed state
     group.visible = true;

@@ -134,6 +134,7 @@ export function createBossMesh(scene) {
   });
   const core = new THREE.Mesh(bakeCoreGeometry(), coreMat);
   group.add(core);
+  const FLASH_WHITE = new THREE.Color(1, 1, 1); // ST-385/E51: hit-flash lerp target (white, not a hue)
 
   // ST-290 (I311): attack telegraph - anticipation reads for the boss volleys (sweep ground
   // truth: anticipation IS the player s reaction window). Two scene-level rings (shared unit
@@ -213,6 +214,14 @@ export function createBossMesh(scene) {
     hullMat.emissiveIntensity = bodyPulse;
     crownMat.emissive.setHex(bodyHex);
     crownMat.emissiveIntensity = bodyPulse * 0.9; // the cap carries a touch less
+    const k = boss.hitFlash || 0; // ST-385/E51: white hit-flash (sim scalar; 0 at rest)
+    if (k > 0) {
+      const sfx = CONFIG.fx.enemyHitFlash.spike;
+      hullMat.emissive.lerp(FLASH_WHITE, k);
+      hullMat.emissiveIntensity += sfx * k;
+      crownMat.emissive.lerp(FLASH_WHITE, k);
+      crownMat.emissiveIntensity += sfx * k;
+    }
     coreMat.emissive.setHex(isSplicer ? (phase2 ? 0x7dffea : 0x19e8cf) : (phase2 ? 0xff4d6d : 0x9a6bff));
     coreMat.emissiveIntensity = phase2
       ? 1.7 + 0.8 * (0.5 + 0.5 * Math.sin(t * 7.2)) // phase 2: the seam blazes (bloom-threshold cross)

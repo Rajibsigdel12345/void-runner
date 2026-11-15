@@ -131,3 +131,51 @@ test('boss: a wave-15 Monolith is built with scaled HP (seed 59)', () => {
   assert.equal(w.boss.maxHp, bossHpForWave(CONFIG, 15), 'maxHp matches the wave curve');
   assert.equal(w.boss.maxHp, CONFIG.boss.maxHp + CONFIG.boss.hpStep, 'wave 15 = base + step');
 });
+
+test('ST-385: fresh boss has no hit-flash (hitFlash 0 at rest)', () => {
+  const w = worldWithBoss(385);
+  assert.equal(w.boss.hitFlash, 0, 'hitFlash starts at 0');
+});
+
+test('ST-385: a boss HP hit spikes the hit-flash to 1', () => {
+  const w = worldWithBoss(385);
+  const r = w.boss.hit();
+  assert.equal(r, false, 'not a killing hit');
+  assert.equal(w.boss.hitFlash, 1, 'hitFlash spiked to 1');
+});
+
+test('ST-385: the killing boss hit also spikes the hit-flash to 1', () => {
+  const w = worldWithBoss(385);
+  w.boss.hp = 1; // one hit to kill
+  const r = w.boss.hit();
+  assert.equal(r, true, 'killing hit');
+  assert.equal(w.boss.hitFlash, 1, 'the kill hit still flashes');
+});
+
+test('ST-385: the boss hit-flash decays to 0 over time (Math.max floor)', () => {
+  const w = worldWithBoss(385);
+  w.boss.hitFlash = 1;
+  let prev = w.boss.hitFlash;
+  const P = { x: 0, y: 0 };
+  for (let i = 0; i < 60; i++) {
+    w.boss.step(DT, P);
+    assert.ok(w.boss.hitFlash <= prev + 1e-9, 'monotone non-increasing');
+    prev = w.boss.hitFlash;
+  }
+  assert.ok(w.boss.hitFlash < 1, 'decayed from 1');
+  w.boss.step(1, P);
+  assert.equal(w.boss.hitFlash, 0, 'clamped to exactly 0');
+});
+
+test('ST-385: the boss hit-flash timeline is deterministic across reseeds', () => {
+  const a = worldWithBoss(385).boss;
+  const b = worldWithBoss(385).boss;
+  const P = { x: 0, y: 0 };
+  a.hit(); b.hit();
+  assert.equal(a.hitFlash, b.hitFlash, 'same spike');
+  assert.equal(a.hitFlash, 1, 'spike was 1');
+  for (let i = 0; i < 40; i++) {
+    a.step(DT, P); b.step(DT, P);
+    assert.equal(a.hitFlash, b.hitFlash, 'identical decay at each step');
+  }
+});

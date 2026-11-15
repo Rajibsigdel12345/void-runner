@@ -162,3 +162,63 @@ test("world: contact with the ship costs a life; the warden survives", () => {
   assert.ok(w.warden.alive, "the drone survives the touch");
   assert.ok(w.drainEvents().some((e) => e.type === "hit"), "hit event for the ship");
 });
+
+test("ST-385: fresh warden has no hit-flash (hitFlash 0 at rest)", () => {
+  const wd = freshWarden();
+  assert.equal(wd.hitFlash, 0, "hitFlash starts at 0");
+});
+
+test("ST-385: absorbed armor hits do not trigger the hit-flash", () => {
+  const wd = freshWarden(); // armor 6
+  for (let i = 0; i < 6; i++) {
+    const r = wd.hit();
+    assert.equal(r.absorbed, true, "armor hit absorbed");
+  }
+  assert.equal(wd.armor, 0, "armor fully spent");
+  assert.equal(wd.hitFlash, 0, "no flash on absorbed hits");
+});
+
+test("ST-385: a non-absorbed HP hit spikes the hit-flash to 1", () => {
+  const wd = freshWarden();
+  for (let i = 0; i < 6; i++) wd.hit(); // spend the 6 armor
+  const r = wd.hit(); // first HP hit
+  assert.equal(r.absorbed, false, "not absorbed");
+  assert.equal(r.killed, false, "not yet killed");
+  assert.equal(wd.hitFlash, 1, "hitFlash spiked to 1");
+});
+
+test("ST-385: the killing HP hit also spikes the hit-flash to 1", () => {
+  const wd = freshWarden();
+  wd.armor = 0; // bypass the armor layer
+  wd.hp = 1;    // one HP hit to kill
+  const r = wd.hit();
+  assert.equal(r.killed, true, "killing hit");
+  assert.equal(wd.hitFlash, 1, "the kill hit still flashes");
+});
+
+test("ST-385: the hit-flash decays to 0 over time (Math.max floor)", () => {
+  const wd = freshWarden();
+  wd.hitFlash = 1;
+  let prev = wd.hitFlash;
+  for (let i = 0; i < 60; i++) {
+    wd.step(1 / 60, SHIP);
+    assert.ok(wd.hitFlash <= prev + 1e-9, "monotone non-increasing");
+    prev = wd.hitFlash;
+  }
+  assert.ok(wd.hitFlash < 1, "decayed from 1");
+  wd.step(1, SHIP);
+  assert.equal(wd.hitFlash, 0, "clamped to exactly 0");
+});
+
+test("ST-385: the hit-flash timeline is deterministic across identical wardens", () => {
+  const a = freshWarden();
+  const b = freshWarden();
+  for (let i = 0; i < 6; i++) { a.hit(); b.hit(); } // spend armor on both
+  a.hit(); b.hit(); // first HP hit on both
+  assert.equal(a.hitFlash, b.hitFlash, "same spike");
+  assert.equal(a.hitFlash, 1, "spike was 1");
+  for (let i = 0; i < 40; i++) {
+    a.step(1 / 60, SHIP); b.step(1 / 60, SHIP);
+    assert.equal(a.hitFlash, b.hitFlash, "identical decay at each step");
+  }
+});

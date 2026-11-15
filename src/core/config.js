@@ -511,6 +511,10 @@ export const CONFIG = {
       hold: 0.5,             // seconds held at full severity after a hit
       fade: 0.5              // seconds of linear fade back to 0
     },
+    enemyHitFlash: {         // ST-385/E51: white hit-flash on the multi-hit enemies (warden HP hits + boss family)
+      decay: 3,              // 1/s: ~0.33 s to full decay (matches the flyer dome flash rate)
+      spike: 1.4,            // emissiveIntensity added at k=1 (hull/crown + warden armor; clears the 0.72 bloom threshold)
+    },
     weaponFanfare: {         // ST-178: weapon level-up fanfare (tier-colored ring + fountain at the ship)
       flash: 0.2,            // white flash bump (clamped to 0.8)
       punch: 0.45            // camera punch energy (boss death 1.0, bomb 0.8; upgrade is lighter)

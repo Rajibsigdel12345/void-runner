@@ -15,6 +15,7 @@ export class Warden {
     this.armor = this.maxArmor = w.armor; // ST-136: absorbs hits before HP loss
     this.radius = w.radius;
     this.alive = true;
+    this.hitFlash = 0; // ST-385/E51: render juice - 1 on an HP hit, decays in step()
     this.rot = this.rng.next() * Math.PI * 2;
   }
 
@@ -23,6 +24,7 @@ export class Warden {
   hit() {
     if (!this.alive) return { absorbed: false, killed: false };
     if (this.armor > 0) { this.armor -= 1; return { absorbed: true, killed: false }; }
+    this.hitFlash = 1; // ST-385/E51: HP hit (not absorbed) -> white flash
     this.hp -= 1;
     if (this.hp <= 0) { this.hp = 0; this.alive = false; return { absorbed: false, killed: true }; }
     return { absorbed: false, killed: false };
@@ -31,6 +33,7 @@ export class Warden {
   /** Advance: slow bounded homing toward the ship (Monolith pattern, faster). */
   step(dt, shipPos) {
     const w = this.cfg.warden;
+    this.hitFlash = Math.max(0, this.hitFlash - this.cfg.fx.enemyHitFlash.decay * dt); // ST-385/E51
     const cur = this._heading();
     const tgt = Math.atan2(shipPos.y - this.pos.y, shipPos.x - this.pos.x);
     let diff = tgt - cur;

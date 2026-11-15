@@ -34,6 +34,7 @@ export class Monolith {
     this.hp = this.maxHp = (typeof hp === 'number' && hp > 0) ? hp : b.maxHp; // ST-064: scaled by wave
     this.radius = b.radius;
     this.alive = true;
+    this.hitFlash = 0; // ST-385/E51: render juice - 1 on an HP hit, decays in step()
     this.ringTimer = b.ringEvery; // first burst after one full interval
     this.rot = this.rng.next() * Math.PI * 2;
     this.phase = 1; // ST-133: 1 normal, 2 enrage (one-way)
@@ -52,6 +53,7 @@ export class Monolith {
    */
   step(dt, shipPos) {
     const b = this.cfg.boss;
+    this.hitFlash = Math.max(0, this.hitFlash - this.cfg.fx.enemyHitFlash.decay * dt); // ST-385/E51
     const p2 = this.phase === 2 ? b.phase2 : null; // ST-133: enrage multipliers
     this.entered = Math.min(1, this.entered + dt / b.enterTime); // ST-135: entrance progress
     const speed = b.speed * (p2 ? p2.speedMult : 1);
@@ -86,6 +88,7 @@ export class Monolith {
   hit() {
     if (!this.alive) return false;
     this.hp -= 1;
+    this.hitFlash = 1; // ST-385/E51: every HP hit (incl. the killing hit) -> white flash
     if (this.hp <= 0) { this.alive = false; return true; }
     const p2 = this.cfg.boss.phase2; // ST-133: one-way enrage below the threshold
     if (this.phase === 1 && p2 && this.hp / this.maxHp < p2.hpFrac) this.phase = 2;
