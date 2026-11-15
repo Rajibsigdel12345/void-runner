@@ -5724,3 +5724,26 @@ Quality bar: npm test 972/972 + npm run build 0 + dist 2,251,526 B (headroom 208
 Risk / follow-up: playframe L 21/1072 + B 50/2634 WILL MOVE (rocks are in the playframe) -> re-measure + decompose EXACT at ST-407 (I437). causal p1 (seed 9876) / rockab (2.2/1.3/0.7) / PWA 11/11 render-invariant, expect ZERO. Backups .evidence/I436/backup/asteroid_M_old.glb 6,336 B + asteroid_M_B_old.glb 5,244 B.
 
 Next: I437 = ST-407 regression R1-R5 (cgs-regression-suite + cgs-gate-check + cgs-milestone-review) + G55.0 gate + close E55.
+
+## I437 - ST-407 fresh R1-R5 regression + G55.0 gate + close E55 (cgs-regression-suite + cgs-gate-check + cgs-milestone-review; probe-only, zero src)
+
+Story: the last story of E55 - a FRESH full regression after the I435 ship (3,254 tris) + I436 rock M/M_B (500 tris) geometry changes, plus the G55.0 milestone gate and E55 close. No code, no asset, no config changes: harnesses retagged from I432 into .evidence/I437/ (causal.mjs, rockab_run.mjs, playframe.mjs, decomp.mjs, pwa_probe.mjs; I432 -> I437 in paths).
+
+R1 (causal p1, seed 9876): EXACT 18/18 - score 11334 / kills 57 / wave 2 / combo 15 / shots 198 / acc 0.2878787878787879 / time 36.14999999999923 / replay 2169/2220/speed 4 / afterQ MENU / console 0/0. Ship + rock geometry are render-only (core logic untouched) -> ZERO change, as predicted.
+
+R2 (rockab): EXACT - RADII [2.2, 1.3, 0.7], all GLB ready, console 0/0. The I436 M maxR 1.30000002 keeps the 1.3 band.
+
+R3 (playframe): the two pins from I432 (L 21/1072, B 50/2634) failed BY DESIGN - the ship (I435) and the M rock (I436) are in the playframe. Re-measured + decomposed + re-pinned EXACT (never silent, comment block in playframe.mjs):
+- L 21/3508 (was 21/1072): single reset frame; +2436 = ship 818 -> 3254 (1x); non-ship baseline 254 byte-identical; L has no rocks.
+- B 50/7872 (was 50/2634): cumulative 2-render window; +5238 = ship 2x(3254-818)=+4872 + 1 wave-1 M rock (500-134)=+366; arithmetic closes exactly (2634+5238=7872); draw calls still 50.
+- P 10/180 UNCHANGED (intended overhead probe frame: ship hidden + 0 rocks).
+- decomp.mjs proves the split: beforeLoopComposer 31/3448 + plainRender 19/4424 = 50/7872; shipDeltaPlain = 6 calls / 3254 tris; ship node sum 958 hull + 672 wings + 212 cockpit + 432 fin + 740 engine + 240 nozzle = 3254; wave-1 set @ reseed 71201 = 4 L@490 + 1 M@500 (scene enumeration). NOT a second ship, NOT a bug, NOT the boss.
+- Ship A/B in-game view (G55.0): 3 PNGs viewed (ship_34_front / ship_face / ship_close; tint_437.mjs = I436 tint pattern with ship kept via whitelist; 6 ship nodes + floor/stars/skybox; console 0/0; renderer.info confirms 0 rock tris - the horizon "rocks" in the shots are the baked equirect skybox texture, src/render/skybox.js).
+
+R4 (PWA, prod :5199, one server, killed after): 11/11 - sw active root scope + controller claimed / online boot / manifest 200 standalone 512 icon / start_url+scope / offline boot no NaN / console 0/0.
+
+R5: npm test 972/972 / npm run build 0 / distcheck: dist 2,251,526 B (ceiling 2,460,000, headroom 208,474 >= 102,400 floor) / 24 GLBs / rocks byte-identical (13,216 / 13,220 B) / vendor 13/13 / sha 76DEA8151BC9352A / hygiene (chrome 0; ports 5173/4173/5199 free after kills).
+
+G55.0 gate (cgs-gate-check): PASS - all 5 regression runs green (R1/R2 EXACT zero-change, R3 re-pinned + decomposed + airtight, R4 11/11, R5 quality bar green); docs booked; E55 milestone review (cgs-milestone-review): scope met 5/5 (ship "real airship" v2 delivered in I435; cuttable other-asset realism delivered in I436; regression clean). E55 CLOSED 5/5.
+
+Next: E56 (new user directive - ship remaster v3: more detail + higher poly, a real airship; other assets more realistic, use polygons/GPU as needed; honest WebGPU re-evaluation). DOCS-first: cgs-scope-check + cgs-create-stories with all re-pins pre-registered.
