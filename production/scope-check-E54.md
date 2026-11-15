@@ -143,7 +143,7 @@ VERDICT: KEEP WebGL2. Do NOT switch to WebGPU. Rationale (confirmed, not assumed
   wings + extent within the ship box. CG A/B SHIP gate. EXPLICIT re-pins (old->new).
 - ST-400 (I430) - (CUTTABLE) 1 other asset realism pass (boss or arena; scope picks at
   bake). EXPLICIT re-pins.
-- ST-401 (I431) - (CUTTABLE / docs) WebGPU feasibility writeup (research DONE above).
+- ST-401 (I431) - DONE at I431 (cgs-reverse-document): formalized into design/webgpu-feasibility.md (NEW). Verdict KEEP WebGL2, do NOT switch (research above stands; verdict unchanged).
   Expected: document + keep WebGL2.
 - ST-402 (I432) - cgs-regression-suite + cgs-gate-check + cgs-milestone-review: fresh R1-R5
   + G54.0 gate + close E54.
@@ -169,7 +169,7 @@ VERDICT: KEEP WebGL2. Do NOT switch to WebGPU. Rationale (confirmed, not assumed
   explicit; assetGlbs + assetPerf green.
 - ST-400: A/B old vs new (grayscale-clay + in-game tint) reads clearly improved; re-pins
   explicit; else CUT (docs-only).
-- ST-401: this WebGPU section stands as the writeup; keep WebGL2.
+- ST-401: DONE at I431 - this WebGPU section is the research; the formal writeup is design/webgpu-feasibility.md; keep WebGL2 (FROZEN).
 - ST-402: fresh R1-R5 (R1 p1 EXACT causal / R2 rockab EXACT / R3 playframe RE-MEASURED
   EXACT + expected draw calls + ship A/B view / R4 PWA 11/11 / R5 tests + build 0 + dist
   within re-negotiated ceiling w/ >= 102,400 B floor + vendor sha + hygiene); G54.0 gate;
@@ -234,3 +234,10 @@ No sim/palette/feel/identity risk; renderer untouched (names/colors/extent prese
 - Playframe L 21/366 + P 10/180 + B 50/1222: NOT re-measured this iter (boss appears only in later waves, NOT in any playframe; B re-measure stays deferred to ST-402/I432 per the pre-registration); causal p1 (seed 9876) + rockab (2.2/1.3/0.7) + PWA 11/11 render-invariant -> untouched.
 - CG A/B SHIP gate: PASS, no rollback (clay old-vs-new + in-game tint x2 angles [34 + front], all VIEWED; new = multi-spike crystal crown + full-height emissive core column + per-facet value + rim). The earlier phantom invisible-boss reading = test-harness artifact (real render = bloom.render() EffectComposer, not vr.render(); a pending frame() overwrote the harness-cam shot with the chase cam, and multi-shot same-canvas made every shot identical) - fixed harness .evidence/I430/boss_tint2.mjs; NOT a real bug.
 - Quality bar: 972/972 + build 0 + dist 138/2,110,034 B (boss byte-identical 77,068 B) + vendor sha256-16 76DEA8151BC9352A (subset 13/13 bad=0) + hygiene (server 5173 killed).
+
+## Executed at I431 (ST-401 WebGPU writeup) - formalized, verdict unchanged
+- Deliverable: design/webgpu-feasibility.md (NEW; cgs-reverse-document contract: Summary / Observed Behavior / Evidence Path / Unknowns / feasibility analysis / Risks / Changed files / Verification / Next owner). The WebGPU-feasibility section above is the research; the formal writeup is now the standalone design doc.
+- Verdict: KEEP WebGL2, do NOT switch (unchanged). DOCS-only; zero src/asset/test.
+- Tree re-verified this session: three r160 (vendor/three.module.js:6); frozen FX = bloom.js EffectComposer+RenderPass+UnrealBloomPass+GradePass / gradePass.js:41 extends OutputPass (I334 bit-identical) / starfield.js:139 ShaderMaterial / asteroidRenderer.js:52 + bossMesh.js:180 onBeforeCompile / 0.72 bloom threshold; vendor/jsm/postprocessing 29 WebGL-only files (no WebGPU equiv); vendor/jsm/renderers/webgpu 4 files present; 24 GLBs = 3,948 tris (WebGL2 trivial).
+- Gates (DOCS-only, code unchanged): 972/972 + build 0 + dist unchanged 138/2,110,034 B + vendor sha256-16 76DEA8151BC9352A unchanged.
+- playframe re-measure stays at ST-402/I432; causal p1 (seed 9876) / rockab (2.2/1.3/0.7) / PWA 11/11 render-invariant EXACT.
