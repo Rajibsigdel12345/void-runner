@@ -691,4 +691,4 @@ recorded in production/gates.md.
 - YouTube grounding (I438; UNVERIFIED-BY-PLAY): CPwTrMi4nRk (displacement hyper-detail) + xUDwvLeL7vM (non-boolean panels/greebles) + hSo1EE0pZnc (real airship detail language: cables/catwalks/antennas) + DX36hit2g0s (detail-without-overwork guard) + I433 refs zit7UmzcSgU / k2vTtHj0MME (still applicable).
 - production/scope-check-E56.md = source of truth.
 - Gate G56.0 (at ST-413): R1 p1 EXACT causal / R2 rockab EXACT 2.2/1.3/0.7 / R3 playframe RE-MEASURED + decomposed + ship A/B view / R4 PWA 11/11 / R5 972+N/N + build 0 + dist <= 2,700,000 B w/ >= 102,400 B floor + vendor sha256-16 76DEA8151BC9352A + hygiene.
-- ST-408 PENDING I438 (this pass).
+- ST-408 DONE I438 (scope-check-E56.md + 6 stories committed); ST-409 DONE I439 (design/asset-spec-ship-remaster-3.md committed - v3 contract: sweet ~11,800 t cap 14,000, 3-layer density, displacement plan, greeble budget, re-pins re-confirmed against live tests); ST-410 PENDING I440 (Blender ship v3 MAIN - next).
