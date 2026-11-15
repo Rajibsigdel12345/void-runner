@@ -286,3 +286,31 @@ Fresh R1-R5 gate before closing E50 (the shatter/debris epic: 2 Blender shard GL
 
 ### Next owner / decision
 - I414: open the next epic (cgs-scope-check + cgs-create-stories). No open epics remain after E50.
+
+## Round G51.0 (I417) - E51 Multi-Hit Enemy Hit-Flash closeout
+
+Skill: cgs-regression-suite + cgs-gate-check + cgs-milestone-review / Date: 2026-11-15 / Iteration: I417 (ST-387)
+
+### Summary
+Fresh R1-R5 gate before closing E51 (the multi-hit enemy hit-flash epic: warden HP hits + boss-family every-hit (monolith + splicer, incl. killing) + flyer 2-bullet kills; decay 3/s in step(), spike 1.4; core seam/ST-290 telegraph untouched; +0 draw calls). Zero source change this iteration - the R1-R3 pins staying EXACT under the shipped flash code is the sim-inert proof, and the fresh flash-at-rest probe (frozen world, direct flyer spawns) closes the ST-386 harness gap: hitFlash is 0 at rest on every flashable enemy and 30 rest syncs of each hero mesh leave every material EXACTLY stable (regression guard for the I416 warden armorMat.emissiveIntensity accumulation fix + the bossMesh after-setHex placement).
+
+### Results
+- R1 p1 demo: EXACT causal fresh (seed 9876: 11334/57/W2/combo 15/shots 198/acc 0.2878787878787879/36.14999999999923 s/replay 2169-2220/speed 4; afterQ MENU; console 0/0) = byte-identical to the I402/I407/I413/I416 pin.
+- R2 rockab: radii EXACT 2.2/1.3/0.7 (all GLB incl. rockComet + debrisChunk/debrisSliver ready; console 0/0).
+- R3 playframe: EXACT fresh - L 21/366 (menu-loop frame) + P 10/180 (overhead probe frame) + B 50/1222 (PLAYING fx-high, rocks 0->5, camFinite) + debris 0 live at both measure points + console 0/0 x2 = +0 steady-state draw calls under the shipped flash code.
+- R3 flash-at-rest (fresh, frozen-world v2): state PLAYING at the begin() boundary (rAF stubbed in-evaluate; frames 35/35 dead = the world stepped 0 times); 2 flyers spawned via the public w.flyers.spawn(ship.pos) -> hitFlash [0,0] (all zero); warden freshK 0 + 30 rest syncs EXACT-stable (armor 0.12-base material present, maxI 0.5); monolith freshK 0 + rest-stable; splicer freshK 0 + rest-stable; cfg {decay 3, spike 1.4} confirmed; console 0/0. NOTE: v1 of this probe failed on a harness bug (it waited LIVE up to 20 s for a natural flyer; the idle ship died -> GAME_OVER before any flyer existed). All product asserts had already passed in that failed run; v2 freezes the loop in the same evaluate and spawns flyers directly (root cause + fix documented in the I417 iteration entry).
+- R4 PWA: 11/11 fresh on :5199 (sw active root scope + claimed, online + offline boot no NaN, manifest standalone + 512 maskable + start_url/scope ".", console 0/0) = identical to the I413 reference (probe copied verbatim, 0 diff lines).
+- R5 quality bar: 969/969 + build 0 + dist 135/1,963,955 B (headroom 133,197 B >= 102,400 B) + vendor sha256-16 76DEA8151BC9352A + hygiene (5199 killed after the probe; 5173 killed at iteration end; 5173/4173/5199 listeners 0, chrome 0, no orphan node - the 7 remaining node procs are Codex session infrastructure, CommandLine-verified). NOTE: the ST-387 story text's "953+N/N" is stale - the baseline moved to 969 at I414+; the gate asserts the current baseline (same stale-baseline pattern as G50.0's "947/947").
+
+### Evidence
+- .evidence/I417/causal.mjs + causal.json (R1+R2; retagged from I416 - OUT/nocache + comment only, harness logic byte-identical)
+- .evidence/I417/playframe.mjs + playframe.json (R3; retagged from I416 as above)
+- .evidence/I417/flashrest.mjs + flashrest.json (R3 flash-at-rest v2, frozen world)
+- .evidence/I417/pwa_probe.mjs + pwa.txt (R4; probe verbatim from I413)
+
+### Verdict
+- G51.0 gate verdict: PASS - all five rounds green fresh; E51's shipped behavior (I415 impl + I416 CG PASS-DEVIATED + follow-up bug fixes) is regression-locked at I417.
+- Milestone transition verdict: E51 CLOSED at I417 (ST-384..387, 4/4 stories shipped).
+
+### Next owner / decision
+- I418: open the next epic (cgs-scope-check + cgs-create-stories). Carryover candidates in priority order: (a) art-improvement research + task list (user-suggested; may use Blender for new assets); (b) per-hit impact SFX audio epic (warden/boss HP hits verified silent; SFX_CUES in main.js, WebAudio synth in src/render/audio.js); (c) E49 i18n tail + touch fallback; (d) flyer decay constant unification (flyer.js hardcoded 3/s -> CONFIG.fx.enemyHitFlash.decay).
