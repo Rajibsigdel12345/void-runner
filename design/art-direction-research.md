@@ -321,3 +321,84 @@ E52 (ST-390) is a bounded, GPU-cheap, video-grounded Blender pass: author astero
 setGLB to pick A/B by r.variant, add B test entries, confirm the playframe stays EXACT. Not over-
 engineered: no sim change, no palette change, no textures, 3 small GLBs + a ~5-line renderer
 change. GPU-cheap: CONFIRMED (see Asset Constraints).
+
+## I423 video grounding (E53 prep, cgs-scope-check slice, YouTube MCP 2026-11-15)
+
+Purpose: ground the two E53 levers (a soft particle sprite for the particle cloud; a re-bake
+of the 3 weak powerup emblems) and write the per-asset briefs. ADDS to the I207/I271/I276/I419
+grounding; does not duplicate it. This is the last open art research slice after E52.
+
+### Why this lever (grounded, not invented)
+- I423 headless ground truth (not invented) proves the two gaps open + player-visible: a seeded
+  particle burst renders as flat hard-edged SQUARE points (the no-map PointsMaterial default),
+  and 3 of 7 powerup emblems (spread=eye, shield=coin, magnet=box) read weak at gameplay scale.
+- These are the two remaining open art levers; the ship/floor/skybox/rock/comet/boss/enemy art is
+  closed (E41/E52/E19-E20). Do not re-open it.
+
+### Ground truth (I423 screenshots, 2026-11-15, .evidence/I423/)
+- particles_square.png: a seeded burst (via __vr.particles.burst + 250 ms) renders as flat square
+  points = the prime gap. The cloud IS additive already (a closed lever); the defect is the
+  MISSING per-point sprite (a raw Points draw = square gl points).
+- powerups_sheet.png (7 emblems): bomb/rapid/slowmo/overdrive read OK; spread = eye-like, shield
+  = coin-like, magnet = box-like = the 3 WEAK. enemies_sheet.png: all enemy silhouettes distinct
+  (do NOT touch). menu.png clean; the skybox warm Milky-Way band is I364-intentional (git log
+  I230 -> I277 -> I293 -> I316 -> I364), NOT a defect.
+
+### Method (I423 YouTube pass; 2 searches / 3 fetches, 2026-11-15; guard: do NOT retry)
+1. tissue inu, "Particles with Spritesheet Textures in Godot" (PMZ7yBwleik, 63K, 1:50).
+   "I tend to use single sprites as textures"; frame 1:22 = soft glowing white sprite particles.
+   Takeaway: a SINGLE soft sprite map is the standard for a point cloud; our no-map Points = the
+   defect.
+2. Tvtig, "How To Create An Explosion Effect In Unity" (cvQiQglPI18, 99K, 3:39). recipe =
+   Particle Standard Unlit + rendering mode FADE + color mode MULTIPLY + color-over-lifetime
+   dark->bright/transparent ramp + burst count 3 + compact sphere r~0.35 + start size 2-3.
+   Takeaway: soft map + fade + ramp = an "energy read"; keep bursts COMPACT.
+3. Made by Doodle, "Game Powerups 3D Illustration - Blender" (hZiw2P3e_mk, 33:08, no captions).
+   each pickup = ONE strong iconic shape (Diamond 0:26 / Star 1:25 / Coin 2:06 / Key 4:05 /
+   Compass 8:10 / Clock 10:45 / Bomb 13:56 / Bolt 16:05 / Heart 18:26); frame 8:17 hex compass =
+   extrude hex + inset + bevel; 24:51 full clay set -> bevel/inset carry the edge read.
+
+### Particle-sprite brief (the ST-394 contract)
+- ONE shared soft radial-gradient sprite: a procedural 64x64 CanvasTexture, white center fading to
+  a transparent edge (no hard square). Set as the `map` on the EXISTING shared PointsMaterial
+  (no new material, no new object = +0 draw calls). Re-tune `size` (size is NOT a frozen pin -
+  free to tune in-story; the sprite core is smaller than the full point, so size likely goes UP
+  from 0.32 to keep the same visual footprint). Keep the existing additive blending + per-particle
+  color + size-attenuation (all closed levers - unchanged).
+- A small commented CONFIG.fx particle-sprite sub-block (sprite enable/size) so it is data-driven +
+  testable. The FX-off tier already = particleOff:0 (no gating needed).
+- Acceptance gate: partshot.mjs A/B (square vs soft, same seeded burst) reads clearly softer; the
+  bloom threshold 0.72 (183.6 linear, FROZEN) crosser check runs BOTH directions (the soft sprite
+  lowers peak per-point luma -> confirm no NEW crossers appear or vanish).
+
+### Powerup emblem brief (the ST-395 modeling contract)
+- ONE strong iconic faceted shape per weak emblem (Made by Doodle method: extrude + inset +
+  bevel): spread = a fan / trident (was eye-like); shield = a hex ring + core (was coin-like);
+  magnet = a horseshoe (was box-like). Same flat-shaded low-poly language as the other 4 emblems.
+- SAME grayscale COLOR_0 facet-value bake (corner-domain, vertex-split, exactly one primitive in
+  [0.30,1.25]); SAME extents (max extent within 15% of the EMBLEM_TARGETS pin - the pickup radius
+  is CODE-side in game.js, NOT the mesh extent, so verify the code side, not the GLB extent);
+  within the existing per-asset byte/tri budgets (emblem <= 60 tris).
+- Silhouette-match contract (I211): any re-baked emblem must ALSO update powerupMesh.js TYPES
+  fallback geo (currently spread ConeGeometry(0.4,0.75,4) / shield TorusGeometry(0.38,0.12,8,20)
+  / magnet SphereGeometry(0.42,16,12)) to match the new silhouette -> no load-pop before the GLB
+  arrives.
+- CG gate (acceptance): grayscale-clay silhouette A/B (old vs new outline at gameplay scale) must
+  read clearly DIFFERENT + improved, + an in-game tinted A/B. If not clearly improved -> CUT that
+  emblem (ship unchanged, docs-only); the epic still closes.
+
+### NOT taskable (documented rejections)
+- The 4 strong emblems (bomb/rapid/slowmo/overdrive read fine) - no re-bake.
+- Per-particle texture variety / a flipbook (a single shared soft sprite is the grounded standard -
+  tissue inu; variety is over-engineer for a 512-point pool).
+- Ship re-bake (heavily pinned) / floor re-bake (I358 + FLOOR-50) / skybox change (I364
+  intentional) / rock-comet-boss-enemy art (closed epics E41/E52/E19-E20).
+- Extra lights / new bloom params (frozen 183.6) / a further YouTube pull (the 3 fetches nail both
+  levers; I419/E21 precedent: frames + method carry the grounding, do not over-fetch).
+
+### Verdict
+E53 (ST-394/ST-395) is a bounded, GPU-cheap, video-grounded art pass: one soft shared particle
+sprite (in-code, +0 draw calls) + a re-bake of the 3 weak powerup emblems in place (Blender,
+silhouette-match fallback contract, CUTTABLE). Not over-engineered: no sim change, no palette
+change, no new asset types, no per-particle variety, no re-open of closed art. GPU-cheap:
+CONFIRMED (~+3-5 KB total vs 111,173 B headroom).

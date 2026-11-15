@@ -5553,3 +5553,44 @@ Next: I423 - open the next epic (cgs-scope-check + cgs-create-stories). Carryove
 per G51.0: (a) art-improvement research + task list (user-suggested) / (b) per-hit impact
 SFX / (c) E49 i18n tail + touch / (d) flyer decay unification / (e) AGENTS.md five-GLBs
 doc-drift note.
+
+## I423 - ST-393: open E53 "Glow & Read" (cgs-scope-check + cgs-create-stories; DOCS-only, zero src)
+Goal: open the next epic - close the two remaining open art gaps that the I423 headless
+screenshots prove are player-visible: (a) the particle bursts render as flat hard-edged SQUARE
+points (the prime "glow" gap), and (b) 3 of the 7 powerup emblems read weak at gameplay scale
+(spread=eye, shield=coin, magnet=box). cgs-scope-check + cgs-create-stories only; zero source
+change; production/scope-check-E53.md is the source of truth.
+Ground truth (I423 headless 1280x720 SwiftShader, .evidence/I423/): particles_square.png = a
+seeded burst (via __vr.particles.burst) renders as flat square points (the no-map
+PointsMaterial default); powerups_sheet.png = 7 emblems where bomb/rapid/slowmo/overdrive read
+clearly but spread (eye-like), shield (coin-like), magnet (box-like) read weak; enemies_sheet
+= all enemy silhouettes distinct (E19/E20 closed - do NOT touch); menu.png clean; the skybox
+warm Milky-Way band is I364-intentional (git log I230 -> I277 -> I293 -> I316 -> I364).
+Bounded scope: ST-394 soft radial-gradient particle sprite (in-code, +0 draw calls, ~+1-2 KB;
+I424); ST-395 re-bake the 3 weak powerup emblems in place (Blender, silhouette-match fallback
+contract, DESIGNATED CUTTABLE; I425); ST-396 fresh R1-R5 + G53.0 + close (I426). NO sim /
+palette / feel change; NO ship/floor/skybox/rock/comet/boss/enemy re-bake (all closed); NO
+per-particle texture variety (over-engineer).
+GPU/compute gate (user only-if-cheap): ST-394 = one shared CanvasTexture on the existing
+PointsMaterial (+0 draw calls, one material prop); ST-395 = 3 GLBs re-baked IN PLACE within
+the existing per-asset byte/tri test budgets (emblem <= 60 tris, max extent within 15%) ->
+total delta ~+3-5 KB << 111,173 B headroom. GPU-cheap: CONFIRMED.
+Re-pin (pre-registered, NEVER silent): expect ZERO movement of playframe (L 21/366 + P 10/180
++ B 50/1222), p1 causal, rockab (2.2/1.3/0.7) - particles are render-only and powerup
+geometry is absent at every playframe moment (drops visible=false at rest; no drops in the
+reseed-71201 live-5 set). The only candidate re-pins are the assetGlbs per-file byte/tri for
+spread/shield/magnet (the PU_FACET p10/p50/p90 + tri + max-extent pins), delivered explicitly
+old->new ONLY IF the re-bake changes them; if a re-bake keeps the bake scheme + extents + tri,
+the pins hold.
+Cut option (pre-registered): ST-395 is cuttable - if a re-baked emblem's grayscale-clay
+silhouette A/B (old vs new at gameplay scale) is not clearly improved, ship that emblem
+unchanged (docs-only cut); ST-394 stays (it closes the core particle gap).
+Deferrals carried: per-hit impact SFX / E49 i18n tail + touch / flyer decay constant
+unification (flyer.js:74) / AGENTS.md five-GLBs doc-drift note.
+Changed files: production/scope-check-E53.md (new; source of truth), design/art-direction-
+research.md (I423 section), CHANGELOG.md, production/iterations.md, production/stories.md,
+production/epics.md, production/timeline.md, production/session-state/active.md. Zero src,
+zero tests, zero assets, zero dist delta.
+Test result: 971/971 green (fresh) + build 0 + dist byte-identical (138 files / 1,985,979 B)
++ vendor sha256-16 76DEA8151BC9352A. Hygiene at iteration end: 5173/4173/5199 free, chrome 0,
+no orphan serve.mjs.
