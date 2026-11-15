@@ -23,6 +23,7 @@ export class Splicer {
     this.hp = this.maxHp = (typeof hp === 'number' && hp > 0) ? hp : s.maxHp;
     this.radius = s.radius;
     this.alive = true;
+    this.hitFlash = 0; // ST-385/E51 (added I416, was missing for the Splicer): render juice - 1 on an HP hit, decays in step()
     this.phase = 1; // 1 normal, 2 enrage (one-way)
     this.entered = 0; // entrance progress 0..1 (bolts gate on it)
     this.kind = 'splicer';
@@ -45,6 +46,7 @@ export class Splicer {
    * Queues undestroyable bolt directions (drained by World via drainBolts()). */
   step(dt) {
     const s = this.cfg.splicer;
+    this.hitFlash = Math.max(0, this.hitFlash - this.cfg.fx.enemyHitFlash.decay * dt); // ST-385/E51 (added I416)
     const p2 = this.phase === 2 ? s.phase2 : null;
     this.entered = Math.min(1, this.entered + dt / s.enterTime);
     const r = this.spawnR + (s.holdRadius - this.spawnR) * this.entered; // ST-143: glide spawn -> hold over the entrance (no teleport)
@@ -79,6 +81,7 @@ export class Splicer {
   hit() {
     if (!this.alive) return false;
     this.hp -= 1;
+    this.hitFlash = 1; // ST-385/E51 (added I416): every HP hit (incl. the killing hit) -> white flash
     if (this.hp <= 0) { this.alive = false; return true; }
     const p2 = this.cfg.splicer.phase2;
     if (this.phase === 1 && p2 && this.hp / this.maxHp < p2.hpFrac) this.phase = 2;

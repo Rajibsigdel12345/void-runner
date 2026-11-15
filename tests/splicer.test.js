@@ -169,3 +169,58 @@ test("balance (I144): worst-case steady-state bolt count stays under the enemyBu
   assert.ok(steady(s.spiralEvery, s.aimEvery) < e.maxConcurrent, "phase 1 steady state under cap");
   assert.ok(steady(s.spiralEvery * s.phase2.spiralEveryMult, s.aimEvery * s.phase2.aimEveryMult) < e.maxConcurrent, "phase 2 steady state under cap");
 });
+
+// ST-386 (I416): the Splicer was missing the ST-385 hit-flash (init/decay/spike).
+// These mirror the Monolith ST-385 tests in boss.test.js for the second boss variant.
+test("ST-386: a World-spawned splicer has hitFlash 0 at rest", () => {
+  const w = new World(new RNG(386));
+  w.begin();
+  w.waves.state = "intermission";
+  w.waves.intermission = 100;
+  w.boss = null;
+  w.bossSpawnCount = 1; // odd -> Splicer variant
+  w.spawnBossForWave(5);
+  assert.ok(w.boss && w.boss.kind === "splicer", "splicer spawned");
+  assert.equal(w.boss.hitFlash, 0, "hitFlash starts at 0");
+});
+
+test("ST-386: a splicer HP hit spikes the hit-flash to 1", () => {
+  const s = freshSplicer();
+  const r = s.hit();
+  assert.equal(r, false, "not a killing hit");
+  assert.equal(s.hitFlash, 1, "hitFlash spiked to 1");
+});
+
+test("ST-386: the killing splicer hit also spikes the hit-flash to 1", () => {
+  const s = freshSplicer();
+  s.hp = 1; // one hit to kill
+  const r = s.hit();
+  assert.equal(r, true, "killing hit");
+  assert.equal(s.hitFlash, 1, "the kill hit still flashes");
+});
+
+test("ST-386: the splicer hit-flash decays to 0 over time (Math.max floor)", () => {
+  const s = freshSplicer();
+  s.hitFlash = 1;
+  let prev = s.hitFlash;
+  for (let i = 0; i < 60; i++) {
+    s.step(1 / 60);
+    assert.ok(s.hitFlash <= prev + 1e-9, "monotone non-increasing");
+    prev = s.hitFlash;
+  }
+  assert.ok(s.hitFlash < 1, "decayed from 1");
+  s.step(1);
+  assert.equal(s.hitFlash, 0, "clamped to exactly 0");
+});
+
+test("ST-386: the splicer hit-flash timeline is deterministic across reseeds", () => {
+  const a = freshSplicer();
+  const b = freshSplicer();
+  a.hit(); b.hit();
+  assert.equal(a.hitFlash, b.hitFlash, "same spike");
+  assert.equal(a.hitFlash, 1, "spike was 1");
+  for (let i = 0; i < 40; i++) {
+    a.step(1 / 60); b.step(1 / 60);
+    assert.equal(a.hitFlash, b.hitFlash, "identical decay at each step");
+  }
+});
