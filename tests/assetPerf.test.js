@@ -47,15 +47,15 @@ const totalTris = parsed.reduce((a, p) => a + p.tris, 0);
 
 // I214 budgets (measured baselines in brackets; caps leave headroom for E9 art growth)
 const BUDGET = {
-  totalFilesKB: 160,   // [116.4 I303 re-measure: +rock I303 silhouette re-bake bytes (L 19.3K)]
-  totalGeoKB: 130,     // [81.8 I292 re-measure: +ship hull/wings COLOR_0]
+  totalFilesKB: 175,   // [158.9 I410 re-measure: 21 GLBs incl. debris; 160 cap left 1.1 KB - too thin for the headroom convention]
+  totalGeoKB: 130,     // [125.8 I410 re-measure: 21 GLBs; cap held (4.3 KB headroom)]
   perFileKB: 60,       // [max 36.8 - asteroid_L, deliberately the heaviest]
-  totalTris: 2000,     // [I344: 1930 (I343 1750 + comet 180), cap 2000 w/ margin]
+  totalTris: 2100,     // [I410: 2026 (I344 1930 + debris 96), cap 2100 w/ margin]
   perFileMats: 3,      // [max 3 - ship body/wing/cockpit]
 };
 
-test('exactly 19 GLB assets (18 models + arena ring)', () => {
-  assert.equal(glbs.length, 19); // I220: +warden, I235: +stinger, I240: +flyer, I344: +comet
+test('exactly 21 GLB assets (20 models + arena ring)', () => {
+  assert.equal(glbs.length, 21); // I220: +warden, I235: +stinger, I240: +flyer, I344: +comet, I410: +debris chunk+sliver
 });
 
 test('total GLB file size within budget', () => {
@@ -89,7 +89,7 @@ test('every GLB has POSITION + NORMAL (render layer assumes both)', () => {
   }
 });
 
-test('COLOR_0 only on the mottled rocks + boss + ship + enemy bodies + pickup emblems + warden hull/armor + arena ring (in-code materials read it; others must not carry it)', () => { // I282: + enemy value bakes; I288/ST-272: + pickup emblem value bakes; I289/ST-273: + warden hull/armor value bakes; I299/ST-281: + arena ring value bake
+test('COLOR_0 only on the mottled rocks + boss + ship + enemy bodies + pickup emblems + warden hull/armor + arena ring + debris shards (in-code materials read it; others must not carry it)', () => { // I282: + enemy value bakes; I288/ST-272: + pickup emblem value bakes; I289/ST-273: + warden hull/armor value bakes; I299/ST-281: + arena ring value bake
   const withColor = parsed.filter((p) => p.attrs.has('COLOR_0')).map((p) => p.file).sort();
-  assert.deepEqual(withColor, ['arena_ring.glb', 'asteroid_L.glb', 'asteroid_M.glb', 'asteroid_S.glb', 'asteroid_comet.glb', 'boss.glb', 'drone.glb', 'flyer.glb', 'powerup_bomb.glb', 'powerup_magnet.glb', 'powerup_overdrive.glb', 'powerup_rapid.glb', 'powerup_shield.glb', 'powerup_slowmo.glb', 'powerup_spread.glb', 'ship.glb', 'stinger.glb', 'warden.glb']); // I299/ST-281: + arena ring value bake (16 -> 17); I289/ST-273 warden (stinger core + flyer dome stay emissive-driven)
+  assert.deepEqual(withColor, ['arena_ring.glb', 'asteroid_L.glb', 'asteroid_M.glb', 'asteroid_S.glb', 'asteroid_comet.glb', 'boss.glb', 'debris_chunk.glb', 'debris_sliver.glb', 'drone.glb', 'flyer.glb', 'powerup_bomb.glb', 'powerup_magnet.glb', 'powerup_overdrive.glb', 'powerup_rapid.glb', 'powerup_shield.glb', 'powerup_slowmo.glb', 'powerup_spread.glb', 'ship.glb', 'stinger.glb', 'warden.glb']); // I299/ST-281: + arena ring value bake (16 -> 17); I289/ST-273 warden (stinger core + flyer dome stay emissive-driven); I410: + debris chunk/sliver (18 -> 20)
 });

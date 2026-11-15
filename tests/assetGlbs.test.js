@@ -1,5 +1,5 @@
 ﻿﻿﻿// I207: vendored GLB asset audit (ST-207, cgs-asset-audit). Pure node - no DOM,
-// no three. Validates the Blender-authored GLBs in assets/ (I220: sixteen total) against the
+// no three. Validates the Blender-authored GLBs in assets/ (I220: sixteen total; I410: 21 incl. debris shards) against the
 // container format, the VR_ naming convention, the poly budgets from
 // design/asset-spec.md, and the logical radii in CONFIG (visual/hitbox parity).
 import test from 'node:test';
@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief)).
-const BUDGETS = { ship: 300, L: 500, M: 140, S: 140, comet: 200, boss: 250, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200 }; // I210 + I211 + I212 + I220 + I307 + I344 (comet)
+const BUDGETS = { ship: 300, L: 500, M: 140, S: 140, comet: 200, boss: 250, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200, chunk: 60, sliver: 50 }; // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris)
 const MAX_FILE_BYTES = 100 * 1024;
 
 function parseGlb(file) {
@@ -796,4 +796,52 @@ test('asteroid_comet.glb: naming, poly budget, single mesh/prim, shape, COLOR_0 
   fl.sort((a, b2) => a - b2); const q = (f) => fl[Math.min(fl.length - 1, Math.floor(f * fl.length))];
   const f = { p10: q(0.1), p50: q(0.5), p90: q(0.9), mean: fl.reduce((sm, x) => sm + x, 0) / fl.length };
   for (const k of ['p10', 'p50', 'p90', 'mean']) assert.ok(Math.abs(f[k] - COMET_FACET[k]) <= 0.005, 'comet facet ' + k + ' ' + f[k].toFixed(3) + ' ~ ' + COMET_FACET[k]);
+});
+
+test('debris_chunk.glb: naming, poly budget, shard radius, grayscale COLOR_0 value bake (I410/ST-380)', () => {
+  const { buf, json, binOff } = parseGlb('debris_chunk.glb');
+  assert.ok(buf.length <= 12000, 'debris_chunk.glb ' + buf.length + ' B <= 12 KB (ST-380 budget)');
+  const s = meshStats({ buf, json, binOff });
+  assert.ok(s.nodeNames.includes('VR_Debris_Chunk'), 'VR_Debris_Chunk node');
+  assert.ok(s.matNames.includes('VR_Debris'), 'VR_Debris material');
+  assert.equal((json.meshes || []).length, 1, 'single mesh');
+  assert.equal(json.meshes[0].primitives.length, 1, 'single primitive');
+  assert.ok(s.totalTris <= BUDGETS.chunk, 'tris ' + s.totalTris + ' <= 60');
+  for (const pr of s.prims) assert.ok(Math.abs(pr.maxRadius - 0.5) / 0.5 <= 0.10, 'maxRadius ' + pr.maxRadius.toFixed(4) + ' ~ 0.5 (+/-10%)');
+  const p = json.meshes[0].primitives[0];
+  assert.ok(p.attributes.COLOR_0 !== undefined, 'primitive has COLOR_0 (grayscale value bake)');
+  const acc = json.accessors[p.attributes.COLOR_0];
+  assert.equal(acc.componentType, 5126, 'COLOR_0 componentType FLOAT');
+  assert.equal(acc.type, 'VEC3', 'COLOR_0 type VEC3');
+  assert.equal(acc.count, json.accessors[p.attributes.POSITION].count, 'COLOR_0 count == POSITION count');
+  const cbv = json.bufferViews[acc.bufferView]; const cbase = binOff + (cbv.byteOffset || 0) + (acc.byteOffset || 0);
+  for (let i = 0; i < acc.count; i++) {
+    const r = buf.readFloatLE(cbase + i * 12), g = buf.readFloatLE(cbase + i * 12 + 4), b = buf.readFloatLE(cbase + i * 12 + 8);
+    for (const v of [r, g, b]) assert.ok(v >= 0.89 && v <= 1.11, 'COLOR_0 channel in [0.89,1.11]: ' + v.toFixed(3));
+    assert.ok(Math.max(Math.abs(r - g), Math.abs(g - b), Math.abs(r - b)) <= 0.02, 'grayscale dev <= 0.02 at vert ' + i + ': ' + r.toFixed(3) + '/' + g.toFixed(3) + '/' + b.toFixed(3));
+  }
+});
+
+test('debris_sliver.glb: naming, poly budget, shard radius, grayscale COLOR_0 value bake (I410/ST-380)', () => {
+  const { buf, json, binOff } = parseGlb('debris_sliver.glb');
+  assert.ok(buf.length <= 12000, 'debris_sliver.glb ' + buf.length + ' B <= 12 KB (ST-380 budget)');
+  const s = meshStats({ buf, json, binOff });
+  assert.ok(s.nodeNames.includes('VR_Debris_Sliver'), 'VR_Debris_Sliver node');
+  assert.ok(s.matNames.includes('VR_Debris'), 'VR_Debris material');
+  assert.equal((json.meshes || []).length, 1, 'single mesh');
+  assert.equal(json.meshes[0].primitives.length, 1, 'single primitive');
+  assert.ok(s.totalTris <= BUDGETS.sliver, 'tris ' + s.totalTris + ' <= 50');
+  for (const pr of s.prims) assert.ok(Math.abs(pr.maxRadius - 0.5) / 0.5 <= 0.10, 'maxRadius ' + pr.maxRadius.toFixed(4) + ' ~ 0.5 (+/-10%)');
+  const p = json.meshes[0].primitives[0];
+  assert.ok(p.attributes.COLOR_0 !== undefined, 'primitive has COLOR_0 (grayscale value bake)');
+  const acc = json.accessors[p.attributes.COLOR_0];
+  assert.equal(acc.componentType, 5126, 'COLOR_0 componentType FLOAT');
+  assert.equal(acc.type, 'VEC3', 'COLOR_0 type VEC3');
+  assert.equal(acc.count, json.accessors[p.attributes.POSITION].count, 'COLOR_0 count == POSITION count');
+  const cbv = json.bufferViews[acc.bufferView]; const cbase = binOff + (cbv.byteOffset || 0) + (acc.byteOffset || 0);
+  for (let i = 0; i < acc.count; i++) {
+    const r = buf.readFloatLE(cbase + i * 12), g = buf.readFloatLE(cbase + i * 12 + 4), b = buf.readFloatLE(cbase + i * 12 + 8);
+    for (const v of [r, g, b]) assert.ok(v >= 0.89 && v <= 1.11, 'COLOR_0 channel in [0.89,1.11]: ' + v.toFixed(3));
+    assert.ok(Math.max(Math.abs(r - g), Math.abs(g - b), Math.abs(r - b)) <= 0.02, 'grayscale dev <= 0.02 at vert ' + i + ': ' + r.toFixed(3) + '/' + g.toFixed(3) + '/' + b.toFixed(3));
+  }
 });
