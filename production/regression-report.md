@@ -342,3 +342,31 @@ Fresh R1-R5 gate before closing E52 (the asteroid silhouette variety epic: B sil
 
 ### Next owner / decision
 - I423: open the next epic (cgs-scope-check + cgs-create-stories). Carryover candidates in priority order: (a) art-improvement research + task list (user-suggested; may use Blender for new assets); (b) per-hit impact SFX audio epic; (c) E49 i18n tail + touch fallback; (d) flyer decay constant unification (flyer.js hardcoded 3/s -> CONFIG.fx.enemyHitFlash.decay); (e) AGENTS.md five-GLBs doc-drift note.
+
+## Round G53.0 (I426) - E53 Glow & Read closeout
+
+Skill: cgs-regression-suite + cgs-gate-check + cgs-milestone-review / Date: 2026-11-15 / Iteration: I426 (ST-396)
+
+### Summary
+Fresh R1-R5 gate before closing E53 (the VFX-glow + pickup-read art epic: ST-394 soft radial-gradient particle sprite shared on the existing PointsMaterial via map + size 0.52, in-code, +0 draw calls, no sim change; ST-395 re-bake of the 3 weak powerup emblems in place - spread eye->trident prism 6628B/48t, shield coin->hex-ring+core 3396->7536B/56t, magnet box->horseshoe U-prism 5256->5116B/36t, same VR_PU_* node+mat names, 1 primitive each, UV-free by design, with the pre-registered explicit PU_FACET re-pins spread -> 0.3271/0.6364/1.1556 / shield -> 0.3374/0.3911/1.1793 / magnet -> 0.3271/0.7265/1.250). Zero source change this iteration - the sim pins staying EXACT under the shipped I424/I425 art work is the regression-locked proof. The soft sprite is +0 draw calls (proven in I424 via a focused interleaved-render probe) and the emblems are not in the playframe reseed-71201 live-5 measure set, so playframe B stayed EXACT 50/1222.
+
+### Results
+- R1 p1 demo: EXACT causal fresh (seed 9876: 11334/57/W2/combo 15/shots 198/acc 0.2878787878787879/36.14999999999923 s/replay 2169-2220/speed 4; afterQ MENU; console 0/0) = byte-identical to the I402/I407/I413/I416/I417/I422 pin.
+- R2 rockab: radii EXACT 2.2/1.3/0.7 (reseed 30201; all GLB incl. rockComet ready; console 0/0).
+- R3 playframe: EXACT fresh - L 21/366 (menu-loop frame) + P 10/180 (overhead probe frame) + B 50/1222 (PLAYING fx-high, rocks 0->5, camFinite) + debris 0 live at both measure points + console 0/0 x2 = +0 steady-state draw calls under the shipped I424 sprite + I425 emblems (both render-only; no sim change).
+- R4 PWA: 11/11 fresh on :5199 (sw active root scope + claimed, online + offline boot no NaN, manifest standalone + 512 maskable + start_url/scope ".", console 0/0) = identical to the I413/I417/I422 reference (probe verbatim).
+- R5 quality bar: 972/972 + build 0 + dist 138/1,990,546 B (rebuild byte-identical to I425; headroom 106,606 B >= 102,400 B floor) + vendor sha256-16 76DEA8151BC9352A + hygiene (5173 then 5199 killed port-based; 5173/4173/5199 listeners 0, chrome 0, node = MCP infra only). NOTE: the ST-396 story text placeholder "971+N/N" is the pre-E53 baseline; the current baseline is 972 (moved at I424 with the +1 config sanity test).
+
+### Evidence
+- .evidence/I426/causal.mjs + causal.json (R1+R2; retagged from I422 - OUT/nocache only)
+- .evidence/I426/playframe.mjs + playframe.json (R3; retagged from I417)
+- .evidence/I426/pwa_probe.mjs (R4; probe verbatim from I413, served on :5199 over dist)
+- .evidence/I425/{emblem_abClay,emblem_abFace,emblem_closeup,emblem_abTint}.png (I425 emblem A/B, CITED - emblems not in playframe)
+- .evidence/I424/{particles_soft,particles_square_i424}.png + probe_drawcalls.mjs (I424 sprite A/B + +0-draw-call proof, CITED)
+
+### Verdict
+- G53.0 gate verdict: PASS - all five rounds green fresh; E53 shipped behavior (I424 soft particle sprite +0 draw calls + I425 re-baked emblems with the pre-registered explicit PU_FACET re-pins) is regression-locked at I426. Zero silent re-pins: only the pre-registered assetGlbs PU_FACET pins moved (I425, explicit old->new); playframe/p1/rockab/PWA all EXACT.
+- Milestone transition verdict: E53 CLOSED at I426 (ST-393..396, 4/4 stories shipped; pre-registered CUT gate for ST-395 unused - all 3 emblems SHIP). Headroom arc: 111,173 B (I423) -> 110,616 B (I424) -> 106,606 B (I425) -> 106,606 B (I426) >= 102,400 B floor.
+
+### Next owner / decision
+- I427: open the next epic per the NEW user directive (cgs-scope-check + cgs-create-stories): remaster the player ship into a detailed "real airship" (more detail, more polygons), make the other assets more realistic (Blender), and probe a WebGL->WebGPU switch if needed - grounded in reference samples (YouTube/web research) rather than invented. Pre-register any SHIP_FACET / playframe L/P/B re-pins the ship-geometry change would force.
