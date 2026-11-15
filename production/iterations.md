@@ -5425,3 +5425,23 @@ Risk/follow-up: I382 = ST-347 grounded direction (docs-only, 2nd cut gate): per-
 - Deferrals carried: per-hit impact SFX audio epic / E49 i18n tail + touch / flyer decay constant unification (flyer.js:74) / AGENTS.md five-GLBs doc-drift note.
 - Changed files: production/scope-check-E52.md (new; source of truth), CHANGELOG.md, production/iterations.md, production/stories.md, production/epics.md, production/timeline.md, production/session-state/active.md. Zero src, zero tests, zero assets, zero dist delta.
 - Test result: 969/969 green (fresh) + build 0 + dist byte-identical (135 files / 1,963,955 B) + vendor sha256-16 76DEA8151BC9352A. Hygiene at iteration end: 5173/4173/5199 free, chrome 0.
+
+## I419 - ST-389: E52 research + art-bible slice (cgs-art-bible; DOCS-only, zero src)
+Goal: ground the E52 silhouette-variety lever and write the per-size A/B modeling brief, ADDING
+to the I207/I271/I276 art grounding without duplicating it (the genre comps already established
+many-different-rocks-tumbling; this slice nails the authoring METHODOLOGY + GPU-cheap proof).
+Method: I418 YouTube MCP pass (4 sources) - August Renders (fractal subdivide = per-rock seed),
+Blender Artifex (displace texture seed/size = the silhouette lever), Grant Abbitt (a distinct
+non-uniform overall form = distinct character), Rod DeWeese (Lattice / non-uniform scale sets
+overall proportion so two same-base rocks read clearly different).
+A/B brief: same icosphere base + subdivision (=> SAME tri count as A), B differs by (a) a
+different displace noise seed + noise scale (crater/ridge layout not a copy of A), (b) a
+different non-uniform overall scale / Lattice (L lopsided chunky, M squat bar, S elongated),
+(c) crater insets placed differently, (d) the SAME value-ladder COLOR_0 bake (L darkest / M mid
+/ S lightest, warm R>=G>=B, per-vertex hue jitter, same I370 bands). A is UNCHANGED.
+GPU-cheap: CONFIRMED - B tri == A per size (490/134/134) within BUDGETS, +0 draw calls, +0
+materials, ~30 KB new GLBs vs 133,197 B dist headroom, no textures.
+Changed files: design/art-direction-research.md (+ I419 slice) + 6 bookkeeping docs.
+Test result: 969/969 + build 0 + dist byte-identical 135/1,963,955 B + vendor sha 76DEA8151BC9352A.
+Next: I420 (ST-390) = Blender-model asteroid_L_B/_M_B/_S_B + wire setGLB per-variant + assetLoader
++ B test entries + re-measure playframe EXACT.

@@ -240,3 +240,84 @@ the FLOOR 50, or the frozen accent list.
    (strength + power curve are the only levers per Lightning Boy 3:48/7:37;
    flat per-face normals are already stable), further research fetching
    (E21 + I276 grounding is sufficient).
+
+
+## I419 silhouette-variety grounding (E52 prep, cgs-art-bible slice, YouTube MCP 2026-11-15)
+
+Purpose: ground the E52 lever (a distinct 2nd low-poly silhouette per rock size) and write the
+per-size A/B modeling brief. ADDS to the I207/I271/I276 grounding; does not duplicate it (the I207
+genre comps already established many-different-rocks-tumbling; this section nails the METHODOLOGY
+for authoring distinct silhouettes cheaply + the GPU-cheap confirmation).
+
+### Why this lever (grounded, not invented)
+- The shipped GLB rock path renders ONE geometry per size (asteroidRenderer.setGLB ->
+  glbGeo[size]), dropping the 3-variant silhouette variety the procedural fallback bakes.
+  Every I207 genre comp (Solaroids, Rocket!, Disasteroids, classic Asteroids) reads via many
+  DISTINCT rock silhouettes tumbling - silhouette diversity is the genre core art signal.
+- The rocks already carry deep craters + bumps (E41 I370: L 5cr+4bump, M/S 4cr+3bump); a relief-
+  DEPTH re-bake would duplicate a closed arc. The OPEN lever is silhouette COUNT/CHARACTER.
+
+### Method (I418 YouTube pass; 3 queries, 2026-11-15)
+1. August Renders, Make an Asteroid Field in Blender in One Minute! (youtu.be/9p4ZTUvBC9s, 37K).
+   icosphere/cube -> subdivide with a FRACTAL value (each rock randomized) -> Array modifier ->
+   separate by loose parts. Takeaway: a different subdivision/fractal seed per rock = a different
+   silhouette; the base shape is the constant.
+2. Blender Artifex, STYLIZED ROCKS In Blender 3D (youtu.be/ygjMX5mSi1Y, 226K). cube -> subdivide
+   (5) -> displace (Voronoi) -> dissolve center verts -> cavity. Takeaway: the displace texture
+   SEED + SIZE is the silhouette lever; dissolve keeps the mesh clean + low-poly.
+3. Grant Abbitt, Low Poly Rocks - Quick and Easy - Detailed (youtu.be/1H2YaRPfpdM, 121K). edge-
+   slide + merge + join to build a distinct character by hand. Takeaway: distinct CHARACTERS come
+   from a non-uniform overall form (a lopsided mass, a bar-like rock, a chunky blob), not just noise.
+4. Rod DeWeese, The Easiest Way to Make Asteroids in Blender (youtu.be/9mfSaP2WFfE, 2026). sphere
+   -> Sub-D -> Displace (non-destructive) + a Lattice for overall distortion. Takeaway: a Lattice
+   (or a non-uniform object scale) sets the rock overall proportion (elongated vs squat vs bar) so
+   two rocks with the same base read clearly different.
+
+### A/B silhouette brief (per size; the ST-390 modeling contract)
+- BASE (shared by A and B): an icosphere at the size subdivision (so A and B have the SAME tri
+  count -> the per-rock tri count is byte-identical to today, keeping the playframe tri pins
+  stable), flat-shaded, origin at the geometric center.
+- A = the existing primary (asteroid_L/M/S.glb, the I370 relief re-bake). UNCHANGED in E52.
+- B = a NEW distinct silhouette per size, built from the same base with: (a) a DIFFERENT displace
+  noise seed (Voronoi/Musgrave) + DIFFERENT noise size/scale (so the crater/ridge LAYOUT is not a
+  copy of A); (b) a DIFFERENT non-uniform overall scale / Lattice distortion (L: lopsided chunky
+  mass; M: squat bar; S: slightly elongated - a distinct character per size, per Abbitt #3 +
+  DeWeese #4); (c) crater insets placed differently from A (inset + push-in, the I207 Sleep Fight
+  method); (d) the SAME value-ladder COLOR_0 bake scheme (L darkest / M mid / S lightest, warm
+  order R>=G>=B, per-vertex hue jitter, facet-mean brightness preserved) relit to the same I370
+  bands, so A and B read as the same MATERIAL family, only different shape.
+- Silhouette test (the acceptance gate): with color + emissive removed (grayscale flat clay), B
+  must read as a clearly DIFFERENT outline from A at gameplay scale (the Curious Archive
+  silhouette-first principle from I207). If it reads like A, re-roll the seed/scale (cut option).
+
+### Palette
+- No palette change. B uses the SAME rock material (0x8a7f72 flat + the I257 warm rim 0xd8a878 @
+  0.12) and the SAME value-ladder COLOR_0 bands as A (art-bible palette is a contract). B is
+  distinguished by SHAPE only (the colorblind/readability rule: shape + value + motion carry the
+  read; emissive is an accent, never the separator).
+
+### Asset Constraints (GPU-cheap confirmation)
+- Tri budget: B tri count == A per size (L 490, M 134, S 134) -> within the existing BUDGETS
+  (L<=500, M<=140, S<=140). The same icosphere subdivision guarantees it.
+- Draw calls: +0 (the pool is shared; same rock count; the renderer just picks A or B per rock).
+- Materials: +0 (the one shared rock material; B carries COLOR_0 like A).
+- File size: each B GLB ~ the primary (L ~18 KB, M/S ~6-7 KB); 3 new GLBs total ~30 KB << the
+  133,197 B dist headroom (survives with ~100 KB to spare).
+- Textures: none (vertex-color COLOR_0 only; the asset-spec no-image-maps rule stands).
+- Naming: VR_Rock (same as A; the B files are separate GLBs but the same VR_Rock material name).
+
+### NOT taskable (documented rejections)
+- A 3rd silhouette per size (a 2-variant A/B doubles variety from 1 -> 2 and already reads as
+  varied; a 3rd is diminishing returns + more Blender/test surface for no new genre signal).
+- Textured / normal-mapped rocks (the flat-shaded low-poly art-bible language; over-engineer).
+- Relief-DEPTH re-bake (that is E41 I370, closed; duplicating it is not E52).
+- New asset TYPES (comet is the only existing variant type; a crystal rock etc. is scope creep).
+- A further displace research pull (the 4 sources above nail the method; E21/I276 precedent: frames
+  + method carry the grounding, do not over-fetch).
+
+### Verdict
+E52 (ST-390) is a bounded, GPU-cheap, video-grounded Blender pass: author asteroid_L_B/_M_B/_S_B
+(2nd distinct silhouette each, same tri count + radii + value-ladder bake + flat-shaded), wire
+setGLB to pick A/B by r.variant, add B test entries, confirm the playframe stays EXACT. Not over-
+engineered: no sim change, no palette change, no textures, 3 small GLBs + a ~5-line renderer
+change. GPU-cheap: CONFIRMED (see Asset Constraints).
