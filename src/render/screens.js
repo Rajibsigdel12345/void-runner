@@ -1,7 +1,7 @@
 ﻿// Void Runner - menu / pause / game-over screens (ST-017). DOM only; text change-cached.
 import { STATE } from '../core/state.js';
 import { encodeResult } from '../core/share.js'; // ST-159: shareable result code
-import { t as tr, kc as kcap } from '../core/strings.js'; // I404: ST-374 strings
+import { t as tr, kc as kcap, onLocale } from '../core/strings.js'; // I404: ST-374 + I405: ST-375 locale switching
 
 export function createScreens(root, settings = {}) {
   const overlay = document.createElement('div');
@@ -87,12 +87,16 @@ export function createScreens(root, settings = {}) {
   bottomWrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:8px;padding-bottom:30px;width:100%;';
   menu.append(topWrap, centerWrap, spacer, bottomWrap);
   const titleEl = line(topWrap, 'VOID RUNNER', 'font-size:calc(46px * var(--vr-fs,1));font-weight:800;letter-spacing:10px;'); titleEl.classList.add('vr-title'); // I65: gradient + glow
-  line(topWrap, tr('menu.tagline'), 'font-size:calc(14px * var(--vr-fs,1));letter-spacing:2px;opacity:0.85;'); // I44 contrast
+  const menuTagline = line(topWrap, tr('menu.tagline'), 'font-size:calc(14px * var(--vr-fs,1));letter-spacing:2px;opacity:0.85;'); // I44 contrast; ST-375: locale re-emit target
   const controls = document.createElement('div');
   controls.style.cssText = 'display:grid;grid-template-columns:auto auto auto auto;gap:5px 16px;font-size:calc(13px * var(--vr-fs,1));padding:10px 16px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);'; // I65: controls card; ST-279: two keycap pairs per row
-  const CONTROL_ROWS = settings.touch // I71: touch vs keyboard instructions
-    ? [[kcap('left_zone'), tr('ctrl.drag_fly')], [kcap('right_zone'), tr('ctrl.aim_fire')], [kcap('two_fingers'), tr('ctrl.pause')]] // ST-268 dual-zone
-    : [[kcap('wasd_arrows'), tr('ctrl.thrust')], [kcap('mouse'), tr('ctrl.aim')], [kcap('click_space'), tr('ctrl.fire')], [kcap('p_esc'), tr('ctrl.pause')], [kcap('m'), tr('ctrl.mute')], [kcap('f'), tr('ctrl.fx')], [kcap('n'), tr('ctrl.music')]];
+  function controlRows() { // ST-375: re-resolvable for locale re-emit
+    return settings.touch // I71: touch vs keyboard instructions
+      ? [[kcap('left_zone'), tr('ctrl.drag_fly')], [kcap('right_zone'), tr('ctrl.aim_fire')], [kcap('two_fingers'), tr('ctrl.pause')]] // ST-268 dual-zone
+      : [[kcap('wasd_arrows'), tr('ctrl.thrust')], [kcap('mouse'), tr('ctrl.aim')], [kcap('click_space'), tr('ctrl.fire')], [kcap('p_esc'), tr('ctrl.pause')], [kcap('m'), tr('ctrl.mute')], [kcap('f'), tr('ctrl.fx')], [kcap('n'), tr('ctrl.music')]];
+  }
+  const CONTROL_ROWS = controlRows();
+  const ctrlCells = []; // ST-375: [keycap span, value line] pairs for locale re-emit
   for (const [k, v] of CONTROL_ROWS) {
     const key = document.createElement('div');
     key.style.cssText = 'text-align:right;';
@@ -104,6 +108,7 @@ export function createScreens(root, settings = {}) {
     val.style.cssText = 'opacity:0.9;';
     val.textContent = v;
     controls.append(key, val);
+    ctrlCells.push([kc, val]); // ST-375
   }
   const top5 = document.createElement('div'); // I66: top-5 card
   top5.style.cssText = 'display:flex;flex-direction:column;gap:4px;font-size:calc(13px * var(--vr-fs,1));padding:10px 18px;min-height:130px;border:1px solid rgba(120,170,255,0.18);border-radius:12px;background:rgba(10,20,45,0.35);'; // ST-279: compact
@@ -119,6 +124,7 @@ export function createScreens(root, settings = {}) {
   menuGrid.append(controls, top5);
   bottomWrap.appendChild(menuGrid);
   const menuStatus = line(bottomWrap, tr('menu.status_line',{mute:tr('state.off'),fx:tr('state.high'),music:tr('state.on')}), 'font-size:calc(12px * var(--vr-fs,1));letter-spacing:2px;opacity:0.65;'); // I165: live session status on the menu (I164 finding); I171: + N music
+  let menuStartBtn = null; let menuStartLine = null; // ST-375: locale re-emit targets (touch btn / keyboard line)
   if (settings.touch && settings.actions && settings.actions.start) { // I71: tappable start on touch
     const startBtn = document.createElement('button');
     startBtn.type = 'button';
@@ -127,30 +133,34 @@ export function createScreens(root, settings = {}) {
     startBtn.style.cssText = 'margin-top:14px;';
     startBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.start(); startBtn.blur(); });
     centerWrap.appendChild(startBtn);
+    menuStartBtn = startBtn; // ST-375
   } else {
-    line(centerWrap, tr('menu.start_key'), 'font-size:calc(18px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;animation:vrPulse 1.6s ease-in-out infinite;');
+    menuStartLine = line(centerWrap, tr('menu.start_key'), 'font-size:calc(18px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;animation:vrPulse 1.6s ease-in-out infinite;');
   }
   const dailyRow = document.createElement('div'); // ST-279: DAILY + REPLAYS side by side
   dailyRow.style.cssText = 'display:flex;gap:14px;align-items:center;';
+  let dailyBtn = null; let replaysBtn = null; // ST-375: locale re-emit targets
   if (settings.actions && typeof settings.actions.startDaily === 'function') { // ST-141: DAILY button (today's seeded board)
-    const dailyBtn = document.createElement('button');
-    dailyBtn.type = 'button';
-    dailyBtn.className = 'vr-pause-btn';
-    dailyBtn.textContent = tr('menu.daily');
-    dailyBtn.style.cssText = 'letter-spacing:3px;';
-    dailyBtn.setAttribute('aria-label', tr('menu.daily_aria'));
-    dailyBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.startDaily(); dailyBtn.blur(); });
-    dailyRow.appendChild(dailyBtn);
+    const dailyBtnEl = document.createElement('button');
+    dailyBtnEl.type = 'button';
+    dailyBtnEl.className = 'vr-pause-btn';
+    dailyBtnEl.textContent = tr('menu.daily');
+    dailyBtnEl.style.cssText = 'letter-spacing:3px;';
+    dailyBtnEl.setAttribute('aria-label', tr('menu.daily_aria'));
+    dailyBtnEl.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.startDaily(); dailyBtnEl.blur(); });
+    dailyRow.appendChild(dailyBtnEl);
+    dailyBtn = dailyBtnEl; // ST-375
   }
   if (settings.actions && typeof settings.actions.showReplays === 'function') { // ST-190: REPLAYS button (demo pilot + saved runs)
-    const replaysBtn = document.createElement('button');
-    replaysBtn.type = 'button';
-    replaysBtn.className = 'vr-pause-btn';
-    replaysBtn.textContent = tr('menu.replays');
-    replaysBtn.style.cssText = 'letter-spacing:3px;';
-    replaysBtn.setAttribute('aria-label', tr('menu.replays_aria'));
-    replaysBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.showReplays(); replaysBtn.blur(); });
-    dailyRow.appendChild(replaysBtn);
+    const replaysBtnEl = document.createElement('button');
+    replaysBtnEl.type = 'button';
+    replaysBtnEl.className = 'vr-pause-btn';
+    replaysBtnEl.textContent = tr('menu.replays');
+    replaysBtnEl.style.cssText = 'letter-spacing:3px;';
+    replaysBtnEl.setAttribute('aria-label', tr('menu.replays_aria'));
+    replaysBtnEl.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.showReplays(); replaysBtnEl.blur(); });
+    dailyRow.appendChild(replaysBtnEl);
+    replaysBtn = replaysBtnEl; // ST-375
   }
   if (dailyRow.children.length) bottomWrap.appendChild(dailyRow);
   const bestRow = document.createElement('div'); // ST-279: best + daily lines share a row
@@ -172,18 +182,24 @@ bottomWrap.append(bestRow, credit);
 
   // --- PAUSED (I68: deeper dim + RESUME / RESTART / QUIT actions, mouse + keys) ---
   const paused = panel('screen-paused', 'radial-gradient(60% 55% at 50% 45%, rgba(30,60,140,0.16), transparent 70%), rgba(2,4,12,0.74)');
-  line(paused, tr('pause.title'), 'font-size:calc(36px * var(--vr-fs,1));font-weight:800;letter-spacing:8px;');
+  const pauseTitle = line(paused, tr('pause.title'), 'font-size:calc(36px * var(--vr-fs,1));font-weight:800;letter-spacing:8px;'); // ST-375: locale re-emit target
   const pauseSnap = line(paused, '', 'font-size:calc(15px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;opacity:0.9;'); // I44: session snapshot
   const pauseActions = (settings.actions && typeof settings.actions.resume === 'function') ? settings.actions : null; // I68
+  function pauseActionSpecs() { // ST-375: re-resolvable for locale re-emit
+    return [
+      [tr('pause.resume'), kcap('p'), pauseActions && pauseActions.resume],
+      [tr('pause.restart'), kcap('r'), pauseActions && pauseActions.restart],
+      [tr('pause.quit'), kcap('q'), pauseActions && pauseActions.quit],
+    ];
+  }
+  const actionLabels = []; // ST-375: [{i, text, key}] for locale re-emit
   if (pauseActions) {
     const actionsRow = document.createElement('div');
     actionsRow.style.cssText = 'display:flex;gap:14px;margin-top:2px;';
     const actionButtons = [];
-    for (const [label, keyHint, fn] of [
-      [tr('pause.resume'), kcap('p'), pauseActions.resume],
-      [tr('pause.restart'), kcap('r'), pauseActions.restart],
-      [tr('pause.quit'), kcap('q'), pauseActions.quit],
-    ]) {
+    const actionSpecs = pauseActionSpecs(); // ST-375
+    for (let ai = 0; ai < actionSpecs.length; ai++) {
+      const [label, keyHint, fn] = actionSpecs[ai];
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'vr-pause-btn';
@@ -192,6 +208,7 @@ bottomWrap.append(bestRow, credit);
       ks.className = 'vr-key';
       ks.textContent = keyHint;
       b.appendChild(ks);
+      actionLabels.push({ i: ai, text: b.childNodes[0], key: ks }); // ST-375: childNodes[0] = the "label + '  '" text node
       b.addEventListener('click', fn);
       actionsRow.appendChild(b);
       actionButtons.push(b);
@@ -219,7 +236,7 @@ bottomWrap.append(bestRow, credit);
 
   // --- GAME OVER ---
   const gameOver = panel('screen-gameover', 'rgba(8,2,6,0.72)');
-  line(gameOver, tr('over.title'), 'font-size:calc(42px * var(--vr-fs,1));font-weight:800;letter-spacing:8px;color:#ff6d8a;');
+  const overTitle = line(gameOver, tr('over.title'), 'font-size:calc(42px * var(--vr-fs,1));font-weight:800;letter-spacing:8px;color:#ff6d8a;'); // ST-375: locale re-emit target
   const finalScore = line(gameOver, tr('over.score',{score:0}), 'font-size:calc(26px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;');
   const overBest = line(gameOver, '', 'font-size:calc(13px * var(--vr-fs,1));opacity:0.7;');
   const newBestLine = line(gameOver, '', 'font-size:calc(16px * var(--vr-fs,1));font-weight:800;letter-spacing:3px;color:#ffe08a;');
@@ -231,6 +248,7 @@ bottomWrap.append(bestRow, credit);
   dailyBadge.style.cssText = 'display:none;font-size:calc(12px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;color:#9fd8ff;border:1px solid rgba(159,216,255,0.4);border-radius:20px;padding:4px 14px;background:rgba(60,120,220,0.16);';
   gameOver.appendChild(dailyBadge);
   let goPrompt = null; // ST-190: restart prompt element (keyboard path); its text is set in update()
+  let overRestartBtn = null; // ST-375: locale re-emit target (touch restart button)
   if (settings.touch && settings.actions && settings.actions.restart) { // I71: tappable restart on touch
     const reBtn = document.createElement('button');
     reBtn.type = 'button';
@@ -239,6 +257,7 @@ bottomWrap.append(bestRow, credit);
     reBtn.style.cssText = 'margin-top:10px;';
     reBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.restart(); reBtn.blur(); });
     gameOver.appendChild(reBtn);
+    overRestartBtn = reBtn; // ST-375
   } else {
     goPrompt = line(gameOver, tr('over.restart_key'), 'font-size:calc(16px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;margin-top:10px;animation:vrPulse 1.6s ease-in-out infinite;'); // ST-190
   }
@@ -274,7 +293,7 @@ bottomWrap.append(bestRow, credit);
   }
   shareBtn.addEventListener('click', (e) => { e.stopPropagation(); if (goShare) copyShare(); shareBtn.blur(); });
   gameOver.appendChild(shareBtn);
-  line(gameOver, tr('over.copy_caption'), 'font-size:calc(11px * var(--vr-fs,1));opacity:0.6;letter-spacing:1px;margin-top:-8px;');
+  const copyCaption = line(gameOver, tr('over.copy_caption'), 'font-size:calc(11px * var(--vr-fs,1));opacity:0.6;letter-spacing:1px;margin-top:-8px;'); // ST-375: locale re-emit target
   let watchRunBtn = null; // ST-191: WATCH THIS RUN (only for the just-saved run)
   if (settings.actions && settings.actions.watchRun) {
     watchRunBtn = document.createElement('button');
@@ -288,8 +307,8 @@ bottomWrap.append(bestRow, credit);
   }
   // --- REPLAYS (ST-190: demo pilot + saved runs; a row starts a watched run) ---
   const replaysPanel = panel('screen-replays', 'radial-gradient(55% 50% at 30% 30%, rgba(60,110,200,0.22), transparent 70%), radial-gradient(50% 55% at 72% 72%, rgba(140,70,180,0.20), transparent 70%), rgba(2,4,12,0.62)');
-  line(replaysPanel, tr('replays.title'), 'font-size:calc(30px * var(--vr-fs,1));font-weight:800;letter-spacing:8px;');
-  line(replaysPanel, tr('replays.sub'), 'font-size:calc(13px * var(--vr-fs,1));letter-spacing:2px;opacity:0.85;');
+  const replaysTitle = line(replaysPanel, tr('replays.title'), 'font-size:calc(30px * var(--vr-fs,1));font-weight:800;letter-spacing:8px;'); // ST-375: locale re-emit target
+  const replaysSub = line(replaysPanel, tr('replays.sub'), 'font-size:calc(13px * var(--vr-fs,1));letter-spacing:2px;opacity:0.85;'); // ST-375: locale re-emit target
   const replaysList = document.createElement('div');
   replaysList.style.cssText = 'display:flex;flex-direction:column;gap:8px;width:min(560px,86vw);max-height:52vh;overflow-y:auto;padding:6px 2px;';
   replaysPanel.appendChild(replaysList);
@@ -321,16 +340,47 @@ bottomWrap.append(bestRow, credit);
       replaysList.appendChild(b);
     }
   }
+  let replaysBackBtn = null; // ST-375: locale re-emit target
   if (settings.actions && typeof settings.actions.closeReplays === 'function') {
-    const backBtn = document.createElement('button');
-    backBtn.type = 'button';
-    backBtn.className = 'vr-pause-btn';
-    backBtn.textContent = tr('replays.back');
-    backBtn.style.cssText = 'margin-top:10px;letter-spacing:3px;';
-    backBtn.setAttribute('aria-label', tr('replays.back_aria'));
-    backBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.closeReplays(); backBtn.blur(); });
-    replaysPanel.appendChild(backBtn);
+    const backBtnEl = document.createElement('button');
+    backBtnEl.type = 'button';
+    backBtnEl.className = 'vr-pause-btn';
+    backBtnEl.textContent = tr('replays.back');
+    backBtnEl.style.cssText = 'margin-top:10px;letter-spacing:3px;';
+    backBtnEl.setAttribute('aria-label', tr('replays.back_aria'));
+    backBtnEl.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.closeReplays(); backBtnEl.blur(); });
+    replaysPanel.appendChild(backBtnEl);
+    replaysBackBtn = backBtnEl; // ST-375
   }
+  // ST-375: live locale switch - re-emit every persistent label this module owns.
+  // Per-frame derived text (menuStatus/pauseSnap/mute/fx/stats/scores/goPrompt) re-resolves
+  // in update() and needs no re-emit. Replay rows are NOT re-emitted: they re-resolve on the
+  // next openReplays (probe-only staleness, documented in the I405 entry).
+  onLocale(() => {
+    menuTagline.textContent = tr('menu.tagline');
+    const rows2 = controlRows();
+    for (let ci = 0; ci < ctrlCells.length; ci++) { ctrlCells[ci][0].textContent = rows2[ci][0]; ctrlCells[ci][1].textContent = rows2[ci][1]; }
+    if (menuStartBtn) menuStartBtn.textContent = tr('menu.start_tap');
+    if (menuStartLine) menuStartLine.textContent = tr('menu.start_key');
+    if (dailyBtn) { dailyBtn.textContent = tr('menu.daily'); dailyBtn.setAttribute('aria-label', tr('menu.daily_aria')); }
+    if (replaysBtn) { replaysBtn.textContent = tr('menu.replays'); replaysBtn.setAttribute('aria-label', tr('menu.replays_aria')); }
+    credit.textContent = tr('menu.credit');
+    top5Head.textContent = tr('menu.board');
+    pauseTitle.textContent = tr('pause.title');
+    if (actionLabels.length) {
+      const specs2 = pauseActionSpecs();
+      for (const a of actionLabels) { a.text.data = specs2[a.i][0] + '  '; a.key.textContent = specs2[a.i][1]; }
+    }
+    overTitle.textContent = tr('over.title');
+    if (shareBtn && !shareBtn.disabled) { shareBtn.textContent = tr('over.copy'); shareBtn.setAttribute('aria-label', tr('over.copy_aria')); } // never clobber the transient COPIED/FAILED feedback
+    copyCaption.textContent = tr('over.copy_caption');
+    if (overRestartBtn) overRestartBtn.textContent = tr('over.restart_tap');
+    if (watchRunBtn) { watchRunBtn.textContent = tr('over.watch_run'); watchRunBtn.setAttribute('aria-label', tr('over.watch_run_aria')); }
+    replaysTitle.textContent = tr('replays.title');
+    replaysSub.textContent = tr('replays.sub');
+    if (replaysBackBtn) { replaysBackBtn.textContent = tr('replays.back'); replaysBackBtn.setAttribute('aria-label', tr('replays.back_aria')); }
+  }); // ST-375
+
   const PANELS = {
     [STATE.MENU]: menu,
     [STATE.PAUSED]: paused,

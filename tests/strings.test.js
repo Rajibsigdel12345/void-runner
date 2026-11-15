@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { STRINGS, KEYCAPS, getLocale, setLocale, t, kc } from '../src/core/strings.js';
+import { STRINGS, KEYCAPS, getLocale, setLocale, onLocale, LOCALES, LOCALE_NAMES, t, kc } from '../src/core/strings.js';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const FILES = [
@@ -83,4 +83,40 @@ test('strings: locale fallback - missing locale key falls back to en', () => {
     setLocale('en');
     delete STRINGS.zztest;
   }
+});
+
+test('strings: ST-375 LOCALES + LOCALE_NAMES are frozen, complete, native names non-empty', () => {
+  assert.deepEqual(LOCALES, ['en', 'zh', 'ja']);
+  assert.ok(Object.isFrozen(LOCALES));
+  assert.ok(Object.isFrozen(LOCALE_NAMES));
+  for (const l of LOCALES) assert.ok(typeof LOCALE_NAMES[l] === 'string' && LOCALE_NAMES[l].length > 0);
+});
+test('strings: ST-375 setLocale switches; empty zh table falls back to en for t() and kc()', () => {
+  setLocale('zh');
+  try {
+    assert.equal(getLocale(), 'zh');
+    assert.equal(t('menu.board'), STRINGS.en['menu.board']);
+    assert.equal(kc('mouse'), KEYCAPS.en['mouse']);
+  } finally { setLocale('en'); }
+});
+test('strings: ST-375 onLocale fires only on actual change; unsubscribe stops delivery', () => {
+  const seen = [];
+  const offA = onLocale((l) => seen.push(['a', l]));
+  const offB = onLocale((l) => seen.push(['b', l]));
+  setLocale('zh');
+  setLocale('zh'); // same locale: no fire
+  offA();
+  setLocale('ja');
+  assert.deepEqual(seen, [['a', 'zh'], ['b', 'zh'], ['b', 'ja']]);
+  offB();
+  setLocale('en'); // no listeners left
+  assert.deepEqual(seen, [['a', 'zh'], ['b', 'zh'], ['b', 'ja']]);
+});
+test('strings: ST-375 setLocale(unknown) ignored: locale unchanged, no fire', () => {
+  const seen = [];
+  const off = onLocale((l) => seen.push(l));
+  setLocale('nope');
+  assert.equal(getLocale(), 'en');
+  assert.deepEqual(seen, []);
+  off();
 });

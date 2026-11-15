@@ -1,5 +1,5 @@
 import { FONT_SCALES } from '../core/storage.js'; // I70
-import { t } from '../core/strings.js'; // I404: ST-374 strings
+import { t, onLocale, LOCALES, LOCALE_NAMES } from '../core/strings.js'; // I404: ST-374 + I405: ST-375 locale selector
 
 // ST-026 settings panel, polished in ST-067: grouped (AUDIO / VISUALS),
 // keyboard-operable (Tab + arrow focus moves on the plain controls, game
@@ -54,7 +54,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
 
   // AUDIO group
   const audioCard = card(t('settings.audio'));
-  row(t('settings.volume'), audioCard);
+  const volRow = row(t('settings.volume'), audioCard); // ST-375: captured for locale re-emit
   const vol = document.createElement('input');
   vol.type = 'range'; vol.min = '0'; vol.max = '1'; vol.step = '0.05';
   vol.value = String(s0.volume);
@@ -63,14 +63,14 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   vol.addEventListener('input', () => emit({ volume: Number(vol.value) }));
   audioCard.appendChild(styleCtl(vol));
 
-  row(t('settings.sfx'), audioCard);
+  const sfxRow = row(t('settings.sfx'), audioCard); // ST-375
   const sfx = document.createElement('input');
   sfx.type = 'checkbox'; sfx.checked = s0.sfx;
   sfx.setAttribute('aria-label', t('settings.sfx_aria'));
   sfx.addEventListener('change', () => emit({ sfx: sfx.checked }));
   audioCard.appendChild(sfx);
 
-  row(t('settings.music'), audioCard); // I158: generative ambient music bed (on by default)
+  const musicRow = row(t('settings.music'), audioCard); // I158: generative ambient music bed (on by default); ST-375
   const music = document.createElement('input');
   music.type = 'checkbox'; music.checked = s0.music;
   music.setAttribute('aria-label', t('settings.music_aria'));
@@ -98,14 +98,14 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   fxSel.addEventListener('change', () => emit({ fx: fxSel.value }, true)); // ST-067: live preview
   visCard.appendChild(styleCtl(fxSel));
 
-  row(t('settings.reduced_motion'), visCard);
+  const rmRow = row(t('settings.reduced_motion'), visCard); // ST-375
   const rm = document.createElement('input');
   rm.type = 'checkbox'; rm.checked = s0.reducedMotion;
   rm.setAttribute('aria-label', t('settings.reduced_motion_aria'));
   rm.addEventListener('change', () => emit({ reducedMotion: rm.checked }));
   visCard.appendChild(rm);
 
-  row(t('settings.font_scale'), visCard); // I70: UI text scale (applied as --vr-fs)
+  const fontRow = row(t('settings.font_scale'), visCard); // I70: UI text scale (applied as --vr-fs); ST-375
   const fontSel = document.createElement('select');
   for (const sc of FONT_SCALES) {
     const o = document.createElement('option');
@@ -118,31 +118,46 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   fontSel.addEventListener('change', () => emit({ fontScale: Number(fontSel.value) }));
   visCard.appendChild(styleCtl(fontSel));
 
-  row(t('settings.shape_cues'), visCard); // I155: colorblind-friendly silhouette markers (on by default)
+  const cuesRow = row(t('settings.shape_cues'), visCard); // I155: colorblind-friendly silhouette markers (on by default); ST-375
   const cues = document.createElement('input');
   cues.type = 'checkbox'; cues.checked = s0.shapeCues;
   cues.setAttribute('aria-label', t('settings.shape_cues_aria'));
   cues.addEventListener('change', () => emit({ shapeCues: cues.checked }));
   visCard.appendChild(cues);
 
-  row(t('settings.colorblind'), visCard); // I158: deuteranopia (Machado 2009) preview on the canvas
+  const cbRow = row(t('settings.colorblind'), visCard); // I158: deuteranopia (Machado 2009) preview on the canvas; ST-375
   const cbPreview = document.createElement('input');
   cbPreview.type = 'checkbox'; cbPreview.checked = s0.colorblindPreview;
   cbPreview.setAttribute('aria-label', t('settings.colorblind_aria'));
   cbPreview.addEventListener('change', () => emit({ colorblindPreview: cbPreview.checked }));
   visCard.appendChild(cbPreview);
 
-  row(t('settings.slowmo_hint'), visCard); // I158: short caption when the slow-mo pickup is on screen / active
+  const smRow = row(t('settings.slowmo_hint'), visCard); // I158: short caption when the slow-mo pickup is on screen / active; ST-375
   const smHint = document.createElement('input');
   smHint.type = 'checkbox'; smHint.checked = s0.slowmoHint;
   smHint.setAttribute('aria-label', t('settings.slowmo_hint_aria'));
   smHint.addEventListener('change', () => emit({ slowmoHint: smHint.checked }));
   visCard.appendChild(smHint);
 
+  // ST-375: LANGUAGE card (3-way EN/zh/ja; locale content tables land in ST-376 - options keep NATIVE names)
+  const langCard = card(t('settings.language'));
+  const langSel = document.createElement('select');
+  for (const loc of LOCALES) {
+    const o = document.createElement('option');
+    o.value = loc; o.textContent = LOCALE_NAMES[loc];
+    langSel.appendChild(o);
+  }
+  langSel.value = s0.locale; // s0.locale is always a valid LOCALES entry (storage validates)
+  langSel.style.width = 'calc(170px * var(--vr-fs,1))';
+  langSel.style.gridColumn = '2';
+  langSel.setAttribute('aria-label', t('settings.language_aria'));
+  langSel.addEventListener('change', () => emit({ locale: langSel.value })); // ST-375: persist + live switch (re-render via onLocale)
+  langCard.appendChild(styleCtl(langSel));
+
   const groups = document.createElement('div');
   groups.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:14px;align-items:start;';
   groups.className = 'vr-settings-groups'; // ST-279: menu scopes this to a single column
-  groups.append(audioCard, visCard);
+  groups.append(audioCard, visCard, langCard); // ST-375
   wrap.appendChild(groups);
 
   const hint = document.createElement('div'); // ST-067: key-nav hint
@@ -150,7 +165,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   hint.style.cssText = 'font-size:calc(11px * var(--vr-fs,1));letter-spacing:2px;opacity:0.55;';
   wrap.appendChild(hint);
 
-  const order = [vol, sfx, music, fxSel, rm, fontSel, cues, cbPreview, smHint]; // I158
+  const order = [vol, sfx, music, fxSel, rm, fontSel, cues, cbPreview, smHint, langSel]; // I158; ST-375: + language select (matches DOM order)
 
   function moveFocus(from, dir) {
     const i = order.indexOf(from);
@@ -165,7 +180,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
     const t = e.target;
     if (order.indexOf(t) < 0) return;
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      if (t === vol || t === fxSel || t === fontSel) return; // native consumption
+      if (t === vol || t === fxSel || t === fontSel || t === langSel) return; // native consumption
       e.preventDefault();
       e.stopPropagation();
       moveFocus(t, e.key === 'ArrowDown' ? 1 : -1);
@@ -192,7 +207,29 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
     music.checked = s.music; // I158
     cbPreview.checked = s.colorblindPreview; // I158
     smHint.checked = s.slowmoHint; // I158
+    langSel.value = s.locale; // ST-375
   }
+
+  // ST-375: live locale switch - re-emit every persistent label this panel owns.
+  // The language select's options keep their NATIVE names (never re-emitted).
+  onLocale(() => {
+    audioCard.firstChild.textContent = t('settings.audio');
+    visCard.firstChild.textContent = t('settings.visuals');
+    langCard.firstChild.textContent = t('settings.language');
+    volRow.textContent = t('settings.volume'); vol.setAttribute('aria-label', t('settings.volume_aria'));
+    sfxRow.textContent = t('settings.sfx'); sfx.setAttribute('aria-label', t('settings.sfx_aria'));
+    musicRow.textContent = t('settings.music'); music.setAttribute('aria-label', t('settings.music_aria'));
+    fxRow.firstChild.data = t('settings.fx'); // firstChild = the label text node (the fxAuto marker span is a child)
+    for (const opt of fxSel.options) opt.textContent = t('settings.fx.' + opt.value);
+    rmRow.textContent = t('settings.reduced_motion'); rm.setAttribute('aria-label', t('settings.reduced_motion_aria'));
+    fontRow.textContent = t('settings.font_scale'); fontSel.setAttribute('aria-label', t('settings.font_scale_aria'));
+    for (const opt of fontSel.options) opt.textContent = t('settings.font_scale.' + (opt.value === '1' ? 'normal' : opt.value === '1.25' ? 'large' : 'xl'));
+    cuesRow.textContent = t('settings.shape_cues'); cues.setAttribute('aria-label', t('settings.shape_cues_aria'));
+    cbRow.textContent = t('settings.colorblind'); cbPreview.setAttribute('aria-label', t('settings.colorblind_aria'));
+    smRow.textContent = t('settings.slowmo_hint'); smHint.setAttribute('aria-label', t('settings.slowmo_hint_aria'));
+    langSel.setAttribute('aria-label', t('settings.language_aria'));
+    hint.textContent = t('settings.kbd_hint');
+  }); // ST-375
 
   return { el: wrap, sync, setFxMarker };
 }

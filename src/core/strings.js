@@ -148,6 +148,8 @@ export const STRINGS = {
     'settings.slowmo_hint': 'SLOW-MO HINT',
     'settings.slowmo_hint_aria': 'Slow-mo hint',
     'settings.kbd_hint': 'TAB NAVIGATES - ARROWS MOVE - SPACE TOGGLES',
+    'settings.language': 'LANGUAGE', // ST-375: language selector card header
+    'settings.language_aria': 'Language', // ST-375: aria-label for the language select
     // toasts
     'toast.fx_auto_low': 'FX AUTO-SET TO LOW (LOW FPS)',
     'toast.recording': 'RECORDING - O TO STOP',
@@ -168,6 +170,8 @@ export const STRINGS = {
     'ctxlost.timeout': 'Still no signal after 10s. If it does not come back, reload the game.',
     'ctxlost.reload': 'RELOAD GAME',
   },
+  zh: {}, // ST-375: empty table until ST-376 (t()/kc() fall back to en)
+  ja: {}, // ST-375: empty table until ST-376 (t()/kc() fall back to en)
 };
 export const KEYCAPS = {
   en: {
@@ -188,10 +192,21 @@ export const KEYCAPS = {
   },
 };
 
+// ST-375: available locales + native names for the selector (content tables land in ST-376).
+export const LOCALES = Object.freeze(['en', 'zh', 'ja']);
+export const LOCALE_NAMES = Object.freeze({ en: 'EN', zh: '\u4e2d\u6587', ja: '\u65e5\u672c\u8a9e' });
+
 let locale = 'en';
 
 export function getLocale() { return locale; }
-export function setLocale(l) { if (STRINGS[l]) locale = l; } // unknown locale ignored (stays)
+const localeListeners = new Set(); // ST-375: live re-render pub-sub (render layer registers; core stays DOM-free)
+export function onLocale(cb) { localeListeners.add(cb); return () => localeListeners.delete(cb); } // ST-375: returns the unsubscribe
+export function setLocale(l) {
+  if (!STRINGS[l]) return; // unknown locale ignored (stays) - validated by table existence, not the LOCALES list (keeps the zztest seam)
+  if (l === locale) return; // silent no-op: no fire, no work
+  locale = l;
+  for (const cb of [...localeListeners]) { try { cb(l); } catch (err) { if (typeof console !== 'undefined') console.warn('[strings] locale listener error:', err); } }
+}
 
 function substitute(s, vars) {
   if (!s) return s;

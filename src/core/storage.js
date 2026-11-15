@@ -10,6 +10,7 @@
 // corrupt/non-integer version, falls back to defaults). migratePayload is pure + tested.
 
 import { CONFIG } from './config.js'; // ST-190: replay tape length cap
+import { LOCALES } from './strings.js'; // ST-375: locale persistence (validated against strings.js LOCALES)
 import { decodeReplay } from './replay.js'; // ST-190: strict replay validation
 
 export const STORE_VERSION = 1;
@@ -24,6 +25,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   music: true,          // generative ambient music bed on/off (I158; audio.js bed)
   colorblindPreview: false, // simulate deuteranopia (Machado 2009) on the canvas (I158; a11y preview)
   slowmoHint: true,     // short slow-mo power-up caption when on screen / active (I158; HUD hint)
+  locale: 'en',         // UI language (ST-375; validated against strings.js LOCALES)
 });
 
 export const FONT_SCALES = Object.freeze([1, 1.25, 1.5]);
@@ -129,7 +131,7 @@ export class Storage {
     return this._write(this.bestKey, { version: STORE_VERSION, value: s });
   }
 
-  /** @returns {{volume:number, sfx:boolean, fx:string, reducedMotion:boolean, fontScale:number, shapeCues:boolean, music:boolean, colorblindPreview:boolean, slowmoHint:boolean}} saved settings merged over defaults. */
+  /** @returns {{volume:number, sfx:boolean, fx:string, reducedMotion:boolean, fontScale:number, shapeCues:boolean, music:boolean, colorblindPreview:boolean, slowmoHint:boolean, locale:string}} saved settings merged over defaults. */
   getSettings() {
     const d = this._readVersioned(this.settingsKey);
     const out = { ...DEFAULT_SETTINGS };
@@ -143,6 +145,7 @@ export class Storage {
     if (typeof d.music === "boolean") out.music = d.music; // I158
     if (typeof d.colorblindPreview === "boolean") out.colorblindPreview = d.colorblindPreview; // I158
     if (typeof d.slowmoHint === "boolean") out.slowmoHint = d.slowmoHint; // I158
+    if (typeof d.locale === 'string' && LOCALES.includes(d.locale)) out.locale = d.locale; // ST-375
     return out;
   }
 
@@ -160,6 +163,7 @@ export class Storage {
     if (typeof merged.music === "boolean") clean.music = merged.music; // I158
     if (typeof merged.colorblindPreview === "boolean") clean.colorblindPreview = merged.colorblindPreview; // I158
     if (typeof merged.slowmoHint === "boolean") clean.slowmoHint = merged.slowmoHint; // I158
+    if (typeof merged.locale === 'string' && LOCALES.includes(merged.locale)) clean.locale = merged.locale; // ST-375
     this._write(this.settingsKey, { version: STORE_VERSION, ...clean });
     return clean;
   }

@@ -389,3 +389,18 @@ test('storage: I158 options (music / colorblindPreview / slowmoHint) defaults, r
   assert.equal(c.colorblindPreview, false);
   assert.equal(c.slowmoHint, true);
 });
+
+test('storage: ST-375 locale default + round-trip + unknown rejected + corrupt safe', () => {
+  assert.equal(DEFAULT_SETTINGS.locale, 'en');
+  const store = memStore();
+  const a = new Storage(store);
+  assert.equal(a.getSettings().locale, 'en');
+  const m = a.setSettings({ locale: 'zh' });
+  assert.equal(m.locale, 'zh');
+  assert.equal(JSON.parse(store.get(a.settingsKey)).locale, 'zh');
+  const b = new Storage(store);
+  assert.equal(b.getSettings().locale, 'zh');
+  assert.equal(a.setSettings({ locale: 'ko' }).locale, 'en'); // unknown -> default
+  store.set(a.settingsKey, JSON.stringify({ version: STORE_VERSION, locale: 123 }));
+  assert.equal(a.getSettings().locale, 'en'); // corrupt -> default, no throw
+});

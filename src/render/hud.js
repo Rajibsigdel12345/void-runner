@@ -2,7 +2,7 @@
 // change; drain bars quantized (chips 1/20, combo 1/40) so style writes stop
 // once the displayed value is unchanged.
 import { CONFIG } from '../core/config.js';
-import { t as tr } from '../core/strings.js'; // I404: ST-374 strings
+import { t as tr, onLocale } from '../core/strings.js'; // I404: ST-374 + I405: ST-375 locale
 
 // I44: power-up indicator chips (GDD: top-right "active power-up timers").
 // Accessibility (GDD): shape + color + label - never color alone. Palette
@@ -100,7 +100,8 @@ export function createHUD(root) {
     const letter = document.createElement('span'); // I70: letter badge (R/S/H/B/M/O)
     letter.style.cssText = `display:inline-flex;align-items:center;justify-content:center;width:1em;height:1em;margin-right:7px;font-size:calc(13px * var(--vr-fs,1));font-weight:800;line-height:1;color:#08101f;background:${s.color};border-radius:0.18em;`;
     letter.textContent = s.letter;
-    top.append(letter, document.createTextNode(tr('hud.pu.' + t)));
+    const puLabel = document.createTextNode(tr('hud.pu.' + t)); // ST-375: captured for locale re-emit
+    top.append(letter, puLabel);
     const track = document.createElement('div');
     track.style.cssText = 'height:3px;margin-top:2px;background:rgba(255,255,255,0.15);';
     const fill = document.createElement('div');
@@ -108,7 +109,7 @@ export function createHUD(root) {
     track.appendChild(fill);
     chip.append(top, track);
     chipCol.appendChild(chip);
-    chips[t] = { chip, fill, lastBar: -1 };
+    chips[t] = { chip, fill, lastBar: -1, label: puLabel }; // ST-375: + label text node
   }
 
   // I160: bottom-center is a compact combo heat bar (small label + 4s drain);
@@ -207,6 +208,13 @@ export function createHUD(root) {
 
   let visible = true;
   function setVisible(v) { if (visible === v) return; visible = v; el.style.display = v ? '' : 'none'; }
+
+  // ST-375: live locale switch - persistent labels only (score/wave/best/modTag re-derive every frame in render()).
+  onLocale(() => {
+    wpnLabel.textContent = tr('hud.wpn');
+    comboLabel.textContent = tr('hud.combo');
+    for (const k of Object.keys(chips)) chips[k].label.data = tr('hud.pu.' + k);
+  }); // ST-375
 
   root.appendChild(el);
   return { el, render, setVisible };

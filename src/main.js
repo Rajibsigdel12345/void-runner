@@ -54,7 +54,7 @@ import { createAdaptiveQuality } from './core/adaptiveQuality.js'; // ST-073
 import { dprForTier } from './core/dprTier.js'; // ST-225: load-reactive DPR (pure core)
 import { createClock } from './core/clock.js'; // ST-078
 import { visibilityAction } from './core/visibilityPause.js'; // I189: pure visibility-pause decision (unit-tested)
-import { t as tr } from './core/strings.js'; // I404: ST-374 strings
+import { t as tr, setLocale, onLocale, getLocale } from './core/strings.js'; // I404: ST-374 + I405: ST-375 locale switching
 import { STATE } from './core/state.js';
 import { Storage, toggleFxQuality } from './core/storage.js';
 import { CONFIG } from './core/config.js';
@@ -323,6 +323,7 @@ slowmoHintEl.setAttribute('aria-hidden', 'true');
 slowmoHintEl.textContent = tr('toast.slowmo');
 slowmoHintEl.style.cssText = 'position:fixed;left:50%;bottom:104px;transform:translateX(-50%);z-index:40;pointer-events:none;font:calc(12px * var(--vr-fs,1))/1.4 ui-monospace,monospace;letter-spacing:.06em;color:#9fe8ff;background:rgba(6,20,30,0.66);padding:5px 12px;border-radius:5px;border:1px solid rgba(159,232,255,0.35);opacity:0;transition:opacity .2s;';
 document.body.appendChild(slowmoHintEl);
+onLocale(() => { slowmoHintEl.textContent = tr('toast.slowmo'); }); // ST-375: registered BEFORE the boot applySettings fire below, so a saved non-en locale applies here too
 
 function applySettings(s) {
   liveSettings = s;
@@ -337,6 +338,7 @@ function applySettings(s) {
   applyColorblindPreview(s.colorblindPreview); // I158: deuteranopia canvas preview
   rockRenders.setShapeCues(s.shapeCues !== false); // I155: colorblind-friendly silhouette cues
   wardenMesh.setShapeCues(s.shapeCues !== false);
+  setLocale(s.locale); // ST-375: live locale switch (no-op unless changed; fires the onLocale re-emits). Boot: applied here before the panels/screens below are built.
 }
 applySettings(liveSettings);
 // ST-073: adaptive quality - rolling FPS below threshold auto-downgrades FX (console log + toast).
@@ -628,7 +630,9 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
 }
 window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shockwaves, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, shipFlameGlow: shipMesh.flameGlow, arenaFloor: grid, // ST-257 (I269)
   floorDisc, // ST-277 (I294)
-  applySettings, liveSettings: () => liveSettings, audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, powerupRenders, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, vendorLowpWarns: () => _vendorLowpWarns, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+  applySettings, liveSettings: () => liveSettings,
+  locale: () => getLocale(), setLocale, // ST-375: locale probe + drive (boot applied in applySettings; live via the settings panel)
+  audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, powerupRenders, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, vendorLowpWarns: () => _vendorLowpWarns, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -678,6 +682,7 @@ let ctxRestoreTimer = 0;
 // I187: named handlers (were inline arrows) so the re-init path is probeable, and a
 // ctxLost flag so the frame loop fully stops while the context is dead.
 let ctxLost = false;
+let ctxEscalated = false; // ST-375: 10s escalation pending (the locale re-emit picks the right status text)
 let framesRendered = 0; // I187: loop-work counter (probe) - frozen while the context is lost
 function onCtxLost(e) {
   e.preventDefault(); // mark the context as restorable
@@ -685,9 +690,11 @@ function onCtxLost(e) {
   if (world.game.state === STATE.PLAYING) world.pause();
   ctxOverlay.style.display = 'flex'; // I75
   ctxStatus.textContent = tr('ctxlost.message');
+  ctxEscalated = false; // ST-375
   clearTimeout(ctxRestoreTimer);
   ctxRestoreTimer = setTimeout(() => { // I75: no restore yet - escalate
     ctxStatus.textContent = tr('ctxlost.timeout');
+    ctxEscalated = true; // ST-375
   }, 10000);
 }
 function onCtxRestored() {
@@ -697,6 +704,7 @@ function onCtxRestored() {
   renderer.info.reset();
   clock.reset(performance.now()); // I187: re-init path - stall time discarded, no dt spike on the first restored frame (ST-078 clamp is the backstop)
   ctxLost = false;
+  ctxEscalated = false; // ST-375
   ctxOverlay.style.display = 'none'; // I75: back to normal (pause screen takes over if the game was running)
 }
 renderer.domElement.addEventListener('webglcontextlost', onCtxLost);
@@ -704,6 +712,12 @@ renderer.domElement.addEventListener('webglcontextrestored', onCtxRestored);
 window.__vr.ctxLost = () => ctxLost; // I187: probe
 window.__vr.simCtxLost = () => onCtxLost({ preventDefault() {} }); // I187: exercise the real handler path without an actual GL loss (smoke/debug only)
 window.__vr.simCtxRestore = () => onCtxRestored(); // I187
+onLocale(() => { // ST-375: ctx overlay is post-construction here - boot covered above, live changes arrive via applySettings
+  ctxTitle.textContent = tr('ctxlost.title');
+  ctxStatus.textContent = ctxEscalated ? tr('ctxlost.timeout') : tr('ctxlost.message');
+  ctxBtn.textContent = tr('ctxlost.reload');
+  updateFxMarker();
+}); // ST-375
 window.__vr.framesRendered = () => framesRendered; // I187: loop-work counter (frozen while the context is lost)
 window.__vr.ctxOverlay = ctxOverlay; // I75: expose after declaration (TDZ-safe)
 window.__vr.clockState = () => clock.state(); // I188: ST-078 clock internals probe (context-loss evidence: reset discards the stall) - called post-load only (TDZ-safe)

@@ -1,5 +1,5 @@
 // ST-055: boss HP bar - minimal DOM (no assets): thin fixed bar under the wave chip.
-import { t } from '../core/strings.js'; // I404: ST-374 strings
+import { t, onLocale } from '../core/strings.js'; // I404: ST-374 + I405: ST-375 locale
 export function createBossHealth(root) {
   const wrap = document.createElement('div');
   wrap.id = 'hud-bossbar'; // ST-269 (I284): probeable DOM ids (wrap/label/bar/fill were id-less = unprobeable)
@@ -20,6 +20,7 @@ export function createBossHealth(root) {
   root.appendChild(wrap);
 
   let _kind = ''; // ST-143: last-synced boss kind (avoids rewriting styles every frame)
+  onLocale(() => { _kind = ''; }); // ST-375: force the label to re-derive on the next sync() (monolith/splicer label + tint)
   /** sync(boss): visible while the boss is alive; fill width = hpFrac; label + tint per variant (ST-143). */
   function sync(boss) {
     if (!boss || !boss.alive) { wrap.style.opacity = '0'; return; }
