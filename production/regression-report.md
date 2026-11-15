@@ -240,3 +240,27 @@ Fresh R1-R5 gate before closing E48 (the last open epic; W1 renderer.compile + W
 
 ### Next owner / decision
 - I403: open the next epic (cgs-scope-check + cgs-create-stories). No open epics remain after E48.
+
+## Round G49.0 (I407) - E49 Localization & Language Selector closeout
+
+Skill: cgs-regression-suite + cgs-gate-check + cgs-milestone-review / Date: 2026-11-15 / Iteration: I407 (ST-377)
+
+### Summary
+Fresh R1-R5 gate before closing E49 (the Localization & Language Selector epic: string extraction + 3-way selector + zh/ja locale tables, all data/render-only). Zero source change this iteration - the R1-R3 pins staying EXACT under the full locale code is the sim-inert proof (R-E49-3).
+
+### Results
+- R1 p1 demo: EXACT causal (seed 9876: 11334/57/W2/combo 15/shots 198/acc 0.2878787878787879/36.14999999999923 s/replay 2169-2220/speed 4; afterQ MENU; console 0/0) = byte-identical to the I402 pin.
+- R2 rockab: radii EXACT 2.2/1.3/0.7 (reseed 30201, all GLB incl. rockComet ready, console 0/0).
+- R3 playframe (I375 canonical probe, .evidence/I407/): A 21/366 EXACT (MENU fx-off, reseed 71200) + B 50/1222 EXACT (PLAYING fx-high, reseed 71201, rocks 0->5, camFinite) + luma within render noise (ring p50 32.2/8.71/8/8/50.63, floor p50 32.2/p90 72.22, sky 70.14) + console 0/0 x2.
+- R4 PWA: 11/11 fresh on :5199 (sw active root scope + claimed, online + offline boot no NaN, manifest standalone + 512 maskable + start_url/scope ".", console 0/0).
+- R5 quality bar: 947/947 + build 0 + dist 132/1,947,982 B (headroom 142,040 B) + vendor sha256-16 76DEA8151BC9352A + locale sweep en/zh/ja x 6 screens all console 0/0 no NaN no tofu 0 overflow + en text A/B vs I405 B1 = 0 diff lines + hygiene (5173+5199 servers killed CommandLine-verified, 5173/4173/5199 listeners 0, chrome 0, no orphan node).
+
+### Evidence
+- .evidence/I407/causal.json + causal.mjs (R1+R2)
+- .evidence/I407/probe_i375.json + i375_overhead_fxoff.png + i375_playing_fxhigh.png (R3)
+- .evidence/I407/localesmoke.json + screenshots (R5 locale sweep)
+- .evidence/I407/textab_en.json (R5 en A/B; baseline .evidence/I405/textab_B1.json)
+- PWA run transcript captured in production/iterations.md I407 (R4)
+
+### Next owner / decision
+- I408: open the next epic (cgs-scope-check). No open epics remain after E49.
