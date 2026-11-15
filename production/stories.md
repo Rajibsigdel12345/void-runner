@@ -1,4 +1,4 @@
-﻿﻿# Stories - Void Runner (cgs-create-stories)
+﻿﻿﻿# Stories - Void Runner (cgs-create-stories)
 
 Format: ID | story | acceptance criteria | verification
 
@@ -540,3 +540,4 @@ E16 closed at I251 (G16.0 PASS). E17 = the asteroid family hero pass + world pol
 - STATUS (I409): E50 OPEN (ST-378..379 done; ST-380..383 pending, I410..I413).
 - STATUS (I410): ST-380 DONE (Blender bake + QA gate + import + test entries; ST-381..383 pending, I411..I413).
 - STATUS (I411): ST-381 DONE (debris pool + death dispatch; shared-cap fix + 4 pool tests; 953/953 + build 0 + smoke 0/0; ST-382..383 pending, I412..I413).
+- STATUS (I412): ST-382 DONE (A/B + art QA; zero src: A-pin root-caused as an rAF race in the original I407 probe - frozen 21/366 = menu-loop frame, not the probe frame, zero code drift; playframe re-pinned L 21/366 + P 10/180 + B 50/1222 EXACT with in-file attribution; AB harness fixed (single-frame 19/916 base; per-class chromaticity tint check) -> 21/21; t3 pixel-proven (21/21 shards at exact positions; isolation + full scene VIEWED); CG2 PASS no revert; 953/953 + build 0 + dist byte-identical 135/1,963,204 B; ST-383 pending, I413).
