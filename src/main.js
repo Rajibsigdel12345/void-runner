@@ -26,6 +26,7 @@ import { createParticles } from './render/particles.js';
 import { createShockwaves } from './render/shockwave.js'; // ST-238 (I245): pooled additive shockwave ring
 import { createDebrisField } from './render/debrisField.js'; // ST-381 (I411): transient 3D death-shatter pool
 import { createShake, createPunch, createFovKick } from './core/fx.js'; // ST-081/ST-082
+import { chaseTargets } from './core/cameraModel.js'; // ST-415 (I445): pure chase-camera targets (edge-aware dolly)
 import { createJuiceTally } from './core/juiceTally.js'; // ST-183: per-run juice-channel tally (feel telemetry)
 import { killPunchEnergy, killPunchDir } from './core/killPunch.js'; // ST-221 (I224): class-scaled kill punch (T4)
 import { shockwaveRadius } from './core/shockwave.js'; // ST-238 (I245): class-scaled ring sizes (pure core)
@@ -625,6 +626,7 @@ const aimWorld = new THREE.Vector3();
 
 // follow-camera state
 const shipFwd = { x: 0, y: 0 }; // ST-074: scratch for ship.forward()
+const camModelOut = { camX: 0, camY: 0, camZ: 0, lookX: 0, lookY: 0, lookZ: 0, s: 1, ahead: 0 }; // ST-415 (I445): chase-target scratch (no per-frame alloc)
 const camPos = { x: 0, y: 9, z: 13 };
 const camLook = { x: 0, y: 0, z: 0 };
 // ST-219: state-tied camera feel - MENU orbit phase (0 = legacy (0,9,13) view) + boss zoom-out (degrees)
@@ -1023,12 +1025,15 @@ function syncVisuals(dt) {
   const ship = world.ship;
   const f = ship.forward(shipFwd); // ST-074: scratch reuse (no per-frame alloc)
   const spdFrac = Math.min(1, ship.speed / CONFIG.ship.maxSpeed); // ST-082: 0..1 speed fraction
-  const ahead = CONFIG.camera.lookAhead + CONFIG.camera.lookAheadSpeed * spdFrac; // ST-082: speed-scaled look-ahead
+  // ST-415 (I445): chase targets from the pure camera model (edge-aware dolly: the
+  // offset + look-ahead scale uniformly near the rim so the ship's screen offset and
+  // the view angle are invariant wherever the ship moves; identity at center).
+  chaseTargets(ship.pos, f, spdFrac, Math.hypot(ship.pos.x, ship.pos.y), CONFIG.arena.radius, CONFIG.camera, camModelOut);
   // ST-219: state-tied camera feel - MENU orbit drift + 2-5% aim lead (eased + capped; dodge-read rule)
   if (st === STATE.MENU && !motionOff) menuOrbitA += dt * CONFIG.camera.menuOrbitRate; // slow drift, motion-gated
-  let camTX = ship.pos.x, camTY = 9, camTZ = ship.pos.y + 13;
-  let lookTX = ship.pos.x + f.x * ahead, lookTZ = ship.pos.y + f.y * ahead; // ST-082
-  let lookTY = 0; // ST-261: MENU frames the hovering ship line (default = arena plane)
+  let camTX = camModelOut.camX, camTY = camModelOut.camY, camTZ = camModelOut.camZ;
+  let lookTX = camModelOut.lookX, lookTZ = camModelOut.lookZ;
+  let lookTY = camModelOut.lookY; // = 0: arena plane (ST-261: MENU overrides)
   if (st === STATE.MENU) { // slow orbit around the arena center (static under reduced motion); ST-261 hero framing
     camTX = Math.sin(menuOrbitA) * mh.radius; camTZ = Math.cos(menuOrbitA) * mh.radius; camTY = mh.height; lookTX = 0; lookTZ = 0; lookTY = mh.lookY;
   } else if (st === STATE.PLAYING && !motionOff) { // 2-5% lead toward the aim point, capped, eased by the look damp

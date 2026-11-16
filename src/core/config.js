@@ -629,9 +629,23 @@ export const CONFIG = {
   camera: {                // ST-082: dynamic camera feel (fovBase 60 = pre-ST-082 hardcode)
     fovBase: 60,           // resting vertical FOV (degrees)
     fovSpeed: 4,           // extra FOV at full ship speed (speed-line feel)
-    lookAhead: 4,          // camera look-ahead along ship facing (world units) at rest
+    lookAhead: 2.6,        // camera look-ahead along ship facing (world units) at rest; ST-415 (I445) retune 4 -> 2.6 (with the dolly a smaller base keeps the ship closer to screen center; still scales with speed and the dolly factor)
     lookAheadSpeed: 2,     // extra look-ahead at full speed (lean into the motion)
     fovDamp: 8,            // FOV ease rate (1/s)
+    // ST-415 (I445): edge-aware dolly (CHASE) - base chase offset, now config (was
+    // hardcoded 9 / 13 in main.js). Measured in I444: at arena y=+20 the legacy
+    // camera sat at y=33, OUTSIDE the r=26 rim, so the arena behind the ship fell
+    // out of frame. The offset + look-ahead now scale by one uniform factor
+    // s(t) = 1 + (rimScale-1)*smoothstep((t-startFrac)/(1-startFrac))^pow,
+    // t = dist/arenaR, so the ship's screen offset and the camera view angle are
+    // invariant wherever the ship moves; s = 1 at center (legacy framing there).
+    camHeight: 9,          // base chase height above the arena plane
+    camBack: 13,           // base chase dolly-back distance (world +Y of the ship)
+    dolly: {
+      startFrac: 0.55,     // dolly begins past this dist/arenaR fraction (0..1)
+      rimScale: 1.7,       // offset + look-ahead scale at the rim (9 -> 15.3, 13 -> 22.1)
+      pow: 2               // smoothstep shaping exponent (soft ramp into the rim)
+    },
   // ST-219: state-tied camera feel (I221) - subtle, motion-gated, view stays dodge-readable
   aimLeadFrac: 0.03,     // camera lead toward the aim point (2-5% of the ship->aim offset)
   aimLeadCap: 1.2,       // max lead offset (world units) - keeps the view dodge-readable

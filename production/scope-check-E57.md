@@ -74,5 +74,14 @@ FITS as one epic, 9 stories, delivered in 4 arcs (camera -> enemies -> campaign 
 - Key audit + config/roster/camera grounding above (measured from src, 2026-11-16).
 - Quality bar at close of I444: npm test (972 expected) + build 0 + dist 2,407,614 B byte-identical (docs-only).
 
+ST-415 (I445, cgs-dev-story; src + tests + probes, .evidence/I445/):
+- src: NEW src/core/cameraModel.js (pure core, DOM/three-free: clamp01/smoothstep01/dollyFactor/chaseTargets/projectNdc) + config.js (lookAhead 4->2.6; camHeight 9 + camBack 13; dolly { startFrac 0.55 / rimScale 1.7 / pow 2 }) + main.js camera block calls chaseTargets + tests/cameraModel.test.js (9 tests, real CONFIG import).
+- Design refinement (documented): pre-registered ADDITIVE dolly base(9,13)+e*(6,10) implemented as UNIFORM-SCALE s(t)=1+(rimScale-1)*smoothstep(clamp01((t-startFrac)/(1-startFrac)))^pow (multiplies height+back-offset+look-ahead) - the only form keeping the ship screen-space offset a strict invariant (unit-verified 1e-9).
+- npm test 981/981 (972+9) + build 0 + dist 2,408,956 B / 139 (was 2,407,614/138; headroom 291,044).
+- Playframe445: Part A EXACT unchanged (L 21/12,654 + P 10/180) / Part B 50/27,654 UNCHANGED (pre-registered B move did not materialize - frustum culling puts exactly 1 L rock in the frozen plain frame; measured, pin stays) / Part C ST-415 acceptance 3 positions (center/nearRim/rimN, fixed south, PAUSED 2500ms, reseed 71202) 16/16 PASS - live->chaseTargets max|dev| 5.5e-5 (tol 0.05); s=1/1.28209/1.7; ship NDC identical within ~7e-7; ndcY -0.142812 at rest/south; arena center in frame at all (worst |NDC| 0.37880 rimN/south); shake 0; fov 60; console 0/0; no NaN; 3 screenshots viewed (ship framed identically; whole arena visible behind at rim = behind-blindness fixed).
+- Causal445 p1 EXACT + radii 2.2/1.3/0.7 EXACT = zero drift (camera presentation-only).
+- Vendor unmodified + sha 76DEA8151BC9352A PIN_OK; hygiene (ports 5173/4173/5199 free, chrome 0).
+
 ## Next owner or decision
-ST-415 (I445): camera consistency - src/core/cameraModel.js + main.js + CONFIG.camera + tests. Read cgs-dev-story first; probe pattern from .evidence/I443/.
+ST-415 (I445): DONE at I445 - uniform-scale dolly, 981/981 + Part C 3-position acceptance PASS + causal p1 zero (details above).
+ST-416 (I446): camera modes OVERVIEW + COCKPIT (cgs-dev-story; src main.js + settingsPanel.js + CONFIG.camera) - V hotkey cycles CHASE -> OVERVIEW -> COCKPIT -> CHASE; settings panel entry + persisted; RM gates cockpit speed-FOV kick; CUTTABLE: cockpit sub-cut. Read cgs-dev-story; probe pattern .evidence/I445/.
