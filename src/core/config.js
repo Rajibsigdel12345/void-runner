@@ -1,5 +1,47 @@
 ﻿﻿﻿﻿// ALL tunables live here (balance table). See design/gdd.md for rationale.
 export const CONFIG = {
+  // ST-431 (I463, E60 B1): role-named palette - the single role-truth section for
+  // every world/UI color (threejs-game-studio material kit: bodyPrimary/hazard/
+  // reward/shield/emissiveSignal). VALUES UNCHANGED: the 12 canonical hexes below
+  // are the exact values already shipped at each carrier key; nothing reads from
+  // this section (zero behavior change, causal-EXACT). Traceability: every other
+  // world/UI color maps to one of these roles (or to a per-entity identity hue
+  // documented in design/enemy-visual-language.md s3 / campaign themes).
+  // C2 value-band audit (design/value-band-audit-E60.md): floor owns the bottom
+  // band (sRGB luma ~10-13), actors sit 7:1 above it - the bands below do not
+  // need re-spacing.
+  palette: {
+    bodyPrimary:  0xab9374,  // ship hull (ship.body.color) - mid-band warm sand
+    bodyDark:     0x54402e,  // ship wing / shadow tone (ship.wing.color)
+    cockpitSignal: 0x59d8ff, // cockpit emissive; L1 bullet family (fx.palette.bulletLevel[0] 0x7fe4ff brightens it)
+    hazard:       0xff4a2a,  // threat red: enemy-bullet emissive (enemyBullets), stinger accent - the one danger color
+    hazardEmber:  0xff9a3d,  // warm ember telegraph: gunship payload bay, engine mid plume, killRing family (0xffa44a)
+    reward:       0xffc300,  // reward gold: rapid pickup (powerup/pickup rapid); spread 0xff9f43 is its ember sibling
+    rewardVital:  0x69f0ae,  // magnet (green); bullet L2 0x8affc0 is its bright sibling
+    rewardCharge: 0xff4dd8,  // overdrive (magenta); fx.palette.power family
+    shield:       0x53d8ff,  // shield pickup + shield FX cyan; graze/drone families
+    floorBright:  0x483728,  // arena grid hub (arena.gridBright) - bottom value band
+    floorDim:     0x1a130d,  // arena grid rim (arena.gridDim) - bottom value band
+    starNear:     0xe8f1ff,  // starfield near shell (starfield.near.color); far shell 0x9db4ff
+  },
+  paletteMap: { // ST-431 (I463): full traceability (color key -> role family). Data-only,
+    // documentation truth (nothing reads this). Per-entity identity hues (fleet
+    // bodies, boss rims, campaign themes) are documented at their keys and in
+    // design/enemy-visual-language.md s3.
+    ship: "bodyPrimary/bodyDark/cockpitSignal",
+    arena: "floorBright/floorDim",
+    starfield: "starNear",
+    enemyBullets: "hazard",
+    stinger: "hazard (accent) + identity rust body",
+    gunship: "hazardEmber (bay) + identity gunmetal body",
+    fleetBodies: "identity hues (enemy-visual-language.md s3)",
+    rock: "hazardEmber desaturated (I257 warm edge 0xd8a878)",
+    powerup: "reward/rewardVital/rewardCharge/shield + bomb 0xff5252 = hazard (C1 candidate)",
+    fxParticles: "per-entity families of the 12 roles (see fx.palette comments)",
+    enemyRim: "per-role darkened body family, luma <= 29 (E59 A2 frozen)",
+    shipHitFlash: "hazard-light (E59 A3 frozen)",
+    campaignThemes: "per-stage overrides of floorBright/floorDim/starNear + accent role",
+  },
   arena: {
     radius: 26,
     // ST-257 (I269): custom warm floor grid (src/render/arenaFloor.js) replaces
