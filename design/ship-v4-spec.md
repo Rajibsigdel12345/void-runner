@@ -204,3 +204,28 @@ in code.
 - No rescale in code (native size authored in Blender).
 - WebGPU: NOT needed at ~33k tris total (F1/F2/F3 unmet - documented at
   ST-427); stays WebGL2.
+
+## I454 notes (measured deviations)
+
+Shipped at I454. Deviations from the frozen contract above (all in the build
+script's DEV list; none touch the name/material contract or the A/B gate):
+
+1. Cross-section centerline +0.22 / ry 0.18 (spec +0.14 / 0.24 - the spec
+   values buried the canopy under the envelope curve).
+2. Pylons dropped (no visible gain at chase distance; tris reclaimed).
+3. Bow collar elliptical (a circular collar clipped the envelope curve).
+4. Stabilizers z 0.12 -> 0.52 (0.12 sat inside the envelope - invisible).
+5. Keel top y -0.05 -> +0.25 (at -0.05 the keel floated 0.13u below the hull).
+6. Aft struts extended (the belly now rises to +0.105 at Y -1.25; was a gap).
+7. Side panels h_y 0.55 -> 0.30, center Y -0.55 (the envelope tapers below
+   rx 0.413 outside Y -0.43..-0.90 - 0.55-high panels would float).
+8. Stern cap fan added (the nacelle tube was open - see-through).
+9. Cross-wires Y-rotated (the build script had a Z-rot typo).
+
+Measured totals: hull 7800 (decimated to the 7,800 cap) / wings 2136 / fin
+928 / engine 2128 / nozzle 284 / cockpit 1000 = TOTAL 14,276 tris (<= 17,000
+target, <= 19,000 cap). GLB 347,184 B (< 393,216 B hard cap). Bbox (glTF
+Y-up): span 4.0 / height 0.90 / len 2.74. Nacelle mouth z=-0.94 (spec target
+-0.88; 0.06u past - still 0.14u clear of the in-code flame apex at z=-0.80).
+Bake percentiles (the test per-tri luma method): hull 0.6148 / 0.9402 /
+1.3888; wings 0.5346 / 0.5854 / 1.4654 (both spreads >= 0.35 floor).

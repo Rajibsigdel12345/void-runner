@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief); ship 300 -> 850 at I429 (ST-399 remaster, 818-tri fighter; design/asset-spec-ship-remaster.md)).
-const BUDGETS = { ship: 14000, L: 2100, M: 520, S: 140, comet: 650, boss: 750, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200, chunk: 60, sliver: 50, hunter: 2400, gunship: 2400 }; // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400)
+const BUDGETS = { ship: 19000, L: 2100, M: 520, S: 140, comet: 650, boss: 750, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200, chunk: 60, sliver: 50, hunter: 2400, gunship: 2400 }; // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276)
 const MAX_FILE_BYTES = 393216; // I440 (ST-410 ship remaster v3) EXPLICIT re-pin: 262144 -> 393216 (ship 190,544 B/3254t -> 270,556 B/12400t; I435 was 100*1024 -> 262144 for v2; max non-ship stays boss 75.26 KB)
 
 function parseGlb(file) {
@@ -91,8 +91,8 @@ test('ship.glb: container, naming, poly budget, silhouette dimensions', () => {
     }
   }
   const span = maxX - minX; const len = maxZ - minZ;
-  assert.ok(Math.abs(span - 2.5) <= 0.25, 'wingspan ' + span.toFixed(3) + ' ~ 2.5');
-  assert.ok(Math.abs(len - 1.9) <= 0.19, 'length ' + len.toFixed(3) + ' ~ 1.9');
+  assert.ok(Math.abs(span - 4.0) <= 0.4, 'wingspan ' + span.toFixed(3) + ' ~ 4.0'); // I454 (ST-424) EXPLICIT re-pin: 2.5 -> 4.0 (v4 span, 1.55x authored scale)
+  assert.ok(Math.abs(len - 2.6) <= 0.26, 'length ' + len.toFixed(3) + ' ~ 2.6'); // I454 (ST-424) EXPLICIT re-pin: 1.9 -> 2.6 (v4 length, nacelle mouth -0.94 .. bow +1.80)
 
   // I292 (ST-275 ship hero pass): per-facet grayscale COLOR_0 value bakes on the two
   // silhouette-carrying nodes (Blender 5.2, corner domain, v = clamp(1.0 + k*nY, 0.30, 1.55),
@@ -135,7 +135,7 @@ test('ship.glb: container, naming, poly budget, silhouette dimensions', () => {
   const hullF = shipFacet['VR_Ship_Hull.001'] || shipFacet['VR_Ship_Hull'];
   const wingF = shipFacet['VR_Ship_Wings.001'] || shipFacet['VR_Ship_Wings'];
   assert.ok(hullF && wingF, 'hull + wings facet data (' + Object.keys(shipFacet).join(',') + ')');
-  const SHIP_FACET = { hull: { p10: 0.5963, p50: 0.9979, p90: 1.3994 }, wings: { p10: 0.3911, p50: 1.0368, p90: 1.55 } }; // I440 (ST-410 ship remaster v3) EXPLICIT re-pin: I435 hull {0.5644/1.0165/1.4302} + wings {0.3612/0.9469/1.55} -> measured on the 12400-tri re-bake (build log run_v3c_final; hull 4208t spread 0.8031 / wings 2100t spread 1.1589; file-level re-verify .evidence/I440/measure_pins.mjs)
+  const SHIP_FACET = { hull: { p10: 0.6148, p50: 0.9402, p90: 1.3888 }, wings: { p10: 0.5346, p50: 0.5854, p90: 1.4654 } }; // I454 (ST-424 ship v4 "real airship") EXPLICIT re-pin: I440 hull {0.5963/0.9979/1.3994} + wings {0.3911/1.0368/1.55} -> measured on the 14276-tri per-vertex re-bake (.evidence/I454/measure454.json; hull 7800t spread 0.7740 / wings 2136t spread 0.9308)
   assert.ok(hullF.p90 - hullF.p10 >= 0.35, 'hull facet luma spread ' + (hullF.p90 - hullF.p10).toFixed(3) + ' >= 0.35 (I292 value bake; pre-bake was a flat in-code tint)');
   assert.ok(wingF.p90 - wingF.p10 >= 0.35, 'wings facet luma spread ' + (wingF.p90 - wingF.p10).toFixed(3) + ' >= 0.35 (I292 value bake; pre-bake was a flat in-code tint)');
   for (const [k, E] of [['hull', hullF], ['wings', wingF]]) {

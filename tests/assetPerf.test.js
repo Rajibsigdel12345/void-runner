@@ -47,10 +47,10 @@ const totalTris = parsed.reduce((a, p) => a + p.tris, 0);
 
 // I214 budgets (measured baselines in brackets; caps leave headroom for E9 art growth)
 const BUDGET = {
-  totalFilesKB: 1024,  // [901.79 I451 re-measure: 26 GLBs = I441 591.27 + enemy_hunter 136.48 KB + enemy_gunship 174.04 KB (I451/ST-421; scope-check-E57 "unless measured higher" clause); cap 1024 holds w/ 122 KB headroom]
-  totalGeoKB: 896,     // [859.11 I451 re-measure: 26 GLBs = I441 554.94 + I451 enemy GLBs 304.17 KB (per-face corner bakes de-index the hulls: POSITION = 3x tris + FLOAT COLOR_0; scope-check-E57 "unless measured higher" clause); cap 896 holds]
-  perFileKB: 400,      // [max 264.21 - ship.glb I440 remaster v3 unchanged (I441 rock L 47.60 KB is second); I435 max was 186.08 v2; I430 max was boss 75.26]
-  totalTris: 26000,    // [I451: 22856 = I441 19736 + hunter 1432 + gunship 1688 (I451/ST-421); cap 26000 holds w/ 3144 tri headroom]
+  totalFilesKB: 1024,  // [976.63 I454 re-measure: I451 901.79 - ship v3 264.21 KB + ship v4 339.05 KB; cap 1024 holds w/ ~47 KB headroom]
+  totalGeoKB: 976,     // [933.47 I454 re-measure: I451 859.11 + ship v4 delta (v3 12400t -> v4 14276t indexed, per-vertex COLOR_0 on hull+wings); I454 (ST-424) EXPLICIT re-pin: 896 -> 976, cap holds w/ ~4% headroom]
+  perFileKB: 400,      // [max 339.05 - ship.glb I454 remaster v4 (14276t, 347,184 B); I440 max was 264.21 v3]
+  totalTris: 26000,    // [I454: 24732 = I451 22856 - ship v3 12400t + ship v4 14276t; cap 26000 holds w/ 1268 tri headroom]
   perFileMats: 3,      // [max 3 - ship body/wing/cockpit]
 };
 
