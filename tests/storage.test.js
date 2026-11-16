@@ -404,3 +404,21 @@ test('storage: ST-375 locale default + round-trip + unknown rejected + corrupt s
   store.set(a.settingsKey, JSON.stringify({ version: STORE_VERSION, locale: 123 }));
   assert.equal(a.getSettings().locale, 'en'); // corrupt -> default, no throw
 });
+
+test('storage: ST-416 cameraMode default + round-trip + unknown rejected + no clobber across other settings', () => {
+  assert.equal(DEFAULT_SETTINGS.cameraMode, 'chase');
+  const store = memStore();
+  const a = new Storage(store);
+  assert.equal(a.getSettings().cameraMode, 'chase');
+  const m = a.setSettings({ cameraMode: 'cockpit' });
+  assert.equal(m.cameraMode, 'cockpit');
+  assert.equal(JSON.parse(store.get(a.settingsKey)).cameraMode, 'cockpit');
+  const b = new Storage(store);
+  assert.equal(b.getSettings().cameraMode, 'cockpit'); // read-back survives a new instance
+  // a later unrelated settings change must NOT clobber the persisted cameraMode
+  assert.equal(a.setSettings({ volume: 0.5 }).cameraMode, 'cockpit');
+  assert.equal(JSON.parse(store.get(a.settingsKey)).cameraMode, 'cockpit');
+  assert.equal(a.setSettings({ cameraMode: 'nope' }).cameraMode, 'chase'); // unknown -> default
+  store.set(a.settingsKey, JSON.stringify({ version: STORE_VERSION, cameraMode: 123 }));
+  assert.equal(a.getSettings().cameraMode, 'chase'); // corrupt -> default, no throw
+});

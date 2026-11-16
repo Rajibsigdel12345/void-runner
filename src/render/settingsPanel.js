@@ -139,6 +139,14 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   smHint.addEventListener('change', () => emit({ slowmoHint: smHint.checked }));
   visCard.appendChild(smHint);
 
+  const camModeRow = row(t('settings.camera_mode'), visCard); // ST-416 (I446): camera mode (V cycles in-game; persisted)
+  const camMode = document.createElement('select');
+  for (const opt of ['chase', 'overview', 'cockpit']) { const o = document.createElement('option'); o.value = opt; o.textContent = t('settings.camera_mode.' + opt); camMode.appendChild(o); }
+  camMode.value = s0.cameraMode || 'chase';
+  camMode.setAttribute('aria-label', t('settings.camera_mode_aria'));
+  camMode.addEventListener('change', () => emit({ cameraMode: camMode.value }));
+  visCard.appendChild(styleCtl(camMode));
+
   // ST-375: LANGUAGE card (3-way EN/zh/ja; locale content tables land in ST-376 - options keep NATIVE names)
   const langCard = card(t('settings.language'));
   const langSel = document.createElement('select');
@@ -165,7 +173,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   hint.style.cssText = 'font-size:calc(11px * var(--vr-fs,1));letter-spacing:2px;opacity:0.55;';
   wrap.appendChild(hint);
 
-  const order = [vol, sfx, music, fxSel, rm, fontSel, cues, cbPreview, smHint, langSel]; // I158; ST-375: + language select (matches DOM order)
+  const order = [vol, sfx, music, fxSel, rm, fontSel, cues, cbPreview, smHint, camMode, langSel]; // I158; ST-375: + language select; ST-416: + camera mode (matches DOM order)
 
   function moveFocus(from, dir) {
     const i = order.indexOf(from);
@@ -180,11 +188,11 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
     const t = e.target;
     if (order.indexOf(t) < 0) return;
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      if (t === vol || t === fxSel || t === fontSel || t === langSel) return; // native consumption
+      if (t === vol || t === fxSel || t === fontSel || t === camMode || t === langSel) return; // native consumption (ST-416: + camera select)
       e.preventDefault();
       e.stopPropagation();
       moveFocus(t, e.key === 'ArrowDown' ? 1 : -1);
-    } else if (e.key === ' ' || e.key === 'Enter' || e.key === 'Escape' || e.key === 'p' || e.key === 'P' || e.key === 'm' || e.key === 'M' || e.key === 'f' || e.key === 'F' || e.key === 'n' || e.key === 'N') {
+    } else if (e.key === ' ' || e.key === 'Enter' || e.key === 'Escape' || e.key === 'p' || e.key === 'P' || e.key === 'm' || e.key === 'M' || e.key === 'f' || e.key === 'F' || e.key === 'n' || e.key === 'N' || e.key === 'v' || e.key === 'V') { // ST-416: V (camera mode) swallowed too
       e.stopPropagation(); // native checkbox/select behavior still runs (no preventDefault)
     }
   });
@@ -207,6 +215,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
     music.checked = s.music; // I158
     cbPreview.checked = s.colorblindPreview; // I158
     smHint.checked = s.slowmoHint; // I158
+    camMode.value = s.cameraMode || 'chase'; // ST-416
     langSel.value = s.locale; // ST-375
   }
 
@@ -227,6 +236,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
     cuesRow.textContent = t('settings.shape_cues'); cues.setAttribute('aria-label', t('settings.shape_cues_aria'));
     cbRow.textContent = t('settings.colorblind'); cbPreview.setAttribute('aria-label', t('settings.colorblind_aria'));
     smRow.textContent = t('settings.slowmo_hint'); smHint.setAttribute('aria-label', t('settings.slowmo_hint_aria'));
+    camModeRow.textContent = t('settings.camera_mode'); camMode.setAttribute('aria-label', t('settings.camera_mode_aria')); for (const o of camMode.options) o.textContent = t('settings.camera_mode.' + o.value); // ST-416
     langSel.setAttribute('aria-label', t('settings.language_aria'));
     hint.textContent = t('settings.kbd_hint');
   }); // ST-375

@@ -1,7 +1,7 @@
 // ST-415 (I445): chase-camera model tests (pure math, DOM-free)
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { clamp01, smoothstep01, dollyFactor, chaseTargets, projectNdc } from '../src/core/cameraModel.js';
+import { clamp01, smoothstep01, dollyFactor, chaseTargets, projectNdc, overviewTargets, cockpitTargets } from '../src/core/cameraModel.js';
 import { CONFIG } from '../src/core/config.js';
 
 const CFG = CONFIG.camera; // real config keeps these tests honest
@@ -118,4 +118,55 @@ test('projectNdc: look point projects to origin; behind-camera and degenerate ->
   assert.ok(Number.isNaN(nd.x) && Number.isNaN(nd.y));
   projectNdc(0, 0, 0, { x: 0, y: 0, z: 1 }, { x: 0, y: 1, z: 1 }, FOV, ASPECT, nd); // straight-up view
   assert.ok(Number.isNaN(nd.x) && Number.isNaN(nd.y));
+});
+// ST-416 (I446): OVERVIEW + COCKPIT camera targets (pure math, DOM-free)
+
+test('overviewTargets: fixed camera above the arena center; the ship never enters the call', () => {
+  const o = { camX: 99, camY: 99, camZ: 99, lookX: 99, lookY: 99, lookZ: 99 };
+  overviewTargets(CFG, o);
+  assert.equal(o.camX, 0);
+  assert.equal(o.camY, CFG.overviewHeight);
+  assert.equal(o.camZ, CFG.overviewBack);
+  assert.equal(o.lookX, 0);
+  assert.equal(o.lookY, 0);
+  assert.equal(o.lookZ, 0);
+  overviewTargets(CFG, o); // calling again (different frame) gives the same fixed target
+  assert.equal(o.camY, CFG.overviewHeight);
+  assert.equal(o.camZ, CFG.overviewBack);
+});
+
+test('overviewTargets: whole arena frames - every rim point is inside |NDC| <= 1 with margin (16:9, fov 60)', () => {
+  const cam = { x: 0, y: CFG.overviewHeight, z: CFG.overviewBack };
+  const look = { x: 0, y: 0, z: 0 };
+  const o = { x: NaN, y: NaN, z: NaN };
+  let worst = 0;
+  for (let i = 0; i < 64; i++) {
+    const a = (i / 64) * Math.PI * 2;
+    projectNdc(R * Math.cos(a), 0, R * Math.sin(a), cam, look, FOV, ASPECT, o);
+    assert.ok(Number.isFinite(o.x) && Number.isFinite(o.y), 'rim pt ' + i);
+    worst = Math.max(worst, Math.abs(o.x), Math.abs(o.y));
+  }
+  assert.ok(worst <= 1, 'worst rim NDC ' + worst);
+  assert.ok(worst <= 0.85, 'tuned margin: worst rim NDC ' + worst + ' (binding point = near rim, bottom edge)');
+});
+
+test('cockpitTargets: seat sits setback behind the ship at eye height; looks lookFar ahead along the heading', () => {
+  const cases = [
+    { p: { x: 0, y: 0 }, f: { x: 0, y: -1 } },
+    { p: { x: 12, y: -5 }, f: { x: SQ, y: SQ } },
+    { p: { x: -R, y: 0 }, f: { x: 1, y: 0 } }
+  ];
+  const o = { camX: 99, camY: 99, camZ: 99, lookX: 99, lookY: 99, lookZ: 99 };
+  for (const c of cases) {
+    cockpitTargets(c.p, c.f, CFG, o);
+    assert.ok(Math.abs(o.camX - (c.p.x - c.f.x * CFG.cockpitSetback)) < 1e-12);
+    assert.ok(Math.abs(o.camY - CFG.cockpitHeight) < 1e-12);
+    assert.ok(Math.abs(o.camZ - (c.p.y - c.f.y * CFG.cockpitSetback)) < 1e-12);
+    assert.ok(Math.abs(o.lookX - (c.p.x + c.f.x * CFG.cockpitLookFar)) < 1e-12);
+    assert.ok(Math.abs(o.lookY) < 1e-12);
+    assert.ok(Math.abs(o.lookZ - (c.p.y + c.f.y * CFG.cockpitLookFar)) < 1e-12);
+    const dx = o.lookX - o.camX, dz = o.lookZ - o.camZ;
+    assert.ok(dx * c.f.x + dz * c.f.y > 0, 'look point is in front of the seat along the heading');
+    assert.ok(Number.isFinite(o.camX) && Number.isFinite(o.camY) && Number.isFinite(o.camZ));
+  }
 });

@@ -82,6 +82,16 @@ ST-415 (I445, cgs-dev-story; src + tests + probes, .evidence/I445/):
 - Causal445 p1 EXACT + radii 2.2/1.3/0.7 EXACT = zero drift (camera presentation-only).
 - Vendor unmodified + sha 76DEA8151BC9352A PIN_OK; hygiene (ports 5173/4173/5199 free, chrome 0).
 
+ST-416 (I446, cgs-dev-story; src + tests + probes, .evidence/I446/):
+- src: src/core/cameraModel.js (append overviewTargets/cockpitTargets, pure core) + config.js (camera overview/cockpit constants) + reticle.js (emphasized) + main.js (camMode + V hotkey + 2 camera-target branches + cockpit FOV kick (RM-gated) + ship hide + reticle sync + __vr.camMode) + settingsPanel.js (camera-mode select) + storage.js (cameraMode + read-back fix) + strings.js (3 locales) + tests (cameraModel +3, storage +1).
+- Design: OVERVIEW ship-independent fixed cam(0,56,20) look(0,0,0) - whole r=26 arena framed identically wherever the ship is (worst rim-point NDC 0.8362 @16:9/fov60, numerically pre-verified with the real projectNdc). COCKPIT first-person seat cam = p - fwd*0.55 at eye 1.15, look = p + fwd*60 on y=0; ship hidden; reticle emphasized 0.95; +9 FOV speed kick RM-gated. V cycles CHASE->OVERVIEW->COCKPIT->CHASE (persisted + panel + toast).
+- Probe-caught + FIXED a REAL storage bug: getSettings() never read cameraMode back from persisted storage -> any later setSettings() silently reset the mode to 'chase'. Fixed + no-clobber-across-other-settings regression test.
+- npm test 985/985 (981 + 3 camera + 1 storage) + build 0 + dist 2,411,901 B / 139 (was 2,408,956; headroom 288,099).
+- Playframe446 21/21: Part A EXACT unchanged (L 21/12,654 + P 10/180) / Part B 50/27,654 UNCHANGED / Part C 3 modes x 3 positions PAUSED: 9/9 conv < 0.00005; OVERVIEW fixed target at ALL 3 positions (ship-independent) + live worstRim 0.8362; COCKPIT ship hidden + reticle 0.95; CHASE ship visible + reticle 0.35; per-mode persisted == live; shake 0; fov 60; no NaN; console 0/0; 9 screenshots viewed. Part D RM gate: V to COCKPIT + ship.vel=(maxSpeed,0), fovKick 72.99; RM checkbox click, fovRM 64.01; delta 8.98 ~= 9 (measured, RM-gated).
+- Causal446 p1 EXACT + radii 2.2/1.3/0.7 EXACT = zero drift (camera presentation-only).
+- Vendor unmodified + sha 76DEA8151BC9352A PIN_OK; hygiene (ports 5173/4173/5199 free, chrome 0).
+
 ## Next owner or decision
 ST-415 (I445): DONE at I445 - uniform-scale dolly, 981/981 + Part C 3-position acceptance PASS + causal p1 zero (details above).
-ST-416 (I446): camera modes OVERVIEW + COCKPIT (cgs-dev-story; src main.js + settingsPanel.js + CONFIG.camera) - V hotkey cycles CHASE -> OVERVIEW -> COCKPIT -> CHASE; settings panel entry + persisted; RM gates cockpit speed-FOV kick; CUTTABLE: cockpit sub-cut. Read cgs-dev-story; probe pattern .evidence/I445/.
+ST-416 (I446): DONE at I446 - OVERVIEW (fixed whole-arena 3/4, ship-independent, worst rim NDC 0.8362) + COCKPIT (first-person seat; RM-gated +9 FOV speed kick; ship hidden, reticle emphasized) on V hotkey CHASE->OVERVIEW->COCKPIT->CHASE (persisted, panel select, i18n en/zh/ja) + probe-caught storage read-back bug fixed; 985/985 + Playframe446 21/21 (details above).
+ST-417 (I447): enemy visual language + campaign design docs (cgs-reverse-document + cgs-design-system; DOCS-only) - design/enemy-visual-language.md + design/campaign-stages.md; YouTube enemy-visual research allowed (label UNVERIFIED-BY-PLAY). Read cgs-reverse-document + cgs-design-system; probe pattern N/A (docs-only).

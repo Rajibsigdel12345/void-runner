@@ -646,6 +646,12 @@ export const CONFIG = {
       rimScale: 1.7,       // offset + look-ahead scale at the rim (9 -> 15.3, 13 -> 22.1)
       pow: 2               // smoothstep shaping exponent (soft ramp into the rim)
     },
+    overviewHeight: 56,    // ST-416 (I446): OVERVIEW height above arena center (fixed 3/4 view; whole arena |NDC|<=0.85 @16:9/fov60)
+    overviewBack: 20,      // ST-416 (I446): OVERVIEW dolly-back (3/4 angle, not straight down)
+    cockpitHeight: 1.15,   // ST-416 (I446): COCKPIT eye height above the arena plane
+    cockpitSetback: 0.55,  // ST-416 (I446): COCKPIT seat setback behind the ship center (along facing)
+    cockpitLookFar: 60,    // ST-416 (I446): COCKPIT look-ahead along the heading (horizon)
+    cockpitFovSpeed: 9,    // ST-416 (I446): extra COCKPIT FOV at full speed (motion-gated seat kick)
   // ST-219: state-tied camera feel (I221) - subtle, motion-gated, view stays dodge-readable
   aimLeadFrac: 0.03,     // camera lead toward the aim point (2-5% of the ship->aim offset)
   aimLeadCap: 1.2,       // max lead offset (world units) - keeps the view dodge-readable

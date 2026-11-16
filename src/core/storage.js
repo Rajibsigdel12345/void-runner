@@ -20,6 +20,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   sfx: true,        // sound effects on/off (I27 consumes)
   fx: 'high',       // 'high' | 'low' | 'off' particle/fx tier (I26 panel, I25 particles honor, ST-224 off)
   reducedMotion: false, // disable shake/flash (I25 honors)
+  cameraMode: 'chase',    // ST-416 (I446): 'chase'|'overview'|'cockpit' (V cycles; panel select)
   fontScale: 1,         // UI text scale 1 | 1.25 | 1.5 (I70; applied as --vr-fs)
   shapeCues: true,      // colorblind-friendly silhouette cues (I155; asteroidRenderer/wardenMesh honor)
   music: true,          // generative ambient music bed on/off (I158; audio.js bed)
@@ -131,7 +132,7 @@ export class Storage {
     return this._write(this.bestKey, { version: STORE_VERSION, value: s });
   }
 
-  /** @returns {{volume:number, sfx:boolean, fx:string, reducedMotion:boolean, fontScale:number, shapeCues:boolean, music:boolean, colorblindPreview:boolean, slowmoHint:boolean, locale:string}} saved settings merged over defaults. */
+  /** @returns {{volume:number, sfx:boolean, fx:string, cameraMode:string, reducedMotion:boolean, fontScale:number, shapeCues:boolean, music:boolean, colorblindPreview:boolean, slowmoHint:boolean, locale:string}} saved settings merged over defaults. */
   getSettings() {
     const d = this._readVersioned(this.settingsKey);
     const out = { ...DEFAULT_SETTINGS };
@@ -139,6 +140,7 @@ export class Storage {
     if (typeof d.volume === 'number' && isFinite(d.volume)) out.volume = Math.min(1, Math.max(0, d.volume));
     if (typeof d.sfx === 'boolean') out.sfx = d.sfx;
     if (d.fx === 'high' || d.fx === 'low' || d.fx === 'off') out.fx = d.fx; // ST-224: 3-tier
+    if (d.cameraMode === 'chase' || d.cameraMode === 'overview' || d.cameraMode === 'cockpit') out.cameraMode = d.cameraMode; // ST-416 (I446)
     if (typeof d.reducedMotion === 'boolean') out.reducedMotion = d.reducedMotion;
     if (FONT_SCALES.includes(d.fontScale)) out.fontScale = d.fontScale; // I70
     if (typeof d.shapeCues === "boolean") out.shapeCues = d.shapeCues; // I155
@@ -157,6 +159,7 @@ export class Storage {
     if (typeof merged.volume === 'number' && isFinite(merged.volume)) clean.volume = Math.min(1, Math.max(0, merged.volume));
     if (typeof merged.sfx === 'boolean') clean.sfx = merged.sfx;
     if (merged.fx === 'high' || merged.fx === 'low' || merged.fx === 'off') clean.fx = merged.fx; // ST-224: 3-tier
+    if (merged.cameraMode === 'chase' || merged.cameraMode === 'overview' || merged.cameraMode === 'cockpit') clean.cameraMode = merged.cameraMode; // ST-416 (I446)
     if (typeof merged.reducedMotion === 'boolean') clean.reducedMotion = merged.reducedMotion;
     if (FONT_SCALES.includes(merged.fontScale)) clean.fontScale = merged.fontScale; // I70
     if (typeof merged.shapeCues === "boolean") clean.shapeCues = merged.shapeCues; // I155

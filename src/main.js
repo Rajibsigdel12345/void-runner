@@ -26,7 +26,7 @@ import { createParticles } from './render/particles.js';
 import { createShockwaves } from './render/shockwave.js'; // ST-238 (I245): pooled additive shockwave ring
 import { createDebrisField } from './render/debrisField.js'; // ST-381 (I411): transient 3D death-shatter pool
 import { createShake, createPunch, createFovKick } from './core/fx.js'; // ST-081/ST-082
-import { chaseTargets } from './core/cameraModel.js'; // ST-415 (I445): pure chase-camera targets (edge-aware dolly)
+import { chaseTargets, overviewTargets, cockpitTargets } from './core/cameraModel.js'; // ST-415 + ST-416 (I445/I446): pure camera targets (chase dolly + overview + cockpit)
 import { createJuiceTally } from './core/juiceTally.js'; // ST-183: per-run juice-channel tally (feel telemetry)
 import { killPunchEnergy, killPunchDir } from './core/killPunch.js'; // ST-221 (I224): class-scaled kill punch (T4)
 import { shockwaveRadius } from './core/shockwave.js'; // ST-238 (I245): class-scaled ring sizes (pure core)
@@ -283,6 +283,7 @@ refreshScoresText();
 // motion (the settings panel lands in I26; values are read at boot).
 let fxCount = 0;
 let motionOff = false;
+let camMode = 'chase'; // ST-416 (I446): active camera mode ('chase'|'overview'|'cockpit'); set in applySettings, cycled by V
 let liveSettings = storage.getSettings(); // ST-026: settings panel keeps this fresh (audio consumes in I27)
 // Audio (ST-027): WebAudio synth, initialized on first user gesture.
 const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', waveCleared: 'cleared', gameover: 'gameover', nearmiss: 'swish', mineExplode: 'mine', bossSpawn: 'bossSpawn', bossRing: 'bossRing', bossDeath: 'bossDeath', bossFire: 'bossFire', mineFire: 'mineFire', vortexTelegraph: 'vortexTelegraph', vortexStart: 'vortexStart', droneExplode: 'drone', weaponLevelUp: 'levelUp', rockShieldHit: 'shieldHit', droneDecay: 'droneDecay', wardenSpawn: 'wardenSpawn', wardenArmor: 'shieldHit', wardenDeath: 'wardenDeath', beltHit: 'shieldHit', stingerTelegraph: 'stingerTelegraph', stingerCharge: 'swish', stingerDeath: 'stingerDeath', stingerFizzle: 'droneDecay', flyerSpawn: 'flyerSpawn', flyerDeath: 'flyerDeath', flyerExit: 'droneDecay' }; // ST-232: flyer cues (exit reuses the seeker decay) // ST-229: charger cues (charge whoosh reuses swish; fizzle reuses the seeker decay) // ST-059/ST-117/ST-123/ST-127/ST-129/ST-137, I173: decay + warden get their own cues (warden armor keeps shieldHit)
@@ -337,6 +338,7 @@ function applySettings(s) {
   // ST-225: FX tier state (fxCount / bloom / DPR) now lives in applyFxTier below - unrelated
   // settings changes (volume etc.) can no longer revert an auto-downgraded tier.
   motionOff = s.reducedMotion === true;
+  camMode = (s.cameraMode === 'overview' || s.cameraMode === 'cockpit') ? s.cameraMode : 'chase'; // ST-416 (I446): validate + fall back to chase
   slowmoHintEl.style.transition = motionOff ? 'none' : 'opacity .2s'; // I161: no fade under reduced motion
   setUiScale(); // I70+I71: UI scale = fontScale x viewport (cascades to DOM overlays only; canvas unaffected)
 
@@ -618,6 +620,13 @@ window.addEventListener('keydown', (e) => {
     menuSettings.sync();
     pauseSettings.sync();
     toast(tr('toast.music',{onoff:next?tr('state.on'):tr('state.off')}));
+  } else if (e.key === 'v' || e.key === 'V') { // ST-416 (I446): camera mode hotkey CHASE -> OVERVIEW -> COCKPIT -> CHASE (persisted; V verified free in I444)
+    const nextCam = { chase: 'overview', overview: 'cockpit', cockpit: 'chase' }[camMode] || 'chase';
+    const mergedCam = storage.setSettings({ cameraMode: nextCam });
+    applySettings(mergedCam);
+    menuSettings.sync();
+    pauseSettings.sync();
+    toast(tr('toast.cammode', { mode: nextCam.toUpperCase() }));
   }
 });
 const raycaster = new THREE.Raycaster();
@@ -667,7 +676,7 @@ window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), inpu
   floorDisc, // ST-277 (I294)
   applySettings, liveSettings: () => liveSettings,
   locale: () => getLocale(), setLocale, // ST-375: locale probe + drive (boot applied in applySettings; live via the settings panel)
-  audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, powerupRenders, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, vendorLowpWarns: () => _vendorLowpWarns, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+  audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, powerupRenders, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, camMode: () => camMode, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, vendorLowpWarns: () => _vendorLowpWarns, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -971,6 +980,7 @@ function syncVisuals(dt) {
   screens.update(st, world, screenOpts);
   const thrustFrac = Math.min(1, Math.hypot(input.state.thrust.x, input.state.thrust.y));
   const mh = CONFIG.camera.menuHero; // ST-261: MENU hero block (framing + pose + idle flame)
+  const inRun = (st === STATE.PLAYING || st === STATE.PAUSED); // ST-416 (I446): camera modes apply only in a run
   const menuFlame = st === STATE.MENU ? (motionOff ? mh.flameIdle : mh.flameIdle * (1 - mh.flameFlicker * (0.5 + 0.5 * Math.sin(simT * mh.flameRate)))) : thrustFrac; // ST-261: gentle engine idle in MENU (steady under reduced motion)
   shipMesh.sync(world.ship, simT, !motionOff, menuFlame); // ST-063 engine flame; ST-261: MENU idle
   if (st === STATE.MENU) { // ST-261: hero pose (render-only - sync owns rotation.y each frame, so this override is authoritative while in MENU)
@@ -981,7 +991,8 @@ function syncVisuals(dt) {
     shipMesh.group.rotation.x = 0;
     shipMesh.group.rotation.z = 0;
   }
-  reticle.sync(world.ship, st === STATE.PLAYING); // I44: only while playing
+  shipMesh.group.visible = !(inRun && camMode === 'cockpit'); // ST-416 (I446): hide the ship in cockpit first-person
+  reticle.sync(world.ship, st === STATE.PLAYING, inRun && camMode === 'cockpit'); // I44: only while playing; ST-416: emphasize the fire-line in cockpit
   bullets.sync(world.weapons);
   bullets.setLevel(world.weaponLevel(), st === STATE.PLAYING && world.powerups.active('overdrive')); // ST-123, ST-248: overdrive heat shift
   rockRenders.sync(world.field, simT); // ST-139
@@ -1036,6 +1047,12 @@ function syncVisuals(dt) {
   let lookTY = camModelOut.lookY; // = 0: arena plane (ST-261: MENU overrides)
   if (st === STATE.MENU) { // slow orbit around the arena center (static under reduced motion); ST-261 hero framing
     camTX = Math.sin(menuOrbitA) * mh.radius; camTZ = Math.cos(menuOrbitA) * mh.radius; camTY = mh.height; lookTX = 0; lookTZ = 0; lookTY = mh.lookY;
+  } else if (inRun && camMode === 'overview') { // ST-416 (I446): fixed whole-arena view (ship-independent)
+    overviewTargets(CONFIG.camera, camModelOut);
+    camTX = camModelOut.camX; camTY = camModelOut.camY; camTZ = camModelOut.camZ; lookTX = camModelOut.lookX; lookTY = camModelOut.lookY; lookTZ = camModelOut.lookZ;
+  } else if (inRun && camMode === 'cockpit') { // ST-416 (I446): first-person seat (heading-aligned)
+    cockpitTargets(ship.pos, f, CONFIG.camera, camModelOut);
+    camTX = camModelOut.camX; camTY = camModelOut.camY; camTZ = camModelOut.camZ; lookTX = camModelOut.lookX; lookTY = camModelOut.lookY; lookTZ = camModelOut.lookZ;
   } else if (st === STATE.PLAYING && !motionOff) { // 2-5% lead toward the aim point, capped, eased by the look damp
     const aim = resolveAimPoint();
     if (aim) {
@@ -1056,7 +1073,7 @@ function syncVisuals(dt) {
   bossZoomFov = damp(bossZoomFov, zoomTX, CONFIG.camera.bossZoomDamp, dt);
   camera.position.set(camPos.x, camPos.y, camPos.z);
   camera.lookAt(camLook.x, camLook.y, camLook.z);
-  const targetFov = CONFIG.camera.fovBase + CONFIG.camera.fovSpeed * spdFrac + fovKick.value() + bossZoomFov; // ST-082: base + speed + kick; ST-219: boss zoom
+  const targetFov = CONFIG.camera.fovBase + CONFIG.camera.fovSpeed * spdFrac + fovKick.value() + bossZoomFov + (inRun && camMode === 'cockpit' && !motionOff ? CONFIG.camera.cockpitFovSpeed * spdFrac : 0); // ST-082: base + speed + kick; ST-219: boss zoom; ST-416: cockpit seat kick (RM-gated)
   if (Math.abs(targetFov - camera.fov) > 0.01) { // only touch the projection when it actually moves
     camera.fov = damp(camera.fov, targetFov, CONFIG.camera.fovDamp, dt);
     camera.updateProjectionMatrix();

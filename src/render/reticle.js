@@ -17,8 +17,9 @@ export function createReticle(scene) {
   line.visible = false;
   scene.add(line);
 
-  function sync(ship, visible) {
+  function sync(ship, visible, emphasized) { // ST-416 (I446): emphasized = cockpit first-person (brighter fire-line)
     line.visible = !!visible;
+    mat.opacity = emphasized ? 0.95 : 0.35; // ST-416 (I446): brighten the fire-line in cockpit first-person
     if (!visible) return;
     const f = ship.forward();
     pos[0] = ship.pos.x + f.x * NOSE;          pos[1] = Y; pos[2] = ship.pos.y + f.y * NOSE;

@@ -97,3 +97,36 @@ export function projectNdc(px, py, pz, cam, look, fovDeg, aspect, out) {
   out.z = cz;
   return out;
 }
+
+// ST-416 (I446): OVERVIEW camera targets - a fixed 3/4 view above the arena center.
+// The targets do NOT depend on the ship: the view is the same wherever the ship moves
+// (the whole arena frames at |NDC| <= 0.85 at 16:9 / fov 60 with the tuned values).
+/**
+ * @param cfg CONFIG.camera (needs overviewHeight, overviewBack)
+ * @param out {camX,camY,camZ,lookX,lookY,lookZ} written in place (no alloc)
+ */
+export function overviewTargets(cfg, out) {
+  out.camX = 0;
+  out.camY = cfg.overviewHeight;
+  out.camZ = cfg.overviewBack;
+  out.lookX = 0; out.lookY = 0; out.lookZ = 0;
+  return out;
+}
+
+// ST-416 (I446): COCKPIT camera targets - first-person seat: eye at cockpitHeight,
+// setback behind the ship center along the facing, looking lookFar ahead on the arena plane.
+/**
+ * @param p   {x, y} ship position on the arena plane (world = (x, 0, y))
+ * @param fwd {x, y} unit ship facing
+ * @param cfg CONFIG.camera (needs cockpitHeight, cockpitSetback, cockpitLookFar)
+ * @param out written in place (no alloc)
+ */
+export function cockpitTargets(p, fwd, cfg, out) {
+  out.camX = p.x - fwd.x * cfg.cockpitSetback;
+  out.camY = cfg.cockpitHeight;
+  out.camZ = p.y - fwd.y * cfg.cockpitSetback;
+  out.lookX = p.x + fwd.x * cfg.cockpitLookFar;
+  out.lookY = 0; // arena plane horizon
+  out.lookZ = p.y + fwd.y * cfg.cockpitLookFar;
+  return out;
+}
