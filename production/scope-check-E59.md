@@ -115,6 +115,7 @@ dist, <= 1,000 tris, zero core changes.
 - ST-429: TBD from the task list (src/render/*, possibly assets/).
 - ST-429 (I460): DONE - A1+A2+A3 all landed (zero core, causal EXACT): A1 player L3 bullet 0xffd27a->0xd6f6ff (cool-vs-threat split restored at max weapon), A2 shared fragment-only fresnel rim src/render/enemyRim.js on 7 roles (peak luma <= 29, 0 added draw calls), A3 pre-created unlit ship damage-flash shell (80 tris, visible=false idle, RM-gated). P0 envelope spent ~12 KB / 80 tris of the 100 KB / 1,000 tris budget; busy460 rim/flash deltas 0.0-0.2 ms, draw-call parity 299=299; playframe pins UNCHANGED (no re-pin).
 - ST-430: .evidence/I461/ probes (fresh harness copies).
+- ST-430 (I461): DONE - fresh R1-R5 + G59.0 gate, probe-only, zero src: causal461 EXACT 18/18 (zero core drift), playframe461 A 21/14,530 + 10/180 EXACT + B 50/32,826 (no re-pin), camera 3x3 + RM gate PASS (maxConv 3.93e-5, OVERVIEW worstRim 0.8362 x3, RM drop 8.981), ship views SHIP_OK (flash shell absent idle), PWA 11/11, 1027/1027 + build 0 + dist 2,875,336 B / 148 + vendor PIN_OK + hygiene. WebGPU re-confirmation: F1 (sustained >~200k tris - measured 28,779 GLB total / 32,826 worst window), F2 (vendor r171+ - frozen r160, 76DEA8151BC9352A), F3 (user mandate - none) all UNMET -> KEEP WebGL2 documented. G59.0 PASS; E59 CLOSED at I461 (ST-428..430 3/3).
 
 ## Verification evidence (I458, docs-only gate)
 - npm test 1027/1027 + npm run build 0 + dist byte-identical 2,873,338 B / 147
