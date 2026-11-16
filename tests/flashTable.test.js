@@ -17,9 +17,10 @@ const PREVIOUS = {
   wardenSpawn: 0.25,
   droneExplode: 0.2,
   overdrive: 0.15,
+  gunshipDeath: 0.4, // ST-418: heavy bomber death flash (wardenDeath 0.4)
 };
 
-test('the table is exactly the nine flashing events', () => {
+test('the table is exactly the ten flashing events', () => {
   assert.deepEqual(Object.keys(T).sort(), Object.keys(PREVIOUS).sort());
 });
 

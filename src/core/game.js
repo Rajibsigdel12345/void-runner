@@ -7,6 +7,8 @@ import { MineField } from './mines.js';
 import { DroneField } from './drones.js'; // ST-117
 import { StingerField } from './stinger.js'; // ST-229
 import { FlyerField } from './flyer.js'; // ST-232
+import { HunterField } from './hunter.js'; // ST-418
+import { GunshipField } from './gunship.js'; // ST-418
 import { Monolith, bossHpForWave, bossBurstVectors } from './boss.js';
 import { Splicer, splicerHpForWave } from './splicer.js';
 import { Warden } from './warden.js'; // ST-136
@@ -34,6 +36,8 @@ export class World {
     this.drones = new DroneField(rng, cfg); // ST-117
     this.stingers = new StingerField(rng, cfg); // ST-229
     this.flyers = new FlyerField(rng, cfg); // ST-232
+this.hunters = new HunterField(rng, cfg); // ST-418
+this.gunships = new GunshipField(rng, cfg); // ST-418
     this.boss = null; // ST-055
     this.bossRelease = 0; // ST-241: 1 -> 0 over music.intensity.releaseTime after a boss death
     this.enemyBullets = new EnemyBulletField(cfg); // ST-056
@@ -198,6 +202,8 @@ export class World {
       this.spawnDronesForWave(wv.startedWave); // ST-117
       this.spawnStingersForWave(wv.startedWave); // ST-229
       this.spawnFlyersForWave(wv.startedWave); // ST-232
+this.spawnHunterForWave(wv.startedWave); // ST-418
+this.spawnGunshipForWave(wv.startedWave); // ST-418
       this.scoreKeeper.setCap(capFor(wv.startedWave, this.cfg)); // ST-233: combo cap wave-scaling (W1-2 capLow / W3+ capHigh)
     }
     const wl = this.weaponLevel(); // ST-122: weapon progression by wave
@@ -207,6 +213,8 @@ export class World {
     this.drones.step(edt, this.ship.pos); // ST-117 (ST-115: scaled under slow-mo)
     this.stingers.step(edt, this.ship.pos); // ST-229 (ST-115: scaled under slow-mo)
     this.flyers.step(edt); // ST-232 (ST-115: scaled under slow-mo; no homing - pure crosser)
+this.hunters.step(edt, this.ship.pos, this.ship.aim); // ST-418 (ST-115: scaled under slow-mo)
+this.gunships.step(edt, this.ship.pos); // ST-418 (ST-115: scaled under slow-mo)
     if (this.warden) this.warden.step(edt, this.ship.pos); // ST-136 (ST-115: scaled under slow-mo)
     for (const dc of this.drones.decayed) { // I129: seeker battery expired -> self-destruct event (render FX in main.js)
       this.emit('droneDecay', { pos: { x: dc.pos.x, y: dc.pos.y } });
@@ -218,6 +226,19 @@ export class World {
     for (const fe of this.flyers.drainEvents()) { // ST-232: hit / exit (SFX + FX in main.js)
       const p = { x: fe.pos.x, y: fe.pos.y };
       this.emit(fe.kind === 'hit' ? 'flyerHit' : 'flyerExit', { pos: p });
+    }
+    for (const he of this.hunters.drainEvents()) { // ST-418: telegraph / dash / fizzle (SFX + FX in main.js)
+      const p = { x: he.pos.x, y: he.pos.y };
+      this.emit(he.kind === 'fizzle' ? 'hunterFizzle' : he.kind === 'telegraph' ? 'hunterTelegraph' : 'hunterDash', { pos: p });
+    }
+    for (const ge of this.gunships.drainEvents()) { // ST-418: arm / fire(heavy bolt) / death(self)
+      const p = { x: ge.pos.x, y: ge.pos.y };
+      if (ge.kind === 'fire') {
+        const gb = this.enemyBullets.fire(ge.pos, ge.dir, this.cfg.gunship.boltSpeed, this.cfg.gunship.boltRadius);
+        if (gb) this.emit('gunshipFire', { pos: p });
+      } else {
+        this.emit(ge.kind === 'arm' ? 'gunshipArm' : 'gunshipDeath', { pos: p, self: ge.self });
+      }
     }
     for (const f of this.mines.takeFires()) { // ST-056
       const b = this.fireAimedBolt(f, this.cfg.enemyBullets.mineSpeed);
@@ -256,6 +277,10 @@ export class World {
     this.resolveBulletStingers(); // ST-229
     this.resolveBulletFlyers(); // ST-232
     this.resolveShipStingers(); // ST-229
+    this.resolveBulletHunters(); // ST-418
+    this.resolveBulletGunships(); // ST-418
+    this.resolveShipHunters(); // ST-418
+    this.resolveShipGunships(); // ST-418
     this.resolveShipBoss(); // ST-055
     this.resolveShipWarden(); // ST-136
     this.resolveShipEnemyBullets(); // ST-056
@@ -800,6 +825,106 @@ export class World {
       this.emit('gameover', { score: this.score });
     }
   }
+  /** ST-418: spawn the wave's hunters once eligible (wave >= firstWave). The first spawn of a
+   * run emits 'hunterSpawn' (the main.js "HUNTER BEHIND YOU" toast). */
+  spawnHunterForWave(wave) {
+    const s = this.cfg.hunter;
+    if (wave < s.firstWave) return;
+    for (let i = 0; i < s.perWave; i++) {
+      const h = this.hunters.spawn(this.ship.pos);
+      if (h && !this._hunterToasted) {
+        this._hunterToasted = true;
+        this.emit('hunterSpawn', { pos: { x: h.pos.x, y: h.pos.y }, wave });
+      }
+    }
+  }
+
+  /** ST-418: bullets destroy hunters (1 hit). Each kill pays +300 and feeds the combo. */
+  resolveBulletHunters() {
+    for (const b of this.weapons.bullets) {
+      if (b.dead) continue;
+      const hit = this.hunters.hunters.find(hm => !hm.dead &&
+        Math.hypot(hm.pos.x - b.pos.x, hm.pos.y - b.pos.y) < hm.radius + b.radius);
+      if (!hit) continue;
+      this.onPlayerBulletHit(b.id);
+      this.hunters.destroy(hit.id);
+      const points = this.scoreKeeper.kill(this.cfg.hunter.score, this.time);
+      this.emit('kill', { pos: { x: hit.pos.x, y: hit.pos.y }, size: 'hunter', points,
+        combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), hunter: true });
+      this.emit('hunterDeath', { pos: { x: hit.pos.x, y: hit.pos.y } });
+    }
+    this.weapons.compact();
+  }
+
+  /** ST-418: a hunter touching the ship costs a life (NO score) and is lost. */
+  resolveShipHunters() {
+    if (this.ship.isInvulnerable || this.lives <= 0) return;
+    const hit = this.hunters.hunters.find(hm => !hm.dead &&
+      Math.hypot(hm.pos.x - this.ship.pos.x, hm.pos.y - this.ship.pos.y) < hm.radius + this.cfg.ship.radius);
+    if (!hit) return;
+    this.hunters.destroy(hit.id);
+    this.emit('hunterDeath', { pos: { x: hit.pos.x, y: hit.pos.y } });
+    const livesLeft = this.shipDamage();
+    this.scoreKeeper.onDamage();
+    const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.ship.damage(v2(nx / n, ny / n));
+    if (livesLeft <= 0) { this.game.to(STATE.GAME_OVER); this.emit('gameover', { score: this.score }); }
+  }
+
+  /** ST-418: spawn the wave's gunships once eligible (wave >= firstWave). The first spawn of a
+   * run emits 'gunshipSpawn' (the main.js "GUNSHIP INBOUND" toast). */
+  spawnGunshipForWave(wave) {
+    const s = this.cfg.gunship;
+    if (wave < s.firstWave) return;
+    for (let i = 0; i < s.perWave; i++) {
+      const g = this.gunships.spawn(this.ship.pos);
+      if (g && !this._gunshipToasted) {
+        this._gunshipToasted = true;
+        this.emit('gunshipSpawn', { pos: { x: g.pos.x, y: g.pos.y }, wave });
+      }
+    }
+  }
+
+  /** ST-418: bullets damage gunships (hp hits). The kill pays +600 and feeds the combo. */
+  resolveBulletGunships() {
+    for (const b of this.weapons.bullets) {
+      if (b.dead) continue;
+      const hit = this.gunships.gunships.find(gm => !gm.dead &&
+        Math.hypot(gm.pos.x - b.pos.x, gm.pos.y - b.pos.y) < gm.radius + b.radius);
+      if (!hit) continue;
+      this.onPlayerBulletHit(b.id);
+      const g = this.gunships.hit(hit.id);
+      for (const ge of this.gunships.drainEvents()) { // hit/kill events reach the world immediately
+        const p = { x: ge.pos.x, y: ge.pos.y };
+        this.emit(ge.kind === 'hit' ? 'gunshipHit' : ge.kind, { pos: p, self: ge.self });
+      }
+      if (g.dead) {
+        const points = this.scoreKeeper.kill(this.cfg.gunship.score, this.time);
+        this.emit('kill', { pos: { x: g.pos.x, y: g.pos.y }, size: 'gunship', points,
+          combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), gunship: true });
+        this.emit('gunshipDeath', { pos: { x: g.pos.x, y: g.pos.y }, self: false });
+      }
+    }
+    this.weapons.compact();
+  }
+
+  /** ST-418: a gunship touching the ship costs a life (NO score) and is lost. */
+  resolveShipGunships() {
+    if (this.ship.isInvulnerable || this.lives <= 0) return;
+    const hit = this.gunships.gunships.find(gm => !gm.dead &&
+      Math.hypot(gm.pos.x - this.ship.pos.x, gm.pos.y - this.ship.pos.y) < gm.radius + this.cfg.ship.radius);
+    if (!hit) return;
+    this.gunships.destroy(hit.id);
+    this.emit('gunshipDeath', { pos: { x: hit.pos.x, y: hit.pos.y }, self: false });
+    const livesLeft = this.shipDamage();
+    this.scoreKeeper.onDamage();
+    const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.ship.damage(v2(nx / n, ny / n));
+    if (livesLeft <= 0) { this.game.to(STATE.GAME_OVER); this.emit('gameover', { score: this.score }); }
+  }
+
   reset() {
     this.ship = new Ship(0, 0, this.cfg);
     this.weapons.clear();
@@ -810,6 +935,10 @@ export class World {
     this.flyers.clear(); // ST-232
     this._stingerToasted = false; // ST-229: re-arm the run's first-spawn callout
     this._flyerToasted = false; // ST-232: re-arm the run's first-spawn callout
+    this.hunters.clear(); // ST-418
+    this.gunships.clear(); // ST-418
+    this._hunterToasted = false; // ST-418
+    this._gunshipToasted = false; // ST-418
     this.boss = null; // ST-055
     this.bossRelease = 0; // ST-241
     this.warden = null; // ST-136

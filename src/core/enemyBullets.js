@@ -12,7 +12,7 @@ export class EnemyBulletField {
   }
 
   /** Fire one bolt from fromPos along dir (unit) at speed. Returns the bolt or null (at cap). */
-  fire(fromPos, dir, speed) {
+  fire(fromPos, dir, speed, radius) {
     const e = this.cfg.enemyBullets;
     if (this.bullets.length >= e.maxConcurrent) return null;
     const b = {
@@ -20,7 +20,7 @@ export class EnemyBulletField {
       pos: v2(fromPos.x, fromPos.y),
       vel: v2(dir.x * speed * this.speedMul, dir.y * speed * this.speedMul), // ST-304 (I329)
       life: e.life,
-      radius: e.radius,
+      radius: radius != null ? radius : e.radius, // ST-418: optional per-bolt radius (heavy gunship bolt)
       dead: false,
     };
     this.bullets.push(b);

@@ -390,6 +390,64 @@ export const CONFIG = {
     rimDist: 15,        // spawn: rim point at least this far from the ship
     score: 250          // kill reward (seeker 200 < stinger 250 < warden 400)
   },
+  hunter: {
+    // ST-418: HUNTER - rear-approach stalker (wave 6+). Orbits to a rear bearing
+    // (behind the nose axis), telegraphs (W-fins deploy + threat-red core ramps
+    // 0xff4a2a), then dashes in a straight line from behind. 1 hit to kill (+300).
+    // Visuals: design/enemy-visual-language.md s3.1 - rust 0x9c5a46 body /
+    // fin-dark 0x4a2a22 / threat-red accent (3 materials, radius 0.8 stinger class).
+    firstWave: 6,       // W6: after the base loop (stinger 7, flyer 9; boss waves 5/10)
+    perWave: 1,
+    maxConcurrent: 2,   // render pool 4 (maxConcurrent + 2, stinger pattern)
+    palette: {
+      body: { color: 0x9c5a46 },   // rust (sRGB luma ~102; below flyer ~110, ~65deg apart - rule 1)
+      fin:  { color: 0x4a2a22 },   // fin undersides (dark)
+      accent: 0xff4a2a,            // threat-red telegraph (shared imminent-damage semantics, rule 4)
+    },
+    radius: 0.8,        // stinger class
+    orbitSpeed: 2.6,    // u/s (quick - a stalker)
+    orbitTurn: 1.7,     // rad/s (tight turn - can swing to the rear)
+    orbitDurMin: 1.4,   // s: rng window for the orbit before the first telegraph
+    orbitDurMax: 2.6,
+    orbitR: 7.5,        // u: rear-anchor distance behind the ship along the nose axis
+    telegraph: 0.85,    // s: warning before the dash (fin-deploy + red ramp) - reaction floor >= 0.7
+    dashSpeed: 9.5,     // u/s (ship maxSpeed 14 - dodgeable with an early read)
+    dashDur: 1.0,       // s: dash length (or until the arena rim)
+    recover: 1.0,       // s: vulnerable drift after each dash
+    maxCharges: 5,      // lifetime dashes, then it fizzles (seeker maxAge precedent)
+    rimDist: 14,        // spawn: rim point at least this far from the ship
+    score: 300          // kill reward (stinger 250 < hunter 300 < flyer 400)
+  },
+  gunship: {
+    // ST-418: GUNSHIP - slow, high-HP heavy bomber (wave 8+). Enters to a mid-arena
+    // hold, then ARMS (payload-bay glow 0xff9a3d ramps) and fires a slow, big aimed
+    // bolt. 10 hits; self-destructs after maxAge; death -> chaff popups.
+    // Visuals: design/enemy-visual-language.md s3.2 - gunmetal 0x39424e body /
+    // nacelle 0x232a33 / payload-bay 0xff9a3d (3 materials, radius 1.6 warden class).
+    firstWave: 8,       // W8: after drones/vortex (boss waves 5/10)
+    perWave: 1,
+    maxConcurrent: 1,   // one at a time - it is large and heavy
+    palette: {
+      body: { color: 0x39424e },    // gunmetal (sRGB luma ~65; below every fleet band - rule 1)
+      nacelle: { color: 0x232a33 }, // engine nacelles (dark)
+      bay: 0xff9a3d,                // payload-bay glow (warm orange, rule 4 payload semantics)
+    },
+    radius: 1.6,        // warden class (strictly below the Monolith 3.4)
+    enterSpeed: 3.0,    // u/s (slow - a bomber)
+    holdRadiusMin: 0.35,// rng fraction of the arena for the hold point (min)
+    holdRadiusMax: 0.65,// (max)
+    holdDist: 2.0,      // u: enter hold within this of the hold point
+    driftOmega: 0.25,   // rad/s (slow drift)
+    driftR: 1.5,        // u: drift radius around the hold point
+    hp: 10,             // hits to kill (high-HP heavy)
+    fireEvery: 2.6,     // s between shots (slow cadence)
+    armDur: 0.9,        // s: arm telegraph before each shot (payload-bay glow ramps)
+    boltSpeed: 5.5,     // u/s heavy bolt (slower than the normal 9 - lobbed, dodgeable)
+    boltRadius: 0.5,    // heavy bolt radius (bigger than the normal 0.22)
+    maxAge: 30,         // s: self-destructs after this even if unhit (seeker maxAge precedent)
+    rimDist: 14,        // spawn: hold point at least this far from the ship
+    score: 600          // kill reward (= Splicer boss 600; heaviest non-boss, below Monolith 1000)
+  },
   flyer: {
     // ST-232: FLYER - evasive sine-weave crosser (wave 9+). The game one pure
     // lead-shot skill target: it never homes, never fires, never rams - you must
@@ -491,6 +549,9 @@ export const CONFIG = {
       droneExplode: 0.35,    // seeker drone explosion
       stingerDeath: 0.6,     // ST-229: charger burst (0.5 wardenSpawn < 0.6 < 0.8 wardenDeath)
       flyerDeath: 0.65,     // ST-232: evasive-target kill (0.6 stingerDeath < 0.65 < 0.8 wardenDeath)
+      hunterDeath: 0.55,    // ST-418: stalker kill (0.35 drone < 0.55 < 0.6 stinger)
+      gunshipDeath: 0.85,   // ST-418: heavy bomber kill (0.8 wardenDeath < 0.85 < 1.0 bossDeath)
+      gunshipSpawn: 0.55,   // ST-418: heavy bomber arrival (0.5 wardenSpawn)
       bossSpawn: 0.7,        // boss arrival
       bossDeath: 1.0,        // boss death
       wardenSpawn: 0.5,      // mini-boss arrival
@@ -501,6 +562,7 @@ export const CONFIG = {
       bossDeath: 0.5,        // boss death
       bossSpawn: 0.4,        // boss arrival
       wardenDeath: 0.4,      // mini-boss death
+      gunshipDeath: 0.4,    // ST-418: heavy bomber death flash (wardenDeath 0.4)
       bomb: 0.35,            // bomb blast
       mineExplode: 0.25,     // mine detonation
       wardenSpawn: 0.25,     // mini-boss arrival
@@ -525,6 +587,8 @@ export const CONFIG = {
       l: 0.18,                // large rock (0.36 u; below the 0.45 weapon fanfare)
       stinger: 0.2,           // ST-229: charger kill (L 0.18 < 0.2 < the 0.35 drone shake rung)
       flyer: 0.25,           // ST-232: evasive-target kill (0.2 stinger < 0.25; overdrive 0.375 -> cap 0.3)
+      hunter: 0.22,          // ST-418: stalker kill (0.2 stinger < 0.22 < 0.25 flyer)
+      gunship: 0.3,          // ST-418: heavy bomber kill (0.25 flyer < 0.3 = the max rung)
       overdriveBoost: 0.5,    // combo-heat: x1.5 while overdrive is active
       max: 0.3                // hard cap (L + overdrive 0.27 stays under the fanfare rung)
     },
@@ -539,7 +603,9 @@ export const CONFIG = {
         L: 3.4,             // large rock (radius 2.2)
         drone: 1.6,         // seeker (radius 0.7)
         stinger: 2.0,       // charger (radius 0.8)
-        warden: 3.0         // mini-boss (radius 1.7)
+        warden: 3.0,         // mini-boss (radius 1.7)
+        hunter: 2.2,         // ST-418: stalker (radius 0.8)
+        gunship: 3.6         // ST-418: heavy bomber (radius 1.6)
       }
     },
     punch: {                  // ST-081: camera punch - brief directed jolt (boss death / bomb)
@@ -603,7 +669,9 @@ export const CONFIG = {
       engine:   [0xffa860, 0xffd9a0, 0x9fd8ff],  // I213 warm core -> cool tail (matches the flame)
       belt:     [0x9fb4d0, 0x7c93b8, 0xcfe0f5],    // ST-139 cool steel - indestructible belt clink
       stinger:  [0xd8f4ff, 0x9fd4ff, 0xffffff],    // ST-229 hot cyan-white (the telegraph family)
-      flyer:    [0xff9de8, 0xffc4f0, 0xff6ad5]    // ST-232 magenta saucer (the evasive-target family)
+      flyer:    [0xff9de8, 0xffc4f0, 0xff6ad5],    // ST-232 magenta saucer (the evasive-target family)
+      hunter:   [0xff7a4d, 0xffb088, 0xffe0c0],    // ST-418 rust-hot (HUNTER kill - threat-red warmed to white)
+      gunship:  [0xffa14d, 0xffc98a, 0xfff0d0]     // ST-418 gunmetal-ember (GUNSHIP kill - payload-amber family)
     },
     enemyBullet: { base: 0x5a1410, emissive: 0xff4a2a, emissiveIntensity: 1.2 }, // ST-248: hot red-orange threat bolt (data-driven; values unchanged)
   },
@@ -765,6 +833,8 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
       mine: { count: 5, speed: 7, life: 0.50, scaleMin: 0.40, scaleMax: 0.65 },
       stinger: { count: 6, speed: 8, life: 0.55, scaleMin: 0.45, scaleMax: 0.75 },
       flyer: { count: 6, speed: 8.5, life: 0.60, scaleMin: 0.45, scaleMax: 0.75 },
+      hunter: { count: 7, speed: 8, life: 0.55, scaleMin: 0.40, scaleMax: 0.80 },  // ST-418: rust-hot shatter
+      gunship: { count: 12, speed: 9, life: 0.75, scaleMin: 0.70, scaleMax: 1.30 }, // ST-418: gunmetal chaff (heavier)
       warden: { count: 10, speed: 9, life: 0.70, scaleMin: 0.80, scaleMax: 1.20 },
       boss: { count: 14, speed: 10, life: 0.80, scaleMin: 1.20, scaleMax: 1.80 }
     }

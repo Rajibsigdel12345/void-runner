@@ -36,6 +36,8 @@ export function createKillFeed(root) {
     if (d.size === 'drone') return t('feed.seeker');
     if (d.size === 'stinger') return t('feed.stinger');
     if (d.size === 'flyer') return t('feed.flyer');
+    if (d.size === 'hunter') return t('feed.hunter');
+    if (d.size === 'gunship') return t('feed.gunship');
     if (d.golden) return t('feed.golden_rock');
     const s = String(d.size || 'M').toUpperCase();
     return t('feed.rock',{size:s});
@@ -45,6 +47,8 @@ export function createKillFeed(root) {
     if (d.size === 'warden') return '#ff9d6d';
     if (d.size === 'stinger') return '#baf3ff';
     if (d.size === 'flyer') return '#ffb3ec';
+    if (d.size === 'hunter') return '#ffb088';
+    if (d.size === 'gunship') return '#ffc98a';
     if (d.golden) return '#ffe08a';
     return '#cfe4ff';
   }
