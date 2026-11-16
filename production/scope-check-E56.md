@@ -127,10 +127,40 @@ before any Blender work. Re-pins ALL pre-registered below (never silent):
   tests/assetPerf.test.js (re-pins only), docs/architecture/ (WebGPU re-eval note at ST-412)
 
 ## Verification evidence
-DOCS-only: npm test 972/972 + npm run build 0 + dist 2,251,526 B byte-identical (headroom 208,474)
+Opening (I438, DOCS-only): npm test 972/972 + npm run build 0 + dist 2,251,526 B byte-identical (headroom 208,474)
 + vendor sha256-16 76DEA8151BC9352A + hygiene (no servers, no chrome, node-only).
 
+Closing (I443, ST-413; G56.0 gate - measured, never assumed; harnesses .evidence/I443/):
+- ST-412 DONE I442: docs/architecture/webgpu-re-eval-E56.md - VERDICT KEEP WebGL2
+  (re-derived, not re-quoted; flip criteria F1/F2/F3; no silent switch).
+- ST-413 DONE I443 - G56.0 PASS 5/5:
+  - R1 causal p1 EXACT (seed 9876): score 11334 / kills 57 / wave 2 / combo 15 / shots 198 /
+    acc 0.2878787878787879 / time 36.14999999999923 / replay 2169/2220/speed 4 / afterQ MENU /
+    console 0/0 / glb all-ready - render-invariant, ZERO drift vs pre-remaster pins.
+  - R2 rockab EXACT: radii L 2.2 / M 1.3 / S 0.7 (18/18 with R1).
+  - R3 playframe RE-MEASURED + airtight decomposed (decomp443.json): L 21/12,654
+    (+9,146 = 1x ship delta 3,254->12,400; non-ship 254 byte-identical) / P 10/180
+    UNCHANGED / B 50/27,654 (+19,782 = 2x(12,400-3,254) + (1,980-490)); the 32,124
+    pre-measure prediction deviated -4,470 = 3x(1,980-490) because frustum culling puts
+    exactly 1 of the 4 remastered L rocks in the plain probe frame (decomp: composer window
+    31/12,594 = 1 ship frame 6/12,400 + non-ship 25/190 byte-identical; plain frame
+    19/15,060 = ship 12,400 + 1 L 1,980 + arena 680; scene enumeration 4xL 1,980 + 1xM 500,
+    ship 6 nodes 12,400, worldBoss=false). Pins re-pinned in .evidence/I443/playframe443.mjs
+    (probe-only, NOT in tests/). Ship A/B view: SHIP_OK + SHIP_ERRS [] (3 PNGs).
+  - R4 PWA 11/11 (prod :5199: sw active root scope + controller claimed / manifest 200
+    standalone 512 icon any+maskable / offline boot no NaN / console 0/0).
+  - R5: npm test 972/972 + build 0 + dist 2,407,614 B / 138 files byte-identical to I442
+    (headroom 292,386 vs the 2,700,000 ceiling; floor 102,400 holds) + vendor 13/13 bad=0
+    + three.module.js sha256-16 76DEA8151BC9352A + hygiene (chrome 0; ports free).
+- G56.0 gate: PASS 5/5 -> E56 CLOSED 6/6 at I443. All re-pins pre-registered in this doc
+  landed as measured: BUDGETS.ship 14000 [12,400] / MAX_FILE_BYTES 393,216 [270,556] /
+  BUDGETS.L 2100 [1,980] + comet 650 [590] / SHIP_FACET + ROCK_FACET re-bakes /
+  assetPerf 768/700/400/20000 [19,736 tris total; 264 headroom] / dist ceiling 2,700,000
+  [2,407,614] / playframe L 21/12,654 + P 10/180 + B 50/27,654 (re-pinned, probe-only).
+
 ## Next owner or decision
-ST-409 (asset spec v3, cgs-asset-spec) at I439 - the v3 ship contract (per-node poly table,
-displacement plan, greeble budget, all re-pins re-confirmed against the spec). No user decision
-needed (autonomous pass; user pre-authorized: "donot stop for my confirmation for the next pass").
+CLOSED (I443): E56 is CLOSED 6/6 - ST-408 I438 / ST-409 I439 / ST-410 I440 / ST-411 I441 /
+ST-412 I442 / ST-413 I443 all DONE; G56.0 gate PASS 5/5 (see Verification evidence).
+Next epic awaits the user's next directive; standing deferrals unchanged (WebGPU migration
+epic / S rock remaster / asteroid MATERIAL craters (UV pipeline) / i18n tail + touch /
+per-hit impact SFX / AGENTS.md five-GLBs doc-drift).
