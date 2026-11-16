@@ -40,13 +40,19 @@ export function createWaveBanner(root) {
     anim = { t: 0, dur: 1.2, text: t('banner.cleared'), subText: t('banner.wave',{n}), tint: '#ffe08a', glow: '0 0 22px rgba(255,224,138,0.35), 0 2px 14px rgba(0,0,0,0.9)' };
     el.style.fontSize = 'calc(40px * var(--vr-fs,1))'; // I161: font-scale
   }
-  function startBoss(n, maxHp, name, kind) { // ST-135/143: boss intro (bigger, variant-tinted); I154: per-variant glow
+  function startBoss(n, maxHp, name, kind) { // ST-135/143: boss intro (bigger, variant-tinted); I154: per-variant glow; ST-420 (I450): Prime gold identity
+    const prime = kind === 'prime'; // ST-420 (I450): Monolith Prime - gold (mirrors startCleared)
     const splicer = kind === 'splicer';
-    anim = { t: 0, dur: 2.2, text: name || t('banner.boss.monolith'), subText: t('banner.boss_sub',{n, hp:maxHp}),
-      tint: splicer ? '#7ff0e0' : '#c9a8ff',
-      glow: splicer ? '0 0 26px rgba(127,240,224,0.5), 0 2px 14px rgba(0,0,0,0.9)' : '0 0 26px rgba(201,168,255,0.55), 0 2px 14px rgba(0,0,0,0.9)' };
+    const tint = prime ? '#ffe08a' : splicer ? '#7ff0e0' : '#c9a8ff';
+    const glow = prime ? '0 0 26px rgba(255,224,138,0.55), 0 2px 14px rgba(0,0,0,0.9)' : splicer ? '0 0 26px rgba(127,240,224,0.5), 0 2px 14px rgba(0,0,0,0.9)' : '0 0 26px rgba(201,168,255,0.55), 0 2px 14px rgba(0,0,0,0.9)';
+    anim = { t: 0, dur: 2.2, text: name || t('banner.boss.monolith'), subText: t('banner.boss_sub',{n, hp:maxHp}), tint, glow };
     el.style.fontSize = 'calc(52px * var(--vr-fs,1))'; // I161: font-scale
-    el.style.color = splicer ? '#7ff0e0' : '#c9a8ff';
+    el.style.color = tint;
+  }
+
+  function startStage(stage, name) { // ST-420: STAGE n - name (gold envelope, mirrors startCleared)
+    anim = { t: 0, dur: 1.6, text: t('banner.stage',{n:stage}), subText: name || '', tint: '#ffe08a', glow: '0 0 22px rgba(255,224,138,0.35), 0 2px 14px rgba(0,0,0,0.9)' };
+    el.style.fontSize = 'calc(48px * var(--vr-fs,1))'; // I161: font-scale
   }
 
   function easeOut(x) { return 1 - Math.pow(1 - x, 3); } // ST-088
@@ -110,5 +116,5 @@ export function createWaveBanner(root) {
     }
   }
 
-  return { el, showWave: startWave, showCleared: startCleared, showBoss: startBoss, sync };
+  return { el, showWave: startWave, showCleared: startCleared, showBoss: startBoss, showStage: startStage, sync };
 }

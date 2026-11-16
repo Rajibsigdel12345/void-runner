@@ -156,3 +156,20 @@ test('strings: ST-376 KEYCAPS zh + ja complete; single-letter hardware keys stay
   setLocale('ja');
   try { assert.equal(kc('wasd_arrows'), KEYCAPS.ja['wasd_arrows']); } finally { setLocale('en'); }
 });
+
+// ST-420 (I450): campaign i18n keys resolve in all three locales; banner.stage keeps {n};
+// Prime proper noun stays English in zh + ja (locale rule for boss names).
+const I450_KEYS = ['menu.mode_endless','menu.mode_campaign','banner.stage','banner.boss.prime','boss.monolith_prime','over.victory_title'];
+test('strings: ST-420 I450 campaign keys resolve in all three locales', () => {
+  for (const l of LOCALES) {
+    for (const k of I450_KEYS) assert.ok(typeof STRINGS[l][k] === 'string' && STRINGS[l][k].length > 0, l + ' missing ' + k);
+  }
+});
+test('strings: ST-420 banner.stage placeholder + Prime proper noun', () => {
+  assert.equal(phSet(STRINGS.en['banner.stage']), 'n');
+  for (const l of ['en','zh','ja']) {
+    assert.equal(phSet(STRINGS[l]['banner.stage']), 'n', l + ' banner.stage placeholders');
+    assert.equal(STRINGS[l]['banner.boss.prime'], 'THE MONOLITH PRIME', l + ' prime banner is a proper noun');
+    assert.equal(STRINGS[l]['boss.monolith_prime'], l === 'en' ? 'MONOLITH PRIME' : 'THE MONOLITH PRIME', l + ' prime HUD name');
+  }
+});

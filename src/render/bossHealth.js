@@ -26,13 +26,21 @@ export function createBossHealth(root) {
     if (!boss || !boss.alive) { wrap.style.opacity = '0'; return; }
     wrap.style.opacity = '1';
     fill.style.width = (Math.max(0, Math.min(1, boss.hpFrac)) * 100) + '%';
-    if (_kind !== boss.kind) {
-      _kind = boss.kind;
-      const sp = boss.kind === 'splicer';
-      label.textContent = sp ? t('boss.splicer') : t('boss.monolith');
-      label.style.color = sp ? 'rgba(120,235,220,0.9)' : 'rgba(190,160,255,0.9)';
-      bar.style.borderColor = sp ? 'rgba(45,212,191,0.5)' : 'rgba(150,110,255,0.5)';
-      fill.style.background = sp ? 'linear-gradient(90deg,#14b8a6,#5eead4)' : 'linear-gradient(90deg,#8b5cf6,#c084fc)';
+    if (_kind !== (boss.kind + (boss.prime ? ':prime' : ''))) { // ST-420: prime shares kind 'monolith' -> composite discriminator
+      _kind = boss.kind + (boss.prime ? ':prime' : '');
+      const prime = boss.prime === true; // Monolith Prime re-tint (gold)
+      if (prime) {
+        label.textContent = t('boss.monolith_prime');
+        label.style.color = 'rgba(255,214,120,0.95)';
+        bar.style.borderColor = 'rgba(255,201,77,0.6)';
+        fill.style.background = 'linear-gradient(90deg,#f59e0b,#ffd54d)';
+      } else {
+        const sp = boss.kind === 'splicer';
+        label.textContent = sp ? t('boss.splicer') : t('boss.monolith');
+        label.style.color = sp ? 'rgba(120,235,220,0.9)' : 'rgba(190,160,255,0.9)';
+        bar.style.borderColor = sp ? 'rgba(45,212,191,0.5)' : 'rgba(150,110,255,0.5)';
+        fill.style.background = sp ? 'linear-gradient(90deg,#14b8a6,#5eead4)' : 'linear-gradient(90deg,#8b5cf6,#c084fc)';
+      }
     }
   }
 

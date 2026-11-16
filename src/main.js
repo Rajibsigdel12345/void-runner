@@ -5,6 +5,7 @@ import { createSkybox } from './render/skybox.js'; // I212
 import { createArenaRing } from './render/arenaRing.js'; // I212
 import { createArenaFloorGrid } from './render/arenaFloor.js'; // ST-257 (I269)
 import { createFloorDisc } from './render/floorDisc.js'; // ST-277 (I294)
+import { createThemeDome } from './render/themeDome.js'; // ST-420 (I450): per-stage sky tint dome
 import { createEngineTrail } from './core/engineTrail.js'; // I213
 import { createShipMesh } from './render/shipMesh.js';
 import { createInput } from './render/input.js';
@@ -62,6 +63,7 @@ import { t as tr, setLocale, onLocale, getLocale } from './core/strings.js'; // 
 import { STATE } from './core/state.js';
 import { Storage, toggleFxQuality } from './core/storage.js';
 import { CONFIG } from './core/config.js';
+import { stageName } from './core/stages.js'; // ST-420 (I450): stage banner name
 import { World } from './core/game.js';
 import { dailyForDate } from './core/daily.js'; // ST-141
 import { RNG } from './core/rng.js';
@@ -131,6 +133,22 @@ const arenaRing = createArenaRing(scene, CONFIG.arena.radius); // I212: boundary
 
 const stars = createStarfield(1337);
 scene.add(stars);
+
+// ST-420 (I450): campaign stage theme - sky tint dome + star/grid/floor tints (event-driven,
+// never per-frame). Identity (invisible dome, white multipliers) whenever no theme is active
+// (MENU / endless / stage 1) so the MENU frame budget stays exact.
+const themeDome = createThemeDome(scene, 320);
+const _starNear = stars.uniforms[0].uColor.value.clone();
+const _starFar = stars.uniforms[1].uColor.value.clone();
+let _currentTheme = null;
+function applyTheme(theme) {
+  _currentTheme = theme;
+  themeDome.set(theme);
+  stars.uniforms[0].uColor.value.setHex(theme ? theme.stars : _starNear.getHex());
+  stars.uniforms[1].uColor.value.setHex(theme ? theme.stars : _starFar.getHex());
+  grid.material.color.setHex(theme ? theme.grid : 0xffffff);
+  if (floorDisc) floorDisc.material.color.setHex(theme ? theme.floor : 0xffffff);
+}
 
 // --- gameplay (I12: World orchestrates core; render layer only syncs visuals) ---
 // Seed is session-random; the determinism harness (I076) pins seeds explicitly.
@@ -452,6 +470,8 @@ function startRun(mode) {
   else hint.show(); // passive 6s hint on subsequent runs
   if (mode === 'daily') { const d = dailyForDate(new Date(), CONFIG.daily.salt); dailyMode = true; dailyKey = d.key; dailySeedVal = d.seed; runSeed = d.seed; world.reseed(d.seed); }
   else { dailyMode = false; dailyKey = null; dailySeedVal = 0; runSeed = freshRunSeed(); world.reseed(runSeed); } // ST-191: fresh, reproducible layout per run
+  world.setMode(mode); // ST-420 (I450): campaign vs endless (setMode clamps non-campaign -> endless)
+  applyTheme(null); // ST-420: start at stage-1 identity tints (themeSwap events drive later stages)
   world.begin();
 }
 function restartRun() {
@@ -460,6 +480,7 @@ function restartRun() {
   newBest = false; popups.clear(); killFeed.clear(); hint.show(); dailyNewBest = false; juiceTally.reset(); // ST-183
   if (dailyMode) { runSeed = dailySeedVal; world.reseed(dailySeedVal); } // ST-141: same seed -> reproduce today's run; ST-191
   else { runSeed = freshRunSeed(); world.reseed(runSeed); } // ST-191: fresh, reproducible layout per run
+  applyTheme(null); // ST-420 (I450): restart at stage-1 identity (reset puts currentStage=1 but emits no themeSwap)
   world.restart();
 }
 
@@ -476,6 +497,7 @@ function startReplayView(data) { // ST-190: watch a replay (demo pilot or saved 
 function exitReplayView() { // ST-190: leave the watched run, back to a clean menu
   replayView = null; newBest = false; popups.clear(); killFeed.clear(); vortexFx.hide(); recorder = null; recStopped = false; watchSavedRun = false; recChip.hide(); // ST-191
   world.reset(); // -> MENU
+  applyTheme(null); // ST-420 (I450): identity tints on exit to menu
 }
 function restartReplay() { // ST-190: replay the same tape from step 0
   if (!replayView) return;
@@ -494,9 +516,11 @@ const screens = createScreens(document.body, {
   actions: { // I68: pause overlay actions; I71: start for touch; ST-141: startDaily for the DAILY button
     start: () => startRun('normal'),
     startDaily: () => startRun('daily'),
+    startEndless: () => startRun('endless'), // ST-420 (I450): explicit endless entry
+    startCampaign: () => startRun('campaign'), // ST-420 (I450): campaign entry (stage 1 = identity tints)
     resume: () => { world.resume(); },
     restart: () => { if (replayView) restartReplay(); else restartRun(); }, // ST-190: restart the watched replay
-    quit: () => { if (replayView) exitReplayView(); else { newBest = false; popups.clear(); vortexFx.hide(); recorder = null; recStopped = false; watchSavedRun = false; recChip.hide(); world.quitToMenu(); } }, // ST-190/ST-191
+    quit: () => { if (replayView) exitReplayView(); else { newBest = false; popups.clear(); vortexFx.hide(); recorder = null; recStopped = false; watchSavedRun = false; recChip.hide(); applyTheme(null); world.quitToMenu(); } }, // ST-190/ST-191; ST-420 (I450): identity tints on quit
     showReplays: () => { const saved = storage.getReplays(); const list = [{ key: 'demo', label: tr('replays.demo_pilot'), score: 0, wave: 0, kills: 0, time: 0, isDemo: true }]; saved.forEach((r2, i) => list.push({ key: i, label: tr('replays.saved_run'), score: r2.data.meta.score, wave: r2.data.meta.wave, kills: r2.data.meta.kills, time: r2.data.meta.time })); screens.openReplays(list); }, // ST-190
     startReplay: (k) => { if (k === 'demo') { startReplayView(demoReplay(CONFIG.replay.demoSeed, CONFIG.replay.demoLen)); return; } const saved = storage.getReplays(); if (saved[k]) startReplayView(saved[k].data); }, // ST-190
     closeReplays: () => screens.closeReplays(), // ST-190
@@ -604,7 +628,7 @@ window.addEventListener('keydown', (e) => {
   } else if (e.key === 'r' || e.key === 'R') { // I68: restart from pause
     if (st === STATE.PAUSED) { if (replayView) restartReplay(); else restartRun(); } // ST-190: restart the replay; ST-141: reseed when daily
   } else if (e.key === 'q' || e.key === 'Q') { // I68: quit from pause
-    if (st === STATE.PAUSED) { if (replayView) exitReplayView(); else { newBest = false; popups.clear(); vortexFx.hide(); recorder = null; recStopped = false; watchSavedRun = false; recChip.hide(); world.quitToMenu(); } } else if (st === STATE.GAME_OVER && replayView) exitReplayView(); // ST-190/ST-191
+    if (st === STATE.PAUSED) { if (replayView) exitReplayView(); else { newBest = false; popups.clear(); vortexFx.hide(); recorder = null; recStopped = false; watchSavedRun = false; recChip.hide(); applyTheme(null); world.quitToMenu(); } } else if (st === STATE.GAME_OVER && replayView) exitReplayView(); // ST-190/ST-191; ST-420 (I450): identity tints on quit
   } else if (e.key === '1' || e.key === '2' || e.key === '3') { // ST-190: replay speed x1/x2/x4
     if (replayView && st === STATE.REPLAY) replayView.speed = e.key === '1' ? 1 : e.key === '2' ? 2 : 4;
   } else if (e.key === 'o' || e.key === 'O') { toggleRecording(); // ST-191: toggle run recording
@@ -684,7 +708,7 @@ window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), inpu
   floorDisc, // ST-277 (I294)
   applySettings, liveSettings: () => liveSettings,
   locale: () => getLocale(), setLocale, // ST-375: locale probe + drive (boot applied in applySettings; live via the settings panel)
-  audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, powerupRenders, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, hunterRenders, gunshipRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, camMode: () => camMode, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, vendorLowpWarns: () => _vendorLowpWarns, render: () => renderer.render(scene, camera) }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+  audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, powerupRenders, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, hunterRenders, gunshipRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, camMode: () => camMode, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, vendorLowpWarns: () => _vendorLowpWarns, render: () => renderer.render(scene, camera), theme: () => _currentTheme, applyTheme, themeDome, warp: () => world.warp }; // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -846,13 +870,14 @@ function tick(dt, intent) {
     if (haptic) haptics.pulse(haptic);
     if (e.type === 'wave') banner.showWave(e.data.n, e.data.mod, e.data.endless);
     else if (e.type === 'waveCleared') banner.showCleared(e.data.n);
-    else if (e.type === 'bossSpawn') { banner.showBoss(e.data.wave, e.data.hp, e.data.kind === 'splicer' ? tr('banner.boss.splicer') : tr('banner.boss.monolith'), e.data.kind); if (e.data.kind === 'splicer') toast(tr('toast.splicer')); } // I154: kind for variant glow // ST-135/143: boss intro (+ Splicer callout)
+    else if (e.type === 'bossSpawn') { const _prime = !!(world.boss && world.boss.prime); _lastBossPrime = _prime; banner.showBoss(e.data.wave, e.data.hp, _prime ? tr('banner.boss.prime') : (e.data.kind === 'splicer' ? tr('banner.boss.splicer') : tr('banner.boss.monolith')), _prime ? 'prime' : e.data.kind); if (e.data.kind === 'splicer') toast(tr('toast.splicer')); } // I154: kind for variant glow; ST-420 (I450): Prime gold identity (flag on world.boss; payload has no prime) // ST-135/143: boss intro
     else if (e.type === 'wardenSpawn') toast(tr('toast.warden')); // ST-137: mini-boss callout
     else if (e.type === 'stingerSpawn') toast(tr('toast.stinger')); // ST-229: first spawn of the run calls out the charger
 else if (e.type === 'flyerSpawn') toast(tr('toast.flyer')); // ST-232: first spawn of the run calls out the evasive target
     else if (e.type === 'hunterSpawn') toast(tr('toast.hunter')); // ST-418: first spawn of the run calls out the stalker
     else if (e.type === 'gunshipSpawn') toast(tr('toast.gunship')); // ST-418: first spawn of the run calls out the bomber
-    else if (e.type === 'kill') { popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 || e.data.golden || e.data.boss, gold: !!e.data.golden, od: !!e.data.overdrive }); killFeed.add(e.data); } // ST-030/052, I153
+    else if (e.type === 'themeSwap') { applyTheme(e.data.theme); banner.showStage(e.data.stage, stageName(e.data.stage, CONFIG)); } // ST-420 (I450): stage tint + STAGE n - name banner (event-driven; null theme = identity)
+    else if (e.type === 'kill') { popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 || e.data.golden || e.data.boss, gold: !!e.data.golden, od: !!e.data.overdrive }); killFeed.add(e.data.boss ? Object.assign({}, e.data, { prime: _lastBossPrime }) : e.data); } // ST-030/052, I153; ST-420 (I450): enrich boss kills with the prime flag
     else if (e.type === 'nearmiss') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points); // ST-053 (plain small popup)
     else if (e.type === 'weaponLevelUp') toast(tr('toast.weapon',{level:e.data.level})); // ST-123
     if (!motionOff) {
@@ -921,6 +946,7 @@ else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, 
     if (e.type === 'shieldPop') {
       shieldRing.pulse();
     } else if (e.type === 'gameover') {
+      _victory = !!e.data.victory; // ST-420 (I450): campaign victory flag (payload; endless never sets it)
       newBest = false; // ST-190: default; a live run raises it below (a watched replay must not touch the scoreboards)
       bestScore = storage.getBest();
       dailyNewBest = false; // ST-141
@@ -962,6 +988,8 @@ const screenOpts = { muted: false, best: 0, newBest: false };
 let _musicIntensity = 0; // I170 (ST-170): last applied music-intensity x (change-cached)
 let _timeWarp = 0; // I172 (ST-172): last applied time-warp x (change-cached)
 let _deathWarpT = 0; // I174 (ST-174): seconds left of the death-slow-mo audio window
+let _lastBossPrime = false; // ST-420 (I450): prime flag of the last spawned boss (kill payload enrichment)
+let _victory = false; // ST-420 (I450): campaign victory flag for the game-over screen
 function syncVisuals(dt) {
   const st = world.game.state;
   let _deathClosed = false; // I174: the death-slow-mo window just ended this frame (forces one exact push)
@@ -989,6 +1017,7 @@ function syncVisuals(dt) {
   screenOpts.dailyNewBest = dailyNewBest; // ST-141
   screenOpts.replayMode = !!replayView; // ST-190: game-over prompt text for finished replays
   screenOpts.watchRun = watchSavedRun; // ST-191: WATCH RUN button on the just-saved run's game over
+  screenOpts.victory = _victory; // ST-420 (I450): gold VICTORY title on the campaign game-over screen
   replayHud.update({ visible: st === STATE.REPLAY, meta: replayView ? replayView.data.meta : null, idx: replayView ? replayView.idx : 0, length: replayView ? replayView.player.length : 0, speed: replayView ? replayView.speed : 1, reducedMotion: motionOff }); // ST-190
   hud.render(world, hudOpts);
   if (coarse && st === STATE.PLAYING) { if (pauseBtn.style.display !== 'flex') pauseBtn.style.display = 'flex'; } else if (pauseBtn.style.display !== 'none') pauseBtn.style.display = 'none'; // I71: on-screen pause button (touch, PLAYING only)
@@ -1044,6 +1073,9 @@ function syncVisuals(dt) {
       for (let k = 0; k < nEmit; k++) particles.burst(tx, tz, { count: cnt, palette: CONFIG.fx.palette.engine, speed: CONFIG.fx.engineTrail.speed, life: CONFIG.fx.engineTrail.life, shape: 'radial', ramp: CONFIG.fx.engineTrail.ramp });
     }
   }
+  if (world.warp && st === STATE.PLAYING && !motionOff && fxCount > 0) { // ST-420 (I450): stage warp FX - sim frozen, real-time render-only tunnel at the ship (FX-tier + motion-gated)
+    particles.burst(world.ship.pos.x, world.ship.pos.y, { count: liveSettings.fx === 'high' ? 6 : 3, color: 0x9fd8ff, speed: 2.5, life: 0.35, shape: 'ring' });
+  }
   shieldRing.sync(world, dt, !motionOff); // I62: freeze under reduced motion
   if (st === STATE.PLAYING) vortexFx.update(dt); // ST-059 (frozen while paused)
   particles.sync(dt);
@@ -1091,7 +1123,7 @@ function syncVisuals(dt) {
   bossZoomFov = damp(bossZoomFov, zoomTX, CONFIG.camera.bossZoomDamp, dt);
   camera.position.set(camPos.x, camPos.y, camPos.z);
   camera.lookAt(camLook.x, camLook.y, camLook.z);
-  const targetFov = CONFIG.camera.fovBase + CONFIG.camera.fovSpeed * spdFrac + fovKick.value() + bossZoomFov + (inRun && camMode === 'cockpit' && !motionOff ? CONFIG.camera.cockpitFovSpeed * spdFrac : 0); // ST-082: base + speed + kick; ST-219: boss zoom; ST-416: cockpit seat kick (RM-gated)
+  const targetFov = CONFIG.camera.fovBase + CONFIG.camera.fovSpeed * spdFrac + fovKick.value() + bossZoomFov + (inRun && camMode === 'cockpit' && !motionOff ? CONFIG.camera.cockpitFovSpeed * spdFrac : 0) + (world.warp ? 2.5 : 0); // ST-082: base + speed + kick; ST-219: boss zoom; ST-416: cockpit seat kick (RM-gated); ST-420 (I450): warp FOV push (sim frozen during warp)
   if (Math.abs(targetFov - camera.fov) > 0.01) { // only touch the projection when it actually moves
     camera.fov = damp(camera.fov, targetFov, CONFIG.camera.fovDamp, dt);
     camera.updateProjectionMatrix();

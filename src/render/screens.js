@@ -163,6 +163,33 @@ export function createScreens(root, settings = {}) {
     replaysBtn = replaysBtnEl; // ST-375
   }
   if (dailyRow.children.length) bottomWrap.appendChild(dailyRow);
+
+  const modeRow = document.createElement('div'); // ST-420 (I450): ENDLESS + CAMPAIGN mode entry (Enter still starts endless)
+  modeRow.style.cssText = 'display:flex;gap:14px;align-items:center;';
+  let endlessBtn = null; let campaignBtn = null; // ST-375: locale re-emit targets
+  if (settings.actions && typeof settings.actions.startEndless === 'function') {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'vr-pause-btn';
+    b.textContent = tr('menu.mode_endless');
+    b.style.cssText = 'letter-spacing:3px;';
+    b.setAttribute('aria-label', tr('menu.mode_endless'));
+    b.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.startEndless(); b.blur(); });
+    modeRow.appendChild(b);
+    endlessBtn = b; // ST-375
+  }
+  if (settings.actions && typeof settings.actions.startCampaign === 'function') {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'vr-pause-btn';
+    b.textContent = tr('menu.mode_campaign');
+    b.style.cssText = 'letter-spacing:3px;color:#ffe08a;';
+    b.setAttribute('aria-label', tr('menu.mode_campaign'));
+    b.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.startCampaign(); b.blur(); });
+    modeRow.appendChild(b);
+    campaignBtn = b; // ST-375
+  }
+  if (modeRow.children.length) bottomWrap.appendChild(modeRow);
   const bestRow = document.createElement('div'); // ST-279: best + daily lines share a row
   bestRow.style.cssText = 'display:flex;gap:24px;align-items:baseline;';
   const menuBest = line(bestRow, '', 'font-size:calc(13px * var(--vr-fs,1));opacity:0.85;'); // best score lands in I18 (I44 contrast)
@@ -364,6 +391,8 @@ bottomWrap.append(bestRow, credit);
     if (menuStartLine) menuStartLine.textContent = tr('menu.start_key');
     if (dailyBtn) { dailyBtn.textContent = tr('menu.daily'); dailyBtn.setAttribute('aria-label', tr('menu.daily_aria')); }
     if (replaysBtn) { replaysBtn.textContent = tr('menu.replays'); replaysBtn.setAttribute('aria-label', tr('menu.replays_aria')); }
+    if (endlessBtn) { endlessBtn.textContent = tr('menu.mode_endless'); endlessBtn.setAttribute('aria-label', tr('menu.mode_endless')); } // ST-420 (I450)
+    if (campaignBtn) { campaignBtn.textContent = tr('menu.mode_campaign'); campaignBtn.setAttribute('aria-label', tr('menu.mode_campaign')); } // ST-420 (I450)
     credit.textContent = tr('menu.credit');
     top5Head.textContent = tr('menu.board');
     pauseTitle.textContent = tr('pause.title');
@@ -389,6 +418,7 @@ bottomWrap.append(bestRow, credit);
     [STATE.REPLAY]: null, // ST-190: no full-screen panel; the in-game HUD + replay bar carry the state
   };
 
+  let _overTitleVictory = null; // ST-420 (I450): last applied victory styling (change-cached)
   const cache = {};
   function set(part, node, text) {
     if (cache[part] === text) return;
@@ -412,6 +442,7 @@ bottomWrap.append(bestRow, credit);
     overlay.classList.toggle('vr-reduced', !!opts.reducedMotion); // I65: gate menu animations
     showPanel(state);
     if (state === STATE.GAME_OVER) {
+      if (_overTitleVictory !== !!opts.victory) { _overTitleVictory = !!opts.victory; set('overTitle', overTitle, _overTitleVictory ? tr('over.victory_title') : tr('over.title')); overTitle.style.color = _overTitleVictory ? '#ffe08a' : '#ff6d8a'; } // ST-420 (I450): campaign victory - gold title
       set('finalScore', finalScore, tr('over.score',{score:world.score}));
       if (goPrompt) set('goPrompt', goPrompt, opts.replayMode ? tr('over.restart_replay') : tr('over.restart_key')); // ST-190: a finished replay quits to the menu
       if (watchRunBtn) watchRunBtn.style.display = opts.watchRun ? 'block' : 'none'; // ST-191: only for the just-saved run
