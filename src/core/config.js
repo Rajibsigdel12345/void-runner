@@ -839,5 +839,20 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
       boss: { count: 14, speed: 10, life: 0.80, scaleMin: 1.20, scaleMax: 1.80 }
     }
   },
+  stages: {
+    // ST-419 (E57): linear campaign - 3 stages x 5 waves over the EXISTING deterministic
+    // timeline waves 1..15 (stageForWave = floor((w-1)/5)+1). ENDLESS is default + structurally
+    // untouched (stage system runs only when mode === 'campaign'). Stage-end boss: w5 Monolith,
+    // w10 Splicer, w15 Monolith Prime. Stage 1 theme = identity default (null = no visual change).
+    stages: [
+      { name: 'Outer Drift',  waves: [1, 5],   boss: 'monolith',       theme: null },
+      { name: 'Debris Field', waves: [6, 10],  boss: 'splicer',        theme: { sky: 0x04101a, stars: 0x9fd8ff, floor: 0x0a2530, grid: 0x123c4a, accent: 0x2dd4bf } }, // cool teal (ST-420 finalizes hexes)
+      { name: 'Core Gate',    waves: [11, 15], boss: 'monolith-prime', theme: { sky: 0x0f0705, stars: 0xffd0a0, floor: 0x2a1408, grid: 0x4a2a12, accent: 0xffc94d } }  // warm ember (ST-420 finalizes hexes)
+    ],
+    monolithPrime: { // stage-3 final boss = re-tuned Monolith (kind STAYS 'monolith'; prime=true tag for render ST-420)
+      name: 'Monolith Prime', hp: 88, phase2: 0.6, burstEvery: 3.2, splitCount: 5, rim: 0xffc94d
+    }
+  },
+  campaign: { warpDuration: 1.6 } // deterministic frozen-sim warp timer (no RNG draws)
 };
 

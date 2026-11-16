@@ -1,0 +1,211 @@
+// ST-419 (I449) / E57: campaign stage system - pure-core unit tests.
+// Covers stage mapping, warp determinism, mode gating, stage-end warp, final-boss victory,
+// endless invariance, and warp-determinism integration. No three, no DOM.
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { World } from '../src/core/game.js';
+import { RNG } from '../src/core/rng.js';
+import { CONFIG } from '../src/core/config.js';
+import { STATE } from '../src/core/state.js';
+import {
+  stageForWave, isStageEndWave, isFinalWave, stageIndex0,
+  makeWarp, stepWarp, stageTheme, stageName
+} from '../src/core/stages.js';
+
+const NEUTRAL = { thrust: { x: 0, y: 0 }, aimPoint: null, firing: false };
+const DT = 1 / 60;
+
+/** Park a fresh world in intermission and force-spawn the given wave's boss (campaign). */
+function worldWithCampaignBoss(seed, wave) {
+  const w = new World(new RNG(seed));
+  w.begin('campaign');
+  w.waves.state = 'intermission';
+  w.waves.intermission = 100;
+  w.spawnBossForWave(wave);
+  w.boss.entered = 1; // skip the entrance
+  assert.ok(w.boss, 'boss spawned');
+  return w;
+}
+function worldWithEndlessBoss(seed, wave) {
+  const w = new World(new RNG(seed));
+  w.begin(); // endless
+  w.waves.state = 'intermission';
+  w.waves.intermission = 100;
+  w.spawnBossForWave(wave);
+  w.boss.entered = 1;
+  assert.ok(w.boss, 'boss spawned');
+  return w;
+}
+/** One 1-damage bullet at the boss position, then step. Kills a boss at hp 1. */
+function landOneBullet(w) {
+  const b = w.boss;
+  w.boss.hp = 1;
+  w.weapons.bullets.push({ id: 1, pos: { x: b.pos.x, y: b.pos.y }, vel: { x: 34, y: 0 }, life: 1, radius: 0.18, dead: false });
+  w.step(DT, NEUTRAL);
+}
+
+test('stages: stageForWave maps waves 1..15 to 3 stages', () => {
+  assert.equal(stageForWave(1), 1);
+  assert.equal(stageForWave(5), 1);
+  assert.equal(stageForWave(6), 2);
+  assert.equal(stageForWave(10), 2);
+  assert.equal(stageForWave(11), 3);
+  assert.equal(stageForWave(15), 3);
+});
+
+test('stages: isStageEndWave only at 5/10/15 (within range)', () => {
+  assert.equal(isStageEndWave(5), true);
+  assert.equal(isStageEndWave(10), true);
+  assert.equal(isStageEndWave(15), true);
+  assert.equal(isStageEndWave(1), false);
+  assert.equal(isStageEndWave(6), false);
+  assert.equal(isStageEndWave(11), false);
+  assert.equal(isStageEndWave(20), false);
+});
+
+test('stages: isFinalWave only at 15', () => {
+  assert.equal(isFinalWave(15), true);
+  assert.equal(isFinalWave(5), false);
+  assert.equal(isFinalWave(10), false);
+  assert.equal(isFinalWave(20), false);
+});
+
+test('stages: stageIndex0 clamped 0..2', () => {
+  assert.equal(stageIndex0(1), 0);
+  assert.equal(stageIndex0(6), 1);
+  assert.equal(stageIndex0(11), 2);
+  assert.equal(stageIndex0(16), 2); // clamped to last
+});
+
+test('stages: makeWarp/stepWarp are deterministic (no RNG)', () => {
+  const a = makeWarp(0.5), b = makeWarp(0.5);
+  assert.deepEqual(a, { t: 0, dur: 0.5 });
+  let sa;
+  for (let i = 0; i < 7; i++) { sa = stepWarp(a, 0.1); assert.equal(stepWarp(b, 0.1), sa); assert.equal(a.t, b.t); }
+  assert.equal(sa, 'done'); // 0.1 * 5 = 0.5 >= 0.5 (done at step 5, stays done)
+  const z = makeWarp(0); // zero/invalid duration -> completes immediately
+  assert.equal(stepWarp(z, DT), 'done');
+});
+
+test('stages: endless is default and runs 40s with ZERO stage events', () => {
+  const w = new World(new RNG(1234));
+  w.begin(); // endless
+  assert.equal(w.mode, 'endless');
+  assert.equal(w.currentStage, 1);
+  assert.equal(w.warp, null);
+  assert.equal(w.victory, false);
+  w.ship.invuln = 1e9; // survive to observe a long run
+  let sawStageEvent = false;
+  for (let i = 0; i < 60 * 40; i++) {
+    w.step(DT, NEUTRAL);
+    for (const e of w.drainEvents()) if (e.type === 'warpStart' || e.type === 'stageCleared' || e.type === 'themeSwap') sawStageEvent = true;
+    if (w.game.in(STATE.GAME_OVER)) break;
+  }
+  assert.equal(sawStageEvent, false, 'no stage events in endless');
+  assert.equal(w.victory, false);
+  assert.equal(w.warp, null);
+});
+
+test('stages: mode selection via begin() and setMode()', () => {
+  const w = new World(new RNG(1));
+  w.setMode('campaign'); assert.equal(w.mode, 'campaign');
+  w.setMode('bogus'); assert.equal(w.mode, 'endless');
+  const w2 = new World(new RNG(1));
+  w2.begin('campaign');
+  assert.equal(w2.mode, 'campaign');
+  assert.ok(w2.game.in(STATE.PLAYING));
+  const w3 = new World(new RNG(1));
+  w3.begin('endless');
+  assert.equal(w3.mode, 'endless');
+});
+
+test('stages: killing the stage-1 (wave 5) boss in campaign starts the warp to stage 2', () => {
+  const w = worldWithCampaignBoss(51, 5);
+  assert.equal(w.boss.kind, 'monolith');
+  assert.equal(w.boss.prime, undefined); // not the Prime
+  assert.equal(w.boss.maxHp, 64);
+  landOneBullet(w);
+  assert.ok(w.warp, 'warp active after stage-end boss death');
+  assert.equal(w.warp.nextStage, 2);
+  const evs = w.drainEvents();
+  assert.ok(evs.find(e => e.type === 'warpStart' && e.data.toStage === 2), 'warpStart toStage 2');
+});
+
+test('stages: the warp freezes the sim (game clock frozen) and advances the stage', () => {
+  const w = worldWithCampaignBoss(52, 5);
+  landOneBullet(w);
+  assert.ok(w.warp, 'warp active');
+  w.drainEvents(); // clear warpStart
+  const t0 = w.time;
+  let guard = 0;
+  while (w.warp && guard < 200) { w.step(DT, NEUTRAL); guard++; }
+  assert.equal(w.warp, null, 'warp completed');
+  assert.equal(w.time, t0, 'game clock frozen during warp');
+  assert.equal(w.currentStage, 2, 'advanced to stage 2');
+  const evs = w.drainEvents();
+  assert.ok(evs.find(e => e.type === 'stageCleared' && e.data.stage === 1), 'stageCleared 1');
+  const ts = evs.find(e => e.type === 'themeSwap');
+  assert.ok(ts && ts.data.stage === 2, 'themeSwap stage 2');
+  assert.ok(ts.data.theme, 'stage 2 has a theme');
+});
+
+test('stages: killing the campaign final (wave 15) boss = Monolith Prime -> victory gameover', () => {
+  const w = worldWithCampaignBoss(53, 15);
+  assert.equal(w.boss.kind, 'monolith');
+  assert.equal(w.boss.prime, true);
+  assert.equal(w.boss.maxHp, 88);
+  assert.equal(w.boss.cfg.boss.burst.every, 3.2); // Prime re-tune
+  assert.equal(w.boss.splitCount, 5);
+  assert.equal(w.boss.cfg.boss.phase2.hpFrac, 0.6);
+  assert.equal(w.boss.spawnWave, 15);
+  w.ship.invuln = 1e9; // survive the split
+  landOneBullet(w);
+  assert.ok(w.game.in(STATE.GAME_OVER), 'game over');
+  assert.equal(w.victory, true, 'victory flag');
+  const evs = w.drainEvents();
+  const go = evs.find(e => e.type === 'gameover');
+  assert.ok(go, 'gameover event');
+  assert.equal(go.data.victory, true, 'gameover carries victory:true');
+  assert.equal(w.warp, null, 'no warp after final boss');
+});
+
+test('stages: killing the ENDLESS final (wave 15) boss is NOT a victory, no warp', () => {
+  const w = worldWithEndlessBoss(54, 15);
+  assert.equal(w.boss.prime, undefined);
+  assert.equal(w.boss.maxHp, 76); // min(88, 64+12)
+  assert.equal(w.boss.cfg.boss.burst.every, 4.0);
+  w.ship.invuln = 1e9;
+  landOneBullet(w);
+  assert.ok(w.game.in(STATE.PLAYING), 'still playing (endless continues)');
+  assert.equal(w.victory, false);
+  assert.equal(w.warp, null);
+  const evs = w.drainEvents();
+  assert.ok(!evs.find(e => e.type === 'gameover' && e.data.victory), 'no victory gameover in endless');
+  assert.ok(evs.find(e => e.type === 'bossDeath'), 'boss still died/split normally');
+});
+
+test('stages: warp is deterministic - two same-seed campaign runs reach warp identically', () => {
+  function drive(seed) {
+    const w = worldWithCampaignBoss(seed, 5);
+    const events = [];
+    landOneBullet(w);
+    for (const e of w.drainEvents()) events.push(e.type + ':' + JSON.stringify(e.data));
+    let frames = 0;
+    while (w.warp && frames < 200) { w.step(DT, NEUTRAL); frames++; for (const e of w.drainEvents()) events.push(e.type + ':' + JSON.stringify(e.data)); }
+    return { frames, events, time: w.time, stage: w.currentStage };
+  }
+  const A = drive(777), B = drive(777);
+  assert.equal(A.frames, B.frames);
+  assert.equal(A.time, B.time);
+  assert.equal(A.stage, B.stage);
+  assert.deepEqual(A.events, B.events);
+});
+
+test('stages: stageTheme/stageName resolve rows and handle stage 1 (null theme)', () => {
+  assert.equal(stageTheme(1, CONFIG), null); // stage 1 = identity default
+  assert.equal(stageTheme(2, CONFIG).accent, 0x2dd4bf);
+  assert.equal(stageTheme(3, CONFIG).accent, 0xffc94d);
+  assert.equal(stageName(1, CONFIG), 'Outer Drift');
+  assert.equal(stageName(3, CONFIG), 'Core Gate');
+  assert.equal(stageTheme(9, CONFIG).accent, 0xffc94d); // clamped to last row
+});

@@ -24,6 +24,7 @@ import { PowerUpField } from './powerups.js';
 import { GameState, STATE } from './state.js';
 import { SkillModel } from './skillModel.js'; // ST-304 (I329)
 import { Director } from './director.js'; // ST-304 (I329)
+import { stageForWave, isStageEndWave, isFinalWave, makeWarp, stepWarp, stageTheme } from './stages.js'; // ST-419 (E57)
 
 export class World {
   constructor(rng, cfg = CONFIG) {
@@ -60,6 +61,7 @@ this.gunships = new GunshipField(rng, cfg); // ST-418
     this.game = new GameState();
     this.time = 0;
     this.replayMode = false; // ST-190: watch a saved replay (REPLAY state)
+    this.mode = 'endless'; this.currentStage = 1; this.warp = null; this.victory = false; // ST-419: mode + campaign state (endless default)
     this._wlevel = 1; // ST-122: current weapon level (drives weaponLevelUp events)
   }
 
@@ -98,12 +100,17 @@ this.gunships = new GunshipField(rng, cfg); // ST-418
   weaponSpec() { return this.cfg.weapon.levels[this.weaponLevel() - 1]; }
 
   /** MENU -> PLAYING and start the wave director. No-op unless in MENU. */
-  begin() {
+  begin(mode) {
+    if (typeof mode === 'string') this.setMode(mode); // ST-419: optional mode (default endless)
     if (!this.game.to(STATE.PLAYING)) return false;
     this.replayMode = false; // ST-190: begin() always starts a live run
+    this.currentStage = 1; this.warp = null; this.victory = false; // ST-419: fresh run
     this.waves.start();
     return true;
   }
+
+  /** ST-419: mode select - 'campaign' runs the linear stage system; anything else = endless. */
+  setMode(m) { this.mode = (m === 'campaign') ? 'campaign' : 'endless'; }
   /** ST-190: start watching a replay - MENU -> REPLAY (same wave start as begin()). */
   replayBegin() {
     if (!this.game.to(STATE.REPLAY)) return false;
@@ -156,6 +163,17 @@ this.gunships = new GunshipField(rng, cfg); // ST-418
    */
   step(dt, intent = { thrust: v2(), aimPoint: null, firing: false }) {
     if (!this.simActive) return; // ST-190: PLAYING or REPLAY
+    // ST-419: campaign warp - whole sim (incl. game clock) frozen; only the fixed timer advances (real dt, no RNG).
+    if (this.warp) {
+      const wst = stepWarp(this.warp, dt);
+      if (wst === 'done') {
+        const next = this.warp.nextStage || (this.currentStage + 1);
+        this.warp = null; this.currentStage = next;
+        this.emit('stageCleared', { stage: next - 1 });
+        this.emit('themeSwap', { stage: next, theme: stageTheme(next, this.cfg) });
+      }
+      return;
+    }
     this.time += dt;
     // ST-115: slow-mo power-up - enemy-side systems (rocks, enemy bullets, mines, boss, vortex) run on a scaled dt; the ship (and its weapons) keep full speed.
     const es = this.enemyScale();
@@ -259,9 +277,10 @@ this.gunships.step(edt, this.ship.pos); // ST-418 (ST-115: scaled under slow-mo)
           if (b) this.emit('bossFire', { pos: { x: this.boss.pos.x, y: this.boss.pos.y } });
         }
         if (this.boss.kind === 'monolith') { // ST-143: radial burst is Monolith-only (Splicer uses the spiral)
+          const bb = this.boss.cfg.boss.burst; // ST-419: per-boss cfg (Prime re-tune); no-op for normal bosses
           this.bossBurstTimer -= edt; // ST-134/ST-115: burst cadence slows under slow-mo
           if (this.bossBurstTimer <= 0) {
-            this.bossBurstTimer += this.cfg.boss.burst.every * (this.boss.phase === 2 ? this.cfg.boss.burst.everyMult : 1); // ST-134: enraged cadence
+            this.bossBurstTimer += bb.every * (this.boss.phase === 2 ? bb.everyMult : 1); // ST-419: per-boss burst cadence
             this.bossBurst();
           }
         }
@@ -287,6 +306,11 @@ this.gunships.step(edt, this.ship.pos); // ST-418 (ST-115: scaled under slow-mo)
     this.resolveBulletRocks();
     this.resolveShipRocks();
     this.resolveNearMisses(); // ST-053 (after ship hits: a hit-rock is destroyed, no double award)
+    // ST-419: campaign victory - final boss died and the ship is still alive (still PLAYING).
+    if (this.victory && this.mode === 'campaign' && this.game.in(STATE.PLAYING)) {
+      this.game.to(STATE.GAME_OVER);
+      this.emit('gameover', { score: this.score, victory: true, stage: this.currentStage });
+    }
   }
 
   /** Firing with power-up modifiers (ST-021): RAPID doubles cadence, SPREAD fires a 3-way burst. */
@@ -464,17 +488,25 @@ this.gunships.step(edt, this.ship.pos); // ST-418 (ST-115: scaled under slow-mo)
       pos = v2(Math.cos(a) * R, Math.sin(a) * R);
       tries++;
     } while (Math.hypot(pos.x - this.ship.pos.x, pos.y - this.ship.pos.y) < 10 && tries < 8);
-    if (useSplicer) {
+    if (this.mode === 'campaign' && isFinalWave(wave)) { // ST-419: campaign final boss = Monolith Prime
+      const mp = this.cfg.stages.monolithPrime;
+      const primeCfg = { ...this.cfg, boss: { ...b, splitCount: mp.splitCount,
+        burst: { ...b.burst, every: mp.burstEvery }, phase2: { ...b.phase2, hpFrac: mp.phase2 } } };
+      this.boss = new Monolith(this.rng, primeCfg, pos, mp.hp);
+      this.boss.prime = true; // kind stays 'monolith' -> reuses all Monolith render/sim branches
+      this.bossFireTimer = b.fireEvery;
+    } else if (useSplicer) {
       this.boss = new Splicer(this.rng, this.cfg, pos, splicerHpForWave(this.cfg, wave)); // ST-143: variant 2
       this.bossFireTimer = this.cfg.splicer.aimEvery; // ST-143: fresh Splicer starts a full aimed interval
     } else {
       this.boss = new Monolith(this.rng, this.cfg, pos, bossHpForWave(this.cfg, wave)); // ST-064: endless-arc HP
-      this.bossFireTimer = this.cfg.boss.fireEvery; // ST-056: fresh boss starts a full interval
+      this.bossFireTimer = b.fireEvery; // ST-056: fresh boss starts a full interval
     }
     this._bossPhaseEmitted = false; // ST-133: fresh boss, enrage not yet announced
-    this.bossBurstTimer = this.cfg.boss.burst.every; // ST-134
+    this.bossBurstTimer = this.boss.cfg.boss.burst.every; // ST-134 (ST-419: per-boss cfg; no-op except Prime)
     this.bossBursts = 0; // ST-134
     this.bossSpawnCount++; // ST-143
+    this.boss.spawnWave = wave; // ST-419: tag every boss (drives warp/victory; unused in endless)
     this.emit('bossSpawn', { pos: { x: pos.x, y: pos.y }, wave, hp: this.boss.maxHp, kind: this.boss.kind }); // ST-135/143
   }
 
@@ -525,6 +557,19 @@ this.gunships.step(edt, this.ship.pos); // ST-418 (ST-115: scaled under slow-mo)
     this.emit('bossDeath', { pos: { x: px, y: py }, kind: boss.kind }); // ST-143: variant tag
     this.boss = null;
     this.bossRelease = 1; // ST-241: arm the post-death release decay
+    this._campaignAfterBossDeath(boss); // ST-419: campaign stage-end hook (no-op in endless)
+  }
+
+  /** ST-419: campaign stage-end hook (mode-gated - endless never runs the stage system). */
+  _campaignAfterBossDeath(boss) {
+    if (this.mode !== 'campaign') return;
+    const w = boss.spawnWave || 0;
+    if (isFinalWave(w)) { this.victory = true; } // GAME_OVER fires at end of step()
+    else if (isStageEndWave(w)) {
+      this.warp = makeWarp(this.cfg.campaign.warpDuration);
+      this.warp.nextStage = stageForWave(w + 1);
+      this.emit('warpStart', { toStage: this.warp.nextStage });
+    }
   }
 
   /** ST-055: the boss touching the ship costs a life (same flow as a rock hit). The boss survives. */
@@ -926,6 +971,7 @@ this.gunships.step(edt, this.ship.pos); // ST-418 (ST-115: scaled under slow-mo)
   }
 
   reset() {
+    this.warp = null; this.victory = false; this.currentStage = 1; // ST-419: reset campaign state (mode persists via begin)
     this.ship = new Ship(0, 0, this.cfg);
     this.weapons.clear();
     this.field.clear();
