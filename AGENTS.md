@@ -8,7 +8,7 @@ Void Runner is a 3D arcade space-asteroid shooter built with **three.js** (no bu
 - Platform: desktop web (keyboard), touch-friendly fallback later
 - Engine: three.js (r160+), no bundler (import maps + vendored modules; scripts/serve.mjs + scripts/build.mjs)
 - Test runner: `npm test` (scripts/run-tests.mjs, in-process node:test over tests/*.test.js; pure-logic modules are DOM-free and unit-testable. A bare `node --test tests/` directory run is NOT the runner in this environment)
-- Art assets: five Blender-made low-poly GLBs in assets/ (ship, asteroid L/M/S, boss) loaded at runtime via GLTFLoader (src/render/assetLoader.js) with procedural fallback; everything else stays procedural: canvas textures, WebAudio-synthesized SFX
+- Art assets: seven Blender-made low-poly GLBs in assets/ (ship, asteroid L/M/S, boss, enemy hunter, enemy gunship) loaded at runtime via GLTFLoader (src/render/assetLoader.js) with procedural fallback; everything else stays procedural: canvas textures, WebAudio-synthesized SFX
 
 ## Commands
 
