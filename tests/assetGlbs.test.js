@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief); ship 300 -> 850 at I429 (ST-399 remaster, 818-tri fighter; design/asset-spec-ship-remaster.md)).
-const BUDGETS = { ship: 19000, L: 2100, M: 520, S: 140, comet: 650, boss: 750, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200, chunk: 60, sliver: 50, hunter: 2400, gunship: 2400 }; // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276)
+const BUDGETS = { ship: 19000, L: 3200, M: 950, S: 380, comet: 650, boss: 1500, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200, chunk: 60, sliver: 50, hunter: 2400, gunship: 2400 }; // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276) + I456 (ST-426 rock L/M/S v11 density remaster 2100/520/140 -> 3200/950/380, actual 3000/900/350; boss 750 -> 1500, actual 1425)
 const MAX_FILE_BYTES = 393216; // I440 (ST-410 ship remaster v3) EXPLICIT re-pin: 262144 -> 393216 (ship 190,544 B/3254t -> 270,556 B/12400t; I435 was 100*1024 -> 262144 for v2; max non-ship stays boss 75.26 KB)
 
 function parseGlb(file) {
@@ -181,9 +181,9 @@ test('asteroid L/M/S: naming, poly budgets, radii match CONFIG (+/-5%)', () => {
 // I307 (ST-287): pins re-measured on the bump+crater relief geometry (488/134/134 tris);
 // same ST-283 value-ladder + warm-order R>=G>=B + per-vertex hue-jitter scheme, denser surface.
 const ROCK_FACET = {
-  L: { p10: 0.1676, p50: 0.4645, p90: 0.7867, mean: 0.4765 }, // I441 (ST-411) L v10 remaster re-pin (490t/18,592B -> 1980t/48,740B, SEED 52417, 14 craters + 15 bumps, maxR 2.2000 EXACT): 0.1410/0.4621/0.7785/0.4830 -> 0.1676/0.4645/0.7867/0.4765 (deltas +0.0266/+0.0024/+0.0082/-0.0065, measured file-level; ladder L<M<S holds: L 0.4645 < M 0.6118 < S 0.7144 p50)
-  M: { p10: 0.2915, p50: 0.6118, p90: 0.9056, mean: 0.6044 },
-  S: { p10: 0.4387, p50: 0.7144, p90: 1.0090, mean: 0.7092 },
+  L: { p10: 0.1491, p50: 0.4634, p90: 0.8049, mean: 0.4750 }, // I456 (ST-426) v11 density remaster re-pin (1980t/48,740B -> 3000t/73,224B, SEED 52417, maxR 2.2000 EXACT, per-vertex COLOR_0): 0.1676/0.4645/0.7867/0.4765 -> 0.1491/0.4634/0.8049/0.4750 (measured file-level, 4-dp truncation; ladder L<M<S holds: L 0.4634 < M 0.6134 < S 0.7214 p50)
+  M: { p10: 0.2997, p50: 0.6133, p90: 0.9084, mean: 0.6049 }, // I456 (ST-426): 0.2915/0.6118/0.9056/0.6044 -> 0.2997/0.6133/0.9084/0.6049 (500t -> 900t)
+  S: { p10: 0.3838, p50: 0.7214, p90: 0.9432, mean: 0.6853 }, // I456 (ST-426): 0.4387/0.7144/1.0090/0.7092 -> 0.3838/0.7214/0.9432/0.6853 (134t -> 350t)
 }; // I370 (ST-337 E41 relief re-bake v8): L 18592B/490t 5cr+4bump / M 6336B/134t 4cr+3bump / S 7344B/134t 4cr+3bump - deeper craters (depth x1.4-1.6 vs I343), rim sigma 0.35-0.55, NEW convex bumps, relief-tracking COLOR_0 (relief z-score |v|/r-1 blended 0.7/0.3 with fbm into the tanh value-ladder; wh=0.7 k=2.4 gain=1.75; centers L 0.46 M 0.62 S 0.8137); deltas vs I343 pins: L p10 -0.0773 p50 -0.0236 p90 -0.0171 mean -0.0099 spread +0.0602; M p10 -0.0377 p50 +0.0893 p90 +0.0273 mean +0.0585 spread +0.0650; S p10 +0.0471 p50 +0.0116 p90 +0.0611 mean +0.0285 spread +0.0139; same warm-order R>=G>=B + per-vertex hue-jitter + per-triangle mean-luma convention;
 // I436 (ST-406) M v9 subdivided realism pass re-pin: 134t/122v 4cr+3bump 6336B -> 500t/252v 8cr+10bump 13216B (deterministic .evidence/I436/build_rock_m_v9.py; denser relief, welded file); M 0.2610/0.6347/0.8769/0.6098 -> 0.2915/0.6118/0.9056/0.6044 (deltas +0.0305/-0.0229/+0.0287/-0.0054; measured file-level); ladder L<M<S holds (L p50 0.4621 < M 0.6118 < S 0.7144)
 // I420 (ST-390 E52): B-variant silhouette GLBs (asteroid_{L,M,S}_B.glb) - same topology as A
@@ -191,9 +191,9 @@ const ROCK_FACET = {
 // COLOR_0 with a B-specific mottle seed. Same value ladder (L<M<S), same warm order
 // R>=G>=B, same [0.10,1.20] band + >= 0.50 facet-spread floor.
 const ROCK_FACET_B = {
-  L: { p10: 0.1444, p50: 0.4403, p90: 0.7442, mean: 0.4478 }, // I441 (ST-411) L_B v10 re-pin (I420 recipe on NEW L, same 1980t topology, 48,744B): 0.1598/0.4465/0.7913/0.4622 -> 0.1444/0.4403/0.7442/0.4478 (deltas -0.0154/-0.0062/-0.0471/-0.0144, measured file-level; ladder L<M<S holds: L 0.4403 < M 0.5984 < S 0.7133 p50)
-  M: { p10: 0.2863, p50: 0.5984, p90: 0.9427, mean: 0.6075 },
-  S: { p10: 0.3791, p50: 0.7133, p90: 0.9625, mean: 0.6849 },
+  L: { p10: 0.1372, p50: 0.4462, p90: 0.7490, mean: 0.4476 }, // I456 (ST-426) L_B v11 re-pin (I420 recipe on NEW v11 L, same 3000t topology, 73,228B): 0.1444/0.4403/0.7442/0.4478 -> 0.1372/0.4462/0.7490/0.4476 (measured file-level; ladder L<M<S holds: L 0.4462 < M 0.6072 < S 0.7137 p50)
+  M: { p10: 0.3324, p50: 0.6072, p90: 0.8965, mean: 0.6104 }, // I456 (ST-426): 0.2863/0.5984/0.9427/0.6075 -> 0.3324/0.6072/0.8965/0.6104 (500t -> 900t)
+  S: { p10: 0.4238, p50: 0.7137, p90: 1.0140, mean: 0.7161 }, // I456 (ST-426): 0.3791/0.7133/0.9625/0.6849 -> 0.4238/0.7137/1.0140/0.7161 (134t -> 350t)
 }; // I420 (ST-390): B bake pins, measured file-level through facetLumas below; I436 (ST-406) M_B v9 re-pin: 0.2842/0.6402/0.9153/0.6297 -> 0.2863/0.5984/0.9427/0.6075 (deltas +0.0021/-0.0418/+0.0274/-0.0222; B built from NEW M v9 via I420 recipe, same 500t topology; ladder L<M<S holds: L 0.4465 < M 0.5984 < S 0.7133 p50)
 function facetLumas({ buf, json, binOff }) {
   const p = json.meshes[0].primitives[0];
@@ -273,7 +273,7 @@ test('asteroid L/M/S: COLOR_0 mottling band + warm order + facet luma spread (I2
 // I420 (ST-390 E52): B-variant silhouette GLBs - distinct low-poly silhouette per size,
 // SAME tri count as primary A (zero re-pin), same radii (visual/hitbox parity), VR_ naming.
 test('asteroid L/M/S _B: naming, poly budgets, radii match CONFIG (+/-5%) (I420)', () => {
-  const A_TRIS = { L: 1980, M: 500, S: 134 }; // I441 (ST-411): L 490 -> 1980 (v10 remaster; L_B same topology -> equal-tris assert holds); I436 (ST-406): M 134 -> 500 (v9 subdivided pass; M_B same topology -> equal-tris assert holds)
+  const A_TRIS = { L: 3000, M: 900, S: 350 }; // I441 (ST-411): L 490 -> 1980 (v10 remaster; L_B same topology -> equal-tris assert holds); I436 (ST-406): M 134 -> 500 (v9 subdivided pass; M_B same topology -> equal-tris assert holds); I456 (ST-426): L/M/S v11 density remaster 1980/500/134 -> 3000/900/350 (B built from NEW A via I420 recipe, same topology)
   for (const size of ['L', 'M', 'S']) {
     const { buf, json, binOff } = parseGlb('asteroid_' + size + '_B.glb');
     assert.ok(buf.length < MAX_FILE_BYTES, 'asteroid_' + size + '_B.glb under 100 KB');
@@ -396,7 +396,7 @@ test('boss.glb: naming, poly budget, cross-section and height vs spec (ST-252)',
   assert.ok(s.nodeNames.includes('VR_Boss_Core'), 'VR_Boss_Core node');
   // The material-present export recipe is what writes real COLOR_0 data (I263 incident).
   for (const n of ['VR_Boss_HullMat', 'VR_Boss_CrownMat', 'VR_Boss_CoreMat']) assert.ok(s.matNames.includes(n), n + ' material (export recipe)');
-  assert.ok(s.totalTris <= BUDGETS.boss, 'boss tris ' + s.totalTris + ' <= 750');
+  assert.ok(s.totalTris <= BUDGETS.boss, 'boss tris ' + s.totalTris + ' <= 1500 (I456 re-pin; was 750)');
   // Exactly one COLOR_0 per primitive - never a COLOR_1 (the duplicate-attribute trap).
   for (const m of json.meshes || []) for (const p of m.primitives || []) {
     assert.ok(p.attributes.COLOR_0 !== undefined, m.name + ' primitive has COLOR_0');

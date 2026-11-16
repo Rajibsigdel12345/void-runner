@@ -47,10 +47,10 @@ const totalTris = parsed.reduce((a, p) => a + p.tris, 0);
 
 // I214 budgets (measured baselines in brackets; caps leave headroom for E9 art growth)
 const BUDGET = {
-  totalFilesKB: 1024,  // [976.63 I454 re-measure: I451 901.79 - ship v3 264.21 KB + ship v4 339.05 KB; cap 1024 holds w/ ~47 KB headroom]
-  totalGeoKB: 976,     // [933.47 I454 re-measure: I451 859.11 + ship v4 delta (v3 12400t -> v4 14276t indexed, per-vertex COLOR_0 on hull+wings); I454 (ST-424) EXPLICIT re-pin: 896 -> 976, cap holds w/ ~4% headroom]
+  totalFilesKB: 1024,  // [I456 re-measure 1016.33: I454 976.63 - old 7 rock GLBs 209.26 KB + new 7 GLBs 249.01 KB; cap 1024 holds w/ 7.67 KB headroom]
+  totalGeoKB: 976,     // [I456 re-measure 973.17: I454 933.47 + 7 remaster GLBs geo delta +39.70 KB (old 199.69 -> new 239.38 KB, per-vertex COLOR_0 + density); cap 976 HOLDS w/ 2.83 KB headroom]
   perFileKB: 400,      // [max 339.05 - ship.glb I454 remaster v4 (14276t, 347,184 B); I440 max was 264.21 v3]
-  totalTris: 26000,    // [I454: 24732 = I451 22856 - ship v3 12400t + ship v4 14276t; cap 26000 holds w/ 1268 tri headroom]
+  totalTris: 30000,    // [I456 (ST-426) EXPLICIT re-pin: 26000 -> 30000, measured 28779 (I454 24732 - rock L/M/S + B v10 2x2614t - boss 650t + rock v11 2x4250t + boss 1425t); cap 30000 holds w/ 1221 tri headroom]
   perFileMats: 3,      // [max 3 - ship body/wing/cockpit]
 };
 
