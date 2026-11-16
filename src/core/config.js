@@ -671,8 +671,8 @@ export const CONFIG = {
       bomb:     [0xfff3b0, 0xffd27a, 0xffffff],  // bright blast
       pickup: { rapid: 0xffc300, spread: 0xff9f43, shield: 0x53d8ff, bomb: 0xff5252, magnet: 0x69f0ae, overdrive: 0xff4dd8, slowmo: 0x9fe8ff }, // ST-177: per-type collect sparkle (matches powerupMesh orb colors); I308/ST-288: rapid synced 0xffe066 -> 0xffc300 to the I288/ST-272 mesh orb (collect-sparkle was flashing the pre-I288 yellow)
       power:    [0xff5ad8, 0xff8ae8, 0xffb6f2],   // magenta overdrive
-      bulletLevel: [0x7fe4ff, 0x8affc0, 0xffd27a],   // ST-123 weapon L1/L2/L3; ST-248: L1 = cockpit-cyan accent (0x59d8ff family, brighter for the bullet read)
-      bulletLevelOverdrive: [0xd2f5ff, 0xd6ffec, 0xfff1e1], // ST-248: overdrive heat shift (white-hot, hue-preserving per level)
+      bulletLevel: [0x7fe4ff, 0x8affc0, 0xd6f6ff],   // ST-123 weapon L1/L2/L3; ST-248: L1 = cockpit-cyan accent (0x59d8ff family, brighter for the bullet read); I460/ST-429 A1: L3 amber 0xffd27a -> ice-white 0xd6f6ff (hue ~205 deg vs threat red ~9 deg = ~164 deg separation; restores the cool-vs-warm bullet contract at max weapon - E59 research finding)
+      bulletLevelOverdrive: [0xd2f5ff, 0xd6ffec, 0xe8fbff], // ST-248: overdrive heat shift (white-hot, hue-preserving per level); I460/ST-429 A1: L3 0xfff1e1 -> 0xe8fbff (B-dominant, brighter than base 0xd6f6ff - ST-248 invariants hold)
       killRing: 0xffa44a,                    // ST-248: plain-kill shockwave ring (amber; was implicit palette.rock[0])
       engine:   [0xffa860, 0xffd9a0, 0x9fd8ff],  // I213 warm core -> cool tail (matches the flame)
       belt:     [0x9fb4d0, 0x7c93b8, 0xcfe0f5],    // ST-139 cool steel - indestructible belt clink
@@ -682,6 +682,28 @@ export const CONFIG = {
       gunship:  [0xffa14d, 0xffc98a, 0xfff0d0]     // ST-418 gunmetal-ember (GUNSHIP kill - payload-amber family)
     },
     enemyBullet: { base: 0x5a1410, emissive: 0xff4a2a, emissiveIntensity: 1.2 }, // ST-248: hot red-orange threat bolt (data-driven; values unchanged)
+    // I460/ST-429 A2: shared fresnel silhouette rim on enemy hulls (the I278
+    // fragment-only pattern proven on the I257 rocks + I272 boss; helper in
+    // src/render/enemyRim.js). Per-role DARK identity accent: peak rim luma
+    // (strength * luma(color)) stays <= 29 - far under the 183.6 bloom band,
+    // so the rim reads but never blooms. Static (no per-frame animation) so it
+    // is reduced-motion safe by construction.
+    enemyRim: {
+      power: 5.0, // fresnel falloff exponent (I278 sign-fix convention)
+      roles: {
+        hunter:  { color: 0x8a3a28, strength: 0.30 }, // dark rust-red (threat family)
+        gunship: { color: 0x9a6a2e, strength: 0.26 }, // dark amber (bay family)
+        warden:  { color: 0x2e6a66, strength: 0.24 }, // steel-teal (armor family)
+        stinger: { color: 0x2e6a7a, strength: 0.24 }, // steel-cyan (lock family)
+        drone:   { color: 0x4a6a7a, strength: 0.22 }, // steel-cyan
+        flyer:   { color: 0x8a3a6a, strength: 0.24 }, // mauve-magenta (dome family)
+        mine:    { color: 0x8a4a3a, strength: 0.24 }  // rust
+      }
+    },
+    // I460/ST-429 A3: shader-stable ship damage flash - a pre-created unlit
+    // additive shell on the ship group (NEVER a per-hit light; no shader
+    // recompilation at contact). Opacity-only envelope, <= 120 ms.
+    shipHitFlash: { dur: 0.12, opacity: 0.45, color: 0xffe0d0 },
   },
 
   // I366/ST-334: starfield correlating with the v6 skybox knots (assets/

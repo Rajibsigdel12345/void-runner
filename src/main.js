@@ -942,7 +942,7 @@ else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, 
     if (e.type === 'vortexTelegraph') { vortexFx.onTelegraph(e.data.pos); } // ST-059 (state always advances; particles above are motion-gated)
     else if (e.type === 'vortexStart') { vortexFx.onStart(e.data.pos); }
     else if (e.type === 'vortexEnd') { vortexFx.onEnd(); }
-    else if (e.type === 'hit') { _deathWarpT = CONFIG.music.warp.death.dur; if (motionOff) { _rmHitT = 0; _rmHitSev = e.data.lives <= 1 ? 1 : 0.6; } } // I174: death-slow-mo audio window (state-agnostic like the vortex chain - it is audio, not motion); ST-176: reduced-motion damage vignette arm (steady-then-fade, mirrors the I85 juice severities; the juice spike + flash stay motion-gated)
+    else if (e.type === 'hit') { _deathWarpT = CONFIG.music.warp.death.dur; if (motionOff) { _rmHitT = 0; _rmHitSev = e.data.lives <= 1 ? 1 : 0.6; } else { shipMesh.flash(simT); } } // I460/ST-429 A3: shader-stable ship damage flash (RM-gated: the ST-176 vignette is the reduced-motion damage read) // I174: death-slow-mo audio window (state-agnostic like the vortex chain - it is audio, not motion); ST-176: reduced-motion damage vignette arm (steady-then-fade, mirrors the I85 juice severities; the juice spike + flash stay motion-gated)
     if (e.type === 'shieldPop') {
       shieldRing.pulse();
     } else if (e.type === 'gameover') {

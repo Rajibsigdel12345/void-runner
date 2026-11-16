@@ -7,6 +7,7 @@
 // useGLB (a /core/i node = glow slot, /fin/i = fin-dark slot, every other mesh = hull).
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
+import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
 
 function bakeHullGeometry() {
   // flat swept manta dart: octahedron squashed in Y (low profile), stretched forward
@@ -110,6 +111,9 @@ export function createHunterRenderer(scene) {
   // ST-421 hook: swap the manta geometry to the Blender hunter GLB. Matches a
   // /core/i node for the glow slot and a /fin/i node for the fin-dark slot;
   // every other mesh feeds the hull. In-code materials kept (wardenMesh, I220).
+  // I460/ST-429 A2: hull silhouette rim (shared I278 pattern; per-role color in CONFIG.enemyRim).
+  applyEnemyRim(hullMat, 'hunter');
+
   function useGLB(obj) {
     let hull = null, fin = null, core = null;
     obj.traverse((o) => {

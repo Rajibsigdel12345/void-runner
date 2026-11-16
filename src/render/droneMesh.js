@@ -1,6 +1,7 @@
 // ST-117: homing drone rendering - pooled angular seeker darts, shared geometry/material, no per-frame allocs.
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
+import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
 
 function bakeDroneGeometry() {
   // angular seeker dart: an octahedron stretched along +X; spins about Y in sync()
@@ -45,6 +46,9 @@ export function createDroneRenderer(scene) {
   // I211: swap the pooled dart geometry to the Blender drone GLB (first mesh).
   // Pool meshes captured geo at creation, so re-point every pooled mesh on swap
   // (same pattern as asteroidRenderer.setShieldGLB, I210).
+  // I460/ST-429 A2: pooled dart silhouette rim (shared I278 pattern; per-role color in CONFIG.enemyRim).
+  applyEnemyRim(mat, 'drone');
+
   function useGLB(obj) {
     let g = null;
     obj.traverse((o) => {

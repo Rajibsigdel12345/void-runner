@@ -8,6 +8,7 @@
 // useGLB (VR_Flyer_Body naming; a /dome|core/i node takes the emissive slot).
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
+import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
 
 function bakeHullGeometry() {
   // elongated hexa-disc: 6-segment cylinder flattened, stretched along +X (forward)
@@ -83,6 +84,9 @@ export function createFlyerRenderer(scene) {
   // ST-234 hook: swap the saucer geometry to the Blender flyer GLB. Matches a
   // /dome|core/i node for the emissive slot (falls back to the second mesh);
   // every other mesh feeds the hull. In-code materials kept (wardenMesh, I220).
+  // I460/ST-429 A2: hull silhouette rim (shared I278 pattern; per-role color in CONFIG.enemyRim).
+  applyEnemyRim(hullMat, 'flyer');
+
   function useGLB(obj) {
     let hull = null, dome = null;
     obj.traverse((o) => {

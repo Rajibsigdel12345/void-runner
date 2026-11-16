@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { RNG } from '../core/rng.js';
 import { CONFIG } from '../core/config.js';
+import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
 
 function bakeMineGeometry() {
   // spiky shell: displace each icosahedron vertex outward on a seeded spike pattern
@@ -27,6 +28,9 @@ export function createMineRenderer(scene) {
     color: 0x3a2430, roughness: 0.6, metalness: 0.4, flatShading: true,
     emissive: 0xff2a2a, emissiveIntensity: 0.6,
   });
+  // I460/ST-429 A2: pooled mine silhouette rim (shared I278 pattern; per-role color in CONFIG.enemyRim).
+  applyEnemyRim(mat, 'mine');
+
   const pool = [];
   for (let i = 0; i < max; i++) {
     const m = new THREE.Mesh(geo, mat);

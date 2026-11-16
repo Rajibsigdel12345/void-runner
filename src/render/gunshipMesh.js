@@ -6,6 +6,7 @@
 // = nacelle slots, every other mesh = hull).
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
+import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
 
 function bakeHullGeometry() {
   const r = CONFIG.gunship.radius;
@@ -97,6 +98,9 @@ export function createGunshipRenderer(scene) {
   // ST-421 hook: swap the bomber geometry to the Blender gunship GLB. Matches a
   // /bay|core/i node for the glow slot and a /nacelle|engine/i node for the
   // nacelle slots; every other mesh feeds the hull. In-code materials kept (I220).
+  // I460/ST-429 A2: hull silhouette rim (shared I278 pattern; per-role color in CONFIG.enemyRim).
+  applyEnemyRim(hullMat, 'gunship');
+
   function useGLB(obj) {
     let hull = null, nacelle = null, bay = null;
     obj.traverse((o) => {

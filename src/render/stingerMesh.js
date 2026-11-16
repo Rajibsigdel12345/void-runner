@@ -6,6 +6,7 @@
 // (VR_Stinger_Body / VR_Stinger_Core node names, in-code materials kept).
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
+import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
 
 function bakeBodyGeometry() {
   // needle dart: octahedron stretched hard along +X (forward)
@@ -96,6 +97,9 @@ export function createStingerRenderer(scene) {
   // ST-230 hook: swap the dart geometry to the Blender stinger GLB. Matches the
   // VR_Stinger_Core node for the glow (falls back to the second mesh); every other
   // mesh feeds the body. In-code materials are kept (same pattern as wardenMesh, I220).
+  // I460/ST-429 A2: body silhouette rim (shared I278 pattern; per-role color in CONFIG.enemyRim).
+  applyEnemyRim(bodyMat, 'stinger');
+
   function useGLB(obj) {
     let body = null, core = null;
     obj.traverse((o) => {

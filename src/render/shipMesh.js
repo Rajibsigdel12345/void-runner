@@ -143,6 +143,26 @@ shipBody.add(mouth);
   glowSprite.visible = false;
   group.add(glowSprite);
 
+  // I460/ST-429 A3: shader-stable damage flash - a pre-created unlit additive
+  // shell (NEVER a per-hit light; no shader recompilation at contact). Icosahedron
+  // detail 1 = 80 tris; visible only during the <= 120 ms opacity envelope, so the
+  // idle draw-call count is unchanged. Time-anchored (t0/t1 in sim seconds) so a
+  // restart (t reset) can never leave it stuck on.
+  const HITF = CONFIG.fx.shipHitFlash;
+  const flashShell = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(1, 1),
+    new THREE.MeshBasicMaterial({ color: HITF.color, transparent: true, opacity: 0,
+      blending: THREE.AdditiveBlending, depthWrite: false })
+  );
+  flashShell.scale.set(1.9, 1.0, 1.5); // v4 airship envelope (2.6u wide / 0.9u high / 4.0u wingspan)
+  flashShell.visible = false;
+  flashShell.frustumCulled = false; // rides the ship - no pop-in near the camera
+  group.add(flashShell);
+  let _fT0 = -1, _fT1 = -1;
+  let flashMatOpacity = 0;
+  /** flash(t): arm the damage-flash envelope starting at sim time t (no-op while it decays - the envelope just restarts). */
+  function flash(t) { _fT0 = t; _fT1 = t + HITF.dur; }
+
   group.position.y = 0.4; // hover just above the arena plane
 
   // I104: useGLB(obj) - swap the procedural body for the Blender ship.
@@ -189,7 +209,16 @@ shipBody.add(mouth);
     // Invuln blink (ST-025): ~6 Hz toggle; disabled under reduced motion.
     group.visible = !(motionOn && ship.isInvulnerable && Math.floor(t * 12) % 2 === 1);
     setFlame(thrustMag || 0, t, motionOn); // ST-063: engine flame
+  // I460/ST-429 A3: damage-flash envelope (opacity only; RM-gated at fire in main.js).
+  if (motionOn && t >= _fT0 && t < _fT1) {
+    flashShell.visible = true;
+    flashMatOpacity = HITF.opacity * ((_fT1 - t) / HITF.dur);
+    flashShell.material.opacity = flashMatOpacity;
+  } else if (flashShell.visible) {
+    flashShell.visible = false;
+    flashShell.material.opacity = 0;
+  }
   }
 
-  return { group, sync, flame: flameMid, flameCore, flameGlow: glowSprite, useGLB };
+  return { group, sync, flash, flame: flameMid, flameCore, flameGlow: glowSprite, useGLB };
 }

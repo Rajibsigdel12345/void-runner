@@ -6,6 +6,7 @@
 import * as THREE from 'three';
 import { RNG } from '../core/rng.js';
 import { CONFIG } from '../core/config.js';
+import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
 
 function bakeDroneGeometry() {
   const r = CONFIG.warden.radius;
@@ -107,6 +108,11 @@ export function createWardenMesh(scene) {
   // node name: VR_Warden_Hull -> hull, VR_Warden_Armor -> armor plate (the existing
   // sync() drives the armor retract/glow unchanged). In-code materials are kept, so
   // the GLB's own materials are ignored.
+  // I460/ST-429 A2: silhouette rim on hull + armor (shared I278 pattern; the armor
+  // emissive rewrite in sync() is additive to outgoingLight and coexists with the rim).
+  applyEnemyRim(hullMat, 'warden');
+  applyEnemyRim(armorMat, 'warden');
+
   function useGLB(obj) {
     if (!obj) return;
     let hullG = null;
