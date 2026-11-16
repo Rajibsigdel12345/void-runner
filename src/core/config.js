@@ -404,6 +404,10 @@ export const CONFIG = {
       fin:  { color: 0x4a2a22 },   // fin undersides (dark)
       accent: 0xff4a2a,            // threat-red telegraph (shared imminent-damage semantics, rule 4)
     },
+    renderLumaGain: 3.0, // I451 (ST-421) rendered-luma audit (render451 Part E, I381/I383 method): ACES +
+                         // exposure 1.15 + grade gamma 1.18 renders the palette body at ~0.45x its sRGB luma
+                         // (hull p50 46 vs the 85-120 band); the render layer scales the hull material color by
+                         // this gain to land the ladder (rendered p50 ~102). Palette hex stays the design value.
     radius: 0.8,        // stinger class
     orbitSpeed: 2.6,    // u/s (quick - a stalker)
     orbitTurn: 1.7,     // rad/s (tight turn - can swing to the rear)
@@ -432,6 +436,10 @@ export const CONFIG = {
       nacelle: { color: 0x232a33 }, // engine nacelles (dark)
       bay: 0xff9a3d,                // payload-bay glow (warm orange, rule 4 payload semantics)
     },
+    renderLumaGain: 4.1, // I451 (ST-421) rendered-luma audit (render451 Part E, I381/I383 method): ACES +
+                         // exposure 1.15 + grade gamma 1.18 renders the palette body at ~0.31x its sRGB luma
+                         // (hull p50 20 vs the 45-85 band); the render layer scales the hull material color by
+                         // this gain to land the ladder (rendered p50 ~65). Palette hex stays the design value.
     radius: 1.6,        // warden class (strictly below the Monolith 3.4)
     enterSpeed: 3.0,    // u/s (slow - a bomber)
     holdRadiusMin: 0.35,// rng fraction of the arena for the hold point (min)

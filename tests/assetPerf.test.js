@@ -47,15 +47,15 @@ const totalTris = parsed.reduce((a, p) => a + p.tris, 0);
 
 // I214 budgets (measured baselines in brackets; caps leave headroom for E9 art growth)
 const BUDGET = {
-  totalFilesKB: 768,   // [591.27 I441 re-measure: 24 GLBs, rock L/L_B v10 18.16/18.16 -> 47.60/47.60 KB + comet 3.72 -> 15.59 KB (I440 was 516.98; ship 264.21 KB unchanged); cap 768 holds]
-  totalGeoKB: 700,     // [554.94 I441 re-measure: 24 GLBs (I440 was 480.66; I435 388.09; I430 264.43); cap 700 holds]
+  totalFilesKB: 1024,  // [901.79 I451 re-measure: 26 GLBs = I441 591.27 + enemy_hunter 136.48 KB + enemy_gunship 174.04 KB (I451/ST-421; scope-check-E57 "unless measured higher" clause); cap 1024 holds w/ 122 KB headroom]
+  totalGeoKB: 896,     // [859.11 I451 re-measure: 26 GLBs = I441 554.94 + I451 enemy GLBs 304.17 KB (per-face corner bakes de-index the hulls: POSITION = 3x tris + FLOAT COLOR_0; scope-check-E57 "unless measured higher" clause); cap 896 holds]
   perFileKB: 400,      // [max 264.21 - ship.glb I440 remaster v3 unchanged (I441 rock L 47.60 KB is second); I435 max was 186.08 v2; I430 max was boss 75.26]
-  totalTris: 20000,    // [I441: 19736 (I440 16262 + 2x(1980-490) rock L/L_B + (590-96) comet); cap 20000 holds w/ 264 tri headroom]
+  totalTris: 26000,    // [I451: 22856 = I441 19736 + hunter 1432 + gunship 1688 (I451/ST-421); cap 26000 holds w/ 3144 tri headroom]
   perFileMats: 3,      // [max 3 - ship body/wing/cockpit]
 };
 
-test('exactly 24 GLB assets (23 models + arena ring) (I420)', () => {
-  assert.equal(glbs.length, 24); // I220: +warden, I235: +stinger, I240: +flyer, I344: +comet, I410: +debris chunk+sliver, I420: +B-variant rocks L/M/S (21 -> 24)
+test('exactly 26 GLB assets (24 models + arena ring) (I451)', () => {
+  assert.equal(glbs.length, 26); // I220: +warden, I235: +stinger, I240: +flyer, I344: +comet, I410: +debris chunk+sliver, I420: +B-variant rocks L/M/S (21 -> 24), I451: +enemy hunter+gunship (24 -> 26)
 });
 
 test('total GLB file size within budget', () => {
@@ -91,5 +91,5 @@ test('every GLB has POSITION + NORMAL (render layer assumes both)', () => {
 
 test('COLOR_0 only on the mottled rocks + boss + ship + enemy bodies + pickup emblems + warden hull/armor + arena ring + debris shards (in-code materials read it; others must not carry it)', () => { // I282: + enemy value bakes; I288/ST-272: + pickup emblem value bakes; I289/ST-273: + warden hull/armor value bakes; I299/ST-281: + arena ring value bake
   const withColor = parsed.filter((p) => p.attrs.has('COLOR_0')).map((p) => p.file).sort();
-  assert.deepEqual(withColor, ['arena_ring.glb', 'asteroid_L.glb', 'asteroid_L_B.glb', 'asteroid_M.glb', 'asteroid_M_B.glb', 'asteroid_S.glb', 'asteroid_S_B.glb', 'asteroid_comet.glb', 'boss.glb', 'debris_chunk.glb', 'debris_sliver.glb', 'drone.glb', 'flyer.glb', 'powerup_bomb.glb', 'powerup_magnet.glb', 'powerup_overdrive.glb', 'powerup_rapid.glb', 'powerup_shield.glb', 'powerup_slowmo.glb', 'powerup_spread.glb', 'ship.glb', 'stinger.glb', 'warden.glb']); // I299/ST-281: + arena ring value bake (16 -> 17); I289/ST-273 warden (stinger core + flyer dome stay emissive-driven); I410: + debris chunk/sliver (18 -> 20); I420: + B-variant rocks L/M/S (20 -> 23)
+  assert.deepEqual(withColor, ['arena_ring.glb', 'asteroid_L.glb', 'asteroid_L_B.glb', 'asteroid_M.glb', 'asteroid_M_B.glb', 'asteroid_S.glb', 'asteroid_S_B.glb', 'asteroid_comet.glb', 'boss.glb', 'debris_chunk.glb', 'debris_sliver.glb', 'drone.glb', 'enemy_gunship.glb', 'enemy_hunter.glb', 'flyer.glb', 'powerup_bomb.glb', 'powerup_magnet.glb', 'powerup_overdrive.glb', 'powerup_rapid.glb', 'powerup_shield.glb', 'powerup_slowmo.glb', 'powerup_spread.glb', 'ship.glb', 'stinger.glb', 'warden.glb']); // I299/ST-281: + arena ring value bake (16 -> 17); I289/ST-273 warden (stinger core + flyer dome stay emissive-driven); I410: + debris chunk/sliver (18 -> 20); I420: + B-variant rocks L/M/S (20 -> 23); I451/ST-421: + enemy hunter/gunship hull bakes (23 -> 25)
 });

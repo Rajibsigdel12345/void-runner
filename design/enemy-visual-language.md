@@ -33,7 +33,7 @@ Color semantics already in use (config.js comments + bossMesh.js + I252/I381/I38
 - Gold family (0xfff0a0 / 0xffe070 / 0xffc94d) = golden rock pickup (treasure language, ST-249).
 
 ## 2. System rules
-1. One hue per role. Two fleet roles must not collide: luma within 10 OR hue within 40 deg is a collision (rendered-luma re-audit required, I381/I383 method).
+1. One hue per role. Two fleet roles must not collide: luma within 10 AND hue within 40 deg is a collision - clearance on EITHER axis suffices (rendered-luma re-audit required, I381/I383 method). [I451 audit: this line originally read "OR", which contradicted the section 3.1/3.2 pre-approvals below; corrected to the doc's intent. Exact hues from the CONFIG palettes: stinger 258.6 / drone 203.1 / flyer 314.3 / hunter 14.0 / gunship 214.3 - all 7 fleet pairs clear the AND rule; hunter/flyer is the documented approved near-band pair (luma delta 7, hue 59.7 deg).]
 2. Bold silhouettes: each role identifiable from outline alone at 96 px rendered size (~30 u chase-camera distance). The BACK view must read as well as the front (HUNTER requirement - it attacks from behind).
 3. Material budget <= 3 per enemy (hull / secondary-dark / emissive-accent). Fleet maximum today is 2 (stinger/flyer).
 4. Accent glow encodes function, not decoration:
@@ -86,6 +86,7 @@ Balance numbers (HP, speed, fire rate, damage) belong to ST-418 CONFIG additions
 5. GLB contract (ST-421): tris <= 2,400; materials <= 3; VR_ naming; single root; Y-up; neutral COLOR_0; exactly-24-GLBs -> 26 re-pin; assetPerf totalTris 20,000 -> 26,000 re-pin (both pre-registered in scope-check-E57.md).
 6. A/B gate (ST-421): clay + in-game tint, old procedural vs new GLB - roll back to procedural if not clearly better.
 7. Fallback: remove a GLB -> procedural mesh renders, no crash, console clean.
+- I451 audit note (rendered luma): the frozen ACES / exposure 1.15 / grade pipeline renders raw palette hexes at ~0.45x (hunter) / ~0.31x (gunship) of sRGB, so the body palettes reach their ladder bands at render time via CONFIG.hunter/gunship.renderLumaGain (3.0 / 4.1, hue-preserving gain on hull color only) - measured in-game p50 sRGB luma: hunter 103.0 (band 85-120) / gunship 65.1 (band 45-85). The palette hexes remain the design values, unchanged.
 
 ## 7. Risks
 - Violet crowding: stinger + Monolith already own purple - HUNTER rust must stay out of the band (rule 1 gate).

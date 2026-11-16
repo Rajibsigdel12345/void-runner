@@ -39,12 +39,13 @@ export function createHunterRenderer(scene) {
   let hullGeo = bakeHullGeometry(); // reassigned by useGLB when the hunter GLB resolves
   let finGeo = bakeFinGeometry();
   let coreGeo = bakeCoreGeometry();
+  const hullColor = new THREE.Color(CONFIG.hunter.palette.body.color).multiplyScalar(CONFIG.hunter.renderLumaGain); // I451: rendered-luma audit (render451 Part E) - the palette renders ~0.45x under ACES/exposure/grade; the gain lands the ladder (p50 ~102)
   const hullMat = new THREE.MeshStandardMaterial({
-    color: CONFIG.hunter.palette.body.color, roughness: 0.55, metalness: 0.5, flatShading: true, vertexColors: true,
+    color: hullColor, roughness: 0.6, metalness: 0.2, flatShading: true, vertexColors: true, // I451: painted rust hull (metalness 0.5 rendered ~3x darker than the palette luma under the scene light; renderLumaGain restores the design band)
     emissive: 0x2a120c, emissiveIntensity: 0.25,
   });
   const finMat = new THREE.MeshStandardMaterial({
-    color: CONFIG.hunter.palette.fin.color, roughness: 0.7, metalness: 0.35, flatShading: true,
+    color: CONFIG.hunter.palette.fin.color, roughness: 0.75, metalness: 0.15, flatShading: true, // I451: painted fin (same metalness fix as hull)
   });
   const coreMats = [];
   for (let i = 0; i < POOL; i++) {
