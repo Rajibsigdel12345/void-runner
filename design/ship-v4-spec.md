@@ -229,3 +229,30 @@ Y-up): span 4.0 / height 0.90 / len 2.74. Nacelle mouth z=-0.94 (spec target
 -0.88; 0.06u past - still 0.14u clear of the in-code flame apex at z=-0.80).
 Bake percentiles (the test per-tri luma method): hull 0.6148 / 0.9402 /
 1.3888; wings 0.5346 / 0.5854 / 1.4654 (both spreads >= 0.35 floor).
+
+## I455 presence notes (measured NDC + no-tighten decision)
+
+Presence pass at I455 (zero src). The 1.55x authored scale was tested against
+the real chase framing (camera (0,9.4,13) look (0,0.4,2.6) - the in-game chase
+camera with the ship at (0,0.4,0); camHeight 9 / camBack 13 / lookAhead 2.6),
+isolated scene (ship + lights + stars), fx off, 1280x720, bg-subtracted
+|dLum|>12 (probe455.mjs):
+
+- Silhouette: 4,504 px (0.49% of frame), bbox 109x95 px at (574,249)..(682,343).
+- ndcW 0.1703 (8.5% of screen width, bright core) / ndcH 0.2639 (13.2% of
+  screen height). The dark wings sit below the dLum threshold against the
+  starfield; the geometric span width is ~0.25 NDC (12.3%) including them.
+- Ship frame: 14 calls / 14,362 tris; console 0/0.
+
+Decision: NO CHASE tighten (camBack 13 -> 11 / camHeight 9 -> 8). The 1.55x
+scale reads present (mid-arcade presence, consistent with a wide arena where
+incoming rocks must stay visible); the tighten would gain only +18% apparent
+size (camera-ship distance 15.8u -> 13.4u) while shrinking forward
+visibility. Fallback if the user still wants it: 2-line config change +
+cameraModel test re-pin (I445/I446 camera work is untouched).
+
+Threadability gate re-computed at current config (radius 0.9 / spiralEvery 0.6
+-> gap 4.2u / I144 slope-1 effective = r + 1.34): r=0.9 -> 1.875x >= 1.8 PASS;
+r=1.0 -> 1.795x FAIL; r=1.05 -> 1.757x FAIL. Radius KEPT at 0.9, zero config
+change. spawnMinPlayerDist 8 kept (worst-case visual clearance 8 - 2.0 - 2.2 =
+3.8u vs 4.55u pre-v4).
