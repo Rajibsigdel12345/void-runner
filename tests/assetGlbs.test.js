@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief); ship 300 -> 850 at I429 (ST-399 remaster, 818-tri fighter; design/asset-spec-ship-remaster.md)).
-const BUDGETS = { ship: 14000, L: 500, M: 520, S: 140, comet: 200, boss: 750, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200, chunk: 60, sliver: 50 }; // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400)
+const BUDGETS = { ship: 14000, L: 2100, M: 520, S: 140, comet: 650, boss: 750, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200, chunk: 60, sliver: 50 }; // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590)
 const MAX_FILE_BYTES = 393216; // I440 (ST-410 ship remaster v3) EXPLICIT re-pin: 262144 -> 393216 (ship 190,544 B/3254t -> 270,556 B/12400t; I435 was 100*1024 -> 262144 for v2; max non-ship stays boss 75.26 KB)
 
 function parseGlb(file) {
@@ -181,7 +181,7 @@ test('asteroid L/M/S: naming, poly budgets, radii match CONFIG (+/-5%)', () => {
 // I307 (ST-287): pins re-measured on the bump+crater relief geometry (488/134/134 tris);
 // same ST-283 value-ladder + warm-order R>=G>=B + per-vertex hue-jitter scheme, denser surface.
 const ROCK_FACET = {
-  L: { p10: 0.1410, p50: 0.4621, p90: 0.7785, mean: 0.4830 },
+  L: { p10: 0.1676, p50: 0.4645, p90: 0.7867, mean: 0.4765 }, // I441 (ST-411) L v10 remaster re-pin (490t/18,592B -> 1980t/48,740B, SEED 52417, 14 craters + 15 bumps, maxR 2.2000 EXACT): 0.1410/0.4621/0.7785/0.4830 -> 0.1676/0.4645/0.7867/0.4765 (deltas +0.0266/+0.0024/+0.0082/-0.0065, measured file-level; ladder L<M<S holds: L 0.4645 < M 0.6118 < S 0.7144 p50)
   M: { p10: 0.2915, p50: 0.6118, p90: 0.9056, mean: 0.6044 },
   S: { p10: 0.4387, p50: 0.7144, p90: 1.0090, mean: 0.7092 },
 }; // I370 (ST-337 E41 relief re-bake v8): L 18592B/490t 5cr+4bump / M 6336B/134t 4cr+3bump / S 7344B/134t 4cr+3bump - deeper craters (depth x1.4-1.6 vs I343), rim sigma 0.35-0.55, NEW convex bumps, relief-tracking COLOR_0 (relief z-score |v|/r-1 blended 0.7/0.3 with fbm into the tanh value-ladder; wh=0.7 k=2.4 gain=1.75; centers L 0.46 M 0.62 S 0.8137); deltas vs I343 pins: L p10 -0.0773 p50 -0.0236 p90 -0.0171 mean -0.0099 spread +0.0602; M p10 -0.0377 p50 +0.0893 p90 +0.0273 mean +0.0585 spread +0.0650; S p10 +0.0471 p50 +0.0116 p90 +0.0611 mean +0.0285 spread +0.0139; same warm-order R>=G>=B + per-vertex hue-jitter + per-triangle mean-luma convention;
@@ -191,7 +191,7 @@ const ROCK_FACET = {
 // COLOR_0 with a B-specific mottle seed. Same value ladder (L<M<S), same warm order
 // R>=G>=B, same [0.10,1.20] band + >= 0.50 facet-spread floor.
 const ROCK_FACET_B = {
-  L: { p10: 0.1598, p50: 0.4465, p90: 0.7913, mean: 0.4622 },
+  L: { p10: 0.1444, p50: 0.4403, p90: 0.7442, mean: 0.4478 }, // I441 (ST-411) L_B v10 re-pin (I420 recipe on NEW L, same 1980t topology, 48,744B): 0.1598/0.4465/0.7913/0.4622 -> 0.1444/0.4403/0.7442/0.4478 (deltas -0.0154/-0.0062/-0.0471/-0.0144, measured file-level; ladder L<M<S holds: L 0.4403 < M 0.5984 < S 0.7133 p50)
   M: { p10: 0.2863, p50: 0.5984, p90: 0.9427, mean: 0.6075 },
   S: { p10: 0.3791, p50: 0.7133, p90: 0.9625, mean: 0.6849 },
 }; // I420 (ST-390): B bake pins, measured file-level through facetLumas below; I436 (ST-406) M_B v9 re-pin: 0.2842/0.6402/0.9153/0.6297 -> 0.2863/0.5984/0.9427/0.6075 (deltas +0.0021/-0.0418/+0.0274/-0.0222; B built from NEW M v9 via I420 recipe, same 500t topology; ladder L<M<S holds: L 0.4465 < M 0.5984 < S 0.7133 p50)
@@ -273,7 +273,7 @@ test('asteroid L/M/S: COLOR_0 mottling band + warm order + facet luma spread (I2
 // I420 (ST-390 E52): B-variant silhouette GLBs - distinct low-poly silhouette per size,
 // SAME tri count as primary A (zero re-pin), same radii (visual/hitbox parity), VR_ naming.
 test('asteroid L/M/S _B: naming, poly budgets, radii match CONFIG (+/-5%) (I420)', () => {
-  const A_TRIS = { L: 490, M: 500, S: 134 }; // I436 (ST-406): M 134 -> 500 (v9 subdivided pass; M_B same topology -> equal-tris assert holds)
+  const A_TRIS = { L: 1980, M: 500, S: 134 }; // I441 (ST-411): L 490 -> 1980 (v10 remaster; L_B same topology -> equal-tris assert holds); I436 (ST-406): M 134 -> 500 (v9 subdivided pass; M_B same topology -> equal-tris assert holds)
   for (const size of ['L', 'M', 'S']) {
     const { buf, json, binOff } = parseGlb('asteroid_' + size + '_B.glb');
     assert.ok(buf.length < MAX_FILE_BYTES, 'asteroid_' + size + '_B.glb under 100 KB');
@@ -841,17 +841,18 @@ test('warden.glb: naming, poly budget, hull/armor radii vs CONFIG, grayscale COL
 // mesh as a COLOR_0 gradient (warm coma base -> bright blue-white ion tip, brighter than I344).
 // Renderer swaps it into an existing S pool slot (size S + variant 2) => +0 new draw-call path.
 // I421 (ST-391 E52 comet re-bake; supersedes the I371 note): ELONGATED icy nucleus (icosphere 42v/80t, 1.35x X-elongation, fbm icy lumps) + 8-seg open cone ion tail (16t) = 96t; warm nucleus -> bright blue-white ion tip; head maxperp 0.5481 (S-scale).
+// I441 (ST-411) comet v3 re-bake: cratered icosphere head (430t) + twisted 16-seg x 6-ring ion-tail tube (160t) = 590t; xspan 2.5716; head maxperp 0.5418 (S-scale); single mesh/prim + VR_Rock_Comet + warm-head/cool-tail contract unchanged.
 // Node VR_Rock_Comet, mat VR_Rock_Comet.
-const COMET_FACET = { p10: 0.7312, p50: 0.7413, p90: 0.8075, mean: 0.7547 }; // I421 (ST-391 E52 comet re-bake): elongated icy nucleus + ion-tail; whole-mesh re-pin (I371: p10 0.5073/p50 0.6417/p90 0.8270/mean 0.6541 -> I421: 0.7312/0.7413/0.8075/0.7547, brighter icy scheme; explicit old->new, not silent)
+const COMET_FACET = { p10: 0.7172, p50: 0.7606, p90: 0.8559, mean: 0.7756 }; // I441 (ST-411) comet v3 re-pin: 0.7312/0.7413/0.8075/0.7547 -> 0.7172/0.7606/0.8559/0.7756 (deltas -0.0140/+0.0193/+0.0486/+0.0209; cratered head + twisted ion tail, measured file-level) // I421 (ST-391 E52 comet re-bake): elongated icy nucleus + ion-tail; whole-mesh re-pin (I371: p10 0.5073/p50 0.6417/p90 0.8270/mean 0.6541 -> I421: 0.7312/0.7413/0.8075/0.7547, brighter icy scheme; explicit old->new, not silent)
 test('asteroid_comet.glb: naming, poly budget, single mesh/prim, shape, COLOR_0 warm-head/cool-tail gradient (I344, re-baked I421)', () => {
   const { buf, json, binOff } = parseGlb('asteroid_comet.glb');
-  assert.ok(buf.length <= 12000, 'asteroid_comet.glb ' + buf.length + ' B <= 12 KB (ST-316 comet budget)');
+  assert.ok(buf.length <= 20000, 'asteroid_comet.glb ' + buf.length + ' B <= 20 KB (I441 ST-411 re-pin 12000 -> 20000; I421 was [3,812], I441 v3 [15,968])');
   const s2 = meshStats({ buf, json, binOff });
   assert.ok(s2.nodeNames.includes('VR_Rock_Comet'), 'VR_Rock_Comet node');
   assert.ok(s2.matNames.includes('VR_Rock_Comet'), 'VR_Rock_Comet material');
   assert.equal((json.meshes || []).length, 1, 'single mesh');
   assert.equal(json.meshes[0].primitives.length, 1, 'single primitive (no tail mesh, +0 draw path)');
-  assert.ok(s2.totalTris <= BUDGETS.comet, 'comet tris ' + s2.totalTris + ' <= 200');
+  assert.ok(s2.totalTris <= BUDGETS.comet, 'comet tris ' + s2.totalTris + ' <= 650');
   const p = json.meshes[0].primitives[0];
   assert.ok(p.attributes.COLOR_0 !== undefined, 'primitive has COLOR_0 (ion-tail gradient)');
   const acc = json.accessors[p.attributes.COLOR_0];
@@ -869,7 +870,7 @@ test('asteroid_comet.glb: naming, poly budget, single mesh/prim, shape, COLOR_0 
   const xspan = maxx - minx;
   assert.ok(xspan > 2.2 * maxperp, 'comet elongated: x-span ' + xspan.toFixed(3) + ' > 2.2x head ' + maxperp.toFixed(3));
   assert.ok(Math.abs(maxperp - 0.58) / 0.58 <= 0.12, 'head perpendicular radius ' + maxperp.toFixed(3) + ' ~ 0.58 (S-scale)');
-  assert.ok(Math.abs(xspan - 2.464) <= 0.06, 'comet x-span ' + xspan.toFixed(4) + ' ~ 2.464 (I421 re-bake; I344 was 1.5828)');
+  assert.ok(Math.abs(xspan - 2.5716) <= 0.06, 'comet x-span ' + xspan.toFixed(4) + ' ~ 2.5716 (I441 v3 re-bake; I421 was 2.464; I344 1.5828)');
   const cbv = json.bufferViews[acc.bufferView]; const cbase = binOff + (cbv.byteOffset || 0) + (acc.byteOffset || 0);
   let warm = 0, cool = 0;
   for (let i = 0; i < acc.count; i++) {
