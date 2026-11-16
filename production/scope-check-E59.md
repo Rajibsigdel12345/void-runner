@@ -111,6 +111,7 @@ dist, <= 1,000 tris, zero core changes.
   CHANGELOG.md (I458 line), production/session-state/active.md (I458 note).
   Zero design docs yet (ST-428's job). Zero src/asset/test.
 - ST-428: design/art-direction-research-E59.md (NEW), design/art-task-list.md (NEW).
+- ST-428 (I459): DONE - art-direction-refresh (docs-only): design/art-direction-research-E59.md (SUPERSEDES the E9-era doc; YouTube + web grounding: inverted bullet colors, one-danger-color, light-rim-on-dark, shader-stable hit feedback, ring-buffer trails, starfield layers, role-named material kit) + design/art-task-list.md (P0: A1 player L3 bullet cool/warm fix 0 KB, A2 shared enemy fresnel rim <= 8 KB, A3 shader-stable ship damage flash <= 4 KB + 200 tris; P0 envelope 12 KB / 200 tris of the 100 KB / 1,000 tris budget; P1: B1 role palette, B2 boss warning card, B3 starflares, B4 afterburner ribbon; P2: bomb hue, value-band audit, fog, nebula shells). P0 envelope lands at 12 KB / 200 tris (of the 100 KB / 1,000 tris budget); execution order A1 -> A2 -> A3 (A3 defers to E60 if the combined perf probe fails).
 - ST-429: TBD from the task list (src/render/*, possibly assets/).
 - ST-430: .evidence/I461/ probes (fresh harness copies).
 
