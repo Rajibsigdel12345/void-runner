@@ -60,6 +60,9 @@ for (const d of ['src', 'public']) {
 const VENDOR_FILES = [
   'three.module.js',
   'three.core.js',
+  // ST-461 (I495): WebGPU closure (raw sizes pinned in vendor.mjs; raw + dist-min sha256-16 in the ADR)
+  'three.webgpu.js',
+  'three.tsl.js',
   // I104: GLTFLoader (Blender-pass GLB assets) + its BufferGeometryUtils dep
   'jsm/loaders/GLTFLoader.js',
   'jsm/utils/BufferGeometryUtils.js',
@@ -81,15 +84,17 @@ for (const rel of VENDOR_FILES) {
   mkdirSync(dirname(toV), { recursive: true });
   cpSync(fromV, toV);
 }
-// ST-460 (I494): after the vendor copy, minify the r187 three ESM vendor bundles in dist
-// (esbuild, syntax-level, format=esm; deterministic given the pinned esbuild). ST-460 ships
-// only the classic closure (three.module.js + three.core.js); three.webgpu.js + three.tsl.js
-// are added at ST-461 with its size-budget strategy (dist ceiling 3,250,000 B). JSM addons +
-// assets stay byte-identical. The frozen sha256-16 pins are computed on the RAW source
-// vendor/ files (see vendor-r187 ADR).
+// ST-460 (I494) + ST-461 (I495): after the vendor copy, minify the r187 three ESM vendor bundles
+// in dist (esbuild, syntax-level, format=esm; deterministic given the pinned esbuild). ST-461 ships
+// the WebGPU closure (three.webgpu.js + three.tsl.js) under the C1-renegotiated dist ceiling of
+// 3,650,000 B (see vendor-r187 ADR addendum + scope-check-E66.md). JSM addons + assets stay
+// byte-identical. The frozen sha256-16 pins are computed on the RAW source vendor/ files.
 const VENDOR_MINIFY = [
   'three.module.js',
   'three.core.js',
+  // ST-461 (I495): the WebGPU closure minifies the same deterministic way (esbuild, format=esm)
+  'three.webgpu.js',
+  'three.tsl.js',
 ];
 {
   const crypto = await import('node:crypto');

@@ -143,6 +143,14 @@ npm run vendor, npm run build. Used for the A/B baseline this session.
   for a vendor fork that fights the upgrade we just made.
 
 ## Status
-ST-460 DONE (I494). Next: ST-461 (I495) - WebGPURenderer boot + dual
-path with ?fx=webgl fallback + ship three.webgpu.js and three.tsl.js +
-import-map entry + size strategy within the ceiling.
+ST-460 DONE (I494); ST-461 DONE (I495) - see the ST-461 addendum below.
+
+## ST-461 addendum (I495 - WebGPURenderer boot + dual path)
+
+Shipped vendor modules (dual-file mapping, [TREE]-verified): three.webgpu.js raw pin EAFEAD3154EC0609 (1,350,894 B; dist-min F549248412C62B9A) + three.tsl.js raw pin D8F3CDB8B85B799A (1,065,544 B; dist-min 7FF9ACF50F006017); three.module.js (A65DE049A7F38B40) + three.core.js (7AB0784CD2532367) byte-identical to I494 (deterministic rebuild).
+Import map: only "three/webgpu" added. three.tsl.js is imported by three.webgpu.js itself; no app module imports the "three/tsl" specifier, so there is no import-map entry for it. three.module.js and three.webgpu.js BOTH map to the SAME three.core.js URL = one core instance (R4 contained: the classic path never mixes with TSL materials).
+Factory (src/render/rendererFactory.js createRenderer(arm)): ?fx=webgl -> frozen classic WebGLRenderer (A/B reference + emergency fallback); ?fx=webgpu -> dynamic import("three/webgpu") + WebGPURenderer + await init() (experimental opt-in); default (auto) -> classic (see the decision below).
+main.js boot: top-level-await createRenderer + await renderer.init() (the r187 WebGPURenderer render() hard-throws before init). Surfaces __vr.backend + __vr.rendererArm; PMREM try/catch degrade + warmCompile guard + webglcontextlost/restored listeners guarded to the webgl2 backend.
+Measured backend reality: the probe env HAS a real WebGPU device (requestAdapter OK on Chrome/Windows; the powerPreference-ignored crbug 369219127 warn is benign). The ?fx=webgpu (auto) arm held sim pins EXACT (core is three-independent) BUT logged NodeBuilder console errors - 16x "THREE.NodeBuilder: ShaderMaterial is not compatible" + 1x "RawShaderMaterial is not compatible" (the classic custom materials - starfield shells, flame/afterburner, rim sites - have no TSL program under r187 WebGPU) + 4x uv-attribute warns.
+DECISION (C3 branch, ADAPTED - measured trigger differs, outcome pre-registered identical): the literal C3 condition (WebGPU unavailable) was NOT met; instead the WebGPU-real arm failed the console 0/0 quality bar for a shipping default (the NodeBuilder errors above). Executed: shipping default = classic WebGLRenderer (no silent look drift: byte-same render path as I494; ab495 fxON 0.002 / fxOFF 0.001 mean). ?fx=webgpu stays the documented EXPERIMENTAL opt-in; ?fx=webgl stays the frozen reference. The NodeBuilder material fixes ARE the staged ST-462 (TSL FX) / ST-463 (TSL material conversions) work; the ST-464 close gate re-evaluates the default -> webgpu flip once the probe console is clean.
+Dist size (C1 EXECUTED, measured): the r187 superset minified dist = 3,536,694 B (171 files) > the old 3,250,000 B ceiling -> ceiling renegotiated 3,250,000 -> 3,650,000 B; headroom 113,306 B >= the 102,400 B close floor (E64 governance contract).

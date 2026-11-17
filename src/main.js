@@ -81,11 +81,17 @@ import { RNG } from './core/rng.js';
 import { damp, v2 } from './core/math.js';
 import { musicIntensityX } from './core/musicIntensity.js'; // I170
 import { timeWarpX } from './core/timeWarp.js'; // I172
+import { createRenderer } from './render/rendererFactory.js'; // ST-461 (I495): dual-path renderer boot (WebGPU default w/ auto WebGL2 fallback; ?fx=webgl frozen classic)
 import { deathWarpX } from './core/deathWarp.js'; // I174
 
 const app = document.getElementById('app');
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+// ST-461 (I495): dual-path renderer boot (factory: src/render/rendererFactory.js). default =
+// WebGPURenderer w/ auto WebGL2 fallback, ?fx=webgl = frozen classic WebGLRenderer (byte-identical
+// ctor params - the causal/A-B reference arm; never loads the webgpu modules), ?fx=webgpu = force WebGPU.
+// Top-level await: the r187 WebGPU render() hard-throws before `await renderer.init()` resolves.
+const { renderer, rendererBackend, rendererArm } = await createRenderer();
+console.info('ST-461 renderer backend:', rendererBackend, '(arm: ' + rendererArm + ')'); // info is outside the console 0/0 error/warn pin
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 // ST-236 (I243): renderer color/tone pipeline from config (pre-pass three defaults: NoToneMapping + implicit sRGB output).
 // The composer path applies the curve in the OutputPass (bloom threshold stays in linear space); the Low-tier direct
@@ -105,12 +111,19 @@ const skybox = createSkybox(scene, 'assets/skybox_equirect.jpg', (tex) => { // I
   // I213: PBR-lite IBL - bake the sky into a PMREM env map so the MeshStandard rocks/ship/belt pick up nebula
   // reflections (they previously only had hemisphere+ambient+directional). envMapIntensity is kept low so
   // hull speculars stay under the bloom threshold (0.72) - only intended glows bloom.
+  // ST-461 (I495): PMREM env bake wrapped - the classic PMREMGenerator driving a WebGPU backend may fail;
+  // degrade to the flat env (identical state to the 4 s skybox-failure fallback) instead of an uncaught throw.
+  try {
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromEquirectangular(tex).texture;
   pmrem.dispose();
   scene.traverse((o) => { const ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : []; for (const m of ms) if (m.isMeshStandardMaterial) m.envMapIntensity = CONFIG.fx.env.intensity; });
     rockRenders.setEnvIntensity(CONFIG.fx.env.rock); // I257 final: rock=0.0 decouples rocks from nebula IBL; ship/belt keep the 0.35 fill
     skySettled = true; warmUp(); // E48 (ST-371, I401): env map settled - arm the both-settle warm gate
+  } catch (e) {
+    console.warn('ST-461: PMREM env bake failed on this backend (non-fatal, flat env):', e);
+    skySettled = true; warmUp();
+  }
 });
 
 const camera = new THREE.PerspectiveCamera(CONFIG.camera.fovBase, window.innerWidth / window.innerHeight, 0.1, 400); // ST-082: base FOV from config
@@ -260,7 +273,8 @@ else if (name === 'wasp') waspRenders.useGLB(entry.object); // ST-449 (pre-wired
 // (lazy compile stays the fallback).
 function warmCompile() {
   try {
-    renderer.compile(scene, camera);
+    // ST-461 (I495): the r187 WebGPU base Renderer exposes compileAsync, not compile - guard the classic pre-compile path
+    if (typeof renderer.compile === 'function') renderer.compile(scene, camera);
   } catch (e) {
     console.warn('E48 warmCompile: pre-compile failed (non-fatal):', e);
   }
@@ -785,7 +799,7 @@ window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), inpu
   floorDisc, // ST-277 (I294)
   applySettings, liveSettings: () => liveSettings,
   locale: () => getLocale(), setLocale, // ST-375: locale probe + drive (boot applied in applySettings; live via the settings panel)
-  audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, powerupRenders, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, hunterRenders, gunshipRenders, sentryRenders, waspRenders, podRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, camMode: () => camMode, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, vendorLowpWarns: () => _vendorLowpWarns, render: () => renderer.render(scene, camera), theme: () => _currentTheme, applyTheme, themeDome, warp: () => world.warp, afterburner }; // ST-434 (I466) B4 // debug/test handle (expanded in I080; ST-059: vortexFx)
+  audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, powerupRenders, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, hunterRenders, gunshipRenders, sentryRenders, waspRenders, podRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, camMode: () => camMode, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, backend: rendererBackend, rendererArm, vendorLowpWarns: () => _vendorLowpWarns, render: () => renderer.render(scene, camera), theme: () => _currentTheme, applyTheme, themeDome, warp: () => world.warp, afterburner }; // ST-434 (I466) B4 // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -860,8 +874,13 @@ function onCtxRestored() {
   ctxEscalated = false; // ST-375
   ctxOverlay.style.display = 'none'; // I75: back to normal (pause screen takes over if the game was running)
 }
-renderer.domElement.addEventListener('webglcontextlost', onCtxLost);
-renderer.domElement.addEventListener('webglcontextrestored', onCtxRestored);
+// ST-461 (I495): webglcontextlost/restored only fire on the WebGL2 backend (classic arm or the auto
+// fallback). The active WebGPU backend has no such events; the simCtxLost/simCtxRestore probes still
+// exercise the handlers directly.
+if (rendererBackend !== 'webgpu') {
+  renderer.domElement.addEventListener('webglcontextlost', onCtxLost);
+  renderer.domElement.addEventListener('webglcontextrestored', onCtxRestored);
+}
 window.__vr.ctxLost = () => ctxLost; // I187: probe
 window.__vr.simCtxLost = () => onCtxLost({ preventDefault() {} }); // I187: exercise the real handler path without an actual GL loss (smoke/debug only)
 window.__vr.simCtxRestore = () => onCtxRestored(); // I187

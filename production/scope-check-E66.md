@@ -70,12 +70,26 @@ current WebGL2/r160 build as the STABLE version in case we need to switch back.
   deterministic) with the frozen sha pinned on the SOURCE vendor file (new convention,
   recorded in the ADR). Renegotiate the ceiling ONLY if minified vendor still exceeds it
   AND measured headroom < the 102,400 B close floor (E64 governance, same contract).
+  C1 EXECUTED (I495, measured): the minified superset dist = 3,536,694 B (171 files) > 3,250,000 B
+  ceiling -> ceiling renegotiated 3,250,000 -> 3,650,000 B; measured headroom 113,306 B >= 102,400 B
+  close floor (E64 contract holds). Dist-min pins: module A65DE049A7F38B40 + core 7AB0784CD2532367
+  (byte-identical to I494) + webgpu F549248412C62B9A + tsl 7FF9ACF50F006017 (new).
 - C2: if TSL Points (sizeNode/pointCoord) cannot express the starfield point-size
   formula on r187, fall back to per-shell size buckets (N PointsMaterials, size =
   per-bucket uniform) - visual delta measured in gate #2.
 - C3: if WebGPU is unavailable in the probe env AND the WebGL2 fallback path shows an
   identity regression vs classic, ship default = classic with WebGPU opt-in (?fx=webgpu)
   and re-open E66 as a perf epic (no silent look drift).
+  C3 EXECUTED (I495, ADAPTED - measured trigger differs, outcome identical): the probe env HAS a
+  real WebGPU device (requestAdapter OK, Chrome on Windows), so the literal condition (WebGPU
+  unavailable) was not met; instead the WebGPU-real arm logged NodeBuilder console errors
+  (16x ShaderMaterial + 1x RawShaderMaterial "not compatible" - the classic custom materials,
+  which are the staged ST-462/463 TSL work) + 4 uv warns, failing the console 0/0
+  bar for a shipping default. Executed: default = classic (auto -> frozen ctor), ?fx=webgpu =
+  experimental opt-in (documented degraded), no silent look drift (default is the byte-same
+  render path as I494; ab495 fxON 0.002 / fxOFF 0.001 mean). The default -> webgpu flip is
+  re-evaluated at the ST-464 close gate once the probe console is clean; no separate perf
+  epic needed (the TSL work is already staged as ST-462/ST-463 within E66).
 
 ## Risks
 - R1 TSL bloom != UnrealBloomPass pixels (pre-registered; the gates measure identity,
