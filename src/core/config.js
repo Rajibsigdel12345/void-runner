@@ -36,7 +36,7 @@ export const CONFIG = {
     gunship: "hazardEmber (bay) + identity gunmetal body",
     fleetBodies: "identity hues (enemy-visual-language.md s3)",
     rock: "hazardEmber desaturated (I257 warm edge 0xd8a878)",
-    powerup: "reward/rewardVital/rewardCharge/shield + bomb 0xff5252 = hazard (C1 candidate)",
+    powerup: "reward/rewardVital/rewardCharge/shield + bomb 0xffa84a = hazardEmber (I464 C1: moved out of the threat-red family)",
     fxParticles: "per-entity families of the 12 roles (see fx.palette comments)",
     enemyRim: "per-role darkened body family, luma <= 29 (E59 A2 frozen)",
     shipHitFlash: "hazard-light (E59 A3 frozen)",

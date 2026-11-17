@@ -31,7 +31,7 @@ function luma(c) {
 // The ST-177 FX-off floor proxy (tests/paletteHarmony.test.js):
 // bg = max(NEBULA_LUMA=51, luma(gridBright)); bomb pickup must clear 59.
 const NEBULA_LUMA = 51;
-const BOMB = 0xff5252;
+const BOMB = 0xffa84a; // I464/ST-432 C1: bomb hue red->amber (contrast invariant unchanged, margin widens)
 
 test("ST-257: layout is sparser than the old PolarGridHelper (12 spokes / 8 rings x 64)", () => {
   assert.ok(G.sectors <= 8, "spokes " + G.sectors + " <= 8");
