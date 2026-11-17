@@ -65,7 +65,7 @@ test('strings: dynamic key families exist (keys concatenated in the source)', ()
 });
 test('strings: t() substitutes {named} placeholders', () => {
   assert.equal(t('over.stats_accuracy', { acc: 95, hit: 10, fired: 20 }), 'ACCURACY 95%    SHOTS 10/20');
-  assert.equal(t('menu.status_line', { mute: 'ON', fx: 'HIGH', music: 'ON' }), 'M \u2014 MUTE (ON)     F \u2014 FX (HIGH)     N \u2014 MUSIC (ON)');
+  assert.equal(t('menu.status_line', { mute: 'ON', fx: 'HIGH', music: 'ON', mode: 'CHASE' }), 'M \u2014 MUTE (ON)     F \u2014 FX (HIGH)     N \u2014 MUSIC (ON)     V \u2014 CAM (CHASE)');
   assert.equal(t('replays.row_stat', { score: 12, wave: 3, kills: 4, time: '0:42' }), 'SCORE 12    WAVE 3    4 KILLS    0:42');
   assert.equal(t('banner.boss_sub', { n: 5, hp: 120 }), 'WAVE 5 \u00b7 120 HP');
 });

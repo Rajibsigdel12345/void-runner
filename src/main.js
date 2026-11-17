@@ -311,6 +311,7 @@ refreshScoresText();
 let fxCount = 0;
 let motionOff = false;
 let camMode = 'chase'; // ST-416 (I446): active camera mode ('chase'|'overview'|'cockpit'); set in applySettings, cycled by V
+let camModeBooted = false; // ST-443 (I476): the boot applySettings (persisted mode) is not a user change - never chip
 let liveSettings = storage.getSettings(); // ST-026: settings panel keeps this fresh (audio consumes in I27)
 // Audio (ST-027): WebAudio synth, initialized on first user gesture.
 const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', waveCleared: 'cleared', gameover: 'gameover', nearmiss: 'swish', mineExplode: 'mine', bossSpawn: 'bossSpawn', bossRing: 'bossRing', bossDeath: 'bossDeath', bossFire: 'bossFire', mineFire: 'mineFire', vortexTelegraph: 'vortexTelegraph', vortexStart: 'vortexStart', droneExplode: 'drone', weaponLevelUp: 'levelUp', rockShieldHit: 'shieldHit', droneDecay: 'droneDecay', wardenSpawn: 'wardenSpawn', wardenArmor: 'shieldHit', wardenDeath: 'wardenDeath', beltHit: 'shieldHit', stingerTelegraph: 'stingerTelegraph', stingerCharge: 'swish', stingerDeath: 'stingerDeath', stingerFizzle: 'droneDecay', flyerSpawn: 'flyerSpawn', flyerDeath: 'flyerDeath', flyerExit: 'droneDecay', hunterTelegraph: 'stingerTelegraph', hunterDash: 'swish', hunterDeath: 'stingerDeath', hunterFizzle: 'droneDecay', gunshipSpawn: 'bossSpawn', gunshipArm: 'vortexTelegraph', gunshipFire: 'bossFire', gunshipHit: 'shieldHit', gunshipDeath: 'wardenDeath' }; // ST-232: flyer cues (exit reuses the seeker decay) // ST-229: charger cues (charge whoosh reuses swish; fizzle reuses the seeker decay) // ST-059/ST-117/ST-123/ST-127/ST-129/ST-137, I173: decay + warden get their own cues (warden armor keeps shieldHit)
@@ -365,7 +366,10 @@ function applySettings(s) {
   // ST-225: FX tier state (fxCount / bloom / DPR) now lives in applyFxTier below - unrelated
   // settings changes (volume etc.) can no longer revert an auto-downgraded tier.
   motionOff = s.reducedMotion === true;
+  const prevCamMode = camMode;
   camMode = (s.cameraMode === 'overview' || s.cameraMode === 'cockpit') ? s.cameraMode : 'chase'; // ST-416 (I446): validate + fall back to chase
+  if (camModeBooted && camMode !== prevCamMode) camChip(tr('toast.cammode', { mode: tr('settings.camera_mode.' + camMode) })); // ST-443 (I476): chip on change from BOTH the V hotkey and the settings panel (both land here); boot never fires
+  camModeBooted = true;
   slowmoHintEl.style.transition = motionOff ? 'none' : 'opacity .2s'; // I161: no fade under reduced motion
   setUiScale(); // I70+I71: UI scale = fontScale x viewport (cascades to DOM overlays only; canvas unaffected)
 
@@ -390,6 +394,20 @@ function toast(msg) {
   toastEl.style.opacity = '1';
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { toastEl.style.opacity = '0'; }, 3000);
+}
+// ST-443 (I476): pooled top-center camera-mode chip - ONE element, opacity-only fade ~1.2 s, reduced-motion safe (mirrors the toast pattern)
+const camChipEl = document.createElement('div');
+camChipEl.id = 'vr-cam-chip';
+camChipEl.setAttribute('aria-live', 'polite');
+camChipEl.style.cssText = 'position:fixed;left:50%;top:9%;transform:translateX(-50%);z-index:60;font:calc(13px * var(--vr-fs,1))/1.4 ui-monospace,monospace;letter-spacing:4px;color:#cfe8ff;text-shadow:0 2px 8px rgba(0,0,0,0.8);opacity:0;transition:opacity .3s;pointer-events:none;';
+document.body.appendChild(camChipEl);
+let camChipTimer = 0;
+function camChip(msg) {
+  camChipEl.textContent = msg;
+  if (motionOff) camChipEl.style.transition = 'none'; // ST-443 (I476): reduced motion - no fade
+  camChipEl.style.opacity = '1';
+  clearTimeout(camChipTimer);
+  camChipTimer = setTimeout(() => { camChipEl.style.opacity = '0'; }, 1200);
 }
 const adaptive = createAdaptiveQuality(CONFIG.adaptive, (info) => {
   if (info.type === 'autoDowngrade') {
@@ -662,8 +680,7 @@ window.addEventListener('keydown', (e) => {
     const mergedCam = storage.setSettings({ cameraMode: nextCam });
     applySettings(mergedCam);
     menuSettings.sync();
-    pauseSettings.sync();
-    toast(tr('toast.cammode', { mode: nextCam.toUpperCase() }));
+    pauseSettings.sync(); // ST-443 (I476): chip fires from the applySettings hook - single source of truth for mode feedback
   }
 });
 const raycaster = new THREE.Raycaster();
@@ -1011,6 +1028,7 @@ function syncVisuals(dt) {
   screenOpts.muted = muted;
   screenOpts.fx = liveSettings.fx; // I157: pause screen F row
   screenOpts.music = liveSettings.music !== false; // I171: menu status row N part
+  screenOpts.camMode = camMode; // ST-443 (I476): menu status row V part (current camera mode)
   screenOpts.best = bestScore;
   screenOpts.newBest = newBest;
   screenOpts.reducedMotion = motionOff; // I65: menu polish (reduced-motion gates the new animations)

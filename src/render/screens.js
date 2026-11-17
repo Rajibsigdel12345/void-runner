@@ -123,7 +123,7 @@ export function createScreens(root, settings = {}) {
   menuGrid.classList.add('vr-menu-grid'); // I71: collapse to one column on narrow viewports
   menuGrid.append(controls, top5);
   bottomWrap.appendChild(menuGrid);
-  const menuStatus = line(bottomWrap, tr('menu.status_line',{mute:tr('state.off'),fx:tr('state.high'),music:tr('state.on')}), 'font-size:calc(12px * var(--vr-fs,1));letter-spacing:2px;opacity:0.65;'); // I165: live session status on the menu (I164 finding); I171: + N music
+  const menuStatus = line(bottomWrap, tr('menu.status_line',{mute:tr('state.off'),fx:tr('state.high'),music:tr('state.on'),mode:tr('settings.camera_mode.chase')}), 'font-size:calc(12px * var(--vr-fs,1));letter-spacing:2px;opacity:0.65;'); // I165: live session status on the menu (I164 finding); I171: + N music
   let menuStartBtn = null; let menuStartLine = null; // ST-375: locale re-emit targets (touch btn / keyboard line)
   if (settings.touch && settings.actions && settings.actions.start) { // I71: tappable start on touch
     const startBtn = document.createElement('button');
@@ -460,7 +460,7 @@ bottomWrap.append(bestRow, credit);
       else dailyBadge.style.display = 'none';
     }
     if (state === STATE.MENU) {
-      set('menuStatus', menuStatus, tr('menu.status_line',{mute:opts.muted?tr('state.on'):tr('state.off'),fx:opts.fx==='low'?tr('state.low'):tr('state.high'),music:opts.music!==false?tr('state.on'):tr('state.off')})); // I165: live mute + fx state; I171: + N music
+      set('menuStatus', menuStatus, tr('menu.status_line',{mute:opts.muted?tr('state.on'):tr('state.off'),fx:opts.fx==='low'?tr('state.low'):tr('state.high'),music:opts.music!==false?tr('state.on'):tr('state.off'),mode:tr('settings.camera_mode.'+(opts.camMode==='overview'||opts.camMode==='cockpit'?opts.camMode:'chase'))})); // I165: live mute + fx state; I171: + N music
       set('menuBest', menuBest, opts.best > 0 ? tr('menu.best',{best:opts.best}) : '');
       set('top5', top5Body, opts.scoresText ? opts.scoresText : tr('menu.no_scores')); // I66
       set('menuDaily', menuDaily, opts.dailyMenu ? (tr('menu.daily_line',{key:opts.dailyMenu.key,best:opts.dailyMenu.value>0?tr('menu.best',{best:opts.dailyMenu.value}):tr('menu.no_best')})) : ''); // ST-141
