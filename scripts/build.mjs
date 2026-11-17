@@ -77,6 +77,9 @@ const VENDOR_FILES = [
   'jsm/shaders/CopyShader.js',
   'jsm/shaders/OutputShader.js',
   'jsm/shaders/LuminosityHighPassShader.js',
+  // ST-462 (I496): TSL bloom effect for the ?fx=webgpu arm (BloomNode.js is imported
+  // by webgpuFx.js via the three/addons/ import-map prefix; jsm stays byte-identical in dist).
+  'jsm/tsl/display/BloomNode.js',
 ];
 for (const rel of VENDOR_FILES) {
   const fromV = join(root, 'vendor', rel);

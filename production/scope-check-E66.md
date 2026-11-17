@@ -113,5 +113,18 @@ current WebGL2/r160 build as the STABLE version in case we need to switch back.
   renegotiation executed and documented).
 - Stable tag reachable; ?fx=webgl reproduces the classic look on r187.
 
+## ST-462 A/B gate #1 result (I496, 2026-11-18)
+EXECUTED (PASS): TSL FX identity on the ?fx=webgpu arm via NEW src/render/webgpuFx.js -
+RenderPipeline + a manual RenderOutputNode-equivalent chain (scenePass + BloomNode composite +
+I334 grade between toneMapping() and workingToColorSpace(); outputColorTransform=false). Identity
+verified per the pre-registered definition (parameter map + grade curve, NOT pixel equality - R1):
+bloom 0.6/0.35/0.72 frozen and read back from the TSL uniform nodes; grade lift 0.0/contrast 1.0/
+gamma 1.18 in I334 order; gate1_496 PASS (webgpu 10/10 + classic 6/6; classic console 0/0; webgpu =
+I495-baseline dirt only) + causal495 PASS (3 arms; webgpu 0 pageerrors, PMREM env bake now succeeds
+- the I496 TDZ-window regression x2 was found + fixed in main.js during the iteration).
+Divergences documented: (1) cross-arm fxON diff mean 45.9 / pct>12 72.5% (informational; R1).
+(2) dist headroom now 94,329 B - BELOW the 102,400 B close floor: ST-463 must be size-neutral/
+negative or the floor renegotiates at the ST-464 close gate (E64 governance contract).
+
 ## Next owner
-I494 = ST-460 (vendor r187 upgrade + ADR + import map + dist size strategy).
+I497 = ST-463 (TSL material conversions - starfield shells + flares + afterburner (PointsNodeMaterial + sizeNode + pointCoord, dynamic aFade) + the 3 onBeforeCompile rim sites -> ONE shared TSL rim helper; C2 fallback = per-shell size buckets; A/B gate #2; cleans the webgpu-arm console; size-neutral/negative required per the I496 headroom flag).

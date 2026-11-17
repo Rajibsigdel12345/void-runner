@@ -128,9 +128,6 @@ const skybox = createSkybox(scene, 'assets/skybox_equirect.jpg', (tex) => { // I
 
 const camera = new THREE.PerspectiveCamera(CONFIG.camera.fovBase, window.innerWidth / window.innerHeight, 0.1, 400); // ST-082: base FOV from config
 
-// I35: bloom post-fx - composer path for High quality, direct render for Low (GDD line 74).
-const bloom = createBloom(renderer, scene, camera);
-
 // I36: opt-in FPS meter - ?fps=1 (fps + ms) or ?fps=2 (+ draw calls/tris).
 const fpsParam = new URLSearchParams(window.location.search).get('fps');
 const fpsMeter = fpsParam ? createFpsMeter(fpsParam === '2' ? renderer : null) : null;
@@ -312,8 +309,26 @@ function warmUp() {
   warmCompile();
   warmRender();
 }
-assetLoader.loadAll().then(() => { assetsSettled = true; warmUp(); });
 setTimeout(() => { skySettled = true; warmUp(); }, 4000); // E48 I401: skybox-failure fallback (no env map; warming still correct)
+// I35: bloom post-fx - composer path for High quality, direct render for Low (GDD line 74).
+// ST-462 (I496): the ?fx=webgpu arm renders FX through the TSL pipeline (BloomNode + the I334
+// grade in a manual RenderOutputNode-equivalent chain). The frozen classic EffectComposer chain
+// stays untouched for the webgl2 arm (and the auto default). Dynamic import keeps the classic
+// default from paying for the webgpu + tsl modules (the ST-461 cost contract).
+// ST-462 (I496) placement: this block's top-level `await import` opens an await window mid-
+// module-evaluation, so any async callback registered earlier that references a top-level decl
+// declared LATER hits the TDZ. Hence (a) it sits below the skybox closure's decls (rockRenders,
+// skySettled) and (b) assetLoader.loadAll() was moved BELOW this block (an asset onReady callback
+// completing inside the window TDZ'd on the renderer consts - caught PMREM warn + uncaught
+// ReferenceError on the webgpu arm, I495 baseline: zero such errors).
+let bloom;
+if (rendererBackend === 'webgpu') {
+  const { createWebGPUPipeline } = await import('./render/webgpuFx.js');
+  bloom = createWebGPUPipeline(renderer, scene, camera);
+} else {
+  bloom = createBloom(renderer, scene, camera);
+}
+assetLoader.loadAll().then(() => { assetsSettled = true; warmUp(); }); // ST-462 (I496): MUST start after the ST-462 bloom block's await import above - an asset onReady callback completing inside that await window hits TDZ on the renderer consts it references (observed: 7 powerups + 2 debris ReferenceErrors on the webgpu arm)
 const bossHealth = createBossHealth(document.body); // ST-055
 const bossHealthV = createBossHealthVertical(document.body); // ST-456 (E64): campaign vertical bar
 const enemyBulletRenders = createEnemyBulletRenderer(scene); // ST-056
