@@ -1,4 +1,4 @@
-﻿﻿﻿﻿// ALL tunables live here (balance table). See design/gdd.md for rationale.
+﻿﻿﻿﻿﻿// ALL tunables live here (balance table). See design/gdd.md for rationale.
 export const CONFIG = {
   // ST-431 (I463, E60 B1): role-named palette - the single role-truth section for
   // every world/UI color (threejs-game-studio material kit: bodyPrimary/hazard/
@@ -693,6 +693,18 @@ export const CONFIG = {
       life: 0.38,             // puff life (s) - full-speed trail ~ rate*life long
       offset: 1.15,           // puff distance behind the ship (u)
     },
+    afterburner: {           // ST-434 (I466) B4: afterburner ribbon - ring-buffer Points motion trail at sustained
+      minThrust: 0.55,        // thrust fraction gate (sustained thrust only)
+      rate: 120,              // points/s while active
+      ring: 96,               // preallocated slots (live ~ rate*life = 48; zero per-frame allocs)
+      life: 0.4,              // per-point fade (s)
+      offset: 0.95,           // spawn distance behind the ship center along facing (u)
+      size: 0.34,             // point size (world u, size-attenuated)
+      drift: 1.6,             // backward drift speed (u/s)
+      spread: 0.16,           // lateral jitter radius (u)
+      color: 0xffa860,        // warm engine family (fx.palette.engine[0])
+      opacity: 0.55,
+    },
     dpr: { high: 2, low: 1.5 }, // ST-225: per-tier device-pixel-ratio caps (load-reactive DPR)
     env: { intensity: 0.35, rock: 0.0 }, // I213 (I257 final): envMapIntensity PBR-lite IBL. 0.55 washed rocks periwinkle; final A/B locked rock=0.0 - fully decouples rocks from the blue-violet nebula PMREM (0.18 vs 0 = dRGB <= 1.5, negligible); ship/belt keep 0.35
     bloom: {                  // I35: post-fx, High quality only (GDD: "Low disables bloom")
@@ -763,7 +775,12 @@ export const CONFIG = {
     near: { count: 280, rMin: 90, rMax: 130, size: 3.2, color: 0xe8f1ff, opacity: 0.95, parallax: 0.25 },
     far:  { count: 520, rMin: 140, rMax: 230, size: 2.2, color: 0x9db4ff, opacity: 0.7, parallax: 0.6 },
     knot: { u: 0.65, latDeg: 4, sizeUDeg: 24, sizeLatDeg: 16, p: 0.25, bright: 1.15 },
-    secondary: { u: 0.18, latDeg: 4, sizeUDeg: 10, sizeLatDeg: 7, p: 0.05, bright: 1.12 } // v6 secondary knot
+    secondary: { u: 0.18, latDeg: 4, sizeUDeg: 10, sizeLatDeg: 7, p: 0.05, bright: 1.12 }, // v6 secondary knot (ST-434 B3 below)
+    // ST-434 (I466) B3: 3-layer star pattern (core/glow/flare) - the flare layer for the
+    // top ~2% brightest near-shell stars (aScale rank = the knot-clump bright stars).
+    // One extra additive Points layer (+1 draw call); uTime freezes under reduced motion
+    // (static, no rotation/breathing). Render-only data - zero core. Far-shell flares deferred.
+    flare: { frac: 0.02, minCount: 4, sizeMul: 2.4, rotSpeed: 0.5, opacity: 0.5 },
   },
 
   camera: {                // ST-082: dynamic camera feel (fovBase 60 = pre-ST-082 hardcode)

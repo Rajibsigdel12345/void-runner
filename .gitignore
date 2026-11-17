@@ -1,4 +1,4 @@
-﻿node_modules/
+node_modules/
 dist/
 *.log
 .DS_Store
@@ -8,3 +8,5 @@ dist/
 .playwright-mcp/
 blender/
 msgfile.txt
+
+.git-commit-msg.txt

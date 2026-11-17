@@ -95,6 +95,124 @@ const FRAG = [
   '}'
 ].join('\n');
 
+// ST-434 (I466) B3: 4-spike star-flare sprite for the top ~2% brightest stars
+// (procedural canvas, shared by all flares - no per-star textures).
+function makeFlareTexture() {
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const g = c.getContext('2d');
+  const rad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  rad.addColorStop(0, 'rgba(255,255,255,1)');
+  rad.addColorStop(0.18, 'rgba(255,255,255,0.5)');
+  rad.addColorStop(0.5, 'rgba(255,255,255,0.1)');
+  rad.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = rad;
+  g.fillRect(0, 0, 64, 64);
+  g.globalCompositeOperation = 'lighter';
+  const spike = (dx, dy) => {
+    const lg = g.createLinearGradient(32, 32, 32 + dx * 32, 32 + dy * 32);
+    lg.addColorStop(0, 'rgba(255,255,255,0.85)');
+    lg.addColorStop(0.55, 'rgba(255,255,255,0.22)');
+    lg.addColorStop(1, 'rgba(255,255,255,0)');
+    g.strokeStyle = lg;
+    g.lineWidth = 2.5;
+    g.beginPath();
+    g.moveTo(32, 32);
+    g.lineTo(32 + dx * 32, 32 + dy * 32);
+    g.stroke();
+  };
+  spike(1, 0); spike(-1, 0); spike(0, 1); spike(0, -1);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+// ST-434 (I466) B3: flare shader - per-star aPhase rotation applied in the fragment
+// (uTime freezes under reduced motion -> static, no rotation/breathing). Point-size
+// attenuation matches the shells (350 / -z).
+const FLARE_VERT = [
+  'attribute float aPhase;',
+  'attribute float aScale;',
+  'uniform float uTime;',
+  'uniform float uSize;',
+  'uniform float uRot;',
+  'varying float vRot;',
+  'varying float vTwinkle;',
+  'void main() {',
+  '  vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);',
+  '  gl_PointSize = uSize * aScale * (350.0 / -mvPosition.z);',
+  '  gl_Position = projectionMatrix * mvPosition;',
+  '  vRot = aPhase + uTime * uRot;',
+  '  vTwinkle = 0.8 + 0.2 * sin(uTime * 1.7 + aPhase * 2.0);',
+  '}'
+].join('\n');
+
+const FLARE_FRAG = [
+  'uniform vec3 uColor;',
+  'uniform float uOpacity;',
+  'uniform sampler2D uFlare;',
+  'varying float vRot;',
+  'varying float vTwinkle;',
+  'void main() {',
+  '  vec2 pc = gl_PointCoord - 0.5;',
+  '  float c = cos(vRot);',
+  '  float s = sin(vRot);',
+  '  pc = mat2(c, -s, s, c) * pc + 0.5;',
+  '  vec4 tex = texture2D(uFlare, pc);',
+  '  if (tex.a < 0.01) discard;',
+  '  gl_FragColor = vec4(uColor, tex.a * vTwinkle * uOpacity);',
+  '}'
+].join('\n');
+
+// ST-434 (I466) B3: one additive Points layer over the top ~frac (min minCount)
+// brightest near-shell stars (aScale rank). Position/phase/scale copied from the
+// source stars; rides the near-shell parallax. Built once - zero per-frame allocs.
+function makeFlare(near, cfg, flCfg, flareTex, color) {
+  const pos = near.geometry.getAttribute('position');
+  const srcScale = near.geometry.getAttribute('aScale');
+  const srcPhase = near.geometry.getAttribute('aPhase');
+  const total = pos.count;
+  const n = Math.max(flCfg.minCount, Math.round(total * flCfg.frac));
+  const order = new Array(total);
+  for (let i = 0; i < total; i++) order[i] = i;
+  order.sort((a, b) => srcScale.array[b] - srcScale.array[a]);
+  const fPos = new Float32Array(n * 3);
+  const fPhase = new Float32Array(n);
+  const fScale = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const s = order[i];
+    fPos[i * 3 + 0] = pos.array[s * 3 + 0];
+    fPos[i * 3 + 1] = pos.array[s * 3 + 1];
+    fPos[i * 3 + 2] = pos.array[s * 3 + 2];
+    fPhase[i] = srcPhase.array[s];
+    fScale[i] = srcScale.array[s];
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(fPos, 3));
+  geo.setAttribute('aPhase', new THREE.BufferAttribute(fPhase, 1));
+  geo.setAttribute('aScale', new THREE.BufferAttribute(fScale, 1));
+  const uniforms = {
+    uTime: { value: 0 },
+    uSize: { value: cfg.size * flCfg.sizeMul },
+    uRot: { value: flCfg.rotSpeed },
+    uColor: { value: new THREE.Color(color) },
+    uOpacity: { value: flCfg.opacity },
+    uFlare: { value: flareTex }
+  };
+  const mat = new THREE.ShaderMaterial({
+    uniforms,
+    vertexShader: FLARE_VERT,
+    fragmentShader: FLARE_FRAG,
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const pts = new THREE.Points(geo, mat);
+  pts.name = 'starflares';
+  pts.userData = { parallax: cfg.parallax, uniforms };
+  return pts;
+}
+
 function makeShell(cfg, rng, glow) {
   const pos = new Float32Array(cfg.count * 3);
   const phase = new Float32Array(cfg.count); // I60: twinkle phase
@@ -156,13 +274,18 @@ export function createStarfield(seed = CONFIG.starfield.seed) {
   group.name = 'starfield';
   const near = makeShell(CONFIG.starfield.near, rng, glow);
   const far = makeShell(CONFIG.starfield.far, rng, glow);
-  group.add(near, far);
-  group.uniforms = [near.userData.uniforms, far.userData.uniforms]; // I60: probe handle
+  // ST-434 (I466) B3: flare layer for the top ~2% brightest NEAR-shell stars (far
+  // shell deferred). +1 draw call; uTime freezes under reduced motion (static).
+  const flare = makeFlare(near, CONFIG.starfield.near, CONFIG.starfield.flare, makeFlareTexture(), CONFIG.starfield.near.color);
+  group.add(near, far, flare);
+  // I60 probe handle: [near, far] indices stable; flare appended LAST so the
+  // theme code (main.js reads [0]/[1]) is untouched.
+  group.uniforms = [near.userData.uniforms, far.userData.uniforms, flare.userData.uniforms];
   let frozenTime = 0;
-  /** I60: t = sim time, camera for parallax, motion = false freezes twinkle + parallax. */
+  /** I60: t = sim time, camera for parallax, motion = false freezes twinkle + parallax (+ flare rotation). */
   group.update = function (t, camera, motion) {
     if (motion) frozenTime = t;
-    for (const shell of [near, far]) {
+    for (const shell of [near, far, flare]) {
       shell.userData.uniforms.uTime.value = frozenTime;
       if (motion && camera) {
         const f = shell.userData.parallax;

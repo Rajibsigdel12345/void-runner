@@ -1,4 +1,4 @@
-﻿﻿﻿// Void Runner - boot (I12: World orchestrator drives ship/weapons/asteroids/collisions)
+﻿﻿﻿﻿// Void Runner - boot (I12: World orchestrator drives ship/weapons/asteroids/collisions)
 import * as THREE from 'three';
 import { createStarfield } from './render/starfield.js';
 import { createSkybox } from './render/skybox.js'; // I212
@@ -7,6 +7,7 @@ import { createArenaFloorGrid } from './render/arenaFloor.js'; // ST-257 (I269)
 import { createFloorDisc } from './render/floorDisc.js'; // ST-277 (I294)
 import { createThemeDome } from './render/themeDome.js'; // ST-420 (I450): per-stage sky tint dome
 import { createEngineTrail } from './core/engineTrail.js'; // I213
+import { createAfterburner } from './render/afterburner.js'; // ST-434 (I466) B4
 import { createShipMesh } from './render/shipMesh.js';
 import { createInput } from './render/input.js';
 import { createBulletPool } from './render/bulletPool.js';
@@ -140,12 +141,14 @@ scene.add(stars);
 const themeDome = createThemeDome(scene, 320);
 const _starNear = stars.uniforms[0].uColor.value.clone();
 const _starFar = stars.uniforms[1].uColor.value.clone();
+const _starFlare = stars.uniforms[2] ? stars.uniforms[2].uColor.value.clone() : null; // ST-434 (I466) B3: flare tint default (near color)
 let _currentTheme = null;
 function applyTheme(theme) {
   _currentTheme = theme;
   themeDome.set(theme);
   stars.uniforms[0].uColor.value.setHex(theme ? theme.stars : _starNear.getHex());
   stars.uniforms[1].uColor.value.setHex(theme ? theme.stars : _starFar.getHex());
+  if (stars.uniforms[2]) stars.uniforms[2].uColor.value.setHex(theme ? theme.stars : _starFlare.getHex()); // ST-434 (I466) B3: flare follows the star tint
   grid.material.color.setHex(theme ? theme.grid : 0xffffff);
   if (floorDisc) floorDisc.material.color.setHex(theme ? theme.floor : 0xffffff);
 }
@@ -559,6 +562,8 @@ function shatterKill(d) {
   if (cls) shatter(d.pos.x, d.pos.y, cls);
 }
 const engineTrail = createEngineTrail(CONFIG.fx.engineTrail); // I213: throttled trail emission (pure core, unit-tested)
+const afterburner = createAfterburner(); // ST-434 (I466) B4: afterburner ribbon (ring-buffer Points, pooled, zero per-frame allocs)
+scene.add(afterburner.points);
 fxPreviewFn = (tier) => { // ST-067: show the new tier immediately (arena center, behind the panel)
   const n = tier === 'high' ? CONFIG.fx.particleHigh : tier === 'low' ? CONFIG.fx.particleLow : CONFIG.fx.particleOff; // ST-224: off preview = no burst
   particles.burst(0, 0, { count: n, color: 0x7fd0ff, speed: 6, life: 0.7 });
@@ -708,7 +713,7 @@ window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), inpu
   floorDisc, // ST-277 (I294)
   applySettings, liveSettings: () => liveSettings,
   locale: () => getLocale(), setLocale, // ST-375: locale probe + drive (boot applied in applySettings; live via the settings panel)
-  audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, powerupRenders, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, hunterRenders, gunshipRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, camMode: () => camMode, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, vendorLowpWarns: () => _vendorLowpWarns, render: () => renderer.render(scene, camera), theme: () => _currentTheme, applyTheme, themeDome, warp: () => world.warp }; // debug/test handle (expanded in I080; ST-059: vortexFx)
+  audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, powerupRenders, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, hunterRenders, gunshipRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, camMode: () => camMode, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, vendorLowpWarns: () => _vendorLowpWarns, render: () => renderer.render(scene, camera), theme: () => _currentTheme, applyTheme, themeDome, warp: () => world.warp, afterburner }; // ST-434 (I466) B4 // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -947,6 +952,7 @@ else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, 
       shieldRing.pulse();
     } else if (e.type === 'gameover') {
       _victory = !!e.data.victory; // ST-420 (I450): campaign victory flag (payload; endless never sets it)
+      afterburner.clear(); // ST-434 (I466) B4: ribbon clears on death
       newBest = false; // ST-190: default; a live run raises it below (a watched replay must not touch the scoreboards)
       bestScore = storage.getBest();
       dailyNewBest = false; // ST-141
@@ -1072,6 +1078,10 @@ function syncVisuals(dt) {
       const cnt = liveSettings.fx === 'low' ? CONFIG.fx.engineTrail.countLow : liveSettings.fx === 'high' ? CONFIG.fx.engineTrail.countHigh : CONFIG.fx.engineTrail.countOff; // ST-224: off = silent trail
       for (let k = 0; k < nEmit; k++) particles.burst(tx, tz, { count: cnt, palette: CONFIG.fx.palette.engine, speed: CONFIG.fx.engineTrail.speed, life: CONFIG.fx.engineTrail.life, shape: 'radial', ramp: CONFIG.fx.engineTrail.ramp });
     }
+  }
+  if (st === STATE.PLAYING) { // ST-434 (I466) B4: afterburner ribbon - sustained-thrust motion channel (RM-gated at the feed: thrust 0 under reduced motion so the residual fades; clears on death)
+    const abF = world.ship.forward(shipFwd); // scratch reuse (zero per-frame alloc)
+    afterburner.update(dt, motionOff ? 0 : thrustFrac, world.ship.pos.x, shipMesh.group.position.y, world.ship.pos.y, abF.x, abF.y);
   }
   if (world.warp && st === STATE.PLAYING && !motionOff && fxCount > 0) { // ST-420 (I450): stage warp FX - sim frozen, real-time render-only tunnel at the ship (FX-tier + motion-gated)
     particles.burst(world.ship.pos.x, world.ship.pos.y, { count: liveSettings.fx === 'high' ? 6 : 3, color: 0x9fd8ff, speed: 2.5, life: 0.35, shape: 'ring' });
