@@ -59,9 +59,11 @@ for (const d of ['src', 'public']) {
 // closure of the four passes used by bloom.js) instead of the full ~21MB package.
 const VENDOR_FILES = [
   'three.module.js',
+  'three.core.js',
   // I104: GLTFLoader (Blender-pass GLB assets) + its BufferGeometryUtils dep
   'jsm/loaders/GLTFLoader.js',
   'jsm/utils/BufferGeometryUtils.js',
+  'jsm/utils/SkeletonUtils.js',
   'jsm/postprocessing/EffectComposer.js',
   'jsm/postprocessing/RenderPass.js',
   'jsm/postprocessing/OutputPass.js',
@@ -79,4 +81,30 @@ for (const rel of VENDOR_FILES) {
   mkdirSync(dirname(toV), { recursive: true });
   cpSync(fromV, toV);
 }
+// ST-460 (I494): after the vendor copy, minify the r187 three ESM vendor bundles in dist
+// (esbuild, syntax-level, format=esm; deterministic given the pinned esbuild). ST-460 ships
+// only the classic closure (three.module.js + three.core.js); three.webgpu.js + three.tsl.js
+// are added at ST-461 with its size-budget strategy (dist ceiling 3,250,000 B). JSM addons +
+// assets stay byte-identical. The frozen sha256-16 pins are computed on the RAW source
+// vendor/ files (see vendor-r187 ADR).
+const VENDOR_MINIFY = [
+  'three.module.js',
+  'three.core.js',
+];
+{
+  const crypto = await import('node:crypto');
+  for (const rel of VENDOR_MINIFY) {
+    const p = join(dist, 'vendor', rel);
+    const out = await transform(readFileSync(p, 'utf8'), {
+      loader: 'js', format: 'esm', minify: true, keepNames: true, legalComments: 'none',
+    });
+    writeFileSync(p, out.code);
+  }
+  for (const rel of VENDOR_MINIFY) {
+    const h = crypto.createHash('sha256').update(readFileSync(join(dist, 'vendor', rel))).digest('hex').slice(0, 16).toUpperCase();
+    console.log('build: dist/vendor/' + rel + ' minified sha256-16 ' + h);
+  }
+  console.log('build: vendor ESM bundles minified (esbuild, deterministic)');
+}
+
 console.log('build: dist/ assembled (static, import-map modules)');
