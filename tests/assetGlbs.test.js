@@ -586,7 +586,8 @@ test('drone.glb: naming, poly budget, dart dimensions vs procedural parity (I211
   const cross = Math.max(e.y, e.z);
   assert.ok(Math.abs(cross - 1.19) / 1.19 <= 0.15, 'drone cross ' + cross.toFixed(3) + ' ~ 1.19');
 });
-
+
+
 // I282 (ST-267 enemy value/shape art pass): the drone/stinger/flyer BODIES carry a
 // grayscale per-face COLOR_0 value bake (Blender 5.2, corner-domain, vertex-split on
 // export) that multiplies the in-code family tint (CONFIG.{drone,stinger,flyer}.palette.body.color):
@@ -670,8 +671,8 @@ test('drone/stinger/flyer bodies: grayscale COLOR_0 value bake band + facet spre
 // hull (never visible) and the GLB replaces it with the recess-visible core
 // the design calls for.
 const ENEMY451_FACET = {
-  hunter:  { p10: 0.6423, p50: 1.1584, p90: 1.25 }, // per-face luma, file-level (I451 build report, re-verified file-level)
-  gunship: { p10: 0.5254, p50: 0.9759, p90: 1.25 },
+  hunter:  { p10: 0.561, p50: 1.0738, p90: 1.25 }, // per-face luma, file-level (I471 v5 re-pin WITH measurement; I451 was 0.6423/1.1584/1.25)
+  gunship: { p10: 0.5167, p50: 1.0383, p90: 1.25 }, // I471 v5 re-pin WITH measurement (I451 was 0.5254/0.9759/1.25)
 };
 function primExtents({ buf, json, binOff }, meshName) {
   const m = (json.meshes || []).find((mm) => mm.name === meshName);
@@ -726,9 +727,9 @@ test('enemy_hunter.glb: naming, poly budget, part extents vs procedural parity, 
   const fin = s.prims.find((p) => p.name === 'VR_Hunter_Fin');
   const core = s.prims.find((p) => p.name === 'VR_Hunter_Core');
   assert.ok(hull && fin && core, 'hull + fin + core prims');
-  assert.equal(hull.tris, 992, 'hull 992 tris');
-  assert.equal(fin.tris, 340, 'fin 340 tris');
-  assert.equal(core.tris, 100, 'core 100 tris');
+  assert.equal(hull.tris, 1400, 'hull 1400 tris (I471 v5 re-pin WITH measurement; was 992)');
+  assert.equal(fin.tris, 600, 'fin 600 tris (I471 v5 re-pin WITH measurement; was 340)');
+  assert.equal(core.tris, 256, 'core 256 tris (I471 v5 re-pin WITH measurement; was 100)');
   // Procedural parity (design/enemy-visual-language.md section 5, 15% band): hull 3.04 X / 1.84 span / 0.544 H;
   // W-fin span 1.92 (locally centered - runtime spread-scales it from the fin origin); core radii 0.374/0.317/0.317.
   const he = primExtents({ buf, json, binOff }, 'VR_Hunter_Hull');
@@ -752,9 +753,9 @@ test('enemy_gunship.glb: naming, poly budget, part extents vs procedural parity,
   const nac = s.prims.find((p) => p.name === 'VR_Gunship_Nacelle');
   const bay = s.prims.find((p) => p.name === 'VR_Gunship_Bay');
   assert.ok(hull && nac && bay, 'hull + nacelle + bay prims');
-  assert.equal(hull.tris, 1450, 'hull 1450 tris');
-  assert.equal(nac.tris, 174, 'nacelle 174 tris');
-  assert.equal(bay.tris, 64, 'bay 64 tris');
+  assert.equal(hull.tris, 1650, 'hull 1650 tris (I471 v5 re-pin WITH measurement; was 1450)');
+  assert.equal(nac.tris, 450, 'nacelle 450 tris (I471 v5 re-pin WITH measurement; was 174)');
+  assert.equal(bay.tris, 168, 'bay 168 tris (I471 v5 re-pin WITH measurement; was 64)');
   // Procedural parity (15% band): hull 4.16 X / 3.04 Z / 1.28 H (H is +12% on the GLB: spine top + open-nose
   // recess - inside the band, intentional, do not "fix"); nacelle hex r 0.448->0.544 len 1.92 (axis X); bay
   // 0.8 x 0.56 footprint. Bay Z is pinned to the measured 0.4945 (documented deviation, see block header).
