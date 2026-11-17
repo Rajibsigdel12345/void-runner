@@ -1130,6 +1130,8 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
     camRoll: 0.22,                         // camera roll (rad) at bankRaw = +/-1 (subtle, chase only)
     ribbon: { behind: 6, ahead: 34, width: 0.7, segments: 64, lift: 0.6, color: 0x7fd8ff, opacity: 0.5 }
   },
+  zoneTheme: { blendDur: 2.5 }, // ST-455 (E64, I488): zone palette crossfade seconds (RM snaps)
+  vista: { seed: 48801, rMin: 85, rMax: 150, yMin: -12, yMax: 28, count: 12, minScale: 6, maxScale: 34, tintMix: 0.35 }, // ST-455 (E64, I488): background vista ring (deterministic; 1 draw call; campaign only)
   campaign: { warpDuration: 1.6 } // deterministic frozen-sim warp timer (no RNG draws)
 };
 

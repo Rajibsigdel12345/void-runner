@@ -37,6 +37,9 @@ import { chaseTargets, overviewTargets, cockpitTargets, flightPathCam } from './
 import { pathPoint } from './core/flightPath.js'; // ST-454 (I487): race-line path point (pure core)
 import { levelStartDistance } from './core/level.js'; // ST-454 (I487): campaign cumulative path distance
 import { createFlightPathLine } from './render/flightPathLine.js'; // ST-454 (I487): visible race-line ribbon
+import { createVistaRing } from './render/vistaRing.js'; // ST-455 (I488): background vista silhouettes (1 draw call)
+import { createZoneTheme } from './render/zoneTheme.js'; // ST-455 (I488): zone palette crossfade driver
+import { zoneThemeFor } from './core/zonePalette.js'; // ST-455 (I488): palette id -> sanitized theme (pure core)
 import { createJuiceTally } from './core/juiceTally.js'; // ST-183: per-run juice-channel tally (feel telemetry)
 import { killPunchEnergy, killPunchDir } from './core/killPunch.js'; // ST-221 (I224): class-scaled kill punch (T4)
 import { shockwaveRadius } from './core/shockwave.js'; // ST-238 (I245): class-scaled ring sizes (pure core)
@@ -151,6 +154,7 @@ const _starFar = stars.uniforms[1].uColor.value.clone();
 const _starFlare = stars.uniforms[2] ? stars.uniforms[2].uColor.value.clone() : null; // ST-434 (I466) B3: flare tint default (near color)
 let _currentTheme = null;
 function applyTheme(theme) {
+  if (zoneTheme) zoneTheme.cancel(); // ST-455 (I488): immediate theme swap (endless stages / menu / run start) wins over any zone fade
   _currentTheme = theme;
   themeDome.set(theme);
   stars.uniforms[0].uColor.value.setHex(theme ? theme.stars : _starNear.getHex());
@@ -171,6 +175,27 @@ const fpA = { x: 0, y: 0, elev: 0, tx: 0, ty: 0, curv: 0, bankRaw: 0 }; // ST-45
 const fpB = { x: 0, y: 0, elev: 0, tx: 0, ty: 0, curv: 0, bankRaw: 0 }; // ST-454 (I487): path scratch @ D+frameDist
 const fpCamOut = { x: 0, y: 0, z: 0 }, fpLookOut = { x: 0, y: 0, z: 0 }; // ST-454 (I487): flightPathCam out
 const SHIP_HOVER = 0.4; // ST-454 (I487): base ship hover height (matches shipMesh.js)
+const vista = createVistaRing(scene, CONFIG.vista); // ST-455 (I488): background vista silhouettes (deterministic; 1 draw call; campaign-gated)
+scene.add(vista.group);
+const zoneTheme = createZoneTheme( // ST-455 (I488): zone palette crossfade driver (idle = zero per-frame work)
+  (s) => { // paint: write the blended painted-state to the themed materials (no per-frame alloc)
+    themeDome.mesh.material.opacity = s.opacity;
+    themeDome.mesh.visible = s.opacity > 0.001;
+    if (s.opacity > 0.001) themeDome.mesh.material.color.setHex(s.sky);
+    grid.material.color.setHex(s.grid);
+    if (floorDisc) floorDisc.material.color.setHex(s.floor);
+    const _ztm = arenaRing.tickMesh();
+    if (_ztm) _ztm.material.color.setHex(s.accent);
+    vista.setTint(s.accent, CONFIG.vista.tintMix);
+  },
+  CONFIG.zoneTheme.blendDur,
+  { sky: 0x000000, grid: 0xffffff, floor: 0xffffff, accent: 0xdfe9ff }, // identity bases (E60: dome sky irrelevant at opacity 0)
+  (theme) => { // discrete star tint on target change (E60 precedent; stars not blended)
+    stars.uniforms[0].uColor.value.setHex(theme ? theme.stars : _starNear.getHex());
+    stars.uniforms[1].uColor.value.setHex(theme ? theme.stars : _starFar.getHex());
+    if (stars.uniforms[2]) stars.uniforms[2].uColor.value.setHex(theme ? theme.stars : _starFlare.getHex());
+  }
+);
 const bullets = createBulletPool(scene);
 const rockRenders = createAsteroidRenderer(scene);
 const mineRenders = createMineRenderer(scene); // ST-054
@@ -924,6 +949,7 @@ else if (e.type === 'flyerSpawn') toast(tr('toast.flyer')); // ST-232: first spa
     else if (e.type === 'waspSpawn') toast(tr('toast.wasp')); // ST-448: first pack of the run calls out the swarm
     else if (e.type === 'podSpawn') toast(tr('toast.pod')); // ST-448: first spawn of the run calls out the pod
     else if (e.type === 'themeSwap') { applyTheme(e.data.theme); banner.showStage(e.data.stage, stageName(e.data.stage, CONFIG)); } // ST-420 (I450): stage tint + STAGE n - name banner (event-driven; null theme = identity)
+    else if (e.type === 'zoneEnter') { if (world.mode === 'campaign') zoneTheme.setTarget(zoneThemeFor(e.data.paletteId, CONFIG.levels.palettes), motionOff); } // ST-455 (I488): zone identity crossfade (hazard/enemy mix already ST-453; zone name HUD = ST-457)
     else if (e.type === 'kill') { popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 || e.data.golden || e.data.boss, gold: !!e.data.golden, od: !!e.data.overdrive }); killFeed.add(e.data.boss ? Object.assign({}, e.data, { prime: _lastBossPrime }) : e.data); } // ST-030/052, I153; ST-420 (I450): enrich boss kills with the prime flag
     else if (e.type === 'nearmiss') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points); // ST-053 (plain small popup)
     else if (e.type === 'weaponLevelUp') toast(tr('toast.weapon',{level:e.data.level})); // ST-123
@@ -1159,6 +1185,8 @@ function syncVisuals(dt) {
   }
   shieldRing.sync(world, dt, !motionOff); // I62: freeze under reduced motion
   flightPathLine.update(fpD, CONFIG.flightPath, onPath); // ST-454 (I487): visible race-line ribbon (campaign + motion only)
+  zoneTheme.update(dt, motionOff); // ST-455 (I488): advance the zone fade (idle = zero work)
+  vista.group.visible = world.mode === 'campaign' && (st === STATE.PLAYING || st === STATE.PAUSED); // ST-455 (I488): static silhouettes, campaign only (endless: 0 added draw calls)
   if (st === STATE.PLAYING) vortexFx.update(dt); // ST-059 (frozen while paused)
   particles.sync(dt);
   shockwaves.sync(dt); // ST-238 (I245)
