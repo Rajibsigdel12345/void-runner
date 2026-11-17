@@ -1,10 +1,10 @@
-\uFEFF﻿# AGENTS.md - Void Runner
+﻿# AGENTS.md - Void Runner
 
 ## Project
 
 Void Runner is a 3D arcade space-asteroid shooter built with **three.js** (no bundler: ES module import maps over vendored modules).
 
-- Genre: arcade survival / asteroids-style, 3D arena
+- Genre: arcade survival / asteroids-style, 3D arena - two modes: ENDLESS (wave-based arena survival) and CAMPAIGN (3 linear levels: per-zone identity, per-level bosses, checkpoint continue, localStorage highest-level persistence)
 - Platform: desktop web (keyboard), touch-friendly fallback later
 - Engine: three.js (r160+), no bundler (import maps + vendored modules; scripts/serve.mjs + scripts/build.mjs)
 - Test runner: `npm test` (scripts/run-tests.mjs, in-process node:test over tests/*.test.js; pure-logic modules are DOM-free and unit-testable. A bare `node --test tests/` directory run is NOT the runner in this environment)
@@ -36,6 +36,7 @@ Void Runner is a 3D arcade space-asteroid shooter built with **three.js** (no bu
 - All tunables live in `src/core/config.js` (one file, commented, data-driven).
 - Determinism: all randomness flows through `src/core/rng.js` (seeded) so tests can pin seeds.
 - Game state machine: `MENU -> PLAYING -> PAUSED -> GAME_OVER -> PLAYING`, plus the replay branch `MENU -> REPLAY -> GAME_OVER` (ST-190) and exitReplay -> MENU.
+- Modes: `world.mode = 'endless' | 'campaign'` (E64, ST-452..ST-457). Campaign runs a levelState (forward distance + zones) over a curved race line (src/core/flightPath.js) with per-zone identity palettes/vistas, an end-of-level campaign boss (src/core/campaignBoss.js: weak-point cycle + telegraphed phases + posture), Ikaruga-style checkpoint continue, and a localStorage highest-level continue (storage.js, key 'voidrunner.campaign'). ALL campaign code is campaign-gated - the endless path is bit-identical (guarded by the causal/playframe pins in the quality bar).
 - ST-190: `MENU -> REPLAY -> (PAUSED <-> REPLAY) / REPLAY -> GAME_OVER / GAME_OVER -> MENU` (replay viewer; watched runs never write scoreboards).
 - Iteration log: every meaningful change gets an entry in `production/iterations.md` (iter #, goal, changed files, test result).
 - Keep draw calls low: reuse geometries/materials, pool bullets and particles.
@@ -45,3 +46,6 @@ Void Runner is a 3D arcade space-asteroid shooter built with **three.js** (no bu
 1. `npm test` passes (green) before declaring done.
 2. `npm run build` succeeds.
 3. Manual smoke in browser where rendering changed (console clean, no NaN).
+4. `npm run build` dist/ total stays under 3,250,000 B (ceiling; I491: 3,173,343 B / 166 files).
+5. Vendor pin: vendor/three.module.js sha256 first-16 must be 76DEA8151BC9352A.
+6. Regressions (dev server up): `node .evidence/I483/causal483.mjs` -> 'CAUSAL456 PASS' and `node .evidence/I483/playframe483.mjs` -> 'PLAYFRAME456 PASS' must stay EXACT - re-pin WITH measurement only when a shipped mesh/geometry changes.
