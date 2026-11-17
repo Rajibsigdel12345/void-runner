@@ -24,6 +24,7 @@ export function createBossHealth(root) {
   /** sync(boss): visible while the boss is alive; fill width = hpFrac; label + tint per variant (ST-143). */
   function sync(boss) {
     if (!boss || !boss.alive) { wrap.style.opacity = '0'; return; }
+    if (boss.isCampaignBoss) { wrap.style.opacity = '0'; return; } // ST-456: campaign uses the vertical bar (createBossHealthVertical)
     wrap.style.opacity = '1';
     fill.style.width = (Math.max(0, Math.min(1, boss.hpFrac)) * 100) + '%';
     if (_kind !== (boss.kind + (boss.prime ? ':prime' : ''))) { // ST-420: prime shares kind 'monolith' -> composite discriminator
@@ -44,5 +45,58 @@ export function createBossHealth(root) {
     }
   }
 
+  return { sync, wrap };
+}
+
+// ST-456 (E64): campaign boss VERTICAL HP bar (right edge) - the endless horizontal bar above is
+// hidden while a campaign boss is up. Same variant tinting (monolith purple / splicer teal /
+// prime gold), same DOM id pattern (probeable). Shown only for campaign bosses (isCampaignBoss).
+export function createBossHealthVertical(root) {
+  const wrap = document.createElement('div');
+  wrap.id = 'hud-bossbar-v';
+  wrap.style.cssText = 'position:fixed;top:50%;right:18px;transform:translateY(-50%);height:220px;max-height:40vh;width:14px;opacity:0;pointer-events:none;transition:opacity 0.25s;z-index:30;';
+  const bar = document.createElement('div');
+  bar.id = 'hud-bossbar-v-bar';
+  bar.style.cssText = 'position:absolute;inset:0;background:rgba(10,8,20,0.65);border:1px solid rgba(150,110,255,0.5);border-radius:7px;overflow:hidden;';
+  const fill = document.createElement('div');
+  fill.id = 'hud-bossbar-v-fill';
+  fill.style.cssText = 'position:absolute;left:0;right:0;bottom:0;height:100%;background:linear-gradient(0deg,#8b5cf6,#c084fc);transition:height 0.1s linear;';
+  bar.appendChild(fill);
+  wrap.appendChild(bar);
+  const label = document.createElement('div');
+  label.id = 'hud-bossbar-v-label';
+  label.textContent = t('boss.monolith');
+  label.style.cssText = 'position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);white-space:nowrap;font:600 calc(11px * var(--vr-fs,1))/1 system-ui,sans-serif;letter-spacing:0.25em;color:rgba(190,160,255,0.9);';
+  wrap.appendChild(label);
+  root.appendChild(wrap);
+
+  let _kind = '';
+  onLocale(() => { _kind = ''; });
+  function sync(boss) {
+    if (!boss || !boss.alive || !boss.isCampaignBoss) { wrap.style.opacity = '0'; return; }
+    wrap.style.opacity = '1';
+    fill.style.height = (Math.max(0, Math.min(1, boss.hpFrac)) * 100) + '%';
+    if (_kind !== (boss.kind + (boss.prime ? ':prime' : ''))) {
+      _kind = boss.kind + (boss.prime ? ':prime' : '');
+      const prime = boss.prime === true;
+      const sp = boss.kind === 'splicer';
+      if (prime) {
+        label.textContent = t('boss.monolith_prime');
+        label.style.color = 'rgba(255,214,120,0.95)';
+        bar.style.borderColor = 'rgba(255,201,77,0.6)';
+        fill.style.background = 'linear-gradient(0deg,#f59e0b,#ffd54d)';
+      } else if (sp) {
+        label.textContent = t('boss.splicer');
+        label.style.color = 'rgba(120,235,220,0.9)';
+        bar.style.borderColor = 'rgba(45,212,191,0.5)';
+        fill.style.background = 'linear-gradient(0deg,#14b8a6,#5eead4)';
+      } else {
+        label.textContent = t('boss.monolith');
+        label.style.color = 'rgba(190,160,255,0.9)';
+        bar.style.borderColor = 'rgba(150,110,255,0.5)';
+        fill.style.background = 'linear-gradient(0deg,#8b5cf6,#c084fc)';
+      }
+    }
+  }
   return { sync, wrap };
 }

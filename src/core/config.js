@@ -1132,6 +1132,26 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
   },
   zoneTheme: { blendDur: 2.5 }, // ST-455 (E64, I488): zone palette crossfade seconds (RM snaps)
   vista: { seed: 48801, rMin: 85, rMax: 150, yMin: -12, yMax: 28, count: 12, minScale: 6, maxScale: 34, tintMix: 0.35 }, // ST-455 (E64, I488): background vista ring (deterministic; 1 draw call; campaign only)
+  campaignBoss: {
+    // ST-456 (E64, I489): the campaign end-of-level boss (one per level). Derives from
+    // boss.glb (per-level retint + posture scale = 0 new tris, no new asset). Weak
+    // point + 3-phase posture (L1) / single-phase (L2-3); move sets reuse the aimed
+    // bolt + rock ring (distinct per phase). Pure core (src/core/campaignBoss.js).
+    radius: 3.4,        // the Monolith obelisk footprint (same space as boss.radius)
+    enterTime: 1.4,     // longer entrance - the fight is a set piece (endless 0.8)
+    speed: 1.4,         // slow homing (always dodgeable)
+    turn: 0.7,          // sluggish heading change rad/s
+    hp: { 1: 96, 2: 110, 3: 130 },    // per-level HP (climbing; the weak point gates TTK)
+    phases: { 1: 3, 2: 1, 3: 1 },     // C3: L1 full 3-phase; L2-3 single-phase
+    phaseAt: [1.0, 0.66, 0.33],       // L1 phase hpFrac thresholds (phase i while f in [at[i+1], at[i]))
+    posture: [1.0, 1.14, 1.28],       // posture/scale per phaseIndex (the growth read on a phase change)
+    weak: { r: 1.4, orbitR: 4.0, armTime: 2.4, teleTime: 0.8, openTime: 2.2 }, // closed -> tele -> open cycle
+    moves: { aimEvery: [2.4, 1.8, 1.3], ringEvery: [99, 3.5, 2.2] }, // per-tier cadence (99 = no ring in phase 0)
+    singlePhaseMoveTier: 1,           // L2/L3 (1 phase) run the tier-1 move set (aimed + ring)
+    score: { 1: 1000, 2: 1400, 3: 2000 },
+    splitCount: 4,        // M rocks on death
+    splitSize: 'M'
+  },
   campaign: { warpDuration: 1.6 } // deterministic frozen-sim warp timer (no RNG draws)
 };
 

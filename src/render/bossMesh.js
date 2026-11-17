@@ -155,6 +155,20 @@ export function createBossMesh(scene) {
   for (const r of [ringWarn, ringFlash]) { r.mesh.visible = false; r.mesh.frustumCulled = false; r.mesh.position.y = teleHeight; scene.add(r.mesh); }
   const teleRed = new THREE.Color(teleBase); // shared lerp target (no per-frame alloc)
 
+  // ST-456 (E64): the campaign weak point - a small emissive orb riding in front of the body
+  // (the only place bullets land). Cyan while it telegraphs, white-hot while open, faint while
+  // closed (armored). A child of the group so the entrance scale births it with the body;
+  // hidden entirely for the endless path (non-campaign bosses never set isCampaignBoss).
+  const weakGeo = new THREE.SphereGeometry(0.55, 20, 14);
+  const weakMat = new THREE.MeshStandardMaterial({
+    color: 0x0b2530, roughness: 0.25, metalness: 0.3,
+    emissive: 0x66ffee, emissiveIntensity: 0.2,
+  });
+  const weakMesh = new THREE.Mesh(weakGeo, weakMat);
+  weakMesh.visible = false;
+  weakMesh.frustumCulled = false;
+  group.add(weakMesh);
+
   // ST-252 (I263): silhouette rim on hull + crown - the obelisk's edges separate from the warm
   // E18 world at distance. Data-driven in CONFIG.boss.rim. rim.color is a shared Color instance
   // (auto-pushed by the uniform); rim.push() mirrors the per-frame strength once the program has
@@ -247,12 +261,12 @@ export function createBossMesh(scene) {
       redMix = Math.max(redMix, aimP * aimP * (tg.aimed.redLean || 0));   // threat-red lean (color-coded sweep)
     }
     let burstP = 0;
-    if (tg && boss.kind === "monolith") burstP = teleProgress(burstT, tg.burst.window);
+    if (tg && boss.kind === "monolith" && !boss.isCampaignBoss) burstP = teleProgress(burstT, tg.burst.window); // ST-456: the campaign boss rings rocks, never radial bolts
     if (burstP > 0) corePulse = Math.max(corePulse, burstP * tg.burst.coreBoost); // long: linear over the wider window
     coreMat.emissiveIntensity += corePulse;
     if (redMix > 0) coreMat.emissive.lerp(teleRed, redMix);
     // (a) rock-ring telegraph: expanding warning ring, radius boss.radius -> maxRadius, urgency-eased.
-    const ringP = (tg && boss.kind === "monolith") ? teleProgress(ringT, tg.ring.window) : 0;
+    const ringP = (tg && (boss.kind === "monolith" || boss.isCampaignBoss)) ? teleProgress(ringT, tg.ring.window) : 0; // ST-456: the campaign boss telegraphs its rock ring too
     if (ringP > 0) {
       const grow = teleUrgency(ringP, 1.6); // slow start, accelerates into the burst
       const rad = boss.radius + (tg.ring.maxRadius - boss.radius) * grow;
@@ -268,7 +282,23 @@ export function createBossMesh(scene) {
       ringFlash.mesh.scale.setScalar(tg.burst.ringRadius);
       teleMat1.opacity = tg.burst.opacity * burstP;
     } else if (ringFlash.on) { ringFlash.mesh.visible = false; teleMat1.opacity = 0; ringFlash.on = false; }
-    group.scale.setScalar(Math.max(0.001, (1 - Math.pow(1 - boss.entered, 3))) * sizeScale); // ST-135/143: entrance + variant size
+    const sIn = Math.max(0.001, (1 - Math.pow(1 - boss.entered, 3)));
+    const posture = boss.isCampaignBoss ? (boss.postureScale || 1) : 1; // ST-456: per-phase posture change
+    const gs = sIn * sizeScale * posture;
+    // ST-456 (E64): weak orb placement - local offset divided by the live group scale so the orb
+    // sits at its true world offset (front of the body, orbit radius); fades in with the entrance.
+    if (boss.isCampaignBoss && boss.entered > 0.5) {
+      const wp = boss.weak;
+      weakMesh.visible = true;
+      weakMesh.position.set((wp.x - boss.pos.x) / gs, 0.15, (wp.y - boss.pos.y) / gs);
+      weakMat.emissive.setHex(wp.open ? 0xffffff : 0x66ffee);
+      weakMat.emissiveIntensity = wp.open
+        ? 2.0 + 0.6 * (0.5 + 0.5 * Math.sin(t * 6.0)) // white-hot pulse while vulnerable
+        : (wp.state === 'tele') ? 0.3 + 1.6 * wp.tele : 0.18; // rising cyan telegraph / faint closed
+    } else {
+      weakMesh.visible = false;
+    }
+    group.scale.setScalar(gs); // ST-135/143: entrance + variant size; ST-456: campaign posture
     group.visible = true;
   }
 

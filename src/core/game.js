@@ -14,6 +14,7 @@ import { WaspField } from './wasp.js'; // ST-448
 import { PodField } from './pod.js'; // ST-448
 import { Monolith, bossHpForWave, bossBurstVectors } from './boss.js';
 import { Splicer, splicerHpForWave } from './splicer.js';
+import { CampaignBoss } from './campaignBoss.js'; // ST-456 (E64): the campaign end-of-level boss
 import { Warden } from './warden.js'; // ST-136
 import { EnemyBulletField } from './enemyBullets.js';
 import { VortexField } from './vortex.js'; // ST-059
@@ -308,24 +309,34 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     }
     this.enemyBullets.step(edt); // ST-056 (ST-115: scaled under slow-mo)
     if (this.boss) { // ST-055/056
-      if (this.boss.step(edt, this.ship.pos) === 'ring') this.bossRingBurst(); // ST-115: scaled under slow-mo
-      if (typeof this.boss.drainBolts === 'function') { // ST-143: Splicer spiral bolts
-        const bolts = this.boss.drainBolts();
-        if (bolts) this.bossSpiralBolts(bolts);
-      }
-      if (this.boss.entered >= 1) { // ST-135: entrance window - no aimed bolts or bursts
-        this.bossFireTimer -= edt; // ST-115: boss fire cadence slows under slow-mo
-        if (this.bossFireTimer <= 0) {
-          this.bossFireTimer += this.bossAimEvery(); // ST-133/143: enraged + per-variant cadence
+      if (this.boss.isCampaignBoss) { // ST-456 (E64): the campaign level boss drives its own move set
+        const ev = this.boss.step(edt, this.ship.pos); // ST-115: scaled under slow-mo
+        if (ev.ring) this.bossRingBurst();
+        if (ev.aim) {
           const b = this.fireAimedBolt(this.boss.pos, this.cfg.enemyBullets.speed);
           if (b) this.emit('bossFire', { pos: { x: this.boss.pos.x, y: this.boss.pos.y } });
         }
-        if (this.boss.kind === 'monolith') { // ST-143: radial burst is Monolith-only (Splicer uses the spiral)
-          const bb = this.boss.cfg.boss.burst; // ST-419: per-boss cfg (Prime re-tune); no-op for normal bosses
-          this.bossBurstTimer -= edt; // ST-134/ST-115: burst cadence slows under slow-mo
-          if (this.bossBurstTimer <= 0) {
-            this.bossBurstTimer += bb.every * (this.boss.phase === 2 ? bb.everyMult : 1); // ST-419: per-boss burst cadence
-            this.bossBurst();
+        if (ev.phase) this.emit('bossPhase', { level: this.levelState.level, phaseIndex: ev.phaseIndex, pos: { x: this.boss.pos.x, y: this.boss.pos.y } });
+      } else {
+        if (this.boss.step(edt, this.ship.pos) === 'ring') this.bossRingBurst(); // ST-115: scaled under slow-mo
+        if (typeof this.boss.drainBolts === 'function') { // ST-143: Splicer spiral bolts
+          const bolts = this.boss.drainBolts();
+          if (bolts) this.bossSpiralBolts(bolts);
+        }
+        if (this.boss.entered >= 1) { // ST-135: entrance window - no aimed bolts or bursts
+          this.bossFireTimer -= edt; // ST-115: boss fire cadence slows under slow-mo
+          if (this.bossFireTimer <= 0) {
+            this.bossFireTimer += this.bossAimEvery(); // ST-133/143: enraged + per-variant cadence
+            const b = this.fireAimedBolt(this.boss.pos, this.cfg.enemyBullets.speed);
+            if (b) this.emit('bossFire', { pos: { x: this.boss.pos.x, y: this.boss.pos.y } });
+          }
+          if (this.boss.kind === 'monolith') { // ST-143: radial burst is Monolith-only (Splicer uses the spiral)
+            const bb = this.boss.cfg.boss.burst; // ST-419: per-boss cfg (Prime re-tune); no-op for normal bosses
+            this.bossBurstTimer -= edt; // ST-134/ST-115: burst cadence slows under slow-mo
+            if (this.bossBurstTimer <= 0) {
+              this.bossBurstTimer += bb.every * (this.boss.phase === 2 ? bb.everyMult : 1); // ST-419: per-boss burst cadence
+              this.bossBurst();
+            }
           }
         }
       }
@@ -575,6 +586,22 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
   resolveBulletBoss() {
     const boss = this.boss;
     if (!boss || !boss.alive) return;
+    if (boss.isCampaignBoss) { // ST-456 (E64): the weak point takes damage; the armored body clangs
+      for (const blt of this.weapons.bullets) {
+        if (blt.dead) continue;
+        const wp = boss.weak;
+        const hitWp = wp.open && Math.hypot(wp.x - blt.pos.x, wp.y - blt.pos.y) < wp.r + blt.radius;
+        const hitBody = Math.hypot(boss.pos.x - blt.pos.x, boss.pos.y - blt.pos.y) < boss.radius + blt.radius;
+        if (hitWp) { // weak point first so it wins overlaps
+          this.onPlayerBulletHit(blt.id);
+          if (boss.hit()) this.bossDeath();
+        } else if (hitBody) {
+          this.onPlayerBulletHit(blt.id); // armored clang - bullet consumed, no HP
+        }
+      }
+      this.weapons.compact();
+      return;
+    }
     for (const blt of this.weapons.bullets) {
       if (blt.dead) continue;
       if (Math.hypot(boss.pos.x - blt.pos.x, boss.pos.y - blt.pos.y) < boss.radius + blt.radius) {
@@ -713,8 +740,7 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     const ls = this.levelState;
     ls.phase = 'boss';
     const kind = bossKind(ls.level, this.cfg);
-    const b = this.cfg.boss;
-    const rad = (kind === 'splicer') ? this.cfg.splicer.radius : b.radius;
+    const rad = this.cfg.campaignBoss.radius; // ST-456: all level bosses share the monolith footprint
     const R = this.cfg.arena.radius - rad;
     let pos = null, tries = 0;
     do {
@@ -722,20 +748,11 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
       pos = v2(Math.cos(a) * R, Math.sin(a) * R);
       tries++;
     } while (Math.hypot(pos.x - this.ship.pos.x, pos.y - this.ship.pos.y) < 10 && tries < 8);
-    if (kind === 'splicer') {
-      this.boss = new Splicer(this.rng, this.cfg, pos, splicerHpForWave(this.cfg, 10)); // ST-453: L2 boss, wave-10-calibrated HP
-      this.bossFireTimer = this.cfg.splicer.aimEvery;
-    } else if (kind === 'monolith-prime') {
-      const mp = this.cfg.stages.monolithPrime;
-      const primeCfg = { ...this.cfg, boss: { ...b, splitCount: mp.splitCount,
-        burst: { ...b.burst, every: mp.burstEvery }, phase2: { ...b.phase2, hpFrac: mp.phase2 } } };
-      this.boss = new Monolith(this.rng, primeCfg, pos, mp.hp);
-      this.boss.prime = true; // kind stays monolith - reuses all Monolith render/sim branches
-      this.bossFireTimer = b.fireEvery;
-    } else {
-      this.boss = new Monolith(this.rng, this.cfg, pos, bossHpForWave(this.cfg, 5)); // ST-453: L1 boss, wave-5-calibrated HP
-      this.bossFireTimer = b.fireEvery;
-    }
+    // ST-456 (E64): every level boss is the CampaignBoss (weak point + phases + posture).
+    // kind stays canonical ('monolith'/'splicer') so render/strings paths are untouched;
+    // tint picks the per-level identity (L3 'prime' = gold monolith).
+    const tint = (kind === 'splicer') ? 'splicer' : (kind === 'monolith-prime') ? 'prime' : 'monolith';
+    this.boss = new CampaignBoss(this.rng, this.cfg, pos, ls.level, tint);
     this._bossPhaseEmitted = false;
     this.bossBurstTimer = this.boss.cfg.boss.burst.every;
     this.bossBursts = 0;

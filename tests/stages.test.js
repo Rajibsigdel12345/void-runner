@@ -41,11 +41,19 @@ function worldWithEndlessBoss(seed, wave) {
   assert.ok(w.boss, 'boss spawned');
   return w;
 }
-/** One 1-damage bullet at the boss position, then step. Kills a boss at hp 1. */
+/** One 1-damage bullet, then step. Kills a boss at hp 1. ST-456: campaign bosses are
+ * armored - the bullet must land on the (forced-open) weak point, not the body. */
 function landOneBullet(w) {
   const b = w.boss;
   w.boss.hp = 1;
-  w.weapons.bullets.push({ id: 1, pos: { x: b.pos.x, y: b.pos.y }, vel: { x: 34, y: 0 }, life: 1, radius: 0.18, dead: false });
+  let px = b.pos.x, py = b.pos.y;
+  if (b.isCampaignBoss) {
+    b.phaseIndex = b.phaseCount - 1; // final phase: an hp drop must not transition (and re-arm the weak point)
+    b.weak.state = 'open'; b.weak.open = true; b._weakTimer = 5; // hold it open through the step
+    b._updateWeak(0);
+    px = b.weak.x; py = b.weak.y;
+  }
+  w.weapons.bullets.push({ id: 1, pos: { x: px, y: py }, vel: { x: 34, y: 0 }, life: 1, radius: 0.18, dead: false });
   w.step(DT, NEUTRAL);
 }
 
@@ -127,8 +135,8 @@ test('stages: mode selection via begin() and setMode()', () => {
 test('stages: killing the level-1 boss in campaign starts the warp to level 2', () => {
   const w = worldWithCampaignBoss(51, 1);
   assert.equal(w.boss.kind, 'monolith');
-  assert.equal(w.boss.prime, undefined); // not the Prime
-  assert.equal(w.boss.maxHp, 64); // bossHpForWave(cfg, 5) - wave-5-calibrated
+  assert.equal(w.boss.prime, false); // ST-456: prime is a boolean identity flag
+  assert.equal(w.boss.maxHp, 96); // ST-456: campaignBoss.hp[1]
   assert.equal(w.boss.spawnWave, 0); // 0 tags a level boss
   landOneBullet(w);
   assert.ok(w.warp, 'warp active after level-1 boss death');
@@ -163,10 +171,10 @@ test('stages: killing the campaign final (level 3) boss = Monolith Prime -> vict
   const w = worldWithCampaignBoss(53, 3);
   assert.equal(w.boss.kind, 'monolith');
   assert.equal(w.boss.prime, true);
-  assert.equal(w.boss.maxHp, 88);
-  assert.equal(w.boss.cfg.boss.burst.every, 3.2); // Prime re-tune
-  assert.equal(w.boss.splitCount, 5);
-  assert.equal(w.boss.cfg.boss.phase2.hpFrac, 0.6);
+  assert.equal(w.boss.maxHp, 130); // ST-456: campaignBoss.hp[3]
+  assert.equal(w.boss.cfg.boss.burst.every, CONFIG.boss.burst.every); // ST-456: base cfg (Prime is a visual identity)
+  assert.equal(w.boss.splitCount, 4); // ST-456: campaignBoss.splitCount
+  assert.equal(w.boss.cfg.boss.phase2.hpFrac, CONFIG.boss.phase2.hpFrac);
   assert.equal(w.boss.spawnWave, 0); // 0 tags a level boss
   w.ship.invuln = 1e9; // survive the split
   landOneBullet(w);

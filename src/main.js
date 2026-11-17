@@ -24,7 +24,7 @@ import { createGunshipRenderer } from './render/gunshipMesh.js'; // ST-418
 import { createSentryRenderer } from './render/sentryMesh.js'; // ST-448
 import { createWaspRenderer } from './render/waspMesh.js'; // ST-448
 import { createPodRenderer } from './render/podMesh.js'; // ST-448
-import { createBossHealth } from './render/bossHealth.js';
+import { createBossHealth, createBossHealthVertical } from './render/bossHealth.js';
 import { createEnemyBulletRenderer } from './render/enemyBulletMesh.js';
 import { createPowerupRenderer } from './render/powerupMesh.js';
 import { createShieldRing } from './render/shieldRing.js';
@@ -301,6 +301,7 @@ function warmUp() {
 assetLoader.loadAll().then(() => { assetsSettled = true; warmUp(); });
 setTimeout(() => { skySettled = true; warmUp(); }, 4000); // E48 I401: skybox-failure fallback (no env map; warming still correct)
 const bossHealth = createBossHealth(document.body); // ST-055
+const bossHealthV = createBossHealthVertical(document.body); // ST-456 (E64): campaign vertical bar
 const enemyBulletRenders = createEnemyBulletRenderer(scene); // ST-056
 const powerupRenders = createPowerupRenderer(scene);
 const shieldRing = createShieldRing(scene);
@@ -1146,10 +1147,15 @@ function syncVisuals(dt) {
     // timers; -1 = no window). fx off = none (R-E29-1); entered < 1 = held (the timers are held too).
     const tb = world.boss;
     const teleOn = !!(tb && tb.alive && tb.entered >= 1 && liveSettings.fx !== "off");
-    bossMesh.sync(world.boss, simT,
-      teleOn && tb.kind === "monolith" ? tb.ringTimer : -1,
-      teleOn ? world.bossFireTimer : -1,
-      teleOn && tb.kind === "monolith" ? world.bossBurstTimer : -1); // ST-055/290
+    let _ringT = -1, _aimT = -1, _burstT = -1;
+    if (tb && tb.alive && tb.isCampaignBoss && tb.entered >= 1) { // ST-456: the campaign boss feeds its OWN move-set timers
+      if (liveSettings.fx !== "off") { _aimT = tb.teleAim; _ringT = tb.teleRing; } // R-E29-1: fx off = no telegraphs (the weak orb itself is identity, always visible)
+    } else if (teleOn) {
+      _ringT = tb.kind === "monolith" ? tb.ringTimer : -1;
+      _aimT = world.bossFireTimer;
+      _burstT = tb.kind === "monolith" ? world.bossBurstTimer : -1;
+    }
+    bossMesh.sync(world.boss, simT, _ringT, _aimT, _burstT); // ST-055/290; ST-456: campaign timers
   }
   wardenMesh.sync(world.warden, simT); // ST-137
   stingerRenders.sync(world.stingers, simT, motionOff); // ST-229: core glow FX-tier-independent; telegraph wobble motion-gated
@@ -1162,6 +1168,7 @@ function syncVisuals(dt) {
   waspRenders.sync(world.wasps, simT, motionOff); // ST-448: threat-red nose ramp (FX-tier-independent)
   podRenders.sync(world.pods, simT, motionOff); // ST-448: idle spin (motion-gated), static seam glow
   bossHealth.sync(world.boss); // ST-055
+  bossHealthV.sync(world.boss); // ST-456 (E64): campaign vertical bar
   enemyBulletRenders.sync(world.enemyBullets, simT); // ST-056
   powerupRenders.sync(world.powerups, dt);
   if (!motionOff && st === STATE.PLAYING) { for (const d of world.powerups.drops) { if (d.dead || !d.magnetPull) continue; particles.burst(d.pos.x, d.pos.y, { count: 2, color: CONFIG.fx.palette.pickup.magnet, speed: 1.5, life: 0.35, shape: 'radial' }); } } // ST-177: magnet pull trail (motion-gated comet wisp behind the orb the magnet drags)
