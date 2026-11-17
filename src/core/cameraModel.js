@@ -131,3 +131,24 @@ export function cockpitTargets(p, fwd, cfg, out, spdFrac = 0) {
   out.lookZ = p.y + fwd.y * ahead;
   return out;
 }
+
+// ST-454 (E64, I487): flight-path camera adjustment (E62-preserving). `chase` = chaseTargets
+// output ({camX,camY,camZ, lookX,lookY,lookZ}); `path` = pathPoint at the ship's distance;
+// `pathAhead` = pathPoint frameDist ahead. (a) vertical LIFT of the whole rig by path.elev
+// (cam.y += e, look world-up -> e): a pure translation, so the cam->ship and cam->look vectors
+// (view angle + screen offset) are UNCHANGED - the E62 invariants hold, no rig rebuild.
+// (b) framing: the look target is pulled toward pathAhead (x/z/elev) by cfg.frameFrac.
+// outCam / outLook are written in place (no per-frame alloc).
+export function flightPathCam(chase, path, pathAhead, cfg, outCam, outLook) {
+  const e = path.elev || 0;
+  outCam.x = chase.camX; outCam.y = chase.camY + e; outCam.z = chase.camZ;
+  const frac = (cfg && cfg.frameFrac != null) ? (cfg.frameFrac < 0 ? 0 : cfg.frameFrac > 1 ? 1 : cfg.frameFrac) : 0;
+  let lx = chase.lookX, ly = e, lz = chase.lookZ;
+  if (frac > 0) {
+    lx += (pathAhead.x - lx) * frac;
+    ly += (pathAhead.elev - ly) * frac;
+    lz += (pathAhead.y - lz) * frac;
+  }
+  outLook.x = lx; outLook.y = ly; outLook.z = lz;
+  return { cam: outCam, look: outLook };
+}

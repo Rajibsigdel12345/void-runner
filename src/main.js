@@ -33,7 +33,10 @@ import { createParticles } from './render/particles.js';
 import { createShockwaves } from './render/shockwave.js'; // ST-238 (I245): pooled additive shockwave ring
 import { createDebrisField } from './render/debrisField.js'; // ST-381 (I411): transient 3D death-shatter pool
 import { createShake, createPunch, createFovKick } from './core/fx.js'; // ST-081/ST-082
-import { chaseTargets, overviewTargets, cockpitTargets } from './core/cameraModel.js'; // ST-415 + ST-416 (I445/I446): pure camera targets (chase dolly + overview + cockpit)
+import { chaseTargets, overviewTargets, cockpitTargets, flightPathCam } from './core/cameraModel.js'; // ST-415 + ST-416 (I445/I446): pure camera targets (chase dolly + overview + cockpit)
+import { pathPoint } from './core/flightPath.js'; // ST-454 (I487): race-line path point (pure core)
+import { levelStartDistance } from './core/level.js'; // ST-454 (I487): campaign cumulative path distance
+import { createFlightPathLine } from './render/flightPathLine.js'; // ST-454 (I487): visible race-line ribbon
 import { createJuiceTally } from './core/juiceTally.js'; // ST-183: per-run juice-channel tally (feel telemetry)
 import { killPunchEnergy, killPunchDir } from './core/killPunch.js'; // ST-221 (I224): class-scaled kill punch (T4)
 import { shockwaveRadius } from './core/shockwave.js'; // ST-238 (I245): class-scaled ring sizes (pure core)
@@ -162,6 +165,12 @@ function applyTheme(theme) {
 const world = new World(new RNG((Date.now() & 0xffff) ^ 0x51ab));
 const shipMesh = createShipMesh();
 scene.add(shipMesh.group);
+const flightPathLine = createFlightPathLine(); // ST-454 (I487): race-line ribbon (campaign + motion only)
+scene.add(flightPathLine.group);
+const fpA = { x: 0, y: 0, elev: 0, tx: 0, ty: 0, curv: 0, bankRaw: 0 }; // ST-454 (I487): path scratch @ D
+const fpB = { x: 0, y: 0, elev: 0, tx: 0, ty: 0, curv: 0, bankRaw: 0 }; // ST-454 (I487): path scratch @ D+frameDist
+const fpCamOut = { x: 0, y: 0, z: 0 }, fpLookOut = { x: 0, y: 0, z: 0 }; // ST-454 (I487): flightPathCam out
+const SHIP_HOVER = 0.4; // ST-454 (I487): base ship hover height (matches shipMesh.js)
 const bullets = createBulletPool(scene);
 const rockRenders = createAsteroidRenderer(scene);
 const mineRenders = createMineRenderer(scene); // ST-054
@@ -1080,13 +1089,25 @@ function syncVisuals(dt) {
   const inRun = (st === STATE.PLAYING || st === STATE.PAUSED); // ST-416 (I446): camera modes apply only in a run
   const menuFlame = st === STATE.MENU ? (motionOff ? mh.flameIdle : mh.flameIdle * (1 - mh.flameFlicker * (0.5 + 0.5 * Math.sin(simT * mh.flameRate)))) : thrustFrac; // ST-261: gentle engine idle in MENU (steady under reduced motion)
   shipMesh.sync(world.ship, simT, !motionOff, menuFlame); // ST-063 engine flame; ST-261: MENU idle
+  const onPath = world.mode === 'campaign' && st === STATE.PLAYING && !motionOff; // ST-454 (I487): race-line active (campaign + playing + motion)
+  let fpD = 0, fpBank = 0; // ST-454 (I487): global path distance + bank
+  if (onPath) {
+    fpD = levelStartDistance(world.levelState.level, CONFIG) + world.levelState.distance; // ST-454 (I487): continuous across levels
+    pathPoint(fpD, CONFIG.flightPath, fpA); // ST-454 (I487): path @ D (elev + tangent + bank)
+    pathPoint(fpD + CONFIG.flightPath.frameDist, CONFIG.flightPath, fpB); // ST-454 (I487): path @ D+frameDist (framing)
+    fpBank = fpA.bankRaw; // ST-454 (I487): bank from path curvature
+  }
+  const _spdF = Math.min(1, world.ship.speed / CONFIG.ship.maxSpeed); // ST-454 (I487): speed fraction for bank/roll gain
+  const shipBank = (onPath && camMode !== 'cockpit') ? fpBank * CONFIG.flightPath.shipBank * (0.4 + 0.6 * _spdF) : 0; // ST-454 (I487)
+  const camRoll = (onPath && camMode === 'chase') ? fpBank * CONFIG.flightPath.camRoll * (0.4 + 0.6 * _spdF) : 0; // ST-454 (I487)
+  shipMesh.group.position.y = SHIP_HOVER + (onPath ? fpA.elev : 0); // ST-454 (I487): path elevation (0 in endless/PAUSED/MENU/RM)
   if (st === STATE.MENU) { // ST-261: hero pose (render-only - sync owns rotation.y each frame, so this override is authoritative while in MENU)
     shipMesh.group.rotation.y = mh.yaw;
     shipMesh.group.rotation.x = mh.pitch;
     shipMesh.group.rotation.z = mh.bank + (motionOff ? 0 : mh.rockAmp * Math.sin(simT * mh.rockRate)); // idle rock, static under reduced motion
   } else { // no MENU pose bleed into the follow cam
     shipMesh.group.rotation.x = 0;
-    shipMesh.group.rotation.z = 0;
+    shipMesh.group.rotation.z = shipBank; // ST-454 (I487): path bank (0 in endless/PAUSED/MENU/RM)
   }
   shipMesh.group.visible = !(inRun && camMode === 'cockpit'); // ST-416 (I446): hide the ship in cockpit first-person
   reticle.sync(world.ship, st === STATE.PLAYING, inRun && camMode === 'cockpit'); // I44: only while playing; ST-416: emphasize the fire-line in cockpit
@@ -1137,6 +1158,7 @@ function syncVisuals(dt) {
     particles.burst(world.ship.pos.x, world.ship.pos.y, { count: liveSettings.fx === 'high' ? 6 : 3, color: 0x9fd8ff, speed: 2.5, life: 0.35, shape: 'ring' });
   }
   shieldRing.sync(world, dt, !motionOff); // I62: freeze under reduced motion
+  flightPathLine.update(fpD, CONFIG.flightPath, onPath); // ST-454 (I487): visible race-line ribbon (campaign + motion only)
   if (st === STATE.PLAYING) vortexFx.update(dt); // ST-059 (frozen while paused)
   particles.sync(dt);
   shockwaves.sync(dt); // ST-238 (I245)
@@ -1164,12 +1186,16 @@ function syncVisuals(dt) {
   } else if (inRun && camMode === 'cockpit') { // ST-416 (I446): first-person seat (heading-aligned)
     cockpitTargets(ship.pos, f, CONFIG.camera, camModelOut, spdFrac); // ST-444 (I477): speed look-ahead (rest 0 == legacy 60 bit-identical)
     camTX = camModelOut.camX; camTY = camModelOut.camY; camTZ = camModelOut.camZ; lookTX = camModelOut.lookX; lookTY = camModelOut.lookY; lookTZ = camModelOut.lookZ;
-  } else if (st === STATE.PLAYING && !motionOff) { // 2-5% lead toward the aim point, capped, eased by the look damp
-    const aim = resolveAimPoint();
-    if (aim) {
-      const ox = aim.x - ship.pos.x, oz = aim.y - ship.pos.y;
-      const m = Math.hypot(ox, oz);
-      if (m > 0.001) { const len = Math.min(m * CONFIG.camera.aimLeadFrac, CONFIG.camera.aimLeadCap); lookTX += ox / m * len; lookTZ += oz / m * len; }
+    if (onPath) { camTY += fpA.elev; lookTY = fpA.elev; } // ST-454 (I487): cockpit rides path altitude
+  } else { // ST-454 (I487): chase (default) - flight-path framing + aim-lead
+    if (onPath) { const r454 = flightPathCam(camModelOut, fpA, fpB, CONFIG.flightPath, fpCamOut, fpLookOut); camTX = r454.cam.x; camTY = r454.cam.y; camTZ = r454.cam.z; lookTX = r454.look.x; lookTY = r454.look.y; lookTZ = r454.look.z; } // ST-454 (I487)
+    if (st === STATE.PLAYING && !motionOff) { // 2-5% lead toward the aim point, capped, eased by the look damp
+      const aim = resolveAimPoint();
+      if (aim) {
+        const ox = aim.x - ship.pos.x, oz = aim.y - ship.pos.y;
+        const m = Math.hypot(ox, oz);
+        if (m > 0.001) { const len = Math.min(m * CONFIG.camera.aimLeadFrac, CONFIG.camera.aimLeadCap); lookTX += ox / m * len; lookTZ += oz / m * len; }
+      }
     }
   }
   camPos.x = damp(camPos.x, camTX, 5, dt);
@@ -1184,6 +1210,7 @@ function syncVisuals(dt) {
   bossZoomFov = damp(bossZoomFov, zoomTX, CONFIG.camera.bossZoomDamp, dt);
   camera.position.set(camPos.x, camPos.y, camPos.z);
   camera.lookAt(camLook.x, camLook.y, camLook.z);
+  if (camRoll !== 0) camera.rotateZ(camRoll); // ST-454 (I487): roll into the race-line turn (chase + campaign + motion)
   const targetFov = CONFIG.camera.fovBase + CONFIG.camera.fovSpeed * spdFrac + fovKick.value() + bossZoomFov + (inRun && camMode === 'cockpit' && !motionOff ? CONFIG.camera.cockpitFovSpeed * spdFrac : 0) + (world.warp ? 2.5 : 0); // ST-082: base + speed + kick; ST-219: boss zoom; ST-416: cockpit seat kick (RM-gated); ST-420 (I450): warp FOV push (sim frozen during warp)
   if (Math.abs(targetFov - camera.fov) > 0.01) { // only touch the projection when it actually moves
     camera.fov = damp(camera.fov, targetFov, CONFIG.camera.fovDamp, dt);

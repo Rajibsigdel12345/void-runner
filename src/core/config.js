@@ -1115,6 +1115,21 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
       gauntlet: { rockRate: 2.0, mineRate: 2.0, enemyRate: 1.5 }
     }
   },
+  flightPath: {
+    // ST-454 (E64, I487): the race line - a smooth bounded 3D path (curves + bank + elevation).
+    // Pure trochoid (sinusoids) -> C-infinity continuous; render lifts the cam rig by elev
+    // (E62-preserving) + frames the path ahead + rolls into the turn. Endless never reads it.
+    a1: 10.0, f1: 0.050, p1: 0.0,          // primary trochoid lobe: radius + spatial freq + phase
+    a2: 2.5,  f2: 0.130, p2: 1.7,          // secondary lobe (adds S-curves + a bounded inner loop)
+    elevBase: 3.0, elevAmp: 2.4, elevFreq: 0.070, elevPhase: 0.0, // vertical ride (world +Y)
+    tangentFloor: 0.15,                    // keep |tangent| bounded away from 0 -> no NaN normalize
+    turnScale: 14.0,                       // curvature -> bankRaw gain (clamped to [-1,1])
+    frameFrac: 0.45,                       // how far the look target is pulled toward path-ahead (0..1)
+    frameDist: 11.0,                       // metres along the path that 'ahead' is (framing lead)
+    shipBank: 0.55,                        // ship roll (rad) at bankRaw = +/-1
+    camRoll: 0.22,                         // camera roll (rad) at bankRaw = +/-1 (subtle, chase only)
+    ribbon: { behind: 6, ahead: 34, width: 0.7, segments: 64, lift: 0.6, color: 0x7fd8ff, opacity: 0.5 }
+  },
   campaign: { warpDuration: 1.6 } // deterministic frozen-sim warp timer (no RNG draws)
 };
 
