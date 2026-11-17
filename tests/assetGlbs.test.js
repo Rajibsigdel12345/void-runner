@@ -135,7 +135,7 @@ test('ship.glb: container, naming, poly budget, silhouette dimensions', () => {
   const hullF = shipFacet['VR_Ship_Hull.001'] || shipFacet['VR_Ship_Hull'];
   const wingF = shipFacet['VR_Ship_Wings.001'] || shipFacet['VR_Ship_Wings'];
   assert.ok(hullF && wingF, 'hull + wings facet data (' + Object.keys(shipFacet).join(',') + ')');
-  const SHIP_FACET = { hull: { p10: 0.6148, p50: 0.9402, p90: 1.3888 }, wings: { p10: 0.5346, p50: 0.5854, p90: 1.4654 } }; // I454 (ST-424 ship v4 "real airship") EXPLICIT re-pin: I440 hull {0.5963/0.9979/1.3994} + wings {0.3911/1.0368/1.55} -> measured on the 14276-tri per-vertex re-bake (.evidence/I454/measure454.json; hull 7800t spread 0.7740 / wings 2136t spread 0.9308)
+  const SHIP_FACET = { hull: { p10: 0.5936, p50: 1.0284, p90: 1.4453 }, wings: { p10: 0.378, p50: 0.9977, p90: 1.55 } }; // I470 (ST-437 ship v5 high-poly real airship) EXPLICIT re-pin: I454 hull {0.6148/0.9402/1.3888} + wings {0.5346/0.5854/1.4654} -> measured on the 17143-tri GLB (.evidence/I470/measure_glb.py; hull 8423t spread 0.8517 / wings 2260t spread 1.172; k_hull 0.55->0.60, SCALE_XYZ 1.600/1.405/1.260, hull-dominant forward mid-band density)
   assert.ok(hullF.p90 - hullF.p10 >= 0.35, 'hull facet luma spread ' + (hullF.p90 - hullF.p10).toFixed(3) + ' >= 0.35 (I292 value bake; pre-bake was a flat in-code tint)');
   assert.ok(wingF.p90 - wingF.p10 >= 0.35, 'wings facet luma spread ' + (wingF.p90 - wingF.p10).toFixed(3) + ' >= 0.35 (I292 value bake; pre-bake was a flat in-code tint)');
   for (const [k, E] of [['hull', hullF], ['wings', wingF]]) {

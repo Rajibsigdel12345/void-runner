@@ -47,10 +47,10 @@ const totalTris = parsed.reduce((a, p) => a + p.tris, 0);
 
 // I214 budgets (measured baselines in brackets; caps leave headroom for E9 art growth)
 const BUDGET = {
-  totalFilesKB: 1024,  // [I456 re-measure 1016.33: I454 976.63 - old 7 rock GLBs 209.26 KB + new 7 GLBs 249.01 KB; cap 1024 holds w/ 7.67 KB headroom]
-  totalGeoKB: 976,     // [I456 re-measure 973.17: I454 933.47 + 7 remaster GLBs geo delta +39.70 KB (old 199.69 -> new 239.38 KB, per-vertex COLOR_0 + density); cap 976 HOLDS w/ 2.83 KB headroom]
-  perFileKB: 400,      // [max 339.05 - ship.glb I454 remaster v4 (14276t, 347,184 B); I440 max was 264.21 v3]
-  totalTris: 30000,    // [I456 (ST-426) EXPLICIT re-pin: 26000 -> 30000, measured 28779 (I454 24732 - rock L/M/S + B v10 2x2614t - boss 650t + rock v11 2x4250t + boss 1425t); cap 30000 holds w/ 1221 tri headroom]
+  totalFilesKB: 1240,  // [I470 (ST-437) EXPLICIT re-pin: 1024 -> 1240, measured 1053.02 (I456 1016.33 + ship v5 384,756 B - ship v4 347,184 B = +36.69 KB); cap 1240 holds w/ 186.98 KB headroom for ST-438 enemy remaster]
+  totalGeoKB: 1120,    // [I470 (ST-437) EXPLICIT re-pin: 976 -> 1120, measured 1010.36 (I456 973.17 + ship v5 geo 379,794 B - ship v4 geo 342,236 B = +37.19 KB); cap 1120 holds w/ 109.64 KB headroom for ST-438]
+  perFileKB: 400,      // [max 375.74 - ship.glb I470 remaster v5 (17143t, 384,756 B); I454 max was 339.05 v4; cap 400 HOLDS w/ 24.26 KB headroom]
+  totalTris: 36000,    // [I470 (ST-437) EXPLICIT re-pin: 30000 -> 36000, measured 31646 (I456 28779 - ship v4 14276t + ship v5 17143t); cap 36000 holds w/ 4354 tri headroom for ST-438]
   perFileMats: 3,      // [max 3 - ship body/wing/cockpit]
 };
 
