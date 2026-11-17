@@ -3,6 +3,7 @@
 // once the displayed value is unchanged.
 import { CONFIG } from '../core/config.js';
 import { t as tr, onLocale } from '../core/strings.js'; // I404: ST-374 + I405: ST-375 locale
+import { zoneNameKey } from '../core/level.js'; // ST-457 (E64): campaign zone name
 
 // I44: power-up indicator chips (GDD: top-right "active power-up timers").
 // Accessibility (GDD): shape + color + label - never color alone. Palette
@@ -81,6 +82,18 @@ export function createHUD(root) {
   const waveMod = document.createElement('div'); // I93: active modifier shown for the whole wave (not just the start banner)
   waveMod.style.cssText = 'font-size:calc(12px * var(--vr-fs,1));font-weight:700;letter-spacing:2px;margin-top:3px;text-shadow:0 1px 3px rgba(0,0,0,0.8);display:none;';
   waveBox.appendChild(waveMod);
+  // ST-457 (E64): campaign level/zone + checkpoint indicator (top-center under the wave box; hidden in endless).
+  const campBox = box('top:64px;left:50%;transform:translateX(-50%);text-align:center;display:none;');
+  const campLevel = document.createElement('div');
+  campLevel.id = 'hud-camp-level';
+  campLevel.style.cssText = 'font-size:calc(11px * var(--vr-fs,1));font-weight:800;letter-spacing:3px;opacity:0.85;';
+  const campZone = document.createElement('div');
+  campZone.id = 'hud-camp-zone';
+  campZone.style.cssText = 'font-size:calc(14px * var(--vr-fs,1));font-weight:600;letter-spacing:2px;margin-top:1px;';
+  const campCp = document.createElement('div');
+  campCp.id = 'hud-camp-cp';
+  campCp.style.cssText = 'font-size:calc(10px * var(--vr-fs,1));font-weight:800;letter-spacing:2px;margin-top:3px;color:#7dff9e;';
+  campBox.append(campLevel, campZone, campCp);
 
   const livesBox = box('top:14px;right:18px;text-align:right');
   const lives = document.createElement('div');
@@ -162,6 +175,15 @@ export function createHUD(root) {
     const n = world.lives;
     set('lives', lives, '♥'.repeat(n) + '♡'.repeat(Math.max(0, world.livesMgr.max - n)));
 
+    // ST-457 (E64): campaign level/zone + checkpoint indicator (change-driven; hidden in endless).
+    const campOn = world.mode === 'campaign';
+    if (campOn !== this._campOn) { this._campOn = campOn; campBox.style.display = campOn ? '' : 'none'; }
+    if (campOn) {
+      const ls = world.levelState;
+      set('campLevel', campLevel, tr('hud.camp.level', { level: ls.level }));
+      set('campZone', campZone, tr(zoneNameKey(ls.level, ls.zone)));
+      set('campCp', campCp, '\u25c6 ' + tr('hud.camp.cp', { zone: ls.zone }));
+    }
     for (const t of Object.keys(chips)) {
       const c = chips[t];
       const left = world.powerups.timeLeft[t];

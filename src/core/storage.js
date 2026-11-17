@@ -10,6 +10,7 @@
 // corrupt/non-integer version, falls back to defaults). migratePayload is pure + tested.
 
 import { CONFIG } from './config.js'; // ST-190: replay tape length cap
+import { levelCount } from './level.js'; // ST-457 (E64): campaign progress clamps to the campaign length
 import { LOCALES } from './strings.js'; // ST-375: locale persistence (validated against strings.js LOCALES)
 import { decodeReplay } from './replay.js'; // ST-190: strict replay validation
 
@@ -81,6 +82,7 @@ export class Storage {
     this.tutorialKey = keys.tutorialKey || 'voidrunner.tutorial'; // I151: first-run tutorial seen flag
     this.maxScores = (Number.isInteger(keys.highScoresMax) && keys.highScoresMax > 0) ? keys.highScoresMax : 5; // I66
     this.replaysKey = keys.replaysKey || 'voidrunner.replays'; // ST-190: saved replays (newest-first, capped)
+this.campaignKey = keys.campaignKey || 'voidrunner.campaign'; // ST-457 (E64): campaign highest-level continue
     this.maxReplays = (Number.isInteger(keys.replaysMax) && keys.replaysMax > 0) ? keys.replaysMax : 2; // ST-190
   }
 
@@ -265,6 +267,21 @@ export class Storage {
     return { saved: this._write(this.replaysKey, list) };
   }
 
+  /** ST-457 (E64): the highest campaign level reached (1..levelCount); 0 when none/corrupt. */
+  getCampaignProgress() {
+    const d = this._readVersioned(this.campaignKey);
+    const n = d && typeof d.level === 'number' ? Math.floor(d.level) : NaN;
+    if (!Number.isInteger(n) || n < 1 || n > levelCount()) return 0;
+    return n;
+  }
+
+  /** ST-457 (E64): persist the reached campaign level - monotonic raise only, clamped 1..levelCount. */
+  setCampaignProgress(level) {
+    if (!Number.isFinite(level)) return this.getCampaignProgress();
+    const n = Math.max(1, Math.min(levelCount(), Math.floor(level)));
+    if (n <= this.getCampaignProgress()) return this.getCampaignProgress();
+    return this._write(this.campaignKey, { version: STORE_VERSION, level: n }) ? n : this.getCampaignProgress();
+  }
   remove(key) {
     try { this.store.remove(key); return true; } catch { return false; }
   }

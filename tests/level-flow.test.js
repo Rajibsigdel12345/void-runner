@@ -278,3 +278,52 @@ test('ST-453: sessionStats.level, reset() re-init, replayBegin gating', () => {
   assert.ok(!hasType(ree, 'levelIntro'));
   assert.ok(!hasType(ree, 'zoneEnter'));
 });
+
+// ST-457 (E64): localStorage-continued start level (clamped; campaign-gated)
+test('ST-457: setCampaignStartLevel clamps to 1..levelCount', () => {
+  const w = new World(new RNG(SEED));
+  assert.equal(w.setCampaignStartLevel(0), 1);
+  assert.equal(w.setCampaignStartLevel(NaN), 1);
+  assert.equal(w.setCampaignStartLevel(99), 3); // campaign length
+  assert.equal(w.setCampaignStartLevel(1.7), 1); // floored
+  assert.equal(w.setCampaignStartLevel(2), 2);
+})
+
+test('ST-457: campaign begin starts at the continued level (L2) with intro + zone enter', () => {
+  const w = new World(new RNG(SEED));
+  w.setMode('campaign');
+  w.setCampaignStartLevel(2);
+  assert.ok(w.begin());
+  const evs = w.drainEvents();
+  const intros = byType(evs, 'levelIntro');
+  assert.equal(intros.length, 1);
+  assert.deepEqual(intros[0].data, { level: 2, nameKey: 'level.name.l2' });
+  const zones = byType(evs, 'zoneEnter');
+  assert.equal(zones.length, 1);
+  assert.deepEqual(zones[0].data, { level: 2, zone: 1, nameKey: 'level.zone.l2z1', paletteId: 'debris-1', hazard: 'moderate', mix: ['drone', 'mine', 'stinger'], forced: true });
+  assert.deepEqual(w.levelState, { level: 2, distance: 0, zone: 1, phase: 'zone' });
+})
+
+test('ST-457: endless begin ignores the start level (no level events, levelState L1)', () => {
+  const w = new World(new RNG(SEED));
+  w.setMode('endless');
+  w.setCampaignStartLevel(2);
+  assert.ok(w.begin());
+  const evs = w.drainEvents();
+  assert.ok(!hasType(evs, 'levelIntro'));
+  assert.ok(!hasType(evs, 'zoneEnter'));
+  assert.deepEqual(w.levelState, { level: 1, distance: 0, zone: 1, phase: 'zone' });
+})
+
+test('ST-457: restart from PAUSED keeps the continue start level', () => {
+  const w = fresh('campaign');
+  w.drainEvents();
+  w.setCampaignStartLevel(2);
+  assert.ok(w.pause());
+  assert.ok(w.restart());
+  const evs = w.drainEvents();
+  const intros = byType(evs, 'levelIntro');
+  assert.equal(intros.length, 1);
+  assert.deepEqual(intros[0].data, { level: 2, nameKey: 'level.name.l2' });
+  assert.ok(hasType(evs, 'zoneEnter'));
+})

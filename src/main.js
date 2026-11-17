@@ -537,16 +537,23 @@ function startRun(mode) {
   if (mode === 'daily') { const d = dailyForDate(new Date(), CONFIG.daily.salt); dailyMode = true; dailyKey = d.key; dailySeedVal = d.seed; runSeed = d.seed; world.reseed(d.seed); }
   else { dailyMode = false; dailyKey = null; dailySeedVal = 0; runSeed = freshRunSeed(); world.reseed(runSeed); } // ST-191: fresh, reproducible layout per run
   world.setMode(mode); // ST-420 (I450): campaign vs endless (setMode clamps non-campaign -> endless)
+  if (mode === 'campaign') { // ST-457 (E64): localStorage continue - highest level reached
+    const cl = storage.getCampaignProgress();
+    world.setCampaignStartLevel(cl > 1 ? cl : 1);
+    if (cl > 1) toast(tr('toast.continue', { level: cl }));
+  }
   applyTheme(null); // ST-420: start at stage-1 identity tints (themeSwap events drive later stages)
   world.begin();
 }
 function restartRun() {
+  const wasCampaign = world.mode === 'campaign'; // ST-457 (E64): restart keeps the continue level
   replayView = null; // ST-190
   recorder = null; recStopped = false; watchSavedRun = false; recChip.hide(); // ST-191: a restart has no recording
   newBest = false; popups.clear(); killFeed.clear(); hint.show(); dailyNewBest = false; juiceTally.reset(); // ST-183
   if (dailyMode) { runSeed = dailySeedVal; world.reseed(dailySeedVal); } // ST-141: same seed -> reproduce today's run; ST-191
   else { runSeed = freshRunSeed(); world.reseed(runSeed); } // ST-191: fresh, reproducible layout per run
   applyTheme(null); // ST-420 (I450): restart at stage-1 identity (reset puts currentStage=1 but emits no themeSwap)
+  if (wasCampaign) world.setCampaignStartLevel(storage.getCampaignProgress()); // ST-457 (E64)
   world.restart();
 }
 
@@ -951,6 +958,8 @@ else if (e.type === 'flyerSpawn') toast(tr('toast.flyer')); // ST-232: first spa
     else if (e.type === 'podSpawn') toast(tr('toast.pod')); // ST-448: first spawn of the run calls out the pod
     else if (e.type === 'themeSwap') { applyTheme(e.data.theme); banner.showStage(e.data.stage, stageName(e.data.stage, CONFIG)); } // ST-420 (I450): stage tint + STAGE n - name banner (event-driven; null theme = identity)
     else if (e.type === 'zoneEnter') { if (world.mode === 'campaign') zoneTheme.setTarget(zoneThemeFor(e.data.paletteId, CONFIG.levels.palettes), motionOff); } // ST-455 (I488): zone identity crossfade (hazard/enemy mix already ST-453; zone name HUD = ST-457)
+    else if (e.type === 'levelIntro') { if (world.mode === 'campaign') storage.setCampaignProgress(e.data.level); } // ST-457 (E64): highest-level continue persistence
+    else if (e.type === 'checkpoint') { if (world.mode === 'campaign') toast(tr('toast.checkpoint', { level: e.data.level })); } // ST-457 (E64): checkpoint-resume callout
     else if (e.type === 'kill') { popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 || e.data.golden || e.data.boss, gold: !!e.data.golden, od: !!e.data.overdrive }); killFeed.add(e.data.boss ? Object.assign({}, e.data, { prime: _lastBossPrime }) : e.data); } // ST-030/052, I153; ST-420 (I450): enrich boss kills with the prime flag
     else if (e.type === 'nearmiss') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points); // ST-053 (plain small popup)
     else if (e.type === 'weaponLevelUp') toast(tr('toast.weapon',{level:e.data.level})); // ST-123

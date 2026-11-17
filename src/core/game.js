@@ -29,7 +29,7 @@ import { GameState, STATE } from './state.js';
 import { SkillModel } from './skillModel.js'; // ST-304 (I329)
 import { Director } from './director.js'; // ST-304 (I329)
 import { stageForWave, isStageEndWave, isFinalWave, makeWarp, stepWarp, stageTheme } from './stages.js'; // ST-419 (E57)
-import { bossDistance, bossKind, isFinalLevel, levelNameKey, zoneAtDistance, zoneNameKey, zoneRow } from './level.js'; // ST-453 (E64)
+import { bossDistance, bossKind, isFinalLevel, levelCount, levelNameKey, zoneAtDistance, zoneNameKey, zoneRow } from './level.js'; // ST-453 (E64); ST-457 (E64)
 
 export class World {
   constructor(rng, cfg = CONFIG) {
@@ -72,6 +72,7 @@ this.pods = new PodField(rng, cfg); // ST-448
     this.mode = 'endless'; this.currentStage = 1; this.warp = null; this.victory = false; // ST-419: mode + campaign state (endless default)
     this._wlevel = 1; // ST-122: current weapon level (drives weaponLevelUp events)
     this.levelState = { level: 1, distance: 0, zone: 1, phase: 'zone' }; // ST-453 (E64)
+    this._campaignStartLevel = 1; // ST-457 (E64): fresh campaign runs start at the localStorage-continued level
     this._levelStartScore = 0; // ST-453 (E64)
     this._lastZone = 0; // ST-453 (E64)
   }
@@ -118,18 +119,25 @@ this.pods = new PodField(rng, cfg); // ST-448
     this.replayMode = false; // ST-190: begin() always starts a live run
     this.currentStage = 1; this.warp = null; this.victory = false; // ST-419: fresh run
     this.waves.start();
-    this._initLevelRun(); // ST-453 (E64): (re)start the level machine (campaign: levelIntro + zoneEnter)
+    this._initLevelRun(this.mode === 'campaign' ? this._campaignStartLevel : 1); // ST-453 (E64) + ST-457 (E64): campaign starts at the continue level
     return true;
   }
 
   /** ST-419: mode select - 'campaign' runs the linear stage system; anything else = endless. */
   setMode(m) { this.mode = (m === 'campaign') ? 'campaign' : 'endless'; }
+  /** ST-457 (E64): the level a fresh campaign run starts at (localStorage continue). Clamped 1..levelCount. */
+  setCampaignStartLevel(n) {
+    const L = levelCount(this.cfg);
+    const k = Math.floor(Number(n));
+    this._campaignStartLevel = (Number.isFinite(k) && k >= 1) ? Math.min(L, k) : 1;
+    return this._campaignStartLevel;
+  }
   /** ST-190: start watching a replay - MENU -> REPLAY (same wave start as begin()). */
   replayBegin() {
     if (!this.game.to(STATE.REPLAY)) return false;
     this.replayMode = true;
     this.waves.start();
-    this._initLevelRun(); // ST-453 (E64)
+    this._initLevelRun(1); // ST-453 (E64); ST-457: replays are always endless
     return true;
   }
   /** PLAYING -> PAUSED (sim frozen via the step gate). No-op unless PLAYING. */
@@ -659,13 +667,16 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     }
   }
 
-  /** ST-453 (E64): (re)start the level machine at level 1 (campaign only; endless = no-op). */
-  _initLevelRun() {
-    this.levelState = { level: 1, distance: 0, zone: 1, phase: 'zone' };
+  /** ST-453 (E64): (re)start the level machine (campaign only; endless = no-op).
+   * ST-457 (E64): `startLevel` = the localStorage-continued level (clamped; endless callers pass 1). */
+  _initLevelRun(startLevel = 1) {
+    const L = levelCount(this.cfg);
+    const s = (Number.isFinite(startLevel) && startLevel >= 1) ? Math.min(L, Math.floor(startLevel)) : 1;
+    this.levelState = { level: s, distance: 0, zone: 1, phase: 'zone' };
     this._levelStartScore = this.scoreKeeper.score;
     this._lastZone = 0;
     if (this.mode === 'campaign') {
-      this.emit('levelIntro', { level: 1, nameKey: levelNameKey(1) });
+      this.emit('levelIntro', { level: s, nameKey: levelNameKey(s) });
       this._emitZoneEnter(true);
     }
   }

@@ -422,3 +422,60 @@ test('storage: ST-416 cameraMode default + round-trip + unknown rejected + no cl
   store.set(a.settingsKey, JSON.stringify({ version: STORE_VERSION, cameraMode: 123 }));
   assert.equal(a.getSettings().cameraMode, 'chase'); // corrupt -> default, no throw
 });
+
+// ST-457 (E64): campaign highest-level continue persistence
+test('storage: campaign progress round-trips as {version,level}', () => {
+  const store = memStore();
+  const a = new Storage(store);
+  assert.equal(a.getCampaignProgress(), 0); // fresh store: none
+  assert.equal(a.setCampaignProgress(2), 2);
+  assert.equal(store.get(a.campaignKey), JSON.stringify({ version: STORE_VERSION, level: 2 }));
+  assert.equal(a.getCampaignProgress(), 2);
+  const b = new Storage(store); // same backing store, new instance
+  assert.equal(b.getCampaignProgress(), 2);
+})
+
+test('storage: campaign progress raises monotonically and clamps to 1..levelCount', () => {
+  const a = new Storage(memStore());
+  assert.equal(a.setCampaignProgress(99), 3); // clamped to the campaign length
+  assert.equal(a.setCampaignProgress(2), 3); // no-raise returns the current value
+  assert.equal(a.setCampaignProgress(3), 3); // equal is not a raise
+  assert.equal(a.setCampaignProgress(5), 3); // clamps down, still not a raise
+  assert.equal(a.getCampaignProgress(), 3);
+  const b = new Storage(memStore());
+  assert.equal(b.setCampaignProgress(0), 1); // 0 on a fresh store clamps up to 1
+  assert.equal(b.getCampaignProgress(), 1);
+  const storeC = memStore();
+  const c = new Storage(storeC);
+  assert.equal(c.setCampaignProgress(NaN), 0); // NaN: no write, returns current
+  assert.equal(c.getCampaignProgress(), 0);
+  assert.equal(storeC._map.size, 0); // nothing persisted
+})
+
+test('storage: campaign progress is corruption- and store-safe', () => {
+  const store = memStore();
+  const a = new Storage(store);
+  store.set(a.campaignKey, 'banana');
+  assert.equal(a.getCampaignProgress(), 0); // corrupt raw -> 0, no throw
+  store.set(a.campaignKey, JSON.stringify({ version: 999, level: 2 }));
+  assert.equal(a.getCampaignProgress(), 0); // unknown version -> 0
+  store.set(a.campaignKey, JSON.stringify({ version: STORE_VERSION, level: 17 }));
+  assert.equal(a.getCampaignProgress(), 0); // beyond the campaign length -> 0
+  const t = new Storage(throwingStore());
+  assert.equal(t.getCampaignProgress(), 0);
+  assert.equal(t.setCampaignProgress(2), 0); // write failure swallowed, returns current
+})
+
+test('storage: campaign progress does not touch the scoreboard keys', () => {
+  const store = memStore();
+  const a = new Storage(store);
+  a.setBest(1234);
+  a.recordScore({ score: 500, wave: 4, kills: 12 });
+  const before = {};
+  for (const [k, v] of store._map) if (k !== a.campaignKey) before[k] = v;
+  assert.equal(a.setCampaignProgress(2), 2);
+  assert.equal(store._map.size, Object.keys(before).length + 1); // exactly one new key: the campaign key
+  assert.ok(store._map.has(a.campaignKey));
+  for (const [k, v] of store._map) if (k !== a.campaignKey) assert.equal(v, before[k], 'key untouched: ' + k);
+  assert.equal(a.getBest(), 1234); // best untouched
+})
