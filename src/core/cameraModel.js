@@ -121,12 +121,13 @@ export function overviewTargets(cfg, out) {
  * @param cfg CONFIG.camera (needs cockpitHeight, cockpitSetback, cockpitLookFar)
  * @param out written in place (no alloc)
  */
-export function cockpitTargets(p, fwd, cfg, out) {
+export function cockpitTargets(p, fwd, cfg, out, spdFrac = 0) {
+  const ahead = cfg.cockpitLookFar + cfg.cockpitLookSpeed * spdFrac; // ST-444 (I477): speed look-ahead (spdFrac 0 -> exactly cockpitLookFar, bit-identical to the legacy fixed 60)
   out.camX = p.x - fwd.x * cfg.cockpitSetback;
   out.camY = cfg.cockpitHeight;
   out.camZ = p.y - fwd.y * cfg.cockpitSetback;
-  out.lookX = p.x + fwd.x * cfg.cockpitLookFar;
+  out.lookX = p.x + fwd.x * ahead;
   out.lookY = 0; // arena plane horizon
-  out.lookZ = p.y + fwd.y * cfg.cockpitLookFar;
+  out.lookZ = p.y + fwd.y * ahead;
   return out;
 }

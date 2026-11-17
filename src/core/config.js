@@ -808,6 +808,7 @@ export const CONFIG = {
     cockpitHeight: 1.15,   // ST-416 (I446): COCKPIT eye height above the arena plane
     cockpitSetback: 0.55,  // ST-416 (I446): COCKPIT seat setback behind the ship center (along facing)
     cockpitLookFar: 60,    // ST-416 (I446): COCKPIT look-ahead along the heading (horizon)
+    cockpitLookSpeed: 40,   // ST-444 (I477): extra COCKPIT look-ahead at full speed (lean into the motion; spdFrac 0 -> exactly cockpitLookFar, bit-identical to the legacy fixed 60)
     cockpitFovSpeed: 9,    // ST-416 (I446): extra COCKPIT FOV at full speed (motion-gated seat kick)
   // ST-219: state-tied camera feel (I221) - subtle, motion-gated, view stays dodge-readable
   aimLeadFrac: 0.03,     // camera lead toward the aim point (2-5% of the ship->aim offset)

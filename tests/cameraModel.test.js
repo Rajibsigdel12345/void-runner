@@ -170,3 +170,29 @@ test('cockpitTargets: seat sits setback behind the ship at eye height; looks loo
     assert.ok(Number.isFinite(o.camX) && Number.isFinite(o.camY) && Number.isFinite(o.camZ));
   }
 });
+
+test('cockpitTargets: speed look-ahead - ahead = cockpitLookFar + cockpitLookSpeed*spdFrac; at rest bit-identical to the legacy fixed 60 (ST-444)', () => {
+  const p = { x: 7, y: -3 };
+  const f = { x: SQ, y: SQ };
+  const o = { camX: 99, camY: 99, camZ: 99, lookX: 99, lookY: 99, lookZ: 99 };
+  for (const s of [0, 0.5, 1]) {
+    cockpitTargets(p, f, CFG, o, s);
+    const ahead = CFG.cockpitLookFar + CFG.cockpitLookSpeed * s;
+    assert.equal(o.lookX, p.x + f.x * ahead);
+    assert.equal(o.lookZ, p.y + f.y * ahead);
+    assert.equal(o.camX, p.x - f.x * CFG.cockpitSetback); // seat position is speed-independent
+    assert.equal(o.camY, CFG.cockpitHeight);
+    assert.ok(Math.abs(o.lookY) < 1e-12);
+  }
+  // at rest (explicit 0 and the legacy 3-arg default) bit-identical to the legacy fixed-60 targets
+  cockpitTargets(p, f, CFG, o, 0);
+  assert.equal(o.lookX, p.x + f.x * 60);
+  assert.equal(o.lookZ, p.y + f.y * 60);
+  const o2 = { camX: 99, camY: 99, camZ: 99, lookX: 99, lookY: 99, lookZ: 99 };
+  cockpitTargets(p, f, CFG, o2); // legacy 3-arg call (default spdFrac = 0)
+  assert.equal(o.lookX, o2.lookX);
+  assert.equal(o.lookZ, o2.lookZ);
+  // full speed: strictly beyond the rest look-ahead
+  cockpitTargets(p, f, CFG, o, 1);
+  assert.ok(o.lookX > p.x + f.x * CFG.cockpitLookFar);
+});

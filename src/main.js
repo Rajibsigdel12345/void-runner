@@ -39,6 +39,7 @@ import { flashEnergy } from './core/flashTable.js'; // ST-179: unified white-fla
 import { dangerVignetteX } from './core/dangerVignette.js'; // ST-176: reduced-motion damage vignette envelope
 import { createHUD } from './render/hud.js';
 import { createReticle } from './render/reticle.js';
+import { createBearingStrip } from './render/bearingStrip.js'; // ST-444 (I477): cockpit-only bearing strip (2D canvas, 0 new 3D draw calls)
 import { createTouchStick } from './render/touchStick.js'; // ST-321 (I351): on-screen thrust stick (coarse-only)
 import { createScreens } from './render/screens.js';
 import { createSettingsPanel } from './render/settingsPanel.js';
@@ -409,6 +410,7 @@ function camChip(msg) {
   clearTimeout(camChipTimer);
   camChipTimer = setTimeout(() => { camChipEl.style.opacity = '0'; }, 1200);
 }
+const bearingStrip = createBearingStrip(); // ST-444 (I477): cockpit-only bearing strip (DOM canvas overlay; 0 new 3D draw calls)
 const adaptive = createAdaptiveQuality(CONFIG.adaptive, (info) => {
   if (info.type === 'autoDowngrade') {
     applyFxTier(info.tier, 'auto-downgrade'); // ST-225: particles + bloom + DPR + marker in one place
@@ -1114,6 +1116,7 @@ function syncVisuals(dt) {
   const ship = world.ship;
   const f = ship.forward(shipFwd); // ST-074: scratch reuse (no per-frame alloc)
   const spdFrac = Math.min(1, ship.speed / CONFIG.ship.maxSpeed); // ST-082: 0..1 speed fraction
+  bearingStrip.update({ on: st === STATE.PLAYING && camMode === 'cockpit', shipX: ship.pos.x, shipZ: ship.pos.y, fwdX: f.x, fwdZ: f.y, arenaR: CONFIG.arena.radius, reducedMotion: motionOff }); // ST-444 (I477): cockpit bearing strip (DOM canvas, 0 3D draw calls)
   // ST-415 (I445): chase targets from the pure camera model (edge-aware dolly: the
   // offset + look-ahead scale uniformly near the rim so the ship's screen offset and
   // the view angle are invariant wherever the ship moves; identity at center).
@@ -1129,7 +1132,7 @@ function syncVisuals(dt) {
     overviewTargets(CONFIG.camera, camModelOut);
     camTX = camModelOut.camX; camTY = camModelOut.camY; camTZ = camModelOut.camZ; lookTX = camModelOut.lookX; lookTY = camModelOut.lookY; lookTZ = camModelOut.lookZ;
   } else if (inRun && camMode === 'cockpit') { // ST-416 (I446): first-person seat (heading-aligned)
-    cockpitTargets(ship.pos, f, CONFIG.camera, camModelOut);
+    cockpitTargets(ship.pos, f, CONFIG.camera, camModelOut, spdFrac); // ST-444 (I477): speed look-ahead (rest 0 == legacy 60 bit-identical)
     camTX = camModelOut.camX; camTY = camModelOut.camY; camTZ = camModelOut.camZ; lookTX = camModelOut.lookX; lookTY = camModelOut.lookY; lookTZ = camModelOut.lookZ;
   } else if (st === STATE.PLAYING && !motionOff) { // 2-5% lead toward the aim point, capped, eased by the look damp
     const aim = resolveAimPoint();
