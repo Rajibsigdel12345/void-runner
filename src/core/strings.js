@@ -102,6 +102,7 @@ export const STRINGS = {
     'banner.cleared': 'CLEARED',
     'banner.countdown': 'NEXT WAVE IN {n}',
     'banner.boss_sub': 'WAVE {n} \u00b7 {hp} HP',
+  'banner.boss_warn': '!! INBOUND !!', // I465/ST-433 B2: dim-red pre-card before the boss intro
     'banner.boss.splicer': 'THE SPLICER',
     'banner.boss.monolith': 'THE MONOLITH',
   'boss.monolith_prime': 'MONOLITH PRIME',
@@ -273,6 +274,7 @@ export const STRINGS = {
     'banner.cleared': '清除完毕',
     'banner.countdown': '下一波 {n}',
     'banner.boss_sub': '波次 {n} · {hp} HP',
+  'banner.boss_warn': '!! 来袭 !!',
     'banner.boss.splicer': 'THE SPLICER',
     'banner.boss.monolith': 'THE MONOLITH',
   'boss.monolith_prime': 'THE MONOLITH PRIME',
@@ -438,6 +440,7 @@ export const STRINGS = {
     'banner.cleared': 'クリア',
     'banner.countdown': '次ウェーブまで {n}',
     'banner.boss_sub': 'ウェーブ {n} ・ {hp} HP',
+  'banner.boss_warn': '!! 接近中 !!',
     'banner.boss.splicer': 'THE SPLICER',
     'banner.boss.monolith': 'THE MONOLITH',
   'boss.monolith_prime': 'THE MONOLITH PRIME',

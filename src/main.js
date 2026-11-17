@@ -870,7 +870,7 @@ function tick(dt, intent) {
     if (haptic) haptics.pulse(haptic);
     if (e.type === 'wave') banner.showWave(e.data.n, e.data.mod, e.data.endless);
     else if (e.type === 'waveCleared') banner.showCleared(e.data.n);
-    else if (e.type === 'bossSpawn') { const _prime = !!(world.boss && world.boss.prime); _lastBossPrime = _prime; banner.showBoss(e.data.wave, e.data.hp, _prime ? tr('banner.boss.prime') : (e.data.kind === 'splicer' ? tr('banner.boss.splicer') : tr('banner.boss.monolith')), _prime ? 'prime' : e.data.kind); if (e.data.kind === 'splicer') toast(tr('toast.splicer')); } // I154: kind for variant glow; ST-420 (I450): Prime gold identity (flag on world.boss; payload has no prime) // ST-135/143: boss intro
+    else if (e.type === 'bossSpawn') { const _prime = !!(world.boss && world.boss.prime); _lastBossPrime = _prime; banner.showBossWarn(); banner.showBoss(e.data.wave, e.data.hp, _prime ? tr('banner.boss.prime') : (e.data.kind === 'splicer' ? tr('banner.boss.splicer') : tr('banner.boss.monolith')), _prime ? 'prime' : e.data.kind); if (e.data.kind === 'splicer') toast(tr('toast.splicer')); } // I154: kind for variant glow; ST-420 (I450): Prime gold identity (flag on world.boss; payload has no prime) // I465/ST-433 B2: showBossWarn() pre-card leads the intro; ST-135/143: boss intro
     else if (e.type === 'wardenSpawn') toast(tr('toast.warden')); // ST-137: mini-boss callout
     else if (e.type === 'stingerSpawn') toast(tr('toast.stinger')); // ST-229: first spawn of the run calls out the charger
 else if (e.type === 'flyerSpawn') toast(tr('toast.flyer')); // ST-232: first spawn of the run calls out the evasive target
