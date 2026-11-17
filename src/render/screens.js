@@ -93,7 +93,7 @@ export function createScreens(root, settings = {}) {
   function controlRows() { // ST-375: re-resolvable for locale re-emit
     return settings.touch // I71: touch vs keyboard instructions
       ? [[kcap('left_zone'), tr('ctrl.drag_fly')], [kcap('right_zone'), tr('ctrl.aim_fire')], [kcap('two_fingers'), tr('ctrl.pause')]] // ST-268 dual-zone
-      : [[kcap('wasd_arrows'), tr('ctrl.thrust')], [kcap('mouse'), tr('ctrl.aim')], [kcap('click_space'), tr('ctrl.fire')], [kcap('p_esc'), tr('ctrl.pause')], [kcap('m'), tr('ctrl.mute')], [kcap('f'), tr('ctrl.fx')], [kcap('n'), tr('ctrl.music')]];
+      : [[kcap('wasd_arrows'), tr('ctrl.thrust')], [kcap('mouse'), tr('ctrl.aim')], [kcap('click_space'), tr('ctrl.fire')], [kcap('p_esc'), tr('ctrl.pause')], [kcap('m'), tr('ctrl.mute')], [kcap('f'), tr('ctrl.fx')], [kcap('n'), tr('ctrl.music')], [kcap('v'), tr('ctrl.camera')]];
   }
   const CONTROL_ROWS = controlRows();
   const ctrlCells = []; // ST-375: [keycap span, value line] pairs for locale re-emit

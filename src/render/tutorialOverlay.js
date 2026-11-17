@@ -61,7 +61,7 @@ export function createTutorialOverlay(root, opts = {}) {
   function rows() { // ST-375: re-resolvable for locale re-emit
     return touch
       ? [[kcap('left_zone'), t('ctrl.drag_fly')], [kcap('right_zone'), t('ctrl.aim_fire')], [kcap('two_fingers'), t('ctrl.pause')]] // ST-268 dual-zone
-      : [[kcap('wasd_arrows'), t('ctrl.thrust')], [kcap('mouse'), t('ctrl.aim')], [kcap('click_space'), t('ctrl.fire')], [kcap('p_esc'), t('ctrl.pause')], [kcap('m'), t('ctrl.mute')], [kcap('n'), t('ctrl.music')]];
+      : [[kcap('wasd_arrows'), t('ctrl.thrust')], [kcap('mouse'), t('ctrl.aim')], [kcap('click_space'), t('ctrl.fire')], [kcap('p_esc'), t('ctrl.pause')], [kcap('m'), t('ctrl.mute')], [kcap('n'), t('ctrl.music')], [kcap('v'), t('ctrl.camera')]];
   }
   const gridCells = []; // ST-375: [keycap span, value line] pairs for locale re-emit
   for (const [k, v] of rows()) {
