@@ -16,6 +16,7 @@ export class WaveDirector {
     this.openGate = null; // ST-242: opening-batch budget (null = normal trickle, pre-ST-242 bit-identical)
     this.onDecide = null; // ST-304 (I329): wave start decision hook; null = pre-I329 bit-identical
     this.activeAdj = null; // ST-304 (I329): the decision applied to the active wave (null or adj)
+    this.rockAllowed = true; // ST-453 (I486): campaign zone identity - false = zone mix has no 'rock' (content consumed, no spawn)
   }
 
   start() {
@@ -26,9 +27,10 @@ export class WaveDirector {
     this.activeMod = 'none';
     this.openGate = null;
     this.activeAdj = null; // ST-304 (I329)
+    this.rockAllowed = true; // ST-453 (I486)
   }
 
-  reset() { this.state = 'idle'; this.wave = 0; this.toSpawn = 0; this.intermission = 0; this.waveElapsed = 0; this.activeMod = 'none'; this.openGate = null; this.activeAdj = null; }
+  reset() { this.state = 'idle'; this.wave = 0; this.toSpawn = 0; this.intermission = 0; this.waveElapsed = 0; this.activeMod = 'none'; this.openGate = null; this.activeAdj = null; this.rockAllowed = true; }
 
   get speedMult() {
     let m = Math.min(this.cfg.wave.speedCap, 1 + this.cfg.wave.speedPerWave * this.wave);
@@ -145,6 +147,7 @@ export class WaveDirector {
     // trickle-spawn up to the concurrent limit
     let guard = 0;
     while (this.toSpawn > 0 && this.field.count < this.concurrentLimit && guard++ < 16 && (this.openGate == null || this.openGate > 0)) {
+      if (!this.rockAllowed) { this.toSpawn -= 1; if (this.openGate != null) this.openGate -= 1; continue; } // ST-453 (I486): rockless zone - consume budget, no spawn (no RNG draws)
       const noNear = playerPos
         ? { x: playerPos.x, y: playerPos.y, min: this.cfg.wave.spawnMinPlayerDist }
         : null;

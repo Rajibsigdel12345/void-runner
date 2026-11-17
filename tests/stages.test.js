@@ -1,6 +1,8 @@
 // ST-419 (I449) / E57: campaign stage system - pure-core unit tests.
-// Covers stage mapping, warp determinism, mode gating, stage-end warp, final-boss victory,
-// endless invariance, and warp-determinism integration. No three, no DOM.
+// ST-453 (E64): the wave-based campaign flow (waves 5/10/15) was replaced by the level-based
+// flow (3 levels, end-of-level boss + warp). The 4 flow tests below were rewritten to drive the
+// level machine; the pure stage-mapping primitives and endless invariance tests are unchanged.
+// Covers stage mapping, warp determinism, mode gating, level-boss victory. No three, no DOM.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { World } from '../src/core/game.js';
@@ -11,19 +13,22 @@ import {
   stageForWave, isStageEndWave, isFinalWave, stageIndex0,
   makeWarp, stepWarp, stageTheme, stageName
 } from '../src/core/stages.js';
+import { bossDistance } from '../src/core/level.js'; // ST-453 (E64)
 
 const NEUTRAL = { thrust: { x: 0, y: 0 }, aimPoint: null, firing: false };
 const DT = 1 / 60;
 
-/** Park a fresh world in intermission and force-spawn the given wave's boss (campaign). */
-function worldWithCampaignBoss(seed, wave) {
+/** ST-453 (E64): campaign bosses come from level ends - park the level machine just short of the
+ * level boss line and step once so _levelStep() spawns it. Skip the entrance animation. */
+function worldWithCampaignBoss(seed, level) {
   const w = new World(new RNG(seed));
   w.begin('campaign');
-  w.waves.state = 'intermission';
-  w.waves.intermission = 100;
-  w.spawnBossForWave(wave);
+  w.levelState.level = level;
+  w.levelState.phase = 'zone';
+  w.levelState.distance = bossDistance(level, CONFIG) - 0.01;
+  w.step(DT, NEUTRAL);
+  assert.ok(w.boss, 'level boss spawned');
   w.boss.entered = 1; // skip the entrance
-  assert.ok(w.boss, 'boss spawned');
   return w;
 }
 function worldWithEndlessBoss(seed, wave) {
@@ -119,45 +124,50 @@ test('stages: mode selection via begin() and setMode()', () => {
   assert.equal(w3.mode, 'endless');
 });
 
-test('stages: killing the stage-1 (wave 5) boss in campaign starts the warp to stage 2', () => {
-  const w = worldWithCampaignBoss(51, 5);
+test('stages: killing the level-1 boss in campaign starts the warp to level 2', () => {
+  const w = worldWithCampaignBoss(51, 1);
   assert.equal(w.boss.kind, 'monolith');
   assert.equal(w.boss.prime, undefined); // not the Prime
-  assert.equal(w.boss.maxHp, 64);
+  assert.equal(w.boss.maxHp, 64); // bossHpForWave(cfg, 5) - wave-5-calibrated
+  assert.equal(w.boss.spawnWave, 0); // 0 tags a level boss
   landOneBullet(w);
-  assert.ok(w.warp, 'warp active after stage-end boss death');
+  assert.ok(w.warp, 'warp active after level-1 boss death');
+  assert.equal(w.warp.nextLevel, 2);
   assert.equal(w.warp.nextStage, 2);
   const evs = w.drainEvents();
   assert.ok(evs.find(e => e.type === 'warpStart' && e.data.toStage === 2), 'warpStart toStage 2');
+  assert.ok(evs.find(e => e.type === 'levelCleared' && e.data.level === 1), 'levelCleared level 1');
 });
 
-test('stages: the warp freezes the sim (game clock frozen) and advances the stage', () => {
-  const w = worldWithCampaignBoss(52, 5);
+test('stages: the warp freezes the sim (game clock frozen) and advances the level', () => {
+  const w = worldWithCampaignBoss(52, 1);
   landOneBullet(w);
   assert.ok(w.warp, 'warp active');
-  w.drainEvents(); // clear warpStart
+  w.drainEvents(); // clear warpStart + levelCleared
   const t0 = w.time;
   let guard = 0;
   while (w.warp && guard < 200) { w.step(DT, NEUTRAL); guard++; }
   assert.equal(w.warp, null, 'warp completed');
   assert.equal(w.time, t0, 'game clock frozen during warp');
   assert.equal(w.currentStage, 2, 'advanced to stage 2');
+  assert.deepEqual(w.levelState, { level: 2, distance: 0, zone: 1, phase: 'zone' }, 'level 2 reset');
   const evs = w.drainEvents();
   assert.ok(evs.find(e => e.type === 'stageCleared' && e.data.stage === 1), 'stageCleared 1');
+  assert.ok(evs.find(e => e.type === 'levelIntro' && e.data.level === 2), 'levelIntro level 2');
   const ts = evs.find(e => e.type === 'themeSwap');
   assert.ok(ts && ts.data.stage === 2, 'themeSwap stage 2');
   assert.ok(ts.data.theme, 'stage 2 has a theme');
 });
 
-test('stages: killing the campaign final (wave 15) boss = Monolith Prime -> victory gameover', () => {
-  const w = worldWithCampaignBoss(53, 15);
+test('stages: killing the campaign final (level 3) boss = Monolith Prime -> victory gameover', () => {
+  const w = worldWithCampaignBoss(53, 3);
   assert.equal(w.boss.kind, 'monolith');
   assert.equal(w.boss.prime, true);
   assert.equal(w.boss.maxHp, 88);
   assert.equal(w.boss.cfg.boss.burst.every, 3.2); // Prime re-tune
   assert.equal(w.boss.splitCount, 5);
   assert.equal(w.boss.cfg.boss.phase2.hpFrac, 0.6);
-  assert.equal(w.boss.spawnWave, 15);
+  assert.equal(w.boss.spawnWave, 0); // 0 tags a level boss
   w.ship.invuln = 1e9; // survive the split
   landOneBullet(w);
   assert.ok(w.game.in(STATE.GAME_OVER), 'game over');
@@ -166,6 +176,7 @@ test('stages: killing the campaign final (wave 15) boss = Monolith Prime -> vict
   const go = evs.find(e => e.type === 'gameover');
   assert.ok(go, 'gameover event');
   assert.equal(go.data.victory, true, 'gameover carries victory:true');
+  assert.equal(go.data.level, 3, 'gameover carries level 3');
   assert.equal(w.warp, null, 'no warp after final boss');
 });
 
@@ -186,7 +197,7 @@ test('stages: killing the ENDLESS final (wave 15) boss is NOT a victory, no warp
 
 test('stages: warp is deterministic - two same-seed campaign runs reach warp identically', () => {
   function drive(seed) {
-    const w = worldWithCampaignBoss(seed, 5);
+    const w = worldWithCampaignBoss(seed, 1);
     const events = [];
     landOneBullet(w);
     for (const e of w.drainEvents()) events.push(e.type + ':' + JSON.stringify(e.data));

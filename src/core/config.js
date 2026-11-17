@@ -1050,6 +1050,9 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
     }
   },
   levels: {
+    // ST-453 (E64): campaign forward-cruise speed (u/s) - drives level distance (endless never uses it).
+    // Zone + hazard data below is read by the level machine in game.js (campaign only).
+    cruiseSpeed: 3.5,
     // ST-452 (I485, E64): linear campaign level data - 3 levels x 4 zones. Pure
     // DATA + pure model (src/core/level.js): nothing in the simulation reads this
     // in ST-452 (model only -> causal + playframe stay EXACT); ST-453 wires the

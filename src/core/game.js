@@ -28,6 +28,7 @@ import { GameState, STATE } from './state.js';
 import { SkillModel } from './skillModel.js'; // ST-304 (I329)
 import { Director } from './director.js'; // ST-304 (I329)
 import { stageForWave, isStageEndWave, isFinalWave, makeWarp, stepWarp, stageTheme } from './stages.js'; // ST-419 (E57)
+import { bossDistance, bossKind, isFinalLevel, levelNameKey, zoneAtDistance, zoneNameKey, zoneRow } from './level.js'; // ST-453 (E64)
 
 export class World {
   constructor(rng, cfg = CONFIG) {
@@ -61,7 +62,7 @@ this.pods = new PodField(rng, cfg); // ST-448
     this.waves = new WaveDirector(rng, this.field, cfg);
     this.skill = new SkillModel(this.cfg.skill, 1 / 60); // ST-304 (I329)
     this.director = new Director(this.cfg.director); // ST-304 (I329)
-    this.waves.onDecide = (wave) => this.director.decideForWave(wave, { replayMode: this.replayMode, performance: this.skill.performance }); // ST-304 (I329)
+    this.waves.onDecide = (wave) => this._decideForWave(wave); // ST-304 (I329) / ST-453 (E64): director decision x zone rockRate (campaign only)
     this.powerups = new PowerUpField(rng, cfg);
     this.livesMgr = new Lives(cfg.ship.lives);
     this.game = new GameState();
@@ -69,6 +70,9 @@ this.pods = new PodField(rng, cfg); // ST-448
     this.replayMode = false; // ST-190: watch a saved replay (REPLAY state)
     this.mode = 'endless'; this.currentStage = 1; this.warp = null; this.victory = false; // ST-419: mode + campaign state (endless default)
     this._wlevel = 1; // ST-122: current weapon level (drives weaponLevelUp events)
+    this.levelState = { level: 1, distance: 0, zone: 1, phase: 'zone' }; // ST-453 (E64)
+    this._levelStartScore = 0; // ST-453 (E64)
+    this._lastZone = 0; // ST-453 (E64)
   }
 
   get score() { return this.scoreKeeper.score; }
@@ -84,6 +88,7 @@ this.pods = new PodField(rng, cfg); // ST-448
       score: sk.score,
       kills: sk.kills,
       wave: this.wave,
+      level: this.levelState.level, // ST-453 (E64)
       maxCombo: sk.maxCombo,
       shotsFired: sk.shotsFired,
       shotsHit: sk.shotsHit,
@@ -112,6 +117,7 @@ this.pods = new PodField(rng, cfg); // ST-448
     this.replayMode = false; // ST-190: begin() always starts a live run
     this.currentStage = 1; this.warp = null; this.victory = false; // ST-419: fresh run
     this.waves.start();
+    this._initLevelRun(); // ST-453 (E64): (re)start the level machine (campaign: levelIntro + zoneEnter)
     return true;
   }
 
@@ -122,6 +128,7 @@ this.pods = new PodField(rng, cfg); // ST-448
     if (!this.game.to(STATE.REPLAY)) return false;
     this.replayMode = true;
     this.waves.start();
+    this._initLevelRun(); // ST-453 (E64)
     return true;
   }
   /** PLAYING -> PAUSED (sim frozen via the step gate). No-op unless PLAYING. */
@@ -173,10 +180,19 @@ this.pods = new PodField(rng, cfg); // ST-448
     if (this.warp) {
       const wst = stepWarp(this.warp, dt);
       if (wst === 'done') {
+        const nextLvl = this.warp.nextLevel; // ST-453 (E64): campaign warp carries the next level (undefined in endless)
         const next = this.warp.nextStage || (this.currentStage + 1);
         this.warp = null; this.currentStage = next;
         this.emit('stageCleared', { stage: next - 1 });
         this.emit('themeSwap', { stage: next, theme: stageTheme(next, this.cfg) });
+        if (typeof nextLvl === "number") {
+          const ls = this.levelState;
+          ls.level = nextLvl; ls.distance = 0; ls.zone = 1; ls.phase = "zone";
+          this._levelStartScore = this.scoreKeeper.score;
+          this._lastZone = 0;
+          this.emit("levelIntro", { level: nextLvl, nameKey: levelNameKey(nextLvl) });
+          this._emitZoneEnter(true);
+        }
       }
       return;
     }
@@ -215,6 +231,7 @@ this.pods = new PodField(rng, cfg); // ST-448
     // apply once other enemy types are folded into the load (E34+). Rocks are the dominant threat.
 
     this.director.sample(dt, this.skill.load); // ST-304 (I329)
+    this._levelStep(dt); // ST-453 (E64): forward level distance + zone/boss transitions (campaign only)
     const wv = this.waves.step(dt, this.ship.pos);
     if (wv.startedWave) {
       this.enemyBullets.speedMul = this.waves.activeAdj ? this.waves.activeAdj.b : 1; // ST-304 (I329)
@@ -342,7 +359,7 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     // ST-419: campaign victory - final boss died and the ship is still alive (still PLAYING).
     if (this.victory && this.mode === 'campaign' && this.game.in(STATE.PLAYING)) {
       this.game.to(STATE.GAME_OVER);
-      this.emit('gameover', { score: this.score, victory: true, stage: this.currentStage });
+      this.emit('gameover', { score: this.score, victory: true, stage: this.currentStage, level: this.levelState.level }); // ST-453 (E64)
     }
   }
 
@@ -439,10 +456,7 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     this.scoreKeeper.onDamage();
     this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: hit.nx, y: hit.ny }, lives: livesLeft });
     this.ship.damage(v2(hit.nx, hit.ny));
-    if (livesLeft <= 0) {
-      this.game.to(STATE.GAME_OVER);
-      this.emit('gameover', { score: this.score });
-    }
+    if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
 
   /** ST-138: from cfg.belt.fromWave, add ONE drifting indestructible belt rock per
@@ -465,7 +479,9 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
   spawnMinesForWave(wave) {
     const m = this.cfg.mine;
     if (wave < m.firstWave) return;
-    for (let i = 0; i < m.perWave; i++) this.mines.spawn(this.ship.pos);
+    if (!this._zoneAllows("mine")) return; // ST-453 (E64): zone mix gate
+    const n = Math.max(0, Math.round(m.perWave * this._hazardRate("mineRate"))); // ST-453 (E64)
+    for (let i = 0; i < n; i++) this.mines.spawn(this.ship.pos);
   }
 
   /** ST-054: bullets shatter mines (1 hit). Each mine kill feeds the combo. */
@@ -500,16 +516,14 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     const n = Math.hypot(nx, ny) || 1;
     this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
     this.ship.damage(v2(nx / n, ny / n));
-    if (livesLeft <= 0) {
-      this.game.to(STATE.GAME_OVER);
-      this.emit('gameover', { score: this.score });
-    }
+    if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
 
   /** ST-055: spawn the Monolith on every multiple of everyWave, in addition to wave content.
    * No-op on other waves or while a boss is alive. Spawns at the rim, re-rolled if too close to the ship. */
   spawnBossForWave(wave) {
     const b = this.cfg.boss;
+    if (this.mode === 'campaign') return; // ST-453 (E64): campaign bosses come from level ends only (per-wave = endless)
     if (wave % b.everyWave !== 0 || this.boss) return;
     // ST-143: alternate the variant by boss-spawn count (0 = Monolith, 1 = Splicer, ...)
     const useSplicer = this.bossSpawnCount % 2 === 1;
@@ -597,12 +611,187 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
   _campaignAfterBossDeath(boss) {
     if (this.mode !== 'campaign') return;
     const w = boss.spawnWave || 0;
+    if (w === 0) { // ST-453 (E64): level boss (spawnWave 0) - the level-clear flow
+      const ls = this.levelState;
+      if (isFinalLevel(ls.level, this.cfg)) { this.victory = true; } // GAME_OVER fires at end of step()
+      else {
+        ls.phase = "clear";
+        this.emit("levelCleared", { level: ls.level, score: this.score });
+        this.warp = makeWarp(this.cfg.campaign.warpDuration);
+        this.warp.nextLevel = ls.level + 1;
+        this.warp.nextStage = ls.level + 1;
+        this.emit("warpStart", { toStage: ls.level + 1, level: ls.level + 1 });
+      }
+      return;
+    }
     if (isFinalWave(w)) { this.victory = true; } // GAME_OVER fires at end of step()
     else if (isStageEndWave(w)) {
       this.warp = makeWarp(this.cfg.campaign.warpDuration);
       this.warp.nextStage = stageForWave(w + 1);
       this.emit('warpStart', { toStage: this.warp.nextStage });
     }
+  }
+
+  /** ST-453 (E64): (re)start the level machine at level 1 (campaign only; endless = no-op). */
+  _initLevelRun() {
+    this.levelState = { level: 1, distance: 0, zone: 1, phase: 'zone' };
+    this._levelStartScore = this.scoreKeeper.score;
+    this._lastZone = 0;
+    if (this.mode === 'campaign') {
+      this.emit('levelIntro', { level: 1, nameKey: levelNameKey(1) });
+      this._emitZoneEnter(true);
+    }
+  }
+
+  /** ST-453 (E64): the zone the ship is in right now (campaign). Sets levelState.zone. */
+  _zoneInfo() {
+    if (this.mode !== 'campaign') return { zone: 0, row: null };
+    const ls = this.levelState;
+    const info = zoneAtDistance(ls.level, ls.distance, this.cfg);
+    ls.zone = info.zone;
+    return { zone: info.zone, row: info.zone >= 1 ? zoneRow(ls.level, info.zone, this.cfg) : null };
+  }
+
+  /** ST-453 (E64): is this enemy type in the current zone mix? (endless: always true) */
+  _zoneAllows(type) {
+    if (this.mode !== 'campaign') return true;
+    const row = this._zoneInfo().row;
+    return !row || row.enemyMix.indexOf(type) >= 0;
+  }
+
+  /** ST-453 (E64): the current zone hazard multiplier for a key (endless: 1, unknown: 1). */
+  _hazardRate(key) {
+    if (this.mode !== 'campaign') return 1;
+    const row = this._zoneInfo().row;
+    if (!row) return 1;
+    const p = (this.cfg.levels.hazardProfiles || {})[row.hazardProfile] || {};
+    return (typeof p[key] === 'number') ? p[key] : 1;
+  }
+
+  /** ST-453 (E64): the director wave decision scaled by the zone rock rate. Endless returns the
+   * director raw decision untouched; campaign never mutates it (frozen). */
+  _decideForWave(wave) {
+    const base = this.director.decideForWave(wave, { replayMode: this.replayMode, performance: this.skill.performance });
+    if (this.mode !== 'campaign') return base;
+    const m = this._hazardRate('rockRate');
+    if (m === 1) return base;
+    return Object.assign({}, base, { d: base.d * m });
+  }
+
+  /** ST-453 (E64): emit zoneEnter for levelState.zone (campaign only). forced bypasses dedupe. */
+  _emitZoneEnter(forced) {
+    if (this.mode !== 'campaign') return;
+    const ls = this.levelState;
+    if (ls.zone === this._lastZone && !forced) return;
+    const row = zoneRow(ls.level, ls.zone, this.cfg);
+    if (!row) return;
+    this._lastZone = ls.zone;
+    this.emit('zoneEnter', { level: ls.level, zone: ls.zone, nameKey: zoneNameKey(ls.level, ls.zone),
+      paletteId: row.paletteId, hazard: row.hazardProfile, mix: row.enemyMix, forced: !!forced });
+  }
+
+  /** ST-453 (E64): per-tick level driver - forward distance, zone transitions, boss trigger.
+   * Endless: keep rockAllowed true and return (bit-identical to pre-ST-453). */
+  _levelStep(dt) {
+    if (this.mode !== 'campaign') { this.waves.rockAllowed = true; return; }
+    const ls = this.levelState;
+    if (ls.phase === 'zone') {
+      ls.distance += this.cfg.levels.cruiseSpeed * dt;
+      const zd = bossDistance(ls.level, this.cfg);
+      if (ls.distance >= zd) {
+        ls.distance = zd;
+        this._spawnLevelBoss();
+      }
+    }
+    const info = this._zoneInfo();
+    this.waves.rockAllowed = !info.row || info.row.enemyMix.indexOf('rock') >= 0;
+    if (info.zone !== this._lastZone) this._emitZoneEnter(false);
+  }
+
+  /** ST-453 (E64): the level-end boss, rim-spawned (same geometry as the per-wave boss spawn). */
+  _spawnLevelBoss() {
+    const ls = this.levelState;
+    ls.phase = 'boss';
+    const kind = bossKind(ls.level, this.cfg);
+    const b = this.cfg.boss;
+    const rad = (kind === 'splicer') ? this.cfg.splicer.radius : b.radius;
+    const R = this.cfg.arena.radius - rad;
+    let pos = null, tries = 0;
+    do {
+      const a = this.rng.next() * Math.PI * 2;
+      pos = v2(Math.cos(a) * R, Math.sin(a) * R);
+      tries++;
+    } while (Math.hypot(pos.x - this.ship.pos.x, pos.y - this.ship.pos.y) < 10 && tries < 8);
+    if (kind === 'splicer') {
+      this.boss = new Splicer(this.rng, this.cfg, pos, splicerHpForWave(this.cfg, 10)); // ST-453: L2 boss, wave-10-calibrated HP
+      this.bossFireTimer = this.cfg.splicer.aimEvery;
+    } else if (kind === 'monolith-prime') {
+      const mp = this.cfg.stages.monolithPrime;
+      const primeCfg = { ...this.cfg, boss: { ...b, splitCount: mp.splitCount,
+        burst: { ...b.burst, every: mp.burstEvery }, phase2: { ...b.phase2, hpFrac: mp.phase2 } } };
+      this.boss = new Monolith(this.rng, primeCfg, pos, mp.hp);
+      this.boss.prime = true; // kind stays monolith - reuses all Monolith render/sim branches
+      this.bossFireTimer = b.fireEvery;
+    } else {
+      this.boss = new Monolith(this.rng, this.cfg, pos, bossHpForWave(this.cfg, 5)); // ST-453: L1 boss, wave-5-calibrated HP
+      this.bossFireTimer = b.fireEvery;
+    }
+    this._bossPhaseEmitted = false;
+    this.bossBurstTimer = this.boss.cfg.boss.burst.every;
+    this.bossBursts = 0;
+    this.bossSpawnCount++;
+    this.boss.spawnWave = 0; // ST-453: 0 tags a level boss (the campaign hook reads levelState)
+    this.emit('bossSpawn', { pos: { x: pos.x, y: pos.y }, wave: this.wave, hp: this.boss.maxHp, kind: this.boss.kind, level: ls.level });
+    this.emit('levelBoss', { level: ls.level, kind: this.boss.kind });
+  }
+
+  /** ST-453 (E64): Ikaruga F6 checkpoint continue - on death the run continues at the level-start
+   * checkpoint (lives restored, field cleared, score back to the snapshot). True if it fired. */
+  _continueAtCheckpoint() {
+    if (this.mode !== 'campaign') return false;
+    const ls = this.levelState;
+    ls.distance = 0; ls.zone = 1; ls.phase = 'zone';
+    this._lastZone = 0;
+    this.livesMgr.reset();
+    this.scoreKeeper.onDamage();
+    this.scoreKeeper.score = this._levelStartScore; // ST-453: back to the level-start snapshot
+    this.ship = new Ship(0, 0, this.cfg);
+    this.weapons.clear();
+    this.field.clear();
+    this.mines.clear();
+    this.drones.clear();
+    this.stingers.clear();
+    this.flyers.clear();
+    this.hunters.clear();
+    this.gunships.clear();
+    this.sentries.clear();
+    this.wasps.clear();
+    this.pods.clear();
+    this.enemyBullets.clear();
+    this.boss = null;
+    this.warden = null;
+    this.bossRelease = 0;
+    this.bossFireTimer = this.cfg.boss.fireEvery;
+    this._bossPhaseEmitted = false;
+    this.bossBurstTimer = this.cfg.boss.burst.every;
+    this.bossBursts = 0;
+    this.powerups.clear();
+    this.vortex.reset();
+    this.waves.toSpawn = 0; // ST-453: waves resume the current cycle (wave number persists)
+    this.waves.state = 'intermission';
+    this.waves.intermission = this.waves.intermissionFor(this.waves.wave + 1);
+    this.waves.waveElapsed = 0;
+    this.waves.rockAllowed = true;
+    this.emit('checkpoint', { level: ls.level, score: this._levelStartScore, reason: 'continue' });
+    this._emitZoneEnter(true);
+    return true;
+  }
+
+  /** ST-453 (E64): lives hit zero - campaign continues at the checkpoint, endless = classic game over. */
+  _onLivesZero() {
+    if (this._continueAtCheckpoint()) return;
+    this.game.to(STATE.GAME_OVER);
+    this.emit('gameover', { score: this.score });
   }
 
   /** ST-055: the boss touching the ship costs a life (same flow as a rock hit). The boss survives. */
@@ -617,10 +806,7 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
       const n = Math.hypot(nx, ny) || 1;
       this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
       this.ship.damage(v2(nx / n, ny / n));
-      if (livesLeft <= 0) {
-        this.game.to(STATE.GAME_OVER);
-        this.emit('gameover', { score: this.score });
-      }
+      if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
     }
   }
   /** ST-056: fire an enemy bolt from fromPos aimed at the ship's current position. */
@@ -668,6 +854,7 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
    * No-op on other waves, while a Monolith is alive, or while one is live. */
   spawnWardenForWave(wave) {
     const w = this.cfg.warden;
+    if (this.mode === 'campaign') return; // ST-453 (E64): the warden is a per-wave boss byproduct (endless only)
     const b = this.cfg.boss;
     if (wave % b.everyWave !== 0 || this.boss || this.warden) return;
     const R = this.cfg.arena.radius - w.radius;
@@ -721,10 +908,7 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
       const n = Math.hypot(nx, ny) || 1;
       this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
       this.ship.damage(v2(nx / n, ny / n));
-      if (livesLeft <= 0) {
-        this.game.to(STATE.GAME_OVER);
-        this.emit('gameover', { score: this.score });
-      }
+      if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
     }
   }
 
@@ -742,10 +926,7 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
         const n = Math.hypot(nx, ny) || 1;
         this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
         this.ship.damage(v2(nx / n, ny / n));
-        if (livesLeft <= 0) {
-          this.game.to(STATE.GAME_OVER);
-          this.emit('gameover', { score: this.score });
-        }
+        if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
         break; // one life per step (invuln prevents chain hits)
       }
     }
@@ -775,7 +956,9 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
   spawnDronesForWave(wave) {
     const d = this.cfg.drone;
     if (wave < d.firstWave) return;
-    for (let i = 0; i < d.perWave; i++) this.drones.spawn(this.ship.pos);
+    if (!this._zoneAllows("drone")) return; // ST-453 (E64): zone mix gate
+    const n = Math.max(0, Math.round(d.perWave * this._hazardRate("enemyRate"))); // ST-453 (E64)
+    for (let i = 0; i < n; i++) this.drones.spawn(this.ship.pos);
   }
 
   /** ST-117: bullets destroy drones (1 hit). Each drone kill feeds the combo. */
@@ -809,10 +992,7 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     const n = Math.hypot(nx, ny) || 1;
     this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
     this.ship.damage(v2(nx / n, ny / n));
-    if (livesLeft <= 0) {
-      this.game.to(STATE.GAME_OVER);
-      this.emit('gameover', { score: this.score });
-    }
+    if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
 
 
@@ -821,7 +1001,9 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
   spawnStingersForWave(wave) {
     const s = this.cfg.stinger;
     if (wave < s.firstWave) return;
-    for (let i = 0; i < s.perWave; i++) {
+    if (!this._zoneAllows("stinger")) return; // ST-453 (E64): zone mix gate
+    const n = Math.max(0, Math.round(s.perWave * this._hazardRate("enemyRate"))); // ST-453 (E64)
+    for (let i = 0; i < n; i++) {
       const st = this.stingers.spawn(this.ship.pos);
       if (st && !this._stingerToasted) {
         this._stingerToasted = true;
@@ -852,7 +1034,9 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
   spawnFlyersForWave(wave) {
     const s = this.cfg.flyer;
     if (wave < s.firstWave) return;
-    for (let i = 0; i < s.perWave; i++) {
+    if (!this._zoneAllows("flyer")) return; // ST-453 (E64): zone mix gate
+    const n = Math.max(0, Math.round(s.perWave * this._hazardRate("enemyRate"))); // ST-453 (E64)
+    for (let i = 0; i < n; i++) {
       const fl = this.flyers.spawn(this.ship.pos);
       if (fl && !this._flyerToasted) {
         this._flyerToasted = true;
@@ -898,17 +1082,16 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     const n = Math.hypot(nx, ny) || 1;
     this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
     this.ship.damage(v2(nx / n, ny / n));
-    if (livesLeft <= 0) {
-      this.game.to(STATE.GAME_OVER);
-      this.emit('gameover', { score: this.score });
-    }
+    if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
   /** ST-418: spawn the wave's hunters once eligible (wave >= firstWave). The first spawn of a
    * run emits 'hunterSpawn' (the main.js "HUNTER BEHIND YOU" toast). */
   spawnHunterForWave(wave) {
     const s = this.cfg.hunter;
     if (wave < s.firstWave) return;
-    for (let i = 0; i < s.perWave; i++) {
+    if (!this._zoneAllows("hunter")) return; // ST-453 (E64): zone mix gate
+    const n = Math.max(0, Math.round(s.perWave * this._hazardRate("enemyRate"))); // ST-453 (E64)
+    for (let i = 0; i < n; i++) {
       const h = this.hunters.spawn(this.ship.pos);
       if (h && !this._hunterToasted) {
         this._hunterToasted = true;
@@ -947,7 +1130,7 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
     this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
     this.ship.damage(v2(nx / n, ny / n));
-    if (livesLeft <= 0) { this.game.to(STATE.GAME_OVER); this.emit('gameover', { score: this.score }); }
+    if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
 
   /** ST-418: spawn the wave's gunships once eligible (wave >= firstWave). The first spawn of a
@@ -955,7 +1138,9 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
   spawnGunshipForWave(wave) {
     const s = this.cfg.gunship;
     if (wave < s.firstWave) return;
-    for (let i = 0; i < s.perWave; i++) {
+    if (!this._zoneAllows("gunship")) return; // ST-453 (E64): zone mix gate
+    const n = Math.max(0, Math.round(s.perWave * this._hazardRate("enemyRate"))); // ST-453 (E64)
+    for (let i = 0; i < n; i++) {
       const g = this.gunships.spawn(this.ship.pos);
       if (g && !this._gunshipToasted) {
         this._gunshipToasted = true;
@@ -1000,7 +1185,7 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
     this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
     this.ship.damage(v2(nx / n, ny / n));
-    if (livesLeft <= 0) { this.game.to(STATE.GAME_OVER); this.emit('gameover', { score: this.score }); }
+    if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
 
   /** ST-448: spawn the wave's sentries once eligible (wave >= 11, never boss waves -
@@ -1009,7 +1194,9 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
   spawnSentryForWave(wave) {
     const s = this.cfg.sentry;
     if (wave < s.firstWave || wave % this.cfg.boss.everyWave === 0) return;
-    for (let i = 0; i < s.perWave; i++) {
+    if (!this._zoneAllows("sentry")) return; // ST-453 (E64): zone mix gate
+    const n = Math.max(0, Math.round(s.perWave * this._hazardRate("enemyRate"))); // ST-453 (E64)
+    for (let i = 0; i < n; i++) {
       const q = this.sentries.spawn(this.ship.pos);
       if (q && !this._sentryToasted) {
         this._sentryToasted = true;
@@ -1023,6 +1210,7 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
   spawnWaspForWave(wave) {
     const s = this.cfg.wasp;
     if (wave < s.firstWave || wave % this.cfg.boss.everyWave === 0) return;
+    if (!this._zoneAllows("wasp")) return; // ST-453 (E64): pack gate (single spawn, no count)
     const pack = this.wasps.spawn(this.ship.pos);
     if (pack && !this._waspToasted) {
       this._waspToasted = true;
@@ -1035,7 +1223,9 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
   spawnPodForWave(wave) {
     const s = this.cfg.pod;
     if (wave < s.firstWave || wave % this.cfg.boss.everyWave === 0) return;
-    for (let i = 0; i < s.perWave; i++) {
+    if (!this._zoneAllows("pod")) return; // ST-453 (E64): zone mix gate
+    const n = Math.max(0, Math.round(s.perWave * this._hazardRate("enemyRate"))); // ST-453 (E64)
+    for (let i = 0; i < n; i++) {
       const q = this.pods.spawn(this.ship.pos);
       if (q && !this._podToasted) {
         this._podToasted = true;
@@ -1122,7 +1312,7 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
     this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
     this.ship.damage(v2(nx / n, ny / n));
-    if (livesLeft <= 0) { this.game.to(STATE.GAME_OVER); this.emit('gameover', { score: this.score }); }
+    if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
 
   /** ST-448: a wasp touching the ship costs a life (NO score) and is lost. */
@@ -1138,7 +1328,7 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
     this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
     this.ship.damage(v2(nx / n, ny / n));
-    if (livesLeft <= 0) { this.game.to(STATE.GAME_OVER); this.emit('gameover', { score: this.score }); }
+    if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
 
   /** ST-448: a pod touching the ship costs a life (NO score) and is lost. */
@@ -1154,11 +1344,12 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
     this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
     this.ship.damage(v2(nx / n, ny / n));
-    if (livesLeft <= 0) { this.game.to(STATE.GAME_OVER); this.emit('gameover', { score: this.score }); }
+    if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
 
   reset() {
     this.warp = null; this.victory = false; this.currentStage = 1; // ST-419: reset campaign state (mode persists via begin)
+    this.levelState = { level: 1, distance: 0, zone: 1, phase: 'zone' }; this._levelStartScore = 0; this._lastZone = 0; // ST-453 (E64)
     this.ship = new Ship(0, 0, this.cfg);
     this.weapons.clear();
     this.field.clear();
