@@ -1049,6 +1049,69 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
       name: 'Monolith Prime', hp: 88, phase2: 0.6, burstEvery: 3.2, splitCount: 5, rim: 0xffc94d
     }
   },
+  levels: {
+    // ST-452 (I485, E64): linear campaign level data - 3 levels x 4 zones. Pure
+    // DATA + pure model (src/core/level.js): nothing in the simulation reads this
+    // in ST-452 (model only -> causal + playframe stay EXACT); ST-453 wires the
+    // level driver. `length` = forward arc distance along the flight path (arena
+    // units, same space as arena.radius 26; ship maxSpeed 14 u/s -> a 100-u zone
+    // is ~7 s at full thrust, ~15-30 s with dodging). `checkpointAt` = fraction
+    // within [0,1] where the zone checkpoint sits (0 = zone start; Ikaruga F6:
+    // death continues from the last checkpoint, never wipe-to-menu).
+    // enemyMix vocabulary (E63 roster): drone/mine/stinger/flyer/hunter/gunship/
+    // sentry/wasp/pod + rock. optionalTargets vocabulary: rock variants
+    // (golden, shielded) + powerups (rapid, spread, shield, magnet, overdrive,
+    // slowmo) + bonus enemies (pod). `name` = en source of truth; display
+    // strings in strings.js ('level.name.l<n>' / 'level.zone.l<n>z<m>', all 3
+    // locales) - pinned equal by tests/level.test.js.
+    levels: [
+      { name: 'Outer Drift', boss: 'monolith', zones: [ // level theme: learn to fly forward (F6)
+        { name: 'Drift Approach',  length: 80,  paletteId: 'drift-1',  hazardProfile: 'calm',     enemyMix: ['drone', 'rock'],            optionalTargets: ['golden'],                checkpointAt: 0 },
+        { name: 'Wreck Alley',     length: 90,  paletteId: 'drift-2',  hazardProfile: 'moderate', enemyMix: ['drone', 'stinger', 'mine'],  optionalTargets: ['shielded', 'pod'],      checkpointAt: 0 },
+        { name: 'Tug Lane',        length: 100, paletteId: 'drift-3',  hazardProfile: 'moderate', enemyMix: ['stinger', 'flyer', 'mine'],  optionalTargets: ['golden', 'pod'],        checkpointAt: 0 },
+        { name: 'Gate Threshold',  length: 60,  paletteId: 'drift-4',  hazardProfile: 'dense',    enemyMix: ['hunter', 'stinger', 'mine'], optionalTargets: ['rapid'],                 checkpointAt: 0 }
+      ] },
+      { name: 'Debris Field', boss: 'splicer', zones: [ // level theme: weave + timing through density (F4/F6)
+        { name: 'Shard Gate',          length: 90,  paletteId: 'debris-1', hazardProfile: 'moderate', enemyMix: ['drone', 'mine', 'stinger'], optionalTargets: ['golden'],           checkpointAt: 0 },
+        { name: 'Tumble Run',          length: 100, paletteId: 'debris-2', hazardProfile: 'dense',    enemyMix: ['mine', 'stinger', 'flyer'],  optionalTargets: ['shielded'],         checkpointAt: 0 },
+        { name: 'Sentry Corridor',     length: 110, paletteId: 'debris-3', hazardProfile: 'dense',    enemyMix: ['sentry', 'mine', 'drone'],   optionalTargets: ['pod'],              checkpointAt: 0 },
+        { name: 'Splicer Antechamber', length: 70,  paletteId: 'debris-4', hazardProfile: 'gauntlet', enemyMix: ['sentry', 'hunter', 'wasp'],  optionalTargets: ['rapid', 'pod'],      checkpointAt: 0 }
+      ] },
+      { name: 'Core Gate', boss: 'monolith-prime', zones: [ // level theme: recap + escalation (Ikaruga F6 final stage)
+        { name: 'Ember Run',         length: 90,  paletteId: 'ember-1', hazardProfile: 'moderate', enemyMix: ['stinger', 'mine', 'drone'], optionalTargets: ['golden'],            checkpointAt: 0 },
+        { name: 'Wasp Swarm',        length: 110, paletteId: 'ember-2', hazardProfile: 'dense',    enemyMix: ['wasp', 'pod', 'stinger'],    optionalTargets: ['pod'],              checkpointAt: 0 },
+        { name: 'Squad Lock',        length: 120, paletteId: 'ember-3', hazardProfile: 'gauntlet', enemyMix: ['sentry', 'gunship', 'mine'],  optionalTargets: ['shielded', 'pod'],   checkpointAt: 0 },
+        { name: 'Prime Threshold',   length: 80,  paletteId: 'ember-4', hazardProfile: 'gauntlet', enemyMix: ['gunship', 'sentry', 'wasp'], optionalTargets: ['rapid', 'shielded'], checkpointAt: 0 }
+      ] }
+    ],
+    palettes: { // zone identity palettes, E57 stage-theme shape {sky, stars, floor, grid, accent}.
+      // MODEL ONLY in ST-452 (data): ST-455 consumes these + runs a rendered-luma
+      // audit (I480 pattern) before finalizing hexes. null = arena identity (no
+      // visual change; E57 stage-1 precedent). drift zones ride the identity
+      // floor (0x483728/0x1a130d) + near stars 0xe8f1ff; debris/ember bases =
+      // the E57 stage-2/3 themes (continuity).
+      'drift-1': null,
+      'drift-2': { sky: 0x05080f, stars: 0xdce8ff, floor: 0x483728, grid: 0x1a130d, accent: 0x59d8ff },
+      'drift-3': { sky: 0x08070d, stars: 0xe8f1ff, floor: 0x4f3a26, grid: 0x1c140c, accent: 0xff9a3d },
+      'drift-4': { sky: 0x0d0605, stars: 0xffd8b0, floor: 0x54351f, grid: 0x1e130a, accent: 0xff4a2a },
+      'debris-1': { sky: 0x04101a, stars: 0x9fd8ff, floor: 0x0a2530, grid: 0x123c4a, accent: 0x2dd4bf },
+      'debris-2': { sky: 0x03141f, stars: 0xb8e8ff, floor: 0x0c2a36, grid: 0x14424f, accent: 0x53d8ff },
+      'debris-3': { sky: 0x051218, stars: 0xa8d8f0, floor: 0x0e2330, grid: 0x163a45, accent: 0x69f0ae },
+      'debris-4': { sky: 0x02131a, stars: 0x8fd0ff, floor: 0x082028, grid: 0x0e3440, accent: 0x2dd4bf },
+      'ember-1': { sky: 0x0f0705, stars: 0xffd0a0, floor: 0x2a1408, grid: 0x4a2a12, accent: 0xffc94d },
+      'ember-2': { sky: 0x120705, stars: 0xffc890, floor: 0x301808, grid: 0x523014, accent: 0xff9a3d },
+      'ember-3': { sky: 0x140804, stars: 0xffb880, floor: 0x361a0a, grid: 0x5a3416, accent: 0xff4a2a },
+      'ember-4': { sky: 0x170a04, stars: 0xffa870, floor: 0x3c1d0c, grid: 0x623a18, accent: 0xffc94d }
+    },
+    hazardProfiles: { // hazard-density vocabulary (F3/F4: tighten <-> release arc).
+      // MODEL ONLY in ST-452: ST-453/ST-455 finalize the multipliers in the
+      // balance pass. rockRate/mineRate/enemyRate scale the zone spawn rates.
+      calm: { rockRate: 0.5, mineRate: 0.0, enemyRate: 0.8 },
+      moderate: { rockRate: 1.0, mineRate: 1.0, enemyRate: 1.0 },
+      dense: { rockRate: 1.5, mineRate: 1.5, enemyRate: 1.25 },
+      gauntlet: { rockRate: 2.0, mineRate: 2.0, enemyRate: 1.5 }
+    }
+  },
   campaign: { warpDuration: 1.6 } // deterministic frozen-sim warp timer (no RNG draws)
 };
 
