@@ -34,6 +34,8 @@ const ASSETS = {
   debrisSliver: 'assets/debris_sliver.glb', // ST-381 (I411): death-shatter shard (thin plate, 48 tris)
   hunter: 'assets/enemy_hunter.glb', // I451 (ST-421 E57): manta hull + W-fin + core (1432 tris; I448 useGLB pre-wire)
   gunship: 'assets/enemy_gunship.glb', // I451 (ST-421 E57): brute hull + open bay + nacelle (1688 tris; I448 useGLB pre-wire)
+  sentry: 'assets/enemy_sentry.glb', // ST-449 (pre-wired at I481; procedural until the GLB lands)
+  wasp: 'assets/enemy_wasp.glb', // ST-449 (pre-wired at I481; procedural until the GLB lands)
 };
 
 // ST-327 (I358): the one PNG texture asset (Blender floor surface, 8,586 B,

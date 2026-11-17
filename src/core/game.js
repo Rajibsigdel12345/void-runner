@@ -9,6 +9,9 @@ import { StingerField } from './stinger.js'; // ST-229
 import { FlyerField } from './flyer.js'; // ST-232
 import { HunterField } from './hunter.js'; // ST-418
 import { GunshipField } from './gunship.js'; // ST-418
+import { SentryField } from './sentry.js'; // ST-448
+import { WaspField } from './wasp.js'; // ST-448
+import { PodField } from './pod.js'; // ST-448
 import { Monolith, bossHpForWave, bossBurstVectors } from './boss.js';
 import { Splicer, splicerHpForWave } from './splicer.js';
 import { Warden } from './warden.js'; // ST-136
@@ -39,6 +42,9 @@ export class World {
     this.flyers = new FlyerField(rng, cfg); // ST-232
 this.hunters = new HunterField(rng, cfg); // ST-418
 this.gunships = new GunshipField(rng, cfg); // ST-418
+this.sentries = new SentryField(rng, cfg); // ST-448
+this.wasps = new WaspField(rng, cfg); // ST-448
+this.pods = new PodField(rng, cfg); // ST-448
     this.boss = null; // ST-055
     this.bossRelease = 0; // ST-241: 1 -> 0 over music.intensity.releaseTime after a boss death
     this.enemyBullets = new EnemyBulletField(cfg); // ST-056
@@ -222,6 +228,9 @@ this.gunships = new GunshipField(rng, cfg); // ST-418
       this.spawnFlyersForWave(wv.startedWave); // ST-232
 this.spawnHunterForWave(wv.startedWave); // ST-418
 this.spawnGunshipForWave(wv.startedWave); // ST-418
+this.spawnSentryForWave(wv.startedWave); // ST-448
+this.spawnWaspForWave(wv.startedWave); // ST-448
+this.spawnPodForWave(wv.startedWave); // ST-448
       this.scoreKeeper.setCap(capFor(wv.startedWave, this.cfg)); // ST-233: combo cap wave-scaling (W1-2 capLow / W3+ capHigh)
     }
     const wl = this.weaponLevel(); // ST-122: weapon progression by wave
@@ -233,6 +242,9 @@ this.spawnGunshipForWave(wv.startedWave); // ST-418
     this.flyers.step(edt); // ST-232 (ST-115: scaled under slow-mo; no homing - pure crosser)
 this.hunters.step(edt, this.ship.pos, this.ship.aim); // ST-418 (ST-115: scaled under slow-mo)
 this.gunships.step(edt, this.ship.pos); // ST-418 (ST-115: scaled under slow-mo)
+this.sentries.step(edt, this.ship.pos); // ST-448 (ST-115: scaled under slow-mo)
+this.wasps.step(edt, this.ship.pos); // ST-448 (ST-115: scaled under slow-mo)
+this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slow-mo)
     if (this.warden) this.warden.step(edt, this.ship.pos); // ST-136 (ST-115: scaled under slow-mo)
     for (const dc of this.drones.decayed) { // I129: seeker battery expired -> self-destruct event (render FX in main.js)
       this.emit('droneDecay', { pos: { x: dc.pos.x, y: dc.pos.y } });
@@ -258,6 +270,21 @@ this.gunships.step(edt, this.ship.pos); // ST-418 (ST-115: scaled under slow-mo)
         this.emit(ge.kind === 'arm' ? 'gunshipArm' : 'gunshipDeath', { pos: p, self: ge.self });
       }
     }
+    for (const se of this.sentries.drainEvents()) { // ST-448: charge / fire(bolt) / death(self)
+      const p = { x: se.pos.x, y: se.pos.y };
+      if (se.kind === 'fire') { const sb = this.enemyBullets.fire(se.pos, se.dir, this.cfg.sentry.boltSpeed); if (sb) this.emit('sentryFire', { pos: p }); }
+      else if (se.kind === 'charge') this.emit('sentryCharge', { pos: p });
+      else if (se.kind === 'death') this.emit('sentryDeath', { pos: p, self: se.self });
+    }
+    for (const we of this.wasps.drainEvents()) { // ST-448: dash / death(self)
+      const p = { x: we.pos.x, y: we.pos.y };
+      this.emit(we.kind === 'dash' ? 'waspDash' : 'waspDeath', { pos: p, self: we.self });
+    }
+    for (const pe of this.pods.drainEvents()) { // ST-448: death(self-expiry; split is resolve-driven)
+      const p = { x: pe.pos.x, y: pe.pos.y };
+      if (pe.kind === 'death') this.emit('podDeath', { pos: p, self: pe.self, split: false });
+    }
+
     for (const f of this.mines.takeFires()) { // ST-056
       const b = this.fireAimedBolt(f, this.cfg.enemyBullets.mineSpeed);
       if (b) this.emit('mineFire', { pos: { x: f.x, y: f.y } });
@@ -300,6 +327,12 @@ this.gunships.step(edt, this.ship.pos); // ST-418 (ST-115: scaled under slow-mo)
     this.resolveBulletGunships(); // ST-418
     this.resolveShipHunters(); // ST-418
     this.resolveShipGunships(); // ST-418
+    this.resolveBulletSentries(); // ST-448
+    this.resolveBulletWasps(); // ST-448
+    this.resolveBulletPods(); // ST-448
+    this.resolveShipSentries(); // ST-448
+    this.resolveShipWasps(); // ST-448
+    this.resolveShipPods(); // ST-448
     this.resolveShipBoss(); // ST-055
     this.resolveShipWarden(); // ST-136
     this.resolveShipEnemyBullets(); // ST-056
@@ -970,6 +1003,160 @@ this.gunships.step(edt, this.ship.pos); // ST-418 (ST-115: scaled under slow-mo)
     if (livesLeft <= 0) { this.game.to(STATE.GAME_OVER); this.emit('gameover', { score: this.score }); }
   }
 
+  /** ST-448: spawn the wave's sentries once eligible (wave >= 11, never boss waves -
+   * the existing boss-wave predicate is reused). The first spawn of a run emits
+   * 'sentrySpawn' (the main.js "SENTRY ON STATION" toast). */
+  spawnSentryForWave(wave) {
+    const s = this.cfg.sentry;
+    if (wave < s.firstWave || wave % this.cfg.boss.everyWave === 0) return;
+    for (let i = 0; i < s.perWave; i++) {
+      const q = this.sentries.spawn(this.ship.pos);
+      if (q && !this._sentryToasted) {
+        this._sentryToasted = true;
+        this.emit('sentrySpawn', { pos: { x: q.pos.x, y: q.pos.y }, wave });
+      }
+    }
+  }
+
+  /** ST-448: spawn the wave's wasp V-pack once eligible (wave >= 12, never boss waves).
+   * The first pack of a run emits 'waspSpawn' (the main.js "WASPS INBOUND" toast). */
+  spawnWaspForWave(wave) {
+    const s = this.cfg.wasp;
+    if (wave < s.firstWave || wave % this.cfg.boss.everyWave === 0) return;
+    const pack = this.wasps.spawn(this.ship.pos);
+    if (pack && !this._waspToasted) {
+      this._waspToasted = true;
+      this.emit('waspSpawn', { pos: { x: pack[1].pos.x, y: pack[1].pos.y }, wave });
+    }
+  }
+
+  /** ST-448: spawn the wave's pods once eligible (wave >= 13, never boss waves).
+   * The first spawn of a run emits 'podSpawn' (the main.js "POD DRIFTING" toast). */
+  spawnPodForWave(wave) {
+    const s = this.cfg.pod;
+    if (wave < s.firstWave || wave % this.cfg.boss.everyWave === 0) return;
+    for (let i = 0; i < s.perWave; i++) {
+      const q = this.pods.spawn(this.ship.pos);
+      if (q && !this._podToasted) {
+        this._podToasted = true;
+        this.emit('podSpawn', { pos: { x: q.pos.x, y: q.pos.y }, wave });
+      }
+    }
+  }
+
+  /** ST-448: bullets damage sentries (3 hits). The kill pays +350 and feeds the combo. */
+  resolveBulletSentries() {
+    for (const b of this.weapons.bullets) {
+      if (b.dead) continue;
+      const hit = this.sentries.sentries.find(qm => !qm.dead &&
+        Math.hypot(qm.pos.x - b.pos.x, qm.pos.y - b.pos.y) < qm.radius + b.radius);
+      if (!hit) continue;
+      this.onPlayerBulletHit(b.id);
+      const q = this.sentries.hit(hit.id);
+      for (const ge of this.sentries.drainEvents()) { // hit events reach the world immediately
+        const p = { x: ge.pos.x, y: ge.pos.y };
+        this.emit('sentryHit', { pos: p });
+      }
+      if (q.dead) {
+        const points = this.scoreKeeper.kill(this.cfg.sentry.score, this.time);
+        this.emit('kill', { pos: { x: q.pos.x, y: q.pos.y }, size: 'sentry', points,
+          combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), sentry: true });
+        this.emit('sentryDeath', { pos: { x: q.pos.x, y: q.pos.y }, self: false });
+      }
+    }
+    this.weapons.compact();
+  }
+
+  /** ST-448: bullets destroy wasps (1 hit). Each kill pays +100 and feeds the combo. */
+  resolveBulletWasps() {
+    for (const b of this.weapons.bullets) {
+      if (b.dead) continue;
+      const hit = this.wasps.wasps.find(wm => !wm.dead &&
+        Math.hypot(wm.pos.x - b.pos.x, wm.pos.y - b.pos.y) < wm.radius + b.radius);
+      if (!hit) continue;
+      this.onPlayerBulletHit(b.id);
+      this.wasps.destroy(hit.id);
+      const points = this.scoreKeeper.kill(this.cfg.wasp.score, this.time);
+      this.emit('kill', { pos: { x: hit.pos.x, y: hit.pos.y }, size: 'wasp', points,
+        combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), wasp: true });
+      this.emit('waspDeath', { pos: { x: hit.pos.x, y: hit.pos.y }, self: false });
+    }
+    this.weapons.compact();
+  }
+
+  /** ST-448: bullets damage pods (4 hits). A lethal hit splits the pod into 2 WASP
+   * corkscrews - driven EXACTLY ONCE from the pod's death event - and pays +300. */
+  resolveBulletPods() {
+    for (const b of this.weapons.bullets) {
+      if (b.dead) continue;
+      const hit = this.pods.pods.find(pm => !pm.dead &&
+        Math.hypot(pm.pos.x - b.pos.x, pm.pos.y - b.pos.y) < pm.radius + b.radius);
+      if (!hit) continue;
+      this.onPlayerBulletHit(b.id);
+      const q = this.pods.hit(hit.id);
+      for (const pe of this.pods.drainEvents()) { // hit + lethal-death (split) events reach the world immediately
+        const p = { x: pe.pos.x, y: pe.pos.y };
+        if (pe.kind === 'hit') this.emit('podHit', { pos: p });
+        else if (pe.kind === 'death') {
+          for (let i = 0; i < this.cfg.pod.splitCount; i++) this.wasps.spawnAt(q.pos, true); // split children (ungated, rim-clamped, excluded from the non-split cap)
+          const points = this.scoreKeeper.kill(this.cfg.pod.score, this.time);
+          this.emit('kill', { pos: { x: q.pos.x, y: q.pos.y }, size: 'pod', points,
+            combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), pod: true });
+          this.emit('podDeath', { pos: { x: q.pos.x, y: q.pos.y }, self: false, split: true });
+        }
+      }
+    }
+    this.weapons.compact();
+  }
+
+  /** ST-448: a sentry touching the ship costs a life (NO score) and is lost. */
+  resolveShipSentries() {
+    if (this.ship.isInvulnerable || this.lives <= 0) return;
+    const hit = this.sentries.sentries.find(qm => !qm.dead &&
+      Math.hypot(qm.pos.x - this.ship.pos.x, qm.pos.y - this.ship.pos.y) < qm.radius + this.cfg.ship.radius);
+    if (!hit) return;
+    this.sentries.destroy(hit.id);
+    this.emit('sentryDeath', { pos: { x: hit.pos.x, y: hit.pos.y }, self: false });
+    const livesLeft = this.shipDamage();
+    this.scoreKeeper.onDamage();
+    const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.ship.damage(v2(nx / n, ny / n));
+    if (livesLeft <= 0) { this.game.to(STATE.GAME_OVER); this.emit('gameover', { score: this.score }); }
+  }
+
+  /** ST-448: a wasp touching the ship costs a life (NO score) and is lost. */
+  resolveShipWasps() {
+    if (this.ship.isInvulnerable || this.lives <= 0) return;
+    const hit = this.wasps.wasps.find(wm => !wm.dead &&
+      Math.hypot(wm.pos.x - this.ship.pos.x, wm.pos.y - this.ship.pos.y) < wm.radius + this.cfg.ship.radius);
+    if (!hit) return;
+    this.wasps.destroy(hit.id);
+    this.emit('waspDeath', { pos: { x: hit.pos.x, y: hit.pos.y }, self: false });
+    const livesLeft = this.shipDamage();
+    this.scoreKeeper.onDamage();
+    const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.ship.damage(v2(nx / n, ny / n));
+    if (livesLeft <= 0) { this.game.to(STATE.GAME_OVER); this.emit('gameover', { score: this.score }); }
+  }
+
+  /** ST-448: a pod touching the ship costs a life (NO score) and is lost. */
+  resolveShipPods() {
+    if (this.ship.isInvulnerable || this.lives <= 0) return;
+    const hit = this.pods.pods.find(pm => !pm.dead &&
+      Math.hypot(pm.pos.x - this.ship.pos.x, pm.pos.y - this.ship.pos.y) < pm.radius + this.cfg.ship.radius);
+    if (!hit) return;
+    this.pods.destroy(hit.id);
+    this.emit('podDeath', { pos: { x: hit.pos.x, y: hit.pos.y }, self: false });
+    const livesLeft = this.shipDamage();
+    this.scoreKeeper.onDamage();
+    const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.ship.damage(v2(nx / n, ny / n));
+    if (livesLeft <= 0) { this.game.to(STATE.GAME_OVER); this.emit('gameover', { score: this.score }); }
+  }
+
   reset() {
     this.warp = null; this.victory = false; this.currentStage = 1; // ST-419: reset campaign state (mode persists via begin)
     this.ship = new Ship(0, 0, this.cfg);
@@ -985,6 +1172,12 @@ this.gunships.step(edt, this.ship.pos); // ST-418 (ST-115: scaled under slow-mo)
     this.gunships.clear(); // ST-418
     this._hunterToasted = false; // ST-418
     this._gunshipToasted = false; // ST-418
+    this.sentries.clear(); // ST-448
+    this.wasps.clear(); // ST-448
+    this.pods.clear(); // ST-448
+    this._sentryToasted = false; // ST-448
+    this._waspToasted = false; // ST-448
+    this._podToasted = false; // ST-448
     this.boss = null; // ST-055
     this.bossRelease = 0; // ST-241
     this.warden = null; // ST-136

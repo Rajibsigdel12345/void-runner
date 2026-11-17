@@ -23,9 +23,12 @@ const PREVIOUS = {
   hunterDeath: 0.55, // ST-418: stalker kill rung (0.35 droneExplode < 0.55 < 0.6 stingerDeath)
   gunshipDeath: 0.85, // ST-418: heavy bomber kill rung (0.8 wardenDeath < 0.85 < 1.0 bossDeath)
   gunshipSpawn: 0.55, // ST-418: heavy bomber arrival rung (0.5 wardenSpawn)
+  sentryDeath: 0.7,    // ST-448: aimed shooter kill rung (0.65 flyerDeath < 0.7 < 0.8 wardenDeath)
+  waspDeath: 0.3,      // ST-448: dasher kill rung (below 0.35 droneExplode)
+  podDeath: 0.75,      // ST-448: splitter kill rung (0.7 sentryDeath < 0.75 < 0.8 wardenDeath)
 };
 
-test('the table is exactly the thirteen shaking events', () => {
+test('the table is exactly the sixteen shaking events', () => {
   assert.deepEqual(Object.keys(T).sort(), Object.keys(PREVIOUS).sort());
 });
 

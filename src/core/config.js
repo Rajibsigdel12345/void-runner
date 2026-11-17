@@ -498,6 +498,93 @@ export const CONFIG = {
     rimDist: 14,        // spawn: hold point at least this far from the ship
     score: 600          // kill reward (= Splicer boss 600; heaviest non-boss, below Monolith 1000)
   },
+  sentry: {  // ST-448 (E63): SENTRY - mid-range aimed shooter (wave 11+, never boss waves).
+    // Holds a preferred orbit band around the ship, aims a turn-limited barrel,
+    // CHARGES (0.8 s telegraph, charge node ramps - the RM-safe cue) and BURSTS 3
+    // aimed bolts (middle dead-aimed). 3 hits. The SQUAD slot: deliberate,
+    // read-and-dodge - unlike the popcorn WASP or the drifting POD.
+    firstWave: 11,      // W11: stage 3 "Core Gate" debut (boss waves 5/10/15 excluded)
+    perWave: 2,
+    maxConcurrent: 2,   // render pool 4 = cap + 2
+    palette: {
+      body: { color: 0x8a8f7a },   // warm sage (rendered p50 137 sky / 132 floor at gain 2.0)
+      base: { color: 0x3a3f34 },   // dark sage spar
+      accent: 0xff9a3d,            // charge-node glow (payload-amber family)
+    },
+    renderLumaGain: 2.0, // I480 rendered-luma audit: POD 127 < SENTRY 137 < WASP 176 (distinct rungs)
+    radius: 1.1,
+    hp: 3,
+    enterSpeed: 2.6,     // u/s: rim -> hold band
+    prefRMin: 9.0,       // preferred orbit band around the ship
+    prefRMax: 13.0,
+    rangeKeep: 0.5,      // u: band tolerance before re-approach
+    strafeOmega: 0.5,    // rad/s: hold strafe
+    aimTurn: 2.2,        // rad/s: barrel slew limit
+    holdMin: 1.2,        // s: hold duration band (rng)
+    holdMax: 2.2,
+    fireMin: 3.5,        // s: cooldown between bursts (rng)
+    fireMax: 4.5,
+    telegraph: 0.8,      // s: charge time (the telegraph floor - F3)
+    burstCount: 3,       // bolts per burst
+    burstGap: 0.18,      // s between bolts
+    boltSpeed: 9.0,      // u/s (= enemyBullets.speed - the normal bolt speed)
+    boltSpread: 0.10,    // rad: side-bolt spread (middle bolt dead-aimed)
+    rimDist: 15,         // spawn: rim point at least this far from the ship
+    score: 350,          // kill reward (300 hunter < 350 < 400 warden)
+    maxAge: 30,          // s: self-destruct (seeker maxAge precedent)
+  },
+  wasp: {  // ST-448 (E63): WASP - popcorn dasher (wave 12+). Spawns as a V-pack of 3 at
+    // the rim; each corkscrews at the ship (1.0-1.2 s anticipation - the F2 floor)
+    // then DASHES straight at the ship's position as predicted at dash start
+    // (15.5 u/s = 1.107x the ship's 14 - under the 1.15x F2 cap; 7.75 u dash <
+    // 21 u ship evasion over 1.5 s). One shot (+100). The SWARM slot: pressure.
+    firstWave: 12,      // W12: after the SENTRY teach (boss waves excluded)
+    perWave: 3,         // a V-pack of 3
+    maxConcurrent: 6,   // cap EXCLUDES split-children (render pool 10 = 6 + 4 headroom)
+    palette: {
+      body: { color: 0xb9c34d },   // chartreuse (rendered p50 176 sky / 171 floor at gain 2.0)
+      wing: { color: 0x5a6128 },   // dark olive wing plate
+      accent: 0xff4a2a,            // nose glow (threat-red dash cue)
+    },
+    renderLumaGain: 2.0,
+    radius: 0.45,
+    hp: 1,
+    score: 100,
+    corkscrewDurMin: 1.0,  // s: anticipation band (F2 floor - never dashes early)
+    corkscrewDurMax: 1.2,
+    corkscrewSpeed: 5.5,   // u/s: spiral approach
+    corkscrewOmega: 6.0,   // rad/s: heading oscillation frequency
+    dashSpeed: 15.5,       // u/s: 1.107x ship maxSpeed (14) - under the 1.15x cap, < 16
+    dashDur: 0.5,          // s: straight dash length
+    packSpread: 0.22,      // rad: V-pack bearing offset per slot
+    rimDist: 15,
+    maxAge: 30,
+  },
+  pod: {  // ST-448 (E63): POD - drifting splitter (wave 13+). PROCEDURAL (Vortex
+    // precedent - its children ARE the WASP unit). Drifts inward on a closed-form
+    // cosine wobble (no ship knowledge, no RNG in step()). 4 hits; a lethal hit
+    // splits into 2 WASP corkscrews (game.js drives the split exactly once).
+    firstWave: 13,      // W13: debut; W14 is the combine wave (boss waves excluded)
+    perWave: 1,
+    maxConcurrent: 2,   // render pool 4 = cap + 2
+    palette: {
+      body: { color: 0x5f8f86 },  // teal-green (rendered p50 127 sky / 122 floor - stable)
+      seam: { color: 0x2a4a45 },  // dark seam band (the split line)
+      core: 0xff9a3d,             // seam core glow (payload-amber, static)
+    },
+    renderLumaGain: 2.0,
+    radius: 1.2,
+    hp: 4,
+    score: 300,          // kill reward (250 stinger < 300 = hunter; 300 < 350 sentry)
+    driftSpeed: 2.2,     // u/s: inward drift
+    driftWobble: 0.4,    // u/s: wobble amplitude (x0.4 under reduced motion)
+    seamGlow: 0.55,      // static core glow intensity (<= 1.0 - RM-safe)
+    splitCount: 2,       // WASP corkscrews on a lethal hit
+    rimDist: 15,
+    rmAmpScale: 0.4,     // reduced-motion wobble scale (flyer rmAmpScale precedent)
+    maxAge: 30,
+  },
+
   flyer: {
     // ST-232: FLYER - evasive sine-weave crosser (wave 9+). The game one pure
     // lead-shot skill target: it never homes, never fires, never rams - you must
@@ -602,6 +689,9 @@ export const CONFIG = {
       hunterDeath: 0.55,    // ST-418: stalker kill (0.35 drone < 0.55 < 0.6 stinger)
       gunshipDeath: 0.85,   // ST-418: heavy bomber kill (0.8 wardenDeath < 0.85 < 1.0 bossDeath)
       gunshipSpawn: 0.55,   // ST-418: heavy bomber arrival (0.5 wardenSpawn)
+      sentryDeath: 0.7,    // ST-448: aimed shooter kill (0.65 flyerDeath < 0.7 < 0.8 wardenDeath)
+      waspDeath: 0.3,      // ST-448: dasher kill (below 0.35 droneExplode)
+      podDeath: 0.75,      // ST-448: splitter kill (0.7 sentryDeath < 0.75 < 0.8 wardenDeath)
       bossSpawn: 0.7,        // boss arrival
       bossDeath: 1.0,        // boss death
       wardenSpawn: 0.5,      // mini-boss arrival
@@ -613,6 +703,7 @@ export const CONFIG = {
       bossSpawn: 0.4,        // boss arrival
       wardenDeath: 0.4,      // mini-boss death
       gunshipDeath: 0.4,    // ST-418: heavy bomber death flash (wardenDeath 0.4)
+      podDeath: 0.4,       // ST-448: splitter death flash (wardenDeath 0.4; sentry/wasp deaths: none)
       bomb: 0.35,            // bomb blast
       mineExplode: 0.25,     // mine detonation
       wardenSpawn: 0.25,     // mini-boss arrival
@@ -638,6 +729,9 @@ export const CONFIG = {
       stinger: 0.2,           // ST-229: charger kill (L 0.18 < 0.2 < the 0.35 drone shake rung)
       flyer: 0.25,           // ST-232: evasive-target kill (0.2 stinger < 0.25; overdrive 0.375 -> cap 0.3)
       hunter: 0.22,          // ST-418: stalker kill (0.2 stinger < 0.22 < 0.25 flyer)
+      wasp: 0.10,          // ST-448: dasher kill (0.08 s < 0.10 < 0.12 m)
+      pod: 0.26,           // ST-448: splitter kill (0.25 flyer < 0.26 < 0.28 sentry)
+      sentry: 0.28,        // ST-448: aimed shooter kill (0.25 flyer < 0.28 < 0.3 gunship)
       gunship: 0.3,          // ST-418: heavy bomber kill (0.25 flyer < 0.3 = the max rung)
       overdriveBoost: 0.5,    // combo-heat: x1.5 while overdrive is active
       max: 0.3                // hard cap (L + overdrive 0.27 stays under the fanfare rung)
@@ -655,6 +749,9 @@ export const CONFIG = {
         stinger: 2.0,       // charger (radius 0.8)
         warden: 3.0,         // mini-boss (radius 1.7)
         hunter: 2.2,         // ST-418: stalker (radius 0.8)
+        wasp: 1.4,           // ST-448: dasher (radius 0.45)
+        sentry: 2.8,         // ST-448: aimed shooter (radius 1.1)
+        pod: 3.0,            // ST-448: splitter (radius 1.2)
         gunship: 3.6         // ST-418: heavy bomber (radius 1.6)
       }
     },
@@ -733,7 +830,10 @@ export const CONFIG = {
       stinger:  [0xd8f4ff, 0x9fd4ff, 0xffffff],    // ST-229 hot cyan-white (the telegraph family)
       flyer:    [0xff9de8, 0xffc4f0, 0xff6ad5],    // ST-232 magenta saucer (the evasive-target family)
       hunter:   [0xff7a4d, 0xffb088, 0xffe0c0],    // ST-418 rust-hot (HUNTER kill - threat-red warmed to white)
-      gunship:  [0xffa14d, 0xffc98a, 0xfff0d0]     // ST-418 gunmetal-ember (GUNSHIP kill - payload-amber family)
+      gunship:  [0xffa14d, 0xffc98a, 0xfff0d0],    // ST-418 gunmetal-ember (GUNSHIP kill - payload-amber family)
+      sentry:   [0xffd9a0, 0xffb060, 0xff9a3d],    // ST-448 warm sage (SENTRY kill - station-ember family)
+      wasp:     [0xeaff9a, 0xcfe05a, 0xb9c34d],    // ST-448 chartreuse (WASP kill - swarm family)
+      pod:      [0xa0f0e0, 0x6fd0c0, 0x5f8f86]     // ST-448 teal-green (POD kill - splitter family)
     },
     enemyBullet: { base: 0x5a1410, emissive: 0xff4a2a, emissiveIntensity: 1.2 }, // ST-248: hot red-orange threat bolt (data-driven; values unchanged)
     // I460/ST-429 A2: shared fresnel silhouette rim on enemy hulls (the I278
@@ -751,7 +851,10 @@ export const CONFIG = {
         stinger: { color: 0x2e6a7a, strength: 0.24 }, // steel-cyan (lock family)
         drone:   { color: 0x4a6a7a, strength: 0.22 }, // steel-cyan
         flyer:   { color: 0x8a3a6a, strength: 0.24 }, // mauve-magenta (dome family)
-        mine:    { color: 0x8a4a3a, strength: 0.24 }  // rust
+        mine:    { color: 0x8a4a3a, strength: 0.24 },  // rust
+        sentry:  { color: 0x4a5a3a, strength: 0.24 }, // ST-448: dark sage (peak rim luma 20.2)
+        wasp:    { color: 0x6a7a2a, strength: 0.24 }, // ST-448: dark chartreuse (peak rim luma 27.1)
+        pod:     { color: 0x2a4a45, strength: 0.26 }  // ST-448: dark teal (peak rim luma 17.4)
       }
     },
     // I460/ST-429 A3: shader-stable ship damage flash - a pre-created unlit
@@ -925,6 +1028,9 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
       flyer: { count: 6, speed: 8.5, life: 0.60, scaleMin: 0.45, scaleMax: 0.75 },
       hunter: { count: 7, speed: 8, life: 0.55, scaleMin: 0.40, scaleMax: 0.80 },  // ST-418: rust-hot shatter
       gunship: { count: 12, speed: 9, life: 0.75, scaleMin: 0.70, scaleMax: 1.30 }, // ST-418: gunmetal chaff (heavier)
+      sentry: { count: 8, speed: 9, life: 0.6, scaleMin: 0.5, scaleMax: 0.9 }, // ST-448: sage shrapnel
+      wasp: { count: 5, speed: 7, life: 0.4, scaleMin: 0.3, scaleMax: 0.55 }, // ST-448: swarm chaff (light)
+      pod: { count: 10, speed: 8, life: 0.7, scaleMin: 0.5, scaleMax: 1.0 }, // ST-448: teal fragments
       warden: { count: 10, speed: 9, life: 0.70, scaleMin: 0.80, scaleMax: 1.20 },
       boss: { count: 14, speed: 10, life: 0.80, scaleMin: 1.20, scaleMax: 1.80 }
     }
