@@ -47,15 +47,15 @@ const totalTris = parsed.reduce((a, p) => a + p.tris, 0);
 
 // I214 budgets (measured baselines in brackets; caps leave headroom for E9 art growth)
 const BUDGET = {
-  totalFilesKB: 1240,  // [I470 (ST-437) EXPLICIT re-pin: 1024 -> 1240, measured 1053.02 (I456 1016.33 + ship v5 384,756 B - ship v4 347,184 B = +36.69 KB); cap 1240 holds w/ 186.98 KB headroom for ST-438 enemy remaster]
-  totalGeoKB: 1120,    // [I470 (ST-437) EXPLICIT re-pin: 976 -> 1120, measured 1010.36 (I456 973.17 + ship v5 geo 379,794 B - ship v4 geo 342,236 B = +37.19 KB); cap 1120 holds w/ 109.64 KB headroom for ST-438]
+  totalFilesKB: 1240,  // [I470 (ST-437) EXPLICIT re-pin: 1024 -> 1240, measured 1053.02]; I482 (ST-449): +sentry 108,980 B + wasp 81,892 B; measured 1237.68; cap 1240 HOLDS w/ 2.32 KB headroom - future enemy art must re-pin
+  totalGeoKB: 1280,    // [I470 (ST-437) EXPLICIT re-pin: 976 -> 1120, measured 1010.36]; I482 (ST-449) EXPLICIT re-pin: 1120 -> 1280, measured 1187.92 (1010.36 + sentry geo 104,928 B + wasp geo 78,672 B = +183.56 KB); cap 1280 holds w/ 92.08 KB headroom
   perFileKB: 400,      // [max 375.74 - ship.glb I470 remaster v5 (17143t, 384,756 B); I454 max was 339.05 v4; cap 400 HOLDS w/ 24.26 KB headroom]
-  totalTris: 36000,    // [I470 (ST-437) EXPLICIT re-pin: 30000 -> 36000, measured 31646 (I456 28779 - ship v4 14276t + ship v5 17143t); cap 36000 holds w/ 4354 tri headroom for ST-438]
+  totalTris: 36000,    // [I470 (ST-437) EXPLICIT re-pin: 30000 -> 36000, measured 31646]; I482 (ST-449): +sentry 1096t + wasp 792t; measured 34938; cap 36000 HOLDS w/ 1062 tri headroom
   perFileMats: 3,      // [max 3 - ship body/wing/cockpit]
 };
 
-test('exactly 26 GLB assets (24 models + arena ring) (I451)', () => {
-  assert.equal(glbs.length, 26); // I220: +warden, I235: +stinger, I240: +flyer, I344: +comet, I410: +debris chunk+sliver, I420: +B-variant rocks L/M/S (21 -> 24), I451: +enemy hunter+gunship (24 -> 26)
+test('exactly 28 GLB assets (26 models + arena ring) (I451 -> I482)', () => {
+  assert.equal(glbs.length, 28); // I220: +warden, I235: +stinger, I240: +flyer, I344: +comet, I410: +debris chunk+sliver, I420: +B-variant rocks L/M/S (21 -> 24), I451: +enemy hunter+gunship (24 -> 26), I482 (ST-449): +enemy sentry+wasp (26 -> 28)
 });
 
 test('total GLB file size within budget', () => {
@@ -91,5 +91,5 @@ test('every GLB has POSITION + NORMAL (render layer assumes both)', () => {
 
 test('COLOR_0 only on the mottled rocks + boss + ship + enemy bodies + pickup emblems + warden hull/armor + arena ring + debris shards (in-code materials read it; others must not carry it)', () => { // I282: + enemy value bakes; I288/ST-272: + pickup emblem value bakes; I289/ST-273: + warden hull/armor value bakes; I299/ST-281: + arena ring value bake
   const withColor = parsed.filter((p) => p.attrs.has('COLOR_0')).map((p) => p.file).sort();
-  assert.deepEqual(withColor, ['arena_ring.glb', 'asteroid_L.glb', 'asteroid_L_B.glb', 'asteroid_M.glb', 'asteroid_M_B.glb', 'asteroid_S.glb', 'asteroid_S_B.glb', 'asteroid_comet.glb', 'boss.glb', 'debris_chunk.glb', 'debris_sliver.glb', 'drone.glb', 'enemy_gunship.glb', 'enemy_hunter.glb', 'flyer.glb', 'powerup_bomb.glb', 'powerup_magnet.glb', 'powerup_overdrive.glb', 'powerup_rapid.glb', 'powerup_shield.glb', 'powerup_slowmo.glb', 'powerup_spread.glb', 'ship.glb', 'stinger.glb', 'warden.glb']); // I299/ST-281: + arena ring value bake (16 -> 17); I289/ST-273 warden (stinger core + flyer dome stay emissive-driven); I410: + debris chunk/sliver (18 -> 20); I420: + B-variant rocks L/M/S (20 -> 23); I451/ST-421: + enemy hunter/gunship hull bakes (23 -> 25)
+  assert.deepEqual(withColor, ['arena_ring.glb', 'asteroid_L.glb', 'asteroid_L_B.glb', 'asteroid_M.glb', 'asteroid_M_B.glb', 'asteroid_S.glb', 'asteroid_S_B.glb', 'asteroid_comet.glb', 'boss.glb', 'debris_chunk.glb', 'debris_sliver.glb', 'drone.glb', 'enemy_gunship.glb', 'enemy_hunter.glb', 'enemy_sentry.glb', 'enemy_wasp.glb', 'flyer.glb', 'powerup_bomb.glb', 'powerup_magnet.glb', 'powerup_overdrive.glb', 'powerup_rapid.glb', 'powerup_shield.glb', 'powerup_slowmo.glb', 'powerup_spread.glb', 'ship.glb', 'stinger.glb', 'warden.glb']); // I299/ST-281: + arena ring value bake (16 -> 17); I289/ST-273 warden (stinger core + flyer dome stay emissive-driven); I410: + debris chunk/sliver (18 -> 20); I420: + B-variant rocks L/M/S (20 -> 23); I451/ST-421: + enemy hunter/gunship hull bakes (23 -> 25); I482/ST-449: + enemy sentry (hull bake + barrel identity) + wasp hull bake (25 -> 27)
 });

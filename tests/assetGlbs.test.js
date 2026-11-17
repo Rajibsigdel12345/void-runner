@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief); ship 300 -> 850 at I429 (ST-399 remaster, 818-tri fighter; design/asset-spec-ship-remaster.md)).
-const BUDGETS = { ship: 19000, L: 3200, M: 950, S: 380, comet: 650, boss: 1500, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200, chunk: 60, sliver: 50, hunter: 2400, gunship: 2400 }; // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276) + I456 (ST-426 rock L/M/S v11 density remaster 2100/520/140 -> 3200/950/380, actual 3000/900/350; boss 750 -> 1500, actual 1425)
+const BUDGETS = { ship: 19000, L: 3200, M: 950, S: 380, comet: 650, boss: 1500, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200, chunk: 60, sliver: 50, hunter: 2400, gunship: 2400, sentry: 1800, wasp: 1200 }; // + I482 (ST-449 sentry/wasp caps 1800/1200; actual 1096/792) // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276) + I456 (ST-426 rock L/M/S v11 density remaster 2100/520/140 -> 3200/950/380, actual 3000/900/350; boss 750 -> 1500, actual 1425)
 const MAX_FILE_BYTES = 393216; // I440 (ST-410 ship remaster v3) EXPLICIT re-pin: 262144 -> 393216 (ship 190,544 B/3254t -> 270,556 B/12400t; I435 was 100*1024 -> 262144 for v2; max non-ship stays boss 75.26 KB)
 
 function parseGlb(file) {
@@ -673,6 +673,7 @@ test('drone/stinger/flyer bodies: grayscale COLOR_0 value bake band + facet spre
 const ENEMY451_FACET = {
   hunter:  { p10: 0.561, p50: 1.0738, p90: 1.25 }, // per-face luma, file-level (I471 v5 re-pin WITH measurement; I451 was 0.6423/1.1584/1.25)
   gunship: { p10: 0.5167, p50: 1.0383, p90: 1.25 }, // I471 v5 re-pin WITH measurement (I451 was 0.5254/0.9759/1.25)
+  wasp:    { p10: 0.4835, p50: 1.0614, p90: 1.25 }, // I482 (ST-449) per-face luma, file-level, pin WITH measurement (sentry bakes two prims - see SENTRY_FACET block)
 };
 function primExtents({ buf, json, binOff }, meshName) {
   const m = (json.meshes || []).find((mm) => mm.name === meshName);
@@ -687,7 +688,7 @@ function primExtents({ buf, json, binOff }, meshName) {
     if (y < miny) miny = y; if (y > maxy) maxy = y;
     if (z < minz) minz = z; if (z > maxz) maxz = z;
   }
-  return { x: maxx - minx, y: maxy - miny, z: maxz - minz, cz: (minz + maxz) / 2 };
+  return { x: maxx - minx, y: maxy - miny, z: maxz - minz, cx: (minx + maxx) / 2, cz: (minz + maxz) / 2 }; // + cx at I482 (ST-449 sentry barrel centering)
 }
 function enemy451Bake(file, hullMesh, key) {
   const { buf, json, binOff } = parseGlb(file);
@@ -775,7 +776,130 @@ test('enemy_gunship.glb: naming, poly budget, part extents vs procedural parity,
 
 // I212: arena boundary ring (ST-212, cgs-dev-story). I254/ST-245 v2: two-node GLB
 // (VR_ArenaRing band + VR_ArenaRing_Ticks neon accent). The v1 exact-48-tris pin is
-// replaced by the two-node counts (band 48 + ticks 12 = 60), documented here.
+// replaced by the two-node counts (band 48 + ticks 12 = 60), documented here.// I482 (ST-449 E63 SENTRY GLB): angular floating watchtower - 8-seg platform + central boss +
+// 2 exhaust stubs (hull prim, 656t, E57 rule 8 grayscale value bake), cruciform base (180t,
+// no bake), forward barrel (140t) and charge orb (120t, emissive accent). Documented deviation
+// from the roster doc (design/enemy-roster-E63.md says "hull prim only" for COLOR_0): the barrel
+// shares VR_sentry_hull with the hull prim (sentryMesh.js renders the barrel slot under hullMat,
+// vertexColors:true), so the barrel carries a CONSTANT 1.0 white-identity COLOR_0 (bake_white)
+// - a GLB barrel primitive without COLOR_0 would render black. The hull prim carries the neutral
+// grayscale bake that multiplies the in-code sage tint.
+const SENTRY_FACET = { VR_Sentry_Hull: { p10: 0.6332, p50: 1.1448, p90: 1.25 } }; // I482 pinned WITH measurement
+function sentryFacetLumas({ buf, json, binOff }, p) {
+  // Per-prim variant of enemyFacetLumas (that reader picks a single primitive; the sentry
+  // bakes TWO prims: hull value bake + barrel constant identity).
+  const cAcc = json.accessors[p.attributes.COLOR_0];
+  const iAcc = json.accessors[p.indices];
+  const cBase = binOff + (json.bufferViews[cAcc.bufferView].byteOffset || 0) + (cAcc.byteOffset || 0);
+  const iBase = binOff + (json.bufferViews[iAcc.bufferView].byteOffset || 0) + (iAcc.byteOffset || 0);
+  const readIdx = (i) => (iAcc.componentType === 5123 ? buf.readUInt16LE(iBase + i * 2) : iAcc.componentType === 5125 ? buf.readUInt32LE(iBase + i * 4) : buf.readUInt8(iBase + i));
+  const fl = [];
+  for (let t = 0; t < iAcc.count / 3; t++) {
+    const lum = (i) => {
+      const o = cBase + i * 12;
+      return 0.2126 * buf.readFloatLE(o) + 0.7152 * buf.readFloatLE(o + 4) + 0.0722 * buf.readFloatLE(o + 8);
+    };
+    fl.push((lum(readIdx(t * 3)) + lum(readIdx(t * 3 + 1)) + lum(readIdx(t * 3 + 2))) / 3);
+  }
+  fl.sort((a, b) => a - b);
+  const q = (f) => fl[Math.min(fl.length - 1, Math.floor(f * fl.length))];
+  return { p10: q(0.1), p50: q(0.5), p90: q(0.9) };
+}
+test('enemy_sentry.glb: naming, poly budget, part extents, hull value bake + barrel identity COLOR_0 (I482/ST-449)', () => {
+  const { buf, json, binOff } = parseGlb('enemy_sentry.glb');
+  assert.ok(buf.length <= 137 * 1024, 'sentry under 137 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB)');
+  const s = meshStats({ buf, json, binOff });
+  for (const n of ['VR_Sentry', 'VR_Sentry_Hull', 'VR_Sentry_Base', 'VR_Sentry_Barrel', 'VR_Sentry_Charge']) assert.ok(s.nodeNames.includes(n), n + ' node');
+  for (const mat of ['VR_sentry_hull', 'VR_sentry_base', 'VR_sentry_charge']) assert.ok(s.matNames.includes(mat), mat + ' material');
+  assert.ok(s.totalTris <= BUDGETS.sentry, 'sentry tris ' + s.totalTris + ' <= 1800');
+  const hull = s.prims.find((p) => p.name === 'VR_Sentry_Hull');
+  const base = s.prims.find((p) => p.name === 'VR_Sentry_Base');
+  const barrel = s.prims.find((p) => p.name === 'VR_Sentry_Barrel');
+  const charge = s.prims.find((p) => p.name === 'VR_Sentry_Charge');
+  assert.ok(hull && base && barrel && charge, 'hull + base + barrel + charge prims');
+  assert.equal(hull.tris, 656, 'hull 656 tris (I482 pin WITH measurement)');
+  assert.equal(base.tris, 180, 'base 180 tris (I482 pin WITH measurement)');
+  assert.equal(barrel.tris, 140, 'barrel 140 tris (I482 pin WITH measurement)');
+  assert.equal(charge.tris, 120, 'charge 120 tris (I482 pin WITH measurement)');
+  // COLOR_0 contract: exactly hull + barrel carry it. Hull = E57 rule 8 value bake (grayscale,
+  // [0.30,1.25] domain, pinned facet luma); barrel = constant 1.0 identity (shared material,
+  // see block header); base + charge must NOT carry it.
+  let c0count = 0;
+  for (const m of json.meshes || []) for (const p of m.primitives || []) {
+    const mn = m.name || 'mesh';
+    if (p.attributes.COLOR_0 === undefined) {
+      assert.ok(mn === 'VR_Sentry_Base' || mn === 'VR_Sentry_Charge', mn + ' must not carry COLOR_0 (contract: hull + barrel only)');
+      continue;
+    }
+    c0count++;
+    const acc = json.accessors[p.attributes.COLOR_0];
+    const bv = json.bufferViews[acc.bufferView];
+    assert.equal(acc.componentType, 5126, mn + ' COLOR_0 componentType FLOAT');
+    assert.equal(acc.type, 'VEC3', mn + ' COLOR_0 type VEC3');
+    assert.equal(acc.count, json.accessors[p.attributes.POSITION].count, mn + ' COLOR_0 count == POSITION count');
+    const baseOff = binOff + (bv.byteOffset || 0) + (acc.byteOffset || 0);
+    if (mn === 'VR_Sentry_Barrel') {
+      for (let i = 0; i < acc.count; i++) {
+        const r = buf.readFloatLE(baseOff + i * 12), g = buf.readFloatLE(baseOff + i * 12 + 4), b = buf.readFloatLE(baseOff + i * 12 + 8);
+        assert.ok(Math.abs(r - 1) <= 0.01 && Math.abs(g - 1) <= 0.01 && Math.abs(b - 1) <= 0.01, mn + ' COLOR_0 constant 1.0 identity at ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
+      }
+    } else {
+      for (let i = 0; i < acc.count; i++) {
+        const r = buf.readFloatLE(baseOff + i * 12), g = buf.readFloatLE(baseOff + i * 12 + 4), b = buf.readFloatLE(baseOff + i * 12 + 8);
+        assert.ok(Math.abs(r - g) <= 0.02 && Math.abs(g - b) <= 0.02, mn + ' COLOR_0 grayscale at ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
+        assert.ok(r >= 0.30 - 0.01 && r <= 1.25 + 0.01, mn + ' COLOR_0 in [0.30,1.25] value domain at ' + i + ': ' + r.toFixed(3));
+      }
+      const f = sentryFacetLumas({ buf, json, binOff }, p);
+      assert.ok(f.p90 - f.p10 >= 0.35, mn + ' facet luma spread ' + (f.p90 - f.p10).toFixed(3) + ' >= 0.35');
+      const E = SENTRY_FACET[mn];
+      for (const k of ['p10', 'p50', 'p90']) {
+        assert.ok(Math.abs(f[k] - E[k]) <= 0.005, mn + ' facet ' + k + ' ' + f[k].toFixed(4) + ' ~ ' + E[k] + ' (I482 bake pin)');
+      }
+    }
+  }
+  assert.equal(c0count, 2, 'exactly two COLOR_0 prims (hull bake + barrel identity)');
+  // Parity (15% band, I482 pins WITH measurement): platform dia 2.343 (doc ~2.3); full hull H
+  // 0.798 incl. boss + exhaust stubs; barrel 1.323 X centered; charge r 0.198; base X 2.640 (doc 2.64).
+  const he = primExtents({ buf, json, binOff }, 'VR_Sentry_Hull');
+  assert.ok(Math.abs(he.x - 2.343) / 2.343 <= 0.15, 'hull platform dia ' + he.x.toFixed(4) + ' ~ 2.343');
+  assert.ok(Math.abs(he.y - 0.798) / 0.798 <= 0.15, 'hull height ' + he.y.toFixed(4) + ' ~ 0.798');
+  assert.ok(Math.abs(he.z - 2.320) / 2.320 <= 0.15, 'hull span ' + he.z.toFixed(4) + ' ~ 2.320');
+  const be = primExtents({ buf, json, binOff }, 'VR_Sentry_Base');
+  assert.ok(Math.abs(be.x - 2.640) / 2.640 <= 0.15, 'base X ' + be.x.toFixed(4) + ' ~ 2.640');
+  const re = primExtents({ buf, json, binOff }, 'VR_Sentry_Barrel');
+  assert.ok(Math.abs(re.x - 1.323) / 1.323 <= 0.15, 'barrel X ' + re.x.toFixed(4) + ' ~ 1.323');
+  assert.ok(Math.abs(re.cx) <= 0.05, 'barrel locally centered (cx ' + re.cx.toFixed(4) + ')');
+  assert.ok(Math.abs(charge.maxRadius - 0.198) / 0.198 <= 0.15, 'charge radius ' + charge.maxRadius.toFixed(4) + ' ~ 0.198');
+});
+test('enemy_wasp.glb: naming, poly budget, part extents vs procedural parity, hull value bake (I482/ST-449)', () => {
+  const { buf, json, binOff } = enemy451Bake('enemy_wasp.glb', 'VR_Wasp_Hull', 'wasp');
+  assert.ok(buf.length <= 100 * 1024, 'wasp under 100 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB)');
+  const s = meshStats({ buf, json, binOff });
+  for (const n of ['VR_Wasp', 'VR_Wasp_Hull', 'VR_Wasp_Wing', 'VR_Wasp_Nose']) assert.ok(s.nodeNames.includes(n), n + ' node');
+  for (const mat of ['VR_wasp_hull', 'VR_wasp_wing', 'VR_wasp_dash']) assert.ok(s.matNames.includes(mat), mat + ' material');
+  assert.ok(s.totalTris <= BUDGETS.wasp, 'wasp tris ' + s.totalTris + ' <= 1200');
+  const hull = s.prims.find((p) => p.name === 'VR_Wasp_Hull');
+  const wing = s.prims.find((p) => p.name === 'VR_Wasp_Wing');
+  const nose = s.prims.find((p) => p.name === 'VR_Wasp_Nose');
+  assert.ok(hull && wing && nose, 'hull + wing + nose prims');
+  assert.equal(hull.tris, 512, 'hull 512 tris (I482 pin WITH measurement)');
+  assert.equal(wing.tris, 200, 'wing 200 tris (I482 pin WITH measurement)');
+  assert.equal(nose.tris, 80, 'nose 80 tris (I482 pin WITH measurement)');
+  // Parity (15% band, I482 pins WITH measurement): dart hull 1.770 X / 0.773 span / 0.381 H;
+  // swept-back wing 2.359 span / 0.464 X / 0.093 H, locally centered on its span axis; nose
+  // 0.324 dia pointing +X (runtime noseMats emissive, no bake).
+  const he = primExtents({ buf, json, binOff }, 'VR_Wasp_Hull');
+  assert.ok(Math.abs(he.x - 1.770) / 1.770 <= 0.15, 'hull X ' + he.x.toFixed(4) + ' ~ 1.770');
+  assert.ok(Math.abs(he.z - 0.773) / 0.773 <= 0.15, 'hull span ' + he.z.toFixed(4) + ' ~ 0.773');
+  assert.ok(Math.abs(he.y - 0.381) / 0.381 <= 0.15, 'hull height ' + he.y.toFixed(4) + ' ~ 0.381');
+  const we = primExtents({ buf, json, binOff }, 'VR_Wasp_Wing');
+  assert.ok(Math.abs(we.z - 2.359) / 2.359 <= 0.15, 'wing span ' + we.z.toFixed(4) + ' ~ 2.359');
+  assert.ok(Math.abs(we.x - 0.464) / 0.464 <= 0.15, 'wing X ' + we.x.toFixed(4) + ' ~ 0.464');
+  assert.ok(Math.abs(we.cz) <= 0.05, 'wing locally centered on its span axis (cz ' + we.cz.toFixed(4) + ')');
+  const ne = primExtents({ buf, json, binOff }, 'VR_Wasp_Nose');
+  assert.ok(Math.abs(ne.x - 0.324) / 0.324 <= 0.15, 'nose dia ' + ne.x.toFixed(4) + ' ~ 0.324');
+});
+
 test('arena_ring.glb: 2 nodes (band+ticks), 60 tris, flat unit ring, +Y normals, COLOR_0 value bake (I212/I254/I299)', () => {
   const { buf, json, binOff } = parseGlb('arena_ring.glb');
   assert.ok(buf.length < MAX_FILE_BYTES, 'arena_ring.glb under 100 KB');
