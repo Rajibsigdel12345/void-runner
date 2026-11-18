@@ -1,0 +1,115 @@
+{
+ "webgl": {
+  "meta": {
+   "backend": "webgl2",
+   "arm": "webgl"
+  },
+  "afterQ": "MENU",
+  "glbWait": "all-ready",
+  "rocks": {
+   "state": "MENU",
+   "radii": [
+    {
+     "size": "L",
+     "radius": 2.2
+    },
+    {
+     "size": "M",
+     "radius": 1.3
+    },
+    {
+     "size": "S",
+     "radius": 0.7
+    }
+   ]
+  },
+  "console": {
+   "p1": {
+    "errors": [],
+    "warnings": []
+   },
+   "p2": {
+    "errors": [],
+    "warnings": []
+   }
+  }
+ },
+ "default": {
+  "meta": {
+   "backend": "webgl2",
+   "arm": "auto"
+  },
+  "afterQ": "MENU",
+  "glbWait": "all-ready",
+  "rocks": {
+   "state": "MENU",
+   "radii": [
+    {
+     "size": "L",
+     "radius": 2.2
+    },
+    {
+     "size": "M",
+     "radius": 1.3
+    },
+    {
+     "size": "S",
+     "radius": 0.7
+    }
+   ]
+  },
+  "console": {
+   "p1": {
+    "errors": [],
+    "warnings": []
+   },
+   "p2": {
+    "errors": [],
+    "warnings": []
+   }
+  }
+ },
+ "webgpu": {
+  "meta": {
+   "backend": "webgpu",
+   "arm": "webgpu"
+  },
+  "afterQ": "MENU",
+  "glbWait": "all-ready",
+  "rocks": {
+   "state": "MENU",
+   "radii": [
+    {
+     "size": "L",
+     "radius": 2.2
+    },
+    {
+     "size": "M",
+     "radius": 1.3
+    },
+    {
+     "size": "S",
+     "radius": 0.7
+    }
+   ]
+  },
+  "console": {
+   "p1": {
+    "errors": [],
+    "warnings": [
+     "The powerPreference option is currently ignored when calling requestAdapter() on Windows. See https://crbug.com/369219127",
+     "THREE.AttributeNode: Vertex attribute \"uv\" not found on geometry.",
+     "THREE.AttributeNode: Vertex attribute \"uv\" not found on geometry."
+    ]
+   },
+   "p2": {
+    "errors": [],
+    "warnings": [
+     "The powerPreference option is currently ignored when calling requestAdapter() on Windows. See https://crbug.com/369219127",
+     "THREE.AttributeNode: Vertex attribute \"uv\" not found on geometry.",
+     "THREE.AttributeNode: Vertex attribute \"uv\" not found on geometry."
+    ]
+   }
+  }
+ }
+}

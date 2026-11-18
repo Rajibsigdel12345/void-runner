@@ -223,3 +223,176 @@ efficiency; COLOR_0 on the same 2 prims):
   6-node/3-mat/2-colorPrims contract asserts.
 - The v5 GLB stays in git; assets/ship.glb is REPLACED at the ST-467
   commit (single commit = build + gate evidence; rollback = revert).
+## 7. I501 MEASURED CORRECTIONS (live v5 parse, .evidence/I501_bounds.cjs)
+
+The frozen numbers above were partly written from memory; the measured v5
+GLB contradicts four of them. These corrections govern the build
+(project rule: re-spec only WITH measurement). glTF<->build mapping
+(verified): glTF x = build_x*1.6, glTF y = build_z*1.26,
+glTF z = -build_y*1.405.
+
+1. E1 prop X: the nacelle axes are at glTF x +/-0.48 (build x +/-0.30),
+   NOT +/-0.34 (that would sit on the centerline between the nacelles).
+   Props built at build x +/-0.30; nacelle spans glTF z -1.096..-0.527
+   (build y 0.375..0.780).
+2. "Center exhaust mouth z = -0.88" mis-identification: the Nozzle bell
+   FRONT is at glTF z -0.871 (0.071u clearance of the flame apex -0.80);
+   the bell RIM (the mouth) is at z -1.293, INSIDE the flame cone (flame
+   radius 0.493 there > rim 0.30) - v5 shipped this with the additive
+   flame and it reads correctly; the Nozzle node keeps the v5 bell
+   EXACTLY (rim assert rim_r >= 0.19 at build y >= 0.915 unchanged).
+   Max stern stays -1.293 (bell rim), so v6 length stays 2.599
+   (|2.599-2.6| = 0.001 PASS).
+3. Nose only reaches glTF z +1.307 (v5 nose sensor, build y -0.93).
+   Corrected ranges (build space):
+     - H1 girders: build y -0.72..+0.48 (glTF z +1.01..-0.67)
+     - H1 gore ribs: build y -0.64, -0.43, -0.21, 0.00, +0.21, +0.40,
+       +0.52 (7 ribs, all inside the envelope rings)
+     - N1 keel: build y -0.78..+0.60 (glTF z +1.096..-0.843; end 0.028u
+       ahead of the bell front -0.871)
+     - N2 nose ring: build y -0.826 (glTF z +1.16)
+4. v5 real y-range is glTF [-0.345, +0.554] (not -0.28..+0.62). Skids:
+   pod top glTF y -0.36, bottom -0.40 (build z -0.2857..-0.3175) - floor
+   -0.42 holds. v6 height = 0.954 (top fin +0.554 .. skid -0.40).
+
+Prop clearance (corrected, asserted in build + CG gate): prop disc at
+build y 0.740 (glTF z -1.040; flame radius there 0.240), blades 0.215
+long from a 0.045 root (tip radius 0.260), poses 90/210/330 deg;
+min tip distance from the Z axis = 0.2375^2 + 0.14^2 -> 0.276 glTF
+(clearance 0.036u); hub to build y 0.839 (glTF -1.179, flame radius
+0.379; hub inner rim 0.42 -> clearance 0.041u). Build assert: every
+Engine vertex with build y > 0.735 has glTF dist-to-Z-axis - flame
+radius >= 0.015.
+
+H4 mast corrected: forward gondola, build (0, -0.39), z 0.19..0.42
+(glTF z +0.55, top glTF y +0.53, under the fin top +0.554); 3 rigging
+cables to nose ring / mid envelope / fin root.
+
+## 8. I501 MEASURED FINAL (ship v6 live - run13, .evidence/I501/build_ship_v6.py)
+
+The deterministic build landed LIGHTER than the frozen aim (25,563 t vs
+34,700 aim / 37,100 cap) because the cut ladder C4 (frame 10 -> 6 girders)
+was applied at run13: 6 longitudinal girders (25/65/115/155/235/295 deg)
+with 13 ribs per gore ring at the 7 frozen V6_RIB_Y positions, and C3 was
+NOT cut (the spoked skids read in the 96-px silhouette). Final asset:
+25,563 tris / 581,440 B / 22.75 B-tri, z-fight 0, CG gate green, LOOK
+8-view PASS.
+
+### 8.1 run13 nudge state (deterministic; re-run reproduces)
+
+- Rib Y-jitter line (build space):
+  yk = y + 0.0015 * (((k*7+3) % m) - (m//2)) + 0.002 * (((ri*5+1) % 7) - 3)
+       + V6_RIB_YK_FIX.get((ri,k), 0.0)
+  V6_RIB_YK_FIX = {(2,3): -0.0275, (2,12): +0.003, (3,1): -0.006,
+  (6,11): +0.006}
+  (run10-restore: run10 re-introduced the 45-pair rib/girder coplanarity
+  regression; the fix was to ROLL BACK to the known-good run9 jitter base
+  and patch the 4 residual pairs with targeted offsets - lesson: never
+  re-derive the jitter expression, restore known-good + patch residuals.)
+- V6_RIB_OFF (radial proud offset per gore ring, default 0.006):
+  {1: 0.018, 5: 0.018, 9: 0.015, 12: 0.018}. k9 history: started 0.018,
+  dropped to 0.015 when the run11 k9 rib corner poked through the skin
+  on the port side (skin 0.003 there) while still clearing the girders
+  (0.015 > 0.012 girder band + 0.003 margin).
+- V6_RIB_TANG (tangential half-width per ring, default 0.075):
+  {6: 0.079, 9: 0.079}. The k6/k9 rings sit on the envelope FLAT side
+  (decagon facet), where the chord sag is maximal; +0.004 keeps the rib
+  outer face inside the skin without riding the flat midline (z-fight
+  pair class: rib-face vs skin-face at distance < 0.0005).
+- belly_M cz = -0.2413 (keel girder bottom face; the zmin floor -0.3333 is
+  binding at the k9 rib in run13: measured minz -0.3287 build = -0.4142
+  blend z).
+- Porthole offset = 0.012 on BOTH the cx and cz lines in the porthole
+  loop ONLY (the 0.008s in the vent-bar loop are untouched): 0.012 is
+  the run13 coplanar fix - at 0.008 the porthole inset faces stayed
+  within 0.004 of the hull skin at the 210x225 hull-facet pair and the
+  ri2 sliver facet (run12_zf: 2 z-fight pairs); 0.012 clears the
+  worst-case 0.0085 facet-normal tilt of the 10-gon chord.
+
+Constants (unchanged from the frozen spec): SCALE (1.600, 1.405, 1.260);
+SEED 42117; SIDES 10; V6_RIB_Y (-0.64, -0.43, -0.21, 0.00, 0.21, 0.40,
+0.52); 13 ribs/ring; posts 6 theta x 14 gi box (0.020, 0.050, 0.030)
+off 0.012; rib box (tang, 0.016, 0.030); porthole box (0.020, 0.045,
+0.040) at y in {-0.30, -0.15, 0.0, 0.10} both sides. Materials:
+Hull/Engine/Nozzle -> VR_Ship_Hull (0.6706, 0.5765, 0.4549); Wings/Fin
+-> VR_Ship_Wing (0.3294, 0.2510, 0.1804); Cockpit -> VR_Ship_Cockpit
+(0.0431, 0.0941, 0.1882) -> colorPrims == 2 (Hull, Wings only), per
+contract F6-4.
+
+### 8.2 run13 FINAL measurements (the numbers that ship)
+
+- GLB: 25,563 tris / 581,440 B (sha256-16 227248D31C980507), z-fight 0,
+  CG QA pass (errors []), per-node tris: Hull 12,207 / Engine 4,880 /
+  Wings 2,644 / Fin 2,312 / Nozzle 1,928 / Cockpit 1,592 - every node
+  within its section 2 cap. (The total still came in under the 34,700
+  aim because the hull base stayed at the v5 8,423-t skin and all
+  line-item budgets - frame cage, gondola detail, spoked skids, props -
+  landed inside their allocations; the 20,500 hull AIM was never the
+  binding constraint, the 34,700 total aim was.)
+- Span x 4.0128 / length z 2.5993 (size pins pass UNCHANGED from v5:
+  |2.599 - 2.6| = 0.001).
+- LOOK gate: 8 views PASS - clay v1_front34 / v2_side / v3_rear34 /
+  v4_top / v5_belly / v6_port_detail + tint v1_front34 / v3_rear34
+  (cockpit dome reads dark VR_Ship_Cockpit; hull/wings light under key
+  3.2; the in-game tint is the three.js material color, not the tint
+  render; v6_port_detail verified the porthole/rib clearance fix -
+  zero z-fight shimmer).
+
+### 8.3 Re-pin log (ST-468 folded into I501 - WITH MEASUREMENT)
+
+Per the I440 precedent, asset-forced re-pins travel WITH the asset so
+every commit stays quality-bar-green. Deviations from the pre-registered
+values, each with the measured number:
+
+1. tests/assetGlbs.test.js BUDGETS.ship: 19,000 -> 25,563 (TIGHT to
+   measurement, NOT the pre-registered 38,500 - the asset landed 9,137 t
+   under the 34,700 aim; the I440 rule pins to measurement when the
+   asset is final).
+2. tests/assetGlbs.test.js MAX_FILE_BYTES: 393,216 -> 1,048,576 (the
+   pre-registered "524,288 old base" in the frozen spec section 6 was a
+   memory error - the actual test value was 393,216; recorded here).
+3. tests/assetPerf.test.js: perFileKB 400 -> 600 (measured 567.82 KB);
+   totalFilesKB 1,240 -> 1,440 (measured 1,429.76 KB / 1,464,072 B);
+   totalGeoKB 1,280 -> 1,400 (measured 1,379.94 KB / 1,413,060 B);
+   totalTris 36,000 -> 45,000 (measured 43,358 = 34,938 - 17,143 +
+   25,563); perFileMats 3 unchanged (ship = 3 mats, still the max).
+4. SHIP_FACET (tests/assetGlbs.test.js), measured with the TEST'S EXACT
+   formula (.evidence/I501/facet_measure.mjs - per-triangle mean luma
+   0.2126/0.7152/0.0722, q(f) = fl[floor(f*len)]): Hull {p10 0.5611,
+   p50 0.9108, p90 1.3070, spread 0.7459}; Wings {p10 0.3869, p50
+   0.9981, p90 1.5500, spread 1.1631}; colorPrims = 2 (VR_Ship_Hull,
+   VR_Ship_Wings - no .001 suffix).
+5. Playframe (.evidence/I491/playframe491.mjs, 3 exact-string edits via
+   .evidence/I501/repin_playframe.mjs): A-L 22/17,361 -> 22/25,781
+   (+8,420 = ship only, fx=off single pass, 218 non-ship tris
+   unchanged); B 52/38,560 -> 52/55,400 (+16,840 = 2 x 8,420 - the
+   fx=high B window renders the scene in TWO passes (main + fx scene
+   pass); single-pass scene 19,280 -> 27,700, non-ship 2,137 unchanged;
+   hv=0/gv=0 holds). The apparent "double ship" delta is the 2-pass
+   render, NOT a duplicate ship (scene-graph probe
+   .evidence/I501/dup_probe.mjs: exactly ONE ship instance).
+6. dist: 3,561,659 B -> 3,758,343 B / 175 files (exactly predicted:
+   3,561,659 - 384,756 + 581,440). Ceiling 3,650,000 -> 3,850,000 WITH
+   MEASUREMENT (the pre-registered ~4,050,000 was based on the 3,955,571
+   prediction - the asset landed 197 KB lighter, so the ceiling lands
+   lighter too); close floor 88,341 -> 91,657 B.
+7. AGENTS.md patched to match (asset line: 28 GLBs ~1,430 KB
+   (1,464,072 B) / 43,358 tris, ship v6 25,563 t I501/ST-467; ceiling
+   line 3,850,000 + floor 91,657; playframe line A 22/25,781 +
+   B 52/55,400 with the 2-pass explanation).
+
+### 8.4 Gate results (I501)
+
+- npm test: 1141/1141 PASS.
+- npm run build: 0; dist 3,758,343 B / 175 files.
+- Vendor pins (ALL 4, r187): dist three.module.js A65DE049A7F38B40 /
+  three.core.js 7AB0784CD2532367 / three.webgpu.js F549248412C62B9A /
+  three.tsl.js 7FF9ACF50F006017 (the AGENTS.md legacy pin
+  76DEA8151BC9352A is the pre-E66 r160 value - obsolete).
+- Playframe (.evidence/I491/playframe491.mjs): PLAYFRAME456 PASS,
+  console 0/0 both arms (A and B).
+- Causal (.evidence/I495/causal495.mjs, dist on :4200): CAUSAL495 PASS -
+  3 arms (webgl/default EXACT seed-9876, webgpu report-only), console
+  clean (webgpu warns = known benign: powerPreference ignored +
+  "uv not found" x2).
+- Hygiene: dev :5173 + preview :4200 killed, 0 listeners.

@@ -1,0 +1,56 @@
+{
+ "RA": {
+  "state": "MENU",
+  "fx": "off",
+  "L": {
+   "calls": 22,
+   "tris": 25781
+  },
+  "P": {
+   "calls": 11,
+   "tris": 180
+  },
+  "calls": 11,
+  "tris": 180,
+  "debrisLive": 0,
+  "debrisVis": [
+   false,
+   false
+  ],
+  "debrisCount": [
+   0,
+   0
+  ]
+ },
+ "RB": {
+  "pre": {
+   "state": "PLAYING",
+   "rocks": 0
+  },
+  "post": {
+   "state": "PLAYING",
+   "rocks": 5
+  },
+  "fx": "high",
+  "calls": 52,
+  "tris": 55400,
+  "debrisLive": 0,
+  "debrisVis": [
+   false,
+   false
+  ],
+  "hunterVis": 0,
+  "gunshipVis": 0,
+  "camFinite": true
+ },
+ "console": {
+  "A": {
+   "e": [],
+   "w": []
+  },
+  "B": {
+   "e": [],
+   "w": []
+  }
+ }
+}
