@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import { RNG } from '../core/rng.js';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
+import { standardMat } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
 
 function bakeDroneGeometry() {
   const r = CONFIG.warden.radius;
@@ -33,7 +34,7 @@ export function createWardenMesh(scene) {
   const r = CONFIG.warden.radius;
   const group = new THREE.Group();
 
-  const hullMat = new THREE.MeshStandardMaterial({
+  const hullMat = standardMat({ // I497 (ST-463)
     color: 0x2c3548, roughness: 0.4, metalness: 0.55, flatShading: true,
     vertexColors: true, // I289/ST-273: GLB COLOR_0 facet-value bake multiplies on top of the base tint
     emissive: 0x19d3c5, emissiveIntensity: 0.3,
@@ -41,7 +42,7 @@ export function createWardenMesh(scene) {
   const hull = new THREE.Mesh(bakeDroneGeometry(), hullMat);
   group.add(hull);
 
-  const armorMat = new THREE.MeshStandardMaterial({
+  const armorMat = standardMat({ // I497 (ST-463)
     color: 0x8fa3c8, roughness: 0.3, metalness: 0.85, flatShading: true,
     emissive: 0x19d3c5, emissiveIntensity: 0.12,
     vertexColors: true, // I289/ST-273: GLB COLOR_0 facet-value bake multiplies on top of the base tint

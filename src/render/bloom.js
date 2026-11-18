@@ -36,6 +36,8 @@ export function createBloom(renderer, scene, camera, cfg = CONFIG) {
     setEnabled(on) { enabled = on === true; },
     get gradePass() { return gradeRef; },
     get enabled() { return enabled; },
+    get composer() { return composer; }, // I497: gate RT capture access (pixel-neutral)
+    get bloomPass() { return bloomPass; }, // I497: gate RT capture access (pixel-neutral)
     resize(w, h) {
       composer.setPixelRatio(renderer.getPixelRatio());
       composer.setSize(w, h);

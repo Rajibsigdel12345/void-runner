@@ -16,6 +16,7 @@
 import * as THREE from 'three';
 import { RNG } from '../core/rng.js';
 import { CONFIG } from '../core/config.js';
+import { isWebGPU, getFxState } from './fxArm.js'; // I497 (ST-463): TSL arm (webgpu-only material branches)
 
 const D2R = Math.PI / 180;
 const TWO_PI = Math.PI * 2;
@@ -168,24 +169,65 @@ const FLARE_FRAG = [
 // brightest near-shell stars (aScale rank). Position/phase/scale copied from the
 // source stars; rides the near-shell parallax. Built once - zero per-frame allocs.
 function makeFlare(near, cfg, flCfg, flareTex, color) {
-  const pos = near.geometry.getAttribute('position');
-  const srcScale = near.geometry.getAttribute('aScale');
-  const srcPhase = near.geometry.getAttribute('aPhase');
-  const total = pos.count;
+  const A = near.userData.arrays; // I497 (ST-463): TSL shells carry the raw star arrays (quad geometry has no star attrs)
+  const posArr = A ? A.pos : near.geometry.getAttribute('position').array;
+  const srcScaleArr = A ? A.scale : near.geometry.getAttribute('aScale').array;
+  const srcPhaseArr = A ? A.phase : near.geometry.getAttribute('aPhase').array;
+  const total = posArr.length / 3;
   const n = Math.max(flCfg.minCount, Math.round(total * flCfg.frac));
   const order = new Array(total);
   for (let i = 0; i < total; i++) order[i] = i;
-  order.sort((a, b) => srcScale.array[b] - srcScale.array[a]);
+  order.sort((a, b) => srcScaleArr[b] - srcScaleArr[a]);
   const fPos = new Float32Array(n * 3);
   const fPhase = new Float32Array(n);
   const fScale = new Float32Array(n);
   for (let i = 0; i < n; i++) {
     const s = order[i];
-    fPos[i * 3 + 0] = pos.array[s * 3 + 0];
-    fPos[i * 3 + 1] = pos.array[s * 3 + 1];
-    fPos[i * 3 + 2] = pos.array[s * 3 + 2];
-    fPhase[i] = srcPhase.array[s];
-    fScale[i] = srcScale.array[s];
+    fPos[i * 3 + 0] = posArr[s * 3 + 0];
+    fPos[i * 3 + 1] = posArr[s * 3 + 1];
+    fPos[i * 3 + 2] = posArr[s * 3 + 2];
+    fPhase[i] = srcPhaseArr[s];
+    fScale[i] = srcScaleArr[s];
+  }
+  if (isWebGPU()) {
+    // I497 (ST-463): TSL flare layer (webgpu arm only) - same recipe as the shells plus
+    // the per-flare UV rotation (T.rotate(vec2, float) - vendor-verified). The classic
+    // `discard tex.a < 0.01` is dropped: additive blending with alpha 0 is equivalent.
+    const { webgpu: W, tsl: T } = getFxState();
+    const iPos = new THREE.InstancedBufferAttribute(fPos, 3);
+    const iPhase = new THREE.InstancedBufferAttribute(fPhase, 1);
+    const iScale = new THREE.InstancedBufferAttribute(fScale, 1);
+    const uTime = T.uniform(0);
+    const uSize = T.uniform(cfg.size * flCfg.sizeMul);
+    const uRot = T.uniform(flCfg.rotSpeed);
+    const uColor = T.uniform(new THREE.Color(color));
+    const uOpacity = T.uniform(flCfg.opacity);
+    const uFlare = T.uniformTexture(flareTex);
+    const aPos = T.instancedBufferAttribute(iPos, 'vec3');
+    const aPhase = T.instancedBufferAttribute(iPhase, 'float');
+    const aScale = T.instancedBufferAttribute(iScale, 'float');
+    const vRot = T.varying(aPhase.add(uTime.mul(uRot)), 'vRot');
+    const vTwinkle = T.varying(T.float(0.8).add(T.float(0.2).mul(T.sin(uTime.mul(T.float(1.7)).add(aPhase.mul(T.float(2.0)))))), 'vTwinkle');
+    const mat = new W.PointsNodeMaterial();
+    mat.positionNode = aPos;
+    mat.sizeNode = uSize.mul(aScale).mul(T.float(700.0).div(T.viewportSize.y));
+    mat.colorNode = uColor;
+    mat.opacityNode = T.texture(uFlare, T.rotate(T.positionGeometry.xy, vRot).add(T.vec2(0.5, 0.5))).a.mul(vTwinkle).mul(uOpacity);
+    mat.fog = false;
+    mat.lights = false;
+    mat.transparent = true;
+    mat.blending = THREE.AdditiveBlending;
+    mat.depthWrite = false;
+    const quad = new THREE.PlaneGeometry(1, 1);
+    const geo = new THREE.InstancedBufferGeometry();
+    geo.index = quad.index;
+    geo.setAttribute('position', quad.attributes.position);
+    geo.instanceCount = n;
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.frustumCulled = false;
+    mesh.name = 'starflares';
+    mesh.userData = { parallax: cfg.parallax, uniforms: { uTime, uSize, uRot, uColor, uOpacity, uFlare } };
+    return mesh;
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(fPos, 3));
@@ -241,6 +283,45 @@ function makeShell(cfg, rng, glow) {
     phase[i] = rng.next() * Math.PI * 2;
     speed[i] = rng.range(0.5, 2.2);
     scale[i] = rng.range(0.7, 1.4) * bright; // I366: clump stars slightly brighter
+  }
+  if (isWebGPU()) {
+    // I497 (ST-463): TSL instanced sprite shell (webgpu arm only) - probe-verified recipe
+    // (.evidence/I497/tslprobe.html): the instanced attrs are node-bound, so the geometry
+    // keeps only the unit-quad position and the shell is a Mesh, not a Points.
+    const { webgpu: W, tsl: T } = getFxState();
+    const iPos = new THREE.InstancedBufferAttribute(pos, 3);
+    const iPhase = new THREE.InstancedBufferAttribute(phase, 1);
+    const iSpeed = new THREE.InstancedBufferAttribute(speed, 1);
+    const iScale = new THREE.InstancedBufferAttribute(scale, 1);
+    const uTime = T.uniform(0);
+    const uSize = T.uniform(cfg.size);
+    const uColor = T.uniform(new THREE.Color(cfg.color));
+    const uOpacity = T.uniform(cfg.opacity);
+    const uGlow = T.uniformTexture(glow);
+    const aPos = T.instancedBufferAttribute(iPos, 'vec3');
+    const aPhase = T.instancedBufferAttribute(iPhase, 'float');
+    const aSpeed = T.instancedBufferAttribute(iSpeed, 'float');
+    const aScale = T.instancedBufferAttribute(iScale, 'float');
+    const vTwinkle = T.varying(T.float(0.72).add(T.float(0.28).mul(T.sin(uTime.mul(aSpeed).add(aPhase)))), 'vTwinkle');
+    const mat = new W.PointsNodeMaterial();
+    mat.positionNode = aPos;
+    mat.sizeNode = uSize.mul(aScale).mul(T.float(700.0).div(T.viewportSize.y));
+    mat.colorNode = uColor;
+    mat.opacityNode = T.texture(uGlow, T.positionGeometry.xy.add(T.vec2(0.5, 0.5))).a.mul(vTwinkle).mul(uOpacity);
+    mat.fog = false;
+    mat.lights = false;
+    mat.transparent = true;
+    mat.blending = THREE.AdditiveBlending;
+    mat.depthWrite = false;
+    const quad = new THREE.PlaneGeometry(1, 1);
+    const geo = new THREE.InstancedBufferGeometry();
+    geo.index = quad.index;
+    geo.setAttribute('position', quad.attributes.position);
+    geo.instanceCount = cfg.count;
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.frustumCulled = false;
+    mesh.userData = { parallax: cfg.parallax, uniforms: { uTime, uSize, uColor, uOpacity, uGlow }, arrays: { pos, phase, scale } };
+    return mesh;
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));

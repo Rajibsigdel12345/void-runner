@@ -35,8 +35,8 @@
 //     passes alpha through. Void Runner is fully opaque (skybox, alpha == 1), so the two
 //     are identical for this app.
 //
-// Low FX tier = direct renderer.render(scene, camera), exactly like the classic Low tier
-// (the renderer built-in output transform applies ACES + exposure + sRGB).
+// Low FX tier = the same TSL PassNode pipeline with the bloom node dropped from the output
+// graph (full scene; ACES + exposure + sRGB via the manual output chain; no bloom mip work).
 import { RenderPipeline } from 'three/webgpu';
 import { pass, select, vec3, vec4, uniform, unpremultiplyAlpha, premultiplyAlpha } from 'three/tsl';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
@@ -62,7 +62,8 @@ export function createWebGPUPipeline(renderer, scene, camera, cfg = CONFIG) {
   const scenePass = pass(scene, camera);
   const sceneColor = scenePass.getTextureNode('output');
   // Parameter map: CONFIG.fx.bloom.* -> BloomNode uniforms (0.6 / 0.35 / 0.72 frozen).
-  const bloomNode = bloom(sceneColor, fx.strength, fx.radius, fx.threshold);
+  const uBloomStrength = uniform(fx.strength); // I497: the Low tier zeroes this (full scene, no bloom) without rebuilding the output node
+  const bloomNode = bloom(sceneColor, uBloomStrength, fx.radius, fx.threshold);
 
   // Parameter map: CONFIG.render.grade.* -> I334 grade uniforms (0.0 / 1.0 / 1.18 frozen).
   const uLift = uniform(grade.lift);
@@ -76,8 +77,14 @@ export function createWebGPUPipeline(renderer, scene, camera, cfg = CONFIG) {
 
   // Rebuild the chain when the renderer tone mapping / output color space change (the
   // RenderPipeline._update contract; the app fixes both at boot - main.js).
+  let enabled = true; // production default = High tier (bloom on). I497 fix for the Low/FX-off tier:
+  // a plain renderer.render(scene, camera) on the WebGPURenderer only draws already-converted
+  // node materials (classic floor/ship/grid/skybox materials are skipped by the plain path -
+  // the gate#2 "rocks only" partial-scene bug). We always render through the TSL PassNode
+  // pipeline and toggle bloom via the uBloomStrength uniform (0 on Low tier) instead of swapping
+  // pipeline.outputNode after creation (the minified vendor mis-handles a post-creation swap).
   function buildOutput() {
-    const content = sceneColor.add(bloomNode); // bloom added in linear scene space (pre tone-map)
+    const content = sceneColor.add(bloomNode); // bloom always in graph; Low tier zeroes uBloomStrength (minified WebGPURenderer mis-handles a post-creation outputNode swap)
     let out = vec4(content.rgb, content.a.clamp(0.0, 1.0));
     out = unpremultiplyAlpha(out);
     out = out.toneMapping(renderer.toneMapping); // exposure: the live renderer reference (TSL default)
@@ -100,7 +107,6 @@ export function createWebGPUPipeline(renderer, scene, camera, cfg = CONFIG) {
     }
   }
 
-  let enabled = false;
   const gradePassShim = { // API symmetry with the classic wrapper (bloom.gradePass)
     setGrade(g) {
       if (!g) return;
@@ -111,9 +117,13 @@ export function createWebGPUPipeline(renderer, scene, camera, cfg = CONFIG) {
   };
 
   return {
-    setEnabled(on) { enabled = on === true; },
+    setEnabled(on) {
+      enabled = on === true;
+      uBloomStrength.value = on ? fx.strength : 0.0; // Low tier: bloom contributes 0, the full scene still renders
+    },
     get enabled() { return enabled; },
     get bloomNode() { return bloomNode; }, // probe access: strength/radius/threshold uniforms
+    get pipeline() { return pipeline; }, // I497: gate RT capture access (pixel-neutral)
     get gradePass() { return gradePassShim; },
     resize() {
       // No-op by design: PassNode and BloomNode auto-sync to the renderer drawing buffer
@@ -121,8 +131,7 @@ export function createWebGPUPipeline(renderer, scene, camera, cfg = CONFIG) {
     },
     render() {
       trackRendererState();
-      if (enabled) pipeline.render();
-      else renderer.render(scene, camera);
+      pipeline.render();
     },
     dispose() {
       bloomNode.dispose();

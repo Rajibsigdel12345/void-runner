@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
+import { standardMat } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
 
 function bakeBodyGeometry() {
   // needle dart: octahedron stretched hard along +X (forward)
@@ -32,7 +33,7 @@ export function createStingerRenderer(scene) {
   const POOL = CONFIG.stinger.maxConcurrent + 2; // cap 2 + 2 spare
   let bodyGeo = bakeBodyGeometry(); // I230: reassigned by useGLB when the stinger GLB resolves
   let coreGeo = bakeCoreGeometry();
-  const bodyMat = new THREE.MeshStandardMaterial({
+  const bodyMat = standardMat({ // I497 (ST-463)
     color: CONFIG.stinger.palette.body.color, roughness: 0.5, metalness: 0.5, flatShading: true, vertexColors: true, // I282/ST-267: deep-violet mid (was 0x2b2136 dark-on-dark) + the GLB COLOR_0 value bake
     emissive: 0x3c1f5c, emissiveIntensity: 0.35,
   });

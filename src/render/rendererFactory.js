@@ -27,7 +27,7 @@ const CLASSIC = 'webgl';
 const WEBGPU = 'webgpu';
 const AUTO = 'auto';
 
-function armFromQuery() {
+export function armFromQuery() { // I497 (ST-463): shared with main.js so ?fx is parsed once
   const fx = new URLSearchParams(window.location.search).get('fx');
   if (fx === CLASSIC) return CLASSIC;
   if (fx === WEBGPU) return WEBGPU;

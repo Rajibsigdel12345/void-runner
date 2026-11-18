@@ -81,7 +81,8 @@ import { RNG } from './core/rng.js';
 import { damp, v2 } from './core/math.js';
 import { musicIntensityX } from './core/musicIntensity.js'; // I170
 import { timeWarpX } from './core/timeWarp.js'; // I172
-import { createRenderer } from './render/rendererFactory.js'; // ST-461 (I495): dual-path renderer boot (WebGPU default w/ auto WebGL2 fallback; ?fx=webgl frozen classic)
+import { createRenderer, armFromQuery } from './render/rendererFactory.js'; // ST-461 (I495): dual-path renderer boot (WebGPU default w/ auto WebGL2 fallback; ?fx=webgl frozen classic)
+import { initFxArm, isWebGPU, getFxState } from './render/fxArm.js'; // I497 (ST-463): TSL arm state (webgpu+tsl load only on the webgpu arm)
 import { deathWarpX } from './core/deathWarp.js'; // I174
 
 const app = document.getElementById('app');
@@ -90,7 +91,9 @@ const app = document.getElementById('app');
 // WebGPURenderer w/ auto WebGL2 fallback, ?fx=webgl = frozen classic WebGLRenderer (byte-identical
 // ctor params - the causal/A-B reference arm; never loads the webgpu modules), ?fx=webgpu = force WebGPU.
 // Top-level await: the r187 WebGPU render() hard-throws before `await renderer.init()` resolves.
-const { renderer, rendererBackend, rendererArm } = await createRenderer();
+const fxArm = armFromQuery(); // I497 (ST-463): single ?fx parse site (rendererFactory)
+const { renderer, rendererBackend, rendererArm } = await createRenderer(fxArm);
+await initFxArm(fxArm); // I497 (ST-463): classic/default never load webgpu+tsl
 console.info('ST-461 renderer backend:', rendererBackend, '(arm: ' + rendererArm + ')'); // info is outside the console 0/0 error/warn pin
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 // ST-236 (I243): renderer color/tone pipeline from config (pre-pass three defaults: NoToneMapping + implicit sRGB output).
@@ -113,12 +116,34 @@ const skybox = createSkybox(scene, 'assets/skybox_equirect.jpg', (tex) => { // I
   // hull speculars stay under the bloom threshold (0.72) - only intended glows bloom.
   // ST-461 (I495): PMREM env bake wrapped - the classic PMREMGenerator driving a WebGPU backend may fail;
   // degrade to the flat env (identical state to the 4 s skybox-failure fallback) instead of an uncaught throw.
+  // I497 (ST-463): dual-arm IBL parity. Classic arm: byte-identical to I496 (classic PMREM bake
+  // into scene.environment + the one-shot envMapIntensity normalize + rock override last).
+  // Webgpu arm: the classic PMREM's 3 internal ShaderMaterials run through NodeBuilder and fall
+  // back to empty NodeMaterials (3 boot errors + black env -> IBL dead; probe_pmrem.mjs). Use the
+  // native three/webgpu PMREMGenerator and restore the exact classic per-material IBL: TSL honors
+  // material.envMapIntensity ONLY with material.envMap set (materialEnvIntensity node; the
+  // scene.environment fallback uses scene.environmentIntensity), so set explicit envMap + the same
+  // 0.35 fill on every standard/node material in the scene (GLB materials included) and the rock
+  // override (0.0, I257) last. scene.environmentIntensity = 1.0 = the classic envMapIntensity
+  // default, so any material that loads AFTER this callback (async GLBs) gets the same IBL on both
+  // arms. Pre-registered D3: native-TSL PMREM bake vs classic PMREM bake (env-map content drift).
   try {
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromEquirectangular(tex).texture;
-  pmrem.dispose();
-  scene.traverse((o) => { const ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : []; for (const m of ms) if (m.isMeshStandardMaterial) m.envMapIntensity = CONFIG.fx.env.intensity; });
-    rockRenders.setEnvIntensity(CONFIG.fx.env.rock); // I257 final: rock=0.0 decouples rocks from nebula IBL; ship/belt keep the 0.35 fill
+    if (isWebGPU()) {
+      const { webgpu } = getFxState();
+      const pmrem = new webgpu.PMREMGenerator(renderer);
+      const rt = pmrem.fromEquirectangular(tex);
+      pmrem.dispose();
+      scene.environment = rt.texture;
+      scene.environmentIntensity = 1.0; // I497: = classic envMapIntensity default for late-loading (post-callback) materials
+      scene.traverse((o) => { const ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : []; for (const m of ms) if (m.isMeshStandardMaterial || m.isMeshStandardNodeMaterial) { m.envMap = rt.texture; m.envMapIntensity = CONFIG.fx.env.intensity; } });
+      rockRenders.setEnvIntensity(CONFIG.fx.env.rock); // I257 final: rock=0.0 decouples rocks (TSL honors it: envMap set); ship/belt keep the 0.35 fill
+    } else {
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      scene.environment = pmrem.fromEquirectangular(tex).texture;
+      pmrem.dispose();
+      scene.traverse((o) => { const ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : []; for (const m of ms) if (m.isMeshStandardMaterial) m.envMapIntensity = CONFIG.fx.env.intensity; });
+      rockRenders.setEnvIntensity(CONFIG.fx.env.rock); // I257 final: rock=0.0 decouples rocks from nebula IBL; ship/belt keep the 0.35 fill
+    }
     skySettled = true; warmUp(); // E48 (ST-371, I401): env map settled - arm the both-settle warm gate
   } catch (e) {
     console.warn('ST-461: PMREM env bake failed on this backend (non-fatal, flat env):', e);
@@ -814,7 +839,8 @@ window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), inpu
   floorDisc, // ST-277 (I294)
   applySettings, liveSettings: () => liveSettings,
   locale: () => getLocale(), setLocale, // ST-375: locale probe + drive (boot applied in applySettings; live via the settings panel)
-  audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, powerupRenders, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, hunterRenders, gunshipRenders, sentryRenders, waspRenders, podRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, camMode: () => camMode, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, backend: rendererBackend, rendererArm, vendorLowpWarns: () => _vendorLowpWarns, render: () => renderer.render(scene, camera), theme: () => _currentTheme, applyTheme, themeDome, warp: () => world.warp, afterburner }; // ST-434 (I466) B4 // debug/test handle (expanded in I080; ST-059: vortexFx)
+  audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, powerupRenders, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, hunterRenders, gunshipRenders, sentryRenders, waspRenders, podRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, camMode: () => camMode, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, THREE, scene, // I497: gate RT capture handles (pixel-neutral)
+  backend: rendererBackend, rendererArm, vendorLowpWarns: () => _vendorLowpWarns, render: () => renderer.render(scene, camera), theme: () => _currentTheme, applyTheme, themeDome, warp: () => world.warp, afterburner }; // ST-434 (I466) B4 // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });
@@ -1334,6 +1360,7 @@ function syncVisuals(dt) {
 }
 
 function frame() {
+  if (window.__vrHalt) return; // I497 (ST-463): test-freeze hook - gate/probes set window.__vrHalt=true so the in-flight frame dies before tick/sync/render (production: flag never set; zero behavior change)
   requestAnimationFrame(frame);
   if (ctxLost) return; // I187: context lost - stop sim + render (three.js render() is a no-op while lost anyway; this also skips tick/sync/info/adaptive overhead). onCtxRestored resets the clock, so no dt spike on the first restored frame.
   const now = performance.now();

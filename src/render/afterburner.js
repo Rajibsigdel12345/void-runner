@@ -7,6 +7,7 @@
 // CONFIG.fx.afterburner.
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
+import { isWebGPU, getFxState } from './fxArm.js'; // I497 (ST-463): TSL arm (webgpu-only ribbon branch)
 
 // 32px radial glow (procedural; smaller than the 64px starfield one - the
 // ribbon points are dense).
@@ -65,14 +66,48 @@ export function createAfterburner() {
     jit[i * 3 + 2] = Math.sin(a) * r;
     life[i] = A.life * (i % 2 === 0 ? 1.0 : 0.8);
   }
-  const geo = new THREE.BufferGeometry();
-  const posAttr = new THREE.BufferAttribute(pos, 3);
+  let geo, posAttr, fadeAttr, mat, points;
+  if (isWebGPU()) {
+    // I497 (ST-463): TSL instanced sprite ribbon (webgpu arm only) - the probe-verified
+    // starfield recipe: node-bound instanced attrs + unit quad, Mesh not Points. No uTime:
+    // the ring advances slots in place, so only the per-slot fade varies per frame.
+    const { webgpu: W, tsl: T } = getFxState();
+    posAttr = new THREE.InstancedBufferAttribute(pos, 3);
+    posAttr.setUsage(THREE.DynamicDrawUsage);
+    fadeAttr = new THREE.InstancedBufferAttribute(fade, 1);
+    fadeAttr.setUsage(THREE.DynamicDrawUsage);
+    const uSize = T.uniform(A.size);
+    const uColor = T.uniform(new THREE.Color(A.color));
+    const uOpacity = T.uniform(A.opacity);
+    const uGlow = T.uniformTexture(makeGlowTexture());
+    const aPos = T.instancedBufferAttribute(posAttr, 'vec3');
+    const aFade = T.instancedBufferAttribute(fadeAttr, 'float');
+    const vFade = T.varying(aFade, 'vFade');
+    mat = new W.PointsNodeMaterial();
+    mat.positionNode = aPos;
+    mat.sizeNode = uSize.mul(aFade).mul(T.float(700.0).div(T.viewportSize.y)); // 2x the classic 350/-z formula (WebGPU sizeNode = H/2/-z)
+    mat.colorNode = uColor;
+    mat.opacityNode = T.texture(uGlow, T.positionGeometry.xy.add(T.vec2(0.5, 0.5))).a.mul(vFade).mul(uOpacity);
+    mat.fog = false;
+    mat.lights = false;
+    mat.transparent = true;
+    mat.blending = THREE.AdditiveBlending;
+    mat.depthWrite = false;
+    const quad = new THREE.PlaneGeometry(1, 1);
+    geo = new THREE.InstancedBufferGeometry();
+    geo.index = quad.index;
+    geo.setAttribute('position', quad.attributes.position);
+    geo.instanceCount = N;
+    points = new THREE.Mesh(geo, mat);
+  } else {
+  geo = new THREE.BufferGeometry();
+  posAttr = new THREE.BufferAttribute(pos, 3);
   posAttr.setUsage(THREE.DynamicDrawUsage);
-  const fadeAttr = new THREE.BufferAttribute(fade, 1);
+  fadeAttr = new THREE.BufferAttribute(fade, 1);
   fadeAttr.setUsage(THREE.DynamicDrawUsage);
   geo.setAttribute('position', posAttr);
   geo.setAttribute('aFade', fadeAttr);
-  const mat = new THREE.ShaderMaterial({
+  mat = new THREE.ShaderMaterial({
     uniforms: {
       uSize: { value: A.size },
       uColor: { value: new THREE.Color(A.color) },
@@ -85,7 +120,8 @@ export function createAfterburner() {
     blending: THREE.AdditiveBlending,
     depthWrite: false
   });
-  const points = new THREE.Points(geo, mat);
+  points = new THREE.Points(geo, mat);
+  } // I497 (ST-463): end webgpu branch (classic ribbon inside the else above)
   points.name = 'afterburner';
   points.frustumCulled = false; // rides the ship - no pop-in near the camera
   points.visible = false;

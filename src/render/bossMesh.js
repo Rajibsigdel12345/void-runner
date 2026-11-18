@@ -14,6 +14,8 @@ import * as THREE from 'three';
 import { RNG } from '../core/rng.js';
 import { CONFIG } from '../core/config.js';
 import { teleProgress, teleUrgency } from '../core/bossTelegraph.js';
+import { standardMat, isWebGPU } from './fxArm.js'; // I497 (ST-463): node material + arm query (webgpu-only branches)
+import { applyTSLRim } from './tslMaterials.js'; // I497 (ST-463): node rim (webgpu arm only)
 
 function bakeWithColors(geo, colorFn) {
   geo.computeVertexNormals();
@@ -114,14 +116,14 @@ function bakeCoreGeometry() {
 export function createBossMesh(scene) {
   const group = new THREE.Group();
 
-  const hullMat = new THREE.MeshStandardMaterial({
+  const hullMat = standardMat({ // I497 (ST-463): node material on the webgpu arm
     color: 0x6b5f88, roughness: 0.45, metalness: 0.4, flatShading: true,
     emissive: 0x7a4dff, emissiveIntensity: 0.25, vertexColors: true,
   });
   const hull = new THREE.Mesh(bakeHullGeometry(), hullMat);
   group.add(hull);
 
-  const crownMat = new THREE.MeshStandardMaterial({
+  const crownMat = standardMat({ // I497 (ST-463): node material on the webgpu arm
     color: 0x7a6f9c, roughness: 0.4, metalness: 0.5, flatShading: true,
     emissive: 0x7a4dff, emissiveIntensity: 0.18, vertexColors: true,
   });
@@ -190,6 +192,11 @@ export function createBossMesh(scene) {
   const rimHull = rimState(CONFIG.boss.rim.hull);
   const rimCrown = rimState(CONFIG.boss.rim.crown);
   const addRim = (mat, rim) => {
+    if (isWebGPU()) { // I497 (ST-463): TSL rim (webgpu arm only) - live Color + strength propagation probe-verified (probedyn2)
+      const h = applyTSLRim(mat, { color: rim.color, strength: rim.strength, power: CONFIG.boss.rim.power });
+      rim.push = (s) => { if (typeof s === 'number' && isFinite(s)) h.setStrength(s); };
+      return;
+    }
     let u = null;
     mat.onBeforeCompile = (shader) => {
       u = shader.uniforms;

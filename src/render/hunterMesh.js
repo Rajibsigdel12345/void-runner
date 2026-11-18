@@ -8,6 +8,7 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
+import { standardMat } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
 
 function bakeHullGeometry() {
   // flat swept manta dart: octahedron squashed in Y (low profile), stretched forward
@@ -41,7 +42,7 @@ export function createHunterRenderer(scene) {
   let finGeo = bakeFinGeometry();
   let coreGeo = bakeCoreGeometry();
   const hullColor = new THREE.Color(CONFIG.hunter.palette.body.color).multiplyScalar(CONFIG.hunter.renderLumaGain); // I451: rendered-luma audit (render451 Part E) - the palette renders ~0.45x under ACES/exposure/grade; the gain lands the ladder (p50 ~102)
-  const hullMat = new THREE.MeshStandardMaterial({
+  const hullMat = standardMat({ // I497 (ST-463)
     color: hullColor, roughness: 0.6, metalness: 0.2, flatShading: true, vertexColors: true, // I451: painted rust hull (metalness 0.5 rendered ~3x darker than the palette luma under the scene light; renderLumaGain restores the design band)
     emissive: 0x2a120c, emissiveIntensity: 0.25,
   });

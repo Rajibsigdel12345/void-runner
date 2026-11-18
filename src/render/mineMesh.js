@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { RNG } from '../core/rng.js';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
+import { standardMat } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
 
 function bakeMineGeometry() {
   // spiky shell: displace each icosahedron vertex outward on a seeded spike pattern
@@ -24,7 +25,7 @@ export function createMineRenderer(scene) {
   const max = CONFIG.mine.maxConcurrent;
   const geo = bakeMineGeometry();
   // dark iron body + red core glow; sync() pulses emissiveIntensity (shared = all blink together)
-  const mat = new THREE.MeshStandardMaterial({
+  const mat = standardMat({ // I497 (ST-463)
     color: 0x3a2430, roughness: 0.6, metalness: 0.4, flatShading: true,
     emissive: 0xff2a2a, emissiveIntensity: 0.6,
   });

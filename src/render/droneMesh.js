@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
+import { standardMat } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
 
 function bakeDroneGeometry() {
   // angular seeker dart: an octahedron stretched along +X; spins about Y in sync()
@@ -17,7 +18,7 @@ export function createDroneRenderer(scene) {
   const max = CONFIG.drone.maxConcurrent;
   let geo = bakeDroneGeometry(); // I211: reassigned by useGLB when the drone GLB resolves
   // dark steel body + cold cyan core glow; sync() pulses emissiveIntensity (shared = all blink together)
-  const mat = new THREE.MeshStandardMaterial({
+  const mat = standardMat({ // I497 (ST-463)
     color: CONFIG.drone.palette.body.color, roughness: 0.45, metalness: 0.55, flatShading: true, vertexColors: true, // I282/ST-267: mid-value steel-cyan (was 0x1f3340 dark-on-dark) + the GLB COLOR_0 value bake
     emissive: 0x37d5ff, emissiveIntensity: 0.7,
   });

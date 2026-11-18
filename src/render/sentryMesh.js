@@ -10,6 +10,7 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
+import { standardMat } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
 
 function bakePlatformGeometry() {
   const r = CONFIG.sentry.radius;
@@ -50,7 +51,7 @@ export function createSentryRenderer(scene) {
   let barrelGeo = bakeBarrelGeometry();
   let chargeGeo = bakeChargeGeometry();
   const hullColor = new THREE.Color(CONFIG.sentry.palette.body.color).multiplyScalar(CONFIG.sentry.renderLumaGain); // I480 rendered-luma audit: POD 127 < SENTRY 137 < WASP 176
-  const hullMat = new THREE.MeshStandardMaterial({
+  const hullMat = standardMat({ // I497 (ST-463)
     color: hullColor, roughness: 0.7, metalness: 0.2, flatShading: true, vertexColors: true,
     emissive: 0x14160f, emissiveIntensity: 0.2,
   });

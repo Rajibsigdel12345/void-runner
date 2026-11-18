@@ -9,6 +9,7 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
+import { standardMat } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
 
 let eggGeo = null, seamGeo = null, coreGeo = null; // module-level: baked once, shared
 
@@ -36,7 +37,7 @@ export function createPodRenderer(scene) {
   if (!eggGeo) bake();
   const POOL = CONFIG.pod.maxConcurrent + 2; // cap 2 + 2 spare
   const bodyColor = new THREE.Color(CONFIG.pod.palette.body.color).multiplyScalar(CONFIG.pod.renderLumaGain); // I480 rendered-luma audit: POD 127 (bottom rung)
-  const bodyMat = new THREE.MeshStandardMaterial({
+  const bodyMat = standardMat({ // I497 (ST-463)
     color: bodyColor, roughness: 0.5, metalness: 0.2, flatShading: true, vertexColors: true,
     emissive: 0x0f1a17, emissiveIntensity: 0.2,
   });

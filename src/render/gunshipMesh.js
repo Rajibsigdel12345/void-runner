@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
+import { standardMat } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
 
 function bakeHullGeometry() {
   const r = CONFIG.gunship.radius;
@@ -40,7 +41,7 @@ export function createGunshipRenderer(scene) {
   let nacelleGeo = bakeNacelleGeometry();
   let bayGeo = bakeBayGeometry();
   const hullColor = new THREE.Color(CONFIG.gunship.palette.body.color).multiplyScalar(CONFIG.gunship.renderLumaGain); // I451: rendered-luma audit (render451 Part E) - the palette renders ~0.31x under ACES/exposure/grade; the gain lands the ladder (p50 ~65)
-  const hullMat = new THREE.MeshStandardMaterial({
+  const hullMat = standardMat({ // I497 (ST-463)
     color: hullColor, roughness: 0.72, metalness: 0.2, flatShading: true, vertexColors: true, // I451: painted gunmetal (metalness 0.55 rendered near-black under the scene light; sRGB palette luma ~65 kept as the design value; renderLumaGain restores the band)
     emissive: 0x101418, emissiveIntensity: 0.2,
   });

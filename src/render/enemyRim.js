@@ -14,6 +14,8 @@
 // the rim reads as an edge accent and never triggers bloom on its own.
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
+import { isWebGPU } from './fxArm.js'; // I497 (ST-463): TSL arm
+import { applyTSLRim } from './tslMaterials.js'; // I497 (ST-463): node rim (webgpu arm only)
 
 /** applyEnemyRim(mat, role): inject the shared fresnel rim into one
  *  MeshStandardMaterial using CONFIG.fx.enemyRim.{power, roles[role]}.
@@ -24,6 +26,10 @@ export function applyEnemyRim(mat, role) {
   const r = CONFIG.fx.enemyRim.roles[role];
   if (!r) throw new Error('enemyRim: unknown role ' + role);
   const power = CONFIG.fx.enemyRim.power;
+  if (isWebGPU()) { // I497 (ST-463): TSL rim (webgpu arm only) - static, no per-frame work
+    applyTSLRim(mat, { color: new THREE.Color(r.color), strength: r.strength, power });
+    return;
+  }
   mat.onBeforeCompile = (shader) => {
     shader.uniforms.uRimColor = { value: new THREE.Color(r.color) };
     shader.uniforms.uRimStrength = { value: r.strength };

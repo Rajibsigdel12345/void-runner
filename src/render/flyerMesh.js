@@ -9,6 +9,7 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
+import { standardMat } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
 
 function bakeHullGeometry() {
   // elongated hexa-disc: 6-segment cylinder flattened, stretched along +X (forward)
@@ -33,7 +34,7 @@ export function createFlyerRenderer(scene) {
   const POOL = CONFIG.flyer.maxConcurrent + 2; // cap 2 + 2 spare (stinger pool pattern)
   let hullGeo = bakeHullGeometry(); // reassigned by useGLB when the flyer GLB resolves
   let domeGeo = bakeDomeGeometry();
-  const hullMat = new THREE.MeshStandardMaterial({
+  const hullMat = standardMat({ // I497 (ST-463)
     color: CONFIG.flyer.palette.body.color, roughness: 0.55, metalness: 0.45, flatShading: true, vertexColors: true, // I282/ST-267: mauve mid (was 0x33202e dark-on-dark) + the GLB COLOR_0 value bake
     emissive: 0x5c1f4a, emissiveIntensity: 0.3,
   });

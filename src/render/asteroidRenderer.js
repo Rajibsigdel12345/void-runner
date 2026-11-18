@@ -2,6 +2,8 @@
 import * as THREE from 'three';
 import { RNG } from '../core/rng.js';
 import { CONFIG } from '../core/config.js';
+import { standardMat, isWebGPU } from './fxArm.js'; // I497 (ST-463): node material + arm query (webgpu-only branches)
+import { applyTSLRim } from './tslMaterials.js'; // I497 (ST-463): node rim (webgpu arm only)
 
 function bakeVariant(seed, radius) {
   const rng = new RNG(seed);
@@ -39,7 +41,7 @@ export function createAsteroidRenderer(scene) {
   const glbGeo = {};
   let glbShellGeo = false; // I210: shield GLB loaded flag
   let glbComet = false; // I344 (ST-316): comet variant GLB loaded flag
-  const mat = new THREE.MeshStandardMaterial({ color: 0x8a7f72, roughness: 0.95, metalness: 0.05, flatShading: true, vertexColors: true }); // I209: GLB-baked shading
+  const mat = standardMat({ color: 0x8a7f72, roughness: 0.95, metalness: 0.05, flatShading: true, vertexColors: true }); // I209: GLB-baked shading (I497: node material on the webgpu arm)
   // ST-139: belt rock - dark cold metal so drifting indestructibles read as "unbreakable".
   const matBelt = new THREE.MeshStandardMaterial({ color: 0x2a313d, roughness: 0.42, metalness: 0.9, flatShading: true, emissive: 0x2f6fd0, emissiveIntensity: 0.6, vertexColors: true }); // I209: vertexColors
   // I60: rim-lit upgrade - fresnel edge added on top of the standard lighting.
@@ -49,6 +51,11 @@ export function createAsteroidRenderer(scene) {
   // (0xd8a878 @ 0.12, ^5 silhouette falloff) keeps the edge accent, harmonizes with the warm
   // rock palette, and lifts rock-vs-nebula contrast (face luma ~57 no-rim -> ~96).
   let rimU = null; // I278 (ST-264): live uniform handle (set at first compile) - the setRim probe/A-B hook
+  let setRimTsl = null; // I497 (ST-463): TSL rim strength setter (webgpu arm only)
+  if (isWebGPU()) {
+    const tslRim = applyTSLRim(mat, { color: new THREE.Color(CONFIG.asteroid.rim.color), strength: CONFIG.asteroid.rim.strength, power: CONFIG.asteroid.rim.power }); // I497 (ST-463)
+    setRimTsl = (s) => { if (typeof s === 'number' && isFinite(s)) tslRim.setStrength(s); };
+  } else {
   mat.onBeforeCompile = (shader) => {
     rimU = shader.uniforms;
     shader.uniforms.uRimColor = { value: new THREE.Color(CONFIG.asteroid.rim.color) }; // I257 final warm edge (I278: data-driven in CONFIG, value FROZEN)
@@ -68,7 +75,8 @@ export function createAsteroidRenderer(scene) {
   };
   // I278 (ST-264): probe/A-B hook - live-set the rock rim strength (rim-off A/B per the I257 precedent);
   // no-op until the material has compiled. Belt/gold materials never had a rim (unchanged).
-  function setRim(s) { if (rimU && typeof s === 'number' && isFinite(s)) rimU.uRimStrength.value = s; }
+  } // I497 (ST-463): end else (classic onBeforeCompile rim inside)
+  function setRim(s) { if (setRimTsl) setRimTsl(s); else if (rimU && typeof s === 'number' && isFinite(s)) rimU.uRimStrength.value = s; } // I497 (ST-463)
   // ST-052: golden rock - bright emissive so bloom (High FX) makes it glow.
   const matGold = new THREE.MeshStandardMaterial({ color: 0xffc94d, emissive: 0xffa018, emissiveIntensity: 1.6, roughness: 0.3, metalness: 0.55, flatShading: true, vertexColors: true }); // I209: vertexColors
   // ST-127: shielded rock - additive energy shell rendered as a CHILD of the rock mesh (hidden by
