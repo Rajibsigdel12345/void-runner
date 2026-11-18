@@ -90,6 +90,7 @@ renegotiation WITH MEASUREMENT at ST-476: expected new ceiling ~4,400,000 B; clo
 re-derives from measured headroom at G68.0 (I498 / I501 precedent). The user authorized
 "polygons and gpu resource as much as needed" - only dist bytes constrain, not GPU.
 FALLBACK before renegotiation: the cut ladder (section 6) - last resort only.
+RESOLVED I510/ST-476 WITH MEASUREMENT: actual chain 3,747,372 (I507) -> 4,190,132 (I508, +442,760) -> 4,623,044 B / 175 (I509, +432,912) = 773,044 B over the 3,850,000 ceiling and 223,044 B over the expected ~4,400,000 B (the expectation used the pre-legacy-4 baseline + aim-weighted delta; the remaster landed cap-side of aim/cap: fleet 19,490 t vs aim 16,690 / cap 19,850). NEW CEILING 4,700,000 B (headroom 76,956 B). Cut ladder NOT invoked. Close floor re-derives WITH MEASUREMENT at G68.0 (ST-479) from the 76,956 B headroom.
 
 ## 6. Cut ladder (last resort, in order)
 

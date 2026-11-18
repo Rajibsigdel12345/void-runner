@@ -45,13 +45,14 @@ const totalSize = parsed.reduce((a, p) => a + p.size, 0);
 const totalGeo = parsed.reduce((a, p) => a + p.geoBytes, 0);
 const totalTris = parsed.reduce((a, p) => a + p.tris, 0);
 
-// I214 budgets (measured baselines in brackets; caps leave headroom for E9 art growth)
+// FINAL fleet budgets (I510/ST-476 E68 close - the fleet is frozen until the next art epic
+// re-registers growth WITH MEASUREMENT; caps held at the I509 measured values, headroom for the next epic):
 const BUDGET = {
-totalFilesKB: 2400,  // [I509 (ST-475 E68 remaster-4) EXPLICIT re-pin: 2300 -> 2400, measured 2273.40 KB (2,327,964 B; remaster-4 507,068 -> 939,980 B, +432,912 B); headroom 126.60 KB; final fleet pin WITH MEASUREMENT at ST-476] // [I508 (ST-474) 1440 -> 2300, measured 1850.64 KB (1,895,052 B)]
-  totalGeoKB: 2350,    // [I509 (ST-475) EXPLICIT re-pin: 2250 -> 2350, measured 2224.32 KB (+423.46 KB vs I508 1800.86: wasp +222.99 / hunter +81.27 / gunship +26.66 / sentry +92.54); headroom 125.68 KB; final pin at ST-476] // [I508 1400 -> 2250, measured 1800.86 KB (1,844,082 B)]
-  perFileKB: 600,      // [I509: unchanged; max stays ship.glb 567.81 KB (581,440 B); max remaster-4 = wasp 302.77 KB (310,036 B)] // [I508: max stays ship.glb 567.82 KB (581,440 B)]
-  totalTris: 58000,    // [I509 (ST-475) EXPLICIT re-pin: 56000 -> 58000, measured 55,075 (remaster-4 6,412 -> 12,916 t = +6,504); headroom 2,925 t; final pin at ST-476] // [I508 45000 -> 56000, measured 48,571]
-  perFileMats: 4,      // [I509 (ST-475) EXPLICIT re-pin: 3 -> 4, measured max 4 = enemy_sentry.glb (platform/base/barrel/charge part bakes per R-VALUE 2-3 band rule); ship stays 3] // [max 3 - ship body/wing/cockpit]
+totalFilesKB: 2400,  // [I510 FINAL holds 2400 (I509 re-pin 2300 -> 2400); measured 2273.40 KB (2,327,964 B; remaster-4 final 939,980 B); headroom 126.60 KB]
+  totalGeoKB: 2350,    // [I510 FINAL holds 2350 (I509 re-pin 2250 -> 2350); measured 2224.32 KB; headroom 125.68 KB]
+  perFileKB: 600,      // [I510 FINAL holds 600; max = ship.glb 567.81 KB (581,440 B); max enemy = wasp 302.77 KB (310,036 B)]
+  totalTris: 58000,    // [I510 FINAL holds 58000 (I509 re-pin 56,000 -> 58,000); measured 55,075 (8 remastered ships 19,490 t inside the I507 cap 19,850; aim 16,690 exceeded - cap governs); headroom 2,925 t]
+  perFileMats: 4,      // [I510 FINAL holds 4 (I509 re-pin 3 -> 4); max = enemy_sentry.glb 4 part bakes (R-VALUE 2-3 band rule); ship stays 3]
 };
 
 test('exactly 28 GLB assets (26 models + arena ring) (I451 -> I482)', () => {
