@@ -6,7 +6,7 @@ Void Runner is a 3D arcade space-asteroid shooter built with **three.js** (no bu
 
 - Genre: arcade survival / asteroids-style, 3D arena - two modes: ENDLESS (wave-based arena survival) and CAMPAIGN (3 linear levels: per-zone identity, per-level bosses, checkpoint continue, localStorage highest-level persistence)
 - Platform: desktop web (keyboard), touch-friendly fallback later
-- Engine: three.js (r160+), no bundler (import maps + vendored modules; scripts/serve.mjs + scripts/build.mjs)
+- Engine: three.js r187 (vendored), no bundler (import maps + vendored modules; scripts/serve.mjs + scripts/build.mjs). Dual renderer arm (E66, closed I498): default = classic WebGLRenderer (I495 C3 measured decision) / ?fx=webgl frozen classic reference (A/B + emergency rollback) / ?fx=webgpu experimental opt-in = WebGPURenderer + TSL FX (src/render/webgpuFx.js + fxArm.js + tslMaterials.js). Stable rollback tag: stable-webgl2-r160 @ 835381c.
 - Test runner: `npm test` (scripts/run-tests.mjs, in-process node:test over tests/*.test.js; pure-logic modules are DOM-free and unit-testable. A bare `node --test tests/` directory run is NOT the runner in this environment)
 - Art assets: 28 Blender-made GLBs in assets/ (~1,238 KB (1,267,388 B) / 34,938 tris): ship v5 "high-poly real airship" 17,143 tris (E61 remaster, Blender 5.2.3 headless), asteroid L/M/S + B-variants + comet, boss, enemy hunter 2,256 / gunship 2,268 (E61 v5 detail pass) / sentry 1,096 / wasp 792 (E63 I482, Blender 5.2.3 headless) / warden / stinger / drone / flyer - the mine stays procedural, 7 powerups, shield, 2 debris chunks, arena ring - loaded at runtime via GLTFLoader (src/render/assetLoader.js) with procedural fallback; everything else stays procedural: canvas textures, WebAudio-synthesized SFX
 
@@ -46,6 +46,6 @@ Void Runner is a 3D arcade space-asteroid shooter built with **three.js** (no bu
 1. `npm test` passes (green) before declaring done.
 2. `npm run build` succeeds.
 3. Manual smoke in browser where rendering changed (console clean, no NaN).
-4. `npm run build` dist/ total stays under 3,250,000 B (ceiling; I491: 3,173,343 B / 166 files).
-5. Vendor pin: vendor/three.module.js sha256 first-16 must be 76DEA8151BC9352A.
-6. Regressions (dev server up): `node .evidence/I483/causal483.mjs` -> 'CAUSAL456 PASS' and `node .evidence/I483/playframe483.mjs` -> 'PLAYFRAME456 PASS' must stay EXACT - re-pin WITH measurement only when a shipped mesh/geometry changes.
+4. `npm run build` dist/ total stays under 3,650,000 B (ceiling; I495 C1 renegotiation from 3,250,000; I498: 3,561,659 B / 175 files).
+5. Vendor pins (dist-minified sha256 first-16, r187): three.module.js A65DE049A7F38B40 + three.core.js 7AB0784CD2532367 + three.webgpu.js F549248412C62B9A + three.tsl.js 7FF9ACF50F006017. (Pre-E66 r160 ref 76DEA8151BC9352A is obsolete.)
+6. Regressions: `node .evidence/I495/causal495.mjs` (dist server :4200) -> 'CAUSAL495 PASS' (3 arms: webgl + default EXACT on the seed-9876 pin set; webgpu report-only) and `node .evidence/I491/playframe491.mjs` (dev server :5173) -> 'PLAYFRAME456 PASS' (A 22/17,361 + 11/180, B 52/38,560 - A re-pinned WITH MEASUREMENT at I497 for the I494 r187 ConeGeometry degenerate-tip-tri skip) must stay EXACT - re-pin WITH measurement only when a shipped mesh/geometry changes.
