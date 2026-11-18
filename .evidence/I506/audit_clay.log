@@ -1,0 +1,41 @@
+BlenderMCP addon registered
+BlenderMCP addon unregistered
+02:05:33 | INFO: Data are loaded, start creating Blender stuff
+02:05:33 | INFO: Blender create Mesh node VR_Hunter_Core
+02:05:33 | INFO: Blender create Mesh node VR_Hunter_Fin
+02:05:33 | INFO: Blender create Mesh node VR_Hunter_Hull
+02:05:33 | INFO: glTF import finished in 0.05s
+00:10.062  render           | Saved: 'E:\Game\.evidence\I506\aud_hunter_f34_clay.png'
+00:11.953  render           | Saved: 'E:\Game\.evidence\I506\aud_hunter_side_clay.png'
+00:14.734  render           | Saved: 'E:\Game\.evidence\I506\aud_hunter_top_clay.png'
+AUDIT hunter meshes=3 tris=2256 center=[0.0004, 0.0, 0.0] radius=1.8243
+  NODE VR_Hunter_Core tris= 256
+  NODE VR_Hunter_Fin tris= 600
+  NODE VR_Hunter_Hull tris= 1400
+02:05:45 | INFO: Data are loaded, start creating Blender stuff
+02:05:45 | INFO: Blender create Mesh node VR_Hunter_Core
+02:05:45 | INFO: Blender create Mesh node VR_Hunter_Fin
+02:05:45 | INFO: Blender create Mesh node VR_Hunter_Hull
+02:05:45 | INFO: glTF import finished in 0.05s
+00:16.641  render           | Saved: 'E:\Game\.evidence\I506\aud_hunter_f34_tint.png'
+00:18.766  render           | Saved: 'E:\Game\.evidence\I506\aud_hunter_side_tint.png'
+00:21.031  render           | Saved: 'E:\Game\.evidence\I506\aud_hunter_top_tint.png'
+02:05:51 | INFO: Data are loaded, start creating Blender stuff
+02:05:51 | INFO: Blender create Mesh node VR_Hunter_Core
+02:05:51 | INFO: Blender create Mesh node VR_Hunter_Fin
+02:05:51 | INFO: Blender create Mesh node VR_Hunter_Hull
+02:05:51 | INFO: glTF import finished in 0.07s
+00:23.406  render           | Saved: 'E:\Game\.evidence\I506\aud_hunter_f34_sil.png'
+DONE hunter
+02:05:54 | INFO: Data are loaded, start creating Blender stuff
+02:05:54 | INFO: Blender create Mesh node VR_Gunship_Bay
+02:05:54 | INFO: Blender create Mesh node VR_Gunship_Hull
+02:05:54 | INFO: Blender create Mesh node VR_Gunship_Nacelle
+02:05:54 | INFO: glTF import finished in 0.06s
+AUDIT gunship meshes=3 tris=2268 center=[0.0483, -0.0019, -0.12] radius=2.7799
+  NODE VR_Gunship_Bay tris= 168
+  NODE VR_Gunship_Hull tris= 1650
+  NODE VR_Gunship_Nacelle tris= 450
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+
+Blender quit

@@ -1,0 +1,233 @@
+BlenderMCP addon registered
+BlenderMCP addon unregistered
+02:10:15 | INFO: Data are loaded, start creating Blender stuff
+02:10:15 | INFO: Blender create Mesh node VR_Hunter_Core
+02:10:15 | INFO: Blender create Mesh node VR_Hunter_Fin
+02:10:15 | INFO: Blender create Mesh node VR_Hunter_Hull
+02:10:15 | INFO: glTF import finished in 0.04s
+AUDIT hunter meshes=3 tris=2256 center=[0.0004, 0.0, 0.0] radius=1.8243
+  NODE VR_Hunter_Core tris= 256
+  NODE VR_Hunter_Fin tris= 600
+  NODE VR_Hunter_Hull tris= 1400
+00:08.938  render           | Saved: 'E:\Game\.evidence\I506\aud_hunter_f34_clay.png'
+00:10.859  render           | Saved: 'E:\Game\.evidence\I506\aud_hunter_side_clay.png'
+00:12.766  render           | Saved: 'E:\Game\.evidence\I506\aud_hunter_top_clay.png'
+02:10:26 | INFO: Data are loaded, start creating Blender stuff
+02:10:26 | INFO: Blender create Mesh node VR_Hunter_Core
+02:10:26 | INFO: Blender create Mesh node VR_Hunter_Fin
+02:10:26 | INFO: Blender create Mesh node VR_Hunter_Hull
+02:10:26 | INFO: glTF import finished in 0.04s
+00:14.344  render           | Saved: 'E:\Game\.evidence\I506\aud_hunter_f34_tint.png'
+00:16.047  render           | Saved: 'E:\Game\.evidence\I506\aud_hunter_side_tint.png'
+00:17.969  render           | Saved: 'E:\Game\.evidence\I506\aud_hunter_top_tint.png'
+02:10:31 | INFO: Data are loaded, start creating Blender stuff
+02:10:31 | INFO: Blender create Mesh node VR_Hunter_Core
+02:10:31 | INFO: Blender create Mesh node VR_Hunter_Fin
+02:10:31 | INFO: Blender create Mesh node VR_Hunter_Hull
+02:10:31 | INFO: glTF import finished in 0.05s
+00:19.594  render           | Saved: 'E:\Game\.evidence\I506\aud_hunter_f34_sil.png'
+DONE hunter
+02:10:33 | INFO: Data are loaded, start creating Blender stuff
+02:10:33 | INFO: Blender create Mesh node VR_Gunship_Bay
+02:10:33 | INFO: Blender create Mesh node VR_Gunship_Hull
+02:10:33 | INFO: Blender create Mesh node VR_Gunship_Nacelle
+02:10:33 | INFO: glTF import finished in 0.06s
+AUDIT gunship meshes=3 tris=2268 center=[0.0483, -0.0019, -0.12] radius=2.7799
+  NODE VR_Gunship_Bay tris= 168
+  NODE VR_Gunship_Hull tris= 1650
+  NODE VR_Gunship_Nacelle tris= 450
+00:21.797  render           | Saved: 'E:\Game\.evidence\I506\aud_gunship_f34_clay.png'
+00:23.906  render           | Saved: 'E:\Game\.evidence\I506\aud_gunship_side_clay.png'
+00:26.266  render           | Saved: 'E:\Game\.evidence\I506\aud_gunship_top_clay.png'
+02:10:39 | INFO: Data are loaded, start creating Blender stuff
+02:10:39 | INFO: Blender create Mesh node VR_Gunship_Bay
+02:10:39 | INFO: Blender create Mesh node VR_Gunship_Hull
+02:10:39 | INFO: Blender create Mesh node VR_Gunship_Nacelle
+02:10:39 | INFO: glTF import finished in 0.06s
+00:28.859  render           | Saved: 'E:\Game\.evidence\I506\aud_gunship_f34_tint.png'
+00:30.906  render           | Saved: 'E:\Game\.evidence\I506\aud_gunship_side_tint.png'
+00:33.266  render           | Saved: 'E:\Game\.evidence\I506\aud_gunship_top_tint.png'
+02:10:46 | INFO: Data are loaded, start creating Blender stuff
+02:10:46 | INFO: Blender create Mesh node VR_Gunship_Bay
+02:10:46 | INFO: Blender create Mesh node VR_Gunship_Hull
+02:10:46 | INFO: Blender create Mesh node VR_Gunship_Nacelle
+02:10:46 | INFO: glTF import finished in 0.06s
+00:35.375  render           | Saved: 'E:\Game\.evidence\I506\aud_gunship_f34_sil.png'
+DONE gunship
+02:10:49 | INFO: Data are loaded, start creating Blender stuff
+02:10:49 | INFO: Blender create Mesh node VR_Sentry_Barrel
+02:10:49 | INFO: Blender create Mesh node VR_Sentry_Base
+02:10:49 | INFO: Blender create Mesh node VR_Sentry_Charge
+02:10:49 | INFO: Blender create Mesh node VR_Sentry_Hull
+02:10:49 | INFO: glTF import finished in 0.06s
+AUDIT sentry meshes=4 tris=1096 center=[0.3118, 0.0007, 0.0397] radius=2.0415
+  NODE VR_Sentry_Barrel tris= 140
+  NODE VR_Sentry_Base tris= 180
+  NODE VR_Sentry_Charge tris= 120
+  NODE VR_Sentry_Hull tris= 656
+00:37.969  render           | Saved: 'E:\Game\.evidence\I506\aud_sentry_f34_clay.png'
+00:40.391  render           | Saved: 'E:\Game\.evidence\I506\aud_sentry_side_clay.png'
+00:43.234  render           | Saved: 'E:\Game\.evidence\I506\aud_sentry_top_clay.png'
+02:10:56 | INFO: Data are loaded, start creating Blender stuff
+02:10:56 | INFO: Blender create Mesh node VR_Sentry_Barrel
+02:10:56 | INFO: Blender create Mesh node VR_Sentry_Base
+02:10:56 | INFO: Blender create Mesh node VR_Sentry_Charge
+02:10:56 | INFO: Blender create Mesh node VR_Sentry_Hull
+02:10:56 | INFO: glTF import finished in 0.05s
+00:45.484  render           | Saved: 'E:\Game\.evidence\I506\aud_sentry_f34_tint.png'
+00:47.656  render           | Saved: 'E:\Game\.evidence\I506\aud_sentry_side_tint.png'
+00:50.625  render           | Saved: 'E:\Game\.evidence\I506\aud_sentry_top_tint.png'
+02:11:04 | INFO: Data are loaded, start creating Blender stuff
+02:11:04 | INFO: Blender create Mesh node VR_Sentry_Barrel
+02:11:04 | INFO: Blender create Mesh node VR_Sentry_Base
+02:11:04 | INFO: Blender create Mesh node VR_Sentry_Charge
+02:11:04 | INFO: Blender create Mesh node VR_Sentry_Hull
+02:11:04 | INFO: glTF import finished in 0.08s
+00:53.328  render           | Saved: 'E:\Game\.evidence\I506\aud_sentry_f34_sil.png'
+DONE sentry
+02:11:07 | INFO: Data are loaded, start creating Blender stuff
+02:11:07 | INFO: Blender create Mesh node VR_Wasp_Hull
+02:11:07 | INFO: Blender create Mesh node VR_Wasp_Nose
+02:11:07 | INFO: Blender create Mesh node VR_Wasp_Wing
+02:11:07 | INFO: glTF import finished in 0.06s
+AUDIT wasp meshes=3 tris=792 center=[0.1779, 0.0007, 0.0119] radius=1.6001
+  NODE VR_Wasp_Hull tris= 512
+  NODE VR_Wasp_Nose tris= 80
+  NODE VR_Wasp_Wing tris= 200
+00:56.094  render           | Saved: 'E:\Game\.evidence\I506\aud_wasp_f34_clay.png'
+00:58.047  render           | Saved: 'E:\Game\.evidence\I506\aud_wasp_side_clay.png'
+01:00.141  render           | Saved: 'E:\Game\.evidence\I506\aud_wasp_top_clay.png'
+02:11:13 | INFO: Data are loaded, start creating Blender stuff
+02:11:13 | INFO: Blender create Mesh node VR_Wasp_Hull
+02:11:13 | INFO: Blender create Mesh node VR_Wasp_Nose
+02:11:13 | INFO: Blender create Mesh node VR_Wasp_Wing
+02:11:13 | INFO: glTF import finished in 0.04s
+01:02.281  render           | Saved: 'E:\Game\.evidence\I506\aud_wasp_f34_tint.png'
+01:04.344  render           | Saved: 'E:\Game\.evidence\I506\aud_wasp_side_tint.png'
+01:06.578  render           | Saved: 'E:\Game\.evidence\I506\aud_wasp_top_tint.png'
+02:11:20 | INFO: Data are loaded, start creating Blender stuff
+02:11:20 | INFO: Blender create Mesh node VR_Wasp_Hull
+02:11:20 | INFO: Blender create Mesh node VR_Wasp_Nose
+02:11:20 | INFO: Blender create Mesh node VR_Wasp_Wing
+02:11:20 | INFO: glTF import finished in 0.06s
+01:09.078  render           | Saved: 'E:\Game\.evidence\I506\aud_wasp_f34_sil.png'
+DONE wasp
+02:11:22 | INFO: Data are loaded, start creating Blender stuff
+02:11:22 | INFO: Blender create Mesh node VR_Warden_Armor
+02:11:22 | INFO: Blender create Mesh node VR_Warden_Hull
+02:11:22 | INFO: glTF import finished in 0.02s
+AUDIT warden meshes=2 tris=180 center=[0.0, -0.0089, 0.0] radius=3.9945
+  NODE VR_Warden_Armor tris= 120
+  NODE VR_Warden_Hull tris= 60
+01:11.438  render           | Saved: 'E:\Game\.evidence\I506\aud_warden_f34_clay.png'
+01:13.750  render           | Saved: 'E:\Game\.evidence\I506\aud_warden_side_clay.png'
+01:15.641  render           | Saved: 'E:\Game\.evidence\I506\aud_warden_top_clay.png'
+02:11:29 | INFO: Data are loaded, start creating Blender stuff
+02:11:29 | INFO: Blender create Mesh node VR_Warden_Armor
+02:11:29 | INFO: Blender create Mesh node VR_Warden_Hull
+02:11:29 | INFO: glTF import finished in 0.03s
+01:17.359  render           | Saved: 'E:\Game\.evidence\I506\aud_warden_f34_tint.png'
+01:19.563  render           | Saved: 'E:\Game\.evidence\I506\aud_warden_side_tint.png'
+01:21.703  render           | Saved: 'E:\Game\.evidence\I506\aud_warden_top_tint.png'
+02:11:35 | INFO: Data are loaded, start creating Blender stuff
+02:11:35 | INFO: Blender create Mesh node VR_Warden_Armor
+02:11:35 | INFO: Blender create Mesh node VR_Warden_Hull
+02:11:35 | INFO: glTF import finished in 0.03s
+01:23.672  render           | Saved: 'E:\Game\.evidence\I506\aud_warden_f34_sil.png'
+DONE warden
+02:11:37 | INFO: Data are loaded, start creating Blender stuff
+02:11:37 | INFO: Blender create Mesh node VR_Stinger_Body
+02:11:37 | INFO: Blender create Mesh node VR_Stinger_Core
+02:11:37 | INFO: glTF import finished in 0.02s
+AUDIT stinger meshes=2 tris=40 center=[0.0, 0.0, 0.0] radius=1.9424
+  NODE VR_Stinger_Body tris= 32
+  NODE VR_Stinger_Core tris= 8
+01:25.594  render           | Saved: 'E:\Game\.evidence\I506\aud_stinger_f34_clay.png'
+01:27.188  render           | Saved: 'E:\Game\.evidence\I506\aud_stinger_side_clay.png'
+01:29.031  render           | Saved: 'E:\Game\.evidence\I506\aud_stinger_top_clay.png'
+02:11:42 | INFO: Data are loaded, start creating Blender stuff
+02:11:42 | INFO: Blender create Mesh node VR_Stinger_Body
+02:11:42 | INFO: Blender create Mesh node VR_Stinger_Core
+02:11:42 | INFO: glTF import finished in 0.02s
+01:30.594  render           | Saved: 'E:\Game\.evidence\I506\aud_stinger_f34_tint.png'
+01:32.094  render           | Saved: 'E:\Game\.evidence\I506\aud_stinger_side_tint.png'
+01:33.844  render           | Saved: 'E:\Game\.evidence\I506\aud_stinger_top_tint.png'
+02:11:47 | INFO: Data are loaded, start creating Blender stuff
+02:11:47 | INFO: Blender create Mesh node VR_Stinger_Body
+02:11:47 | INFO: Blender create Mesh node VR_Stinger_Core
+02:11:47 | INFO: glTF import finished in 0.01s
+01:35.328  render           | Saved: 'E:\Game\.evidence\I506\aud_stinger_f34_sil.png'
+DONE stinger
+02:11:48 | INFO: Data are loaded, start creating Blender stuff
+02:11:48 | INFO: Blender create Mesh node VR_Drone
+02:11:48 | INFO: glTF import finished in 0.01s
+AUDIT drone meshes=1 tris=52 center=[0.0, 0.0, 0.0] radius=1.4117
+  NODE VR_Drone tris= 52
+01:36.906  render           | Saved: 'E:\Game\.evidence\I506\aud_drone_f34_clay.png'
+01:38.438  render           | Saved: 'E:\Game\.evidence\I506\aud_drone_side_clay.png'
+01:40.219  render           | Saved: 'E:\Game\.evidence\I506\aud_drone_top_clay.png'
+02:11:53 | INFO: Data are loaded, start creating Blender stuff
+02:11:53 | INFO: Blender create Mesh node VR_Drone
+02:11:53 | INFO: glTF import finished in 0.01s
+01:41.859  render           | Saved: 'E:\Game\.evidence\I506\aud_drone_f34_tint.png'
+01:43.438  render           | Saved: 'E:\Game\.evidence\I506\aud_drone_side_tint.png'
+01:44.922  render           | Saved: 'E:\Game\.evidence\I506\aud_drone_top_tint.png'
+02:11:58 | INFO: Data are loaded, start creating Blender stuff
+02:11:58 | INFO: Blender create Mesh node VR_Drone
+02:11:58 | INFO: glTF import finished in 0.01s
+01:46.359  render           | Saved: 'E:\Game\.evidence\I506\aud_drone_f34_sil.png'
+DONE drone
+02:11:59 | INFO: Data are loaded, start creating Blender stuff
+02:11:59 | INFO: Blender create Mesh node VR_Flyer_Body
+02:11:59 | INFO: Blender create Mesh node VR_Flyer_Dome
+02:11:59 | INFO: glTF import finished in 0.01s
+AUDIT flyer meshes=2 tris=62 center=[0.0, 0.0, 0.045] radius=1.6870
+  NODE VR_Flyer_Body tris= 20
+  NODE VR_Flyer_Dome tris= 42
+01:48.203  render           | Saved: 'E:\Game\.evidence\I506\aud_flyer_f34_clay.png'
+01:49.766  render           | Saved: 'E:\Game\.evidence\I506\aud_flyer_side_clay.png'
+01:51.578  render           | Saved: 'E:\Game\.evidence\I506\aud_flyer_top_clay.png'
+02:12:05 | INFO: Data are loaded, start creating Blender stuff
+02:12:05 | INFO: Blender create Mesh node VR_Flyer_Body
+02:12:05 | INFO: Blender create Mesh node VR_Flyer_Dome
+02:12:05 | INFO: glTF import finished in 0.01s
+01:53.297  render           | Saved: 'E:\Game\.evidence\I506\aud_flyer_f34_tint.png'
+01:54.859  render           | Saved: 'E:\Game\.evidence\I506\aud_flyer_side_tint.png'
+01:56.719  render           | Saved: 'E:\Game\.evidence\I506\aud_flyer_top_tint.png'
+02:12:10 | INFO: Data are loaded, start creating Blender stuff
+02:12:10 | INFO: Blender create Mesh node VR_Flyer_Body
+02:12:10 | INFO: Blender create Mesh node VR_Flyer_Dome
+02:12:10 | INFO: glTF import finished in 0.01s
+01:58.406  render           | Saved: 'E:\Game\.evidence\I506\aud_flyer_f34_sil.png'
+DONE flyer
+02:12:12 | INFO: Data are loaded, start creating Blender stuff
+02:12:12 | INFO: Blender create Mesh node VR_Boss_Core
+02:12:12 | INFO: Blender create Mesh node VR_Boss_Crown
+02:12:12 | INFO: Blender create Mesh node VR_Boss_Hull
+02:12:12 | INFO: glTF import finished in 0.03s
+AUDIT boss meshes=3 tris=398 center=[0.0, -0.0, 0.45] radius=5.6746
+  NODE VR_Boss_Core tris= 20
+  NODE VR_Boss_Crown tris= 52
+  NODE VR_Boss_Hull tris= 326
+02:00.172  render           | Saved: 'E:\Game\.evidence\I506\aud_boss_f34_clay.png'
+02:01.813  render           | Saved: 'E:\Game\.evidence\I506\aud_boss_side_clay.png'
+02:03.203  render           | Saved: 'E:\Game\.evidence\I506\aud_boss_top_clay.png'
+02:12:16 | INFO: Data are loaded, start creating Blender stuff
+02:12:16 | INFO: Blender create Mesh node VR_Boss_Core
+02:12:16 | INFO: Blender create Mesh node VR_Boss_Crown
+02:12:16 | INFO: Blender create Mesh node VR_Boss_Hull
+02:12:16 | INFO: glTF import finished in 0.02s
+02:04.766  render           | Saved: 'E:\Game\.evidence\I506\aud_boss_f34_tint.png'
+02:06.172  render           | Saved: 'E:\Game\.evidence\I506\aud_boss_side_tint.png'
+02:07.578  render           | Saved: 'E:\Game\.evidence\I506\aud_boss_top_tint.png'
+02:12:21 | INFO: Data are loaded, start creating Blender stuff
+02:12:21 | INFO: Blender create Mesh node VR_Boss_Core
+02:12:21 | INFO: Blender create Mesh node VR_Boss_Crown
+02:12:21 | INFO: Blender create Mesh node VR_Boss_Hull
+02:12:21 | INFO: glTF import finished in 0.02s
+02:08.922  render           | Saved: 'E:\Game\.evidence\I506\aud_boss_f34_sil.png'
+DONE boss
+ALL_DONE
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+
+Blender quit
