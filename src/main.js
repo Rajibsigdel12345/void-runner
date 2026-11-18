@@ -33,7 +33,7 @@ import { createParticles } from './render/particles.js';
 import { createShockwaves } from './render/shockwave.js'; // ST-238 (I245): pooled additive shockwave ring
 import { createDebrisField } from './render/debrisField.js'; // ST-381 (I411): transient 3D death-shatter pool
 import { createShake, createPunch, createFovKick } from './core/fx.js'; // ST-081/ST-082
-import { chaseTargets, overviewTargets, cockpitTargets, flightPathCam } from './core/cameraModel.js'; // ST-415 + ST-416 (I445/I446): pure camera targets (chase dolly + overview + cockpit)
+import { chaseTargets, overviewTargets, cockpitTargets, flightPathCam, cockpitThrust } from './core/cameraModel.js'; // ST-415 + ST-416 (I445/I446): pure camera targets (chase dolly + overview + cockpit)
 import { pathPoint } from './core/flightPath.js'; // ST-454 (I487): race-line path point (pure core)
 import { levelStartDistance } from './core/level.js'; // ST-454 (I487): campaign cumulative path distance
 import { createFlightPathLine } from './render/flightPathLine.js'; // ST-454 (I487): visible race-line ribbon
@@ -798,6 +798,7 @@ const aimWorld = new THREE.Vector3();
 
 // follow-camera state
 const shipFwd = { x: 0, y: 0 }; // ST-074: scratch for ship.forward()
+const cockpitThrustOut = { x: 0, y: 0 }; const cockpitDragOut = { x: 0, y: 0 }; // I504 (ST-470): scratch for cockpit camera-relative thrust/aim rotation (no per-frame alloc)
 const camModelOut = { camX: 0, camY: 0, camZ: 0, lookX: 0, lookY: 0, lookZ: 0, s: 1, ahead: 0 }; // ST-415 (I445): chase-target scratch (no per-frame alloc)
 const camPos = { x: 0, y: 9, z: 13 };
 const camLook = { x: 0, y: 0, z: 0 };
@@ -982,7 +983,8 @@ function resolveAimPoint() {
   }
   if (input.touchDrag) { // ST-268 (ST-033 carryover): while left-drag-thrusting, aim along the drag (fire forward)
     const sp = world.ship.pos;
-    return { x: sp.x + input.touchDrag.x * 10, y: sp.y + input.touchDrag.y * 10 };
+    const drag = camMode === 'cockpit' ? cockpitThrust(input.touchDrag.x, input.touchDrag.y, world.ship.aim, cockpitDragOut) : input.touchDrag; // I504 (ST-470): camera-relative in cockpit (chase keeps the screen-basis identity)
+    return { x: sp.x + drag.x * 10, y: sp.y + drag.y * 10 };
   }
   if (!input.pointer.active) return null;
   raycaster.setFromCamera(input.pointer.ndc, camera);
@@ -995,7 +997,7 @@ function resolveAimPoint() {
 function tick(dt, intent) {
   if (tutorialActive) return; // I151: freeze the sim while the first-run tutorial is up (render keeps going)
   if (!intent) input.tick(dt); // ST-033: decay touch fire-tail / pause cooldown
-  const it = intent || { thrust: input.state.thrust, aimPoint: resolveAimPoint(), firing: input.state.firing };
+  const it = intent || { thrust: camMode === 'cockpit' ? cockpitThrust(input.state.thrust.x, input.state.thrust.y, world.ship.aim, cockpitThrustOut) : input.state.thrust, aimPoint: resolveAimPoint(), firing: input.state.firing }; // I504 (ST-470): cockpit = camera-relative WASD (screen-up = along the seat axis); chase keeps the screen-basis thrust (bit-identical; the scripted-intent path bypasses this line so the causal harness is untouched)
   if (intent) { input.state.thrust.x = it.thrust.x; input.state.thrust.y = it.thrust.y; input.state.firing = it.firing; } // I213: mirror scripted intent into the live input state so the render layer (flame, engine trail) tracks the pilot
   if (recorder && !recStopped && world.simActive) recorder.record(it); // ST-191: record exactly the intent the sim receives (one per substep; freezes at stop/death/tutorial)
   world.step(dt, it);
@@ -1205,8 +1207,8 @@ function syncVisuals(dt) {
     shipMesh.group.rotation.x = 0;
     shipMesh.group.rotation.z = shipBank; // ST-454 (I487): path bank (0 in endless/PAUSED/MENU/RM)
   }
-  shipMesh.group.visible = !(inRun && camMode === 'cockpit'); // ST-416 (I446): hide the ship in cockpit first-person
-  reticle.sync(world.ship, st === STATE.PLAYING, inRun && camMode === 'cockpit'); // I44: only while playing; ST-416: emphasize the fire-line in cockpit
+  shipMesh.group.visible = true; // I504 (ST-470): ship visible in cockpit too (nose + canopy frame the seat, per user request); chase framing unchanged (pin EXACT)
+  reticle.sync(world.ship, st === STATE.PLAYING && !(inRun && camMode === 'cockpit'), false); // I44: only while playing; I504 (ST-470): 3D fire-line hidden in cockpit (replaced by the small screen-center dot on the bearing-strip HUD)
   bullets.sync(world.weapons);
   bullets.setLevel(world.weaponLevel(), st === STATE.PLAYING && world.powerups.active('overdrive')); // ST-123, ST-248: overdrive heat shift
   rockRenders.sync(world.field, simT); // ST-139
@@ -1290,7 +1292,7 @@ function syncVisuals(dt) {
   } else if (inRun && camMode === 'cockpit') { // ST-416 (I446): first-person seat (heading-aligned)
     cockpitTargets(ship.pos, f, CONFIG.camera, camModelOut, spdFrac); // ST-444 (I477): speed look-ahead (rest 0 == legacy 60 bit-identical)
     camTX = camModelOut.camX; camTY = camModelOut.camY; camTZ = camModelOut.camZ; lookTX = camModelOut.lookX; lookTY = camModelOut.lookY; lookTZ = camModelOut.lookZ;
-    if (onPath) { camTY += fpA.elev; lookTY = fpA.elev; } // ST-454 (I487): cockpit rides path altitude
+    if (onPath) { camTY += fpA.elev; lookTY += fpA.elev; } // ST-454 (I487); I504 (ST-470): cockpit rides path altitude (additive: the lookDrop pitch survives on the campaign path)
   } else { // ST-454 (I487): chase (default) - flight-path framing + aim-lead
     if (onPath) { const r454 = flightPathCam(camModelOut, fpA, fpB, CONFIG.flightPath, fpCamOut, fpLookOut); camTX = r454.cam.x; camTY = r454.cam.y; camTZ = r454.cam.z; lookTX = r454.look.x; lookTY = r454.look.y; lookTZ = r454.look.z; } // ST-454 (I487)
     if (st === STATE.PLAYING && !motionOff) { // 2-5% lead toward the aim point, capped, eased by the look damp

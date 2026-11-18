@@ -115,6 +115,8 @@ export function overviewTargets(cfg, out) {
 
 // ST-416 (I446): COCKPIT camera targets - first-person seat: eye at cockpitHeight,
 // setback behind the ship center along the facing, looking lookFar ahead on the arena plane.
+// I504 (ST-470): the look point drops cockpitLookDrop below the eye - a gentle down-pitch so the
+// ship nose/canopy frame the bottom of the first-person view (the ship is visible in cockpit now).
 /**
  * @param p   {x, y} ship position on the arena plane (world = (x, 0, y))
  * @param fwd {x, y} unit ship facing
@@ -127,8 +129,21 @@ export function cockpitTargets(p, fwd, cfg, out, spdFrac = 0) {
   out.camY = cfg.cockpitHeight;
   out.camZ = p.y - fwd.y * cfg.cockpitSetback;
   out.lookX = p.x + fwd.x * ahead;
-  out.lookY = 0; // arena plane horizon
+  out.lookY = out.camY - (cfg.cockpitLookDrop || 0); // I504 (ST-470): gentle down-pitch (legacy 0 when the key is absent)
   out.lookZ = p.y + fwd.y * ahead;
+  return out;
+}
+
+// I504 (ST-470): COCKPIT camera-relative thrust rotation. In the first-person seat the player
+// only sees what is in front, so the on-screen thrust basis is the camera basis (screen-up =
+// along the seat axis, screen-right = camera right), not the fixed chase basis (screen-up = sim -y).
+// (tx, ty) = thrust in the screen basis; aim = ship aim angle (fwd = (cos aim, sin aim)).
+// screen-up -> fwd = (cos a, sin a); screen-right -> (-sin a, cos a). Identity at the default
+// aim -PI/2 (nose-up), so the legacy screen-basis convention is preserved where it already worked.
+export function cockpitThrust(tx, ty, aim, out) {
+  const sa = Math.sin(aim), ca = Math.cos(aim);
+  out.x = -tx * sa - ty * ca;
+  out.y = tx * ca - ty * sa;
   return out;
 }
 

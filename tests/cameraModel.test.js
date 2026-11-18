@@ -1,7 +1,7 @@
 // ST-415 (I445): chase-camera model tests (pure math, DOM-free)
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { clamp01, smoothstep01, dollyFactor, chaseTargets, projectNdc, overviewTargets, cockpitTargets } from '../src/core/cameraModel.js';
+import { clamp01, smoothstep01, dollyFactor, chaseTargets, projectNdc, overviewTargets, cockpitTargets, cockpitThrust } from '../src/core/cameraModel.js';
 import { CONFIG } from '../src/core/config.js';
 
 const CFG = CONFIG.camera; // real config keeps these tests honest
@@ -163,7 +163,7 @@ test('cockpitTargets: seat sits setback behind the ship at eye height; looks loo
     assert.ok(Math.abs(o.camY - CFG.cockpitHeight) < 1e-12);
     assert.ok(Math.abs(o.camZ - (c.p.y - c.f.y * CFG.cockpitSetback)) < 1e-12);
     assert.ok(Math.abs(o.lookX - (c.p.x + c.f.x * CFG.cockpitLookFar)) < 1e-12);
-    assert.ok(Math.abs(o.lookY) < 1e-12);
+    assert.ok(Math.abs(o.lookY - (CFG.cockpitHeight - CFG.cockpitLookDrop)) < 1e-12); // I504: gentle down-pitch
     assert.ok(Math.abs(o.lookZ - (c.p.y + c.f.y * CFG.cockpitLookFar)) < 1e-12);
     const dx = o.lookX - o.camX, dz = o.lookZ - o.camZ;
     assert.ok(dx * c.f.x + dz * c.f.y > 0, 'look point is in front of the seat along the heading');
@@ -182,7 +182,7 @@ test('cockpitTargets: speed look-ahead - ahead = cockpitLookFar + cockpitLookSpe
     assert.equal(o.lookZ, p.y + f.y * ahead);
     assert.equal(o.camX, p.x - f.x * CFG.cockpitSetback); // seat position is speed-independent
     assert.equal(o.camY, CFG.cockpitHeight);
-    assert.ok(Math.abs(o.lookY) < 1e-12);
+    assert.ok(Math.abs(o.lookY - (CFG.cockpitHeight - CFG.cockpitLookDrop)) < 1e-12); // I504: gentle down-pitch
   }
   // at rest (explicit 0 and the legacy 3-arg default) bit-identical to the legacy fixed-60 targets
   cockpitTargets(p, f, CFG, o, 0);
@@ -195,4 +195,47 @@ test('cockpitTargets: speed look-ahead - ahead = cockpitLookFar + cockpitLookSpe
   // full speed: strictly beyond the rest look-ahead
   cockpitTargets(p, f, CFG, o, 1);
   assert.ok(o.lookX > p.x + f.x * CFG.cockpitLookFar);
+});
+
+// I504 (ST-470): cockpit camera-relative thrust rotation
+const thr = { x: 99, y: 99 };
+const near0 = (v) => Math.abs(v) < 1e-12;
+
+test('cockpitThrust: identity at the default aim (-PI/2, nose-up) - the legacy screen basis', () => {
+  const a = -Math.PI / 2;
+  for (const v of [[0, -1], [0, 1], [1, 0], [-1, 0], [SQ, -SQ]]) {
+    cockpitThrust(v[0], v[1], a, thr);
+    assert.ok(Math.abs(thr.x - v[0]) < 1e-12 && Math.abs(thr.y - v[1]) < 1e-12, 'identity at -PI/2 for ' + v);
+  }
+});
+
+test('cockpitThrust: a=0 (nose-east) maps screen-up to +x and screen-right to +y', () => {
+  cockpitThrust(0, -1, 0, thr); assert.ok(Math.abs(thr.x - 1) < 1e-12 && near0(thr.y)); // W = along the nose
+  cockpitThrust(1, 0, 0, thr); assert.ok(near0(thr.x) && Math.abs(thr.y - 1) < 1e-12); // D = screen-right
+  cockpitThrust(0, 1, 0, thr); assert.ok(Math.abs(thr.x + 1) < 1e-12 && near0(thr.y)); // S = astern
+  cockpitThrust(-1, 0, 0, thr); assert.ok(near0(thr.x) && Math.abs(thr.y + 1) < 1e-12); // A = screen-left
+});
+
+test('cockpitThrust: rotation preserves magnitude, zero stays zero, basis stays orthonormal (any aim)', () => {
+  for (const a of [0, 0.7, -2.1, Math.PI]) {
+    cockpitThrust(0.6, -0.8, a, thr);
+    assert.ok(Math.abs(Math.hypot(thr.x, thr.y) - 1) < 1e-12);
+    cockpitThrust(0, 0, a, thr);
+    assert.ok(thr.x === 0 && thr.y === 0, 'zero stays zero'); // === normalizes -0
+    cockpitThrust(0, -1, a, thr); const ux = thr.x, uy = thr.y; // screen-up -> fwd
+    cockpitThrust(1, 0, a, thr); // screen-right -> camera right
+    assert.ok(Math.abs(ux * Math.cos(a) + uy * Math.sin(a) - 1) < 1e-12, 'screen-up maps to fwd');
+    assert.ok(Math.abs(ux * thr.x + uy * thr.y) < 1e-12, 'screen-right is perpendicular to screen-up');
+    assert.ok(Math.abs(thr.x + Math.sin(a)) < 1e-12 && Math.abs(thr.y - Math.cos(a)) < 1e-12, 'right = (-sin a, cos a)');
+  }
+});
+
+test('cockpitTargets: I504 seat - look drops cockpitLookDrop below the eye (down-pitch frames the nose)', () => {
+  const p = { x: 0, y: 0 };
+  const f = { x: 0, y: -1 };
+  const o = { camX: 99, camY: 99, camZ: 99, lookX: 99, lookY: 99, lookZ: 99 };
+  cockpitTargets(p, f, CFG, o);
+  assert.equal(o.camY, CFG.cockpitHeight);
+  assert.ok(Math.abs(o.lookY - (CFG.cockpitHeight - CFG.cockpitLookDrop)) < 1e-12);
+  assert.ok(o.lookY < o.camY, 'look point is below the eye (nose in frame)');
 });

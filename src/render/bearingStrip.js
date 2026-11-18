@@ -32,6 +32,11 @@ export function createBearingStrip() {
   canvas.height = Math.round(H * dpr);
   canvas.style.cssText = 'position:fixed;left:50%;bottom:11%;transform:translateX(-50%) scale(var(--vr-fs,1));z-index:55;width:' + W + 'px;height:' + H + 'px;opacity:0;transition:opacity .3s;pointer-events:none;';
   document.body.appendChild(canvas);
+  const dot = document.createElement('div'); // I504 (ST-470): small screen-center aiming dot (replaces the 3D fire-line in cockpit)
+  dot.id = 'vr-cockpit-dot';
+  dot.setAttribute('aria-hidden', 'true');
+  dot.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:55;width:4px;height:4px;border-radius:50%;background:rgba(235,245,255,0.85);box-shadow:0 0 4px rgba(127,212,255,0.6);opacity:0;transition:opacity .3s;pointer-events:none;';
+  document.body.appendChild(dot);
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
   const rimOut = { x: 0, y: 0, ok: false };
@@ -100,13 +105,15 @@ export function createBearingStrip() {
     if (on !== visible) {
       visible = on;
       canvas.style.opacity = on ? '1' : '0';
+      dot.style.opacity = on ? '1' : '0'; // I504 (ST-470): the center dot fades with the cockpit
     }
     if (opts.reducedMotion !== lastRM) {
       lastRM = opts.reducedMotion;
       canvas.style.transition = opts.reducedMotion ? 'none' : 'opacity .3s';
+      dot.style.transition = opts.reducedMotion ? 'none' : 'opacity .3s';
     }
     if (on) drawFrame(opts.shipX, opts.shipZ, opts.fwdX, opts.fwdZ, opts.arenaR);
   }
 
-  return { update, el: canvas };
+  return { update, el: canvas, elDot: dot };
 }
