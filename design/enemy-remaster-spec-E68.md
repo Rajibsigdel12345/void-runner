@@ -229,6 +229,53 @@ FROZEN 4.2 targets, with the final gains:
   iter2-4 measurement passes (each pass measures the full 9-role fleet in
   ~10 s).
 
+### 4.5 ST-478 fleet-coherence gate (I512, FINAL)
+
+Method: headless SwiftShader 1280x720, fx=high, bloom in the render path,
+I511 bg/fg diff measurement. A 3x3 SCREEN-space grid (cam (0,10,30) level at
+(0,10,-10); slots unprojected at row depths 14/28/46 -> pure-sky backdrop,
+>=120 px projected spacing; fog-free: all d < 60). The per-role solo control
+at the same geometry quantifies bloom cross-talk (all9.p50 - solo.p50).
+
+Measured (all9 p50 / solo p50 / crossTalk / hue):
+  drone   181.23 / 181.23 / +0.00 / 189.5
+  stinger  87.82 /  88.82 / -1.00 / 222.6
+  flyer    46.73 /  46.73 / +0.00 / 329.4
+  hunter   63.08 /  63.08 / +0.00 /  13.5
+  sentry  113.02 / 113.02 / +0.00 /  40.7
+  wasp     86.29 /  86.29 / +0.00 /  47.3
+  gunship  63.73 /  63.73 / +0.00 / 160.3
+  warden  129.13 / 129.13 / +0.00 / 181.4
+  boss     65.54 /  64.61 / +0.93 / 257.4
+
+Gate results:
+- BLOOM CROSS-TALK (the point of the shared-scene frame): <= 0.93 luma on
+  all 9 roles - the shared all-9 frame does not perturb solo role identity.
+- E57 rule-1 AND-test (|dluma|<=10 AND dhue<=40): ZERO collisions on all 8
+  adjacent frozen-ladder pairs in the all-9 frame AND in the solo ladder.
+- LADDER DIRECTION at this geometry: 4 adjacent pairs inverted vs the frozen
+  4.4 in-game d~12 ladder (wasp>sentry dl -26.73/dh 6.6, sentry>warden
+  -16.11/140.7, hunter>stinger -24.74/150.9, flyer>boss -18.81/72).
+  MEASUREMENT-REGIME artifact, documented, NOT a CONFIG finding: the
+  distant-sky masks (d 14-46) measure core hull pixels of thin airframes
+  while the in-game d~12 masks are halo-inclusive at close range; the
+  bloom-capped wasp loses 64.3 luma (150.55 -> 86.29), the thin flyer 47.5
+  (94.22 -> 46.73), the hunter 53.0 (116.11 -> 63.08), while the solid-body
+  boss holds (-3.8) and the top rung drone (-2.85). The frozen ladder is
+  pinned to in-game geometry (4.4, I511); no CONFIG change, no re-pin
+  (evidence-only iteration).
+- B (96 px silhouettes front+back): 18/18 areaFrac96 >= 0.03 (min 0.2052
+  flyer_back; max 0.5605 boss_front) - every role reads at a glance.
+- C (low-DPR 0.5 accent survival): margins (p90 - bgP50) 47.57-149.48 on all
+  9 roles (>= 25 required); mask n 584-39197 (>= 20 required).
+- D (reduced-motion telegraphs, motionOff=true): hunter fin z 1.0 -> 1.9
+  (delta 0.9) + core intensity 2.9; sentry charge 1.9; stinger core 2.9 +
+  wobble frozen (posX 0 motionOff, 0.0625 when on) + core scale 1.9; boss
+  rock-ring telestate visible at scale 9.0 / opacity 0.35, core 2.68
+  (0xde59ac).
+- E: 24 PNGs in .evidence/I512/ (9x2 silhouette board, hero all-9 frame,
+  4 telegraph stills, 18 96 px sils).
+
 ## 5. GLB contract (E57 rule 8 + E68 re-pins)
 
 Per asset (ST-474/ST-475 builds are REJECTED if any fails):
@@ -280,7 +327,7 @@ Per asset (ST-474/ST-475 builds are REJECTED if any fails):
 - ST-477: in-game luma re-ladder + CONFIG palette moves (closing gate for
   section 4; stinger exact hex + gunship x boss borderline settled here).
 - ST-478: fleet-coherence gate (E57 rule-1 AND-test across all 9 + 96 px
-  silhouette board + low-DPR pass).
+  silhouette board + low-DPR pass) - DONE I512 (4.5).
 - ST-479: G68.0 close.
 
 ## 8. Open items / risks (carried, not frozen)
