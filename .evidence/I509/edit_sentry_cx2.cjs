@@ -1,0 +1,16 @@
+const fs = require('fs');
+const p = 'tests/assetGlbs.test.js';
+let s = fs.readFileSync(p, 'utf8');
+const a = 'Math.abs(re.cx) <= 0.05';
+const b = 'barrel locally centered';
+const ia = s.indexOf(a), ib = s.indexOf(b);
+if (ia < 0 || ib < 0 || ia > ib) throw new Error('markers not found ' + ia + ' ' + ib);
+s = s.slice(0, ia) + 'Math.abs(re.cx - (-0.085)) <= 0.01' + s.slice(ia + a.length);
+const j = s.indexOf(b);
+s = s.slice(0, j) + 'barrel cx pin -0.0850 (I509 TRUE-AXIS, glb_probe.mjs; muzzle-forward barrel, bbox center is not node-centered)' + s.slice(j + b.length);
+fs.writeFileSync(p, s, 'utf8');
+const s2 = fs.readFileSync(p, 'utf8');
+console.log('BOM', (s2.match(/\uFEFF/g) || []).length, '| CRLF', (s2.match(/\r\n/g) || []).length, 'of', (s2.match(/\n/g) || []).length, '| bytes', Buffer.byteLength(s2));
+const k = s2.indexOf('Math.abs(re.cx - (-0.085))');
+const ls = s2.lastIndexOf('\n', k) + 1; let le = s2.indexOf('\n', k);
+console.log('NEW LINE:', s2.slice(ls, le).replace(/\r/g, ''));

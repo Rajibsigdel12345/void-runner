@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief); ship 300 -> 850 at I429 (ST-399 remaster, 818-tri fighter; design/asset-spec-ship-remaster.md)).
-const BUDGETS = { ship: 25563, L: 3200, M: 950, S: 380, comet: 650, boss: 1500, shield: 120, emblem: 60, drone: 1800, arenaRing: 120, warden: 1800, chunk: 60, sliver: 50, hunter: 2400, gunship: 2400, sentry: 1800, wasp: 1200 }; // + I482 (ST-449 sentry/wasp caps 1800/1200; actual 1096/792) + I501 (ST-467 ship v6 real-airship remaster 19000 -> 25563, measured 25,563 t / 581,440 B; pinned tight to measurement - the asset landed 9,137 t under the 34,700 aim so the pre-registered 38,500 was not needed; future growth requires an explicit re-pin) // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276) + I456 (ST-426 rock L/M/S v11 density remaster 2100/520/140 -> 3200/950/380, actual 3000/900/350; boss 750 -> 1500, actual 1425) + I508 (ST-474 E68 legacy-4 remaster) drone/warden caps 100/200 -> 1800/1800 (spec aim 1400)
+const BUDGETS = { ship: 25563, L: 3200, M: 950, S: 380, comet: 650, boss: 1500, shield: 120, emblem: 60, drone: 1800, arenaRing: 120, warden: 1800, chunk: 60, sliver: 50, hunter: 3366, gunship: 2596, sentry: 2934, wasp: 4020 }; // + I482 (ST-449 sentry/wasp caps 1800/1200; actual 1096/792) + I501 (ST-467 ship v6 real-airship remaster 19000 -> 25563, measured 25,563 t / 581,440 B; pinned tight to measurement - the asset landed 9,137 t under the 34,700 aim so the pre-registered 38,500 was not needed; future growth requires an explicit re-pin) // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276) + I456 (ST-426 rock L/M/S v11 density remaster 2100/520/140 -> 3200/950/380, actual 3000/900/350; boss 750 -> 1500, actual 1425) + I508 (ST-474 E68 legacy-4 remaster) drone/warden caps 100/200 -> 1800/1800 (spec aim 1400) + I509 (ST-475 E68 remaster-4 re-pin WITH measurement) hunter/gunship/sentry/wasp 3366/2596/2934/4020 (wasp 1200 -> 4020: wing-mirror rebuild, double blade 2400 t)
 const MAX_FILE_BYTES = 1048576; // I501 (ST-467 ship v6) EXPLICIT re-pin: 393216 -> 1048576 (ship v6 581,440 B; spec s5 pre-registered 1,048,576; max non-ship stays boss 75.26 KB) // I440 (ST-410 ship remaster v3) EXPLICIT re-pin: 262144 -> 393216 (ship 190,544 B/3254t -> 270,556 B/12400t; I435 was 100*1024 -> 262144 for v2; max non-ship stays boss 75.26 KB)
 
 function parseGlb(file) {
@@ -685,26 +685,32 @@ test('drone/stinger/flyer: every prim carries the I508 grayscale COLOR_0 bake; p
 });
 
 
-// I451 (ST-421 E57): Blender-authored enemy GLBs for the two I448 core+render
-// slots. hunter = manta hull + W-fin (deployed-telegraph read) + reactor core;
-// gunship = brute hull with open-nose weapon-bay recess + hex nacelle + bay
-// core (design/enemy-visual-language.md: "open forward weapons bay - a 'brute'
-// outline"). Same contract as the I282 enemy family: in-code materials are kept
-// (hull COLOR_0 grayscale value bake multiplies the family tint; a missing hull
-// COLOR_0 is filled white in code), exactly one primitive carries COLOR_0 (the
-// hull), corner-domain per-face bake v = clamp(1.0 + 0.55*dot(n, L), 0.30, 1.25)
-// with L = normalize(-0.30, -0.15, 0.94). Per-prim extents below are computed
-// manually: the global extents() helper unions all prims with NO node
-// transforms, so per-part parity needs the per-mesh reader. Parity targets are
-// the procedural shapes (15% band); the gunship bay Z (0.49 vs procedural 0.80)
-// is an EXPLICIT deviation: the procedural 0.8^3 bay was fully enclosed in the
-// hull (never visible) and the GLB replaces it with the recess-visible core
-// the design calls for.
+// I509 (ST-475 E68): remaster-4 fleet GLBs (hunter/gunship/sentry/wasp) - real-spaceship
+// Blender 5.2.3 headless rebuild (build_remaster4.py; CG gate + 12-view sheets in
+// .evidence/I509/gate_notes.md). Contract (I508 pattern): flat node set, no root nodes;
+// EVERY primitive carries a grayscale COLOR_0 value bake (FLOAT 5126 VEC3, count ==
+// POSITION count, |r-g|,|g-b| <= 0.02, domain [0.25,1.00]); materials named
+// VR_<Asset>_<Part>Mat. Runtime note: game code reads vertexColors only on the hull
+// material per asset (S4.6 deviation, documented in gate_notes.md) - accent bakes are a
+// harmless superset. Extent pins are the I509 TRUE-AXIS measurements (glb_probe.mjs); the
+// v37-checkpoint "axis defect" was an ext_verify.mjs column-rotation artifact - no frame
+// change, standard Y-up glTF frame (glTF.x = build.x fwd, glTF.y = build.z up, glTF.z = -build.y).
 const ENEMY451_FACET = {
-  hunter:  { p10: 0.561, p50: 1.0738, p90: 1.25 }, // per-face luma, file-level (I471 v5 re-pin WITH measurement; I451 was 0.6423/1.1584/1.25)
-  gunship: { p10: 0.5167, p50: 1.0383, p90: 1.25 }, // I471 v5 re-pin WITH measurement (I451 was 0.5254/0.9759/1.25)
-  wasp:    { p10: 0.4835, p50: 1.0614, p90: 1.25 }, // I482 (ST-449) per-face luma, file-level, pin WITH measurement (sentry bakes two prims - see SENTRY_FACET block)
+  hunter:  { VR_Hunter_Hull:  { p10: 0.3000, p50: 0.4733, p90: 0.7076 },
+             VR_Hunter_Fin:   { p10: 0.3689, p50: 0.3908, p90: 0.4115 },
+             VR_Hunter_Core:  { p10: 0.9000, p50: 0.9000, p90: 0.9000 } },
+  gunship: { VR_Gunship_Hull:    { p10: 0.3473, p50: 0.4751, p90: 0.5259 },
+             VR_Gunship_Nacelle: { p10: 0.2600, p50: 0.4732, p90: 0.6600 },
+             VR_Gunship_Bay:     { p10: 0.9500, p50: 0.9500, p90: 0.9500 } },
+  sentry:  { VR_Sentry_Platform: { p10: 0.4532, p50: 0.4657, p90: 0.7200 },
+             VR_Sentry_Base:     { p10: 0.3400, p50: 0.3400, p90: 0.3400 },
+             VR_Sentry_Barrel:   { p10: 0.4727, p50: 0.5202, p90: 0.6600 },
+             VR_Sentry_Charge:   { p10: 0.9500, p50: 0.9500, p90: 0.9500 } },
+  wasp:    { VR_Wasp_Hull: { p10: 0.3400, p50: 0.5467, p90: 0.7200 },
+             VR_Wasp_Wing: { p10: 0.3600, p50: 0.5483, p90: 0.5820 }, // I509 wing-mirror rebuild pin WITH measurement (pre-fix 0.3400/0.5468/0.5815, cz -0.5500)
+             VR_Wasp_Nose: { p10: 0.9500, p50: 0.9500, p90: 0.9500 } },
 };
+
 function primExtents({ buf, json, binOff }, meshName) {
   const m = (json.meshes || []).find((mm) => mm.name === meshName);
   assert.ok(m, meshName + ' mesh present');
@@ -720,216 +726,138 @@ function primExtents({ buf, json, binOff }, meshName) {
   }
   return { x: maxx - minx, y: maxy - miny, z: maxz - minz, cx: (minx + maxx) / 2, cz: (minz + maxz) / 2 }; // + cx at I482 (ST-449 sentry barrel centering)
 }
-function enemy451Bake(file, hullMesh, key) {
+function remaster4Bake(file, asset) {
+  // I509: validate the full remaster-4 COLOR_0 contract per prim and pin per-node facet
+  // lumas (reuses enemyFacetLumasPrim - identical algorithm to the I508 legacy-4 test).
   const { buf, json, binOff } = parseGlb(file);
-  let bakePrims = 0;
+  let colorPrims = 0;
   for (const m of json.meshes || []) for (const p of m.primitives || []) {
-    if (p.attributes.COLOR_0 === undefined) continue;
-    bakePrims++;
-    assert.equal(m.name, hullMesh, file + ': only ' + hullMesh + ' carries the I451 value bake (found ' + m.name + ')');
+    const mn = m.name || 'mesh';
+    assert.ok(p.attributes.COLOR_0 !== undefined, mn + ' primitive has COLOR_0 (I509 bake - all prims)');
+    colorPrims++;
     const acc = json.accessors[p.attributes.COLOR_0];
+    const posAcc = json.accessors[p.attributes.POSITION];
     const bv = json.bufferViews[acc.bufferView];
-    assert.equal(acc.componentType, 5126, m.name + ' COLOR_0 componentType FLOAT');
-    assert.equal(acc.type, 'VEC3', m.name + ' COLOR_0 type VEC3');
-    assert.equal(acc.count, json.accessors[p.attributes.POSITION].count, m.name + ' COLOR_0 count == POSITION count');
+    const stride = parseInt(acc.type.replace('VEC', ''), 10);
+    assert.equal(acc.componentType, 5126, mn + ' COLOR_0 componentType FLOAT');
+    assert.equal(acc.type, 'VEC3', mn + ' COLOR_0 type VEC3');
+    assert.equal(acc.count, posAcc.count, mn + ' COLOR_0 count == POSITION count');
+    assert.ok(bv.byteLength >= acc.count * stride * 4, mn + ' COLOR_0 bufferView spec-size');
     const base = binOff + (bv.byteOffset || 0) + (acc.byteOffset || 0);
     for (let i = 0; i < acc.count; i++) {
-      const r = buf.readFloatLE(base + i * 12), g = buf.readFloatLE(base + i * 12 + 4), b = buf.readFloatLE(base + i * 12 + 8);
-      assert.ok(Math.abs(r - g) <= 0.02 && Math.abs(g - b) <= 0.02, m.name + ' COLOR_0 grayscale at ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
-      assert.ok(r >= 0.30 - 0.01 && r <= 1.25 + 0.01, m.name + ' COLOR_0 in [0.30,1.25] value domain at ' + i + ': ' + r.toFixed(3));
+      const r = buf.readFloatLE(base + i * stride * 4);
+      const g = buf.readFloatLE(base + i * stride * 4 + 4);
+      const b = buf.readFloatLE(base + i * stride * 4 + 8);
+      assert.ok(Math.abs(r - g) <= 0.02 && Math.abs(g - b) <= 0.02, file + ' COLOR_0 grayscale at ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
+      assert.ok(r >= 0.25 && r <= 1.00, file + ' COLOR_0 in [0.25,1.00] I509 value domain at ' + i + ': ' + r.toFixed(3));
+    }
+    const f = enemyFacetLumasPrim({ buf, json, binOff }, p);
+    const E = ENEMY451_FACET[asset][mn];
+    assert.ok(E, mn + ' has an I509 per-prim facet pin');
+    for (const k of ['p10', 'p50', 'p90']) {
+      assert.ok(Math.abs(f[k] - E[k]) <= 0.005, file + ' ' + mn + ' facet ' + k + ' ' + f[k].toFixed(4) + ' ~ ' + E[k] + ' (I509 bake pin)');
     }
   }
-  assert.equal(bakePrims, 1, file + ': exactly one hull primitive carries the I451 value bake');
-  const f = enemyFacetLumas({ buf, json, binOff });
-  const E = ENEMY451_FACET[key];
-  assert.ok(f.p90 - f.p10 >= 0.35, file + ' facet luma spread ' + (f.p90 - f.p10).toFixed(3) + ' >= 0.35 (I451 value bake; pre-bake was a flat in-code tint)');
-  for (const k of ['p10', 'p50', 'p90']) {
-    assert.ok(Math.abs(f[k] - E[k]) <= 0.005, file + ' facet ' + k + ' ' + f[k].toFixed(4) + ' ~ ' + E[k] + ' (I451 bake pin)');
-  }
+  assert.equal(colorPrims, Object.keys(ENEMY451_FACET[asset]).length, file + ': prim count matches the I509 pin table');
   return { buf, json, binOff };
 }
-test('enemy_hunter.glb: naming, poly budget, part extents vs procedural parity, hull value bake (I451/ST-421)', () => {
-  const { buf, json, binOff } = enemy451Bake('enemy_hunter.glb', 'VR_Hunter_Hull', 'hunter');
+test('enemy_hunter.glb: I509 (ST-475 E68) remaster-4 needle fighter - nodes, per-node tris, extents, all-prim COLOR_0', () => {
+  const { buf, json, binOff } = remaster4Bake('enemy_hunter.glb', 'hunter');
+  assert.ok(buf.length <= 228 * 1024, 'hunter under 228 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I509 227,496 B)');
   const s = meshStats({ buf, json, binOff });
-  for (const n of ['VR_Hunter', 'VR_Hunter_Hull', 'VR_Hunter_Fin', 'VR_Hunter_Core']) assert.ok(s.nodeNames.includes(n), n + ' node');
-  for (const mat of ['VR_Hunter_Hull', 'VR_Hunter_Fin', 'VR_Hunter_Core']) assert.ok(s.matNames.includes(mat), mat + ' material');
-  assert.ok(s.totalTris <= BUDGETS.hunter, 'hunter tris ' + s.totalTris + ' <= 2400');
-  const hull = s.prims.find((p) => p.name === 'VR_Hunter_Hull');
-  const fin = s.prims.find((p) => p.name === 'VR_Hunter_Fin');
-  const core = s.prims.find((p) => p.name === 'VR_Hunter_Core');
-  assert.ok(hull && fin && core, 'hull + fin + core prims');
-  assert.equal(hull.tris, 1400, 'hull 1400 tris (I471 v5 re-pin WITH measurement; was 992)');
-  assert.equal(fin.tris, 600, 'fin 600 tris (I471 v5 re-pin WITH measurement; was 340)');
-  assert.equal(core.tris, 256, 'core 256 tris (I471 v5 re-pin WITH measurement; was 100)');
-  // Procedural parity (design/enemy-visual-language.md section 5, 15% band): hull 3.04 X / 1.84 span / 0.544 H;
-  // W-fin span 1.92 (locally centered - runtime spread-scales it from the fin origin); core radii 0.374/0.317/0.317.
+  for (const n of ['VR_Hunter_Hull', 'VR_Hunter_Fin', 'VR_Hunter_Core']) assert.ok(s.nodeNames.includes(n), n + ' node');
+  assert.equal(s.nodeNames.length, 3, 'flat node set (no root nodes)');
+  for (const mat of ['VR_Hunter_HullMat', 'VR_Hunter_FinMat', 'VR_Hunter_CoreMat']) assert.ok(s.matNames.includes(mat), mat + ' material');
+  assert.equal(s.totalTris, BUDGETS.hunter, 'hunter total tris == ' + BUDGETS.hunter + ' (I509 re-pin WITH measurement)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Hunter_Hull').tris, 2138, 'hull 2138 tris (I509 exact)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Hunter_Fin').tris, 972, 'fin 972 tris (I509 exact)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Hunter_Core').tris, 256, 'core 256 tris (I509 exact)');
+  // Per-node extents: I509 TRUE-AXIS measurements (glb_probe.mjs; 10% band).
   const he = primExtents({ buf, json, binOff }, 'VR_Hunter_Hull');
-  assert.ok(Math.abs(he.x - 3.04) / 3.04 <= 0.15, 'hull X ' + he.x.toFixed(4) + ' ~ 3.04');
-  assert.ok(Math.abs(he.z - 1.84) / 1.84 <= 0.15, 'hull span ' + he.z.toFixed(4) + ' ~ 1.84');
-  assert.ok(Math.abs(he.y - 0.544) / 0.544 <= 0.15, 'hull height ' + he.y.toFixed(4) + ' ~ 0.544');
+  assert.ok(Math.abs(he.x - 1.32) / 1.32 <= 0.1, 'hull X ' + he.x.toFixed(4) + ' ~ 1.32');
+  assert.ok(Math.abs(he.y - 1.0) / 1.0 <= 0.1, 'hull Y ' + he.y.toFixed(4) + ' ~ 1.0');
+  assert.ok(Math.abs(he.z - 1.1593) / 1.1593 <= 0.1, 'hull Z ' + he.z.toFixed(4) + ' ~ 1.1593');
   const fe = primExtents({ buf, json, binOff }, 'VR_Hunter_Fin');
-  assert.ok(Math.abs(fe.z - 1.92) / 1.92 <= 0.15, 'fin span ' + fe.z.toFixed(4) + ' ~ 1.92');
-  assert.ok(Math.abs(fe.cz) <= 0.05, 'fin locally centered on its span axis (cz ' + fe.cz.toFixed(4) + ')');
+  assert.ok(Math.abs(fe.y - 1.002) / 1.002 <= 0.1, 'fin Y (dorsal keel) ' + fe.y.toFixed(4) + ' ~ 1.002');
+  assert.ok(Math.abs(fe.z - 0.84) / 0.84 <= 0.1, 'fin Z (side plates) ' + fe.z.toFixed(4) + ' ~ 0.84');
   const ce = primExtents({ buf, json, binOff }, 'VR_Hunter_Core');
-  assert.ok(Math.abs(ce.x - 0.748) / 0.748 <= 0.15, 'core X ' + ce.x.toFixed(4) + ' ~ 0.748');
-  assert.ok(Math.abs(ce.y - 0.634) / 0.634 <= 0.15, 'core Y ' + ce.y.toFixed(4) + ' ~ 0.634');
-});
-test('enemy_gunship.glb: naming, poly budget, part extents vs procedural parity, hull value bake (I451/ST-421)', () => {
-  const { buf, json, binOff } = enemy451Bake('enemy_gunship.glb', 'VR_Gunship_Hull', 'gunship');
-  const s = meshStats({ buf, json, binOff });
-  for (const n of ['VR_Gunship', 'VR_Gunship_Hull', 'VR_Gunship_Nacelle', 'VR_Gunship_Bay']) assert.ok(s.nodeNames.includes(n), n + ' node');
-  for (const mat of ['VR_Gunship_Hull', 'VR_Gunship_Nacelle', 'VR_Gunship_Bay']) assert.ok(s.matNames.includes(mat), mat + ' material');
-  assert.ok(s.totalTris <= BUDGETS.gunship, 'gunship tris ' + s.totalTris + ' <= 2400');
-  const hull = s.prims.find((p) => p.name === 'VR_Gunship_Hull');
-  const nac = s.prims.find((p) => p.name === 'VR_Gunship_Nacelle');
-  const bay = s.prims.find((p) => p.name === 'VR_Gunship_Bay');
-  assert.ok(hull && nac && bay, 'hull + nacelle + bay prims');
-  assert.equal(hull.tris, 1650, 'hull 1650 tris (I471 v5 re-pin WITH measurement; was 1450)');
-  assert.equal(nac.tris, 450, 'nacelle 450 tris (I471 v5 re-pin WITH measurement; was 174)');
-  assert.equal(bay.tris, 168, 'bay 168 tris (I471 v5 re-pin WITH measurement; was 64)');
-  // Procedural parity (15% band): hull 4.16 X / 3.04 Z / 1.28 H (H is +12% on the GLB: spine top + open-nose
-  // recess - inside the band, intentional, do not "fix"); nacelle hex r 0.448->0.544 len 1.92 (axis X); bay
-  // 0.8 x 0.56 footprint. Bay Z is pinned to the measured 0.4945 (documented deviation, see block header).
-  const he = primExtents({ buf, json, binOff }, 'VR_Gunship_Hull');
-  assert.ok(Math.abs(he.x - 4.16) / 4.16 <= 0.15, 'hull X ' + he.x.toFixed(4) + ' ~ 4.16');
-  assert.ok(Math.abs(he.z - 3.04) / 3.04 <= 0.15, 'hull Z ' + he.z.toFixed(4) + ' ~ 3.04');
-  assert.ok(Math.abs(he.y - 1.28) / 1.28 <= 0.15, 'hull H ' + he.y.toFixed(4) + ' ~ 1.28 (+12% intentional: spine + recess)');
-  const ne = primExtents({ buf, json, binOff }, 'VR_Gunship_Nacelle');
-  assert.ok(Math.abs(ne.z - 1.088) / 1.088 <= 0.15, 'nacelle dia ' + ne.z.toFixed(4) + ' ~ 1.088 (hex r 0.544)');
-  assert.ok(Math.abs(ne.x - 1.92) / 1.92 <= 0.15, 'nacelle len ' + ne.x.toFixed(4) + ' ~ 1.92 (+10%: nozzle lip)');
-  const be = primExtents({ buf, json, binOff }, 'VR_Gunship_Bay');
-  assert.ok(Math.abs(be.x - 0.8) / 0.8 <= 0.15, 'bay X ' + be.x.toFixed(4) + ' ~ 0.8');
-  assert.ok(Math.abs(be.y - 0.56) / 0.56 <= 0.15, 'bay Y ' + be.y.toFixed(4) + ' ~ 0.56');
-  assert.ok(Math.abs(be.z - 0.4945) <= 0.02, 'bay Z ' + be.z.toFixed(4) + ' ~ 0.4945 (measured pin; procedural 0.8^3 bay was enclosed-invisible - documented deviation)');
+  assert.ok(Math.abs(ce.y - 0.24) / 0.24 <= 0.1, 'core Y ' + ce.y.toFixed(4) + ' ~ 0.24');
 });
 
+test('enemy_gunship.glb: I509 (ST-475 E68) remaster-4 brute bomber - nodes, per-node tris, extents, all-prim COLOR_0', () => {
+  const { buf, json, binOff } = remaster4Bake('enemy_gunship.glb', 'gunship');
+  assert.ok(buf.length <= 200 * 1024, 'gunship under 200 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I509 198,760 B)');
+  const s = meshStats({ buf, json, binOff });
+  for (const n of ['VR_Gunship_Hull', 'VR_Gunship_Nacelle', 'VR_Gunship_Bay']) assert.ok(s.nodeNames.includes(n), n + ' node');
+  assert.equal(s.nodeNames.length, 3, 'flat node set (no root nodes)');
+  for (const mat of ['VR_Gunship_HullMat', 'VR_Gunship_NacelleMat', 'VR_Gunship_BayMat']) assert.ok(s.matNames.includes(mat), mat + ' material');
+  assert.equal(s.totalTris, BUDGETS.gunship, 'gunship total tris == ' + BUDGETS.gunship + ' (I509 re-pin WITH measurement)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Gunship_Hull').tris, 1732, 'hull 1732 tris (I509 exact)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Gunship_Nacelle').tris, 544, 'nacelle 544 tris (I509 exact)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Gunship_Bay').tris, 320, 'bay 320 tris (I509 exact)');
+  // Per-node extents: I509 TRUE-AXIS measurements (glb_probe.mjs; 10% band).
+  const he = primExtents({ buf, json, binOff }, 'VR_Gunship_Hull');
+  assert.ok(Math.abs(he.x - 2.1) / 2.1 <= 0.1, 'hull X ' + he.x.toFixed(4) + ' ~ 2.1');
+  assert.ok(Math.abs(he.y - 1.4158) / 1.4158 <= 0.1, 'hull Y ' + he.y.toFixed(4) + ' ~ 1.4158');
+  assert.ok(Math.abs(he.z - 2.0) / 2.0 <= 0.1, 'hull Z ' + he.z.toFixed(4) + ' ~ 2.0');
+  const ne = primExtents({ buf, json, binOff }, 'VR_Gunship_Nacelle');
+  assert.ok(Math.abs(ne.x - 1.45) / 1.45 <= 0.1, 'nacelle X ' + ne.x.toFixed(4) + ' ~ 1.45');
+  assert.ok(Math.abs(ne.z - 0.8558) / 0.8558 <= 0.1, 'nacelle Z ' + ne.z.toFixed(4) + ' ~ 0.8558');
+  const be = primExtents({ buf, json, binOff }, 'VR_Gunship_Bay');
+  assert.ok(Math.abs(be.y - 0.48) / 0.48 <= 0.1, 'bay Y ' + be.y.toFixed(4) + ' ~ 0.48');
+  assert.ok(Math.abs(be.z - 0.4605) / 0.4605 <= 0.1, 'bay Z ' + be.z.toFixed(4) + ' ~ 0.4605');
+});
+
+test('enemy_sentry.glb: I509 (ST-475 E68) remaster-4 floating watchtower - nodes, per-node tris, extents, all-prim COLOR_0', () => {
+  const { buf, json, binOff } = remaster4Bake('enemy_sentry.glb', 'sentry');
+  assert.ok(buf.length <= 204 * 1024, 'sentry under 204 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I509 203,688 B)');
+  const s = meshStats({ buf, json, binOff });
+  for (const n of ['VR_Sentry_Platform', 'VR_Sentry_Base', 'VR_Sentry_Barrel', 'VR_Sentry_Charge']) assert.ok(s.nodeNames.includes(n), n + ' node');
+  assert.equal(s.nodeNames.length, 4, 'flat node set (no root nodes)');
+  for (const mat of ['VR_Sentry_PlatformMat', 'VR_Sentry_BaseMat', 'VR_Sentry_BarrelMat', 'VR_Sentry_ChargeMat']) assert.ok(s.matNames.includes(mat), mat + ' material');
+  assert.equal(s.totalTris, BUDGETS.sentry, 'sentry total tris == ' + BUDGETS.sentry + ' (I509 re-pin WITH measurement)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Sentry_Platform').tris, 1772, 'platform 1772 tris (I509 exact)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Sentry_Base').tris, 324, 'base 324 tris (I509 exact)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Sentry_Barrel').tris, 582, 'barrel 582 tris (I509 exact)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Sentry_Charge').tris, 256, 'charge 256 tris (I509 exact)');
+  // Per-node extents: I509 TRUE-AXIS measurements (glb_probe.mjs; 10% band).
+  const pe = primExtents({ buf, json, binOff }, 'VR_Sentry_Platform');
+  assert.ok(Math.abs(pe.x - 2.23) / 2.23 <= 0.1, 'platform X ' + pe.x.toFixed(4) + ' ~ 2.23');
+  assert.ok(Math.abs(pe.z - 2.23) / 2.23 <= 0.1, 'platform Z ' + pe.z.toFixed(4) + ' ~ 2.23');
+  const be = primExtents({ buf, json, binOff }, 'VR_Sentry_Base');
+  assert.ok(Math.abs(be.x - 2.76) / 2.76 <= 0.1, 'base X ' + be.x.toFixed(4) + ' ~ 2.76');
+  const re = primExtents({ buf, json, binOff }, 'VR_Sentry_Barrel');
+  assert.ok(Math.abs(re.x - 1.13) / 1.13 <= 0.1, 'barrel X ' + re.x.toFixed(4) + ' ~ 1.13');
+  assert.ok(Math.abs(re.cx - (-0.085)) <= 0.01, 'barrel cx pin -0.0850 (I509 TRUE-AXIS, glb_probe.mjs; muzzle-forward barrel, bbox center is not node-centered) (cx ' + re.cx.toFixed(4) + ')');
+  const ch = primExtents({ buf, json, binOff }, 'VR_Sentry_Charge');
+  assert.ok(Math.abs(ch.y - 0.206) / 0.206 <= 0.1, 'charge dia ' + ch.y.toFixed(4) + ' ~ 0.206');
+});
+
+test('enemy_wasp.glb: I509 (ST-475 E68) remaster-4 swift dart + wing-mirror rebuild - nodes, per-node tris, extents, all-prim COLOR_0', () => {
+  const { buf, json, binOff } = remaster4Bake('enemy_wasp.glb', 'wasp');
+  assert.ok(buf.length <= 310 * 1024, 'wasp under 310 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I509 post-fix 310,036 B)');
+  const s = meshStats({ buf, json, binOff });
+  for (const n of ['VR_Wasp_Hull', 'VR_Wasp_Wing', 'VR_Wasp_Nose']) assert.ok(s.nodeNames.includes(n), n + ' node');
+  assert.equal(s.nodeNames.length, 3, 'flat node set (no root nodes)');
+  for (const mat of ['VR_Wasp_HullMat', 'VR_Wasp_WingMat', 'VR_Wasp_NoseMat']) assert.ok(s.matNames.includes(mat), mat + ' material');
+  assert.equal(s.totalTris, BUDGETS.wasp, 'wasp total tris == ' + BUDGETS.wasp + ' (I509 re-pin WITH measurement)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Wasp_Hull').tris, 1356, 'hull 1356 tris (I509 exact)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Wasp_Wing').tris, 2400, 'wing 2400 tris (I509 double-blade rebuild pin WITH measurement)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Wasp_Nose').tris, 264, 'nose 264 tris (I509 exact)');
+  // Per-node extents: I509 TRUE-AXIS measurements (glb_probe.mjs; 10% band).
+  const he = primExtents({ buf, json, binOff }, 'VR_Wasp_Hull');
+  assert.ok(Math.abs(he.x - 1.685) / 1.685 <= 0.1, 'hull X ' + he.x.toFixed(4) + ' ~ 1.685');
+  assert.ok(Math.abs(he.y - 0.7234) / 0.7234 <= 0.1, 'hull Y ' + he.y.toFixed(4) + ' ~ 0.7234');
+  const we = primExtents({ buf, json, binOff }, 'VR_Wasp_Wing');
+  assert.ok(Math.abs(we.z - 2.46) / 2.46 <= 0.1, 'wing span Z ' + we.z.toFixed(4) + ' ~ 2.46 (I509 double blade)');
+  assert.ok(Math.abs(we.cz) <= 0.05, 'wing mirror-symmetric about the hull (cz ' + we.cz.toFixed(4) + '; pre-fix was -0.5500 - the wing-mirror regression guard)');
+  const ne = primExtents({ buf, json, binOff }, 'VR_Wasp_Nose');
+  assert.ok(Math.abs(ne.x - 0.62) / 0.62 <= 0.1, 'nose X ' + ne.x.toFixed(4) + ' ~ 0.62');
+});
 
 // I212: arena boundary ring (ST-212, cgs-dev-story). I254/ST-245 v2: two-node GLB
 // (VR_ArenaRing band + VR_ArenaRing_Ticks neon accent). The v1 exact-48-tris pin is
-// replaced by the two-node counts (band 48 + ticks 12 = 60), documented here.// I482 (ST-449 E63 SENTRY GLB): angular floating watchtower - 8-seg platform + central boss +
-// 2 exhaust stubs (hull prim, 656t, E57 rule 8 grayscale value bake), cruciform base (180t,
-// no bake), forward barrel (140t) and charge orb (120t, emissive accent). Documented deviation
-// from the roster doc (design/enemy-roster-E63.md says "hull prim only" for COLOR_0): the barrel
-// shares VR_sentry_hull with the hull prim (sentryMesh.js renders the barrel slot under hullMat,
-// vertexColors:true), so the barrel carries a CONSTANT 1.0 white-identity COLOR_0 (bake_white)
-// - a GLB barrel primitive without COLOR_0 would render black. The hull prim carries the neutral
-// grayscale bake that multiplies the in-code sage tint.
-const SENTRY_FACET = { VR_Sentry_Hull: { p10: 0.6332, p50: 1.1448, p90: 1.25 } }; // I482 pinned WITH measurement
-function sentryFacetLumas({ buf, json, binOff }, p) {
-  // Per-prim variant of enemyFacetLumas (that reader picks a single primitive; the sentry
-  // bakes TWO prims: hull value bake + barrel constant identity).
-  const cAcc = json.accessors[p.attributes.COLOR_0];
-  const iAcc = json.accessors[p.indices];
-  const cBase = binOff + (json.bufferViews[cAcc.bufferView].byteOffset || 0) + (cAcc.byteOffset || 0);
-  const iBase = binOff + (json.bufferViews[iAcc.bufferView].byteOffset || 0) + (iAcc.byteOffset || 0);
-  const readIdx = (i) => (iAcc.componentType === 5123 ? buf.readUInt16LE(iBase + i * 2) : iAcc.componentType === 5125 ? buf.readUInt32LE(iBase + i * 4) : buf.readUInt8(iBase + i));
-  const fl = [];
-  for (let t = 0; t < iAcc.count / 3; t++) {
-    const lum = (i) => {
-      const o = cBase + i * 12;
-      return 0.2126 * buf.readFloatLE(o) + 0.7152 * buf.readFloatLE(o + 4) + 0.0722 * buf.readFloatLE(o + 8);
-    };
-    fl.push((lum(readIdx(t * 3)) + lum(readIdx(t * 3 + 1)) + lum(readIdx(t * 3 + 2))) / 3);
-  }
-  fl.sort((a, b) => a - b);
-  const q = (f) => fl[Math.min(fl.length - 1, Math.floor(f * fl.length))];
-  return { p10: q(0.1), p50: q(0.5), p90: q(0.9) };
-}
-test('enemy_sentry.glb: naming, poly budget, part extents, hull value bake + barrel identity COLOR_0 (I482/ST-449)', () => {
-  const { buf, json, binOff } = parseGlb('enemy_sentry.glb');
-  assert.ok(buf.length <= 137 * 1024, 'sentry under 137 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB)');
-  const s = meshStats({ buf, json, binOff });
-  for (const n of ['VR_Sentry', 'VR_Sentry_Hull', 'VR_Sentry_Base', 'VR_Sentry_Barrel', 'VR_Sentry_Charge']) assert.ok(s.nodeNames.includes(n), n + ' node');
-  for (const mat of ['VR_sentry_hull', 'VR_sentry_base', 'VR_sentry_charge']) assert.ok(s.matNames.includes(mat), mat + ' material');
-  assert.ok(s.totalTris <= BUDGETS.sentry, 'sentry tris ' + s.totalTris + ' <= 1800');
-  const hull = s.prims.find((p) => p.name === 'VR_Sentry_Hull');
-  const base = s.prims.find((p) => p.name === 'VR_Sentry_Base');
-  const barrel = s.prims.find((p) => p.name === 'VR_Sentry_Barrel');
-  const charge = s.prims.find((p) => p.name === 'VR_Sentry_Charge');
-  assert.ok(hull && base && barrel && charge, 'hull + base + barrel + charge prims');
-  assert.equal(hull.tris, 656, 'hull 656 tris (I482 pin WITH measurement)');
-  assert.equal(base.tris, 180, 'base 180 tris (I482 pin WITH measurement)');
-  assert.equal(barrel.tris, 140, 'barrel 140 tris (I482 pin WITH measurement)');
-  assert.equal(charge.tris, 120, 'charge 120 tris (I482 pin WITH measurement)');
-  // COLOR_0 contract: exactly hull + barrel carry it. Hull = E57 rule 8 value bake (grayscale,
-  // [0.30,1.25] domain, pinned facet luma); barrel = constant 1.0 identity (shared material,
-  // see block header); base + charge must NOT carry it.
-  let c0count = 0;
-  for (const m of json.meshes || []) for (const p of m.primitives || []) {
-    const mn = m.name || 'mesh';
-    if (p.attributes.COLOR_0 === undefined) {
-      assert.ok(mn === 'VR_Sentry_Base' || mn === 'VR_Sentry_Charge', mn + ' must not carry COLOR_0 (contract: hull + barrel only)');
-      continue;
-    }
-    c0count++;
-    const acc = json.accessors[p.attributes.COLOR_0];
-    const bv = json.bufferViews[acc.bufferView];
-    assert.equal(acc.componentType, 5126, mn + ' COLOR_0 componentType FLOAT');
-    assert.equal(acc.type, 'VEC3', mn + ' COLOR_0 type VEC3');
-    assert.equal(acc.count, json.accessors[p.attributes.POSITION].count, mn + ' COLOR_0 count == POSITION count');
-    const baseOff = binOff + (bv.byteOffset || 0) + (acc.byteOffset || 0);
-    if (mn === 'VR_Sentry_Barrel') {
-      for (let i = 0; i < acc.count; i++) {
-        const r = buf.readFloatLE(baseOff + i * 12), g = buf.readFloatLE(baseOff + i * 12 + 4), b = buf.readFloatLE(baseOff + i * 12 + 8);
-        assert.ok(Math.abs(r - 1) <= 0.01 && Math.abs(g - 1) <= 0.01 && Math.abs(b - 1) <= 0.01, mn + ' COLOR_0 constant 1.0 identity at ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
-      }
-    } else {
-      for (let i = 0; i < acc.count; i++) {
-        const r = buf.readFloatLE(baseOff + i * 12), g = buf.readFloatLE(baseOff + i * 12 + 4), b = buf.readFloatLE(baseOff + i * 12 + 8);
-        assert.ok(Math.abs(r - g) <= 0.02 && Math.abs(g - b) <= 0.02, mn + ' COLOR_0 grayscale at ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
-        assert.ok(r >= 0.30 - 0.01 && r <= 1.25 + 0.01, mn + ' COLOR_0 in [0.30,1.25] value domain at ' + i + ': ' + r.toFixed(3));
-      }
-      const f = sentryFacetLumas({ buf, json, binOff }, p);
-      assert.ok(f.p90 - f.p10 >= 0.35, mn + ' facet luma spread ' + (f.p90 - f.p10).toFixed(3) + ' >= 0.35');
-      const E = SENTRY_FACET[mn];
-      for (const k of ['p10', 'p50', 'p90']) {
-        assert.ok(Math.abs(f[k] - E[k]) <= 0.005, mn + ' facet ' + k + ' ' + f[k].toFixed(4) + ' ~ ' + E[k] + ' (I482 bake pin)');
-      }
-    }
-  }
-  assert.equal(c0count, 2, 'exactly two COLOR_0 prims (hull bake + barrel identity)');
-  // Parity (15% band, I482 pins WITH measurement): platform dia 2.343 (doc ~2.3); full hull H
-  // 0.798 incl. boss + exhaust stubs; barrel 1.323 X centered; charge r 0.198; base X 2.640 (doc 2.64).
-  const he = primExtents({ buf, json, binOff }, 'VR_Sentry_Hull');
-  assert.ok(Math.abs(he.x - 2.343) / 2.343 <= 0.15, 'hull platform dia ' + he.x.toFixed(4) + ' ~ 2.343');
-  assert.ok(Math.abs(he.y - 0.798) / 0.798 <= 0.15, 'hull height ' + he.y.toFixed(4) + ' ~ 0.798');
-  assert.ok(Math.abs(he.z - 2.320) / 2.320 <= 0.15, 'hull span ' + he.z.toFixed(4) + ' ~ 2.320');
-  const be = primExtents({ buf, json, binOff }, 'VR_Sentry_Base');
-  assert.ok(Math.abs(be.x - 2.640) / 2.640 <= 0.15, 'base X ' + be.x.toFixed(4) + ' ~ 2.640');
-  const re = primExtents({ buf, json, binOff }, 'VR_Sentry_Barrel');
-  assert.ok(Math.abs(re.x - 1.323) / 1.323 <= 0.15, 'barrel X ' + re.x.toFixed(4) + ' ~ 1.323');
-  assert.ok(Math.abs(re.cx) <= 0.05, 'barrel locally centered (cx ' + re.cx.toFixed(4) + ')');
-  assert.ok(Math.abs(charge.maxRadius - 0.198) / 0.198 <= 0.15, 'charge radius ' + charge.maxRadius.toFixed(4) + ' ~ 0.198');
-});
-test('enemy_wasp.glb: naming, poly budget, part extents vs procedural parity, hull value bake (I482/ST-449)', () => {
-  const { buf, json, binOff } = enemy451Bake('enemy_wasp.glb', 'VR_Wasp_Hull', 'wasp');
-  assert.ok(buf.length <= 100 * 1024, 'wasp under 100 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB)');
-  const s = meshStats({ buf, json, binOff });
-  for (const n of ['VR_Wasp', 'VR_Wasp_Hull', 'VR_Wasp_Wing', 'VR_Wasp_Nose']) assert.ok(s.nodeNames.includes(n), n + ' node');
-  for (const mat of ['VR_wasp_hull', 'VR_wasp_wing', 'VR_wasp_dash']) assert.ok(s.matNames.includes(mat), mat + ' material');
-  assert.ok(s.totalTris <= BUDGETS.wasp, 'wasp tris ' + s.totalTris + ' <= 1200');
-  const hull = s.prims.find((p) => p.name === 'VR_Wasp_Hull');
-  const wing = s.prims.find((p) => p.name === 'VR_Wasp_Wing');
-  const nose = s.prims.find((p) => p.name === 'VR_Wasp_Nose');
-  assert.ok(hull && wing && nose, 'hull + wing + nose prims');
-  assert.equal(hull.tris, 512, 'hull 512 tris (I482 pin WITH measurement)');
-  assert.equal(wing.tris, 200, 'wing 200 tris (I482 pin WITH measurement)');
-  assert.equal(nose.tris, 80, 'nose 80 tris (I482 pin WITH measurement)');
-  // Parity (15% band, I482 pins WITH measurement): dart hull 1.770 X / 0.773 span / 0.381 H;
-  // swept-back wing 2.359 span / 0.464 X / 0.093 H, locally centered on its span axis; nose
-  // 0.324 dia pointing +X (runtime noseMats emissive, no bake).
-  const he = primExtents({ buf, json, binOff }, 'VR_Wasp_Hull');
-  assert.ok(Math.abs(he.x - 1.770) / 1.770 <= 0.15, 'hull X ' + he.x.toFixed(4) + ' ~ 1.770');
-  assert.ok(Math.abs(he.z - 0.773) / 0.773 <= 0.15, 'hull span ' + he.z.toFixed(4) + ' ~ 0.773');
-  assert.ok(Math.abs(he.y - 0.381) / 0.381 <= 0.15, 'hull height ' + he.y.toFixed(4) + ' ~ 0.381');
-  const we = primExtents({ buf, json, binOff }, 'VR_Wasp_Wing');
-  assert.ok(Math.abs(we.z - 2.359) / 2.359 <= 0.15, 'wing span ' + we.z.toFixed(4) + ' ~ 2.359');
-  assert.ok(Math.abs(we.x - 0.464) / 0.464 <= 0.15, 'wing X ' + we.x.toFixed(4) + ' ~ 0.464');
-  assert.ok(Math.abs(we.cz) <= 0.05, 'wing locally centered on its span axis (cz ' + we.cz.toFixed(4) + ')');
-  const ne = primExtents({ buf, json, binOff }, 'VR_Wasp_Nose');
-  assert.ok(Math.abs(ne.x - 0.324) / 0.324 <= 0.15, 'nose dia ' + ne.x.toFixed(4) + ' ~ 0.324');
-});
-
+// replaced by the two-node counts (band 48 + ticks 12 = 60), documented here.
 test('arena_ring.glb: 2 nodes (band+ticks), 60 tris, flat unit ring, +Y normals, COLOR_0 value bake (I212/I254/I299)', () => {
   const { buf, json, binOff } = parseGlb('arena_ring.glb');
   assert.ok(buf.length < MAX_FILE_BYTES, 'arena_ring.glb under 100 KB');

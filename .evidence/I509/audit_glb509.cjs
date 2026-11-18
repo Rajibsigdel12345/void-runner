@@ -1,0 +1,22 @@
+const fs = require("fs");
+function glbStats(p) {
+  const b = fs.readFileSync(p);
+  const jsonLen = b.readUInt32LE(12);
+  const json = JSON.parse(b.subarray(20, 20 + jsonLen).toString("utf8"));
+  const accs = json.accessors || [];
+  let idxCount = 0;
+  for (const m of json.meshes || []) for (const pr of m.primitives || []) {
+    if (pr.indices != null) idxCount += accs[pr.indices].count;
+    if (pr.indices == null && pr.attributes.POSITION) idxCount += accs[pr.attributes.POSITION].count;
+  }
+  const tris = Math.round(idxCount / 3);
+  const mats = (json.materials || []).map(m => m.name);
+  let colorPrims = 0;
+  for (const m of json.meshes || []) for (const pr of m.primitives || []) if (pr.attributes && pr.attributes.COLOR_0) colorPrims++;
+  const nodes = (json.meshes || []).map((m, i) => ({ name: m.name || ("mesh" + i), tris: Math.round((m.primitives || []).reduce((n, pr) => { const c = pr.indices != null ? accs[pr.indices].count : (pr.attributes.POSITION ? accs[pr.attributes.POSITION].count : 0); return n + c; }, 0) / 3) }));
+  return { bytes: b.length, tris, colorPrims, mats, nodes };
+}
+const FLEET = ["hunter","gunship","sentry","wasp"];
+for (const f of FLEET) {
+  try { const s = glbStats("E:/Game/.evidence/I509/" + f + ".glb"); console.log(f, JSON.stringify(s)); } catch (e) { console.log(f, "ERR", e.message.slice(0,80)); }
+}
