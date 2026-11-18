@@ -1,0 +1,19 @@
+// I508 (ST-474, E68 legacy-4 remaster) supersedes the I211 dart-parity contract: the
+// procedural dart is GONE. drone.glb is now the "seeker-fly" - 18-gon bug body + 20-gon
+// front sensor-eye dome (x 0.72 r 0.34) + stub swept wings + wingtip fins, one merged
+// node/prim (VR_Drone), per-face grayscale COLOR_0 value bake (hash3 bands + bright eye).
+// Union bbox class target 1.41 (I508 measured half-diag 1.467 = 1.04x). Pin WITH measurement:
+// 118,828 B / 1,516 t; extents x 2.1000 / y 1.1421 / z 1.7000 (raw vertex space).
+test('drone.glb: I508 (ST-474) E68 seeker-fly remaster - naming, poly budget, union extents (I211 superseded)', () => {
+  const { buf, json, binOff } = parseGlb('drone.glb');
+  assert.ok(buf.length < MAX_FILE_BYTES, 'drone.glb under 1 MB');
+  const s = meshStats({ buf, json, binOff });
+  assert.ok(s.nodeNames.includes('VR_Drone'), 'VR_Drone node (single merged node)');
+  assert.ok(s.matNames.includes('VR_DroneMat'), 'VR_DroneMat material (vestigial - in-code JS material governs)');
+  assert.ok(s.totalTris <= BUDGETS.drone, 'drone tris ' + s.totalTris + ' <= 1800 (E68 legacy-4 cap)');
+  assert.ok(s.totalTris >= 1400, 'drone tris ' + s.totalTris + ' >= 1400 (E68 legacy-4 aim - no silent simplification)');
+  const e = extents({ buf, json, binOff });
+  assert.ok(Math.abs(e.x - 2.10) / 2.10 <= 0.10, 'drone X extent ' + e.x.toFixed(3) + ' ~ 2.10 (I508 pin)');
+  assert.ok(Math.abs(e.y - 1.1421) / 1.1421 <= 0.10, 'drone Y extent ' + e.y.toFixed(3) + ' ~ 1.1421 (I508 pin)');
+  assert.ok(Math.abs(e.z - 1.70) / 1.70 <= 0.10, 'drone Z extent ' + e.z.toFixed(3) + ' ~ 1.70 (I508 pin)');
+});

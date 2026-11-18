@@ -1,0 +1,4 @@
+const WARDEN_FACET = {
+  VR_Warden_Armor: { p10: 0.38, p50: 0.38, p90: 0.673 },  // I508 (ST-474): side slabs flat 0.38, top slab higher (pre-I508 0.5945/1.0/1.25)
+  VR_Warden_Hull:  { p10: 0.28, p50: 0.4737, p90: 0.70 }, // I508 (ST-474): hex hull + merged core weak spot (pre-I508 0.703/1.1287/1.25)
+};

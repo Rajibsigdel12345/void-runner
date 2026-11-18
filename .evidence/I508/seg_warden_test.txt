@@ -1,0 +1,45 @@
+test('warden.glb: naming, poly budget, hull/armor radii, grayscale COLOR_0 value bake (I220 -> I289 -> I508)', () => {
+  const { buf, json, binOff } = parseGlb('warden.glb');
+  assert.ok(buf.length <= 96 * 1024, 'warden.glb under 96 KB (I508 re-pin 40 -> 96 KB; measured 91,064 B)');
+  const s = meshStats({ buf, json, binOff });
+  assert.ok(s.nodeNames.includes('VR_Warden_Hull'), 'VR_Warden_Hull node');
+  assert.ok(s.nodeNames.includes('VR_Warden_Armor'), 'VR_Warden_Armor node');
+  assert.ok(s.matNames.includes('VR_Warden_HullMat'), 'VR_Warden_HullMat material (I508; vestigial - in-code JS material governs)');
+  assert.ok(s.matNames.includes('VR_Warden_ArmorMat'), 'VR_Warden_ArmorMat material (I508)');
+  for (const m of json.meshes || []) for (const p of m.primitives || []) {
+    const mn = m.name || 'mesh';
+    assert.ok(p.attributes.COLOR_0 !== undefined, mn + ' primitive has COLOR_0 (I289/I508 value bake)');
+    const acc = json.accessors[p.attributes.COLOR_0];
+    const bv = json.bufferViews[acc.bufferView];
+    const stride = parseInt(acc.type.replace('VEC', ''), 10);
+    assert.equal(acc.componentType, 5126, mn + ' COLOR_0 componentType FLOAT');
+    assert.equal(acc.type, 'VEC3', mn + ' COLOR_0 type VEC3');
+    assert.ok(bv.byteLength >= acc.count * stride * 4, mn + ' COLOR_0 bufferView spec-size');
+    const base = binOff + (bv.byteOffset || 0) + (acc.byteOffset || 0);
+    for (let i = 0; i < acc.count; i++) {
+      const rv = buf.readFloatLE(base + i * stride * 4);
+      const gv = buf.readFloatLE(base + i * stride * 4 + 4);
+      const bv2 = buf.readFloatLE(base + i * stride * 4 + 8);
+      assert.ok(Math.abs(rv - gv) <= 0.02 && Math.abs(gv - bv2) <= 0.02, mn + ' COLOR_0 grayscale at ' + i + ': ' + [rv, gv, bv2].map((x) => x.toFixed(3)).join(','));
+      assert.ok(rv >= 0.25 && rv <= 1.00, mn + ' COLOR_0 in [0.25,1.00] I508 value domain at ' + i + ': ' + rv.toFixed(3));
+    }
+    const f = wardenFacetLumas({ buf, json, binOff }, p);
+    const E = WARDEN_FACET[mn];
+    assert.ok(f.p90 - f.p10 >= 0.25, mn + ' facet luma spread ' + (f.p90 - f.p10).toFixed(3) + ' >= 0.25 (I508 value bake; Armor side slabs are flat by design)');
+    for (const k of ['p10', 'p50', 'p90']) {
+      assert.ok(Math.abs(f[k] - E[k]) <= 0.005, mn + ' facet ' + k + ' ' + f[k].toFixed(4) + ' ~ ' + E[k] + ' (I508 bake pin)');
+    }
+  }
+  assert.ok(s.totalTris <= BUDGETS.warden, 'warden tris ' + s.totalTris + ' <= 1800 (E68 legacy-4 cap)');
+  assert.ok(s.totalTris >= 1400, 'warden tris ' + s.totalTris + ' >= 1400 (E68 legacy-4 aim - no silent simplification)');
+  const hull = s.prims.find((p) => p.name.includes('Hull'));
+  const armor = s.prims.find((p) => p.name.includes('Armor'));
+  const r = CONFIG.warden.radius;
+  // I508 re-pins WITH measurement (supersede the I220/I289 procedural-plate pins): hull = 6-gon
+  // hex hull + front core weak spot (dome + spikes + brackets merged) -> maxRadius 2.1848
+  // (~r*1.285; pre-I508 the r*1.25 spike cap); armor = three 4.8-long slabs -> maxRadius 3.4111
+  // (keeps the union bbox ~3.99 class; pre-I508 ~r*1.55 = 2.635).
+  assert.ok(hull.maxRadius >= r * 0.95, 'hull covers the logical body (' + hull.maxRadius.toFixed(3) + ')');
+  assert.ok(Math.abs(hull.maxRadius - 2.1848) / 2.1848 <= 0.10, 'hull max radius ' + hull.maxRadius.toFixed(3) + ' ~ 2.1848 (I508 pin)');
+  assert.ok(Math.abs(armor.maxRadius - 3.4111) / 3.4111 <= 0.10, 'armor outer radius ' + armor.maxRadius.toFixed(3) + ' ~ 3.4111 (I508 pin)');
+});

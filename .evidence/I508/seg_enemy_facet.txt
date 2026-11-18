@@ -1,0 +1,7 @@
+const ENEMY_FACET = {
+  drone:   { VR_Drone:        { p10: 0.30,   p50: 0.5332, p90: 0.6467 } }, // I508 (ST-474) per-prim re-pin WITH measurement
+  stinger: { VR_Stinger_Body: { p10: 0.34,   p50: 0.4504, p90: 0.579 },
+             VR_Stinger_Core: { p10: 0.94,   p50: 0.94,   p90: 0.94 } },
+  flyer:   { VR_Flyer_Body:   { p10: 0.3823, p50: 0.5741, p90: 0.6275 },
+             VR_Flyer_Dome:   { p10: 0.92,   p50: 0.92,   p90: 0.92 } },
+};

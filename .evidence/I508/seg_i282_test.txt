@@ -1,0 +1,32 @@
+test('drone/stinger/flyer: every prim carries the I508 grayscale COLOR_0 bake; per-prim facet pins (I282 -> I508)', () => {
+  for (const name of ['drone', 'stinger', 'flyer']) {
+    const { buf, json, binOff } = parseGlb(name + '.glb');
+    let colorPrims = 0;
+    for (const m of json.meshes || []) for (const p of m.primitives || []) {
+      const mn = m.name || 'mesh';
+      assert.ok(p.attributes.COLOR_0 !== undefined, mn + ' primitive has COLOR_0 (I508 bake - all prims)');
+      colorPrims++;
+      const acc = json.accessors[p.attributes.COLOR_0];
+      const bv = json.bufferViews[acc.bufferView];
+      const stride = parseInt(acc.type.replace('VEC', ''), 10);
+      assert.equal(acc.componentType, 5126, mn + ' COLOR_0 componentType FLOAT');
+      assert.equal(acc.type, 'VEC3', mn + ' COLOR_0 type VEC3');
+      assert.ok(bv.byteLength >= acc.count * stride * 4, mn + ' COLOR_0 bufferView spec-size');
+      const base = binOff + (bv.byteOffset || 0) + (acc.byteOffset || 0);
+      for (let i = 0; i < acc.count; i++) {
+        const r = buf.readFloatLE(base + i * stride * 4);
+        const g = buf.readFloatLE(base + i * stride * 4 + 4);
+        const b = buf.readFloatLE(base + i * stride * 4 + 8);
+        assert.ok(Math.abs(r - g) <= 0.02 && Math.abs(g - b) <= 0.02, name + ' COLOR_0 grayscale at ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
+        assert.ok(r >= 0.25 && r <= 1.00, name + ' COLOR_0 in [0.25,1.00] I508 value domain at ' + i + ': ' + r.toFixed(3));
+      }
+      const f = enemyFacetLumasPrim({ buf, json, binOff }, p);
+      const E = ENEMY_FACET[name][mn];
+      assert.ok(E, mn + ' has an I508 per-prim facet pin');
+      for (const k of ['p10', 'p50', 'p90']) {
+        assert.ok(Math.abs(f[k] - E[k]) <= 0.005, name + ' ' + mn + ' facet ' + k + ' ' + f[k].toFixed(4) + ' ~ ' + E[k] + ' (I508 bake pin)');
+      }
+    }
+    assert.equal(colorPrims, Object.keys(ENEMY_FACET[name]).length, name + ': prim count matches the I508 pin table');
+  }
+});

@@ -188,8 +188,13 @@ ST-477 in-game, not here.
 ## 5. GLB contract (E57 rule 8 + E68 re-pins)
 
 Per asset (ST-474/ST-475 builds are REJECTED if any fails):
-1. Node naming VR_<Asset>_<Node> (e.g. VR_Stinger_Hull, VR_Gunship_NacelleL) -
-   the assetLoader.js + per-role mesh builders key on these names.
+1. Node naming VR_<Asset>_<Node> - the per-role mesh builders key on EXACT
+   names; modeling rows are merged into these export nodes (ST-474 verified
+   against the loaders, I508): stinger VR_Stinger_Body (Hull+FinL+FinR+Exhaust
+   merged) / VR_Stinger_Core; drone VR_Drone (all rows merged, single node);
+   warden VR_Warden_Hull (Hull+Core) / VR_Warden_Armor (ArmorL+ArmorR+ArmorTop);
+   flyer VR_Flyer_Body (WingL+WingR+Body+Tail) / VR_Flyer_Dome. Per-node tri
+   asserts use the merged sums. (ST-475 remaster-4 v2 names per section 3.2.)
 2. NEUTRAL COLOR_0 grayscale value bake on every mesh (2-3 bands, R-VALUE) - the
    material tint multiplies on top (vertexColors path, I289/ST-273).
 3. Y-up glTF export (Blender 5.2.3 headless -b --python, deterministic script).
@@ -240,6 +245,7 @@ Per asset (ST-474/ST-475 builds are REJECTED if any fails):
 - stinger exact steel-blue hex: class frozen (0x54688a), value settled ST-477.
 - dist ceiling: current 3,747,372 B vs renegotiated ~4,400,000 B pre-reg
   (scope-check) - WITH MEASUREMENT at ST-476; cut ladder C1-C4 on overrun.
-- warden legacy bbox (3.99) is far above its 1.7 gameplay radius (load-time scale
-  correction in assetLoader.js); the v2 build should target a 1.7-class
-  Blender-space scale so the correction stays near 1.0 (section 5.6 catches drift).
+- warden: the 1.7 is the CONFIG gameplay radius, NOT the Blender-space bbox
+  class - the hull builds 1.7-class while the armor slabs keep the bbox corner
+  at the legacy ~3.99 class (assetLoader does no scale normalization, so the
+  in-game size must not drift; section 5.6 catches it).

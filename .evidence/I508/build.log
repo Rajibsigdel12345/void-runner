@@ -1,0 +1,50 @@
+BlenderMCP addon registered
+BUILD_PART_DONE
+TRIS VR_Stinger_Body 1572 aim 1260 cap 1580
+TRIS VR_Stinger_Core 160 aim 140 cap 180
+TRIS VR_Drone 1516 aim 1350 cap 1700
+TRIS VR_Warden_Hull 776 aim 650 cap 840
+TRIS VR_Warden_Armor 780 aim 750 cap 960
+TRIS VR_Flyer_Body 1528 aim 1200 cap 1540
+TRIS VR_Flyer_Dome 242 aim 200 cap 250
+RAD stinger 2.162 target 1.94 class 1.115
+RAD drone 1.467 target 1.41 class 1.04
+RAD warden 3.619 target 3.99 class 0.907
+RAD flyer 1.717 target 1.69 class 1.016
+INFO Draco is available, use library at D:\Blender\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_draco_bridge.dll
+INFO MeshOptimizer is available, use library at D:\Blender\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_meshopt_bridge.dll
+02:45:08 | INFO: Starting glTF 2.0 export
+02:45:08 | INFO: Extracting primitive: VR_Stinger_Body
+02:45:08 | INFO: Primitives created: 1
+02:45:08 | INFO: Extracting primitive: VR_Stinger_Core
+02:45:08 | INFO: Primitives created: 1
+02:45:08 | INFO: Finished glTF 2.0 export in 0.03776741027832031 s
+
+EXPORT_OK E:/Game/.evidence/I508/stinger.glb
+02:45:08 | INFO: Starting glTF 2.0 export
+02:45:08 | INFO: Extracting primitive: VR_Drone
+02:45:08 | INFO: Primitives created: 1
+02:45:08 | INFO: Finished glTF 2.0 export in 0.014917612075805664 s
+
+EXPORT_OK E:/Game/.evidence/I508/drone.glb
+02:45:08 | INFO: Starting glTF 2.0 export
+02:45:08 | INFO: Extracting primitive: VR_Warden_Armor
+02:45:08 | INFO: Primitives created: 1
+02:45:08 | INFO: Extracting primitive: VR_Warden_Hull
+02:45:08 | INFO: Primitives created: 1
+02:45:08 | INFO: Finished glTF 2.0 export in 0.021922826766967773 s
+
+EXPORT_OK E:/Game/.evidence/I508/warden.glb
+02:45:08 | INFO: Starting glTF 2.0 export
+02:45:08 | INFO: Extracting primitive: VR_Flyer_Body
+02:45:08 | INFO: Primitives created: 1
+02:45:08 | INFO: Extracting primitive: VR_Flyer_Dome
+02:45:08 | INFO: Primitives created: 1
+02:45:08 | INFO: Finished glTF 2.0 export in 0.02226996421813965 s
+
+EXPORT_OK E:/Game/.evidence/I508/flyer.glb
+ALL_GATES_PASS
+BlenderMCP addon unregistered
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+
+Blender quit

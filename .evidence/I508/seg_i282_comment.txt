@@ -1,0 +1,8 @@
+// I282 (ST-267 enemy value/shape art pass) -> I508 (ST-474, E68 legacy-4 remaster) supersedes
+// the "one body prim bakes, core/dome clean" contract: EVERY prim on drone/stinger/flyer now
+// carries a grayscale per-face COLOR_0 value bake (Blender 5.2, per-node hash3 value bands
+// 0.22-0.96 + functional zones; core/dome flat 0.94/0.92 - a near-neutral multiplier so the
+// in-code emissive materials still drive those reads). The bake multiplies the in-code family
+// tint (CONFIG.{drone,stinger,flyer}.palette.body.color). Value domain measured [0.28, 0.94]
+// -> assert [0.25, 1.00]. Per-prim percentile pins are the I508 measurements (pre-I508 I282
+// file-level pins were drone 0.570/0.830/1.180, stinger 0.580/0.760/0.980, flyer 0.320/0.820/1.120).

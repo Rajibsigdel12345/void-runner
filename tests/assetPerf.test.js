@@ -47,10 +47,10 @@ const totalTris = parsed.reduce((a, p) => a + p.tris, 0);
 
 // I214 budgets (measured baselines in brackets; caps leave headroom for E9 art growth)
 const BUDGET = {
-  totalFilesKB: 1440,  // [I501 (ST-467 ship v6) EXPLICIT re-pin: 1240 -> 1440, measured 1429.76 KB (1,464,072 B); I503 (ST-469 boss v2) re-measure: 1418.25 KB (1,452,292 B; -11,780 B = boss 43,656 -> 31,876 B); cap 1440 HOLDS w/ 21.75 KB headroom] // [I470 (ST-437) EXPLICIT re-pin: 1024 -> 1240, measured 1053.02]; I482 (ST-449): +sentry 108,980 B + wasp 81,892 B; measured 1237.68; cap 1240 HOLDS w/ 2.32 KB headroom - future enemy art must re-pin
-  totalGeoKB: 1400,    // [I501 (ST-467 ship v6) EXPLICIT re-pin: 1280 -> 1400, measured 1379.94 KB (1,413,060 B); I503 (ST-469 boss v2) re-measure: 1368.44 KB (1,401,282 B); cap 1400 HOLDS w/ 31.56 KB headroom] // [I470 (ST-437) EXPLICIT re-pin: 976 -> 1120, measured 1010.36]; I482 (ST-449) EXPLICIT re-pin: 1120 -> 1280, measured 1187.92 (1010.36 + sentry geo 104,928 B + wasp geo 78,672 B = +183.56 KB); cap 1280 holds w/ 92.08 KB headroom
-  perFileKB: 600,      // [I501 (ST-467 ship v6) EXPLICIT re-pin: 400 -> 600, measured 567.82 KB (581,440 B); I503: max non-ship enemy_gunship 167.71 KB (boss now 31.13 KB)] // [max 375.74 - ship.glb I470 remaster v5 (17143t, 384,756 B); I454 max was 339.05 v4; cap 400 HOLDS w/ 24.26 KB headroom]
-  totalTris: 45000,    // [I501 (ST-467 ship v6) EXPLICIT re-pin: 36000 -> 45000, measured 43,358 (34,938 - 17,143 + 25,563); I503 (ST-469 boss v2) re-measure: 42,331 (43,358 - 1,425 + 398); cap 45,000 HOLDS w/ 2,669 tri headroom] // [I470 (ST-437) EXPLICIT re-pin: 30000 -> 36000, measured 31646]; I482 (ST-449): +sentry 1096t + wasp 792t; measured 34,938
+totalFilesKB: 2300,  // [I508 (ST-474 E68 legacy-4 remaster) EXPLICIT re-pin: 1440 -> 2300, measured 1850.64 KB (1,895,052 B; +442,760 B = legacy-4 39,944 -> 482,704 B); headroom for ST-475 remaster-4 v2 - final fleet pin WITH MEASUREMENT at ST-476] // [I501 1240 -> 1440, measured 1429.76; I503 re-measure 1418.25 KB (1,452,292 B); cap 1440 held w/ 21.75 KB]
+  totalGeoKB: 2250,    // [I508 (ST-474) EXPLICIT re-pin: 1400 -> 2250, measured 1800.86 KB (1,844,082 B; +442,800 B); final fleet pin WITH MEASUREMENT at ST-476] // [I501 1280 -> 1400, measured 1379.94; I503 re-measure 1368.44 KB (1,401,282 B)]
+  perFileKB: 600,      // [I508: max stays ship.glb 567.82 KB (581,440 B); max remaster = flyer 136.37 KB (139,640 B)] // [I501 400 -> 600, measured 567.82 KB; I503 max non-ship enemy_gunship 167.71 KB]
+  totalTris: 56000,    // [I508 (ST-474) EXPLICIT re-pin: 45000 -> 56000, measured 48,571 (legacy-4 334 -> 6,574 t = +6,240); final fleet pin WITH MEASUREMENT at ST-476] // [I501 36000 -> 45000, measured 43,358; I503 re-measure 42,331]
   perFileMats: 3,      // [max 3 - ship body/wing/cockpit]
 };
 

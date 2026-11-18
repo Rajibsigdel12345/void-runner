@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief); ship 300 -> 850 at I429 (ST-399 remaster, 818-tri fighter; design/asset-spec-ship-remaster.md)).
-const BUDGETS = { ship: 25563, L: 3200, M: 950, S: 380, comet: 650, boss: 1500, shield: 120, emblem: 60, drone: 100, arenaRing: 120, warden: 200, chunk: 60, sliver: 50, hunter: 2400, gunship: 2400, sentry: 1800, wasp: 1200 }; // + I482 (ST-449 sentry/wasp caps 1800/1200; actual 1096/792) + I501 (ST-467 ship v6 real-airship remaster 19000 -> 25563, measured 25,563 t / 581,440 B; pinned tight to measurement - the asset landed 9,137 t under the 34,700 aim so the pre-registered 38,500 was not needed; future growth requires an explicit re-pin) // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276) + I456 (ST-426 rock L/M/S v11 density remaster 2100/520/140 -> 3200/950/380, actual 3000/900/350; boss 750 -> 1500, actual 1425)
+const BUDGETS = { ship: 25563, L: 3200, M: 950, S: 380, comet: 650, boss: 1500, shield: 120, emblem: 60, drone: 1800, arenaRing: 120, warden: 1800, chunk: 60, sliver: 50, hunter: 2400, gunship: 2400, sentry: 1800, wasp: 1200 }; // + I482 (ST-449 sentry/wasp caps 1800/1200; actual 1096/792) + I501 (ST-467 ship v6 real-airship remaster 19000 -> 25563, measured 25,563 t / 581,440 B; pinned tight to measurement - the asset landed 9,137 t under the 34,700 aim so the pre-registered 38,500 was not needed; future growth requires an explicit re-pin) // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276) + I456 (ST-426 rock L/M/S v11 density remaster 2100/520/140 -> 3200/950/380, actual 3000/900/350; boss 750 -> 1500, actual 1425) + I508 (ST-474 E68 legacy-4 remaster) drone/warden caps 100/200 -> 1800/1800 (spec aim 1400)
 const MAX_FILE_BYTES = 1048576; // I501 (ST-467 ship v6) EXPLICIT re-pin: 393216 -> 1048576 (ship v6 581,440 B; spec s5 pre-registered 1,048,576; max non-ship stays boss 75.26 KB) // I440 (ST-410 ship remaster v3) EXPLICIT re-pin: 262144 -> 393216 (ship 190,544 B/3254t -> 270,556 B/12400t; I435 was 100*1024 -> 262144 for v2; max non-ship stays boss 75.26 KB)
 
 function parseGlb(file) {
@@ -573,42 +573,47 @@ test('powerup emblems: naming, poly budgets, normalized extents, grayscale COLOR
   }
 });
 
-test('drone.glb: naming, poly budget, dart dimensions vs procedural parity (I211)', () => {
+// I508 (ST-474, E68 legacy-4 remaster) supersedes the I211 dart-parity contract: the
+// procedural dart is GONE. drone.glb is now the "seeker-fly" - 18-gon bug body + 20-gon
+// front sensor-eye dome (x 0.72 r 0.34) + stub swept wings + wingtip fins, one merged
+// node/prim (VR_Drone), per-face grayscale COLOR_0 value bake (hash3 bands + bright eye).
+// Union bbox class target 1.41 (I508 measured half-diag 1.467 = 1.04x). Pin WITH measurement:
+// 118,828 B / 1,516 t; extents x 2.1000 / y 1.1421 / z 1.7000 (raw vertex space).
+test('drone.glb: I508 (ST-474) E68 seeker-fly remaster - naming, poly budget, union extents (I211 superseded)', () => {
   const { buf, json, binOff } = parseGlb('drone.glb');
-  assert.ok(buf.length < MAX_FILE_BYTES, 'drone.glb under 100 KB');
+  assert.ok(buf.length < MAX_FILE_BYTES, 'drone.glb under 1 MB');
   const s = meshStats({ buf, json, binOff });
-  assert.ok(s.nodeNames.includes('VR_Drone'), 'VR_Drone node');
-  assert.ok(s.matNames.includes('VR_Drone'), 'VR_Drone material');
-  assert.ok(s.totalTris <= BUDGETS.drone, 'drone tris ' + s.totalTris + ' <= 100');
+  assert.ok(s.nodeNames.includes('VR_Drone'), 'VR_Drone node (single merged node)');
+  assert.ok(s.matNames.includes('VR_DroneMat'), 'VR_DroneMat material (vestigial - in-code JS material governs)');
+  assert.ok(s.totalTris <= BUDGETS.drone, 'drone tris ' + s.totalTris + ' <= 1800 (E68 legacy-4 cap)');
+  assert.ok(s.totalTris >= 1400, 'drone tris ' + s.totalTris + ' >= 1400 (E68 legacy-4 aim - no silent simplification)');
   const e = extents({ buf, json, binOff });
-  // Procedural parity: octahedron r=0.7 scaled (1.6, 0.85, 0.85) -> length 2.24 along X, cross ~1.19.
-  assert.ok(Math.abs(e.x - 2.24) / 2.24 <= 0.15, 'drone X extent ' + e.x.toFixed(3) + ' ~ 2.24');
-  const cross = Math.max(e.y, e.z);
-  assert.ok(Math.abs(cross - 1.19) / 1.19 <= 0.15, 'drone cross ' + cross.toFixed(3) + ' ~ 1.19');
+  assert.ok(Math.abs(e.x - 2.10) / 2.10 <= 0.10, 'drone X extent ' + e.x.toFixed(3) + ' ~ 2.10 (I508 pin)');
+  assert.ok(Math.abs(e.y - 1.1421) / 1.1421 <= 0.10, 'drone Y extent ' + e.y.toFixed(3) + ' ~ 1.1421 (I508 pin)');
+  assert.ok(Math.abs(e.z - 1.70) / 1.70 <= 0.10, 'drone Z extent ' + e.z.toFixed(3) + ' ~ 1.70 (I508 pin)');
 });
 
 
-// I282 (ST-267 enemy value/shape art pass): the drone/stinger/flyer BODIES carry a
-// grayscale per-face COLOR_0 value bake (Blender 5.2, corner-domain, vertex-split on
-// export) that multiplies the in-code family tint (CONFIG.{drone,stinger,flyer}.palette.body.color):
-// drone = steel-cyan mid (bright nose / dark belly, clears the skybox mid-band), stinger =
-// deep-violet needle (dark body, white-hot telegraph tip is the read), flyer = mauve saucer
-// (bright deck / dark keel, magenta dome carries the hue). Geometry UNCHANGED (extents/tris
-// pins above hold); only the color attribute was added. Core + dome primitives stay without
-// COLOR_0 (per-instance emissive materials drive them).
+// I282 (ST-267 enemy value/shape art pass) -> I508 (ST-474, E68 legacy-4 remaster) supersedes
+// the "one body prim bakes, core/dome clean" contract: EVERY prim on drone/stinger/flyer now
+// carries a grayscale per-face COLOR_0 value bake (Blender 5.2, per-node hash3 value bands
+// 0.22-0.96 + functional zones; core/dome flat 0.94/0.92 - a near-neutral multiplier so the
+// in-code emissive materials still drive those reads). The bake multiplies the in-code family
+// tint (CONFIG.{drone,stinger,flyer}.palette.body.color). Value domain measured [0.28, 0.94]
+// -> assert [0.25, 1.00]. Per-prim percentile pins are the I508 measurements (pre-I508 I282
+// file-level pins were drone 0.570/0.830/1.180, stinger 0.580/0.760/0.980, flyer 0.320/0.820/1.120).
 const ENEMY_FACET = {
-  drone:   { p10: 0.570, p50: 0.830, p90: 1.180 }, // sRGB-agnostic linear bake domain [0.30, 1.25]
-  stinger: { p10: 0.580, p50: 0.760, p90: 0.980 },
-  flyer:   { p10: 0.320, p50: 0.820, p90: 1.120 }, // facet-domain p10 (keel faces); the per-corner read was 0.370
+  drone:   { VR_Drone:        { p10: 0.30,   p50: 0.5332, p90: 0.6467 } }, // I508 (ST-474) per-prim re-pin WITH measurement
+  stinger: { VR_Stinger_Body: { p10: 0.34,   p50: 0.4504, p90: 0.579 },
+             VR_Stinger_Core: { p10: 0.94,   p50: 0.94,   p90: 0.94 } },
+  flyer:   { VR_Flyer_Body:   { p10: 0.3823, p50: 0.5741, p90: 0.6275 },
+             VR_Flyer_Dome:   { p10: 0.92,   p50: 0.92,   p90: 0.92 } },
 };
-function enemyFacetLumas({ buf, json, binOff }) {
-  // Find the primitive carrying COLOR_0 (the body) and read per-face luma through the
-  // index accessor (vertex-split colors: COLOR_0 count == POSITION count).
-  let p = null;
-  for (const m of json.meshes || []) for (const q of m.primitives || []) if (q.attributes.COLOR_0 !== undefined) p = q;
-  assert.ok(p, 'body primitive with COLOR_0');
-  const cAcc = json.accessors[p.attributes.COLOR_0];
-  const iAcc = json.accessors[p.indices];
+function enemyFacetLumasPrim({ buf, json, binOff }, prim) {
+  // I508: per-prim per-face luma through the index accessor (vertex-split colors:
+  // COLOR_0 count == POSITION count). Replaces the I282 whole-file "last COLOR_0 prim" reader.
+  const cAcc = json.accessors[prim.attributes.COLOR_0];
+  const iAcc = json.accessors[prim.indices];
   const cBase = binOff + (json.bufferViews[cAcc.bufferView].byteOffset || 0) + (cAcc.byteOffset || 0);
   const iBase = binOff + (json.bufferViews[iAcc.bufferView].byteOffset || 0) + (iAcc.byteOffset || 0);
   const readIdx = (i) => (iAcc.componentType === 5123 ? buf.readUInt16LE(iBase + i * 2) : iAcc.componentType === 5125 ? buf.readUInt32LE(iBase + i * 4) : buf.readUInt8(iBase + i));
@@ -625,32 +630,57 @@ function enemyFacetLumas({ buf, json, binOff }) {
   const q = (f) => fl[Math.min(fl.length - 1, Math.floor(f * fl.length))];
   return { p10: q(0.1), p50: q(0.5), p90: q(0.9) };
 }
-test('drone/stinger/flyer bodies: grayscale COLOR_0 value bake band + facet spread (I282)', () => {
+// Legacy whole-file reader (I451 hunter / I482 wasp): pools per-face luma over every
+// COLOR_0 prim (legacy files carry exactly one, so identical to the I508 prim reader).
+function enemyFacetLumas({ buf, json, binOff }) {
+  const fl = [];
+  for (const m of json.meshes || []) for (const pr of m.primitives || []) {
+    if (pr.attributes.COLOR_0 === undefined) continue;
+    const cAcc = json.accessors[pr.attributes.COLOR_0];
+    const iAcc = json.accessors[pr.indices];
+    const cBase = binOff + (json.bufferViews[cAcc.bufferView].byteOffset || 0) + (cAcc.byteOffset || 0);
+    const iBase = binOff + (json.bufferViews[iAcc.bufferView].byteOffset || 0) + (iAcc.byteOffset || 0);
+    const readIdx = (j) => (iAcc.componentType === 5123 ? buf.readUInt16LE(iBase + j * 2) : iAcc.componentType === 5125 ? buf.readUInt32LE(iBase + j * 4) : buf.readUInt8(iBase + j));
+    for (let t = 0; t < iAcc.count / 3; t++) {
+      const i0 = readIdx(t * 3), i1 = readIdx(t * 3 + 1), i2 = readIdx(t * 3 + 2);
+      const lum = (j) => { const o = cBase + j * 12; return 0.2126 * buf.readFloatLE(o) + 0.7152 * buf.readFloatLE(o + 4) + 0.0722 * buf.readFloatLE(o + 8); };
+      fl.push((lum(i0) + lum(i1) + lum(i2)) / 3);
+    }
+  }
+  fl.sort((a, b) => a - b);
+  const q = (f) => fl[Math.min(fl.length - 1, Math.floor(f * fl.length))];
+  return { p10: q(0.1), p50: q(0.5), p90: q(0.9) };
+}
+test('drone/stinger/flyer: every prim carries the I508 grayscale COLOR_0 bake; per-prim facet pins (I282 -> I508)', () => {
   for (const name of ['drone', 'stinger', 'flyer']) {
     const { buf, json, binOff } = parseGlb(name + '.glb');
-    let bodyChecked = 0;
+    let colorPrims = 0;
     for (const m of json.meshes || []) for (const p of m.primitives || []) {
-      if (p.attributes.COLOR_0 === undefined) continue; // core/dome: emissive-driven, no bake
-      bodyChecked++;
+      const mn = m.name || 'mesh';
+      assert.ok(p.attributes.COLOR_0 !== undefined, mn + ' primitive has COLOR_0 (I508 bake - all prims)');
+      colorPrims++;
       const acc = json.accessors[p.attributes.COLOR_0];
       const bv = json.bufferViews[acc.bufferView];
       const stride = parseInt(acc.type.replace('VEC', ''), 10);
+      assert.equal(acc.componentType, 5126, mn + ' COLOR_0 componentType FLOAT');
+      assert.equal(acc.type, 'VEC3', mn + ' COLOR_0 type VEC3');
+      assert.ok(bv.byteLength >= acc.count * stride * 4, mn + ' COLOR_0 bufferView spec-size');
       const base = binOff + (bv.byteOffset || 0) + (acc.byteOffset || 0);
       for (let i = 0; i < acc.count; i++) {
         const r = buf.readFloatLE(base + i * stride * 4);
         const g = buf.readFloatLE(base + i * stride * 4 + 4);
         const b = buf.readFloatLE(base + i * stride * 4 + 8);
         assert.ok(Math.abs(r - g) <= 0.02 && Math.abs(g - b) <= 0.02, name + ' COLOR_0 grayscale at ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
-        assert.ok(r >= 0.30 - 0.01 && r <= 1.25 + 0.01, name + ' COLOR_0 in [0.30,1.25] value domain at ' + i + ': ' + r.toFixed(3));
+        assert.ok(r >= 0.25 && r <= 1.00, name + ' COLOR_0 in [0.25,1.00] I508 value domain at ' + i + ': ' + r.toFixed(3));
+      }
+      const f = enemyFacetLumasPrim({ buf, json, binOff }, p);
+      const E = ENEMY_FACET[name][mn];
+      assert.ok(E, mn + ' has an I508 per-prim facet pin');
+      for (const k of ['p10', 'p50', 'p90']) {
+        assert.ok(Math.abs(f[k] - E[k]) <= 0.005, name + ' ' + mn + ' facet ' + k + ' ' + f[k].toFixed(4) + ' ~ ' + E[k] + ' (I508 bake pin)');
       }
     }
-    assert.equal(bodyChecked, 1, name + ': exactly one body primitive carries the bake (core/dome stay emissive-driven)');
-    const f = enemyFacetLumas({ buf, json, binOff });
-    const E = ENEMY_FACET[name];
-    assert.ok(f.p90 - f.p10 >= 0.35, name + ' facet luma spread ' + (f.p90 - f.p10).toFixed(3) + ' >= 0.35 (I282 value bake; pre-bake was a flat in-code tint)');
-    for (const k of ['p10', 'p50', 'p90']) {
-      assert.ok(Math.abs(f[k] - E[k]) <= 0.005, name + ' facet ' + k + ' ' + f[k].toFixed(3) + ' ~ ' + E[k] + ' (I282 bake pin)');
-    }
+    assert.equal(colorPrims, Object.keys(ENEMY_FACET[name]).length, name + ': prim count matches the I508 pin table');
   }
 });
 
@@ -1013,8 +1043,8 @@ assert.ok(s.matNames.includes('VR_ArenaRing_Ticks'), 'VR_ArenaRing_Ticks materia
 // Geometry UNCHANGED (tris/radii pins below hold). The 8 in-code spike cones are
 // not part of the GLB.
 const WARDEN_FACET = {
-  VR_Warden_Armor: { p10: 0.5945, p50: 1.0, p90: 1.25 },   // plate ring: up-facing plate tops hit the 1.25 clamp
-  VR_Warden_Hull:  { p10: 0.703, p50: 1.1287, p90: 1.25 }, // 60-tri blob: per-face nZ bakes (bmesh normals)
+  VR_Warden_Armor: { p10: 0.38, p50: 0.38, p90: 0.673 },  // I508 (ST-474): side slabs flat 0.38, top slab higher (pre-I508 0.5945/1.0/1.25)
+  VR_Warden_Hull:  { p10: 0.28, p50: 0.4737, p90: 0.70 }, // I508 (ST-474): hex hull + merged core weak spot (pre-I508 0.703/1.1287/1.25)
 };
 function wardenFacetLumas({ buf, json, binOff }, p) {
   // Per-prim variant of enemyFacetLumas (that reader picks a single primitive; the
@@ -1036,17 +1066,17 @@ function wardenFacetLumas({ buf, json, binOff }, p) {
   const q = (f) => fl[Math.min(fl.length - 1, Math.floor(f * fl.length))];
   return { p10: q(0.1), p50: q(0.5), p90: q(0.9) };
 }
-test('warden.glb: naming, poly budget, hull/armor radii vs CONFIG, grayscale COLOR_0 value bake (I220 -> I289)', () => {
+test('warden.glb: naming, poly budget, hull/armor radii, grayscale COLOR_0 value bake (I220 -> I289 -> I508)', () => {
   const { buf, json, binOff } = parseGlb('warden.glb');
-  assert.ok(buf.length <= 40 * 1024, 'warden.glb under 40 KB');
+  assert.ok(buf.length <= 96 * 1024, 'warden.glb under 96 KB (I508 re-pin 40 -> 96 KB; measured 91,064 B)');
   const s = meshStats({ buf, json, binOff });
   assert.ok(s.nodeNames.includes('VR_Warden_Hull'), 'VR_Warden_Hull node');
   assert.ok(s.nodeNames.includes('VR_Warden_Armor'), 'VR_Warden_Armor node');
-  assert.ok(s.matNames.includes('VR_Warden_Hull'), 'VR_Warden_Hull material');
-  assert.ok(s.matNames.includes('VR_Warden_Armor'), 'VR_Warden_Armor material');
+  assert.ok(s.matNames.includes('VR_Warden_HullMat'), 'VR_Warden_HullMat material (I508; vestigial - in-code JS material governs)');
+  assert.ok(s.matNames.includes('VR_Warden_ArmorMat'), 'VR_Warden_ArmorMat material (I508)');
   for (const m of json.meshes || []) for (const p of m.primitives || []) {
     const mn = m.name || 'mesh';
-    assert.ok(p.attributes.COLOR_0 !== undefined, mn + ' primitive has COLOR_0 (I289 value bake)');
+    assert.ok(p.attributes.COLOR_0 !== undefined, mn + ' primitive has COLOR_0 (I289/I508 value bake)');
     const acc = json.accessors[p.attributes.COLOR_0];
     const bv = json.bufferViews[acc.bufferView];
     const stride = parseInt(acc.type.replace('VEC', ''), 10);
@@ -1059,23 +1089,27 @@ test('warden.glb: naming, poly budget, hull/armor radii vs CONFIG, grayscale COL
       const gv = buf.readFloatLE(base + i * stride * 4 + 4);
       const bv2 = buf.readFloatLE(base + i * stride * 4 + 8);
       assert.ok(Math.abs(rv - gv) <= 0.02 && Math.abs(gv - bv2) <= 0.02, mn + ' COLOR_0 grayscale at ' + i + ': ' + [rv, gv, bv2].map((x) => x.toFixed(3)).join(','));
-      assert.ok(rv >= 0.30 - 0.01 && rv <= 1.25 + 0.01, mn + ' COLOR_0 in [0.30,1.25] value domain at ' + i + ': ' + rv.toFixed(3));
+      assert.ok(rv >= 0.25 && rv <= 1.00, mn + ' COLOR_0 in [0.25,1.00] I508 value domain at ' + i + ': ' + rv.toFixed(3));
     }
     const f = wardenFacetLumas({ buf, json, binOff }, p);
     const E = WARDEN_FACET[mn];
-    assert.ok(f.p90 - f.p10 >= 0.35, mn + ' facet luma spread ' + (f.p90 - f.p10).toFixed(3) + ' >= 0.35 (I289 value bake; pre-bake was a flat in-code tint)');
+    assert.ok(f.p90 - f.p10 >= 0.25, mn + ' facet luma spread ' + (f.p90 - f.p10).toFixed(3) + ' >= 0.25 (I508 value bake; Armor side slabs are flat by design)');
     for (const k of ['p10', 'p50', 'p90']) {
-      assert.ok(Math.abs(f[k] - E[k]) <= 0.005, mn + ' facet ' + k + ' ' + f[k].toFixed(3) + ' ~ ' + E[k] + ' (I289 bake pin)');
+      assert.ok(Math.abs(f[k] - E[k]) <= 0.005, mn + ' facet ' + k + ' ' + f[k].toFixed(4) + ' ~ ' + E[k] + ' (I508 bake pin)');
     }
   }
-  assert.ok(s.totalTris <= BUDGETS.warden, 'warden tris ' + s.totalTris + ' <= 200');
+  assert.ok(s.totalTris <= BUDGETS.warden, 'warden tris ' + s.totalTris + ' <= 1800 (E68 legacy-4 cap)');
+  assert.ok(s.totalTris >= 1400, 'warden tris ' + s.totalTris + ' >= 1400 (E68 legacy-4 aim - no silent simplification)');
   const hull = s.prims.find((p) => p.name.includes('Hull'));
   const armor = s.prims.find((p) => p.name.includes('Armor'));
   const r = CONFIG.warden.radius;
+  // I508 re-pins WITH measurement (supersede the I220/I289 procedural-plate pins): hull = 6-gon
+  // hex hull + front core weak spot (dome + spikes + brackets merged) -> maxRadius 2.1848
+  // (~r*1.285; pre-I508 the r*1.25 spike cap); armor = three 4.8-long slabs -> maxRadius 3.4111
+  // (keeps the union bbox ~3.99 class; pre-I508 ~r*1.55 = 2.635).
   assert.ok(hull.maxRadius >= r * 0.95, 'hull covers the logical body (' + hull.maxRadius.toFixed(3) + ')');
-  assert.ok(hull.maxRadius <= r * 1.25, 'hull max radius ' + hull.maxRadius.toFixed(3) + ' <= r*1.25 (spike accents stay inside the armor ring)');
-  assert.ok(Math.abs(armor.maxRadius - r * 1.55) / (r * 1.55) <= 0.10,
-    'armor outer radius ' + armor.maxRadius.toFixed(3) + ' ~ r*1.55 (procedural plate-ring parity)');
+  assert.ok(Math.abs(hull.maxRadius - 2.1848) / 2.1848 <= 0.10, 'hull max radius ' + hull.maxRadius.toFixed(3) + ' ~ 2.1848 (I508 pin)');
+  assert.ok(Math.abs(armor.maxRadius - 3.4111) / 3.4111 <= 0.10, 'armor outer radius ' + armor.maxRadius.toFixed(3) + ' ~ 3.4111 (I508 pin)');
 });
 
 // I371 (ST-338 E41 comet re-bake; supersedes the I344 note): comet rock variant

@@ -1,0 +1,114 @@
+BlenderMCP addon registered
+BlenderMCP addon unregistered
+02:46:05 | INFO: Data are loaded, start creating Blender stuff
+02:46:05 | INFO: Blender create Mesh node VR_Stinger_Body
+02:46:05 | INFO: Blender create Mesh node VR_Stinger_Core
+02:46:05 | INFO: glTF import finished in 0.03s
+AUDIT stinger meshes=2 tris=1732 radius=2.1624
+  NODE VR_Stinger_Body tris= 1572
+  NODE VR_Stinger_Core tris= 160
+00:08.000  render           | Saved: 'E:\Game\.evidence\I508\aud_stinger_f34_clay.png'
+00:09.484  render           | Saved: 'E:\Game\.evidence\I508\aud_stinger_front_clay.png'
+00:10.859  render           | Saved: 'E:\Game\.evidence\I508\aud_stinger_back_clay.png'
+00:12.219  render           | Saved: 'E:\Game\.evidence\I508\aud_stinger_side_clay.png'
+00:13.640  render           | Saved: 'E:\Game\.evidence\I508\aud_stinger_top_clay.png'
+02:46:17 | INFO: Data are loaded, start creating Blender stuff
+02:46:17 | INFO: Blender create Mesh node VR_Stinger_Body
+02:46:17 | INFO: Blender create Mesh node VR_Stinger_Core
+02:46:17 | INFO: glTF import finished in 0.03s
+00:14.781  render           | Saved: 'E:\Game\.evidence\I508\aud_stinger_f34_tint.png'
+00:16.094  render           | Saved: 'E:\Game\.evidence\I508\aud_stinger_front_tint.png'
+00:17.359  render           | Saved: 'E:\Game\.evidence\I508\aud_stinger_back_tint.png'
+00:18.719  render           | Saved: 'E:\Game\.evidence\I508\aud_stinger_side_tint.png'
+00:20.125  render           | Saved: 'E:\Game\.evidence\I508\aud_stinger_top_tint.png'
+02:46:24 | INFO: Data are loaded, start creating Blender stuff
+02:46:24 | INFO: Blender create Mesh node VR_Stinger_Body
+02:46:24 | INFO: Blender create Mesh node VR_Stinger_Core
+02:46:24 | INFO: glTF import finished in 0.03s
+00:21.109  render           | Saved: 'E:\Game\.evidence\I508\aud_stinger_front_sil96.png'
+00:22.172  render           | Saved: 'E:\Game\.evidence\I508\aud_stinger_back_sil96.png'
+DONE stinger
+02:46:26 | INFO: Data are loaded, start creating Blender stuff
+02:46:26 | INFO: Blender create Mesh node VR_Drone
+02:46:26 | INFO: glTF import finished in 0.02s
+AUDIT drone meshes=1 tris=1516 radius=1.4667
+  NODE VR_Drone tris= 1516
+00:23.781  render           | Saved: 'E:\Game\.evidence\I508\aud_drone_f34_clay.png'
+00:25.172  render           | Saved: 'E:\Game\.evidence\I508\aud_drone_front_clay.png'
+00:26.547  render           | Saved: 'E:\Game\.evidence\I508\aud_drone_back_clay.png'
+00:28.000  render           | Saved: 'E:\Game\.evidence\I508\aud_drone_side_clay.png'
+00:29.531  render           | Saved: 'E:\Game\.evidence\I508\aud_drone_top_clay.png'
+02:46:33 | INFO: Data are loaded, start creating Blender stuff
+02:46:33 | INFO: Blender create Mesh node VR_Drone
+02:46:33 | INFO: glTF import finished in 0.03s
+00:31.078  render           | Saved: 'E:\Game\.evidence\I508\aud_drone_f34_tint.png'
+00:32.453  render           | Saved: 'E:\Game\.evidence\I508\aud_drone_front_tint.png'
+00:33.812  render           | Saved: 'E:\Game\.evidence\I508\aud_drone_back_tint.png'
+00:35.234  render           | Saved: 'E:\Game\.evidence\I508\aud_drone_side_tint.png'
+00:36.734  render           | Saved: 'E:\Game\.evidence\I508\aud_drone_top_tint.png'
+02:46:40 | INFO: Data are loaded, start creating Blender stuff
+02:46:40 | INFO: Blender create Mesh node VR_Drone
+02:46:40 | INFO: glTF import finished in 0.02s
+00:37.687  render           | Saved: 'E:\Game\.evidence\I508\aud_drone_front_sil96.png'
+00:38.703  render           | Saved: 'E:\Game\.evidence\I508\aud_drone_back_sil96.png'
+DONE drone
+02:46:42 | INFO: Data are loaded, start creating Blender stuff
+02:46:42 | INFO: Blender create Mesh node VR_Warden_Armor
+02:46:42 | INFO: Blender create Mesh node VR_Warden_Hull
+02:46:42 | INFO: glTF import finished in 0.03s
+AUDIT warden meshes=2 tris=1556 radius=3.6188
+  NODE VR_Warden_Armor tris= 780
+  NODE VR_Warden_Hull tris= 776
+00:40.531  render           | Saved: 'E:\Game\.evidence\I508\aud_warden_f34_clay.png'
+00:42.094  render           | Saved: 'E:\Game\.evidence\I508\aud_warden_front_clay.png'
+00:43.625  render           | Saved: 'E:\Game\.evidence\I508\aud_warden_back_clay.png'
+00:45.203  render           | Saved: 'E:\Game\.evidence\I508\aud_warden_side_clay.png'
+00:46.875  render           | Saved: 'E:\Game\.evidence\I508\aud_warden_top_clay.png'
+02:46:50 | INFO: Data are loaded, start creating Blender stuff
+02:46:50 | INFO: Blender create Mesh node VR_Warden_Armor
+02:46:50 | INFO: Blender create Mesh node VR_Warden_Hull
+02:46:50 | INFO: glTF import finished in 0.03s
+00:48.640  render           | Saved: 'E:\Game\.evidence\I508\aud_warden_f34_tint.png'
+00:50.250  render           | Saved: 'E:\Game\.evidence\I508\aud_warden_front_tint.png'
+00:51.781  render           | Saved: 'E:\Game\.evidence\I508\aud_warden_back_tint.png'
+00:53.359  render           | Saved: 'E:\Game\.evidence\I508\aud_warden_side_tint.png'
+00:55.078  render           | Saved: 'E:\Game\.evidence\I508\aud_warden_top_tint.png'
+02:46:58 | INFO: Data are loaded, start creating Blender stuff
+02:46:58 | INFO: Blender create Mesh node VR_Warden_Armor
+02:46:59 | INFO: Blender create Mesh node VR_Warden_Hull
+02:46:59 | INFO: glTF import finished in 0.03s
+00:56.109  render           | Saved: 'E:\Game\.evidence\I508\aud_warden_front_sil96.png'
+00:57.172  render           | Saved: 'E:\Game\.evidence\I508\aud_warden_back_sil96.png'
+DONE warden
+02:47:01 | INFO: Data are loaded, start creating Blender stuff
+02:47:01 | INFO: Blender create Mesh node VR_Flyer_Body
+02:47:01 | INFO: Blender create Mesh node VR_Flyer_Dome
+02:47:01 | INFO: glTF import finished in 0.03s
+AUDIT flyer meshes=2 tris=1770 radius=1.7169
+  NODE VR_Flyer_Body tris= 1528
+  NODE VR_Flyer_Dome tris= 242
+00:58.656  render           | Saved: 'E:\Game\.evidence\I508\aud_flyer_f34_clay.png'
+00:59.922  render           | Saved: 'E:\Game\.evidence\I508\aud_flyer_front_clay.png'
+01:01.219  render           | Saved: 'E:\Game\.evidence\I508\aud_flyer_back_clay.png'
+01:02.562  render           | Saved: 'E:\Game\.evidence\I508\aud_flyer_side_clay.png'
+01:04.000  render           | Saved: 'E:\Game\.evidence\I508\aud_flyer_top_clay.png'
+02:47:07 | INFO: Data are loaded, start creating Blender stuff
+02:47:07 | INFO: Blender create Mesh node VR_Flyer_Body
+02:47:07 | INFO: Blender create Mesh node VR_Flyer_Dome
+02:47:07 | INFO: glTF import finished in 0.03s
+01:05.406  render           | Saved: 'E:\Game\.evidence\I508\aud_flyer_f34_tint.png'
+01:06.844  render           | Saved: 'E:\Game\.evidence\I508\aud_flyer_front_tint.png'
+01:08.250  render           | Saved: 'E:\Game\.evidence\I508\aud_flyer_back_tint.png'
+01:09.672  render           | Saved: 'E:\Game\.evidence\I508\aud_flyer_side_tint.png'
+01:11.281  render           | Saved: 'E:\Game\.evidence\I508\aud_flyer_top_tint.png'
+02:47:15 | INFO: Data are loaded, start creating Blender stuff
+02:47:15 | INFO: Blender create Mesh node VR_Flyer_Body
+02:47:15 | INFO: Blender create Mesh node VR_Flyer_Dome
+02:47:15 | INFO: glTF import finished in 0.03s
+01:12.281  render           | Saved: 'E:\Game\.evidence\I508\aud_flyer_front_sil96.png'
+01:13.422  render           | Saved: 'E:\Game\.evidence\I508\aud_flyer_back_sil96.png'
+DONE flyer
+ALL_DONE
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+
+Blender quit
