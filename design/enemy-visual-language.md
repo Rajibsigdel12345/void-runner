@@ -17,8 +17,8 @@ so ST-418/ST-421 build to one spec without a second design pass.
 |------|-----------|----------------------|-----------|------------|-----------|--------------|
 | Mine | 5 | renderer-side (no palette field in CONFIG) | - | drifting spiky mine, slow turn | 1 (mineMesh.js) | slow pursuit; fires only inside fireRange 7.0 |
 | Drone (seeker) | 8 | 0x6f8796 steel-cyan | ~131 | small seeker, banking | 1 (droneMesh.js) | fast homing; decays (self-destruct) |
-| Stinger | 7 | 0x917fb9 violet mid | 135.0 (I383 rendered audit) | slender dart | 2 (stingerMesh.js) | cyan->white lock telegraph, straight-line dash |
-| Flyer | 9 | 0x7d6878 mauve mid | ~110 | broad-winged, magenta dome | 2 (flyerMesh.js) | sine-weave crosser; never attacks |
+| Stinger | 7 | 0x54688a steel-blue (I511/ST-477) | 102.2 (rendered p50 ~110 sky, I511; was 0x917fb9 violet 135.0 - I383) | slender dart | 2 (stingerMesh.js) | cyan->white lock telegraph, straight-line dash |
+| Flyer | 9 | 0x7d6878 mauve mid | ~110 (rendered p50 ~95 sky, I511/ST-477) | broad-winged, magenta dome | 2 (flyerMesh.js) | sine-weave crosser; never attacks |
 | Vortex | 8 | (FX, non-corporeal) | - | pulsing pull field | n/a | telegraph ring; pulls rocks + ship |
 | Warden | 5th waves w/o live Monolith | renderer-side (wardenMesh.js) | - | armored drone mini-boss, r 1.7 | - | armor ping before HP loss |
 | Monolith | 5, 15, ... | hull 0x6b5f88, emissive 0x7a4dff | - | obelisk, r 3.4 | 3 (hull/crown/core, bossMesh.js) | purple rim 0x9a5bff; ring bursts + split |
@@ -29,7 +29,7 @@ Color semantics already in use (config.js comments + bossMesh.js + I252/I381/I38
 - Warm amber 0xffb347 family = player ship identity (body/plume; FROZEN).
 - Cool cyan 0x59d8ff = player cockpit + shield pickup (FROZEN identity).
 - Purple = Monolith identity (0x9a5bff rim / 0x7a4dff emissive); teal = Splicer identity (0x2dd4bf).
-- Fleet body luma ladder (top to bottom): stinger 135 > drone 131 > flyer ~110.
+- Fleet body luma ladder (top to bottom, rendered p50 sky re-audit I511/ST-477): drone ~180 > wasp ~175 > sentry ~140 > warden ~120 > hunter ~118 > stinger ~110 > flyer ~95 > boss ~68 ~= gunship ~65.
 - Gold family (0xfff0a0 / 0xffe070 / 0xffc94d) = golden rock pickup (treasure language, ST-249).
 
 ## 2. System rules
@@ -60,7 +60,7 @@ Color semantics already in use (config.js comments + bossMesh.js + I252/I381/I38
 ### 3.2 GUNSHIP (wave 8+)
 - Behavior pairing: slow, high-HP bomber; lobbed heavy shots; chaff popups on death (ST-418 core spec).
 - Silhouette: bulky wide hull, two exposed engine nacelles flanking a central spine, an open forward weapons bay - a "brute" outline; the largest non-boss read in the fleet.
-- Palette (proposed): body 0x39424e (gunmetal; sRGB luma ~65 - below every fleet band, distinct hue from all roles); nacelle dark 0x232a33; payload-bay glow 0xff9a3d family (payload semantics, brightens while a shot is armed, rule 4).
+- Palette (proposed): body 0x344250 (slate, I511/ST-477: sRGB luma 64.0, hue 210.0 sat 35% - definite hue, below every fleet band); nacelle dark 0x232a33; payload-bay glow 0xff9a3d family (payload semantics, brightens while a shot is armed, rule 4).
 - Materials: 3 (hull / nacelle / bay-glow).
 - Geometry: 1,200-2,000 tris; radius 1.6; slow tumble ~0.4 rad/s (warden-class read).
 - Death: existing explosion FX + chaff popups (ST-418 core spec) - no new visual language.

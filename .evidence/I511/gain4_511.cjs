@@ -1,0 +1,12 @@
+﻿const fs = require('fs');
+const p = 'E:/Game/src/core/config.js';
+let s = fs.readFileSync(p, 'utf8');
+const needle = 'renderLumaGain: 1.6,';
+const c = s.split(needle).length - 1;
+if (c !== 1) throw new Error('flyer 1.6 count ' + c);
+const i = s.indexOf(needle);
+const ls = s.lastIndexOf('\n', i) + 1; let le = s.indexOf('\n', i); if (le === -1) le = s.length;
+if (!s.slice(ls, le).includes('magenta rung')) throw new Error('flyer marker check failed');
+s = s.replace(needle, 'renderLumaGain: 1.3,');
+fs.writeFileSync(p, s, 'utf8');
+console.log('gain4 applied: flyer 1.6 -> 1.3');

@@ -35,7 +35,7 @@ export function createFlyerRenderer(scene) {
   let hullGeo = bakeHullGeometry(); // reassigned by useGLB when the flyer GLB resolves
   let domeGeo = bakeDomeGeometry();
   const hullMat = standardMat({ // I497 (ST-463)
-    color: CONFIG.flyer.palette.body.color, roughness: 0.55, metalness: 0.45, flatShading: true, vertexColors: true, // I282/ST-267: mauve mid (was 0x33202e dark-on-dark) + the GLB COLOR_0 value bake
+    color: new THREE.Color(CONFIG.flyer.palette.body.color).multiplyScalar(CONFIG.flyer.renderLumaGain), // I511/ST-477: x1.852 magenta rung gain (v2 bake rendered p50 51.3 sky; lands ~95 rung) + the GLB COLOR_0 value bake
     emissive: 0x5c1f4a, emissiveIntensity: 0.3,
   });
   const domeMats = [];

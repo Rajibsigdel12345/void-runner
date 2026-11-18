@@ -32,8 +32,8 @@ export const CONFIG = {
     arena: "floorBright/floorDim",
     starfield: "starNear",
     enemyBullets: "hazard",
-    stinger: "hazard (accent) + identity rust body",
-    gunship: "hazardEmber (bay) + identity gunmetal body",
+    stinger: "hazard (accent) + identity steel-blue body (I511/ST-477: 0x54688a - moved off the I506 violet x boss collision)",
+    gunship: "hazardEmber (bay) + identity slate body (I511/ST-477: 0x334550 - definite hue h202.8 (iter3))",
     fleetBodies: "identity hues (enemy-visual-language.md s3)",
     rock: "hazardEmber desaturated (I257 warm edge 0xd8a878)",
     powerup: "reward/rewardVital/rewardCharge/shield + bomb 0xffa84a = hazardEmber (I464 C1: moved out of the threat-red family)",
@@ -355,7 +355,8 @@ export const CONFIG = {
     turn: 1.5,      // heading change rad/s
     spin: 0.9,      // body tumble rad/s
     splitCount: 2,  // S rocks on death
-    score: 400      // kill reward (seeker 200, Monolith 1000)
+    score: 400,      // kill reward (seeker 200, Monolith 1000)
+    renderLumaGain: 4.5, // I511/ST-477 in-game re-audit: the I508 v2 GLB bake renders p50 83.9 (was 123.8 legacy); gain restores the ~120 ladder rung (hue 176 teal unchanged)
   },
   belt: {
     // ST-138: the ASTEROID BELT - from wave 8, one drifting INDESTRUCTIBLE rock joins
@@ -415,7 +416,8 @@ export const CONFIG = {
     firstWave: 7,       // wave 7: one after the W6 breather (boss waves are 5/10)
     perWave: 1,
     maxConcurrent: 2,
-    palette: { body: { color: 0x917fb9 } }, // I383/E43 G2: violet mid (sRGB luma 135.0; same hue as the I282/ST-267 deep violet 0x5a4f73 luma 83.9, VALUE-only lift - the I381 audit read it darkest-in-fleet at rendered p50 30.36 with negative sky sepB; GLB COLOR_0 bake multiplies on top)
+    palette: { body: { color: 0x54688a } }, // I511/ST-477: steel-blue class 0x54688a (sRGB luma 102.2, hue 215.8 - spec 4.3 FROZEN class; the I383 violet 0x917fb9 rendered 65.7/280.2, a true E57 rule-1 collision with boss 68.4/259.1; moved to the h 215-230 target band)
+    renderLumaGain: 2.2, // I511/ST-477 in-game re-audit: baseline sky p50 51.1 (violet); hex move projects ~40.8 rendered; gain 2.7 lands the ~110 steel-blue rung
     radius: 0.8,
     cruiseSpeed: 1.8,   // u/s (dodgeable: ship maxSpeed 14)
     cruiseTurn: 1.4,    // rad/s (gentle homing while cruising)
@@ -446,10 +448,7 @@ export const CONFIG = {
       fin:  { color: 0x4a2a22 },   // fin undersides (dark)
       accent: 0xff4a2a,            // threat-red telegraph (shared imminent-damage semantics, rule 4)
     },
-    renderLumaGain: 3.0, // I451 (ST-421) rendered-luma audit (render451 Part E, I381/I383 method): ACES +
-                         // exposure 1.15 + grade gamma 1.18 renders the palette body at ~0.45x its sRGB luma
-                         // (hull p50 46 vs the 85-120 band); the render layer scales the hull material color by
-                         // this gain to land the ladder (rendered p50 ~102). Palette hex stays the design value.
+    renderLumaGain: 7.5, // I451 gain pattern; I511/ST-477 re-ladder: the I509 v2 GLB bake renders p50 69.3 sky (was 118.3 legacy); 3.0 -> 5.1 (x1.703) restores the ~118 rust rung (hue 12.5 unchanged)
     radius: 0.8,        // stinger class
     orbitSpeed: 2.6,    // u/s (quick - a stalker)
     orbitTurn: 1.7,     // rad/s (tight turn - can swing to the rear)
@@ -468,20 +467,17 @@ export const CONFIG = {
     // ST-418: GUNSHIP - slow, high-HP heavy bomber (wave 8+). Enters to a mid-arena
     // hold, then ARMS (payload-bay glow 0xff9a3d ramps) and fires a slow, big aimed
     // bolt. 10 hits; self-destructs after maxAge; death -> chaff popups.
-    // Visuals: design/enemy-visual-language.md s3.2 - gunmetal 0x39424e body /
+    // Visuals: design/enemy-visual-language.md s3.2 - slate 0x334550 body (I511/ST-477; iter3 hue-nudge from 0x344250; was gunmetal 0x39424e) /
     // nacelle 0x232a33 / payload-bay 0xff9a3d (3 materials, radius 1.6 warden class).
     firstWave: 8,       // W8: after drones/vortex (boss waves 5/10)
     perWave: 1,
     maxConcurrent: 1,   // one at a time - it is large and heavy
     palette: {
-      body: { color: 0x39424e },    // gunmetal (sRGB luma ~65; below every fleet band - rule 1)
+      body: { color: 0x334550 },    // slate (I511/ST-477 iter3 hue-nudge: sRGB luma 66.0, hue 202.8, sat 36% (was 0x344250 luma 64.0 hue 210.0 - iter2 rendered hue 222.5 gave gunship x boss dhue 36.6, inside the E57 AND-test band; target rendered hue <= 219) - the I451 gunmetal 0x39424e rendered as an unstable neutral; definite hue per spec 4.2 target)
       nacelle: { color: 0x232a33 }, // engine nacelles (dark)
       bay: 0xff9a3d,                // payload-bay glow (warm orange, rule 4 payload semantics)
     },
-    renderLumaGain: 4.1, // I451 (ST-421) rendered-luma audit (render451 Part E, I381/I383 method): ACES +
-                         // exposure 1.15 + grade gamma 1.18 renders the palette body at ~0.31x its sRGB luma
-                         // (hull p50 20 vs the 45-85 band); the render layer scales the hull material color by
-                         // this gain to land the ladder (rendered p50 ~65). Palette hex stays the design value.
+    renderLumaGain: 7.2, // I451 gain pattern; I511/ST-477 re-ladder: the I509 v2 GLB bake renders p50 47.6 sky (was 86.6 legacy); 4.1 -> 5.6 (x1.366) lands the ~65 slate rung; gunship x boss borderline settled in the I511 in-game audit WITH MEASUREMENT
     radius: 1.6,        // warden class (strictly below the Monolith 3.4)
     enterSpeed: 3.0,    // u/s (slow - a bomber)
     holdRadiusMin: 0.35,// rng fraction of the arena for the hold point (min)
@@ -511,7 +507,7 @@ export const CONFIG = {
       base: { color: 0x3a3f34 },   // dark sage spar
       accent: 0xff9a3d,            // charge-node glow (payload-amber family)
     },
-    renderLumaGain: 2.0, // I480 rendered-luma audit: POD 127 < SENTRY 137 < WASP 176 (distinct rungs)
+    renderLumaGain: 4.05, // I480 gain pattern; I511/ST-477 re-ladder: the I509 v2 GLB bake renders p50 93.9 sky (was 150.5 legacy - the spec bake-driven -10 assumption overshot, value bands went dark); 2.0 -> 2.98 (x1.491) lands the ~140 olive rung (hue 41 unchanged)
     radius: 1.1,
     hp: 3,
     enterSpeed: 2.6,     // u/s: rim -> hold band
@@ -546,7 +542,7 @@ export const CONFIG = {
       wing: { color: 0x5a6128 },   // dark olive wing plate
       accent: 0xff4a2a,            // nose glow (threat-red dash cue)
     },
-    renderLumaGain: 2.0,
+    renderLumaGain: 4.0, // I480 gain pattern; I511/ST-477 re-ladder: the I509 v2 GLB bake renders p50 132.3 sky (was 177.3 legacy); 2.0 -> 2.65 (x1.323) restores the ~175 chartreuse rung (hue 49 unchanged)
     radius: 0.45,
     hp: 1,
     score: 100,
@@ -593,6 +589,7 @@ export const CONFIG = {
     perWave: 1,
     maxConcurrent: 2,   // render pool 4 (maxConcurrent + 2, stinger pattern)
     palette: { body: { color: 0x7d6878 } }, // I282/ST-267: mauve mid (sRGB luma ~110, below the drone band; the magenta dome carries the hue; GLB COLOR_0 bake multiplies on top)
+    renderLumaGain: 1.3, // I511/ST-477 in-game re-audit: the I508 v2 GLB bake renders p50 51.3 sky (was 65.8 legacy); x1.852 lands the ~95 magenta rung (+30 per spec 4.2; hue 327 unchanged)
     radius: 0.9,
     cruiseSpeed: 2.5,   // u/s crossing speed (ship 14 - never a threat, a target)
     weaveAmp: 1.2,      // u: perpendicular weave amplitude (the lead to read)

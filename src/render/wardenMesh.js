@@ -35,7 +35,7 @@ export function createWardenMesh(scene) {
   const group = new THREE.Group();
 
   const hullMat = standardMat({ // I497 (ST-463)
-    color: 0x2c3548, roughness: 0.4, metalness: 0.55, flatShading: true,
+    color: new THREE.Color(0x2c3548).multiplyScalar(CONFIG.warden.renderLumaGain), roughness: 0.4, metalness: 0.55, flatShading: true, // I511/ST-477: gain restores the ~120 rung (v2 bake rendered p50 83.9)
     vertexColors: true, // I289/ST-273: GLB COLOR_0 facet-value bake multiplies on top of the base tint
     emissive: 0x19d3c5, emissiveIntensity: 0.3,
   });
@@ -43,7 +43,7 @@ export function createWardenMesh(scene) {
   group.add(hull);
 
   const armorMat = standardMat({ // I497 (ST-463)
-    color: 0x8fa3c8, roughness: 0.3, metalness: 0.85, flatShading: true,
+    color: new THREE.Color(0x8fa3c8).multiplyScalar(CONFIG.warden.renderLumaGain), roughness: 0.3, metalness: 0.85, flatShading: true, // I511/ST-477: gain restores the ~120 rung (armor plate)
     emissive: 0x19d3c5, emissiveIntensity: 0.12,
     vertexColors: true, // I289/ST-273: GLB COLOR_0 facet-value bake multiplies on top of the base tint
   });
@@ -60,7 +60,7 @@ export function createWardenMesh(scene) {
   // so the "exposed" state reads by silhouette, not just by the orange glow.
   let shapeCuesOn = true;
   const spikeGeo = new THREE.ConeGeometry(r * 0.16, r * 0.55, 4);
-  const spikeMat = new THREE.MeshStandardMaterial({ color: 0x8fa3c8, roughness: 0.3, metalness: 0.85, flatShading: true, emissive: 0xff7a3c, emissiveIntensity: 0.5 });
+  const spikeMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(0x8fa3c8).multiplyScalar(CONFIG.warden.renderLumaGain), roughness: 0.3, metalness: 0.85, flatShading: true, emissive: 0xff7a3c, emissiveIntensity: 0.5 }); // I511/ST-477: spike collar shares the armor gain (single CONFIG lever)
   const spikes = new THREE.Group();
   for (let i = 0; i < 8; i++) {
     const holder = new THREE.Object3D();

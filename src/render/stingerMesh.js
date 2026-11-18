@@ -34,8 +34,8 @@ export function createStingerRenderer(scene) {
   let bodyGeo = bakeBodyGeometry(); // I230: reassigned by useGLB when the stinger GLB resolves
   let coreGeo = bakeCoreGeometry();
   const bodyMat = standardMat({ // I497 (ST-463)
-    color: CONFIG.stinger.palette.body.color, roughness: 0.5, metalness: 0.5, flatShading: true, vertexColors: true, // I282/ST-267: deep-violet mid (was 0x2b2136 dark-on-dark) + the GLB COLOR_0 value bake
-    emissive: 0x3c1f5c, emissiveIntensity: 0.35,
+    color: new THREE.Color(CONFIG.stinger.palette.body.color).multiplyScalar(CONFIG.stinger.renderLumaGain), // I511/ST-477: steel-blue 0x54688a x luma gain (GLB COLOR_0 bake multiplies on top)
+    emissive: 0x22344d, emissiveIntensity: 0.35, // I511/ST-477: steel-blue dark (was violet 0x3c1f5c - body hue moved off the boss violet band)
   });
   const coreMats = [];
   for (let i = 0; i < POOL; i++) {

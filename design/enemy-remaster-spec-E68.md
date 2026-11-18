@@ -185,6 +185,50 @@ ST-477 in-game, not here.
   after all 8 remasters + palette updates; the gunship x boss borderline is
   settled there WITH MEASUREMENT.
 
+### 4.4 ST-477 measured result (I511, FINAL)
+
+The section-4 closing gate ran as a 4-pass in-game audit
+(.evidence/I511/luma_audit511.mjs, headless SwiftShader, 1280x720, pixel
+ratio 1, BLOOM in the render path - render2() runs bloom.render, so the
+measurement is what the player sees). Per-role SKY p50 / mean hue vs the
+FROZEN 4.2 targets, with the final gains:
+
+| role    | gain | sky p50 | hue   | 4.2 target      | verdict                    |
+|---------|------|---------|-------|-----------------|----------------------------|
+| drone   | -    | 184.08  | 189.5 | ~180            | KEEP (+4.1)                |
+| wasp    | 4.0  | 150.55  | 50.0  | ~175 (legacy)   | BLOOM-CAPPED (see below)   |
+| sentry  | 4.05 | 136.73  | 41.5  | ~140            | -3.3                       |
+| warden  | 4.5  | 119.49  | 179.1 | ~120            | -0.5                       |
+| hunter  | 7.5  | 116.11  | 16.0  | ~118            | -1.9                       |
+| stinger | 2.2  | 108.89  | 221.0 | ~110 h215-230   | -1.1, hue in-band          |
+| flyer   | 1.3  |  94.22  | 335.8 | ~95             | -0.8                       |
+| boss    | -    |  68.40  | 259.1 | ~68             | UNCHANGED (I503)           |
+| gunship | 7.2  |  68.16  | 158.1 | ~65 h<=219      | +3.2, mean hue <= 219      |
+
+- Strict rung order drone > wasp > sentry > warden > hunter > stinger >
+  flyer > boss > gunship: PASS (boss x gunship dluma 0.24).
+- E57 rule-1 AND test (collision iff dluma <= 10 AND dhue <= 40): all 8
+  adjacent pairs PASS. Wasp x sentry gap 13.82 with dhue only 8.5 - the
+  dluma gap is the separating axis. Boss x gunship dhue 101.
+- Wasp is BLOOM-CAPPED: gain 6.0 blew the v2-baked hull to white and the
+  bloom halo flooded the measurement window (areaFrac 0.031 -> 0.33,
+  p50 38.26 = halo median, meaningless). Gain 4.0 keeps p90 206.27 under
+  the bloom threshold while leaving the > 10 gap over sentry. The legacy
+  ~175 rung is unreachable on the v2 bake without blow-out; the rung is
+  re-set at 150.55 WITH MEASUREMENT.
+- Gunship x boss settled WITH MEASUREMENT: the near-neutral slate mean hue
+  is unstable (0x344250 / g7.2: 222.5, dhue 36.6 = inside the AND band;
+  0x334550 / g7.2: 158.1, dhue 101 = clear). Mean d < 4 - the gunship
+  identity axis is near-neutral slate (saturation + 4x silhouette + amber
+  bay glow), not a hue-axis split from the boss purple 259.1. Hex final
+  0x334550 (sRGB luma 66.0 / hue 202.8).
+- The v2 COLOR_0 bakes render every remastered hull far darker than the
+  4.3 bake assumptions; the renderLumaGain knob did the work. Gain response
+  is strongly sub-linear (fitted k 0.23-1.28 per role), so the iter1
+  extrapolations missed (2 rung crosses) and the ladder locked over the
+  iter2-4 measurement passes (each pass measures the full 9-role fleet in
+  ~10 s).
+
 ## 5. GLB contract (E57 rule 8 + E68 re-pins)
 
 Per asset (ST-474/ST-475 builds are REJECTED if any fails):
@@ -241,8 +285,8 @@ Per asset (ST-474/ST-475 builds are REJECTED if any fails):
 
 ## 8. Open items / risks (carried, not frozen)
 
-- gunship x boss borderline dhue ~44: clear today, ~1 deg of hue margin - ST-477.
-- stinger exact steel-blue hex: class frozen (0x54688a), value settled ST-477.
+- gunship x boss borderline: settled I511 WITH MEASUREMENT (0x334550 / g7.2 mean hue 158.1 vs boss 259.1, dhue 101; the 0x344250 iter2 state was inside the AND band at dhue 36.6; 4.4).
+- stinger steel-blue hex: settled I511 (0x54688a / gain 2.2; measured 108.89 / hue 221.0 in-band; 4.4).
 - dist ceiling: current 3,747,372 B vs renegotiated ~4,400,000 B pre-reg
   (scope-check) - WITH MEASUREMENT at ST-476; cut ladder C1-C4 on overrun.
 - warden: the 1.7 is the CONFIG gameplay radius, NOT the Blender-space bbox
