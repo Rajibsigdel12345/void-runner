@@ -24,6 +24,9 @@ import { createGunshipRenderer } from './render/gunshipMesh.js'; // ST-418
 import { createSentryRenderer } from './render/sentryMesh.js'; // ST-448
 import { createWaspRenderer } from './render/waspMesh.js'; // ST-448
 import { createPodRenderer } from './render/podMesh.js'; // ST-448
+import { createPhantomRenderer } from './render/phantomMesh.js'; // ST-485 (E69)
+import { createHaulerRenderer } from './render/haulerMesh.js'; // ST-485 (E69)
+import { createBulwarkRenderer } from './render/bulwarkMesh.js'; // ST-485 (E69)
 import { createBossHealth, createBossHealthVertical } from './render/bossHealth.js';
 import { createEnemyBulletRenderer } from './render/enemyBulletMesh.js';
 import { createPowerupRenderer } from './render/powerupMesh.js';
@@ -244,6 +247,9 @@ const gunshipRenders = createGunshipRenderer(scene); // ST-418
 const sentryRenders = createSentryRenderer(scene); // ST-448
 const waspRenders = createWaspRenderer(scene); // ST-448
 const podRenders = createPodRenderer(scene); // ST-448
+const phantomRenders = createPhantomRenderer(scene); // ST-485 (E69)
+const haulerRenders = createHaulerRenderer(scene); // ST-485 (E69)
+const bulwarkRenders = createBulwarkRenderer(scene); // ST-485 (E69)
 // I104: GLB assets (Blender pass) - fire-and-forget load with procedural
 // fallback: renderers start procedural and each asset swaps in as it loads.
 const assetLoader = createAssetLoader();
@@ -274,6 +280,9 @@ else if (name === 'hunter') hunterRenders.useGLB(entry.object); // ST-421: Blend
 else if (name === 'gunship') gunshipRenders.useGLB(entry.object); // ST-421: Blender gunship (pre-wired hook)
 else if (name === 'sentry') sentryRenders.useGLB(entry.object); // ST-449 (pre-wired at I481; procedural until the GLB lands)
 else if (name === 'wasp') waspRenders.useGLB(entry.object); // ST-449 (pre-wired at I481; procedural until the GLB lands)
+else if (name === 'phantom') phantomRenders.useGLB(entry.object); // ST-485 (E69): Blender phantom (I519 wiring)
+else if (name === 'hauler') haulerRenders.useGLB(entry.object); // ST-485 (E69): Blender hauler (I519 wiring)
+else if (name === 'bulwark') bulwarkRenders.useGLB(entry.object); // ST-485 (E69): Blender bulwark (I519 wiring)
    else if (name === 'debrisChunk') debris.setGeometry('chunk', entry.object); // ST-381 (I411): GLB over the procedural fallback
    else if (name === 'debrisSliver') debris.setGeometry('sliver', entry.object);
   else if (name === 'arenaRing') arenaRing.useGLB(entry.object); // I212
@@ -701,7 +710,7 @@ const shakeOff = { x: 0, y: 0, z: 0 };
 const punch = createPunch({ decay: CONFIG.fx.punch.decay, amplitude: CONFIG.fx.punch.amplitude }); // ST-081: directed camera jolt
 const _kpd = { x: 0, y: 0, z: 0 }; // ST-221 (I224): kill-punch direction scratch (no per-kill allocation)
 const _killCh = { punch: 0, ring: 0 }; // ST-238 (I245): kill juice-channel scratch (no per-kill allocation)
-const SW_COLORS = { drone: CONFIG.fx.palette.drone[0], stinger: CONFIG.fx.palette.stinger[0], hunter: CONFIG.fx.palette.hunter[0], gunship: CONFIG.fx.palette.gunship[0], sentry: CONFIG.fx.palette.sentry[0], wasp: CONFIG.fx.palette.wasp[0], pod: CONFIG.fx.palette.pod[0], warden: CONFIG.fx.palette.boss[0] }; // ST-238 (I245): per-class ring colors (built once)
+const SW_COLORS = { drone: CONFIG.fx.palette.drone[0], stinger: CONFIG.fx.palette.stinger[0], hunter: CONFIG.fx.palette.hunter[0], gunship: CONFIG.fx.palette.gunship[0], sentry: CONFIG.fx.palette.sentry[0], wasp: CONFIG.fx.palette.wasp[0], pod: CONFIG.fx.palette.pod[0], warden: CONFIG.fx.palette.boss[0], phantom: CONFIG.fx.palette.phantom[0], hauler: CONFIG.fx.palette.hauler[0], bulwark: CONFIG.fx.palette.bulwark[0] }; // ST-485 (E69): E69 class ring colors // ST-238 (I245): per-class ring colors (built once)
 let hitStop = 0; // ST-081: sim-freeze seconds remaining (render loop; rendering keeps going)
 const fovKick = createFovKick({ decay: CONFIG.fx.fovKick.decay, max: CONFIG.fx.fovKick.max }); // ST-082: dynamic FOV kick
 let simT = 0; // sim-clock for timed visuals (invuln blink)
@@ -840,7 +849,7 @@ window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), inpu
   floorDisc, // ST-277 (I294)
   applySettings, liveSettings: () => liveSettings,
   locale: () => getLocale(), setLocale, // ST-375: locale probe + drive (boot applied in applySettings; live via the settings panel)
-  audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, powerupRenders, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, hunterRenders, gunshipRenders, sentryRenders, waspRenders, podRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, camMode: () => camMode, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, THREE, scene, // I497: gate RT capture handles (pixel-neutral)
+  audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, powerupRenders, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, hunterRenders, gunshipRenders, sentryRenders, waspRenders, podRenders, phantomRenders, haulerRenders, bulwarkRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, camMode: () => camMode, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, THREE, scene, // I497: gate RT capture handles (pixel-neutral)
   backend: rendererBackend, rendererArm, vendorLowpWarns: () => _vendorLowpWarns, render: () => renderer.render(scene, camera), theme: () => _currentTheme, applyTheme, themeDome, warp: () => world.warp, afterburner }; // ST-434 (I466) B4 // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
@@ -1051,6 +1060,13 @@ else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, 
       else if (e.type === 'waspDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.max(4, Math.ceil(fxCount * 0.5)), palette: CONFIG.fx.palette.wasp, speed: 8, life: 0.4 }); shake.trigger(shakeEnergy('waspDeath', CONFIG.fx.shakeTable)); juiceTally.record('waspDeath', { shake: 1 }); } // ST-448: kill (no flash)
       else if (e.type === 'podHit') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount ? Math.max(4, fxCount >> 2) : 0, palette: CONFIG.fx.palette.pod, speed: 6, life: 0.35 }); } // ST-448: shell hit
       else if (e.type === 'podDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount * 2, palette: CONFIG.fx.palette.pod, speed: 12, life: 0.7, shape: 'ring' }); shake.trigger(shakeEnergy('podDeath', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('podDeath', CONFIG.fx.flashTable)); juiceTally.record('podDeath', { shake: 1, flash: 1 }); } // ST-448: split (ring + flash)
+      else if (e.type === 'phantomStrike') particles.burst(e.data.pos.x, e.data.pos.y, { count: 5, palette: CONFIG.fx.palette.phantom, speed: 5, life: 0.25 }); // ST-485 (E69): strike muzzle (cloak edge flares)
+      else if (e.type === 'phantomDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 1.2), palette: CONFIG.fx.palette.phantom, speed: 10, life: 0.5 }); shake.trigger(shakeEnergy('phantomDeath', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('phantomDeath', CONFIG.fx.flashTable)); juiceTally.record('phantomDeath', { shake: 1, flash: 1 }); } // ST-485 (E69): cloaker kill (0.35 shake rung + 0.11 flash)
+      else if (e.type === 'haulerMineDrop') particles.burst(e.data.pos.x, e.data.pos.y, { count: 6, palette: CONFIG.fx.palette.mine, speed: 3, life: 0.3 }); // ST-485 (E69): mine-bay ejection puff
+      else if (e.type === 'haulerDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount * 2, palette: CONFIG.fx.palette.hauler, speed: 12, life: 0.7, shape: 'ring' }); shake.trigger(shakeEnergy('haulerDeath', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('haulerDeath', CONFIG.fx.flashTable)); juiceTally.record('haulerDeath', { shake: 1, flash: 1 }); } // ST-485 (E69): truck kill (0.7 rung + 0.29 flash)
+      else if (e.type === 'bulwarkNegate') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.max(5, Math.ceil(fxCount * 0.4)), palette: CONFIG.fx.palette.bulwark, speed: 6, life: 0.3 }); // ST-485 (E69): shield-negation sparks (frequent - no shake)
+      else if (e.type === 'bulwarkStun') { particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 1.2), palette: CONFIG.fx.palette.bulwark, speed: 10, life: 0.5, shape: 'ring' }); shockwaves.spawn(e.data.pos.x, e.data.pos.y, { radius: 3.5, color: CONFIG.fx.palette.bulwark[0] }); juiceTally.record('bulwarkStun', { ring: 1 }); } // ST-485 (E69): shield overload (ring, no shake - player reward)
+      else if (e.type === 'bulwarkDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount * 2, palette: CONFIG.fx.palette.bulwark, speed: 13, life: 0.75, shape: 'ring' }); shake.trigger(shakeEnergy('bulwarkDeath', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('bulwarkDeath', CONFIG.fx.flashTable)); juiceTally.record('bulwarkDeath', { shake: 1, flash: 1 }); } // ST-485 (E69): enforcer kill (0.8 rung + 0.3 flash)
 
       else if (e.type === 'bossSpawn') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.boss, speed: 8, life: 0.7 }); shake.trigger(shakeEnergy('bossSpawn', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('bossSpawn', CONFIG.fx.flashTable)); juiceTally.record('bossSpawn', { shake: 1, flash: 1 }); } // ST-055/ST-175
       else if (e.type === 'bossPhase2') { hitStop = Math.max(hitStop, CONFIG.fx.hitStop.bossPhase2); juiceTally.record('bossPhase2', { hitStop: 1 }); } // ST-217: 40 ms hit-stop on enrage entry (hit-stop only - no shake/flash; phase < death in the juice hierarchy)
@@ -1096,6 +1112,9 @@ else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, 
       else if (e.type === 'sentryDeath') shatter(e.data.pos.x, e.data.pos.y, 'sentry');
       else if (e.type === 'waspDeath') shatter(e.data.pos.x, e.data.pos.y, 'wasp');
       else if (e.type === 'podDeath') shatter(e.data.pos.x, e.data.pos.y, 'pod');
+      else if (e.type === 'phantomDeath') shatter(e.data.pos.x, e.data.pos.y, 'phantom');
+      else if (e.type === 'haulerDeath') shatter(e.data.pos.x, e.data.pos.y, 'hauler');
+      else if (e.type === 'bulwarkDeath') shatter(e.data.pos.x, e.data.pos.y, 'bulwark');
       else if (e.type === 'wardenDeath') shatter(e.data.pos.x, e.data.pos.y, 'warden');
       else if (e.type === 'bossDeath') shatter(e.data.pos.x, e.data.pos.y, 'boss');
     }
@@ -1241,6 +1260,9 @@ function syncVisuals(dt) {
   sentryRenders.sync(world.sentries, simT, motionOff); // ST-448: charge-node ramp (FX-tier-independent, RM-safe intensity)
   waspRenders.sync(world.wasps, simT, motionOff); // ST-448: threat-red nose ramp (FX-tier-independent)
   podRenders.sync(world.pods, simT, motionOff); // ST-448: idle spin (motion-gated), static seam glow
+phantomRenders.sync(world.phantoms, simT, motionOff); // ST-485 (E69): cloak fade + strike nose ramp (RM-safe state ramps)
+haulerRenders.sync(world.haulers, simT, motionOff); // ST-485 (E69): mine-bay telegraph ramp
+bulwarkRenders.sync(world.bulwarks, simT, motionOff); // ST-485 (E69): shield-core charge ramp + stun dim
   bossHealth.sync(world.boss); // ST-055
   bossHealthV.sync(world.boss); // ST-456 (E64): campaign vertical bar
   enemyBulletRenders.sync(world.enemyBullets, simT); // ST-056

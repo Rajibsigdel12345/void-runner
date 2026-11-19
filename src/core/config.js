@@ -589,11 +589,11 @@ export const CONFIG = {
     perWave: 1,
     maxConcurrent: 2,
     palette: {
-      body: { color: 0x40c055 },  // cloaker green (CANDIDATE - ST-485 freezes WITH MEASUREMENT)
-      pod: { color: 0x1d5c3f },   // dark hull pod (CANDIDATE)
-      accent: 0x7dffc8,           // cloak-edge accent (CANDIDATE)
+      body: { color: 0x40c055 },  // cloaker green (I519 FROZEN WITH MEASUREMENT: p50 98.67 sky / 105.26 floor, hue 127.1/129.2; ladder rung 6 of 12; E57 rule-1 AND test FAIL vs all 9 frozen pairs on both backdrops)
+      pod: { color: 0x1d5c3f },   // dark hull pod (I519 FROZEN)
+      accent: 0x7dffc8,           // cloak-edge accent (I519 FROZEN)
     },
-    renderLumaGain: 2.0,          // CANDIDATE - ST-485 freezes WITH MEASUREMENT
+    renderLumaGain: 2.0,          // I519 FROZEN WITH MEASUREMENT (audit .evidence/I519/luma_i519.json)
     radius: 0.5,
     hp: 2,
     score: 250,          // kill reward (250 = stinger rung; 250 < 300 hunter)
@@ -625,11 +625,11 @@ export const CONFIG = {
     perWave: 1,
     maxConcurrent: 1,
     palette: {
-      body: { color: 0x975a2d },  // ore-bronze (I517 CG tint luma 99.5 hue 25.0; CANDIDATE - ST-485)
-      sponson: 0x4a2c17,          // dark sponsons (CANDIDATE)
-      hatch: 0xffb45e,            // hatch amber (CANDIDATE)
+      body: { color: 0x975a2d },  // ore-bronze (I519 FROZEN WITH MEASUREMENT: p50 53.53 sky / 48.97 floor, hue 18.8; ladder rung 2 of 12; MUST dluma > 10 vs hunter 116.11/13.5 passes (62.6 sky); lands below preferred band 95-105 per big/slow = dark)
+      sponson: 0x4a2c17,          // dark sponsons (I519 FROZEN)
+      hatch: 0xffb45e,            // hatch amber (I519 FROZEN)
     },
-    renderLumaGain: 1.6,          // CANDIDATE - ST-485 freezes WITH MEASUREMENT
+    renderLumaGain: 1.6,          // I519 FROZEN WITH MEASUREMENT (audit .evidence/I519/luma_i519.json)
     radius: 1.1,
     hp: 12,
     score: 400,          // kill reward (400 = flyer rung; 400 < 600 splicer)
@@ -656,11 +656,11 @@ export const CONFIG = {
     perWave: 1,
     maxConcurrent: 1,
     palette: {
-      body: { color: 0xaa3c96 },  // shield-magenta (CANDIDATE - ST-485 freezes WITH MEASUREMENT)
-      spine: 0x4a1a3d,            // dark spine (CANDIDATE)
-      core: 0xff7de8,             // shield-core accent (CANDIDATE)
+      body: { color: 0xaa3c96 },  // shield-magenta (I519 FROZEN WITH MEASUREMENT: p50 25.84 sky / 29.27 floor, hue 330.4/328.0; ladder rung 1 of 12; MUST |dluma| 68.4 > 10 vs flyer 94.22 passes; dhue 71.3 > 40 vs boss; lands below target band 110-125 - all MUST constraints satisfied, no ladder collision)
+      spine: 0x4a1a3d,            // dark spine (I519 FROZEN)
+      core: 0xff7de8,             // shield-core accent (I519 FROZEN)
     },
-    renderLumaGain: 1.4,          // CANDIDATE - ST-485 freezes WITH MEASUREMENT
+    renderLumaGain: 1.4,          // I519 FROZEN WITH MEASUREMENT (audit .evidence/I519/luma_i519.json)
     radius: 1.2,
     hp: 18,
     score: 500,          // kill reward (400 warden < 500 < 600 splicer)
@@ -938,7 +938,10 @@ export const CONFIG = {
       gunship:  [0xffa14d, 0xffc98a, 0xfff0d0],    // ST-418 gunmetal-ember (GUNSHIP kill - payload-amber family)
       sentry:   [0xffd9a0, 0xffb060, 0xff9a3d],    // ST-448 warm sage (SENTRY kill - station-ember family)
       wasp:     [0xeaff9a, 0xcfe05a, 0xb9c34d],    // ST-448 chartreuse (WASP kill - swarm family)
-      pod:      [0xa0f0e0, 0x6fd0c0, 0x5f8f86]     // ST-448 teal-green (POD kill - splitter family)
+      pod:      [0xa0f0e0, 0x6fd0c0, 0x5f8f86],   // ST-448 teal-green (POD kill - splitter family)
+      phantom:  [0xc8ffd8, 0x7dffc8, 0x40c055],  // ST-485 (E69): cloaker-green (PHANTOM kill - cloaker family)
+      hauler:   [0xffe0b0, 0xffb45e, 0x975a2d],  // ST-485 (E69): ore-bronze (HAULER kill - truck family)
+      bulwark:  [0xffd0f8, 0xff7de8, 0xaa3c96]   // ST-485 (E69): shield-magenta (BULWARK kill - enforcer family)
     },
     enemyBullet: { base: 0x5a1410, emissive: 0xff4a2a, emissiveIntensity: 1.2 }, // ST-248: hot red-orange threat bolt (data-driven; values unchanged)
     // I460/ST-429 A2: shared fresnel silhouette rim on enemy hulls (the I278
@@ -959,7 +962,10 @@ export const CONFIG = {
         mine:    { color: 0x8a4a3a, strength: 0.24 },  // rust
         sentry:  { color: 0x4a5a3a, strength: 0.24 }, // ST-448: dark sage (peak rim luma 20.2)
         wasp:    { color: 0x6a7a2a, strength: 0.24 }, // ST-448: dark chartreuse (peak rim luma 27.1)
-        pod:     { color: 0x2a4a45, strength: 0.26 }  // ST-448: dark teal (peak rim luma 17.4)
+        pod:     { color: 0x2a4a45, strength: 0.26 }, // ST-448: dark teal (peak rim luma 17.4)
+        phantom: { color: 0x2a5a35, strength: 0.30 }, // ST-485 (E69): dark cloaker-green (peak rim luma 23.1)
+        hauler:  { color: 0x5a3a1a, strength: 0.30 }, // ST-485 (E69): dark ore-bronze (peak rim luma 18.8)
+        bulwark: { color: 0x5a2a52, strength: 0.30 }  // ST-485 (E69): dark shield-magenta (peak rim luma 16.5)
       }
     },
     // I460/ST-429 A3: shader-stable ship damage flash - a pre-created unlit
@@ -1138,6 +1144,9 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
       wasp: { count: 5, speed: 7, life: 0.4, scaleMin: 0.3, scaleMax: 0.55 }, // ST-448: swarm chaff (light)
       pod: { count: 10, speed: 8, life: 0.7, scaleMin: 0.5, scaleMax: 1.0 }, // ST-448: teal fragments
       warden: { count: 10, speed: 9, life: 0.70, scaleMin: 0.80, scaleMax: 1.20 },
+      phantom: { count: 5, speed: 7, life: 0.45, scaleMin: 0.35, scaleMax: 0.65 },  // ST-485 (E69): cloaker shards (light)
+      hauler: { count: 10, speed: 8, life: 0.70, scaleMin: 0.50, scaleMax: 1.00 },  // ST-485 (E69): truck fragments (heavy)
+      bulwark: { count: 12, speed: 9, life: 0.75, scaleMin: 0.60, scaleMax: 1.20 },  // ST-485 (E69): enforcer chaff (heaviest)
       boss: { count: 14, speed: 10, life: 0.80, scaleMin: 1.20, scaleMax: 1.80 }
     }
   },

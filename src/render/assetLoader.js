@@ -36,6 +36,9 @@ const ASSETS = {
   gunship: 'assets/enemy_gunship.glb', // I451 (ST-421 E57): brute hull + open bay + nacelle (1688 tris; I448 useGLB pre-wire)
   sentry: 'assets/enemy_sentry.glb', // ST-449 (pre-wired at I481; procedural until the GLB lands)
   wasp: 'assets/enemy_wasp.glb', // ST-449 (pre-wired at I481; procedural until the GLB lands)
+  phantom: 'assets/enemy_phantom.glb', // ST-485 (E69): arrow hull + 2 canopy pods (I519: render wiring)
+  hauler: 'assets/enemy_hauler.glb', // ST-485 (E69): squat armored transport + mine-bay hatch
+  bulwark: 'assets/enemy_bulwark.glb', // ST-485 (E69): shield slab + spine + core (I519: render wiring)
 };
 
 // ST-327 (I358): the one PNG texture asset (Blender floor surface, 8,586 B,
