@@ -1,0 +1,11 @@
+const fs = require('fs');
+const ep = fs.readFileSync('E:/Game/production/epics.md', 'latin1');
+const i = ep.indexOf('## E70');
+console.log('=== EPICS E70 FULL BLOCK (' + (ep.length - i) + 'B)');
+console.log(ep.slice(i));
+const ac = fs.readFileSync('E:/Game/production/session-state/active.md', 'latin1');
+const j = ac.lastIndexOf('I523');
+console.log('=== ACTIVE (470186B) last I523 @' + j);
+console.log(ac.slice(Math.max(0, j - 1800)));
+const tl = fs.readFileSync('E:/Game/production/timeline.md');
+console.log('=== TIMELINE last 60 hex:', tl.slice(-60).toString('hex'));

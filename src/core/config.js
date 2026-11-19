@@ -582,7 +582,7 @@ export const CONFIG = {
   },
 
   phantom: {  // ST-484 (E69): PHANTOM - flank-ambush cloaker (wave 13+).
-    // enter 1.2 s (invisible) -> orbit 3.5 / cloak 1.2 / drift 1.0 / strike 2.5
+    // enter 2.0 s (invisible; I524/ST-490: was 1.2) -> orbit 3.5 / cloak 1.2 / drift 1.0 / strike 2.5
     // (8.2 s cycle, no RNG in step()). Targetable only while opacity > 0.5;
     // contact always applies. 2 hits (+250, stinger rung).
     firstWave: 13,
@@ -608,7 +608,7 @@ export const CONFIG = {
     burstGap: 0.3,       // s between burst bolts
     uncloakDur: 0.5,     // s: strike uncloak ramp
     chargeDur: 0.35,     // s: charge cue before the burst
-    enterDur: 1.2,       // s: invisible entry
+    enterDur: 2.0,       // s: invisible entry (I524/ST-490 E70: 1.2 -> 2.0, Option B primary; R1 TTK residual WITH measurement)
     orbitDur: 3.5,
     cloakDur: 1.2,
     driftDur: 1.0,

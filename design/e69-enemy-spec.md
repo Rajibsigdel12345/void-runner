@@ -294,3 +294,70 @@ motionOff branches; RM only scales motion, not presentation state) - confirmed l
 Phantom state histogram across the window (170 chunks): enter 11, orbit 71, cloak 24, drift 20, strike 44.
 Probe hygiene note: the uncontrolled test ship took 2 ambient wave-rock hits outside the invuln window
 (lives 2 -> 1) - probe artifact, not a game bug. End state PLAYING, console 0 errors / 0 warnings, no NaN.
+## Appendix B (E70, I524/ST-490) - R1 phantom TTK residual - Option B WITH MEASUREMENT
+
+### B.1 Residual and pre-registered levers
+- E69 residual R1 (I522, Appendix A.4): kiter median TTK 1.4667 s < the 2.0 s floor
+  (a 2-hit kill in ~0.27 s of visible orbit after a 1.2 s invisible enter); the E69
+  frozen levers were exhausted (orbitR 11 -> 15 applied at I521; targetOpacity gave no
+  better trade) -> ACCEPT-WITH-DOCUMENTATION, deferred to E70.
+- E70 pre-registration (design/e70-balance-followup-research.md sec.3, I523):
+  Option B (PRIMARY) phantom.enterDur 1.2 -> 2.0 - a pacing lever that adds readable
+  time (F1/F4); Option A (FALLBACK) phantom.hp 2 -> 3. Decision rule: re-confirm the
+  baseline -> Option B -> criteria -> ship / Option A / accept-with-documentation.
+  Criteria: R1 median TTK in [2.0, 12.0] AND expiry <= 15% AND hit <= 35%;
+  R2 phantom2 bothKilled 100% AND median <= 20 s; R5 aggro <= kiter + 1.0 s.
+
+### B.2 Measurement
+Harness .evidence/I524/balance524.mjs (mechanically spliced from the I521
+seed62100.mjs probe - pilots + threat scan + runIsolated byte-identical, verified by
+splice524.cjs; node-only, 60 Hz; seeds identical to I521: phantom1 62100+i,
+phantom2 72100+i, x100 each).
+
+BEFORE (baseline re-confirm - integrity gate PASS):
+- phantom1 kiter: median 1.4667 s (p90 2.8167), killed 100/100, expiry 0, hitRuns 0;
+  per-seed histogram {88 ticks: 57, 169 ticks: 43}
+- phantom1 aggro: median 1.5333 s
+- phantom2 kiter: bothKilled 100/100, median 5.05 s (p90 15.4833), hitRuns 2
+
+AFTER (Option B, phantom.enterDur = 2.0):
+- phantom1 kiter: median 4.05 s (p90 6.0667), killed 100/100, expiry 0, hitRuns 0;
+  per-seed histogram {243 ticks: 57, 364 ticks: 43}
+- phantom1 aggro: median 2.15 s
+- phantom2 kiter: bothKilled 100/100, median 6.075 s (p90 24.5667), hitRuns 7
+
+### B.3 Verdict (frozen criteria, evaluated exactly)
+- R1 PASS: median 4.05 s in [2.0, 12.0]; expiry 0 <= 15%; hit 0 <= 35%.
+- R2 HOLDS: bothKilled 100% (unchanged); median 6.075 <= 20 s (5.05 -> 6.075, +1.025).
+- R5 HOLDS: aggro 2.15 <= kiter 4.05 + 1.0.
+- Decision rule step 3: SHIP Option B. Residual R1 CLOSED. Option A not needed.
+
+### B.4 Deviation from the pre-registered prediction (documented)
+- Predicted median TTK ~2.27 s (+0.8 s); measured 4.05 s (+2.58 s). Mechanism: the
+  in-orbit kill offset is NOT preserved across the enter extension because
+  (a) the pilot weave is a function of absolute tick (sin(t/90)*4), so the pilot's
+  weave/relative phase at orbit start differs by 48 ticks, and (b) the phantom
+  finishes homing to the ring in ~1.25 s (15 u at 12 u/s), i.e. BEFORE the 2.0 s
+  gate, and sits stationary-invisible for the remaining 0.75 s, changing the
+  pilot's closing geometry. Structure IS preserved: the per-seed cluster
+  assignment is identical (the same 57/43 seeds in the same clusters, offsets
+  +155/+195 ticks) - deterministic, no seed re-classification.
+- R2 deaths (phantom2 hitRuns) 2 -> 7: the longer invisible enter gives the second
+  phantom more time to strike before the pilot clears the first. The frozen R2
+  constrains only bothKilled + median (both pass); recorded for transparency.
+- The 8.2 s cycle is unchanged (enter is outside the cycle; the
+  tests/phantom.test.js 8.2 s pin still passes); targetable fraction
+  ~71% -> ~64% (7.0 s visible / 9.0 s), matching the pre-registered design intent
+  (F1: readable time beats damage-model time).
+
+### B.5 Pins and tests (measured, I524)
+- enterDur affects only wave-13+ behavior (firstWave 13) -> the pin windows
+  (causal495 wave 2 / 36.15 s; playframe A = MENU; B = frame 50 ~ wave 1) draw
+  zero changed RNG: ALL EXACT - causal495 3-arm PASS (webgl/default EXACT; webgpu
+  err=0 warn=3 documented I498 baseline), causal483 CAUSAL456 PASS,
+  playframe483/491 PLAYFRAME456 PASS (B 52/55,400 hv=0/gv=0; console 0/0),
+  pwa491 SUMMARY 11/11.
+- No test re-pins required (the cycle pin excludes enterDur; the first strike now
+  lands at 7.7 s = 462 ticks < the 600-tick budget).
+- dist 5,254,934 -> 5,254,932 B / 184 (-2 B, measured); git diff vendor/ empty;
+  BOM delta 0.

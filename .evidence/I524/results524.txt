@@ -1,0 +1,45 @@
+I524 (ST-490, E70) - R1 phantom TTK residual, Option B WITH MEASUREMENT, 2026-11-20
+Servers: dev :5173 (pid 26524), dist :4200 (pid 22936), dist :5199 (pid 25308) - all hidden, all killed, all ports verified ECONNREFUSED.
+One headless Chromium tab per harness; all tabs closed by the harnesses.
+
+BUILD: npm run build exit 0. dist = 5,254,932 B / 184 files (-2 B vs I523's 5,254,934 - config comment text only).
+VENDOR PINS (8/8 EXACT):
+  raw      three.module 104F561458997220 / three.core 613E370F76638FDE / three.webgpu EAFEAD3154EC0609 / three.tsl D8F3CDB8B85B799A
+  dist-min three.module A65DE049A7F38B40 / three.core 7AB0784CD2532367 / three.webgpu F549248412C62B9A / three.tsl 7FF9ACF50F006017
+
+TTK HARNESS (.evidence/I524/balance524.mjs, node-only 60 Hz, seeds 62100+i / 72100+i, x100 each):
+  baseline (integrity gate PASS - reproduces I521/I522):
+    phantom1-kiter: median 1.4667 s (p90 2.8167), killed 100/100, expired 0, hitRuns 0; histogram {88 ticks: 57, 169 ticks: 43}
+    phantom1-aggro: median 1.5333 s
+    phantom2-kiter: bothKilled 100/100, median 5.05 s (p90 15.4833), hitRuns 2
+  optionB (phantom.enterDur 1.2 -> 2.0, src/core/config.js single value + 2 comment lines):
+    phantom1-kiter: median 4.05 s (p90 6.0667), killed 100/100, expired 0, hitRuns 0; histogram {243 ticks: 57, 364 ticks: 43} (same seeds, same clusters, +155/+195 ticks)
+    phantom1-aggro: median 2.15 s
+    phantom2-kiter: bothKilled 100/100, median 6.075 s (p90 24.5667), hitRuns 7
+
+VERDICT (frozen criteria, .evidence/I524/rules.md):
+  R1 PASS: median 4.05 s in [2.0, 12.0]; expired 0 <= 15%; hit 0 <= 35%
+  R2 HOLDS: bothKilled 100% (unchanged); median 6.075 <= 20 s (5.05 -> 6.075)
+  R5 HOLDS: aggro 2.15 <= kiter 4.05 + 1.0
+  Decision rule step 3: SHIP Option B. Residual R1 CLOSED. Option A (phantom.hp 2 -> 3) not needed.
+  Deviation documented: predicted +0.8 s vs measured +2.58 s - mechanism in spec Appendix B.4 (pilot weave sin(t/90) absolute-tick phase + phantom parked-invisible 0.75 s on ring).
+
+HARNESS RESULTS (all green, fresh runs):
+  1. causal495 (dist :4200)  -> CAUSAL495 PASS
+     webgl arm:  18/18 EXACT, console 0/0
+     default arm: 18/18 EXACT same pin set, console 0/0
+     webgpu arm:  err=0, warn=3 (powerPreference x1 + AttributeNode uv x2 = documented I498 baseline dirt), sim pins EXACT
+  2. causal483 (dev :5173)   -> CAUSAL456 PASS (console 0/0)
+  3. playframe483 (dev 5173) -> PLAYFRAME456 PASS (B 52/55,400 hv=0/gv=0; console 0/0)
+  4. playframe491 (dev 5173) -> PLAYFRAME456 PASS (B 52/55,400 hv=0/gv=0; console 0/0)
+  5. pwa491 (dist :5199)     -> SUMMARY 11/11
+
+TESTS: npm test 1,187 pass / 0 fail (cycle pin excludes enterDur; first strike 7.7 s = 462 ticks < 600-tick budget - no re-pins needed).
+
+CEILING: measured dist 5,254,932 B / 184 vs ceiling 6,100,000 B
+  headroom 845,068 B >= 102,400 B floor -> CUT LADDER not invoked
+  CLOSE FLOOR E69 = 845,066 B (I522) HOLDS; ceiling 6,100,000 B unchanged.
+
+DOCS: design/e69-enemy-spec.md Appendix B (E70) appended 22,659 -> 26,738 B (head16 232045363920456e6d792053706563 unchanged, pure ASCII, LF, ends NL).
+CHANGES: src/core/config.js only (phantom.enterDur 1.2 -> 2.0 + 2 comment lines). git diff vendor/ empty. BOM delta 0.
+E70 progress: ST-490 DONE (I524). Next: I525 = ST-491 (R7 diagnosis harness, diagnosis-only, no game change).
