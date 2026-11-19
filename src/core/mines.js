@@ -38,6 +38,29 @@ export class MineField {
     });
     return this.mines[this.mines.length - 1];
   }
+  /** ST-484 (E69): place a mine at an exact position (the HAULER drop). Cap-
+   * gated like spawn(); the pos is rim-clamped IN PLACE (callers pass fresh
+   * copies). A unit dirHint overrides the home-in aim; without it the mine
+   * homes in like any other (rot + home jitter are the only RNG draws). */
+  spawnAt(pos, dirHint = null) {
+    const m = this.cfg.mine;
+    if (this.mines.length >= m.maxConcurrent) return null;
+    const l = v2Len(pos);
+    const r = this.cfg.arena.radius - m.radius;
+    if (l > r) { pos.x = pos.x / l * r; pos.y = pos.y / l * r; }
+    const hasHint = dirHint && Number.isFinite(dirHint.x) && Number.isFinite(dirHint.y) && (dirHint.x !== 0 || dirHint.y !== 0);
+    const ang = hasHint ? Math.atan2(dirHint.y, dirHint.x) : Math.atan2(-pos.y, -pos.x) + this.rng.range(-0.4, 0.4);
+    this.mines.push({
+      id: this.nextId++,
+      pos,
+      vel: v2(Math.cos(ang) * m.speed, Math.sin(ang) * m.speed),
+      radius: m.radius,
+      rot: this.rng.next() * Math.PI * 2,
+      fireTimer: m.fireEvery, // ST-056: first shot after a full interval
+      dead: false,
+    });
+    return this.mines[this.mines.length - 1];
+  }
 
   /**
    * Advance all mines: constant speed, heading eases toward the ship at at most

@@ -12,6 +12,9 @@ import { GunshipField } from './gunship.js'; // ST-418
 import { SentryField } from './sentry.js'; // ST-448
 import { WaspField } from './wasp.js'; // ST-448
 import { PodField } from './pod.js'; // ST-448
+import { PhantomField } from './phantom.js'; // ST-484 (E69)
+import { HaulerField } from './hauler.js'; // ST-484 (E69)
+import { BulwarkField } from './bulwark.js'; // ST-484 (E69)
 import { Monolith, bossHpForWave, bossBurstVectors } from './boss.js';
 import { Splicer, splicerHpForWave } from './splicer.js';
 import { CampaignBoss } from './campaignBoss.js'; // ST-456 (E64): the campaign end-of-level boss
@@ -47,6 +50,9 @@ this.gunships = new GunshipField(rng, cfg); // ST-418
 this.sentries = new SentryField(rng, cfg); // ST-448
 this.wasps = new WaspField(rng, cfg); // ST-448
 this.pods = new PodField(rng, cfg); // ST-448
+this.phantoms = new PhantomField(rng, cfg); // ST-484 (E69)
+this.haulers = new HaulerField(rng, cfg); // ST-484 (E69)
+this.bulwarks = new BulwarkField(rng, cfg); // ST-484 (E69)
     this.boss = null; // ST-055
     this.bossRelease = 0; // ST-241: 1 -> 0 over music.intensity.releaseTime after a boss death
     this.enemyBullets = new EnemyBulletField(cfg); // ST-056
@@ -257,6 +263,9 @@ this.spawnGunshipForWave(wv.startedWave); // ST-418
 this.spawnSentryForWave(wv.startedWave); // ST-448
 this.spawnWaspForWave(wv.startedWave); // ST-448
 this.spawnPodForWave(wv.startedWave); // ST-448
+this.spawnPhantomForWave(wv.startedWave); // ST-484 (E69)
+this.spawnHaulerForWave(wv.startedWave); // ST-484 (E69)
+this.spawnBulwarkForWave(wv.startedWave); // ST-484 (E69)
       this.scoreKeeper.setCap(capFor(wv.startedWave, this.cfg)); // ST-233: combo cap wave-scaling (W1-2 capLow / W3+ capHigh)
     }
     const wl = this.weaponLevel(); // ST-122: weapon progression by wave
@@ -271,6 +280,9 @@ this.gunships.step(edt, this.ship.pos); // ST-418 (ST-115: scaled under slow-mo)
 this.sentries.step(edt, this.ship.pos); // ST-448 (ST-115: scaled under slow-mo)
 this.wasps.step(edt, this.ship.pos); // ST-448 (ST-115: scaled under slow-mo)
 this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slow-mo)
+this.phantoms.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
+this.haulers.step(edt); // ST-484 (E69; closed-form plod; no shipPos, no RNG)
+this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     if (this.warden) this.warden.step(edt, this.ship.pos); // ST-136 (ST-115: scaled under slow-mo)
     for (const dc of this.drones.decayed) { // I129: seeker battery expired -> self-destruct event (render FX in main.js)
       this.emit('droneDecay', { pos: { x: dc.pos.x, y: dc.pos.y } });
@@ -309,6 +321,31 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     for (const pe of this.pods.drainEvents()) { // ST-448: death(self-expiry; split is resolve-driven)
       const p = { x: pe.pos.x, y: pe.pos.y };
       if (pe.kind === 'death') this.emit('podDeath', { pos: p, self: pe.self, split: false });
+    }
+
+    for (const pe of this.phantoms.drainEvents()) { // ST-484 (E69): fire / charge / death(self-expiry)
+      const p = { x: pe.pos.x, y: pe.pos.y };
+      if (pe.kind === 'fire') {
+        const b = this.enemyBullets.fire(pe.pos, pe.dir, this.cfg.phantom.boltSpeed);
+        if (b) this.emit('phantomStrike', { pos: p });
+      } else if (pe.kind === 'charge') this.emit('phantomCharge', { pos: p });
+      else this.emit('phantomDeath', { pos: p, self: pe.self });
+    }
+    for (const he of this.haulers.drainEvents()) { // ST-484 (E69): mineDrop / telegraph / death(self-expiry)
+      const p = { x: he.pos.x, y: he.pos.y };
+      if (he.kind === 'mineDrop') {
+        const m = this.mines.spawnAt(he.pos, he.dir);
+        if (m) this.emit('haulerMineDrop', { pos: p });
+      } else if (he.kind === 'telegraph') this.emit('haulerTelegraph', { pos: p });
+      else this.emit('haulerDeath', { pos: p, self: he.self });
+    }
+    for (const be of this.bulwarks.drainEvents()) { // ST-484 (E69): fire(no dir) / charge / death(self-expiry)
+      const p = { x: be.pos.x, y: be.pos.y };
+      if (be.kind === 'fire') {
+        const b = this.fireAimedBolt(be.pos, this.cfg.bulwark.boltSpeed);
+        if (b) this.emit('bulwarkFire', { pos: p });
+      } else if (be.kind === 'charge') this.emit('bulwarkCharge', { pos: p });
+      else this.emit('bulwarkDeath', { pos: p, self: be.self });
     }
 
     for (const f of this.mines.takeFires()) { // ST-056
@@ -366,9 +403,15 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     this.resolveBulletSentries(); // ST-448
     this.resolveBulletWasps(); // ST-448
     this.resolveBulletPods(); // ST-448
+    this.resolveBulletPhantoms(); // ST-484 (E69)
+    this.resolveBulletHaulers(); // ST-484 (E69)
+    this.resolveBulletBulwarks(); // ST-484 (E69)
     this.resolveShipSentries(); // ST-448
     this.resolveShipWasps(); // ST-448
     this.resolveShipPods(); // ST-448
+    this.resolveShipPhantoms(); // ST-484 (E69)
+    this.resolveShipHaulers(); // ST-484 (E69)
+    this.resolveShipBulwarks(); // ST-484 (E69)
     this.resolveShipBoss(); // ST-055
     this.resolveShipWarden(); // ST-136
     this.resolveShipEnemyBullets(); // ST-056
@@ -795,6 +838,9 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     this.sentries.clear();
     this.wasps.clear();
     this.pods.clear();
+    this.phantoms.clear(); // ST-484 (E69)
+    this.haulers.clear(); // ST-484 (E69)
+    this.bulwarks.clear(); // ST-484 (E69)
     this.enemyBullets.clear();
     this.boss = null;
     this.warden = null;
@@ -1262,6 +1308,56 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     }
   }
 
+  /** ST-484 (E69): spawn the wave's phantoms once eligible (wave >= 13, never
+   * boss waves). The first spawn of a run emits 'phantomSpawn' (the "PHANTOM
+   * INBOUND" toast). The gate returns before any RNG draw. */
+  spawnPhantomForWave(wave) {
+    const s = this.cfg.phantom;
+    if (wave < s.firstWave || wave % this.cfg.boss.everyWave === 0) return;
+    if (!this._zoneAllows("phantom")) return; // ST-453 (E64): zone mix gate
+    const n = Math.max(0, Math.round(s.perWave * this._hazardRate("enemyRate"))); // ST-453 (E64)
+    for (let i = 0; i < n; i++) {
+      const q = this.phantoms.spawn(this.ship.pos);
+      if (q && !this._phantomToasted) {
+        this._phantomToasted = true;
+        this.emit('phantomSpawn', { pos: { x: q.pos.x, y: q.pos.y }, wave });
+      }
+    }
+  }
+
+  /** ST-484 (E69): spawn the wave's haulers once eligible (spec wave >= 15;
+   * wave 15 is a boss wave so the effective debut is wave 16 - ST-487
+   * adjudicates). The first spawn of a run emits 'haulerSpawn'. */
+  spawnHaulerForWave(wave) {
+    const s = this.cfg.hauler;
+    if (wave < s.firstWave || wave % this.cfg.boss.everyWave === 0) return;
+    if (!this._zoneAllows("hauler")) return; // ST-453 (E64): zone mix gate
+    const n = Math.max(0, Math.round(s.perWave * this._hazardRate("enemyRate"))); // ST-453 (E64)
+    for (let i = 0; i < n; i++) {
+      const q = this.haulers.spawn(this.ship.pos, this.ship.aim);
+      if (q && !this._haulerToasted) {
+        this._haulerToasted = true;
+        this.emit('haulerSpawn', { pos: { x: q.pos.x, y: q.pos.y }, wave });
+      }
+    }
+  }
+
+  /** ST-484 (E69): spawn the wave's bulwarks once eligible (wave >= 17, never
+   * boss waves). The first spawn of a run emits 'bulwarkSpawn'. */
+  spawnBulwarkForWave(wave) {
+    const s = this.cfg.bulwark;
+    if (wave < s.firstWave || wave % this.cfg.boss.everyWave === 0) return;
+    if (!this._zoneAllows("bulwark")) return; // ST-453 (E64): zone mix gate
+    const n = Math.max(0, Math.round(s.perWave * this._hazardRate("enemyRate"))); // ST-453 (E64)
+    for (let i = 0; i < n; i++) {
+      const q = this.bulwarks.spawn(this.ship.pos);
+      if (q && !this._bulwarkToasted) {
+        this._bulwarkToasted = true;
+        this.emit('bulwarkSpawn', { pos: { x: q.pos.x, y: q.pos.y }, wave });
+      }
+    }
+  }
+
   /** ST-448: bullets damage sentries (3 hits). The kill pays +350 and feeds the combo. */
   resolveBulletSentries() {
     for (const b of this.weapons.bullets) {
@@ -1327,6 +1423,85 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     this.weapons.compact();
   }
 
+  /** ST-484 (E69): bullets damage phantoms (2 hits) - ONLY while the cloak is
+   * up (opacity > targetOpacity - the cloak read, checked BEFORE the radius
+   * test). A lethal hit pays +250 and feeds the combo. */
+  resolveBulletPhantoms() {
+    const s = this.cfg.phantom;
+    for (const b of this.weapons.bullets) {
+      if (b.dead) continue;
+      const hit = this.phantoms.phantoms.find(pm => !pm.dead && pm.opacity > s.targetOpacity &&
+        Math.hypot(pm.pos.x - b.pos.x, pm.pos.y - b.pos.y) < pm.radius + b.radius);
+      if (!hit) continue;
+      this.onPlayerBulletHit(b.id);
+      const q = this.phantoms.hit(hit.id);
+      for (const pe of this.phantoms.drainEvents()) {
+        const p = { x: pe.pos.x, y: pe.pos.y };
+        if (pe.kind === 'hit') this.emit('phantomHit', { pos: p });
+      }
+      if (q.dead) {
+        const points = this.scoreKeeper.kill(s.score, this.time);
+        this.emit('kill', { pos: { x: q.pos.x, y: q.pos.y }, size: 'phantom', points,
+          combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), phantom: true });
+        this.emit('phantomDeath', { pos: { x: q.pos.x, y: q.pos.y }, self: false });
+      }
+    }
+    this.weapons.compact();
+  }
+
+  /** ST-484 (E69): bullets damage haulers (12 hits). A lethal hit pays +400
+   * and feeds the combo. */
+  resolveBulletHaulers() {
+    const s = this.cfg.hauler;
+    for (const b of this.weapons.bullets) {
+      if (b.dead) continue;
+      const hit = this.haulers.haulers.find(pm => !pm.dead &&
+        Math.hypot(pm.pos.x - b.pos.x, pm.pos.y - b.pos.y) < pm.radius + b.radius);
+      if (!hit) continue;
+      this.onPlayerBulletHit(b.id);
+      const q = this.haulers.hit(hit.id);
+      for (const he of this.haulers.drainEvents()) {
+        const p = { x: he.pos.x, y: he.pos.y };
+        if (he.kind === 'hit') this.emit('haulerHit', { pos: p });
+      }
+      if (q.dead) {
+        const points = this.scoreKeeper.kill(s.score, this.time);
+        this.emit('kill', { pos: { x: q.pos.x, y: q.pos.y }, size: 'hauler', points,
+          combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), hauler: true });
+        this.emit('haulerDeath', { pos: { x: q.pos.x, y: q.pos.y }, self: false });
+      }
+    }
+    this.weapons.compact();
+  }
+
+  /** ST-484 (E69): bullets damage bulwarks (18 hits) unless the frontal shield
+   * arc negates the shot (the field takes the bullet position for the arc test
+   * and pushes 'negate'/'stun'). A lethal hit pays +500 and feeds the combo. */
+  resolveBulletBulwarks() {
+    const s = this.cfg.bulwark;
+    for (const b of this.weapons.bullets) {
+      if (b.dead) continue;
+      const hit = this.bulwarks.bulwarks.find(pm => !pm.dead &&
+        Math.hypot(pm.pos.x - b.pos.x, pm.pos.y - b.pos.y) < pm.radius + b.radius);
+      if (!hit) continue;
+      this.onPlayerBulletHit(b.id);
+      const q = this.bulwarks.hit(hit.id, b.pos);
+      for (const be of this.bulwarks.drainEvents()) {
+        const p = { x: be.pos.x, y: be.pos.y };
+        if (be.kind === 'negate') this.emit('bulwarkNegate', { pos: p });
+        else if (be.kind === 'stun') this.emit('bulwarkStun', { pos: p });
+        else this.emit('bulwarkHit', { pos: p });
+      }
+      if (q.dead) {
+        const points = this.scoreKeeper.kill(s.score, this.time);
+        this.emit('kill', { pos: { x: q.pos.x, y: q.pos.y }, size: 'bulwark', points,
+          combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), bulwark: true });
+        this.emit('bulwarkDeath', { pos: { x: q.pos.x, y: q.pos.y }, self: false });
+      }
+    }
+    this.weapons.compact();
+  }
+
   /** ST-448: a sentry touching the ship costs a life (NO score) and is lost. */
   resolveShipSentries() {
     if (this.ship.isInvulnerable || this.lives <= 0) return;
@@ -1375,6 +1550,55 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
 
+  /** ST-484 (E69): a phantom touching the ship costs a life (NO score) and is
+   * lost - REGARDLESS of cloak (contact ignores opacity). */
+  resolveShipPhantoms() {
+    if (this.ship.isInvulnerable || this.lives <= 0) return;
+    const hit = this.phantoms.phantoms.find(pm => !pm.dead &&
+      Math.hypot(pm.pos.x - this.ship.pos.x, pm.pos.y - this.ship.pos.y) < pm.radius + this.cfg.ship.radius);
+    if (!hit) return;
+    this.phantoms.destroy(hit.id);
+    this.emit('phantomDeath', { pos: { x: hit.pos.x, y: hit.pos.y }, self: false });
+    const livesLeft = this.shipDamage();
+    this.scoreKeeper.onDamage();
+    const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.ship.damage(v2(nx / n, ny / n));
+    if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
+  }
+
+  /** ST-484 (E69): a hauler touching the ship costs a life (NO score) and is lost. */
+  resolveShipHaulers() {
+    if (this.ship.isInvulnerable || this.lives <= 0) return;
+    const hit = this.haulers.haulers.find(pm => !pm.dead &&
+      Math.hypot(pm.pos.x - this.ship.pos.x, pm.pos.y - this.ship.pos.y) < pm.radius + this.cfg.ship.radius);
+    if (!hit) return;
+    this.haulers.destroy(hit.id);
+    this.emit('haulerDeath', { pos: { x: hit.pos.x, y: hit.pos.y }, self: false });
+    const livesLeft = this.shipDamage();
+    this.scoreKeeper.onDamage();
+    const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.ship.damage(v2(nx / n, ny / n));
+    if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
+  }
+
+  /** ST-484 (E69): a bulwark touching the ship costs a life (NO score) and is lost. */
+  resolveShipBulwarks() {
+    if (this.ship.isInvulnerable || this.lives <= 0) return;
+    const hit = this.bulwarks.bulwarks.find(pm => !pm.dead &&
+      Math.hypot(pm.pos.x - this.ship.pos.x, pm.pos.y - this.ship.pos.y) < pm.radius + this.cfg.ship.radius);
+    if (!hit) return;
+    this.bulwarks.destroy(hit.id);
+    this.emit('bulwarkDeath', { pos: { x: hit.pos.x, y: hit.pos.y }, self: false });
+    const livesLeft = this.shipDamage();
+    this.scoreKeeper.onDamage();
+    const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.ship.damage(v2(nx / n, ny / n));
+    if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
+  }
+
   reset() {
     this.warp = null; this.victory = false; this.currentStage = 1; // ST-419: reset campaign state (mode persists via begin)
     this.levelState = { level: 1, distance: 0, zone: 1, phase: 'zone' }; this._levelStartScore = 0; this._lastZone = 0; // ST-453 (E64)
@@ -1394,9 +1618,15 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
     this.sentries.clear(); // ST-448
     this.wasps.clear(); // ST-448
     this.pods.clear(); // ST-448
+    this.phantoms.clear(); // ST-484 (E69)
+    this.haulers.clear(); // ST-484 (E69)
+    this.bulwarks.clear(); // ST-484 (E69)
     this._sentryToasted = false; // ST-448
     this._waspToasted = false; // ST-448
     this._podToasted = false; // ST-448
+    this._phantomToasted = false; // ST-484 (E69)
+    this._haulerToasted = false; // ST-484 (E69)
+    this._bulwarkToasted = false; // ST-484 (E69)
     this.boss = null; // ST-055
     this.bossRelease = 0; // ST-241
     this.warden = null; // ST-136

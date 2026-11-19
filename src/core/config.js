@@ -581,6 +581,105 @@ export const CONFIG = {
     maxAge: 30,
   },
 
+  phantom: {  // ST-484 (E69): PHANTOM - flank-ambush cloaker (wave 13+).
+    // enter 1.2 s (invisible) -> orbit 3.5 / cloak 1.2 / drift 1.0 / strike 2.5
+    // (8.2 s cycle, no RNG in step()). Targetable only while opacity > 0.5;
+    // contact always applies. 2 hits (+250, stinger rung).
+    firstWave: 13,
+    perWave: 1,
+    maxConcurrent: 2,
+    palette: {
+      body: { color: 0x40c055 },  // cloaker green (CANDIDATE - ST-485 freezes WITH MEASUREMENT)
+      pod: { color: 0x1d5c3f },   // dark hull pod (CANDIDATE)
+      accent: 0x7dffc8,           // cloak-edge accent (CANDIDATE)
+    },
+    renderLumaGain: 2.0,          // CANDIDATE - ST-485 freezes WITH MEASUREMENT
+    radius: 0.5,
+    hp: 2,
+    score: 250,          // kill reward (250 = stinger rung; 250 < 300 hunter)
+    enterSpeed: 12,      // u/s invisible flank-in
+    orbitSpeed: 6.5,     // u/s tangential orbit speed
+    orbitR: 11,          // u: flank ring around the ship
+    cloakOpacity: 0.12,  // cloak floor (targetable only above targetOpacity)
+    targetOpacity: 0.5,  // opacity line above which bullets connect
+    boltSpeed: 15,       // u/s: strike bolt (< 16, <= 1.15x ship F2 cap)
+    boltSpread: 0.16,    // rad: burst bolt offset per step
+    burstCount: 3,
+    burstGap: 0.3,       // s between burst bolts
+    uncloakDur: 0.5,     // s: strike uncloak ramp
+    chargeDur: 0.35,     // s: charge cue before the burst
+    enterDur: 1.2,       // s: invisible entry
+    orbitDur: 3.5,
+    cloakDur: 1.2,
+    driftDur: 1.0,
+    strikeDur: 2.5,
+    rimDist: 15,
+    maxAge: 45,
+  },
+  hauler: {  // ST-484 (E69): HAULER - slow ore truck (spec wave 15+; 15 is a boss
+    // wave (boss.everyWave 5) so the standard gate makes the effective debut
+    // wave 16 - ST-487 adjudicates). Closed-form plod 3.5 u/s + 1.2 Hz wobble,
+    // rim ping-pong, a mine drop every 4.0 s (0.4 s telegraph), never shoots.
+    // 12 hits (+400, flyer rung). No RNG in step().
+    firstWave: 15,
+    perWave: 1,
+    maxConcurrent: 1,
+    palette: {
+      body: { color: 0x975a2d },  // ore-bronze (I517 CG tint luma 99.5 hue 25.0; CANDIDATE - ST-485)
+      sponson: 0x4a2c17,          // dark sponsons (CANDIDATE)
+      hatch: 0xffb45e,            // hatch amber (CANDIDATE)
+    },
+    renderLumaGain: 1.6,          // CANDIDATE - ST-485 freezes WITH MEASUREMENT
+    radius: 1.1,
+    hp: 12,
+    score: 400,          // kill reward (400 = flyer rung; 400 < 600 splicer)
+    speed: 3.5,          // u/s plod
+    enterSpeed: 8,       // u/s entry home-in
+    enterDur: 2.0,       // s: entry (or earlier on target arrival)
+    forwardOffMin: 2,    // u: frozen target ahead of the ship (min)
+    forwardOffMax: 5,    // u (max)
+    lateralOffMin: 4,    // u: to one side (min)
+    lateralOffMax: 8,    // u (max)
+    mineEvery: 4.0,      // s: mine drop cadence
+    dropTelegraph: 0.4,  // s: telegraph before each drop
+    wobbleAmp: 0.5,      // u: plod wobble amplitude
+    wobbleFreq: 1.2,     // Hz: plod wobble frequency
+    rimDist: 15,
+    maxAge: 60,
+  },
+  bulwark: {  // ST-484 (E69): BULWARK - shield enforcer (wave 17+). Hovers on a
+    // 8-10 u ring, yaw 0.5 rad/s; frontal arc (+/-50 deg) negates bullets -
+    // 6 negations -> 1.5 s stun; one slow bolt every 6.0 s (0.6 s charge,
+    // no dir - game.js re-aims). Stun does not pause the cadence. 18 hits
+    // (+500). No RNG in step().
+    firstWave: 17,
+    perWave: 1,
+    maxConcurrent: 1,
+    palette: {
+      body: { color: 0xaa3c96 },  // shield-magenta (CANDIDATE - ST-485 freezes WITH MEASUREMENT)
+      spine: 0x4a1a3d,            // dark spine (CANDIDATE)
+      core: 0xff7de8,             // shield-core accent (CANDIDATE)
+    },
+    renderLumaGain: 1.4,          // CANDIDATE - ST-485 freezes WITH MEASUREMENT
+    radius: 1.2,
+    hp: 18,
+    score: 500,          // kill reward (400 warden < 500 < 600 splicer)
+    yawRate: 0.5,        // rad/s: heading slew toward the ship
+    shieldArc: 0.8727,   // rad: +/- 50 deg frontal negation arc
+    shieldHitsToStun: 6, // negations until the shield overloads
+    shieldStunDur: 1.5,  // s
+    boltEvery: 6.0,      // s: bolt cadence
+    boltTelegraph: 0.6,  // s: charge cue
+    boltSpeed: 10,       // u/s slow bolt (< 16)
+    enterSpeed: 6,       // u/s entry
+    holdRMin: 8,         // u: hover ring (min)
+    holdRMax: 10,        // u (max)
+    strafeOmega: 0.15,   // rad/s: ring strafe
+    enterDur: 1.5,       // s: entry (or earlier at the ring)
+    rimDist: 15,
+    maxAge: 60,
+  },
+
   flyer: {
     // ST-232: FLYER - evasive sine-weave crosser (wave 9+). The game one pure
     // lead-shot skill target: it never homes, never fires, never rams - you must
@@ -689,6 +788,9 @@ export const CONFIG = {
       sentryDeath: 0.7,    // ST-448: aimed shooter kill (0.65 flyerDeath < 0.7 < 0.8 wardenDeath)
       waspDeath: 0.3,      // ST-448: dasher kill (below 0.35 droneExplode)
       podDeath: 0.75,      // ST-448: splitter kill (0.7 sentryDeath < 0.75 < 0.8 wardenDeath)
+      phantomDeath: 0.35,  // ST-484 (E69): cloaker kill (0.3 waspDeath < 0.35 < 0.4 mineExplode)
+      haulerDeath: 0.7,     // ST-484 (E69): truck kill (0.65 flyerDeath < 0.7 < 0.75 podDeath)
+      bulwarkDeath: 0.8,    // ST-484 (E69): enforcer kill (0.75 podDeath < 0.8 < 0.85 gunshipDeath)
       bossSpawn: 0.7,        // boss arrival
       bossDeath: 1.0,        // boss death
       wardenSpawn: 0.5,      // mini-boss arrival
@@ -729,6 +831,9 @@ export const CONFIG = {
       wasp: 0.10,          // ST-448: dasher kill (0.08 s < 0.10 < 0.12 m)
       pod: 0.26,           // ST-448: splitter kill (0.25 flyer < 0.26 < 0.28 sentry)
       sentry: 0.28,        // ST-448: aimed shooter kill (0.25 flyer < 0.28 < 0.3 gunship)
+      phantom: 0.11,       // ST-484 (E69): cloaker kill (0.10 wasp < 0.11 < 0.12 m)
+      hauler: 0.29,        // ST-484 (E69): truck kill (0.28 sentry < 0.29 < 0.3 gunship)
+      bulwark: 0.3,        // ST-484 (E69): enforcer kill (0.29 hauler < 0.3 = the max rung; overdrive -> cap)
       gunship: 0.3,          // ST-418: heavy bomber kill (0.25 flyer < 0.3 = the max rung)
       overdriveBoost: 0.5,    // combo-heat: x1.5 while overdrive is active
       max: 0.3                // hard cap (L + overdrive 0.27 stays under the fanfare rung)
@@ -749,7 +854,10 @@ export const CONFIG = {
         wasp: 1.4,           // ST-448: dasher (radius 0.45)
         sentry: 2.8,         // ST-448: aimed shooter (radius 1.1)
         pod: 3.0,            // ST-448: splitter (radius 1.2)
-        gunship: 3.6         // ST-418: heavy bomber (radius 1.6)
+        gunship: 3.6,       // ST-418: heavy bomber (radius 1.6)
+        phantom: 1.5,       // ST-484 (E69): cloaker (radius 0.5)
+        hauler: 3.2,        // ST-484 (E69): truck (radius 1.1)
+        bulwark: 3.4,       // ST-484 (E69): enforcer (radius 1.2)
       }
     },
     punch: {                  // ST-081: camera punch - brief directed jolt (boss death / bomb)
@@ -1060,7 +1168,7 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
     // within [0,1] where the zone checkpoint sits (0 = zone start; Ikaruga F6:
     // death continues from the last checkpoint, never wipe-to-menu).
     // enemyMix vocabulary (E63 roster): drone/mine/stinger/flyer/hunter/gunship/
-    // sentry/wasp/pod + rock. optionalTargets vocabulary: rock variants
+    // sentry/wasp/pod/phantom/hauler/bulwark + rock. optionalTargets vocabulary: rock variants
     // (golden, shielded) + powerups (rapid, spread, shield, magnet, overdrive,
     // slowmo) + bonus enemies (pod). `name` = en source of truth; display
     // strings in strings.js ('level.name.l<n>' / 'level.zone.l<n>z<m>', all 3
