@@ -1,0 +1,19 @@
+﻿isolated phantom1 done (3060 ms)
+isolated phantom2 done (10991 ms)
+isolated hauler1 done (39949 ms)
+isolated bulwark1 done (65146 ms)
+sweep done (78047 ms)
+
+=== RULE VERDICTS ===
+R1 FAIL {"medianTTK":1.4666666666666666,"expiryRate":0,"hitRate":0}
+R2 PASS {"bothKilledRate":1,"medianTTK":5.05}
+R3 PASS {"medianTTK":4.633333333333333,"hitRate":0,"killRate":1}
+R4 PASS {"medianTTK":8.266666666666666,"killRate":1,"stunsInKilledPct":1}
+R5.phantom1 PASS {"kiter":1.4666666666666666,"aggro":1.5333333333333332}
+R5.phantom2 PASS {"kiter":5.05,"aggro":3.3833333333333333}
+R5.hauler1 PASS {"kiter":4.633333333333333,"aggro":2.4833333333333334}
+R5.bulwark1 PASS {"kiter":8.266666666666666,"aggro":null}
+R6 PASS {"phantom":250,"hauler":400,"bulwark":500,"splicer":600}
+R7 FAIL {"wave20Reached":0,"n":10}
+R8 FAIL {"ratioHighLow":null,"low":21.15833333333333,"high":null}
+total ms: 78062

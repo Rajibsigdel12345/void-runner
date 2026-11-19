@@ -599,7 +599,7 @@ export const CONFIG = {
     score: 250,          // kill reward (250 = stinger rung; 250 < 300 hunter)
     enterSpeed: 12,      // u/s invisible flank-in
     orbitSpeed: 6.5,     // u/s tangential orbit speed
-    orbitR: 11,          // u: flank ring around the ship
+    orbitR: 15,          // u: flank ring around the ship (I521/ST-487: 11 -> 15; kiter median TTK 1.4s -> 1.4667s, near-inert on harness seeds 62100+i; scan predicted 2.82 in its own context - see spec Appendix A)
     cloakOpacity: 0.12,  // cloak floor (targetable only above targetOpacity)
     targetOpacity: 0.5,  // opacity line above which bullets connect
     boltSpeed: 15,       // u/s: strike bolt (< 16, <= 1.15x ship F2 cap)
@@ -621,7 +621,7 @@ export const CONFIG = {
     // wave 16 - ST-487 adjudicates). Closed-form plod 3.5 u/s + 1.2 Hz wobble,
     // rim ping-pong, a mine drop every 4.0 s (0.4 s telegraph), never shoots.
     // 12 hits (+400, flyer rung). No RNG in step().
-    firstWave: 15,
+    firstWave: 16,      // I521/ST-487: spec said 15 but 15 is a boss wave (never spawns) - pinned to effective debut 16
     perWave: 1,
     maxConcurrent: 1,
     palette: {

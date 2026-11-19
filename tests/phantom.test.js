@@ -32,7 +32,7 @@ test('phantom: config sanity (gate 13, 2 hits, +250, the 8.2 s cycle, F2 bolt ca
   assert.ok(s.boltSpeed < 16, 'absolute dodgeability ceiling');
   assert.ok(s.boltSpeed <= 1.15 * CONFIG.ship.maxSpeed + EPS, 'under the 1.15x ship F2 cap');
   assert.ok(Math.abs(s.orbitDur + s.cloakDur + s.driftDur + s.strikeDur - 8.2) < 1e-9, '8.2 s cycle exact');
-  assert.equal(s.orbitR, 11, 'flank ring radius');
+  assert.equal(s.orbitR, 15, 'flank ring radius (I521/ST-487: 11 -> 15)');
   assert.ok(s.cloakOpacity < s.targetOpacity, 'cloak floor below the targetable line');
   assert.ok(s.enterDur > 0 && s.uncloakDur < s.strikeDur, 'entry + uncloak windows sane');
 });

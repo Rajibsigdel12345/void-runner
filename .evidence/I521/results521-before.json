@@ -1,0 +1,397 @@
+{
+ "meta": {
+  "dt": 0.016666666666666666,
+  "isolCap": 5400,
+  "sweepCap": 36000,
+  "seedBase": 52100
+ },
+ "isolated": {
+  "phantom1": {
+   "kiter": {
+    "n": 100,
+    "killed": 100,
+    "expiredRuns": 0,
+    "hitRuns": 0,
+    "medianTTK": 1.4,
+    "p90TTK": 1.6,
+    "killRate": 1,
+    "expiryRate": 0,
+    "hitRate": 0,
+    "deaths": 0,
+    "negatesMedian": 0,
+    "stunsMedian": 0,
+    "stunsInKilledPct": 0,
+    "deadRuns": 0
+   },
+   "aggro": {
+    "n": 100,
+    "killed": 100,
+    "expiredRuns": 0,
+    "hitRuns": 0,
+    "medianTTK": 1.5,
+    "p90TTK": 1.5,
+    "killRate": 1,
+    "expiryRate": 0,
+    "hitRate": 0,
+    "deaths": 0,
+    "negatesMedian": 0,
+    "stunsMedian": 0,
+    "stunsInKilledPct": 0,
+    "deadRuns": 0
+   },
+   "cautious": {
+    "n": 100,
+    "killed": 0,
+    "expiredRuns": 100,
+    "hitRuns": 0,
+    "medianTTK": null,
+    "p90TTK": null,
+    "killRate": 0,
+    "expiryRate": 1,
+    "hitRate": 0,
+    "deaths": 0,
+    "negatesMedian": 0,
+    "stunsMedian": 0,
+    "stunsInKilledPct": 0,
+    "deadRuns": 0
+   }
+  },
+  "phantom2": {
+   "kiter": {
+    "n": 100,
+    "killed": 100,
+    "expiredRuns": 0,
+    "hitRuns": 7,
+    "medianTTK": 4,
+    "p90TTK": 7.1499999999999995,
+    "killRate": 1,
+    "expiryRate": 0,
+    "hitRate": 0.07,
+    "deaths": 7,
+    "negatesMedian": 0,
+    "stunsMedian": 0,
+    "stunsInKilledPct": 0,
+    "deadRuns": 0
+   },
+   "aggro": {
+    "n": 100,
+    "killed": 100,
+    "expiredRuns": 0,
+    "hitRuns": 0,
+    "medianTTK": 2.8666666666666667,
+    "p90TTK": 3.466666666666667,
+    "killRate": 1,
+    "expiryRate": 0,
+    "hitRate": 0,
+    "deaths": 0,
+    "negatesMedian": 0,
+    "stunsMedian": 0,
+    "stunsInKilledPct": 0,
+    "deadRuns": 0
+   },
+   "cautious": {
+    "n": 100,
+    "killed": 1,
+    "expiredRuns": 97,
+    "hitRuns": 20,
+    "medianTTK": 3.3833333333333333,
+    "p90TTK": 3.3833333333333333,
+    "killRate": 0.01,
+    "expiryRate": 0.97,
+    "hitRate": 0.2,
+    "deaths": 24,
+    "negatesMedian": 0,
+    "stunsMedian": 0,
+    "stunsInKilledPct": 0,
+    "deadRuns": 2
+   }
+  },
+  "hauler1": {
+   "kiter": {
+    "n": 100,
+    "killed": 100,
+    "expiredRuns": 0,
+    "hitRuns": 0,
+    "medianTTK": 4.633333333333333,
+    "p90TTK": 4.95,
+    "killRate": 1,
+    "expiryRate": 0,
+    "hitRate": 0,
+    "deaths": 0,
+    "negatesMedian": 0,
+    "stunsMedian": 0,
+    "stunsInKilledPct": 0,
+    "deadRuns": 0
+   },
+   "aggro": {
+    "n": 100,
+    "killed": 7,
+    "expiredRuns": 0,
+    "hitRuns": 93,
+    "medianTTK": 2.4833333333333334,
+    "p90TTK": 2.75,
+    "killRate": 0.07,
+    "expiryRate": 0,
+    "hitRate": 0.93,
+    "deaths": 93,
+    "negatesMedian": 0,
+    "stunsMedian": 0,
+    "stunsInKilledPct": 0,
+    "deadRuns": 0
+   },
+   "cautious": {
+    "n": 100,
+    "killed": 18,
+    "expiredRuns": 82,
+    "hitRuns": 0,
+    "medianTTK": 21.916666666666664,
+    "p90TTK": 58.833333333333336,
+    "killRate": 0.18,
+    "expiryRate": 0.82,
+    "hitRate": 0,
+    "deaths": 0,
+    "negatesMedian": 0,
+    "stunsMedian": 0,
+    "stunsInKilledPct": 0,
+    "deadRuns": 0
+   }
+  },
+  "bulwark1": {
+   "kiter": {
+    "n": 100,
+    "killed": 100,
+    "expiredRuns": 0,
+    "hitRuns": 0,
+    "medianTTK": 8.266666666666666,
+    "p90TTK": 8.583333333333334,
+    "killRate": 1,
+    "expiryRate": 0,
+    "hitRate": 0,
+    "deaths": 0,
+    "negatesMedian": 16,
+    "stunsMedian": 2,
+    "stunsInKilledPct": 1,
+    "deadRuns": 0
+   },
+   "aggro": {
+    "n": 100,
+    "killed": 0,
+    "expiredRuns": 0,
+    "hitRuns": 100,
+    "medianTTK": null,
+    "p90TTK": null,
+    "killRate": 0,
+    "expiryRate": 0,
+    "hitRate": 1,
+    "deaths": 100,
+    "negatesMedian": 6,
+    "stunsMedian": 1,
+    "stunsInKilledPct": 0,
+    "deadRuns": 0
+   },
+   "cautious": {
+    "n": 100,
+    "killed": 0,
+    "expiredRuns": 100,
+    "hitRuns": 0,
+    "medianTTK": null,
+    "p90TTK": null,
+    "killRate": 0,
+    "expiryRate": 1,
+    "hitRate": 0,
+    "deaths": 0,
+    "negatesMedian": 0,
+    "stunsMedian": 0,
+    "stunsInKilledPct": 0,
+    "deadRuns": 0
+   }
+  }
+ },
+ "sweep": {
+  "n": 10,
+  "wave20Reached": 0,
+  "waveReached": [
+   5,
+   10,
+   5,
+   5,
+   12,
+   8,
+   10,
+   11,
+   10,
+   6
+  ],
+  "gameOverRuns": 10,
+  "deathsTotal": [
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3
+  ],
+  "medianDeaths": 3,
+  "clear": {
+   "1": 22.383333333333333,
+   "2": 23.84166666666667,
+   "3": 21.816666666666666,
+   "4": 20.5,
+   "5": 22.733333333333334,
+   "6": 10.025,
+   "7": 14.35,
+   "8": null,
+   "9": null,
+   "10": null,
+   "11": null,
+   "12": null,
+   "13": null,
+   "14": null,
+   "15": null,
+   "16": null,
+   "17": null,
+   "18": null,
+   "19": null,
+   "20": null
+  },
+  "nonBossLowMedian": 21.15833333333333,
+  "nonBossHighMedian": null,
+  "ratioHighLow": null,
+  "hits1320": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "medianHits1320": 0,
+  "bossClears": {
+   "5": 12.2,
+   "10": 11.875,
+   "15": null,
+   "20": null
+  },
+  "killsByType": {
+   "L": 194,
+   "M": 768,
+   "S": 2117,
+   "mine": 40,
+   "boss": 9,
+   "hunter": 29,
+   "stinger": 23,
+   "drone": 18,
+   "gunship": 11,
+   "flyer": 10,
+   "sentry": 4,
+   "wasp": 3
+  },
+  "seeds": [
+   52700,
+   52701,
+   52702,
+   52703,
+   52704,
+   52705,
+   52706,
+   52707,
+   52708,
+   52709
+  ]
+ },
+ "rules": {
+  "R1": {
+   "pass": false,
+   "v": {
+    "medianTTK": 1.4,
+    "expiryRate": 0,
+    "hitRate": 0
+   }
+  },
+  "R2": {
+   "pass": true,
+   "v": {
+    "bothKilledRate": 1,
+    "medianTTK": 4
+   }
+  },
+  "R3": {
+   "pass": true,
+   "v": {
+    "medianTTK": 4.633333333333333,
+    "hitRate": 0,
+    "killRate": 1
+   }
+  },
+  "R4": {
+   "pass": true,
+   "v": {
+    "medianTTK": 8.266666666666666,
+    "killRate": 1,
+    "stunsInKilledPct": 1
+   }
+  },
+  "R5": {
+   "phantom1": {
+    "pass": true,
+    "v": {
+     "kiter": 1.4,
+     "aggro": 1.5
+    }
+   },
+   "phantom2": {
+    "pass": true,
+    "v": {
+     "kiter": 4,
+     "aggro": 2.8666666666666667
+    }
+   },
+   "hauler1": {
+    "pass": true,
+    "v": {
+     "kiter": 4.633333333333333,
+     "aggro": 2.4833333333333334
+    }
+   },
+   "bulwark1": {
+    "pass": true,
+    "v": {
+     "kiter": 8.266666666666666,
+     "aggro": null
+    }
+   }
+  },
+  "R6": {
+   "pass": true,
+   "v": {
+    "phantom": 250,
+    "hauler": 400,
+    "bulwark": 500,
+    "splicer": 600
+   }
+  },
+  "R7": {
+   "pass": false,
+   "v": {
+    "wave20Reached": 0,
+    "n": 10
+   }
+  },
+  "R8": {
+   "pass": false,
+   "v": {
+    "ratioHighLow": null,
+    "low": 21.15833333333333,
+    "high": null
+   }
+  }
+ }
+}

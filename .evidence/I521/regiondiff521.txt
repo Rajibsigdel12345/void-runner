@@ -1,0 +1,93 @@
+--- harness ---
+function makeWorld(seed) {
+  const w = new World(new RNG(seed));
+  w.begin();
+  w.waves.state = "idle"; // isolated: director never spawns
+  w.waves.wave = 12; // weapon L3 debut context (minWave 10 -> level 3)
+  return w;
+}
+
+function runIsolated(cond, pilotName, seed) {
+  const type = COND_TYPE[cond];
+  const w = makeWorld(seed);
+  let total = 0;
+  if (cond === "phantom1" || cond === "phantom2") {
+    const n = cond === "phantom1" ? 1 : 2;
+    for (let i = 0; i < n; i++) if (w.phantoms.spawn(w.ship.pos)) total++;
+  } else if (cond === "hauler1") {
+    if (w.haulers.spawn(w.ship.pos, w.ship.aim)) total++;
+  } else if (cond === "bulwark1") {
+    if (w.bulwarks.spawn(w.ship.pos)) total++;
+  }
+  const threats = [];
+  const r = { seed, cond, pilot: pilotName, total, kills: 0, expired: 0, hits: 0,
+              negates: 0, stuns: 0, dead: false, ttk: null, ticks: 0 };
+  const deathEv = type + "Death";
+  for (let t = 0; t < ISOL_CAP; t++) {
+    const intent = PILOTS[pilotName](w, t, threats);
+    w.step(DT, intent);
+    pushThreats(w, threats);
+    for (const ev of w.drainEvents()) {
+      if (ev.type === "kill" && ev.data.size === type) {
+        r.kills++;
+        if (r.kills + r.expired === total) r.ttk = (t + 1) * DT;
+      } else if (ev.type === deathEv && ev.data.self) {
+        r.expired++;
+      } else if (ev.type === "hit") r.hits++;
+      else if (ev.type === "bulwarkNegate") r.negates++;
+      else if (ev.type === "bulwarkStun") r.stuns++;
+    }
+    r.ticks = t + 1;
+    if (w.gameOver) { r.dead = true; break; }
+    if (r.kills + r.expired === total) break; // resolved (TTK set only if last event was a kill)
+  }
+  return r;
+}
+
+--- probe ---
+function makeWorld(seed) {
+  const w = new World(new RNG(seed));
+  w.begin();
+  w.waves.state = "idle"; // isolated: director never spawns
+  w.waves.wave = 12; // weapon L3 debut context (minWave 10 -> level 3)
+  return w;
+}
+
+function runIsolated(cond, pilotName, seed) {
+  const type = COND_TYPE[cond];
+  const w = makeWorld(seed);
+  let total = 0;
+  if (cond === "phantom1" || cond === "phantom2") {
+    const n = cond === "phantom1" ? 1 : 2;
+    for (let i = 0; i < n; i++) if (w.phantoms.spawn(w.ship.pos)) total++;
+  } else if (cond === "hauler1") {
+    if (w.haulers.spawn(w.ship.pos, w.ship.aim)) total++;
+  } else if (cond === "bulwark1") {
+    if (w.bulwarks.spawn(w.ship.pos)) total++;
+  }
+  const threats = [];
+  const r = { seed, cond, pilot: pilotName, total, kills: 0, expired: 0, hits: 0,
+              negates: 0, stuns: 0, dead: false, ttk: null, ticks: 0 };
+  const deathEv = type + "Death";
+  for (let t = 0; t < ISOL_CAP; t++) {
+    const intent = PILOTS[pilotName](w, t, threats);
+    w.step(DT, intent);
+    pushThreats(w, threats);
+    for (const ev of w.drainEvents()) {
+      if (ev.type === "kill" && ev.data.size === type) {
+        r.kills++;
+        if (r.kills + r.expired === total) r.ttk = (t + 1) * DT;
+      } else if (ev.type === deathEv && ev.data.self) {
+        r.expired++;
+      } else if (ev.type === "hit") r.hits++;
+      else if (ev.type === "bulwarkNegate") r.negates++;
+      else if (ev.type === "bulwarkStun") r.stuns++;
+    }
+    r.ticks = t + 1;
+    if (w.gameOver) { r.dead = true; break; }
+    if (r.kills + r.expired === total) break; // resolved (TTK set only if last event was a kill)
+  }
+  return r;
+}
+
+

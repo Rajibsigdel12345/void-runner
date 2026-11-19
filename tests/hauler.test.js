@@ -21,7 +21,7 @@ const EPS = 1e-9;
 
 test('hauler: config sanity (spec W15 = boss wave -> effective W16, 12 hits, +400)', () => {
   const s = CONFIG.hauler;
-  assert.equal(s.firstWave, 15, 'spec gate is wave 15');
+  assert.equal(s.firstWave, 16, 'spec gate 15 is a boss wave -> pinned to effective debut 16 (I521/ST-487)');
   assert.equal(15 % CONFIG.boss.everyWave, 0, 'wave 15 IS a boss wave (effective debut 16; ST-487 adjudicates)');
   assert.equal(s.perWave, 1, 'one truck per wave');
   assert.equal(s.maxConcurrent, 1, 'cap one');

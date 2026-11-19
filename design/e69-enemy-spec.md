@@ -178,3 +178,119 @@ Persistence: highest-level 3 -> 4 (storage key 'voidrunner.campaign').
 - R3: BULWARK frontal negation interacts with spread fire - negation is per-bullet; N=6 reset keeps it beatable.
 - R4: Level 4 palette collision with debris-1..4 teal family (flagged in section 9) - ST-486 audit decides (a) vs (b).
 - R5: Boss Option A (retint/posture variant) may read as "same boss" - mitigation: new move set (phantom + bulwark spawns) + different posture; if readability fails at ST-486, escalate to scope-check (no silent new asset).
+
+## Appendix A - ST-487 (I521): balance adjudication, measured, and the "harness vs probe" mystery (resolved)
+
+ST-487, I521. Authority: the only story allowed to move sections 3-5 stat values, WITH measurement + this
+appendix. Frozen protocol: .evidence/I521/rules.md (written BEFORE measurement). Harness:
+.evidence/I521/balance521.mjs (node-only, 60 Hz, fresh World per run; isolated conditions = idle waves +
+wave-12 weapon-L3 context, 100 seeds x 3 pilots [kiter/aggro/cautious, the I328 frozen trio]; sweep = full
+director from wave 1 on seeds 52700+i x 10, cap 600 s).
+
+### A.1 Result: one tuning pass (the only allowed), shipped WITH measurement
+Moves:
+- phantom.orbitR 11 -> 15 (u; flank ring radius around the ship). Smallest lever per the frozen priority
+  order that can touch R1 (a phantom rule: levers 1-2 are bulwark stun / hauler mine+hp, which cannot move
+  a phantom TTK). targetOpacity was also explored in scan521; orbitR is the move shipped.
+- hauler.firstWave 15 -> 16: the pre-registered "make the gate honest" move (rules.md) - R3 PASSES, and the
+  move is bit-identical (see A.5).
+Verdicts (harness stdout, verbatim):
+- BEFORE (results521-before.json / instr-out.txt, orbitR 11):
+  R1 FAIL {medianTTK 1.4, expiryRate 0, hitRate 0}
+  R2 PASS {bothKilledRate 1, medianTTK 4}
+  R3 PASS {medianTTK 4.6333, hitRate 0, killRate 1}
+  R4 PASS {medianTTK 8.2667, killRate 1, stunsInKilledPct 1}
+  R5 PASS x4 {phantom1 kiter 1.4 / aggro 1.5, phantom2 kiter 4 / aggro 2.8667, hauler1 kiter 4.6333 / aggro
+  2.4833, bulwark1 kiter 8.2667 / aggro null - aggro dies in 100% of bulwark runs, verdict vacuous}
+  R6 PASS {250 < 400 < 500 < 600}
+  R7 FAIL {wave20Reached 0/10; per-run death waves [5,10,5,5,12,8,10,11,10,6]; medianDeaths 3}
+  R8 FAIL {ratioHighLow null, low median 21.1583, high null} (consequence of R7)
+- AFTER (results521.json / after-rerun-out.txt, orbitR 15):
+  R1 FAIL {medianTTK 1.4667, p90 2.8167, expiryRate 0, hitRate 0} - residual, see A.4
+  R2 PASS {bothKilledRate 1, medianTTK 5.05}
+  R3 PASS {medianTTK 4.6333, hitRate 0, killRate 1} (unchanged - orbitR is a phantom lever)
+  R4 PASS {medianTTK 8.2667, killRate 1, stunsInKilledPct 1} (unchanged)
+  R5 PASS x4 {phantom1 kiter 1.4667 / aggro 1.5333, phantom2 kiter 5.05 / aggro 3.3833, hauler1 kiter
+  4.6333 / aggro 2.4833, bulwark1 kiter 8.2667 / aggro null}
+  R6 PASS (unchanged); R7 FAIL (unchanged: 0/10, same death waves); R8 FAIL (unchanged, consequence of R7)
+Frozen policy: at most ONE tuning pass - spent. No second fiddle pass; residuals ship documented (A.4).
+
+### A.2 The "harness vs probe" mystery - resolved: seed-set mismatch
+Symptom: the harness reported phantom1 kiter median TTK 1.4 s while the previous session's standalone
+"verbatim" probes reported 1.6 s on what they believed to be the same protocol. A long probe chain hunted a
+harness bug: probe328 (I328 verbatim protocol), probebisect (V0 control / V1 -SkillModel / V2 +I521 loop
+order / V3 +extended scan), probetrace/probetrace2 (RNG-draw traces), probediff (per-tick intent diff V0 vs
+V3), probe2x2 (loop-order x seed-family; Arm A = the recorded I521 sweep, I521 order + 52700 seeds, 10/10
+dead waves 1-2), probes100/probesameproc/probev100/probeverbatim, bis1..bis10 (file bisection; bis6 = full
+harness copy, bis7 = file-context test), diag521 (single-process warm-up bisection), pattern521 (per-seed
+pattern compare), regiondiff521 (harness vs probe function diff).
+Hypotheses rejected with evidence:
+- Process-context / warm-up: diag521.mjs FRESH == AFTER == AGAIN in one process; src/core is grep-clean of
+  Math.random / Date.now / performance.now (only hit: the declarative comment at engineTrail.js:3).
+- File-context: bis7.mjs (harness top-level + probe loop) reproduces the probe pattern.
+- Code divergence: regiondiff521.txt shows makeWorld/runIsolated functionally identical (2 cosmetic blank
+  lines); the kiter pilot nearest() (key = d - t.r) is byte-identical in balance521.mjs, scan521.mjs,
+  probev100.mjs and seed62100.mjs.
+- The previous session's "process-context" and "byte-identity mystery" hypotheses are explicitly RETRACTED.
+Resolution (verified byte-for-byte):
+- The harness seed formula (balance521.mjs, verbatim):
+  52100 + (CONDS.indexOf(cond) + 1) * 10000 + i, with CONDS = [phantom1, phantom2, hauler1, bulwark1]
+  -> phantom1 runs on seeds 62100+i (phantom2 72100+i, hauler1 82100+i, bulwark1 92100+i).
+  (rules.md's shorthand "52100 + condition*10000 + i" omits the +1 offset; the harness code is
+  authoritative.)
+- Every previous-session probe/scan used seed family 53100+i instead (the "scan family", per scan521.mjs's
+  header). Different seeds = different RNG streams = different per-seed outcomes and slightly different
+  medians.
+- seed62100.mjs = the probe protocol + the harness's actual family (62100+i, kiter, phantom1, orbitR 11):
+  its per-seed tick pattern matches the harness's own stdout (instr-out.txt "H i ticks" lines) with 0/100
+  flips - the standalone probe reproduces the harness byte-for-byte (median 84 ticks = 1.4 s in both).
+- probev100 (53100+i): median 96 ticks = 1.6 s, pattern 57-59/100 flips from the 62100 pattern. The 1.4 vs
+  1.6 s discrepancy is the seed family, not a bug.
+- pattern521.txt (the "59-60 flips" file) compares the "probe (standalone)" line - verified 0/100 equal to
+  probev100's output, i.e. the 53100 family - against a historical harness-variant pattern; its "flips" are
+  two different seed families at the same index, not divergence.
+- Honest correction: scan521.mjs's header claims its 53100..53199 numbers are "directly comparable to
+  results521.json". That claim is FALSE (the harness phantom1 family is 62100..62199).
+
+### A.3 What the lever actually does (measured)
+- On the R1-pinned kiter (harness seeds 62100+i), orbitR 11 -> 15 moved the median 84 -> 88 ticks
+  (1.4 -> 1.4667 s; p90 1.6 -> 2.8167 s). Near-inert on these seeds.
+- The previous session's scan (scan521.mjs) reported 2.82 s at orbitR 15 - on its own 53100 seed set, where
+  the kiter behaves differently (see A.2).
+- The lever is pilot-dependent (BEFORE -> AFTER, kiter unless noted):
+  phantom1 cautious: 100% expiry -> 100% kill, median 23.825 s; phantom2 cautious: expiry 0.97 -> 0.62
+  (killed 1 -> 4); phantom2 kiter: hitRuns 7 -> 2, median 4.0 -> 5.05 s (R2 stays PASS).
+- Reading: a larger flank ring keeps the phantom off the ship's immediate flank, so the slow-approaching
+  cautious pilot finally catches and kills instead of expiring, while the kiter's 12 u standoff weave is
+  barely affected on the harness seeds.
+
+### A.4 Residuals for ST-488 (frozen levers exhausted; out of ST-487 scope)
+- R1: median TTK 1.4667 s, below the 2.0 s floor. Only the frozen phantom levers (orbitR/targetOpacity) can
+  touch it; orbitR moved (smallest effective), targetOpacity explored with no better trade. Next-lever
+  candidates for ST-488 (NOT frozen by ST-487): phantom 2-hit -> 3-hit HP, or cloak/strike timing.
+- R7: 0/10 reach wave 20. The kiter dies on waves 5-12, i.e. pre-E69 content (rocks/drones/stingers/flyers/
+  hunters/gunships/sentries/wasps + mines). No frozen lever can reach this - all four are E69-only.
+- R8: null ratio - direct consequence of R7 (no wave 13-20 clears exist to measure).
+
+### A.5 Hauler firstWave 15 -> 16 (pre-registered move, bit-identical)
+rules.md pre-registered: if R3 PASSES, move CONFIG hauler.firstWave 15 -> 16 ("make the gate honest": wave 15
+is a boss wave and can never spawn a hauler). R3 PASSES (4.6333 s / hit 0 / kill 1) both before and after -
+bit-identical, because game.js spawnHaulerForWave's boss-wave gate already blocked 15 (the effective endless
+debut was always 16; the I518 OPEN DEVIATION is hereby closed). The game.js gate comment records the
+adjudication (comment-only, no logic change).
+
+### A.6 R9 - reduced-motion telegraph audit (report-only)
+Method: dev server :5173, one headless-browser tab (closed after the probe). RM ON via localStorage
+(voidrunner.settings reducedMotion:true) + OS-level media emulation, ENDLESS -> PLAYING, one
+phantom/hauler/bulwark spawned at fixed offsets, ship pushed away + invuln 30 s, 17 s simulated in 0.1 s
+chunks, reading the pool slot materials directly (phantom nose, hauler hatch, bulwark core).
+Measured (idle base -> peak during the telegraph window):
+- phantom nose emissive 0.60 -> 1.80 (strike/uncloak ramp); cloak slot opacity floor 0.12 (targetOpacity 0.5)
+- hauler hatch emissive 0.35 -> 1.725 (mine-drop telegraph)
+- bulwark core emissive 0.50 -> 1.861 (bolt charge)
+Visibility threshold chosen as >= 1.0 absolute = >= 2x the idle base: on the dark space backdrop the
+telegraphs are unmissable (all three peaks clear it). RM-safe by construction (the render syncs contain no
+motionOff branches; RM only scales motion, not presentation state) - confirmed live under RM.
+Phantom state histogram across the window (170 chunks): enter 11, orbit 71, cloak 24, drift 20, strike 44.
+Probe hygiene note: the uncontrolled test ship took 2 ambient wave-rock hits outside the invuln window
+(lives 2 -> 1) - probe artifact, not a game bug. End state PLAYING, console 0 errors / 0 warnings, no NaN.

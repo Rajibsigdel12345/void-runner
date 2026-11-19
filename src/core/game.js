@@ -1335,8 +1335,9 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
   }
 
   /** ST-484 (E69): spawn the wave's haulers once eligible (spec wave >= 15;
-   * wave 15 is a boss wave so the effective debut is wave 16 - ST-487
-   * adjudicates). The first spawn of a run emits 'haulerSpawn'. */
+   * wave 15 is a boss wave so the effective debut is wave 16 - ST-487/I521:
+   * config firstWave pinned to 16, behavior bit-identical). The first spawn
+   * of a run emits 'haulerSpawn'. */
   spawnHaulerForWave(wave) {
     const s = this.cfg.hauler;
     if (wave < s.firstWave || wave % this.cfg.boss.everyWave === 0) return;
