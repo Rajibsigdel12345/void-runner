@@ -517,7 +517,7 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     }
     const livesLeft = this.shipDamage();
     this.scoreKeeper.onDamage();
-    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: hit.nx, y: hit.ny }, lives: livesLeft });
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: hit.nx, y: hit.ny }, lives: livesLeft, source: 'rock_' + (hitRock ? hitRock.size : '?') });
     this.ship.damage(v2(hit.nx, hit.ny));
     if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
@@ -577,7 +577,7 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     this.scoreKeeper.onDamage();
     const nx = (this.ship.pos.x - hit.pos.x), ny = (this.ship.pos.y - hit.pos.y);
     const n = Math.hypot(nx, ny) || 1;
-    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft, source: 'mine' });
     this.ship.damage(v2(nx / n, ny / n));
     if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
@@ -887,7 +887,7 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
       this.scoreKeeper.onDamage();
       const nx = (this.ship.pos.x - boss.pos.x), ny = (this.ship.pos.y - boss.pos.y);
       const n = Math.hypot(nx, ny) || 1;
-      this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+      this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft, source: 'boss_' + this.boss.kind });
       this.ship.damage(v2(nx / n, ny / n));
       if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
     }
@@ -989,7 +989,7 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
       this.scoreKeeper.onDamage();
       const nx = (this.ship.pos.x - wd.pos.x), ny = (this.ship.pos.y - wd.pos.y);
       const n = Math.hypot(nx, ny) || 1;
-      this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+      this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft, source: 'warden' });
       this.ship.damage(v2(nx / n, ny / n));
       if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
     }
@@ -1007,7 +1007,7 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
         this.scoreKeeper.onDamage();
         const nx = (this.ship.pos.x - b.pos.x), ny = (this.ship.pos.y - b.pos.y);
         const n = Math.hypot(nx, ny) || 1;
-        this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+        this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft, source: 'bullet', sourceSpeed: Math.hypot(b.vel.x, b.vel.y), sourceRadius: b.radius });
         this.ship.damage(v2(nx / n, ny / n));
         if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
         break; // one life per step (invuln prevents chain hits)
@@ -1073,7 +1073,7 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     this.scoreKeeper.onDamage();
     const nx = (this.ship.pos.x - hit.pos.x), ny = (this.ship.pos.y - hit.pos.y);
     const n = Math.hypot(nx, ny) || 1;
-    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft, source: 'drone' });
     this.ship.damage(v2(nx / n, ny / n));
     if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
@@ -1163,7 +1163,7 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     this.scoreKeeper.onDamage();
     const nx = (this.ship.pos.x - hit.pos.x), ny = (this.ship.pos.y - hit.pos.y);
     const n = Math.hypot(nx, ny) || 1;
-    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft, source: 'stinger' });
     this.ship.damage(v2(nx / n, ny / n));
     if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
@@ -1211,7 +1211,7 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     const livesLeft = this.shipDamage();
     this.scoreKeeper.onDamage();
     const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
-    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft, source: 'hunter' });
     this.ship.damage(v2(nx / n, ny / n));
     if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
@@ -1266,7 +1266,7 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     const livesLeft = this.shipDamage();
     this.scoreKeeper.onDamage();
     const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
-    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft, source: 'gunship' });
     this.ship.damage(v2(nx / n, ny / n));
     if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
@@ -1523,7 +1523,7 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     const livesLeft = this.shipDamage();
     this.scoreKeeper.onDamage();
     const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
-    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft, source: 'sentry' });
     this.ship.damage(v2(nx / n, ny / n));
     if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
@@ -1539,7 +1539,7 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     const livesLeft = this.shipDamage();
     this.scoreKeeper.onDamage();
     const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
-    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft, source: 'wasp' });
     this.ship.damage(v2(nx / n, ny / n));
     if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
@@ -1555,7 +1555,7 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     const livesLeft = this.shipDamage();
     this.scoreKeeper.onDamage();
     const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
-    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft, source: 'pod' });
     this.ship.damage(v2(nx / n, ny / n));
     if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
@@ -1572,7 +1572,7 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     const livesLeft = this.shipDamage();
     this.scoreKeeper.onDamage();
     const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
-    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft, source: 'phantom' });
     this.ship.damage(v2(nx / n, ny / n));
     if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
@@ -1588,7 +1588,7 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     const livesLeft = this.shipDamage();
     this.scoreKeeper.onDamage();
     const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
-    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft, source: 'hauler' });
     this.ship.damage(v2(nx / n, ny / n));
     if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
@@ -1604,7 +1604,7 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     const livesLeft = this.shipDamage();
     this.scoreKeeper.onDamage();
     const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
-    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft });
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft, source: 'bulwark' });
     this.ship.damage(v2(nx / n, ny / n));
     if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }

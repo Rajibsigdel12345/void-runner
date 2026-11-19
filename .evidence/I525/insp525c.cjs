@@ -1,0 +1,11 @@
+﻿const fs = require('fs');
+const t = fs.readFileSync('E:/Game/production/stories.md').toString('latin1');
+const i = t.indexOf('STATUS (I524):');
+console.log('STORIES around I524:');
+console.log(t.slice(i, i + 300));
+console.log('---CHANGELOG head:');
+const c = fs.readFileSync('E:/Game/CHANGELOG.md').toString('latin1');
+console.log(c.slice(0, 400));
+console.log('---ACTIVE tail:');
+const a = fs.readFileSync('E:/Game/production/session-state/active.md').toString('latin1');
+console.log(a.slice(-1200));
