@@ -128,20 +128,21 @@ test('ST-453: boss kill -> levelCleared -> warp -> level 2 (fresh start)', () =>
   assert.equal(w._levelStartScore, w.scoreKeeper.score);
 });
 
-test('ST-453: full campaign - 3 level bosses, victory on the final prime', () => {
+test('ST-453/ST-486: full campaign - 4 level bosses, victory on the final abyssal', () => {
   const w = fresh('campaign');
   w.drainEvents();
   const all = [];
-  for (let lvl = 1; lvl <= 3; lvl++) {
+  for (let lvl = 1; lvl <= 4; lvl++) { // ST-486 (E69): +L4
     const evs = runToBoss(w);
     all.push(...evs);
     if (lvl === 3) assert.ok(w.boss.prime, 'L3 boss is prime');
+    if (lvl === 4) assert.ok(w.boss.abyssal, 'L4 boss is abyssal'); // ST-486 (E69)
     w.boss.hp = 1;
     assert.ok(w.boss.hit(), 'killing hit L' + lvl);
     w.bossDeath();
     const evs2 = w.drainEvents();
     all.push(...evs2);
-    if (lvl < 3) {
+    if (lvl < 4) {
       all.push(...runWarp(w));
       assert.equal(w.levelState.level, lvl + 1);
     } else {
@@ -150,15 +151,15 @@ test('ST-453: full campaign - 3 level bosses, victory on the final prime', () =>
       all.push(...w.drainEvents());
     }
   }
-  assert.deepEqual(byType(all, 'levelBoss').map(e => e.data.kind), ['monolith', 'splicer', 'monolith']);
+  assert.deepEqual(byType(all, 'levelBoss').map(e => e.data.kind), ['monolith', 'splicer', 'monolith', 'monolith']); // ST-486: abyssal keeps kind 'monolith'
   const go = byType(all, 'gameover');
   assert.equal(go.length, 1);
   assert.equal(go[0].data.victory, true);
-  assert.equal(go[0].data.level, 3);
-  assert.equal(go[0].data.stage, 3);
+  assert.equal(go[0].data.level, 4); // ST-486 (E69)
+  assert.equal(go[0].data.stage, 4); // ST-486 (E69)
   assert.ok(w.game.in(STATE.GAME_OVER));
-  assert.ok(isFinalLevel(3, CONFIG));
-  assert.ok(isCampaignComplete(3, levelLength(3, CONFIG), CONFIG));
+  assert.ok(isFinalLevel(4, CONFIG));
+  assert.ok(isCampaignComplete(4, levelLength(4, CONFIG), CONFIG));
 });
 
 test('ST-453: checkpoint continue - death restarts the level at the zone-1 checkpoint (x2)', () => {
@@ -284,7 +285,7 @@ test('ST-457: setCampaignStartLevel clamps to 1..levelCount', () => {
   const w = new World(new RNG(SEED));
   assert.equal(w.setCampaignStartLevel(0), 1);
   assert.equal(w.setCampaignStartLevel(NaN), 1);
-  assert.equal(w.setCampaignStartLevel(99), 3); // campaign length
+  assert.equal(w.setCampaignStartLevel(99), 4); // campaign length (ST-486 E69)
   assert.equal(w.setCampaignStartLevel(1.7), 1); // floored
   assert.equal(w.setCampaignStartLevel(2), 2);
 })

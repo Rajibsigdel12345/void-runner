@@ -362,6 +362,7 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
           if (b) this.emit('bossFire', { pos: { x: this.boss.pos.x, y: this.boss.pos.y } });
         }
         if (ev.phase) this.emit('bossPhase', { level: this.levelState.level, phaseIndex: ev.phaseIndex, pos: { x: this.boss.pos.x, y: this.boss.pos.y } });
+        if (ev.spawn) this._spawnAbyssalMinion(ev.spawn); // ST-486 (E69): the abyssal boss summons reinforcements at the rim
       } else {
         if (this.boss.step(edt, this.ship.pos) === 'ring') this.bossRingBurst(); // ST-115: scaled under slow-mo
         if (typeof this.boss.drainBolts === 'function') { // ST-143: Splicer spiral bolts
@@ -789,6 +790,14 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     if (info.zone !== this._lastZone) this._emitZoneEnter(false);
   }
 
+  /** ST-486 (E69): the abyssal boss (L4 "Necro Reef") summons reinforcements at the rim.
+   * phantom.maxConcurrent=2 / bulwark.maxConcurrent=1 self-cap (spawn() returns null when full). */
+  _spawnAbyssalMinion(type) {
+    if (!this.cfg.campaignBoss.abyssal) return;
+    if (type === 'bulwark') this.bulwarks.spawn(this.ship.pos);
+    else this.phantoms.spawn(this.ship.pos);
+  }
+
   /** ST-453 (E64): the level-end boss, rim-spawned (same geometry as the per-wave boss spawn). */
   _spawnLevelBoss() {
     const ls = this.levelState;
@@ -805,7 +814,7 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     // ST-456 (E64): every level boss is the CampaignBoss (weak point + phases + posture).
     // kind stays canonical ('monolith'/'splicer') so render/strings paths are untouched;
     // tint picks the per-level identity (L3 'prime' = gold monolith).
-    const tint = (kind === 'splicer') ? 'splicer' : (kind === 'monolith-prime') ? 'prime' : 'monolith';
+    const tint = (kind === 'splicer') ? 'splicer' : (kind === 'monolith-prime') ? 'prime' : (kind === 'abyssal') ? 'abyssal' : 'monolith'; // ST-486 (E69): L4 necro-reef identity
     this.boss = new CampaignBoss(this.rng, this.cfg, pos, ls.level, tint);
     this._bossPhaseEmitted = false;
     this.bossBurstTimer = this.boss.cfg.boss.burst.every;

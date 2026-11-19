@@ -850,7 +850,7 @@ window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), inpu
   applySettings, liveSettings: () => liveSettings,
   locale: () => getLocale(), setLocale, // ST-375: locale probe + drive (boot applied in applySettings; live via the settings panel)
   audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, powerupRenders, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, hunterRenders, gunshipRenders, sentryRenders, waspRenders, podRenders, phantomRenders, haulerRenders, bulwarkRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, camMode: () => camMode, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, THREE, scene, // I497: gate RT capture handles (pixel-neutral)
-  backend: rendererBackend, rendererArm, vendorLowpWarns: () => _vendorLowpWarns, render: () => renderer.render(scene, camera), theme: () => _currentTheme, applyTheme, themeDome, warp: () => world.warp, afterburner }; // ST-434 (I466) B4 // debug/test handle (expanded in I080; ST-059: vortexFx)
+  backend: rendererBackend, rendererArm, vendorLowpWarns: () => _vendorLowpWarns, render: () => renderer.render(scene, camera), theme: () => _currentTheme, applyTheme, themeDome, warp: () => world.warp, afterburner, zoneTheme }; // ST-434 (I466) B4; ST-486 (I520): zone-palette probe (palette audit) // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
 window.addEventListener('keydown', markAudioReady, { once: true });

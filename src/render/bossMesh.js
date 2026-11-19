@@ -223,6 +223,7 @@ export function createBossMesh(scene) {
     if (!boss || !boss.alive) { group.visible = false; group.scale.setScalar(1); return; }
     const isSplicer = boss.kind === 'splicer'; // ST-143: variant 2 - teal identity
     const isPrime = boss.prime === true; // ST-420: Monolith Prime (kind stays 'monolith'; gold identity)
+    const isAbyssal = boss.abyssal === true; // ST-486 (E69): Necro Reef final boss (kind stays 'monolith')
     const r = isSplicer ? CONFIG.splicer.radius : CONFIG.boss.radius;
     const sizeScale = r / CONFIG.boss.radius; // geometry is baked at the Monolith radius
     group.position.set(boss.pos.x, r * 1.3 + 0.3, boss.pos.y);
@@ -231,7 +232,7 @@ export function createBossMesh(scene) {
     const bodyPulse = isSplicer
       ? 0.30 + 0.30 * (0.5 + 0.5 * Math.sin(t * 4.2))
       : phase2 ? 0.30 + 0.20 * (0.5 + 0.5 * Math.sin(t * 5.6)) : 0.18 + 0.18 * (0.5 + 0.5 * Math.sin(t * 2.4));
-    const bodyHex = isPrime ? 0xd9a441 : isSplicer ? 0x2dd4bf : phase2 ? 0xb44dff : 0x7a4dff; // ST-420: prime gold; ST-143: teal vs Monolith purple
+    const bodyHex = isAbyssal ? CONFIG.campaignBoss.abyssal.body : isPrime ? 0xd9a441 : isSplicer ? 0x2dd4bf : phase2 ? 0xb44dff : 0x7a4dff; // ST-486: abyssal necro-magenta; ST-420: prime gold; ST-143: teal vs Monolith purple
     hullMat.emissive.setHex(bodyHex);
     hullMat.emissiveIntensity = bodyPulse;
     crownMat.emissive.setHex(bodyHex);
@@ -244,12 +245,12 @@ export function createBossMesh(scene) {
       crownMat.emissive.lerp(FLASH_WHITE, k);
       crownMat.emissiveIntensity += sfx * k;
     }
-    coreMat.emissive.setHex(isPrime ? (phase2 ? 0xffe9a8 : 0xffc94d) : isSplicer ? (phase2 ? 0x7dffea : 0x19e8cf) : (phase2 ? 0xff4d6d : 0x9a6bff));
+    coreMat.emissive.setHex(isAbyssal ? CONFIG.campaignBoss.abyssal.core : isPrime ? (phase2 ? 0xffe9a8 : 0xffc94d) : isSplicer ? (phase2 ? 0x7dffea : 0x19e8cf) : (phase2 ? 0xff4d6d : 0x9a6bff)); // ST-486: abyssal core
     coreMat.emissiveIntensity = phase2
       ? 1.7 + 0.8 * (0.5 + 0.5 * Math.sin(t * 7.2)) // phase 2: the seam blazes (bloom-threshold cross)
       : 0.85 + 0.45 * (0.5 + 0.5 * Math.sin(t * (isSplicer ? 4.2 : 2.4)));
     // ST-252: rim follows the variant identity (Monolith purple / Splicer teal) with a phase-2 lift.
-    const rimHex = isPrime ? CONFIG.stages.monolithPrime.rim : isSplicer ? CONFIG.boss.rim.splicerColor : CONFIG.boss.rim.color; // ST-420: prime gold rim
+    const rimHex = isAbyssal ? CONFIG.campaignBoss.abyssal.rim : isPrime ? CONFIG.stages.monolithPrime.rim : isSplicer ? CONFIG.boss.rim.splicerColor : CONFIG.boss.rim.color; // ST-420: prime gold rim; ST-486: abyssal rim
     const rimLift = phase2 ? CONFIG.boss.rim.phase2Lift : 1;
     rimHull.color.setHex(rimHex);
     rimCrown.color.setHex(rimHex);

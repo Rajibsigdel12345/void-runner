@@ -34,11 +34,13 @@ test('I489 campaignBoss: config sanity', () => {
   assert.ok(cb.enterTime > 0);
   assert.ok(cb.speed > 0 && cb.speed < CONFIG.ship.maxSpeed);
   assert.ok(cb.speed < CONFIG.boss.speed);
-  for (const l of [1, 2, 3]) {
+  for (const l of [1, 2, 3, 4]) { // ST-486 (E69): +L4
     assert.ok(cb.hp[l] > 0);
     assert.ok(cb.score[l] > 0);
   }
-  assert.deepEqual(cb.phases, { 1: 3, 2: 1, 3: 1 });
+  assert.deepEqual(cb.phases, { 1: 3, 2: 1, 3: 1, 4: 1 }); // ST-486 (E69)
+  assert.ok(cb.abyssal && cb.abyssal.spawnEvery > 0 && cb.abyssal.spawnFirst > 0, 'ST-486 abyssal move-set config');
+  assert.ok(Number.isInteger(cb.abyssal.body) && Number.isInteger(cb.abyssal.core) && Number.isInteger(cb.abyssal.rim), 'ST-486 abyssal identity hexes');
   assert.deepEqual(cb.phaseAt, [1.0, 0.66, 0.33]);
   const w = cb.weak;
   assert.ok(w.r > 0 && w.orbitR > 0 && w.armTime > 0 && w.teleTime > 0 && w.openTime > 0);
@@ -87,8 +89,9 @@ test('I489 campaignBoss: phase counts and starting posture', () => {
   assert.equal(boss(1, 'monolith').phaseCount, 3);
   assert.equal(boss(2, 'splicer').phaseCount, 1);
   assert.equal(boss(3, 'prime').phaseCount, 1);
-  for (const l of [1, 2, 3]) {
-    const b = boss(l, ['monolith', 'splicer', 'prime'][l - 1]);
+  assert.equal(boss(4, 'abyssal').phaseCount, 1); // ST-486 (E69)
+  for (const l of [1, 2, 3, 4]) {
+    const b = boss(l, ['monolith', 'splicer', 'prime', 'abyssal'][l - 1]);
     assert.equal(b.phaseIndex, 0);
     assert.equal(b.postureScale, CONFIG.campaignBoss.posture[0]);
   }
@@ -157,8 +160,8 @@ test('I489 campaignBoss: hit deals 1 damage, kill flips alive', () => {
 
 test('I489 campaignBoss: per-level stats', () => {
   const cb = CONFIG.campaignBoss;
-  const tints = ['monolith', 'splicer', 'prime'];
-  for (const l of [1, 2, 3]) {
+  const tints = ['monolith', 'splicer', 'prime', 'abyssal']; // ST-486 (E69)
+  for (const l of [1, 2, 3, 4]) {
     const b = boss(l, tints[l - 1]);
     assert.equal(b.hp, cb.hp[l]);
     assert.equal(b.maxHp, cb.hp[l]);
@@ -179,15 +182,19 @@ test('I489 campaignBoss: canonical kind + prime + isCampaignBoss', () => {
   const b3 = boss(3, 'prime');
   assert.equal(b3.kind, 'monolith');
   assert.equal(b3.prime, true);
-  assert.ok(b1.isCampaignBoss && b2.isCampaignBoss && b3.isCampaignBoss);
+  const b4 = boss(4, 'abyssal'); // ST-486 (E69)
+  assert.equal(b4.kind, 'monolith');
+  assert.equal(b4.prime, false);
+  assert.equal(b4.abyssal, true);
+  assert.ok(b1.isCampaignBoss && b2.isCampaignBoss && b3.isCampaignBoss && b4.isCampaignBoss);
 });
 
 test('I489 campaignBoss: level boss wiring (kind + distance)', () => {
-  for (const l of [1, 2, 3]) {
+  for (const l of [1, 2, 3, 4]) { // ST-486 (E69)
     assert.ok(bossKind(l).length > 0);
     assert.equal(bossDistance(l), levelLength(l));
   }
-  assert.deepEqual([bossKind(1), bossKind(2), bossKind(3)], ['monolith', 'splicer', 'monolith-prime']);
+  assert.deepEqual([bossKind(1), bossKind(2), bossKind(3), bossKind(4)], ['monolith', 'splicer', 'monolith-prime', 'abyssal']); // ST-486 (E69)
 });
 
 test('I489 campaignBoss: timers seeded from the starting tier', () => {
@@ -227,4 +234,33 @@ test('I489 campaignBoss: no NaN on coincident ship and huge dt', () => {
   }
   assert.ok(b.teleRing === -1 || Number.isFinite(b.teleRing));
   assert.ok(['closed', 'tele', 'open'].includes(b.weak.state));
+});
+
+test('ST-486 abyssal: summon cadence - phantom then bulwark alternating, deterministic, entrance-gated', () => {
+  const b = boss(4, 'abyssal');
+  b.entered = 1; // skip the 1.4 s entrance
+  const spawns = [];
+  for (let i = 0; i < 1100; i++) { // ~18.3 s: 3 summons at t=5, 11, 17 s
+    const ev = b.step(DT, P);
+    if (ev.spawn) spawns.push(ev.spawn);
+  }
+  assert.deepEqual(spawns, ['phantom', 'bulwark', 'phantom'], 'first 3 summons alternate phantom/bulwark');
+  // config-driven (no RNG draw): two identical bosses summon on identical frames
+  const a = boss(4, 'abyssal'), c = boss(4, 'abyssal');
+  a.entered = 1; c.entered = 1;
+  let lastA = -1, lastC = -1;
+  for (let i = 0; i < 400; i++) {
+    if (a.step(DT, P).spawn) lastA = i;
+    if (c.step(DT, P).spawn) lastC = i;
+  }
+  assert.ok(lastA >= 0 && lastA === lastC, 'deterministic summon frame');
+  // entrance gate: no summon before the entrance completes
+  const g = boss(4, 'abyssal');
+  g.entered = 0.9;
+  g._spawnTimer = 0.001;
+  assert.equal(g.step(DT, P).spawn, 0, 'no summon before the entrance completes');
+  // non-abyssal campaign bosses never summon (endless/campaign L1-3 behavior untouched)
+  const m = boss(1, 'monolith');
+  m.entered = 1;
+  assert.ok(runFrames(m, 1200).every((e) => e.spawn === 0), 'monolith never summons');
 });

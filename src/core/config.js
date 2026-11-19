@@ -1200,7 +1200,13 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
         { name: 'Wasp Swarm',        length: 110, paletteId: 'ember-2', hazardProfile: 'dense',    enemyMix: ['wasp', 'pod', 'stinger'],    optionalTargets: ['pod'],              checkpointAt: 0 },
         { name: 'Squad Lock',        length: 120, paletteId: 'ember-3', hazardProfile: 'gauntlet', enemyMix: ['sentry', 'gunship', 'mine'],  optionalTargets: ['shielded', 'pod'],   checkpointAt: 0 },
         { name: 'Prime Threshold',   length: 80,  paletteId: 'ember-4', hazardProfile: 'gauntlet', enemyMix: ['gunship', 'sentry', 'wasp'], optionalTargets: ['rapid', 'shielded'], checkpointAt: 0 }
-      ] }
+      ] },
+      { name: 'Necro Reef', boss: 'abyssal', zones: [ // ST-486 (E69): the E69 trio - teach-isolate-combine into the final abyssal boss
+        { name: 'Reef Approach',   length: 100, paletteId: 'reef-1', hazardProfile: 'calm',     enemyMix: ['phantom', 'rock'],                  optionalTargets: ['golden'],            checkpointAt: 0 },
+        { name: 'Minefield Drift', length: 110, paletteId: 'reef-2', hazardProfile: 'moderate', enemyMix: ['hauler', 'mine', 'drone'],           optionalTargets: ['shielded'],          checkpointAt: 0 },
+        { name: 'Bulwark Wall',    length: 120, paletteId: 'reef-3', hazardProfile: 'dense',    enemyMix: ['bulwark', 'stinger', 'wasp'],     optionalTargets: ['pod'],               checkpointAt: 0 },
+        { name: 'Necro Gauntlet',  length: 90,  paletteId: 'reef-4', hazardProfile: 'gauntlet', enemyMix: ['phantom', 'hauler', 'bulwark', 'mine'], optionalTargets: ['rapid', 'shielded'], checkpointAt: 0 }
+      ] },
     ],
     palettes: { // zone identity palettes, E57 stage-theme shape {sky, stars, floor, grid, accent}.
       // MODEL ONLY in ST-452 (data): ST-455 consumes these + runs a rendered-luma
@@ -1219,7 +1225,14 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
       'ember-1': { sky: 0x0f0705, stars: 0xffd0a0, floor: 0x2a1408, grid: 0x4a2a12, accent: 0xffc94d },
       'ember-2': { sky: 0x120705, stars: 0xffc890, floor: 0x301808, grid: 0x523014, accent: 0xff9a3d },
       'ember-3': { sky: 0x140804, stars: 0xffb880, floor: 0x361a0a, grid: 0x5a3416, accent: 0xff4a2a },
-      'ember-4': { sky: 0x170a04, stars: 0xffa870, floor: 0x3c1d0c, grid: 0x623a18, accent: 0xffc94d }
+      'ember-4': { sky: 0x170a04, stars: 0xffa870, floor: 0x3c1d0c, grid: 0x623a18, accent: 0xffc94d },
+      // ST-486 (E69): level 4 "Necro Reef" - the (b) magenta/violet necro-reef identity. The (a)
+      // deep-teal candidate was REJECTED with measurement (see .evidence/I520): its accent would land
+      // dhue <= 12 from debris-1..4 (already the teal 0x2dd4bf family) - the R4 flagged collision.
+      'reef-1': { sky: 0x08040f, stars: 0xd8c8ff, floor: 0x1a1030, grid: 0x2a1a44, accent: 0x8a5cff },
+      'reef-2': { sky: 0x090412, stars: 0xe0c8ff, floor: 0x201238, grid: 0x301e4e, accent: 0xa04dff },
+      'reef-3': { sky: 0x0a0414, stars: 0xf0c4ff, floor: 0x261440, grid: 0x362058, accent: 0xc840e8 },
+      'reef-4': { sky: 0x0c0418, stars: 0xffc0f0, floor: 0x2c1648, grid: 0x3c2260, accent: 0xff3dd6 }
     },
     hazardProfiles: { // hazard-density vocabulary (F3/F4: tighten <-> release arc).
       // MODEL ONLY in ST-452: ST-453/ST-455 finalize the multipliers in the
@@ -1256,16 +1269,21 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
     enterTime: 1.4,     // longer entrance - the fight is a set piece (endless 0.8)
     speed: 1.4,         // slow homing (always dodgeable)
     turn: 0.7,          // sluggish heading change rad/s
-    hp: { 1: 96, 2: 110, 3: 130 },    // per-level HP (climbing; the weak point gates TTK)
-    phases: { 1: 3, 2: 1, 3: 1 },     // C3: L1 full 3-phase; L2-3 single-phase
+    hp: { 1: 96, 2: 110, 3: 130, 4: 150 }, // per-level HP (climbing; the weak point gates TTK) ST-486 (E69): +L4
+    phases: { 1: 3, 2: 1, 3: 1, 4: 1 }, // C3: L1 full 3-phase; L2-4 single-phase (ST-486: L4 abyssal)
     phaseAt: [1.0, 0.66, 0.33],       // L1 phase hpFrac thresholds (phase i while f in [at[i+1], at[i]))
     posture: [1.0, 1.14, 1.28],       // posture/scale per phaseIndex (the growth read on a phase change)
     weak: { r: 1.4, orbitR: 4.0, armTime: 2.4, teleTime: 0.8, openTime: 2.2 }, // closed -> tele -> open cycle
     moves: { aimEvery: [2.4, 1.8, 1.3], ringEvery: [99, 3.5, 2.2] }, // per-tier cadence (99 = no ring in phase 0)
     singlePhaseMoveTier: 1,           // L2/L3 (1 phase) run the tier-1 move set (aimed + ring)
-    score: { 1: 1000, 2: 1400, 3: 2000 },
+    score: { 1: 1000, 2: 1400, 3: 2000, 4: 2600 },
     splitCount: 4,        // M rocks on death
-    splitSize: 'M'
+    splitSize: 'M',
+    abyssal: {  // ST-486 (E69): L4 "Necro Reef" final boss (kind stays 'monolith'; retint/posture Option A, 0 new tris).
+      // body/core/rim = the necro-reef magenta identity (distinct from monolith purple / splicer teal / prime gold).
+      // Spawn move set: summon reinforcements at the rim (phantom/bulwark alternating); field maxConcurrent self-caps (phantom 2 / bulwark 1).
+      spawnEvery: 6.0, spawnFirst: 5.0, body: 0xd12b7a, core: 0xff4d9e, rim: 0x7a1048
+    }
   },
   campaign: { warpDuration: 1.6 } // deterministic frozen-sim warp timer (no RNG draws)
 };

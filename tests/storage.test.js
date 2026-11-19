@@ -437,11 +437,11 @@ test('storage: campaign progress round-trips as {version,level}', () => {
 
 test('storage: campaign progress raises monotonically and clamps to 1..levelCount', () => {
   const a = new Storage(memStore());
-  assert.equal(a.setCampaignProgress(99), 3); // clamped to the campaign length
-  assert.equal(a.setCampaignProgress(2), 3); // no-raise returns the current value
-  assert.equal(a.setCampaignProgress(3), 3); // equal is not a raise
-  assert.equal(a.setCampaignProgress(5), 3); // clamps down, still not a raise
-  assert.equal(a.getCampaignProgress(), 3);
+  assert.equal(a.setCampaignProgress(99), 4); // clamped to the campaign length (ST-486 E69: L4)
+  assert.equal(a.setCampaignProgress(2), 4); // no-raise returns the current value
+  assert.equal(a.setCampaignProgress(4), 4); // equal is not a raise
+  assert.equal(a.setCampaignProgress(5), 4); // clamps down, still not a raise
+  assert.equal(a.getCampaignProgress(), 4);
   const b = new Storage(memStore());
   assert.equal(b.setCampaignProgress(0), 1); // 0 on a fresh store clamps up to 1
   assert.equal(b.getCampaignProgress(), 1);

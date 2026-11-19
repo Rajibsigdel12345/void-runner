@@ -19,9 +19,12 @@ export class CampaignBoss {
     this.pos = pos;
     const cb = cfg.campaignBoss;
     this.level = level;
-    this.tint = tint; // 'monolith' | 'splicer' | 'prime'
+    this.tint = tint; // 'monolith' | 'splicer' | 'prime' | 'abyssal' (ST-486 E69)
     this.kind = (tint === 'splicer') ? 'splicer' : 'monolith'; // canonical kind -> reuses the Monolith render color/rim
     this.prime = (tint === 'prime');                            // L3 gold identity (kind stays monolith)
+    this.abyssal = (tint === 'abyssal');                    // ST-486 (E69): L4 "Necro Reef" final boss (kind stays monolith)
+    this._spawnParity = 0;                                  // ST-486: deterministic spawn alternation (no RNG draw)
+    this._spawnTimer = this.abyssal ? cb.abyssal.spawnFirst : -1;
     this.isCampaignBoss = true;                                 // gates every NEW campaign behavior
     this.hp = this.maxHp = (cb.hp[level] != null) ? cb.hp[level] : 96;
     this.radius = cb.radius;
@@ -155,7 +158,16 @@ export class CampaignBoss {
     const rtier = Math.min(this._moveTier(), cb.moves.ringEvery.length - 1);
     this.teleAim = this._aimTimer;
     this.teleRing = (cb.moves.ringEvery[rtier] < 90) ? this._ringTimer : -1;
-    return { aim, ring, phase, phaseIndex: this.phaseIndex };
+    let spawn = 0;
+    if (this.abyssal && this.entered >= 1) { // ST-486 (E69): summon reinforcements at the rim (field maxConcurrent self-caps)
+      this._spawnTimer -= dt;
+      if (this._spawnTimer <= 0) {
+        this._spawnTimer += this.cfg.campaignBoss.abyssal.spawnEvery;
+        this._spawnParity ^= 1;
+        spawn = (this._spawnParity === 1) ? 'phantom' : 'bulwark'; // phantom first (weaker), then bulwark, alternating
+      }
+    }
+    return { aim, ring, phase, phaseIndex: this.phaseIndex, spawn };
   }
 
   /** Apply one weak-point hit (1 damage). Returns true when this hit kills it.

@@ -1,0 +1,632 @@
+{
+ "tag": "I520 ST-486 zone-palette rendered-luma + hue audit (L4 Necro Reef reef-1..4)",
+ "method": "I480/I519 - headless chrome, fx=high, RAF frozen, all actors+stars+arenaRing+vista hidden, 2 bloom renders/frame, 2d-canvas pixel read, stride-3 full-frame sample",
+ "L1band": {
+  "minHue": 150.7,
+  "maxHue": 193.6
+ },
+ "reefHues": [
+  {
+   "id": "reef-1",
+   "accent": "0x8a5cff",
+   "hue": 256.9,
+   "luma": 113.5
+  },
+  {
+   "id": "reef-2",
+   "accent": "0xa04dff",
+   "hue": 268,
+   "luma": 107.5
+  },
+  {
+   "id": "reef-3",
+   "accent": "0xc840e8",
+   "hue": 288.6,
+   "luma": 105
+  },
+  {
+   "id": "reef-4",
+   "accent": "0xff3dd6",
+   "hue": 312.7,
+   "luma": 113.3
+  }
+ ],
+ "a1rows": [
+  {
+   "candidate": "a_low 0x14b8a6",
+   "hue": 173.4,
+   "vs_debris1": 1,
+   "vs_debris4": 1,
+   "vs_debris2": 20.2,
+   "vs_debris3": 22.7
+  },
+  {
+   "candidate": "a_high 0x2dd4bf",
+   "hue": 172.5,
+   "vs_debris1": 0,
+   "vs_debris4": 0,
+   "vs_debris2": 21.1,
+   "vs_debris3": 21.8
+  }
+ ],
+ "a2pairs": [
+  {
+   "reef": "reef-1",
+   "l1": "0x2dd4bf",
+   "dhue": 84.5
+  },
+  {
+   "reef": "reef-1",
+   "l1": "0x53d8ff",
+   "dhue": 63.3
+  },
+  {
+   "reef": "reef-1",
+   "l1": "0x69f0ae",
+   "dhue": 106.3
+  },
+  {
+   "reef": "reef-1",
+   "l1": "0x2dd4bf",
+   "dhue": 84.5
+  },
+  {
+   "reef": "reef-2",
+   "l1": "0x2dd4bf",
+   "dhue": 95.5
+  },
+  {
+   "reef": "reef-2",
+   "l1": "0x53d8ff",
+   "dhue": 74.4
+  },
+  {
+   "reef": "reef-2",
+   "l1": "0x69f0ae",
+   "dhue": 117.3
+  },
+  {
+   "reef": "reef-2",
+   "l1": "0x2dd4bf",
+   "dhue": 95.5
+  },
+  {
+   "reef": "reef-3",
+   "l1": "0x2dd4bf",
+   "dhue": 116.1
+  },
+  {
+   "reef": "reef-3",
+   "l1": "0x53d8ff",
+   "dhue": 95
+  },
+  {
+   "reef": "reef-3",
+   "l1": "0x69f0ae",
+   "dhue": 137.9
+  },
+  {
+   "reef": "reef-3",
+   "l1": "0x2dd4bf",
+   "dhue": 116.1
+  },
+  {
+   "reef": "reef-4",
+   "l1": "0x2dd4bf",
+   "dhue": 140.2
+  },
+  {
+   "reef": "reef-4",
+   "l1": "0x53d8ff",
+   "dhue": 119.1
+  },
+  {
+   "reef": "reef-4",
+   "l1": "0x69f0ae",
+   "dhue": 162
+  },
+  {
+   "reef": "reef-4",
+   "l1": "0x2dd4bf",
+   "dhue": 140.2
+  }
+ ],
+ "a3pairs": [
+  {
+   "reef": "reef-1",
+   "vs": "drift-2",
+   "dhue": 62.8,
+   "dluma": 78.3,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-1",
+   "vs": "drift-3",
+   "dhue": 131.8,
+   "dluma": 55.2,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-1",
+   "vs": "drift-4",
+   "dhue": 112.1,
+   "dluma": 3.4,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-1",
+   "vs": "ember-1",
+   "dhue": 144.9,
+   "dluma": 90,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-1",
+   "vs": "ember-2",
+   "dhue": 131.8,
+   "dluma": 55.2,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-1",
+   "vs": "ember-3",
+   "dhue": 112.1,
+   "dluma": 3.4,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-1",
+   "vs": "ember-4",
+   "dhue": 144.9,
+   "dluma": 90,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-1",
+   "vs": "abyssal hull 0xd12b7a",
+   "dhue": 74.5,
+   "dluma": 29.6,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-2",
+   "vs": "drift-2",
+   "dhue": 73.9,
+   "dluma": 84.3,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-2",
+   "vs": "drift-3",
+   "dhue": 120.8,
+   "dluma": 61.3,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-2",
+   "vs": "drift-4",
+   "dhue": 101,
+   "dluma": 2.7,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-2",
+   "vs": "ember-1",
+   "dhue": 133.8,
+   "dluma": 96,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-2",
+   "vs": "ember-2",
+   "dhue": 120.8,
+   "dluma": 61.3,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-2",
+   "vs": "ember-3",
+   "dhue": 101,
+   "dluma": 2.7,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-2",
+   "vs": "ember-4",
+   "dhue": 133.8,
+   "dluma": 96,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-2",
+   "vs": "abyssal hull 0xd12b7a",
+   "dhue": 63.5,
+   "dluma": 23.5,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-3",
+   "vs": "drift-2",
+   "dhue": 94.5,
+   "dluma": 86.8,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-3",
+   "vs": "drift-3",
+   "dhue": 100.2,
+   "dluma": 63.7,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-3",
+   "vs": "drift-4",
+   "dhue": 80.4,
+   "dluma": 5.1,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-3",
+   "vs": "ember-1",
+   "dhue": 113.2,
+   "dluma": 98.5,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-3",
+   "vs": "ember-2",
+   "dhue": 100.2,
+   "dluma": 63.7,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-3",
+   "vs": "ember-3",
+   "dhue": 80.4,
+   "dluma": 5.1,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-3",
+   "vs": "ember-4",
+   "dhue": 113.2,
+   "dluma": 98.5,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-3",
+   "vs": "abyssal hull 0xd12b7a",
+   "dhue": 42.9,
+   "dluma": 21,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-4",
+   "vs": "drift-2",
+   "dhue": 118.6,
+   "dluma": 78.5,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-4",
+   "vs": "drift-3",
+   "dhue": 76.1,
+   "dluma": 55.5,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-4",
+   "vs": "drift-4",
+   "dhue": 56.3,
+   "dluma": 3.1,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-4",
+   "vs": "ember-1",
+   "dhue": 89.1,
+   "dluma": 90.2,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-4",
+   "vs": "ember-2",
+   "dhue": 76.1,
+   "dluma": 55.5,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-4",
+   "vs": "ember-3",
+   "dhue": 56.3,
+   "dluma": 3.1,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-4",
+   "vs": "ember-4",
+   "dhue": 89.1,
+   "dluma": 90.2,
+   "andCollision": false
+  },
+  {
+   "reef": "reef-4",
+   "vs": "abyssal hull 0xd12b7a",
+   "dhue": 18.8,
+   "dluma": 29.3,
+   "andCollision": false
+  }
+ ],
+ "hullReference_notGated": {
+  "scoping": "monolith/prime/splicer hulls render only in their own levels (L1/L3) and never concurrently with a reef palette (reef = L4-only; endless = drift/ember stage palettes) -> reference margin only",
+  "reef-1": {
+   "monolith 0x7a4dff": {
+    "dhue": 1.8,
+    "dluma": 14.1,
+    "andTestWouldBeCollision": false
+   },
+   "splicer 0x2dd4bf": {
+    "dhue": 84.5,
+    "dluma": 61.4,
+    "andTestWouldBeCollision": false
+   },
+   "prime 0xd9a441": {
+    "dhue": 142.1,
+    "dluma": 54.6,
+    "andTestWouldBeCollision": false
+   }
+  },
+  "reef-2": {
+   "monolith 0x7a4dff": {
+    "dhue": 12.8,
+    "dluma": 8.1,
+    "andTestWouldBeCollision": true
+   },
+   "splicer 0x2dd4bf": {
+    "dhue": 95.5,
+    "dluma": 67.5,
+    "andTestWouldBeCollision": false
+   },
+   "prime 0xd9a441": {
+    "dhue": 131.1,
+    "dluma": 60.6,
+    "andTestWouldBeCollision": false
+   }
+  },
+  "reef-3": {
+   "monolith 0x7a4dff": {
+    "dhue": 33.4,
+    "dluma": 5.6,
+    "andTestWouldBeCollision": true
+   },
+   "splicer 0x2dd4bf": {
+    "dhue": 116.1,
+    "dluma": 69.9,
+    "andTestWouldBeCollision": false
+   },
+   "prime 0xd9a441": {
+    "dhue": 110.5,
+    "dluma": 63.1,
+    "andTestWouldBeCollision": false
+   }
+  },
+  "reef-4": {
+   "monolith 0x7a4dff": {
+    "dhue": 57.5,
+    "dluma": 13.9,
+    "andTestWouldBeCollision": false
+   },
+   "splicer 0x2dd4bf": {
+    "dhue": 140.2,
+    "dluma": 61.7,
+    "andTestWouldBeCollision": false
+   },
+   "prime 0xd9a441": {
+    "dhue": 86.4,
+    "dluma": 54.8,
+    "andTestWouldBeCollision": false
+   }
+  }
+ },
+ "rendered": {
+  "reef-1": {
+   "config": {
+    "sky": 525327,
+    "stars": 14207231,
+    "floor": 1708080,
+    "grid": 2759236,
+    "accent": 9067775
+   },
+   "painted": {
+    "sky": 525327,
+    "grid": 2759236,
+    "floor": 1708080,
+    "accent": 9067775,
+    "opacity": 0.6
+   },
+   "sky": {
+    "p10": 0,
+    "p50": 16.77,
+    "p90": 43.88,
+    "rgb": {
+     "r": 27.9,
+     "g": 15.7,
+     "b": 15.9
+    },
+    "hue": 359,
+    "sat": 0.14
+   },
+   "floor": {
+    "p10": 0,
+    "p50": 33.61,
+    "p90": 46.58,
+    "rgb": {
+     "r": 43.2,
+     "g": 24.2,
+     "b": 23
+    },
+    "hue": 3.6,
+    "sat": 0.153
+   }
+  },
+  "reef-2": {
+   "config": {
+    "sky": 590866,
+    "stars": 14731519,
+    "floor": 2101816,
+    "grid": 3153486,
+    "accent": 10505727
+   },
+   "painted": {
+    "sky": 590866,
+    "grid": 3153486,
+    "floor": 2101816,
+    "accent": 10505727,
+    "opacity": 0.6
+   },
+   "sky": {
+    "p10": 0,
+    "p50": 16.92,
+    "p90": 44.02,
+    "rgb": {
+     "r": 28,
+     "g": 15.7,
+     "b": 16.6
+    },
+    "hue": 355.8,
+    "sat": 0.141
+   },
+   "floor": {
+    "p10": 0,
+    "p50": 33.75,
+    "p90": 46.66,
+    "rgb": {
+     "r": 43.3,
+     "g": 24.2,
+     "b": 23.9
+    },
+    "hue": 1.1,
+    "sat": 0.145
+   }
+  },
+  "reef-3": {
+   "config": {
+    "sky": 656404,
+    "stars": 15779071,
+    "floor": 2495552,
+    "grid": 3547224,
+    "accent": 13123816
+   },
+   "painted": {
+    "sky": 656404,
+    "grid": 3547224,
+    "floor": 2495552,
+    "accent": 13123816,
+    "opacity": 0.6
+   },
+   "sky": {
+    "p10": 0,
+    "p50": 16.99,
+    "p90": 44.22,
+    "rgb": {
+     "r": 28.2,
+     "g": 15.7,
+     "b": 17.1
+    },
+    "hue": 353.4,
+    "sat": 0.142
+   },
+   "floor": {
+    "p10": 0,
+    "p50": 33.89,
+    "p90": 46.8,
+    "rgb": {
+     "r": 43.5,
+     "g": 24.2,
+     "b": 24.5
+    },
+    "hue": 359.1,
+    "sat": 0.142
+   }
+  },
+  "reef-4": {
+   "config": {
+    "sky": 787480,
+    "stars": 16761072,
+    "floor": 2889288,
+    "grid": 3940960,
+    "accent": 16727510
+   },
+   "painted": {
+    "sky": 787480,
+    "grid": 3940960,
+    "floor": 2889288,
+    "accent": 16727510,
+    "opacity": 0.6
+   },
+   "sky": {
+    "p10": 0,
+    "p50": 17.27,
+    "p90": 44.38,
+    "rgb": {
+     "r": 28.4,
+     "g": 15.7,
+     "b": 18.2
+    },
+    "hue": 348.3,
+    "sat": 0.144
+   },
+   "floor": {
+    "p10": 0,
+    "p50": 34.11,
+    "p90": 46.94,
+    "rgb": {
+     "r": 43.8,
+     "g": 24.2,
+     "b": 25.9
+    },
+    "hue": 354.8,
+    "sat": 0.144
+   }
+  }
+ },
+ "assertions": [
+  {
+   "id": "A1",
+   "claim": "(a) deep-teal candidate accent lands dhue <= 12 from the debris-1/debris-4 0x2dd4bf accents (config comment + spec R4)",
+   "measured": "max dhue vs 0x2dd4bf members = 1.0 deg",
+   "threshold": "<= 12",
+   "pass": true
+  },
+  {
+   "id": "A2",
+   "claim": "(b) reef accents clear the L1 Debris Field accent band (150.7..193.6 deg) by > 40 deg",
+   "measured": "min dhue = 63.3 deg",
+   "threshold": "> 40",
+   "pass": true
+  },
+  {
+   "id": "A3",
+   "claim": "E57 rule-1 AND test (dluma<=10 AND dhue<=40): 0 collisions for reef accents vs drift/ember ladder accents + abyssal L4 boss hull",
+   "measured": "0 collisions / 32 pairs",
+   "threshold": "0",
+   "pass": true
+  },
+  {
+   "id": "A4",
+   "claim": "rendered backdrop stats finite (no NaN) for all 4 palettes x sky/floor",
+   "measured": "0 non-finite",
+   "threshold": "0",
+   "pass": true
+  },
+  {
+   "id": "A5",
+   "claim": "browser smoke: console errors === 0 (quality-bar gate 3)",
+   "measured": "0 errors",
+   "threshold": "0",
+   "pass": true
+  }
+ ],
+ "consoleErrors": 0,
+ "consoleErrorSample": []
+}
