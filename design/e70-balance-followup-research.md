@@ -317,3 +317,49 @@ telemetry, no new persistent telemetry surface (console 0/0 by the pin bar).
   tabs).
 - Next owner: I524 = ST-490 (R1 WITH MEASUREMENT; decision rule step 1 = re-confirm the
   1.4667 s baseline on 62100+i x 100 BEFORE any config move).
+
+## 12. R7 resolution - Branch C: accept-with-documentation (I526, ST-492; recorded WITH MEASUREMENT)
+
+### 12.1 Branch evaluation on the ST-491 data (I525 sweep, 52700+i x 10, deterministic)
+Measured (I525, .evidence/I525/sweep525.json + results525.txt): 10/10 runs died, median
+death wave 9, all runs hits=3. Killing-blow tally (primary attribution; strict ==
+primary, 0 monolithProbable rocks): MONOLITH 3 (1 of the 3 is a residual bolt 12 ticks
+after the boss death - recorded as bullet_unknown per the frozen boss-alive-at-hit
+rule), SPLICER 1, gunship 2, rock_S 1, rock_L 1, sentry 1, bullet_unknown 1.
+- H (heavyweight-attributed) = 4/10 < 6/10 -> Branch B NOT met.
+- Max non-heavyweight source = gunship 2/10 < 4/10 -> Branch A NOT met.
+- -> BRANCH C (pilot wall / diffuse): accept-with-documentation. NO lever applied.
+
+### 12.2 What the data shows (recorded for the next episode)
+- The kill distribution is diffuse: 10 kills across 7 source classes (4 heavyweight
+  across 3 classes; 5 pre-E69 roster/rocks + 1 residual unknown). No single
+  pre-registered lever target accounts for a majority of deaths; every frozen lever
+  (Branch A/B candidates) is individually below its threshold.
+- The wave-5 Monolith is a WINDOW problem, not an unbeatable HP wall: the kiter killed
+  the wave-5 Monolith in 7 of 10 runs (bossDeaths 5805/6454/7977/7550/5242/7014/6270),
+  yet 4/10 runs still died on wave 5 - from its bolts (body/aimed) while it was alive
+  or in the ticks after death. No run cleared wave 8+; the pre-E69 pressure band
+  (waves 5-12: rocks + drones/hunters/stingers/gunships/sentries/wasps + mines) is
+  where the kiter runs out of resources (all runs hits=3 at death).
+- Median non-boss clear w1-7: 22.4/23.8/21.8/20.5/22.7(7/10)/10.0(6/7)/14.4(6/6) s;
+  plannedContent run0 w1-12: 5/6/6/8/10/6/8/10/11/12/9/10 spawns.
+
+### 12.3 Acceptance + residual disposition
+- R7 (0/10 reach wave 20): stays OPEN as a documented known limitation - the I525
+  sweep reconfirms it (median death wave 9; no wave-8+ clear). Consistent with the E69
+  close (I522): documented, not fixed. No frozen lever can reach it (all four are
+  E69-only) and Branch C forbids a global difficulty knob (instrument change; the pilot
+  trio is frozen I328; out of E70 scope).
+- R8 (null ratio): stays OPEN as a direct consequence of R7 (no wave-13-20 clears
+  exist to measure).
+- No lever applied, no config change, no src change. The 15 payload-only hit-source
+  tags (I525) remain as permanent telemetry for future episodes.
+- Future-episode inputs (NOT E70 scope): if a future episode relaxes the pilot freeze,
+  the largest non-heavyweight cluster is the gunship (2/10; unique 0.5 radius bolt);
+  the Monolith post-kill bolt window (residual bolts after death) is a cleanup
+  candidate; the pre-E69 density band (waves 5-12) is the pressure wall behind both.
+
+### 12.4 Verification (I526, docs-only, measured)
+npm test 1,187/1,187 + build exit 0 + dist byte-identical 5,255,258 B/184 (src
+unchanged since I525) + git diff vendor/ empty + BOM delta 0 + hygiene (no servers,
+no tabs). Next owner: I527 = ST-493 (G70.0 close gate).
