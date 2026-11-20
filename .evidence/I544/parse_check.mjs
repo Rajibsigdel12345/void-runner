@@ -1,0 +1,1 @@
+try { await import("file:///E:/Game/src/render/screens.js"); console.log("PARSE OK"); } catch (e) { console.error("PARSE FAIL", e.message); process.exit(1); }

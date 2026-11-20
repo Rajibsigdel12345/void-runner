@@ -2,6 +2,7 @@
 import { STATE } from '../core/state.js';
 import { encodeResult } from '../core/share.js'; // ST-159: shareable result code
 import { t as tr, kc as kcap, onLocale } from '../core/strings.js'; // I404: ST-374 + I405: ST-375 locale switching
+import { menuModel } from '../core/menuModel.js'; // ST-510 (I544) D1: pure core menu decision model
 
 export function createScreens(root, settings = {}) {
   const overlay = document.createElement('div');
@@ -39,7 +40,7 @@ export function createScreens(root, settings = {}) {
     '.vr-reduced .vr-start{animation:none !important;}',
     '#screen-menu .vr-settings-groups{grid-template-columns:1fr !important;}', // ST-279: menu settings stack (narrow left column),
     '#screen-menu .vr-settings{z-index:2;}',
-    '#screen-menu .vr-settings > div > div{background:rgba(6,12,30,0.92);}', // opaque so the corner panel reads over the grid edge,
+    '#screen-menu .vr-settings .vr-settings-groups > div{background:rgba(6,12,30,0.92);}', // opaque so the corner panel reads over the grid edge,
     '@media (max-width:620px),(max-height:480px){.vr-menu-grid{grid-template-columns:1fr !important;max-width:100% !important;}.vr-credit{display:none !important;}#screen-menu .vr-settings{position:static !important;left:auto !important;bottom:auto !important;margin-top:8px !important;z-index:auto !important;}#screen-menu{justify-content:flex-start !important;overflow-y:auto !important;padding:18px 0 !important;}#screen-paused,#screen-gameover,#screen-replays{justify-content:flex-start !important;overflow-y:auto !important;padding:18px 0 !important;}}',
     '@media (pointer:coarse){.vr-start,.vr-pause-btn{box-sizing:border-box;min-height:44px}#vr-pause-btn{width:44px !important;height:44px !important}.vr-settings input[type=checkbox]{-webkit-appearance:none;appearance:none;box-sizing:border-box;width:44px;height:44px;margin:0;padding:0;border:1px solid #2b4a8a;border-radius:4px;background:rgba(10,18,40,0.8) center/20px 20px no-repeat;cursor:pointer}.vr-settings input[type=checkbox]:checked{background-color:#2b4a8a;background-image:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%3E%3Cpath%20fill=%22none%22%20stroke=%22%23ffe08a%22%20stroke-width=%223.4%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%20d=%22M4%2012.5l5.2%205.2L20%206.5%22/%3E%3C/svg%3E")}.vr-settings input[type=range]{height:44px}.vr-settings select{min-height:44px}}', // ST-324 (I354): 44 px coarse-pointer touch targets (fine/desktop byte-untouched)
   ].join('');
@@ -118,11 +119,12 @@ export function createScreens(root, settings = {}) {
   const top5Body = document.createElement('div');
   top5Body.style.cssText = 'display:flex;flex-direction:column;gap:3px;white-space:pre-line;font-variant-numeric:tabular-nums;';
   top5.append(top5Head, top5Body);
-  const menuGrid = document.createElement('div'); // I66: two-column menu
-  menuGrid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;max-width:640px;';
-  menuGrid.classList.add('vr-menu-grid'); // I71: collapse to one column on narrow viewports
-  menuGrid.append(controls, top5);
-  bottomWrap.appendChild(menuGrid);
+  // ST-510 (I544) D1: standard-game menu hierarchy - the centered hero keeps the start prompt (touch)
+  // or the CONTINUE - LV N primary (campaign progress exists, checkpoint continue ST-457); the bottom
+  // zone = NEW GAME heading + ENDLESS/CAMPAIGN/DAILY row + SETTINGS/REPLAYS row + TOP 5 + status line +
+  // best/daily + credit. The settings panel is a collapsed corner panel (Esc closes it) and now holds
+  // the controls help card (the old I66 two-column grid is gone).
+  const newGameHead = line(bottomWrap, tr('menu.new_game'), 'font-size:calc(12px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;opacity:0.8;'); // ST-510 (I544): NEW GAME heading
   const menuStatus = line(bottomWrap, tr('menu.status_line',{mute:tr('state.off'),fx:tr('state.high'),music:tr('state.on'),mode:tr('settings.camera_mode.chase')}), 'font-size:calc(12px * var(--vr-fs,1));letter-spacing:2px;opacity:0.65;'); // I165: live session status on the menu (I164 finding); I171: + N music
   let menuStartBtn = null; let menuStartLine = null; // ST-375: locale re-emit targets (touch btn / keyboard line)
   if (settings.touch && settings.actions && settings.actions.start) { // I71: tappable start on touch
@@ -130,22 +132,51 @@ export function createScreens(root, settings = {}) {
     startBtn.type = 'button';
     startBtn.className = 'vr-start';
     startBtn.textContent = tr('menu.start_tap');
-    startBtn.style.cssText = 'margin-top:14px;';
+    startBtn.style.cssText = 'margin-top:14px';
     startBtn.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.start(); startBtn.blur(); });
     centerWrap.appendChild(startBtn);
     menuStartBtn = startBtn; // ST-375
   } else {
     menuStartLine = line(centerWrap, tr('menu.start_key'), 'font-size:calc(18px * var(--vr-fs,1));font-weight:700;letter-spacing:4px;animation:vrPulse 1.6s ease-in-out infinite;');
   }
-  const dailyRow = document.createElement('div'); // ST-279: DAILY + REPLAYS side by side
-  dailyRow.style.cssText = 'display:flex;gap:14px;align-items:center;';
+  let continueBtn = null; // ST-510 (I544) D1: CONTINUE - LV N primary (campaign checkpoint continue, ST-457)
+  if (settings.actions && typeof settings.actions.startCampaign === 'function') {
+    const cb = document.createElement('button');
+    cb.type = 'button';
+    cb.className = 'vr-start';
+    cb.style.cssText = 'margin-top:14px;color:#ffe08a';
+    cb.style.display = 'none'; // shown by refreshMenu when progress exists
+    cb.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.startCampaign(); cb.blur(); });
+    centerWrap.appendChild(cb);
+    continueBtn = cb;
+  }
+  let settingsOpen = false; // ST-510 (I544) D1: settings panel collapsed by default
+  const settingsBtn = document.createElement('button'); // ST-510 (I544) D1: SETTINGS toggle
+  settingsBtn.type = 'button';
+  settingsBtn.className = 'vr-pause-btn';
+  settingsBtn.textContent = tr('menu.settings');
+  settingsBtn.style.cssText = 'letter-spacing:3px';
+  settingsBtn.setAttribute('aria-label', tr('menu.settings_aria'));
+  settingsBtn.setAttribute('aria-expanded', 'false');
+  function setSettingsOpen(open) { // ST-510 (I544) D1
+    settingsOpen = open;
+    if (settings.menu) {
+      settings.menu.el.style.display = open ? 'flex' : 'none';
+      if (open) settings.menu.sync();
+    }
+    settingsBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  settingsBtn.addEventListener('click', (e) => { e.stopPropagation(); setSettingsOpen(!settingsOpen); settingsBtn.blur(); });
+  const dailyRow = document.createElement('div'); // ST-510 (I544) D1: secondary row - SETTINGS + DAILY + REPLAYS (was ST-279 DAILY+REPLAYS)
+  dailyRow.style.cssText = 'display:flex;gap:14px;align-items:center';
+  dailyRow.appendChild(settingsBtn);
   let dailyBtn = null; let replaysBtn = null; // ST-375: locale re-emit targets
   if (settings.actions && typeof settings.actions.startDaily === 'function') { // ST-141: DAILY button (today's seeded board)
     const dailyBtnEl = document.createElement('button');
     dailyBtnEl.type = 'button';
     dailyBtnEl.className = 'vr-pause-btn';
     dailyBtnEl.textContent = tr('menu.daily');
-    dailyBtnEl.style.cssText = 'letter-spacing:3px;';
+    dailyBtnEl.style.cssText = 'letter-spacing:3px';
     dailyBtnEl.setAttribute('aria-label', tr('menu.daily_aria'));
     dailyBtnEl.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.startDaily(); dailyBtnEl.blur(); });
     dailyRow.appendChild(dailyBtnEl);
@@ -156,23 +187,21 @@ export function createScreens(root, settings = {}) {
     replaysBtnEl.type = 'button';
     replaysBtnEl.className = 'vr-pause-btn';
     replaysBtnEl.textContent = tr('menu.replays');
-    replaysBtnEl.style.cssText = 'letter-spacing:3px;';
+    replaysBtnEl.style.cssText = 'letter-spacing:3px';
     replaysBtnEl.setAttribute('aria-label', tr('menu.replays_aria'));
     replaysBtnEl.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.showReplays(); replaysBtnEl.blur(); });
     dailyRow.appendChild(replaysBtnEl);
     replaysBtn = replaysBtnEl; // ST-375
   }
-  if (dailyRow.children.length) bottomWrap.appendChild(dailyRow);
-
-  const modeRow = document.createElement('div'); // ST-420 (I450): ENDLESS + CAMPAIGN mode entry (Enter still starts endless)
-  modeRow.style.cssText = 'display:flex;gap:14px;align-items:center;';
+  const modeRow = document.createElement('div'); // ST-420 (I450) + ST-510 (I544): NEW GAME row - ENDLESS / CAMPAIGN / DAILY
+  modeRow.style.cssText = 'display:flex;gap:14px;align-items:center';
   let endlessBtn = null; let campaignBtn = null; // ST-375: locale re-emit targets
   if (settings.actions && typeof settings.actions.startEndless === 'function') {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'vr-pause-btn';
     b.textContent = tr('menu.mode_endless');
-    b.style.cssText = 'letter-spacing:3px;';
+    b.style.cssText = 'letter-spacing:3px';
     b.setAttribute('aria-label', tr('menu.mode_endless'));
     b.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.startEndless(); b.blur(); });
     modeRow.appendChild(b);
@@ -183,28 +212,32 @@ export function createScreens(root, settings = {}) {
     b.type = 'button';
     b.className = 'vr-pause-btn';
     b.textContent = tr('menu.mode_campaign');
-    b.style.cssText = 'letter-spacing:3px;color:#ffe08a;';
+    b.style.cssText = 'letter-spacing:3px;color:#ffe08a';
     b.setAttribute('aria-label', tr('menu.mode_campaign'));
     b.addEventListener('click', (e) => { e.stopPropagation(); settings.actions.startCampaign(); b.blur(); });
     modeRow.appendChild(b);
     campaignBtn = b; // ST-375
   }
-  if (modeRow.children.length) bottomWrap.appendChild(modeRow);
+  if (dailyBtn) modeRow.appendChild(dailyBtn); // ST-510 (I544): DAILY is a NEW GAME choice (moved from the secondary row)
+  if (modeRow.children.length) newGameHead.style.display = 'block'; else newGameHead.style.display = 'none'; // ST-510 (I544)
   const bestRow = document.createElement('div'); // ST-279: best + daily lines share a row
-  bestRow.style.cssText = 'display:flex;gap:24px;align-items:baseline;';
+  bestRow.style.cssText = 'display:flex;gap:24px;align-items:baseline';
   const menuBest = line(bestRow, '', 'font-size:calc(13px * var(--vr-fs,1));opacity:0.85;'); // best score lands in I18 (I44 contrast)
   const menuDaily = line(bestRow, '', 'font-size:calc(13px * var(--vr-fs,1));opacity:0.85;letter-spacing:1px;color:#9fd8ff;'); // ST-141: daily board line
   const credit = document.createElement('div'); // I65: credits
   credit.className = 'vr-credit';
   credit.textContent = tr('menu.credit');
   bestRow.append(menuBest, menuDaily);
-bottomWrap.append(bestRow, credit);
+  bottomWrap.append(newGameHead, modeRow, dailyRow, top5, menuStatus, bestRow, credit); // ST-510 (I544) D1: bottom-zone order (append = move, reorders in place)
   if (settings.menu) {
     // ST-279: demoted to the bottom-left corner (clear of the centered ship hero band).
     settings.menu.el.style.position = 'absolute';
     settings.menu.el.style.left = '16px';
     settings.menu.el.style.bottom = '54px'; // ST-318 (I347): E31 minor (a) - clears the menu-credit 7px cross (I319); >=20px gap bar
+    settings.menu.el.appendChild(controls); // ST-510 (I544): the controls help card lives in the settings panel now
+    controls.style.background = 'rgba(6,12,30,0.92)'; // opaque over the menu edge
     bottomWrap.appendChild(settings.menu.el);
+    setSettingsOpen(false); // ST-510 (I544): collapsed by default
   }
 
   // --- PAUSED (I68: deeper dim + RESUME / RESTART / QUIT actions, mouse + keys) ---
@@ -393,6 +426,9 @@ bottomWrap.append(bestRow, credit);
     if (replaysBtn) { replaysBtn.textContent = tr('menu.replays'); replaysBtn.setAttribute('aria-label', tr('menu.replays_aria')); }
     if (endlessBtn) { endlessBtn.textContent = tr('menu.mode_endless'); endlessBtn.setAttribute('aria-label', tr('menu.mode_endless')); } // ST-420 (I450)
     if (campaignBtn) { campaignBtn.textContent = tr('menu.mode_campaign'); campaignBtn.setAttribute('aria-label', tr('menu.mode_campaign')); } // ST-420 (I450)
+    if (continueBtn) { const mm2 = menuModel(settings.menuProgress ? settings.menuProgress() : 0); if (mm2.hasContinue) { continueBtn.textContent = mm2.primary.label; continueBtn.setAttribute('aria-label', mm2.primary.aria); } } // ST-510 (I544): D1 continue label follows the locale
+    settingsBtn.textContent = tr('menu.settings'); settingsBtn.setAttribute('aria-label', tr('menu.settings_aria')); // ST-510 (I544)
+    newGameHead.textContent = tr('menu.new_game'); // ST-510 (I544)
     credit.textContent = tr('menu.credit');
     top5Head.textContent = tr('menu.board');
     pauseTitle.textContent = tr('pause.title');
@@ -427,11 +463,28 @@ bottomWrap.append(bestRow, credit);
   }
 
   let shown = null;
+  function refreshMenu() { // ST-510 (I544): re-evaluate the menu model (progress changes during play)
+    const mm = menuModel(settings.menuProgress ? settings.menuProgress() : 0);
+    if (continueBtn) {
+      if (mm.hasContinue) {
+        continueBtn.textContent = mm.primary.label;
+        continueBtn.setAttribute('aria-label', mm.primary.aria);
+      }
+      continueBtn.style.display = mm.hasContinue ? 'block' : 'none';
+    }
+    if (menuStartBtn) menuStartBtn.style.display = mm.hasContinue ? 'none' : '';
+    if (menuStartLine) menuStartLine.style.display = mm.hasContinue ? 'none' : ''; // I544 fix: hide the keyboard start prompt only when CONTINUE owns the menu
+  }
+  document.addEventListener('keydown', (e) => { // ST-510 (I544): Esc collapses the open menu settings panel (capture: before the panel swallows it)
+    if (e.key !== 'Escape' || shown !== STATE.MENU || !settingsOpen || replaysOpenFlag) return;
+    setSettingsOpen(false);
+    e.stopPropagation();
+  }, true);
   function showPanel(state) {
     if (shown === state) return;
     shown = state;
     for (const p of Object.values(PANELS)) if (p) p.style.display = PANELS[state] === p ? 'flex' : 'none';
-    if (state === STATE.MENU && settings.menu) settings.menu.sync();
+    if (state === STATE.MENU) { setSettingsOpen(false); refreshMenu(); if (settings.menu) settings.menu.sync(); } // ST-510 (I544): D1 - collapse reset + re-evaluate the continue primary on every menu show
     if (state === STATE.PAUSED && settings.pause) settings.pause.sync();
   }
 

@@ -20,6 +20,7 @@ const FILES = [
   'src/render/settingsPanel.js',
   'src/render/bossHealth.js',
   'src/main.js',
+  'src/core/menuModel.js', // ST-510 (I544): the menu decision model t() keys must resolve
 ];
 // Matches t('key') / tr('key') / kc('key') / kcap('key') calls whose string literal is the FULL
 // first argument (followed by ) or ,). Partial concatenations like tr('hud.pu.' + type) are

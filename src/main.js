@@ -76,6 +76,7 @@ import { visibilityAction } from './core/visibilityPause.js'; // I189: pure visi
 import { t as tr, setLocale, onLocale, getLocale } from './core/strings.js'; // I404: ST-374 + I405: ST-375 locale switching
 import { STATE } from './core/state.js';
 import { Storage, toggleFxQuality } from './core/storage.js';
+import { menuModel } from './core/menuModel.js'; // ST-510 (I544) D1: Enter = continue/start decision
 import { CONFIG } from './core/config.js';
 import { stageName } from './core/stages.js'; // ST-420 (I450): stage banner name
 import { World } from './core/game.js';
@@ -649,6 +650,7 @@ function replayIntent() { // ST-190: next recorded intent (neutral past the end)
 
 const screens = createScreens(document.body, {
   menu: menuSettings, pause: pauseSettings, touch: coarse, // I71: touch-aware menu
+  menuProgress: () => storage.getCampaignProgress(), // ST-510 (I544) D1: fresh campaign progress for the CONTINUE primary
   actions: { // I68: pause overlay actions; I71: start for touch; ST-141: startDaily for the DAILY button
     start: () => startRun('normal'),
     startDaily: () => startRun('daily'),
@@ -758,7 +760,7 @@ window.addEventListener('keydown', (e) => {
     const ae = document.activeElement;
     const onButton = !!(ae && ae.tagName === 'BUTTON'); // I165: a focused button owns Enter (DAILY, COPY RESULT, TAP) so its label is never lied to
     if (!onButton && st === STATE.MENU) {
-      startRun('normal'); // ST-141: Enter starts a normal run (DAILY button for the daily run)
+      startRun(menuModel(storage.getCampaignProgress()).enterAction); // ST-510 (I544) D1: Enter = CONTINUE (campaign checkpoint, ST-457) when progress exists, else the pre-E74 endless path (bit-identical at progress 0)
     } else if (!onButton && st === STATE.GAME_OVER) {
       if (replayView) exitReplayView(); else restartRun(); // ST-190: a finished replay quits to the menu; ST-141: reseed when daily so Enter reproduces today's run
     } else if (!onButton && st === STATE.PAUSED) { // I68: Enter resumes
