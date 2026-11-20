@@ -34,11 +34,11 @@ test('I489 campaignBoss: config sanity', () => {
   assert.ok(cb.enterTime > 0);
   assert.ok(cb.speed > 0 && cb.speed < CONFIG.ship.maxSpeed);
   assert.ok(cb.speed < CONFIG.boss.speed);
-  for (const l of [1, 2, 3, 4]) { // ST-486 (E69): +L4
+  for (const l of [1, 2, 3, 4, 5]) { // ST-486 (E69): +L4, ST-517 (E75): +L5
     assert.ok(cb.hp[l] > 0);
     assert.ok(cb.score[l] > 0);
   }
-  assert.deepEqual(cb.phases, { 1: 3, 2: 1, 3: 1, 4: 1 }); // ST-486 (E69)
+  assert.deepEqual(cb.phases, { 1: 3, 2: 1, 3: 1, 4: 1, 5: 3 }); // ST-486 (E69); ST-517 (E75): L5 archon 3-phase
   assert.ok(cb.abyssal && cb.abyssal.spawnEvery > 0 && cb.abyssal.spawnFirst > 0, 'ST-486 abyssal move-set config');
   assert.ok(Number.isInteger(cb.abyssal.body) && Number.isInteger(cb.abyssal.core) && Number.isInteger(cb.abyssal.rim), 'ST-486 abyssal identity hexes');
   assert.deepEqual(cb.phaseAt, [1.0, 0.66, 0.33]);
@@ -90,8 +90,9 @@ test('I489 campaignBoss: phase counts and starting posture', () => {
   assert.equal(boss(2, 'splicer').phaseCount, 1);
   assert.equal(boss(3, 'prime').phaseCount, 1);
   assert.equal(boss(4, 'abyssal').phaseCount, 1); // ST-486 (E69)
-  for (const l of [1, 2, 3, 4]) {
-    const b = boss(l, ['monolith', 'splicer', 'prime', 'abyssal'][l - 1]);
+  assert.equal(boss(5, 'monolith').phaseCount, 3); // ST-517 (E75): L5 3-phase (archon kind lands D4/ST-519; monolith tint fallback)
+  for (const l of [1, 2, 3, 4, 5]) {
+    const b = boss(l, ['monolith', 'splicer', 'prime', 'abyssal', 'monolith'][l - 1]);
     assert.equal(b.phaseIndex, 0);
     assert.equal(b.postureScale, CONFIG.campaignBoss.posture[0]);
   }
@@ -160,8 +161,8 @@ test('I489 campaignBoss: hit deals 1 damage, kill flips alive', () => {
 
 test('I489 campaignBoss: per-level stats', () => {
   const cb = CONFIG.campaignBoss;
-  const tints = ['monolith', 'splicer', 'prime', 'abyssal']; // ST-486 (E69)
-  for (const l of [1, 2, 3, 4]) {
+  const tints = ['monolith', 'splicer', 'prime', 'abyssal', 'monolith']; // ST-486 (E69); ST-517 (E75): L5 monolith fallback
+  for (const l of [1, 2, 3, 4, 5]) {
     const b = boss(l, tints[l - 1]);
     assert.equal(b.hp, cb.hp[l]);
     assert.equal(b.maxHp, cb.hp[l]);
@@ -186,15 +187,18 @@ test('I489 campaignBoss: canonical kind + prime + isCampaignBoss', () => {
   assert.equal(b4.kind, 'monolith');
   assert.equal(b4.prime, false);
   assert.equal(b4.abyssal, true);
-  assert.ok(b1.isCampaignBoss && b2.isCampaignBoss && b3.isCampaignBoss && b4.isCampaignBoss);
+  const b5 = boss(5, 'monolith'); // ST-517 (E75): archon falls back to monolith tint until D4/ST-519
+  assert.equal(b5.kind, 'monolith');
+  assert.equal(b5.prime, false);
+  assert.ok(b1.isCampaignBoss && b2.isCampaignBoss && b3.isCampaignBoss && b4.isCampaignBoss && b5.isCampaignBoss);
 });
 
 test('I489 campaignBoss: level boss wiring (kind + distance)', () => {
-  for (const l of [1, 2, 3, 4]) { // ST-486 (E69)
+  for (const l of [1, 2, 3, 4, 5]) { // ST-486 (E69), ST-517 (E75)
     assert.ok(bossKind(l).length > 0);
     assert.equal(bossDistance(l), levelLength(l));
   }
-  assert.deepEqual([bossKind(1), bossKind(2), bossKind(3), bossKind(4)], ['monolith', 'splicer', 'monolith-prime', 'abyssal']); // ST-486 (E69)
+  assert.deepEqual([bossKind(1), bossKind(2), bossKind(3), bossKind(4), bossKind(5)], ['monolith', 'splicer', 'monolith-prime', 'abyssal', 'archon']); // ST-486 (E69); ST-517 (E75)
 });
 
 test('I489 campaignBoss: timers seeded from the starting tier', () => {

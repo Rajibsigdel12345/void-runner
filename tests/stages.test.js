@@ -167,12 +167,12 @@ test('stages: the warp freezes the sim (game clock frozen) and advances the leve
   assert.ok(ts.data.theme, 'stage 2 has a theme');
 });
 
-test('stages: killing the campaign final (level 4) boss = abyssal -> victory gameover (ST-486 E69)', () => {
-  const w = worldWithCampaignBoss(53, 4);
+test('stages: killing the campaign final (level 5) boss = archon (monolith tint until D4) -> victory gameover (ST-517 E75)', () => {
+  const w = worldWithCampaignBoss(53, 5);
   assert.equal(w.boss.kind, 'monolith');
   assert.equal(w.boss.prime, false);
-  assert.equal(w.boss.abyssal, true); // ST-486 (E69)
-  assert.equal(w.boss.maxHp, 150); // ST-486: campaignBoss.hp[4]
+  assert.equal(w.boss.abyssal, false); // ST-517 (E75): archon identity lands D4/ST-519; monolith fallback is not abyssal
+  assert.equal(w.boss.maxHp, 175); // ST-517: campaignBoss.hp[5]
   assert.equal(w.boss.cfg.boss.burst.every, CONFIG.boss.burst.every); // ST-456: base cfg (Prime is a visual identity)
   assert.equal(w.boss.splitCount, 4); // ST-456: campaignBoss.splitCount
   assert.equal(w.boss.cfg.boss.phase2.hpFrac, CONFIG.boss.phase2.hpFrac);
@@ -185,7 +185,7 @@ test('stages: killing the campaign final (level 4) boss = abyssal -> victory gam
   const go = evs.find(e => e.type === 'gameover');
   assert.ok(go, 'gameover event');
   assert.equal(go.data.victory, true, 'gameover carries victory:true');
-  assert.equal(go.data.level, 4, 'gameover carries level 4');
+  assert.equal(go.data.level, 5, 'gameover carries level 5'); // ST-517 (E75)
   assert.equal(w.warp, null, 'no warp after final boss');
 });
 

@@ -1,0 +1,246 @@
+{
+  "pipeline": "I551 (ST-517, E75) K5 CJK byte pipeline - curated \\uXXXX source, EOL-matched insert, read-back codepoint verify",
+  "keys": [
+    {
+      "key": "level.name.l5",
+      "en": {
+        "value": "Zenith Spire",
+        "codepoints": [
+          "5A",
+          "65",
+          "6E",
+          "69",
+          "74",
+          "68",
+          "20",
+          "53",
+          "70",
+          "69",
+          "72",
+          "65"
+        ]
+      },
+      "zh": {
+        "value": "天顶之塔",
+        "codepoints": [
+          "5929",
+          "9876",
+          "4E4B",
+          "5854"
+        ]
+      },
+      "ja": {
+        "value": "天頂の尖塔",
+        "codepoints": [
+          "5929",
+          "9802",
+          "306E",
+          "5C16",
+          "5854"
+        ]
+      }
+    },
+    {
+      "key": "level.zone.l5z1",
+      "en": {
+        "value": "Spire Approach",
+        "codepoints": [
+          "53",
+          "70",
+          "69",
+          "72",
+          "65",
+          "20",
+          "41",
+          "70",
+          "70",
+          "72",
+          "6F",
+          "61",
+          "63",
+          "68"
+        ]
+      },
+      "zh": {
+        "value": "尖塔接近",
+        "codepoints": [
+          "5C16",
+          "5854",
+          "63A5",
+          "8FD1"
+        ]
+      },
+      "ja": {
+        "value": "スパイア接近",
+        "codepoints": [
+          "30B9",
+          "30D1",
+          "30A4",
+          "30A2",
+          "63A5",
+          "8FD1"
+        ]
+      }
+    },
+    {
+      "key": "level.zone.l5z2",
+      "en": {
+        "value": "Halo Circuit",
+        "codepoints": [
+          "48",
+          "61",
+          "6C",
+          "6F",
+          "20",
+          "43",
+          "69",
+          "72",
+          "63",
+          "75",
+          "69",
+          "74"
+        ]
+      },
+      "zh": {
+        "value": "光环航道",
+        "codepoints": [
+          "5149",
+          "73AF",
+          "822A",
+          "9053"
+        ]
+      },
+      "ja": {
+        "value": "ハーー回路",
+        "codepoints": [
+          "30CF",
+          "30FC",
+          "30FC",
+          "56DE",
+          "8DEF"
+        ]
+      }
+    },
+    {
+      "key": "level.zone.l5z3",
+      "en": {
+        "value": "Crown Ascent",
+        "codepoints": [
+          "43",
+          "72",
+          "6F",
+          "77",
+          "6E",
+          "20",
+          "41",
+          "73",
+          "63",
+          "65",
+          "6E",
+          "74"
+        ]
+      },
+      "zh": {
+        "value": "王冕攀升",
+        "codepoints": [
+          "738B",
+          "5195",
+          "6500",
+          "5347"
+        ]
+      },
+      "ja": {
+        "value": "クラウン上昇",
+        "codepoints": [
+          "30AF",
+          "30E9",
+          "30A6",
+          "30F3",
+          "4E0A",
+          "6607"
+        ]
+      }
+    },
+    {
+      "key": "level.zone.l5z4",
+      "en": {
+        "value": "Archon Threshold",
+        "codepoints": [
+          "41",
+          "72",
+          "63",
+          "68",
+          "6F",
+          "6E",
+          "20",
+          "54",
+          "68",
+          "72",
+          "65",
+          "73",
+          "68",
+          "6F",
+          "6C",
+          "64"
+        ]
+      },
+      "zh": {
+        "value": "执政官之门",
+        "codepoints": [
+          "6267",
+          "653F",
+          "5B98",
+          "4E4B",
+          "95E8"
+        ]
+      },
+      "ja": {
+        "value": "アーコン散居",
+        "codepoints": [
+          "30A2",
+          "30FC",
+          "30B3",
+          "30F3",
+          "6563",
+          "5C45"
+        ]
+      }
+    }
+  ],
+  "mt_references": [
+    {
+      "key": "level.name.l5",
+      "en": "Zenith Spire",
+      "gtx_zh": "天顶尖塔",
+      "gtx_ja": "ゼニス スパイア"
+    },
+    {
+      "key": "level.zone.l5z1",
+      "en": "Spire Approach",
+      "gtx_zh": "尖顶方法",
+      "gtx_ja": "スパイアアプローチ"
+    },
+    {
+      "key": "level.zone.l5z2",
+      "en": "Halo Circuit",
+      "gtx_zh": "光环电路",
+      "gtx_ja": "ハローサーキット"
+    },
+    {
+      "key": "level.zone.l5z3",
+      "en": "Crown Ascent",
+      "gtx_zh": "皇冠攀登",
+      "gtx_ja": "クラウンアセント"
+    },
+    {
+      "key": "level.zone.l5z4",
+      "en": "Archon Threshold",
+      "gtx_zh": "执政官阈值",
+      "gtx_ja": "アルコンの閾値"
+    }
+  ],
+  "verification": {
+    "PASS": "all 15 insertions verified by codepoint"
+  },
+  "mt_note": "MyMemory returned EMPTY (free-tier rate limit); gtx endpoint retry recorded as the independent reference."
+}

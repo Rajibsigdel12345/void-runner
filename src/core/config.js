@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿// ALL tunables live here (balance table). See design/gdd.md for rationale.
+﻿﻿﻿﻿﻿﻿// ALL tunables live here (balance table). See design/gdd.md for rationale.
 export const CONFIG = {
   // ST-431 (I463, E60 B1): role-named palette - the single role-truth section for
   // every world/UI color (threejs-game-studio material kit: bodyPrimary/hazard/
@@ -1207,7 +1207,12 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
         { name: 'Bulwark Wall',    length: 120, paletteId: 'reef-3', hazardProfile: 'dense',    enemyMix: ['bulwark', 'stinger', 'wasp'],     optionalTargets: ['pod'],               checkpointAt: 0 },
         { name: 'Necro Gauntlet',  length: 90,  paletteId: 'reef-4', hazardProfile: 'gauntlet', enemyMix: ['phantom', 'hauler', 'bulwark', 'mine'], optionalTargets: ['rapid', 'shielded'], checkpointAt: 0 }
       ] },
-    ],
+      { name: 'Zenith Spire', boss: 'archon', zones: [ // ST-517 (E75): final level; 'archon' kind lands D4/ST-519 - until then the monolith tint fallback applies (game.js)
+        { name: 'Spire Approach',   length: 100, paletteId: 'zenith-1', hazardProfile: 'moderate', enemyMix: ['phantom', 'drone', 'mine'],            optionalTargets: ['golden'],   checkpointAt: 0 },
+        { name: 'Halo Circuit',     length: 120, paletteId: 'zenith-2', hazardProfile: 'dense',    enemyMix: ['hunter', 'stinger', 'mine'],           optionalTargets: ['shielded'], checkpointAt: 0 },
+        { name: 'Crown Ascent',     length: 130, paletteId: 'zenith-3', hazardProfile: 'gauntlet', enemyMix: ['gunship', 'sentry', 'wasp'],           optionalTargets: ['pod'],      checkpointAt: 0 },
+        { name: 'Archon Threshold', length: 90,  paletteId: 'zenith-4', hazardProfile: 'gauntlet', enemyMix: ['phantom', 'bulwark', 'hunter', 'mine'], optionalTargets: ['rapid', 'shielded'], checkpointAt: 0 }
+      ] },    ],
     palettes: { // zone identity palettes, E57 stage-theme shape {sky, stars, floor, grid, accent}.
       // MODEL ONLY in ST-452 (data): ST-455 consumes these + runs a rendered-luma
       // audit (I480 pattern) before finalizing hexes. null = arena identity (no
@@ -1232,7 +1237,11 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
       'reef-1': { sky: 0x08040f, stars: 0xd8c8ff, floor: 0x1a1030, grid: 0x2a1a44, accent: 0x8a5cff },
       'reef-2': { sky: 0x090412, stars: 0xe0c8ff, floor: 0x201238, grid: 0x301e4e, accent: 0xa04dff },
       'reef-3': { sky: 0x0a0414, stars: 0xf0c4ff, floor: 0x261440, grid: 0x362058, accent: 0xc840e8 },
-      'reef-4': { sky: 0x0c0418, stars: 0xffc0f0, floor: 0x2c1648, grid: 0x3c2260, accent: 0xff3dd6 }
+      'reef-4': { sky: 0x0c0418, stars: 0xffc0f0, floor: 0x2c1648, grid: 0x3c2260, accent: 0xff3dd6 },
+      'zenith-1': { sky: 0x03060f, stars: 0xbcd8ff, floor: 0x0d1830, grid: 0x14243c, accent: 0x2a5cff },
+      'zenith-2': { sky: 0x040814, stars: 0xc8e0ff, floor: 0x101c36, grid: 0x182a42, accent: 0x2a7aff },
+      'zenith-3': { sky: 0x050a18, stars: 0xd4e8ff, floor: 0x13203c, grid: 0x1c304a, accent: 0x3d95ff },
+      'zenith-4': { sky: 0x070c1e, stars: 0xe0f0ff, floor: 0x172444, grid: 0x203654, accent: 0x4da8ff }
     },
     hazardProfiles: { // hazard-density vocabulary (F3/F4: tighten <-> release arc).
       // MODEL ONLY in ST-452: ST-453/ST-455 finalize the multipliers in the
@@ -1269,14 +1278,14 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
     enterTime: 1.4,     // longer entrance - the fight is a set piece (endless 0.8)
     speed: 1.4,         // slow homing (always dodgeable)
     turn: 0.7,          // sluggish heading change rad/s
-    hp: { 1: 96, 2: 110, 3: 130, 4: 150 }, // per-level HP (climbing; the weak point gates TTK) ST-486 (E69): +L4
-    phases: { 1: 3, 2: 1, 3: 1, 4: 1 }, // C3: L1 full 3-phase; L2-4 single-phase (ST-486: L4 abyssal)
+    hp: { 1: 96, 2: 110, 3: 130, 4: 150, 5: 175 }, // per-level HP (climbing; the weak point gates TTK) ST-486 (E69): +L4, ST-517 (E75): +L5
+    phases: { 1: 3, 2: 1, 3: 1, 4: 1, 5: 3 }, // C3: L1 full 3-phase; L2-4 single-phase (ST-486: L4 abyssal; ST-517: L5 archon 3-phase)
     phaseAt: [1.0, 0.66, 0.33],       // L1 phase hpFrac thresholds (phase i while f in [at[i+1], at[i]))
     posture: [1.0, 1.14, 1.28],       // posture/scale per phaseIndex (the growth read on a phase change)
     weak: { r: 1.4, orbitR: 4.0, armTime: 2.4, teleTime: 0.8, openTime: 2.2 }, // closed -> tele -> open cycle
     moves: { aimEvery: [2.4, 1.8, 1.3], ringEvery: [99, 3.5, 2.2] }, // per-tier cadence (99 = no ring in phase 0)
     singlePhaseMoveTier: 1,           // L2/L3 (1 phase) run the tier-1 move set (aimed + ring)
-    score: { 1: 1000, 2: 1400, 3: 2000, 4: 2600 },
+    score: { 1: 1000, 2: 1400, 3: 2000, 4: 2600, 5: 3400 },
     splitCount: 4,        // M rocks on death
     splitSize: 'M',
     abyssal: {  // ST-486 (E69): L4 "Necro Reef" final boss (kind stays 'monolith'; retint/posture Option A, 0 new tris).

@@ -17,14 +17,14 @@ const TARGETS = new Set(['golden', 'shielded', 'rapid', 'spread', 'shield', 'mag
 const HAZARDS = new Set(['calm', 'moderate', 'dense', 'gauntlet']);
 const phSet = (v) => [...String(v).matchAll(/\{([a-zA-Z0-9_]+)\}/g)].map((m) => m[1]).sort().join(',');
 
-test('level: structure - 4 levels x 4 zones, lengths 330/370/400/420, campaign 1520 (ST-486 E69)', () => {
-  assert.equal(levelCount(), 4);
-  assert.deepEqual([1, 2, 3, 4].map((l) => zoneCount(l)), [4, 4, 4, 4]);
-  assert.deepEqual([1, 2, 3, 4].map((l) => levelLength(l)), [330, 370, 400, 420]);
-  assert.equal(campaignLength(), 1520);
-  assert.deepEqual([1, 2, 3, 4].map((l) => levelStartDistance(l)), [0, 330, 700, 1100]);
-  assert.deepEqual([1, 2, 3, 4].map((l) => bossKind(l)), ['monolith', 'splicer', 'monolith-prime', 'abyssal']);
-  assert.deepEqual([1, 2, 3, 4].map((l) => bossDistance(l)), [330, 370, 400, 420]);
+test('level: structure - 5 levels x 4 zones, lengths 330/370/400/420/440, campaign 1960 (ST-517 E75)', () => {
+  assert.equal(levelCount(), 5); // ST-517 (E75): +L5
+  assert.deepEqual([1, 2, 3, 4, 5].map((l) => zoneCount(l)), [4, 4, 4, 4, 4]); // ST-517: +L5
+  assert.deepEqual([1, 2, 3, 4, 5].map((l) => levelLength(l)), [330, 370, 400, 420, 440]); // ST-517: +L5
+  assert.equal(campaignLength(), 1960); // ST-517 (E75): +L5 (440)
+  assert.deepEqual([1, 2, 3, 4, 5].map((l) => levelStartDistance(l)), [0, 330, 700, 1100, 1520]); // ST-517: +L5
+  assert.deepEqual([1, 2, 3, 4, 5].map((l) => bossKind(l)), ['monolith', 'splicer', 'monolith-prime', 'abyssal', 'archon']); // ST-517: +L5
+  assert.deepEqual([1, 2, 3, 4, 5].map((l) => bossDistance(l)), [330, 370, 400, 420, 440]); // ST-517: +L5
 });
 
 test('level: every zone carries the full ST-452 field set with valid vocabulary', () => {
@@ -67,6 +67,7 @@ test('level: checkpoints - one per zone at zone starts (fraction 0)', () => {
   assert.deepEqual(checkpointsForLevel(2), [{ zone: 1, distance: 0 }, { zone: 2, distance: 90 }, { zone: 3, distance: 190 }, { zone: 4, distance: 300 }]);
   assert.deepEqual(checkpointsForLevel(3), [{ zone: 1, distance: 0 }, { zone: 2, distance: 90 }, { zone: 3, distance: 200 }, { zone: 4, distance: 320 }]);
   assert.deepEqual(checkpointsForLevel(4), [{ zone: 1, distance: 0 }, { zone: 2, distance: 100 }, { zone: 3, distance: 210 }, { zone: 4, distance: 330 }]); // ST-486 (E69)
+  assert.deepEqual(checkpointsForLevel(5), [{ zone: 1, distance: 0 }, { zone: 2, distance: 100 }, { zone: 3, distance: 220 }, { zone: 4, distance: 350 }]); // ST-517 (E75)
 });
 
 test('level: zoneAtDistance - zone takes over at its start distance; last zone holds its end', () => {
@@ -106,13 +107,16 @@ test('level: clear / final / victory logic', () => {
   assert.equal(isLevelCleared(1, 329.9999), false);
   assert.equal(isLevelCleared(1, 330), true);
   assert.equal(isFinalLevel(3), false); // ST-486 (E69): L3 is no longer final
-  assert.equal(isFinalLevel(4), true);
+  assert.equal(isFinalLevel(4), false); // ST-517 (E75): L5 is final now
+  assert.equal(isFinalLevel(5), true);
   assert.equal(isFinalLevel(2), false);
   assert.equal(isCampaignComplete(1, 330), false); // cleared, but not final
   assert.equal(isCampaignComplete(3, 399), false);
   assert.equal(isCampaignComplete(3, 400), false); // ST-486 (E69): L3 cleared is not campaign-complete
   assert.equal(isCampaignComplete(4, 419.9999), false);
-  assert.equal(isCampaignComplete(4, 420), true);
+  assert.equal(isCampaignComplete(4, 420), false); // ST-517 (E75): L4 cleared is not campaign-complete
+  assert.equal(isCampaignComplete(5, 439.9999), false);
+  assert.equal(isCampaignComplete(5, 440), true);
 });
 
 test('level: i18n parity - config name = STRINGS.en, zh/ja complete, structural keys 3-locale', () => {

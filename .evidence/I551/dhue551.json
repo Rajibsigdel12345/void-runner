@@ -1,0 +1,98 @@
+{
+  "gate": 12,
+  "measured": "I551 (ST-517, E75) - config.js on disk, 2026-11-20T20:59:16.307Z",
+  "existing": {
+    "drift-2": {
+      "hex": "0x59d8ff",
+      "hue": 194.09638554216872
+    },
+    "drift-3": {
+      "hex": "0xff9a3d",
+      "hue": 28.76288659793812
+    },
+    "drift-4": {
+      "hex": "0xff4a2a",
+      "hue": 9.014084507042242
+    },
+    "debris-1": {
+      "hex": "0x2dd4bf",
+      "hue": 172.45508982035926
+    },
+    "debris-2": {
+      "hex": "0x53d8ff",
+      "hue": 193.60465116279067
+    },
+    "debris-3": {
+      "hex": "0x69f0ae",
+      "hue": 150.66666666666663
+    },
+    "debris-4": {
+      "hex": "0x2dd4bf",
+      "hue": 172.45508982035926
+    },
+    "ember-1": {
+      "hex": "0xffc94d",
+      "hue": 41.797752808988776
+    },
+    "ember-2": {
+      "hex": "0xff9a3d",
+      "hue": 28.76288659793812
+    },
+    "ember-3": {
+      "hex": "0xff4a2a",
+      "hue": 9.014084507042242
+    },
+    "ember-4": {
+      "hex": "0xffc94d",
+      "hue": 41.797752808988776
+    },
+    "reef-1": {
+      "hex": "0x8a5cff",
+      "hue": 256.9325153374233
+    },
+    "reef-2": {
+      "hex": "0xa04dff",
+      "hue": 267.97752808988764
+    },
+    "reef-3": {
+      "hex": "0xc840e8",
+      "hue": 288.57142857142856
+    },
+    "reef-4": {
+      "hex": "0xff3dd6",
+      "hue": 312.680412371134
+    }
+  },
+  "new": {
+    "zenith-1": {
+      "hex": "0x2a5cff",
+      "hue": 225.91549295774644,
+      "minDhue": 31.02,
+      "nearest": "reef-1",
+      "pass": true
+    },
+    "zenith-2": {
+      "hex": "0x2a7aff",
+      "hue": 217.46478873239437,
+      "minDhue": 23.37,
+      "nearest": "drift-2",
+      "pass": true
+    },
+    "zenith-3": {
+      "hex": "0x3d95ff",
+      "hue": 212.78350515463922,
+      "minDhue": 18.69,
+      "nearest": "drift-2",
+      "pass": true
+    },
+    "zenith-4": {
+      "hex": "0x4da8ff",
+      "hue": 209.32584269662925,
+      "minDhue": 15.23,
+      "nearest": "drift-2",
+      "pass": true
+    }
+  },
+  "newBandSpread": 16.59,
+  "PASS": true
+}

@@ -1,0 +1,221 @@
+{
+  "pass": true,
+  "pins": {
+    "levelCount": {
+      "got": 5,
+      "want": 5,
+      "ok": true
+    },
+    "levelLength5": {
+      "got": 440,
+      "want": 440,
+      "ok": true
+    },
+    "levelLengths": {
+      "got": [
+        330,
+        370,
+        400,
+        420,
+        440
+      ],
+      "want": [
+        330,
+        370,
+        400,
+        420,
+        440
+      ],
+      "ok": true
+    },
+    "campaignLength": {
+      "got": 1960,
+      "want": 1960,
+      "ok": true
+    },
+    "levelStartDistance5": {
+      "got": 1520,
+      "want": 1520,
+      "ok": true
+    },
+    "bossDistance5": {
+      "got": 440,
+      "want": 440,
+      "ok": true
+    },
+    "bossKind5": {
+      "got": "archon",
+      "want": "archon",
+      "ok": true
+    },
+    "bossKinds": {
+      "got": [
+        "monolith",
+        "splicer",
+        "monolith-prime",
+        "abyssal",
+        "archon"
+      ],
+      "want": [
+        "monolith",
+        "splicer",
+        "monolith-prime",
+        "abyssal",
+        "archon"
+      ],
+      "ok": true
+    },
+    "checkpoints5": {
+      "got": [
+        {
+          "zone": 1,
+          "distance": 0
+        },
+        {
+          "zone": 2,
+          "distance": 100
+        },
+        {
+          "zone": 3,
+          "distance": 220
+        },
+        {
+          "zone": 4,
+          "distance": 350
+        }
+      ],
+      "want": [
+        {
+          "zone": 1,
+          "distance": 0
+        },
+        {
+          "zone": 2,
+          "distance": 100
+        },
+        {
+          "zone": 3,
+          "distance": 220
+        },
+        {
+          "zone": 4,
+          "distance": 350
+        }
+      ],
+      "ok": true
+    },
+    "isFinalLevel4": {
+      "got": false,
+      "want": false,
+      "ok": true
+    },
+    "isFinalLevel5": {
+      "got": true,
+      "want": true,
+      "ok": true
+    },
+    "isCampaignComplete5at440": {
+      "got": true,
+      "want": true,
+      "ok": true
+    },
+    "isCampaignComplete4at420": {
+      "got": false,
+      "want": false,
+      "ok": true
+    },
+    "palettesZenith": {
+      "got": [
+        {
+          "sky": 198159,
+          "stars": 12376319,
+          "floor": 858160,
+          "grid": 1319996,
+          "accent": 2776319
+        },
+        {
+          "sky": 264212,
+          "stars": 13164799,
+          "floor": 1055798,
+          "grid": 1583682,
+          "accent": 2783999
+        },
+        {
+          "sky": 330264,
+          "stars": 13953279,
+          "floor": 1253436,
+          "grid": 1847370,
+          "accent": 4036095
+        },
+        {
+          "sky": 461854,
+          "stars": 14741759,
+          "floor": 1516612,
+          "grid": 2111060,
+          "accent": 5089535
+        }
+      ],
+      "want": [
+        {
+          "sky": 198159,
+          "stars": 12376319,
+          "floor": 858160,
+          "grid": 1319996,
+          "accent": 2776319
+        },
+        {
+          "sky": 264212,
+          "stars": 13164799,
+          "floor": 1055798,
+          "grid": 1583682,
+          "accent": 2783999
+        },
+        {
+          "sky": 330264,
+          "stars": 13953279,
+          "floor": 1253436,
+          "grid": 1847370,
+          "accent": 4036095
+        },
+        {
+          "sky": 461854,
+          "stars": 14741759,
+          "floor": 1516612,
+          "grid": 2111060,
+          "accent": 5089535
+        }
+      ],
+      "ok": true
+    },
+    "cbHp5": {
+      "got": 175,
+      "want": 175,
+      "ok": true
+    },
+    "cbPhases5": {
+      "got": 3,
+      "want": 3,
+      "ok": true
+    },
+    "cbScore5": {
+      "got": 3400,
+      "want": 3400,
+      "ok": true
+    },
+    "storageClamp99": {
+      "got": 5,
+      "want": 5,
+      "ok": true
+    },
+    "storageNoLower": {
+      "got": 5,
+      "want": 5,
+      "ok": true
+    },
+    "storageNoEqual": {
+      "got": 5,
+      "want": 5,
+      "ok": true
+    }
+  }
+}
