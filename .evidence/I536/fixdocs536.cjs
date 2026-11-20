@@ -1,0 +1,10 @@
+﻿const fs=require("fs");
+const p="E:/Game/.evidence/I536/i536docs.cjs";
+let s=fs.readFileSync(p,"latin1");
+const bad=String.fromCharCode(96)+" + chr(59);";
+const count=s.split(bad).length-1;
+console.log("occurrences of bad:",count);
+if(count!==1)throw new Error("expected exactly 1");
+s=s.replace(bad,String.fromCharCode(96)+";");
+fs.writeFileSync(p,s,"latin1");
+console.log("fixed");

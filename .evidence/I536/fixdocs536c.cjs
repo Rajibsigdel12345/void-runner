@@ -1,0 +1,12 @@
+﻿const fs=require("fs");
+const p="E:/Game/.evidence/I536/i536docs.cjs";
+let s=fs.readFileSync(p,"latin1");
+const BT=String.fromCharCode(96), DQ=String.fromCharCode(34);
+const bad="complete"+BT+" + String.fromCharCode(10) + "+DQ+BT+";";
+const good="complete\\n"+BT+";";
+const count=s.split(bad).length-1;
+console.log("occurrences:",count);
+if(count!==1)throw new Error("expected 1");
+s=s.replace(bad,good);
+fs.writeFileSync(p,s,"latin1");
+console.log("fixed");

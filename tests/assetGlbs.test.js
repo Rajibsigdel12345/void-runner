@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief); ship 300 -> 850 at I429 (ST-399 remaster, 818-tri fighter; design/asset-spec-ship-remaster.md)).
-const BUDGETS = { ship: 25563, L: 3200, M: 950, S: 380, comet: 650, boss: 1500, shield: 120, emblem: 60, drone: 1800, arenaRing: 120, warden: 1800, chunk: 60, sliver: 50, hunter: 3366, gunship: 2596, sentry: 2934, wasp: 4020, phantom: 3048, bulwark: 3160, hauler: 3920 }; // + I482 (ST-449 sentry/wasp caps 1800/1200; actual 1096/792) + I501 (ST-467 ship v6 real-airship remaster 19000 -> 25563, measured 25,563 t / 581,440 B; pinned tight to measurement - the asset landed 9,137 t under the 34,700 aim so the pre-registered 38,500 was not needed; future growth requires an explicit re-pin) // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276) + I456 (ST-426 rock L/M/S v11 density remaster 2100/520/140 -> 3200/950/380, actual 3000/900/350; boss 750 -> 1500, actual 1425) + I508 (ST-474 E68 legacy-4 remaster) drone/warden caps 100/200 -> 1800/1800 (spec aim 1400) + I509 (ST-475 E68 remaster-4 re-pin WITH measurement) hunter/gunship/sentry/wasp 3366/2596/2934/4020 (wasp 1200 -> 4020: wing-mirror rebuild, double blade 2400 t) + I516 (ST-482 E69 phantom/bulwark 2336/2700, pinned tight to measurement) + I517 (ST-483 E69 hauler 3506, pinned tight to measurement)
+const BUDGETS = { ship: 25563, L: 3200, M: 950, S: 380, comet: 650, boss: 1500, shield: 120, emblem: 60, drone: 1800, arenaRing: 120, warden: 1800, chunk: 60, sliver: 50, hunter: 3366, gunship: 2906, sentry: 2934, wasp: 4020, phantom: 3048, bulwark: 3160, hauler: 3920 }; // + I482 (ST-449 sentry/wasp caps 1800/1200; actual 1096/792) + I501 (ST-467 ship v6 real-airship remaster 19000 -> 25563, measured 25,563 t / 581,440 B; pinned tight to measurement - the asset landed 9,137 t under the 34,700 aim so the pre-registered 38,500 was not needed; future growth requires an explicit re-pin) // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276) + I456 (ST-426 rock L/M/S v11 density remaster 2100/520/140 -> 3200/950/380, actual 3000/900/350; boss 750 -> 1500, actual 1425) + I508 (ST-474 E68 legacy-4 remaster) drone/warden caps 100/200 -> 1800/1800 (spec aim 1400) + I509 (ST-475 E68 remaster-4 re-pin WITH measurement) hunter/gunship/sentry/wasp 3366/2596/2934/4020 (wasp 1200 -> 4020: wing-mirror rebuild, double blade 2400 t) + I516 (ST-482 E69 phantom/bulwark 2336/2700, pinned tight to measurement) + I517 (ST-483 E69 hauler 3506, pinned tight to measurement)
 const MAX_FILE_BYTES = 1048576; // I501 (ST-467 ship v6) EXPLICIT re-pin: 393216 -> 1048576 (ship v6 581,440 B; spec s5 pre-registered 1,048,576; max non-ship stays boss 75.26 KB) // I440 (ST-410 ship remaster v3) EXPLICIT re-pin: 262144 -> 393216 (ship 190,544 B/3254t -> 270,556 B/12400t; I435 was 100*1024 -> 262144 for v2; max non-ship stays boss 75.26 KB)
 
 function parseGlb(file) {
@@ -699,9 +699,9 @@ const ENEMY451_FACET = {
   hunter:  { VR_Hunter_Hull:  { p10: 0.3000, p50: 0.4733, p90: 0.7076 },
              VR_Hunter_Fin:   { p10: 0.3689, p50: 0.3908, p90: 0.4115 },
              VR_Hunter_Core:  { p10: 0.9000, p50: 0.9000, p90: 0.9000 } },
-  gunship: { VR_Gunship_Hull:    { p10: 0.3473, p50: 0.4751, p90: 0.5259 },
-             VR_Gunship_Nacelle: { p10: 0.2600, p50: 0.4732, p90: 0.6600 },
-             VR_Gunship_Bay:     { p10: 0.9500, p50: 0.9500, p90: 0.9500 } },
+  gunship: { VR_Gunship_Hull:    { p10: 0.3463, p50: 0.4472, p90: 0.5042 },
+             VR_Gunship_Nacelle: { p10: 0.2600, p50: 0.3400, p90: 0.5421 },
+             VR_Gunship_Bay:     { p10: 0.7800, p50: 0.8400, p90: 0.9500 } },
   sentry:  { VR_Sentry_Platform: { p10: 0.4532, p50: 0.4657, p90: 0.7200 },
              VR_Sentry_Base:     { p10: 0.3400, p50: 0.3400, p90: 0.3400 },
              VR_Sentry_Barrel:   { p10: 0.4727, p50: 0.5202, p90: 0.6600 },
@@ -796,28 +796,28 @@ test('enemy_hunter.glb: I509 (ST-475 E68) remaster-4 needle fighter - nodes, per
   assert.ok(Math.abs(ce.y - 0.24) / 0.24 <= 0.1, 'core Y ' + ce.y.toFixed(4) + ' ~ 0.24');
 });
 
-test('enemy_gunship.glb: I509 (ST-475 E68) remaster-4 brute bomber - nodes, per-node tris, extents, all-prim COLOR_0', () => {
+test('enemy_gunship.glb: I536 (ST-502 E72) brute bomber v2 - nodes, per-node tris, extents, all-prim COLOR_0', () => {
   const { buf, json, binOff } = remaster4Bake('enemy_gunship.glb', 'gunship');
-  assert.ok(buf.length <= 200 * 1024, 'gunship under 200 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I509 198,760 B)');
+  assert.ok(buf.length <= 210 * 1024, 'gunship under 210 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I536 215,032 B)');
   const s = meshStats({ buf, json, binOff });
   for (const n of ['VR_Gunship_Hull', 'VR_Gunship_Nacelle', 'VR_Gunship_Bay']) assert.ok(s.nodeNames.includes(n), n + ' node');
   assert.equal(s.nodeNames.length, 3, 'flat node set (no root nodes)');
   for (const mat of ['VR_Gunship_HullMat', 'VR_Gunship_NacelleMat', 'VR_Gunship_BayMat']) assert.ok(s.matNames.includes(mat), mat + ' material');
   assert.equal(s.totalTris, BUDGETS.gunship, 'gunship total tris == ' + BUDGETS.gunship + ' (I509 re-pin WITH measurement)');
-  assert.equal(s.prims.find((p) => p.name === 'VR_Gunship_Hull').tris, 1732, 'hull 1732 tris (I509 exact)');
-  assert.equal(s.prims.find((p) => p.name === 'VR_Gunship_Nacelle').tris, 544, 'nacelle 544 tris (I509 exact)');
-  assert.equal(s.prims.find((p) => p.name === 'VR_Gunship_Bay').tris, 320, 'bay 320 tris (I509 exact)');
-  // Per-node extents: I509 TRUE-AXIS measurements (glb_probe.mjs; 10% band).
+  assert.equal(s.prims.find((p) => p.name === 'VR_Gunship_Hull').tris, 1864, 'hull 1864 tris (I536 exact)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Gunship_Nacelle').tris, 750, 'nacelle 750 tris (I536 exact)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Gunship_Bay').tris, 292, 'bay 292 tris (I536 exact)');
+  // Per-node extents: I536 TRUE-AXIS measurements (probe536.mjs; 10% band).
   const he = primExtents({ buf, json, binOff }, 'VR_Gunship_Hull');
-  assert.ok(Math.abs(he.x - 2.1) / 2.1 <= 0.1, 'hull X ' + he.x.toFixed(4) + ' ~ 2.1');
-  assert.ok(Math.abs(he.y - 1.4158) / 1.4158 <= 0.1, 'hull Y ' + he.y.toFixed(4) + ' ~ 1.4158');
-  assert.ok(Math.abs(he.z - 2.0) / 2.0 <= 0.1, 'hull Z ' + he.z.toFixed(4) + ' ~ 2.0');
+  assert.ok(Math.abs(he.x - 2.95) / 2.95 <= 0.1, 'hull X ' + he.x.toFixed(4) + ' ~ 2.95');
+  assert.ok(Math.abs(he.y - 1.35) / 1.35 <= 0.1, 'hull Y ' + he.y.toFixed(4) + ' ~ 1.35');
+  assert.ok(Math.abs(he.z - 1.94) / 1.94 <= 0.1, 'hull Z ' + he.z.toFixed(4) + ' ~ 1.94');
   const ne = primExtents({ buf, json, binOff }, 'VR_Gunship_Nacelle');
-  assert.ok(Math.abs(ne.x - 1.45) / 1.45 <= 0.1, 'nacelle X ' + ne.x.toFixed(4) + ' ~ 1.45');
-  assert.ok(Math.abs(ne.z - 0.8558) / 0.8558 <= 0.1, 'nacelle Z ' + ne.z.toFixed(4) + ' ~ 0.8558');
+  assert.ok(Math.abs(ne.x - 1.336) / 1.336 <= 0.1, 'nacelle X ' + ne.x.toFixed(4) + ' ~ 1.336');
+  assert.ok(Math.abs(ne.z - 0.87) / 0.87 <= 0.1, 'nacelle Z ' + ne.z.toFixed(4) + ' ~ 0.87');
   const be = primExtents({ buf, json, binOff }, 'VR_Gunship_Bay');
-  assert.ok(Math.abs(be.y - 0.48) / 0.48 <= 0.1, 'bay Y ' + be.y.toFixed(4) + ' ~ 0.48');
-  assert.ok(Math.abs(be.z - 0.4605) / 0.4605 <= 0.1, 'bay Z ' + be.z.toFixed(4) + ' ~ 0.4605');
+  assert.ok(Math.abs(be.y - 0.43) / 0.43 <= 0.1, 'bay Y ' + be.y.toFixed(4) + ' ~ 0.43');
+  assert.ok(Math.abs(be.z - 0.58) / 0.58 <= 0.1, 'bay Z ' + be.z.toFixed(4) + ' ~ 0.58');
 });
 
 test('enemy_sentry.glb: I509 (ST-475 E68) remaster-4 floating watchtower - nodes, per-node tris, extents, all-prim COLOR_0', () => {
