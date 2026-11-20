@@ -1,0 +1,41 @@
+I528 / ST-494 - E71 open (camera framing + cockpit FPV) - docs-only, zero src - quality bar (measured)
+=========================================================================================================
+HEAD before: bf6df5f (I527, E70 CLOSED 5/5). origin/main == bf6df5f (I527 already PUSHED-OK 093b7c3..bf6df5f).
+
+AUDIT FINDING (the whole point): the incoming handoff's E71 research/implementation plan was a
+re-discovery of already-shipped work. Measured audit of HEAD confirmed the user 3 verbatim
+camera/FPV requests were ~95% ALREADY SHIPPED:
+  (A) chase position-invariant view angle  - DONE ST-415 I445 (cameraModel.js chaseTargets + dollyFactor;
+      far-view 8.6% at rest I504/ST-470, within the pre-registered <=10% rule).
+  (B1) cockpit shows a portion of the ship - DONE I504/ST-470 (cockpitHeight 1.02 / setback 0.15 /
+      lookDrop 1.2 + main.js:1232 shipMesh.group.visible=true in cockpit).
+  (C) view-relative cockpit controls       - DONE I504/ST-470 (cameraModel.js cockpitThrust, main.js:995 touch + :1009 WASD).
+GENUINE RESIDUALS (pre-registered, design/e71-camera-fpv-research.md sec.3):
+  R-CAM-1 (B2): cockpit aiming indicator is a plain center DOT (#vr-cockpit-dot) but the user asked for a
+    CROSSHAIR -> center dot + four short ticks (render-only bearingStrip.js, keep el+id, smoke504 18/18).
+  R-CAM-2: verify position-invariant framing + far-view band in BOTH endless (rim) AND campaign (path
+    excursion) WITH MEASUREMENT; default document-only, one smallest-lever only on a measured gap.
+Grounding: LABELED YouTube MCP, chapter-level cites only (crosshair dot+4-tick form + Dead Space subtle
+principle + cockpit convention confirms I504 on-model). Transcripts NOT pulled (house norm).
+
+BOOKKEEPING (i528docs.cjs, single-anchor asserts, BOM-preserved):
+  epics.md: E70 header doc-fix IN PROGRESS->CLOSED (opened I523, closed I527) + E71 block at EOF.
+  stories.md: STATUS (I528) line before STATUS (I527).
+  iterations.md: I528 section. timeline.md: I528 line. CHANGELOG.md: I528 line. active.md: finalize I527
+  push-pending -> PUSHED-OK (093b7c3..bf6df5f) + I528 note.
+New docs: design/e71-camera-fpv-research.md (12,537 B, LF no-BOM) + production/scope-check-E71.md (8,108 B, LF no-BOM).
+
+QUALITY BAR (docs-only, measured):
+  npm test ................ 1,187/1,187 pass, 0 fail (duration ~7.6 s).
+  npm run build ........... exit 0.
+  dist .................... 5,255,258 B / 184 files (byte-identical to HEAD; git status dist/ clean).
+  vendor pins (dist-min) .. EXACT 4/4: A65DE049A7F38B40 / 7AB0784CD2532367 / F549248412C62B9A / 7FF9ACF50F006017.
+  git diff vendor/ ........ empty (0 B).
+  BOM delta ............... 0 (CHANGELOG 7 / stories 5 / epics 3 / iterations 5 / timeline 3 / AGENTS 1 /
+                           e71-research 0 / scope-check-E71 0) - all match baselines.
+  hygiene ................. 0 servers (5173/4200/5199/4173 all ECONNREFUSED), 0 browser tabs (headless-only).
+Pin set: docs-only, zero src -> no re-run needed; the 5-harness ALL-EXPECTED-EXACT re-runs happen at the
+G71.0 close gate (I531). Cockpit-only surface (R-CAM-1) draws zero pin surface; R-CAM-2 probe-only by default.
+
+NEXT: I529 = ST-495 (R-CAM-1: cockpit crosshair in src/render/bearingStrip.js, render-only, probed;
+  keep #vr-cockpit-dot el + id so smoke504 stays 18/18).
