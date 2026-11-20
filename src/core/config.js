@@ -1023,7 +1023,7 @@ export const CONFIG = {
     cockpitSetback: 0.15,  // ST-416 (I446); I504 (ST-470): COCKPIT seat setback behind the ship center (along facing; 0.55 -> 0.15 moves the seat forward so the nose + canopy frame the view)
     cockpitLookFar: 60,    // ST-416 (I446): COCKPIT look-ahead along the heading (horizon)
     cockpitLookSpeed: 40,   // ST-444 (I477): extra COCKPIT look-ahead at full speed (lean into the motion; spdFrac 0 -> exactly cockpitLookFar, bit-identical to the legacy fixed 60)
-    cockpitLookDrop: 1.2,   // I504 (ST-470): COCKPIT look point drops this far below the eye (gentle ~1.1 deg down-pitch at lookFar 60; frames the nose/canopy at the bottom)
+    cockpitLookDrop: 4.0,   // I550 (ST-516): G-c cockpit bow framing - look point drops this far below the eye (~3.8 deg down-pitch at lookFar 60; 2405-vert bow sweep: 644 in-frame, yMin -0.967, centerBand 12, horizonY 0.109, minD 0.433 -> bow frames the bottom, crosshair zone clean; supersedes I504 1.2 which left the nose below the frame)
 cockpitFovSpeed: 9,    // ST-416 (I446): extra COCKPIT FOV at full speed (motion-gated seat kick)
   // ST-219: state-tied camera feel (I221) - subtle, motion-gated, view stays dodge-readable
   aimLeadFrac: 0.03,     // camera lead toward the aim point (2-5% of the ship->aim offset)

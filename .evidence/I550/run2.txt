@@ -1,0 +1,20 @@
+node : node:internal/modules/run_main:107
+At line:2 char:1
++ node .evidence\I550\bowprobe550.mjs 2>&1 | Out-String | Set-Content . ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (node:internal/modules/run_main:107:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    triggerUncaughtException(
+    ^
+
+page.evaluate: SyntaxError: missing ) after argument list
+    at eval (<anonymous>)
+    at UtilityScript.evaluate (<anonymous>:370:30)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at E:\Game\.evidence\I550\bowprobe550.mjs:54:21 {
+  log: []
+}
+
+Node.js v26.7.0
+

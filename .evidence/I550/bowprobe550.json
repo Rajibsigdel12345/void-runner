@@ -1,0 +1,347 @@
+{
+  "sweep": {
+    "dbg": {
+      "camWorld": [
+        -9.184850993605149e-18,
+        0.62,
+        0.15
+      ],
+      "parent": null,
+      "bowView": [
+        -5.204748896376252e-17,
+        -0.1366742611434536,
+        -1.0050970830426738
+      ],
+      "horizonClip": [
+        -5.965639833548703e-17,
+        0.05400955699297813,
+        -300.00482182707515
+      ]
+    },
+    "nPts": 2405,
+    "meshes": [
+      "(anon)",
+      "VR_Ship_Cockpit",
+      "VR_Ship_Fin",
+      "VR_Ship_Hull",
+      "VR_Ship_Nozzle",
+      "VR_Ship_Wings"
+    ],
+    "shipGroupPos": [
+      0,
+      0.4,
+      0
+    ],
+    "shipGroupRotZ": 0,
+    "shipWorldY": 0.4,
+    "results": [
+      {
+        "h": 0.62,
+        "drop": 2,
+        "inF": 173,
+        "minD": 0.445,
+        "yMin": -0.897,
+        "yMax": 0.919,
+        "xMin": -0.99,
+        "xMax": 0.992,
+        "centerBand": 35,
+        "horizonY": 0.054
+      },
+      {
+        "h": 0.62,
+        "drop": 4,
+        "inF": 180,
+        "minD": 0.441,
+        "yMin": -0.957,
+        "yMax": 0.993,
+        "xMin": -0.993,
+        "xMax": 0.999,
+        "centerBand": 32,
+        "horizonY": 0.112
+      },
+      {
+        "h": 0.62,
+        "drop": 6,
+        "inF": 183,
+        "minD": 0.447,
+        "yMin": -0.988,
+        "yMax": 0.932,
+        "xMin": -0.979,
+        "xMax": 0.983,
+        "centerBand": 16,
+        "horizonY": 0.169
+      },
+      {
+        "h": 0.62,
+        "drop": 8,
+        "inF": 183,
+        "minD": 0.453,
+        "yMin": -1,
+        "yMax": 0.985,
+        "xMin": -0.967,
+        "xMax": 0.971,
+        "centerBand": 13,
+        "horizonY": 0.227
+      },
+      {
+        "h": 0.62,
+        "drop": 10,
+        "inF": 182,
+        "minD": 0.459,
+        "yMin": -0.93,
+        "yMax": 0.939,
+        "xMin": -0.956,
+        "xMax": 0.987,
+        "centerBand": 16,
+        "horizonY": 0.284
+      },
+      {
+        "h": 0.62,
+        "drop": 14,
+        "inF": 200,
+        "minD": 0.467,
+        "yMin": -0.963,
+        "yMax": 0.994,
+        "xMin": -0.999,
+        "xMax": 0.964,
+        "centerBand": 6,
+        "horizonY": 0.399
+      },
+      {
+        "h": 0.75,
+        "drop": 2,
+        "inF": 227,
+        "minD": 0.65,
+        "yMin": -0.929,
+        "yMax": 0.984,
+        "xMin": -0.86,
+        "xMax": 0.862,
+        "centerBand": 41,
+        "horizonY": 0.053
+      },
+      {
+        "h": 0.75,
+        "drop": 4,
+        "inF": 200,
+        "minD": 0.63,
+        "yMin": -0.983,
+        "yMax": 0.999,
+        "xMin": -0.859,
+        "xMax": 0.864,
+        "centerBand": 41,
+        "horizonY": 0.111
+      },
+      {
+        "h": 0.75,
+        "drop": 6,
+        "inF": 175,
+        "minD": 0.548,
+        "yMin": -0.999,
+        "yMax": 0.981,
+        "xMin": -0.859,
+        "xMax": 0.866,
+        "centerBand": 38,
+        "horizonY": 0.168
+      },
+      {
+        "h": 0.75,
+        "drop": 8,
+        "inF": 173,
+        "minD": 0.529,
+        "yMin": -0.987,
+        "yMax": 0.98,
+        "xMin": -0.861,
+        "xMax": 0.87,
+        "centerBand": 40,
+        "horizonY": 0.226
+      },
+      {
+        "h": 0.75,
+        "drop": 10,
+        "inF": 171,
+        "minD": 0.494,
+        "yMin": -0.999,
+        "yMax": 0.838,
+        "xMin": -0.9,
+        "xMax": 0.902,
+        "centerBand": 29,
+        "horizonY": 0.284
+      },
+      {
+        "h": 0.75,
+        "drop": 14,
+        "inF": 185,
+        "minD": 0.437,
+        "yMin": -0.995,
+        "yMax": 0.98,
+        "xMin": -0.998,
+        "xMax": 0.911,
+        "centerBand": 13,
+        "horizonY": 0.399
+      },
+      {
+        "h": 0.9,
+        "drop": 2,
+        "inF": 400,
+        "minD": 0.526,
+        "yMin": -0.983,
+        "yMax": 0.999,
+        "xMin": -0.853,
+        "xMax": 0.856,
+        "centerBand": 16,
+        "horizonY": 0.052
+      },
+      {
+        "h": 0.9,
+        "drop": 4,
+        "inF": 351,
+        "minD": 0.526,
+        "yMin": -0.989,
+        "yMax": 0.995,
+        "xMin": -0.846,
+        "xMax": 0.851,
+        "centerBand": 22,
+        "horizonY": 0.11
+      },
+      {
+        "h": 0.9,
+        "drop": 6,
+        "inF": 317,
+        "minD": 0.546,
+        "yMin": -0.983,
+        "yMax": 0.998,
+        "xMin": -0.841,
+        "xMax": 0.847,
+        "centerBand": 31,
+        "horizonY": 0.168
+      },
+      {
+        "h": 0.9,
+        "drop": 8,
+        "inF": 286,
+        "minD": 0.567,
+        "yMin": -0.958,
+        "yMax": 0.998,
+        "xMin": -0.836,
+        "xMax": 0.844,
+        "centerBand": 41,
+        "horizonY": 0.225
+      },
+      {
+        "h": 0.9,
+        "drop": 10,
+        "inF": 247,
+        "minD": 0.557,
+        "yMin": -0.974,
+        "yMax": 0.999,
+        "xMin": -0.832,
+        "xMax": 0.843,
+        "centerBand": 42,
+        "horizonY": 0.283
+      },
+      {
+        "h": 0.9,
+        "drop": 14,
+        "inF": 194,
+        "minD": 0.607,
+        "yMin": -0.984,
+        "yMax": 0.995,
+        "xMin": -0.827,
+        "xMax": 0.842,
+        "centerBand": 40,
+        "horizonY": 0.398
+      },
+      {
+        "h": 1.02,
+        "drop": 2,
+        "inF": 764,
+        "minD": 0.441,
+        "yMin": -0.998,
+        "yMax": 1,
+        "xMin": -0.927,
+        "xMax": 0.985,
+        "centerBand": 15,
+        "horizonY": 0.052
+      },
+      {
+        "h": 1.02,
+        "drop": 4,
+        "inF": 644,
+        "minD": 0.433,
+        "yMin": -0.967,
+        "yMax": 0.998,
+        "xMin": -0.942,
+        "xMax": 0.999,
+        "centerBand": 12,
+        "horizonY": 0.109
+      },
+      {
+        "h": 1.02,
+        "drop": 6,
+        "inF": 522,
+        "minD": 0.428,
+        "yMin": -0.894,
+        "yMax": 0.999,
+        "xMin": -0.958,
+        "xMax": 0.953,
+        "centerBand": 15,
+        "horizonY": 0.167
+      },
+      {
+        "h": 1.02,
+        "drop": 8,
+        "inF": 433,
+        "minD": 0.461,
+        "yMin": -0.983,
+        "yMax": 0.999,
+        "xMin": -0.817,
+        "xMax": 0.825,
+        "centerBand": 18,
+        "horizonY": 0.224
+      },
+      {
+        "h": 1.02,
+        "drop": 10,
+        "inF": 380,
+        "minD": 0.47,
+        "yMin": -0.996,
+        "yMax": 1,
+        "xMin": -0.808,
+        "xMax": 0.819,
+        "centerBand": 22,
+        "horizonY": 0.282
+      },
+      {
+        "h": 1.02,
+        "drop": 14,
+        "inF": 316,
+        "minD": 0.488,
+        "yMin": -0.961,
+        "yMax": 0.994,
+        "xMin": -0.795,
+        "xMax": 0.809,
+        "centerBand": 41,
+        "horizonY": 0.397
+      }
+    ]
+  },
+  "liveCockpit": {
+    "camMode": "cockpit",
+    "camPos": [
+      2.75167035078396e-9,
+      1.0259804863778843,
+      0.1522277436490302
+    ],
+    "camDir": [
+      -4.5736709761506144e-11,
+      -0.02004509709635154,
+      -0.999799076856144
+    ],
+    "fov": 60
+  },
+  "console": {
+    "errors": 0,
+    "warnings": 0,
+    "sample": []
+  }
+}

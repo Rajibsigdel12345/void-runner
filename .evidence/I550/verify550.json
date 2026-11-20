@@ -1,0 +1,23 @@
+{
+  "verify": {
+    "camMode": "cockpit",
+    "camPos": [
+      1.1974637622047111e-10,
+      1.046738331984399,
+      0.15993918117399206
+    ],
+    "fov": 60,
+    "nPts": 2405,
+    "inF": 760,
+    "minD": 0.443,
+    "yMin": -0.961,
+    "yMax": 0.996,
+    "centerBand": 15,
+    "horizonY": 0.11
+  },
+  "console": {
+    "errors": 0,
+    "warnings": 0,
+    "sample": []
+  }
+}
