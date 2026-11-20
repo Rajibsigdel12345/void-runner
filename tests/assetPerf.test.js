@@ -49,7 +49,7 @@ const totalTris = parsed.reduce((a, p) => a + p.tris, 0);
 // re-registers growth WITH MEASUREMENT; caps held at the I509 measured values, headroom for the next epic):
 const BUDGET = {
 totalFilesKB: 3000,  // [I517 re-pin WITH MEASUREMENT 2700 -> 3000 (ST-483 +hauler); measured 2857.41 KB (2,925,988 B); headroom 142.59 KB]
-  totalGeoKB: 2850,    // [I517 re-pin WITH MEASUREMENT 2650 -> 2850 (ST-483 +hauler); measured 2797.04 KB (2,864,166 B); headroom 52.96 KB]
+  totalGeoKB: 2920,    // [I534 re-pin WITH MEASUREMENT 2850 -> 2920 (ST-500 hauler v2 ridge remaster +640 hull tris); measured 2866.07 KB (2,934,858 B); headroom 53.93 KB; ST-501 bulwark + ST-502 gunship v2 re-measure/re-pin at landing + G72.0]
   perFileKB: 600,      // [I517 holds 600; max = ship.glb 567.81 KB (581,440 B); max enemy = wasp 302.77 KB (310,036 B); hauler 258.22 KB (264,416 B)]
   totalTris: 66000,    // [I517 re-pin WITH MEASUREMENT 62,000 -> 66,000 (ST-483 +hauler 3,506 t); measured 63,617 t; headroom 2,383 t]
   perFileMats: 4,      // [I510 FINAL holds 4 (I509 re-pin 3 -> 4); max = enemy_sentry.glb 4 part bakes (R-VALUE 2-3 band rule); ship stays 3]
