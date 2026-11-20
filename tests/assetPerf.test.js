@@ -48,10 +48,10 @@ const totalTris = parsed.reduce((a, p) => a + p.tris, 0);
 // FINAL fleet budgets (I510/ST-476 E68 close - the fleet is frozen until the next art epic
 // re-registers growth WITH MEASUREMENT; caps held at the I509 measured values, headroom for the next epic):
 const BUDGET = {
-totalFilesKB: 3000,  // [I517 re-pin WITH MEASUREMENT 2700 -> 3000 (ST-483 +hauler); measured 2857.41 KB (2,925,988 B); headroom 142.59 KB]
-  totalGeoKB: 2925,    // [I536 RE-PIN WITH MEASUREMENT 2920 -> 2925 (ST-502 gunship v2 landing): measured 2921.67 KB (2,991,786 B); headroom 3.33 KB; prior I535 re-measure: 2905.82 KB (2,975,562 B)]
-  perFileKB: 600,      // [I517 holds 600; max = ship.glb 567.81 KB (581,440 B); max enemy = wasp 302.77 KB (310,036 B); hauler 258.22 KB (264,416 B)]
-  totalTris: 66000,    // [I517 re-pin WITH MEASUREMENT 62,000 -> 66,000 (ST-483 +hauler 3,506 t); I536 re-measure WITH MEASUREMENT: measured 65,513 t; headroom 487 t]
+totalFilesKB: 3300,  // [I541 re-pin WITH MEASUREMENT 3000 -> 3300 (ST-507 ship v7 +158,572 B); measured 3,136.95 KB (3,212,232 B); headroom 163.05 KB]
+  totalGeoKB: 3080,    // [I541 RE-PIN WITH MEASUREMENT 2925 -> 3080 (ST-507 ship v7): measured 3,076.52 KB (3,150,354 B); headroom 3.48 KB; prior I536: 2921.67 KB (2,991,786 B)]
+  perFileKB: 760,      // [I541 re-pin WITH MEASUREMENT 600 -> 760 (ST-507 ship v7); max = ship.glb 722.67 KB (740,012 B); max enemy = wasp 302.77 KB (310,036 B)]
+  totalTris: 73000,    // [I541 re-pin WITH MEASUREMENT 66,000 -> 73,000 (ST-507 ship v7 +6,936 t); measured 72,449 t; headroom 551 t; prior I536: 65,513 t]
   perFileMats: 4,      // [I510 FINAL holds 4 (I509 re-pin 3 -> 4); max = enemy_sentry.glb 4 part bakes (R-VALUE 2-3 band rule); ship stays 3]
 };
 
