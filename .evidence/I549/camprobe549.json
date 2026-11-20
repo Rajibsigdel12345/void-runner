@@ -1,0 +1,416 @@
+{
+ "R": {
+  "fx": "off",
+  "w0": {
+   "state": "PLAYING",
+   "tutorial": false,
+   "camMode": "chase"
+  },
+  "chase": [
+   {
+    "camMode": "chase",
+    "state": "PLAYING",
+    "camPos": [
+     2.686685948013515e-7,
+     8.999992212571554,
+     12.99999064083877
+    ],
+    "camDir": [
+     -1.4917757749723152e-8,
+     -0.4997223568987801,
+     -0.866185641774053
+    ],
+    "fov": 60,
+    "ship": {
+     "x": 0,
+     "y": 0,
+     "aim": -1.5707963267948966,
+     "speed": 0
+    },
+    "shipNdc": {
+     "x": -2.80410906722232e-9,
+     "y": -0.10607424903810192,
+     "depth": 15.558013614069027,
+     "inFront": true,
+     "inFrame": true
+    },
+    "centerNdc": {
+     "x": -2.7685389528109617e-9,
+     "y": -0.14281187605119866,
+     "depth": 15.75790255682854,
+     "inFront": true,
+     "inFrame": true
+    },
+    "farRimNdc": {
+     "x": 1.025732395995835e-8,
+     "y": 0.5291121748627832,
+     "depth": 38.278729242953915,
+     "inFront": true,
+     "inFrame": true
+    },
+    "sideRimNdc": {
+     "x": 1.6075263537906137,
+     "y": -0.1428119041619121,
+     "depth": 15.757902168966838,
+     "inFront": true,
+     "inFrame": false
+    },
+    "xcheck": {
+     "camErr": 0.000009359161229127722,
+     "lookDot": 0.9999999999999939,
+     "modelCam": [
+      0,
+      9,
+      13
+     ],
+     "modelLook": [
+      1.5920408388915593e-16,
+      0,
+      -2.6
+     ],
+     "s": 1,
+     "pass": true
+    }
+   },
+   {
+    "camMode": "chase",
+    "state": "PLAYING",
+    "camPos": [
+     2.145202405541563e-12,
+     8.99999999993782,
+     24.999165012046955
+    ],
+    "camDir": [
+     -1.1910699492473535e-13,
+     -0.49973956402684727,
+     -0.8661757143595383
+    ],
+    "fov": 60,
+    "ship": {
+     "x": 0,
+     "y": 12,
+     "aim": -1.5707963267948966,
+     "speed": 0
+    },
+    "shipNdc": {
+     "x": -2.2400970884145107e-14,
+     "y": -0.10609124695109334,
+     "depth": 15.557321290987103,
+     "inFront": true,
+     "inFrame": true
+    },
+    "centerNdc": {
+     "x": 4.8149233917608345e-14,
+     "y": 0.31112350207204487,
+     "depth": 26.1513256889123,
+     "inFront": true,
+     "inFrame": true
+    },
+    "farRimNdc": {
+     "x": 9.743695825225438e-14,
+     "y": 0.6295465729908367,
+     "depth": 48.671894262260295,
+     "inFront": true,
+     "inFrame": true
+    },
+    "sideRimNdc": {
+     "x": 0.9686408774083332,
+     "y": 0.31112350207196343,
+     "depth": 26.151325688909203,
+     "inFront": true,
+     "inFrame": true
+    },
+    "xcheck": {
+     "camErr": 0.00083498795304493,
+     "lookDot": 0.99999999980489,
+     "modelCam": [
+      0,
+      9,
+      25
+     ],
+     "modelLook": [
+      1.5920408388915593e-16,
+      0,
+      9.4
+     ],
+     "s": 1,
+     "pass": true
+    }
+   },
+   {
+    "camMode": "chase",
+    "state": "PLAYING",
+    "camPos": [
+     2.0181058519637205e-17,
+     13.407767431945581,
+     42.36600900027827
+    ],
+    "camDir": [
+     8.087914539397818e-18,
+     -0.4997317720111977,
+     -0.8661802099116259
+    ],
+    "fov": 60,
+    "ship": {
+     "x": 0,
+     "y": 23,
+     "aim": -1.5707963267948966,
+     "speed": 0
+    },
+    "shipNdc": {
+     "x": -8.414230284865663e-18,
+     "y": -0.11826845368488213,
+     "depth": 23.274848409687174,
+     "inFront": true,
+     "inFrame": true
+    },
+    "centerNdc": {
+     "x": -9.334248577214033e-18,
+     "y": 0.38148154869605116,
+     "depth": 43.39688594645905,
+     "inFront": true,
+     "inFrame": true
+    },
+    "farRimNdc": {
+     "x": -9.733467523108701e-18,
+     "y": 0.592553574542806,
+     "depth": 65.91757140416132,
+     "inFront": true,
+     "inFrame": true
+    },
+    "sideRimNdc": {
+     "x": 0.5837110776092846,
+     "y": 0.38148154869605116,
+     "depth": 43.39688594645905,
+     "inFront": true,
+     "inFrame": true
+    },
+    "xcheck": {
+     "camErr": 0.001209668333387981,
+     "lookDot": 0.9999999999421313,
+     "modelCam": [
+      0,
+      13.408074462884993,
+      42.367218668611656
+     ],
+     "modelLook": [
+      2.3718002350902127e-16,
+      0,
+      19.126556266277667
+     ],
+     "s": 1.4897860514316659,
+     "pass": true
+    }
+   }
+  ],
+  "overview": {
+   "camMode": "overview",
+   "state": "PLAYING",
+   "camPos": [
+    1.6105646622890829e-22,
+    55.9970422737885,
+    20.001553243769045
+   ],
+   "fov": 60,
+   "shipNdc": {
+    "x": 3.388833530874335e-24,
+    "y": -0.7260634462335491,
+    "depth": 51.34875522110686,
+    "inFront": true,
+    "inFrame": true
+   },
+   "rimE": {
+    "x": 0.4260071631067744,
+    "y": 0.0000053683399767174175,
+    "depth": 59.46201203744974,
+    "inFront": true,
+    "inFrame": true
+   },
+   "rimN": {
+    "x": 9.959515223441578e-24,
+    "y": -0.8361974892035717,
+    "depth": 50.7163296427945,
+    "inFront": true,
+    "inFrame": true
+   },
+   "rimW": {
+    "x": -0.4260071631067744,
+    "y": 0.0000053683399767174175,
+    "depth": 59.46201203744974,
+    "inFront": true,
+    "inFrame": true
+   },
+   "rimS": {
+    "x": -7.673498320720386e-23,
+    "y": 0.6217701138649858,
+    "depth": 68.20769443210499,
+    "inFront": true,
+    "inFrame": true
+   }
+  },
+  "cockpit": {
+   "camMode": "cockpit",
+   "state": "PLAYING",
+   "camPos": [
+    -9.182222754477144e-18,
+    1.0357322790804275,
+    23.14909871654275
+   ],
+   "fov": 60,
+   "ship": {
+    "x": 0,
+    "y": 23,
+    "aim": -1.5707963267948966,
+    "speed": 0
+   },
+   "shipVisible": true,
+   "nose": [
+    {
+     "d": 0.5,
+     "ndc": {
+      "x": 7.791072028481356e-20,
+      "y": -1.5005854731794226,
+      "depth": 0.660802863931103,
+      "inFront": true,
+      "inFrame": false
+     }
+    },
+    {
+     "d": 0.8,
+     "ndc": {
+      "x": 5.372019201117735e-20,
+      "y": -1.0211805084282313,
+      "depth": 0.9607416008881273,
+      "inFront": true,
+      "inFrame": false
+     }
+    },
+    {
+     "d": 1.1,
+     "ndc": {
+      "x": 4.104039533033083e-20,
+      "y": -0.7698938307666567,
+      "depth": 1.2606803378451552,
+      "inFront": true,
+      "inFrame": true
+     }
+    },
+    {
+     "d": 1.4,
+     "ndc": {
+      "x": 3.323451344756305e-20,
+      "y": -0.6151978073254214,
+      "depth": 1.5606190748021795,
+      "inFront": true,
+      "inFrame": true
+     }
+    }
+   ],
+   "canopy": {
+    "x": 4.881773349965091e-20,
+    "y": -0.7111558277694763,
+    "depth": 1.0580940905944693,
+    "inFront": true,
+    "inFrame": true
+   },
+   "shipNdc": {
+    "x": 3.1665283606608925e-19,
+    "y": -6.766972657674373,
+    "depth": 0.16191538795631288,
+    "inFront": true,
+    "inFrame": false
+   },
+   "dom": {
+    "strip": 1,
+    "dot": 1,
+    "ticks": [
+     1,
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  "controls": {
+   "attempts": [
+    {
+     "attempt": 1,
+     "keys": {
+      "w": {
+       "dx": 0,
+       "dy": -3.43,
+       "mag": 3.43,
+       "along": 3.43,
+       "cross": 0,
+       "pass": true,
+       "state": "PLAYING"
+      },
+      "s": {
+       "dx": 0,
+       "dy": 0.917,
+       "mag": 0.917,
+       "along": 0.917,
+       "cross": 0,
+       "pass": true,
+       "state": "PLAYING"
+      },
+      "a": {
+       "dx": -3.391,
+       "dy": 1.562,
+       "mag": 3.733,
+       "along": 3.391,
+       "cross": -1.562,
+       "pass": true,
+       "state": "PLAYING"
+      },
+      "d": {
+       "dx": 0.851,
+       "dy": 0.714,
+       "mag": 1.111,
+       "along": 0.871,
+       "cross": 0.689,
+       "pass": true,
+       "state": "PLAYING"
+      }
+     },
+     "mouse": {
+      "a0": -1.5447,
+      "a1": 0.6742,
+      "daim": 2.2189,
+      "pass": true
+     },
+     "dead": false
+    }
+   ]
+  },
+  "vswitch": {
+   "cockpitToChase": {
+    "label": "cockpitToChase",
+    "frames": 45,
+    "pathLen": 21.007,
+    "frame1Dist": 1.615,
+    "fracOfPathInFrame1": 0.0769,
+    "t99ms": 683,
+    "verdict": "DAMPED"
+   },
+   "chaseToOverview": {
+    "label": "chaseToOverview",
+    "frames": 45,
+    "pathLen": 39.695,
+    "frame1Dist": 3.357,
+    "fracOfPathInFrame1": 0.0846,
+    "t99ms": 683,
+    "verdict": "DAMPED"
+   }
+  }
+ },
+ "gaps": [
+  "cockpit.nose.inFrame lower-center (d 0.5..1.4)",
+  "cockpit.shipVisible group+ NDC y > -1.15"
+ ],
+ "gapCount": 2,
+ "console": {
+  "e": [],
+  "w": []
+ }
+}
