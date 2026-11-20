@@ -98,3 +98,21 @@ R-CAM-2 (verify, default document-only) - "same view angle wherever the ship mov
 
 ## 10. Next
   I529 = ST-495 (R-CAM-1: cockpit crosshair, render-only, probed).
+
+## 11. I530 (ST-496) R-CAM-2 measured findings (cross-mode, WITH MEASUREMENT)
+Probe: .evidence/I530/probe_farview530.mjs (pure core, DOM-free; steady-state targets; fov 60 @ 16:9; SHIP_HOVER 0.4; behind-point 12 u). Output: .evidence/I530/probe530.out.
+
+A. ENDLESS (arena) - rim (t -> 1, dolly engaged, s 1.000 -> 1.700):
+  A1 position invariance (center t=0 vs rim t=1, same heading (0,1) + speed):
+    - cam->look angle IDENTICAL at both positions: az 180.00 / el -40.87 at rest, -46.97 at full speed (view angle strictly position-invariant).
+    - cam->ship az identical (180.00); el differs by exactly 0.50 deg (-33.49 center -> -33.99 rim): SHIP_HOVER 0.4 does not scale with s (only the cam offset does) - known negligible artifact of the uniform-scale form.
+    - max ship-NDC delta center->rim: 0.0154 (rest) / 0.0160 (full speed) = <=1.6% of half-screen. ST-415 invariance VERIFIED in endless.
+  A2 far-view % (24 theta x 3 radii x 4 headings x 2 speeds = 576 samples; NEW metric, no pre-registered threshold):
+    - behind-12m (ship - fwd*12): RIM 50.0% out (288 behind-cam, 0 oob) vs FULL-ARENA 76.4% -> the rim dolly REDUCES out-of-frame by 26.4pp. The fixed world-angle rig (cam always +z of the ship) puts the behind-point on the camera side for exactly half the headings by construction - a property of the rig, not a framing defect; addressable only by a ship-relative rig rebuild (out of scope: would re-pin all causal/playframe harnesses + change game feel; smallest-lever-first).
+    - diametric rim point (far rim, 52 u): 83.3% out at rim - physical fov-60 bound for a 52 u arena in a close chase camera; the OVERVIEW mode (ST-416 I446) is the documented whole-arena view (|NDC| <= 0.85 @ 16:9 / fov 60).
+    - arena center point: 72.9% out at rim / 63.5% full arena.
+B. CAMPAIGN (flight path; max excursion measured 12.50 u at d=235, maxElev 5.40):
+  B1 I504 re-verification EXACT: behind-track-12m out-of-frame 43/500 = 8.6% at rest (I504: 8.6% - reproduced to the sample) => WITHIN the pre-registered <=10% rule; 81/500 = 16.2% at full speed (the rule is rest-scoped; the speed lean [lookAheadSpeed + fovSpeed] intentionally shifts framing forward).
+  B2 STRUCTURAL FINDING: max path excursion t = 12.50/26 = 0.481 < dolly.startFrac 0.55 -> s = 1.000 over the ENTIRE campaign path: the rim dolly never engages in campaign; the campaign framing is the base (9, 13) rig everywhere (the flightPathCam lift is a pure translation).
+  B3 with the flightPathCam lift, cam->ship angle is EXACTLY invariant between d=0 and d=maxExcursion: (az 180.00, el -33.49) at both positions; camLook differs only by path tangent (heading, by design); ship NDC in-frame at both positions and across the full path (rest x[-0.3146,0.3559] y[-0.2843,0.4657]; full speed x[-0.3853,0.4403] y[-0.3229,0.6015]; 0 NaN).
+VERDICT: MEASURE-ONLY - NO LEVER. User request (A) "same view angle wherever the ship moves" is numerically CLOSED in both modes: the view angle is strictly position-invariant (endless A1 + campaign B3) and the behind-track far-view in campaign is within the pre-registered rule (B1). The endless behind-cam % (A2) is a property of the fixed world-angle rig, not of the position-invariant framing; a ship-relative rig is a major, disproportionate rebuild. The whole-arena "see everything" need is served by OVERVIEW (V hotkey).

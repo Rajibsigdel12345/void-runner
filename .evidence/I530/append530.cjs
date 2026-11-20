@@ -1,0 +1,15 @@
+const fs = require('fs');
+const p = 'E:/Game/design/e71-camera-fpv-research.md';
+let s = fs.readFileSync(p, 'latin1');
+const before = Buffer.from(s, 'latin1').toString('hex');
+let boms = 0; const b = Buffer.from(s, 'latin1');
+for (let i = 0; i + 2 < b.length; i++) if (b[i] === 0xEF && b[i + 1] === 0xBB && b[i + 2] === 0xBF) boms++;
+if (s.indexOf('\r') !== -1) throw new Error('doc has CR');
+if (!s.endsWith('\n')) s += '\n';
+s += '\n' + fs.readFileSync('E:/Game/tmp_f530.txt', 'latin1') + '\n';
+const nb = Buffer.from(s, 'latin1'); let nboms = 0;
+for (let i = 0; i + 2 < nb.length; i++) if (nb[i] === 0xEF && nb[i + 1] === 0xBB && nb[i + 2] === 0xBF) nboms++;
+if (nboms !== boms) throw new Error('BOM drift');
+fs.writeFileSync(p, s, 'latin1');
+console.log('FINDINGS APPENDED', before.length ? '' : '', 'bytes', s.length, 'BOM', boms);
+fs.unlinkSync('E:/Game/tmp_f530.txt');
