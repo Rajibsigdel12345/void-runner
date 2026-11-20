@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief); ship 300 -> 850 at I429 (ST-399 remaster, 818-tri fighter; design/asset-spec-ship-remaster.md)).
-const BUDGETS = { ship: 25563, L: 3200, M: 950, S: 380, comet: 650, boss: 1500, shield: 120, emblem: 60, drone: 1800, arenaRing: 120, warden: 1800, chunk: 60, sliver: 50, hunter: 3366, gunship: 2596, sentry: 2934, wasp: 4020, phantom: 2336, bulwark: 2700, hauler: 3506 }; // + I482 (ST-449 sentry/wasp caps 1800/1200; actual 1096/792) + I501 (ST-467 ship v6 real-airship remaster 19000 -> 25563, measured 25,563 t / 581,440 B; pinned tight to measurement - the asset landed 9,137 t under the 34,700 aim so the pre-registered 38,500 was not needed; future growth requires an explicit re-pin) // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276) + I456 (ST-426 rock L/M/S v11 density remaster 2100/520/140 -> 3200/950/380, actual 3000/900/350; boss 750 -> 1500, actual 1425) + I508 (ST-474 E68 legacy-4 remaster) drone/warden caps 100/200 -> 1800/1800 (spec aim 1400) + I509 (ST-475 E68 remaster-4 re-pin WITH measurement) hunter/gunship/sentry/wasp 3366/2596/2934/4020 (wasp 1200 -> 4020: wing-mirror rebuild, double blade 2400 t) + I516 (ST-482 E69 phantom/bulwark 2336/2700, pinned tight to measurement) + I517 (ST-483 E69 hauler 3506, pinned tight to measurement)
+const BUDGETS = { ship: 25563, L: 3200, M: 950, S: 380, comet: 650, boss: 1500, shield: 120, emblem: 60, drone: 1800, arenaRing: 120, warden: 1800, chunk: 60, sliver: 50, hunter: 3366, gunship: 2596, sentry: 2934, wasp: 4020, phantom: 3048, bulwark: 2700, hauler: 3506 }; // + I482 (ST-449 sentry/wasp caps 1800/1200; actual 1096/792) + I501 (ST-467 ship v6 real-airship remaster 19000 -> 25563, measured 25,563 t / 581,440 B; pinned tight to measurement - the asset landed 9,137 t under the 34,700 aim so the pre-registered 38,500 was not needed; future growth requires an explicit re-pin) // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276) + I456 (ST-426 rock L/M/S v11 density remaster 2100/520/140 -> 3200/950/380, actual 3000/900/350; boss 750 -> 1500, actual 1425) + I508 (ST-474 E68 legacy-4 remaster) drone/warden caps 100/200 -> 1800/1800 (spec aim 1400) + I509 (ST-475 E68 remaster-4 re-pin WITH measurement) hunter/gunship/sentry/wasp 3366/2596/2934/4020 (wasp 1200 -> 4020: wing-mirror rebuild, double blade 2400 t) + I516 (ST-482 E69 phantom/bulwark 2336/2700, pinned tight to measurement) + I517 (ST-483 E69 hauler 3506, pinned tight to measurement)
 const MAX_FILE_BYTES = 1048576; // I501 (ST-467 ship v6) EXPLICIT re-pin: 393216 -> 1048576 (ship v6 581,440 B; spec s5 pre-registered 1,048,576; max non-ship stays boss 75.26 KB) // I440 (ST-410 ship remaster v3) EXPLICIT re-pin: 262144 -> 393216 (ship 190,544 B/3254t -> 270,556 B/12400t; I435 was 100*1024 -> 262144 for v2; max non-ship stays boss 75.26 KB)
 
 function parseGlb(file) {
@@ -709,10 +709,10 @@ const ENEMY451_FACET = {
   wasp:    { VR_Wasp_Hull: { p10: 0.3400, p50: 0.5467, p90: 0.7200 },
              VR_Wasp_Wing: { p10: 0.3600, p50: 0.5483, p90: 0.5820 }, // I509 wing-mirror rebuild pin WITH measurement (pre-fix 0.3400/0.5468/0.5815, cz -0.5500)
              VR_Wasp_Nose: { p10: 0.9500, p50: 0.9500, p90: 0.9500 } },
-  phantom: { VR_Hull:  { p10: 0.3400, p50: 0.3800, p90: 0.6200 },
-              VR_Nose:  { p10: 0.9300, p50: 0.9300, p90: 0.9300 },
-              VR_PodL:  { p10: 0.5023, p50: 0.6600, p90: 0.6600 },
-              VR_PodR:  { p10: 0.5037, p50: 0.6600, p90: 0.6600 } },
+  phantom: { VR_Hull:  { p10: 0.3600, p50: 0.5164, p90: 0.6059 },
+              VR_Nose:  { p10: 0.9000, p50: 0.9000, p90: 0.9000 },
+              VR_PodL:  { p10: 0.4790, p50: 0.6081, p90: 0.6800 },
+              VR_PodR:  { p10: 0.4729, p50: 0.6134, p90: 0.6800 } }, // I533 (ST-499 E72) pins WITH measurement (probe533.mjs; cloaker-dart v2 remaster)
   bulwark: { VR_Shield: { p10: 0.4600, p50: 0.6190, p90: 0.7400 },
               VR_Core:   { p10: 0.9300, p50: 0.9300, p90: 0.9300 },
               VR_Spine:  { p10: 0.2800, p50: 0.3876, p90: 0.4103 } }, // I516 (ST-482) pins WITH measurement (measure_facets516.mjs)
@@ -867,30 +867,30 @@ test('enemy_wasp.glb: I509 (ST-475 E68) remaster-4 swift dart + wing-mirror rebu
   assert.ok(Math.abs(ne.x - 0.62) / 0.62 <= 0.1, 'nose X ' + ne.x.toFixed(4) + ' ~ 0.62');
 });
 
-test('enemy_phantom.glb: I516 (ST-482 E69) remaster-4 phantom interceptor - nodes, per-node tris, extents, all-prim COLOR_0', () => {
+test('enemy_phantom.glb: I533 (ST-499 E72) cloaker-dart phantom interceptor v2 - nodes, per-node tris, extents, all-prim COLOR_0', () => {
   const { buf, json, binOff } = remaster4Bake('enemy_phantom.glb', 'phantom');
-  assert.ok(buf.length <= 184 * 1024, 'phantom under 184 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I516 183,724 B)');
+  assert.ok(buf.length <= 210 * 1024, 'phantom under 210 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I533 214,568 B)');
   const s = meshStats({ buf, json, binOff });
   for (const n of ['VR_Hull', 'VR_PodL', 'VR_PodR', 'VR_Nose']) assert.ok(s.nodeNames.includes(n), n + ' node');
   assert.equal(s.nodeNames.length, 4, 'flat node set (no root nodes)');
   for (const mat of ['VR_HullMat', 'VR_PodLMat', 'VR_PodRMat', 'VR_NoseMat']) assert.ok(s.matNames.includes(mat), mat + ' material');
-  assert.equal(s.totalTris, BUDGETS.phantom, 'phantom total tris == ' + BUDGETS.phantom + ' (I516 pin WITH measurement)');
-  assert.equal(s.prims.find((p) => p.name === 'VR_Hull').tris, 1416, 'hull 1416 tris (I516 exact)');
-  assert.equal(s.prims.find((p) => p.name === 'VR_Nose').tris, 264, 'nose 264 tris (I516 exact)');
-  assert.equal(s.prims.find((p) => p.name === 'VR_PodL').tris, 328, 'pod L 328 tris (I516 exact)');
-  assert.equal(s.prims.find((p) => p.name === 'VR_PodR').tris, 328, 'pod R 328 tris (I516 exact)');
+  assert.equal(s.totalTris, BUDGETS.phantom, 'phantom total tris == ' + BUDGETS.phantom + ' (I533 re-pin WITH measurement)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Hull').tris, 1972, 'hull 1972 tris (I533 re-pin WITH measurement)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Nose').tris, 284, 'nose 284 tris (I533 re-pin WITH measurement)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_PodL').tris, 396, 'pod L 396 tris (I533 re-pin WITH measurement)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_PodR').tris, 396, 'pod R 396 tris (I533 re-pin WITH measurement)');
   // Per-node extents: I516 TRUE-AXIS measurements (glb_probe.mjs; 10% band).
   const he = primExtents({ buf, json, binOff }, 'VR_Hull');
-  assert.ok(Math.abs(he.x - 1.36) / 1.36 <= 0.1, 'hull X ' + he.x.toFixed(4) + ' ~ 1.36');
-  assert.ok(Math.abs(he.y - 0.385) / 0.385 <= 0.1, 'hull Y ' + he.y.toFixed(4) + ' ~ 0.385');
-  assert.ok(Math.abs(he.z - 0.48) / 0.48 <= 0.1, 'hull Z ' + he.z.toFixed(4) + ' ~ 0.48');
+  assert.ok(Math.abs(he.x - 1.56) / 1.56 <= 0.1, 'hull X ' + he.x.toFixed(4) + ' ~ 1.56 (I533)');
+  assert.ok(Math.abs(he.y - 0.4903) / 0.4903 <= 0.1, 'hull Y ' + he.y.toFixed(4) + ' ~ 0.4903 (I533)');
+  assert.ok(Math.abs(he.z - 0.5732) / 0.5732 <= 0.1, 'hull Z ' + he.z.toFixed(4) + ' ~ 0.5732 (I533)');
   const ne = primExtents({ buf, json, binOff }, 'VR_Nose');
-  assert.ok(Math.abs(ne.x - 0.188) / 0.188 <= 0.1, 'nose X ' + ne.x.toFixed(4) + ' ~ 0.188');
+  assert.ok(Math.abs(ne.x - 0.1209) / 0.1209 <= 0.1, 'nose X ' + ne.x.toFixed(4) + ' ~ 0.1209 (I533)');
   const pl = primExtents({ buf, json, binOff }, 'VR_PodL');
   const pr = primExtents({ buf, json, binOff }, 'VR_PodR');
-  assert.ok(Math.abs(pl.x - 0.33) / 0.33 <= 0.1, 'pod L X ' + pl.x.toFixed(4) + ' ~ 0.33');
-  assert.ok(Math.abs(pl.cz - 0.30) <= 0.03, 'pod L cz ' + pl.cz.toFixed(4) + ' ~ +0.30 (mirror guard)');
-  assert.ok(Math.abs(pr.cz + 0.30) <= 0.03, 'pod R cz ' + pr.cz.toFixed(4) + ' ~ -0.30 (mirror guard)');
+  assert.ok(Math.abs(pl.x - 0.36) / 0.36 <= 0.1, 'pod L X ' + pl.x.toFixed(4) + ' ~ 0.36 (I533)');
+  assert.ok(Math.abs(pl.cz - 0.1275) <= 0.03, 'pod L cz ' + pl.cz.toFixed(4) + ' ~ +0.1275 (I533 mirror guard)');
+  assert.ok(Math.abs(pr.cz + 0.1275) <= 0.03, 'pod R cz ' + pr.cz.toFixed(4) + ' ~ -0.1275 (I533 mirror guard)');
 });
 
 test('enemy_bulwark.glb: I516 (ST-482 E69) remaster-4 hex-shield guardian - nodes, per-node tris, extents, all-prim COLOR_0', () => {
