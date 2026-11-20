@@ -1,0 +1,10 @@
+const fs = require("fs");
+const P = "tests/installUi.test.js";
+let src = fs.readFileSync(P, "utf8");
+const from = "test('installUiState: truthy non-booleans coerce to safe booleans (no show, no throw)', () => {\n  const s = installUiState({ promptAvailable: 'yes', appInstalled: 1, dismissed: 'x' });\n  assert.equal(s.showButton, false);\n  assert.equal(s.promptAvailable, false);\n  assert.equal(s.appInstalled, true);\n  assert.equal(s.dismissed, false);\n});";
+const to = "test('installUiState: truthy non-booleans coerce to false (strict === true: only a real true arms it) (no show, no throw)', () => {\n  const s = installUiState({ promptAvailable: 'yes', appInstalled: 1, dismissed: 'x' });\n  assert.equal(s.showButton, false);\n  assert.equal(s.promptAvailable, false); // 'yes' !== true\n  assert.equal(s.appInstalled, false); // 1 !== true\n  assert.equal(s.dismissed, false); // 'x' !== true\n  assert.equal(s.reason, 'unavailable');\n});";
+const n = src.split(from).length - 1;
+if (n !== 1) throw new Error("anchor count " + n + " (want 1)");
+src = src.replace(from, to);
+fs.writeFileSync(P, src, "utf8");
+console.log("TEST_FIXED");

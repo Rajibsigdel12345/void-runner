@@ -54,6 +54,7 @@ import { createReticle } from './render/reticle.js';
 import { createBearingStrip } from './render/bearingStrip.js'; // ST-444 (I477): cockpit-only bearing strip (2D canvas, 0 new 3D draw calls)
 import { createTouchStick } from './render/touchStick.js'; // ST-321 (I351): on-screen thrust stick (coarse-only)
 import { createRotateHint } from './render/rotateHint.js'; // ST-511 (I545, E74 D2): rotate-to-landscape hint (coarse+portrait only)
+import { createInstallButton } from './render/installPrompt.js'; // ST-512 (I546, E74 D4): PWA install affordance (beforeinstallprompt + menu gated)
 import { createScreens } from './render/screens.js';
 import { createSettingsPanel } from './render/settingsPanel.js';
 import { createAudio } from './render/audio.js';
@@ -749,6 +750,9 @@ const touchStick = coarse ? createTouchStick() : { sync: function () {} }; // ST
 const rotateHint = coarse ? createRotateHint(document.body) : { setLabel() {}, el: null, visible: false, dispose() {} }; // ST-511 (I545) D2: rotate-to-landscape hint (touch + portrait only)
 rotateHint.setLabel(tr('ui.rotate_hint'));
 onLocale(() => rotateHint.setLabel(tr('ui.rotate_hint'))); // ST-375: live re-emit
+const installPrompt = createInstallButton(document.body); // ST-512 (I546, E74 D4): PWA install affordance (body overlay; beforeinstallprompt + menu gated)
+installPrompt.setLabel(tr('menu.install')); // i18n label (en/zh/ja)
+onLocale(() => installPrompt.setLabel(tr('menu.install'))); // ST-375: live re-emit
 
 // Session keys (ST-017): Enter start/restart, P/Esc pause, M mute.
 window.addEventListener('keydown', (e) => {
@@ -851,7 +855,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, (replayView && world.game.in(STATE.REPLAY)) ? replayIntent() : intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, rotateHint, stickGeom, advance, storage, particles, shockwaves, debris, debrisLive: () => debris.live, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, shipFlameGlow: shipMesh.flameGlow, arenaFloor: grid, // ST-257 (I269)
+window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, rotateHint, installPrompt, stickGeom, advance, storage, particles, shockwaves, debris, debrisLive: () => debris.live, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, shipFlameGlow: shipMesh.flameGlow, arenaFloor: grid, // ST-257 (I269)
   floorDisc, // ST-277 (I294)
   applySettings, liveSettings: () => liveSettings,
   locale: () => getLocale(), setLocale, // ST-375: locale probe + drive (boot applied in applySettings; live via the settings panel)
@@ -1210,6 +1214,7 @@ function syncVisuals(dt) {
   if (coarse && st === STATE.PLAYING) { if (pauseBtn.style.display !== 'flex') pauseBtn.style.display = 'flex'; } else if (pauseBtn.style.display !== 'none') pauseBtn.style.display = 'none'; // I71: on-screen pause button (touch, PLAYING only)
   touchStick.sync(input, dt, st === STATE.PLAYING); // ST-321 (I351): on-screen thrust stick (fades out on non-PLAYING / pointercancel / blur)
   screens.update(st, world, screenOpts);
+installPrompt.setMenuVisible(st === STATE.MENU); // ST-512 (I546, E74 D4): install button only on the menu (no-op guard keeps per-frame free)
   const thrustFrac = Math.min(1, Math.hypot(input.state.thrust.x, input.state.thrust.y));
   const mh = CONFIG.camera.menuHero; // ST-261: MENU hero block (framing + pose + idle flame)
   const inRun = (st === STATE.PLAYING || st === STATE.PAUSED); // ST-416 (I446): camera modes apply only in a run

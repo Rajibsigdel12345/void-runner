@@ -1,0 +1,1 @@
+I546 (ST-512, E74): PWA install hardening - D4 meta gap-fill (iOS/Android) + in-menu install affordance (pure core installUi + DOM installPrompt, beforeinstallprompt-gated, menu-gated, i18n en/zh/ja) + 192 icon (quality bar 6/6: 1201/1201 / build 0 / smoke546 21/21 / dist 5,559,215 B / vendor 4/4 / causal495+playframe491+pwa491 EXACT / BOM delta 0)
