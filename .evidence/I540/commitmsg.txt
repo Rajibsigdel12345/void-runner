@@ -1,0 +1,1 @@
+I540 (ST-506, E73): ship v7 "warship airship" Blender build (Blender 5.2.3 headless) - build 33,882 t / GLB 32,499 t / 740,012 B, all gates + P1 - quality bar 6/6

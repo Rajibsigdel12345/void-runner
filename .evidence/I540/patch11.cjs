@@ -1,0 +1,10 @@
+const fs = require("fs");
+const p = "E:/Game/.evidence/I540/build_ship_v7.py";
+let s = fs.readFileSync(p, "latin1");
+const old = "        print(\"ZMIN\", _ob.name, round(min(_zz), 4))\n";
+const i = s.indexOf(old);
+if (i < 0 || s.indexOf(old, i + 1) >= 0) throw new Error("anchor bad");
+const next = old + "    _h = [o for o in parts if o.name == \"VR_Ship_Hull\"][0]\n    _vv = sorted(_h.data.vertices, key=lambda v: v.co.z)[:5]\n    for v in _vv:\n        print(\"HULLLOW\", round(v.co.x, 4), round(v.co.y, 4), round(v.co.z, 4))\n";
+s = s.slice(0, i) + next + s.slice(i + old.length);
+fs.writeFileSync(p, s, "latin1");
+console.log("PATCH11 OK");

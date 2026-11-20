@@ -1,0 +1,68 @@
+﻿blender.exe : E:\Game\.evidence\I540\build_ship_v7.py:728: DeprecationWarning: 'Material.use_nodes' is expected to be 
+removed in Blender 6.0
+At line:13 char:200
++ ... COMPILE_OK; & "D:/Blender/blender.exe" -b --factory-startup -P .evide ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (E:\Game\.eviden... in Blender 6.0:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  mat.use_nodes = True
+Traceback (most recent call last):
+  File "E:\Game\.evidence\I540\build_ship_v7.py", line 854, in <module>
+    main()
+    ~~~~^^
+  File "E:\Game\.evidence\I540\build_ship_v7.py", line 824, in main
+    assert zmin >= -0.399, "belly below -0.399 (%.4f)" % zmin
+           ^^^^^^^^^^^^^^
+AssertionError: belly below -0.399 (-0.4038)
+BEVEL VR_Ship_Hull sel 84 bnd 0 nm 0 degen 0 zeroe 0
+BEVEL VR_Ship_Hull sel 0 bnd 0 nm 0 degen 0 zeroe 0
+BEVEL VR_Ship_Wings sel 146 bnd 0 nm 0 degen 0 zeroe 0
+INSET 8 candidates 21 nm 0 degen 0
+INSET 8 candidates 21 nm 0 degen 0
+BEVEL VR_Ship_Wings sel 60 bnd 0 nm 0 degen 0 zeroe 0
+BEVEL VR_Ship_Cockpit sel 180 bnd 0 nm 0 degen 0 zeroe 0
+INSET 10 candidates 367 nm 0 degen 0
+BEVEL VR_Ship_Cockpit sel 8 bnd 0 nm 0 degen 0 zeroe 0
+BEVEL VR_Ship_Fin sel 169 bnd 0 nm 0 degen 0 zeroe 0
+INSET 0 candidates 0 nm 0 degen 0
+INSET 0 candidates 0 nm 0 degen 0
+BEVEL VR_Ship_Fin sel 0 bnd 0 nm 0 degen 0 zeroe 0
+ENG7 pre-bevel1 tris 0
+BEVEL VR_Ship_Engine sel 1164 bnd 0 nm 0 degen 0 zeroe 0
+ENG7 post-bevel1 tris 4924
+ENG7 post-subdiv tris 5844
+BEVEL VR_Ship_Engine sel 0 bnd 0 nm 0 degen 0 zeroe 0
+ENG7 final tris 5844
+NOZ7 pre-bevel1 tris 0
+BEVEL VR_Ship_Nozzle sel 628 bnd 0 nm 0 degen 0 zeroe 0
+NOZ7 post-bevel1 tris 2670
+NOZ7 post-subdiv tris 2670
+BEVEL VR_Ship_Nozzle sel 24 bnd 0 nm 0 degen 0 zeroe 0
+NOZ7 final tris 2862
+CLEANUP VR_Ship_Hull nm 0 degen 0 zeroe 0 bnd 0
+CLEANUP VR_Ship_Wings nm 0 degen 0 zeroe 0 bnd 0
+CLEANUP VR_Ship_Cockpit nm 0 degen 0 zeroe 0 bnd 0
+CLEANUP VR_Ship_Fin nm 0 degen 0 zeroe 0 bnd 0
+CLEANUP VR_Ship_Engine nm 0 degen 0 zeroe 0 bnd 0
+CLEANUP VR_Ship_Nozzle nm 0 degen 0 zeroe 0 bnd 0
+PART VR_Ship_Hull tris 15604 verts 8106
+PART VR_Ship_Wings tris 4120 verts 2084
+PART VR_Ship_Cockpit tris 2754 verts 1405
+PART VR_Ship_Fin tris 2698 verts 1375
+PART VR_Ship_Engine tris 5844 verts 2968
+PART VR_Ship_Nozzle tris 2862 verts 1467
+FACET hull   p10 0.4638 p50 0.8052 p90 1.2933 spread 0.8295
+FACET wings  p10 0.3914 p50 0.932 p90 1.5452 spread 1.1538
+ZMIN VR_Ship_Hull -0.4038
+ZMIN VR_Ship_Wings -0.0565
+ZMIN VR_Ship_Cockpit 0.67
+ZMIN VR_Ship_Fin -0.345
+ZMIN VR_Ship_Engine -0.1539
+ZMIN VR_Ship_Nozzle -0.085
+BUILD extent x -2.01 2.0107 span 4.0208
+BUILD extent y -1.3004 1.3 len 2.6004
+BUILD extent z -0.4038 1.255
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+
+Blender quit

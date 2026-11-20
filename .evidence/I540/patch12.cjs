@@ -1,0 +1,10 @@
+const fs = require("fs");
+const p = "E:/Game/.evidence/I540/build_ship_v7.py";
+let s = fs.readFileSync(p, "latin1");
+const old = "        print(\"HULLLOW\", round(v.co.x, 4), round(v.co.y, 4), round(v.co.z, 4))\n";
+const i = s.indexOf(old);
+if (i < 0 || s.indexOf(old, i + 1) >= 0) throw new Error("anchor bad");
+const next = "        print(\"HULLLOW\", round(v.co.x, 4), round(v.co.y, 4), round(v.co.z, 4),\n              (round(v.normal.x, 3), round(v.normal.y, 3), round(v.normal.z, 3)), v.link_faces[:1])\n";
+s = s.slice(0, i) + next + s.slice(i + old.length);
+fs.writeFileSync(p, s, "latin1");
+console.log("PATCH12 OK");

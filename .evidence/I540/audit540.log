@@ -1,0 +1,44 @@
+﻿blender.exe : E:\Game\.evidence\I540\audit540.py:8: DeprecationWarning: 'World.use_nodes' is expected to be removed in 
+Blender 6.0
+At line:100 char:62
++ ... udit540.py; & "D:/Blender/blender.exe" -b --factory-startup -P .evide ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (E:\Game\.eviden... in Blender 6.0:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  w = bpy.data.worlds.new("World"); sc.world = w; w.use_nodes = True
+E:\Game\.evidence\I540\audit540.py:42: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 
+6.0
+  clay = bpy.data.materials.new("clay"); clay.use_nodes = True
+E:\Game\.evidence\I540\audit540.py:46: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 
+6.0
+  m = bpy.data.materials.new("flat_" + hexc[0:6] if False else "flat"); m.use_nodes = True
+E:\Game\.evidence\I540\audit540.py:52: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 
+6.0
+  m = bpy.data.materials.new("tint_" + tag); m.use_nodes = True
+21:25:42 | INFO: Data are loaded, start creating Blender stuff
+21:25:42 | INFO: Blender create Mesh node VR_Ship_Cockpit
+21:25:42 | INFO: Blender create Mesh node VR_Ship_Engine
+21:25:42 | INFO: Blender create Mesh node VR_Ship_Fin
+21:25:42 | INFO: Blender create Mesh node VR_Ship_Hull
+21:25:42 | INFO: Blender create Mesh node VR_Ship_Nozzle
+21:25:42 | INFO: Blender create Mesh node VR_Ship_Wings
+21:25:42 | INFO: glTF import finished in 0.31s
+AUDIT ship_v7 meshes=6 tris=32499 radius=2.5319 center=(0.0, -0.0, 0.431)
+00:11.093  render           | Saved: 'E:\Game\.evidence\I540\a540_ship_f34_clay.png'
+00:13.297  render           | Saved: 'E:\Game\.evidence\I540\a540_ship_front_clay.png'
+00:15.234  render           | Saved: 'E:\Game\.evidence\I540\a540_ship_side_clay.png'
+00:17.125  render           | Saved: 'E:\Game\.evidence\I540\a540_ship_rear34_clay.png'
+00:20.765  render           | Saved: 'E:\Game\.evidence\I540\a540_ship_f34_tint.png'
+00:23.343  render           | Saved: 'E:\Game\.evidence\I540\a540_ship_front_tint.png'
+00:25.375  render           | Saved: 'E:\Game\.evidence\I540\a540_ship_side_tint.png'
+00:27.531  render           | Saved: 'E:\Game\.evidence\I540\a540_ship_rear34_tint.png'
+E:\Game\.evidence\I540\audit540.py:89: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 
+6.0
+  sil = bpy.data.materials.new("sil"); sil.use_nodes = True
+00:28.781  render           | Saved: 'E:\Game\.evidence\I540\a540_ship_front_sil96.png'
+00:29.922  render           | Saved: 'E:\Game\.evidence\I540\a540_ship_rear34_sil96.png'
+ALL_DONE
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+
+Blender quit
