@@ -126,7 +126,7 @@ export function createHaulerRenderer(scene) {
       const n = o.name || '';
       if (/hatch/i.test(n)) { if (!hatch) hatch = o; }
       else if (/sponsonl/i.test(n)) { if (!sponsonL) sponsonL = o; }
-      else if (/sponsorr/i.test(n)) { if (!sponsonR) sponsonR = o; }
+      else if (/sponsonr/i.test(n)) { if (!sponsonR) sponsonR = o; }
       else if (/stack/i.test(n)) { if (!stack) stack = o; }
       else if (!hull) hull = o;
     });
