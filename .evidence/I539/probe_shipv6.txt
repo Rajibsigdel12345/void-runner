@@ -1,0 +1,12 @@
+PROBE ship.glb (v6)  file=581440 B  bin=576428 B  meshes=6 nodes=6 materials=[VR_Ship_Cockpit, VR_Ship_Hull, VR_Ship_Wing]
+NODE VR_Ship_Cockpit  mesh=VR_Ship_Cockpit  tris=1592  x=[-0.260, 0.260]  y=[0.057, 0.491]  z=[0.112, 0.801]  mat=VR_Ship_Cockpit  color0=no
+NODE VR_Ship_Engine  mesh=VR_Ship_Engine  tris=4880  x=[-0.902, 0.902]  y=[-0.294, 0.294]  z=[-1.179, -0.520]  mat=VR_Ship_Hull  color0=no
+NODE VR_Ship_Fin  mesh=VR_Ship_Fin  tris=2312  x=[-0.368, 0.368]  y=[-0.013, 0.554]  z=[-0.786, -0.283]  mat=VR_Ship_Wing  color0=no
+NODE VR_Ship_Hull  mesh=VR_Ship_Hull  tris=12207  x=[-0.614, 0.671]  y=[-0.414, 0.538]  z=[-0.955, 1.307]  mat=VR_Ship_Hull  color0=yes
+NODE VR_Ship_Nozzle  mesh=VR_Ship_Nozzle  tris=1928  x=[-0.662, 0.662]  y=[-0.326, 0.214]  z=[-1.293, 1.183]  mat=VR_Ship_Hull  color0=no
+NODE VR_Ship_Wings  mesh=VR_Ship_Wings  tris=2644  x=[-2.006, 2.006]  y=[-0.128, 0.271]  z=[-0.932, 0.723]  mat=VR_Ship_Wing  color0=yes
+TOTAL tris=25563
+OVERALL span_x=4.013  height_y=0.969  length_z=2.599  min-y=-0.414  max-y=0.554  bow_z=1.307  tail_z=-1.293
+FACET (per-triangle mean luma of COLOR_0; q(f)=v[floor(f*len)]):
+  VR_Ship_Hull  p10=0.5611  p50=0.9108  p90=1.3070  (spread 0.7459)
+  VR_Ship_Wings  p10=0.3869  p50=0.9981  p90=1.5500  (spread 1.1631)
