@@ -1,0 +1,10 @@
+const fs=require('fs');
+let s=fs.readFileSync('.evidence/I534/audit_hauler_v2.py','utf8');
+const rep=(old,nw,c)=>{const k=s.split(old).length-1;if(k!==(c||1))throw new Error('occurrence '+k+' for: '+old.slice(0,40));s=k>1?s.split(old).join(nw):s.replace(old,nw);};
+rep('hauler_v2.glb','bulwark_v2.glb');
+rep('AUDIT hauler_v2','AUDIT bulwark_v2');
+rep('I534','I535',2);
+rep('v2_hauler_','v2_bulwark_',3);
+rep('hexc = (0x97/255, 0x5a/255, 0x2d/255, 1.0)','hexc = (0xaa/255, 0x3c/255, 0x96/255, 1.0)');
+fs.writeFileSync('.evidence/I535/audit_bulwark_v2.py',s);
+console.log('AUDIT_SCRIPT_READY');
