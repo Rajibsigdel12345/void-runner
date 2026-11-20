@@ -9,7 +9,7 @@ import { createThemeDome } from './render/themeDome.js'; // ST-420 (I450): per-s
 import { createEngineTrail } from './core/engineTrail.js'; // I213
 import { createAfterburner } from './render/afterburner.js'; // ST-434 (I466) B4
 import { createShipMesh } from './render/shipMesh.js';
-import { createInput } from './render/input.js';
+import { createInput, stickGeom } from './render/input.js';
 import { createBulletPool } from './render/bulletPool.js';
 import { createAsteroidRenderer } from './render/asteroidRenderer.js';
 import { createAssetLoader } from './render/assetLoader.js'; // I104
@@ -53,6 +53,7 @@ import { createHUD } from './render/hud.js';
 import { createReticle } from './render/reticle.js';
 import { createBearingStrip } from './render/bearingStrip.js'; // ST-444 (I477): cockpit-only bearing strip (2D canvas, 0 new 3D draw calls)
 import { createTouchStick } from './render/touchStick.js'; // ST-321 (I351): on-screen thrust stick (coarse-only)
+import { createRotateHint } from './render/rotateHint.js'; // ST-511 (I545, E74 D2): rotate-to-landscape hint (coarse+portrait only)
 import { createScreens } from './render/screens.js';
 import { createSettingsPanel } from './render/settingsPanel.js';
 import { createAudio } from './render/audio.js';
@@ -745,6 +746,9 @@ pauseBtn.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
 pauseBtn.addEventListener('click', (e) => { e.stopPropagation(); togglePause(); pauseBtn.blur(); });
 document.body.appendChild(pauseBtn);
 const touchStick = coarse ? createTouchStick() : { sync: function () {} }; // ST-321 (I351): on-screen thrust stick - created ONLY on touch (zero DOM on mouse/keyboard)
+const rotateHint = coarse ? createRotateHint(document.body) : { setLabel() {}, el: null, visible: false, dispose() {} }; // ST-511 (I545) D2: rotate-to-landscape hint (touch + portrait only)
+rotateHint.setLabel(tr('ui.rotate_hint'));
+onLocale(() => rotateHint.setLabel(tr('ui.rotate_hint'))); // ST-375: live re-emit
 
 // Session keys (ST-017): Enter start/restart, P/Esc pause, M mute.
 window.addEventListener('keydown', (e) => {
@@ -847,7 +851,7 @@ function advance(simSeconds, intent = { thrust: v2(0, 0), aimPoint: null, firing
   for (let i = 0; i < n; i++) tick(STEP, (replayView && world.game.in(STATE.REPLAY)) ? replayIntent() : intent);
   syncVisuals(STEP);
 }
-window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, advance, storage, particles, shockwaves, debris, debrisLive: () => debris.live, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, shipFlameGlow: shipMesh.flameGlow, arenaFloor: grid, // ST-257 (I269)
+window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), input, rotateHint, stickGeom, advance, storage, particles, shockwaves, debris, debrisLive: () => debris.live, shipGroup: shipMesh.group, shipFlame: shipMesh.flame, shipFlameCore: shipMesh.flameCore, shipFlameGlow: shipMesh.flameGlow, arenaFloor: grid, // ST-257 (I269)
   floorDisc, // ST-277 (I294)
   applySettings, liveSettings: () => liveSettings,
   locale: () => getLocale(), setLocale, // ST-375: locale probe + drive (boot applied in applySettings; live via the settings panel)

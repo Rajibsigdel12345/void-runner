@@ -29,6 +29,7 @@ export const STRINGS = {
     'menu.board': 'TOP 5',
     'menu.start_tap': 'TAP TO START',
     'menu.start_key': 'PRESS ENTER TO START',
+    'ui.rotate_hint': 'ROTATE TO LANDSCAPE',
 
     'menu.continue': 'CONTINUE \u2014 LV {level}',
     'menu.continue_aria': 'Continue the campaign from level {level}',
@@ -254,6 +255,7 @@ export const STRINGS = {
     'menu.board': '前五名',
     'menu.start_tap': '点击开始',
     'menu.start_key': '按回车键开始',
+    'ui.rotate_hint': '\u8bf7\u6a2a\u5c4f\u6e38\u73a9',
 
     'menu.continue': '\u7ee7\u7eed \u2014 \u7b2c{level}\u5173',
     'menu.continue_aria': '\u4ece\u7b2c{level}\u5173\u7ee7\u7eed\u6218\u5f79',
@@ -466,6 +468,7 @@ export const STRINGS = {
     'menu.board': 'トップ5',
     'menu.start_tap': 'タップして開始',
     'menu.start_key': 'ENTERキーで開始',
+    'ui.rotate_hint': '\u6a2a\u5411\u304d\u3067\u30d7\u30ec\u30a4\u3057\u3066\u304f\u3060\u3055\u3044',
 
     'menu.continue': '\u7d96\u7d9a \u2014 LV{level}',
     'menu.continue_aria': '\u30ec\u30d9\u30eb{level}\u304b\u3089\u30ad\u30e3\u30e9\u30fc\u3092\u7d9a\u3059\u308b',

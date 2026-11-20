@@ -29,3 +29,16 @@ export function knobOffset(dx, dy, deadzone, maxPx) {
   else { const s = maxPx / m; x = dx * s; y = dy * s; mag = 1; }
   return { x, y, mag, active: m > deadzone };
 }
+
+// ST-511 (I545, E74 D3): responsive thrust-stick geometry (pure, no DOM). The on-screen
+// floating stick (ring + knob) and the input math MUST move together (1:1), so this is the
+// single source of truth consumed by both render/touchStick.js and render/input.js.
+// vh = viewport height in CSS px. For a usable landscape height (vh >= 360) or any
+// non-finite/invalid vh it returns the shipped bit-identical geometry (maxPx 90 = 180 px
+// ring, deadzone 24 = 48 px knob). For a short landscape height (1 <= vh < 360) it shrinks
+// the travel so the ring (2*maxPx) stays <= 50% of the short side, while holding a 44 px
+// knob floor (UX-2 44 px touch-target minimum; UX-4 "bigger stick for small screens").
+export function stickGeomFor(vh) {
+  if (!Number.isFinite(vh) || vh < 1 || vh >= 360) return { maxPx: 90, deadzone: 24 };
+  return { maxPx: Math.max(56, Math.floor(vh / 4)), deadzone: 22 };
+}

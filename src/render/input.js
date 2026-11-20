@@ -1,12 +1,12 @@
 // Void Runner - DOM input state (ST-006; ST-033 touch; ST-268 dual-zone touch). Render layer only; core stays DOM-free.
 import { v2, v2Norm } from '../core/math.js';
-import { zoneFor, thrustFromDrag, ZONE } from '../core/touchZones.js';
+import { zoneFor, thrustFromDrag, stickGeomFor, ZONE } from '../core/touchZones.js';
 
 const TRACKED = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'];
 
 // Touch tuning (ST-033 -> ST-268 dual-zone):
-//  - LEFT-zone drag = thrust on a floating stick (origin = down-point): DEADZONE px dead-zone,
-//    linear ramp to full thrust at MAX_PX px, auto-centre (zero thrust) on release.
+//  - LEFT-zone drag = thrust on a floating stick (origin = down-point): dead-zone px dead-zone,
+//    linear ramp to full thrust at maxPx, auto-centre (zero thrust) on release.
 //  - RIGHT-zone touch = aim (touch position) + fire while down; release keeps FIRE_TAIL so a
 //    tap still launches >=1 bullet (ST-033 tap guarantee, fire interval ~0.18 s).
 //  - Silent move = left-only (no fire).
@@ -14,13 +14,39 @@ const TRACKED = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowL
 //    + visual-confirmation callback). Cross-zone fingers (left thrust + right fire) are the core
 //    dual-zone loop and must NOT pause (ST-268 spec delta vs the ST-033 any-second-finger rule).
 //  - Extra (3rd+) fingers ignored; onBlur clears all. Keyboard/mouse paths untouched (BY LAYER).
-export const DEADZONE = 24; // px (the ST-033 DRAG_THRESH); ST-321 (I351): shared with the on-screen stick visual
-export const MAX_PX = 90; // px of drag for full-thrust magnitude; ST-321 (I351): shared with the on-screen stick visual
+//  - ST-511 (I545, E74 D3): the dead-zone / full-thrust radius are RESPONSIVE - a single shared
+//    live value (stickGeom()) computed from the viewport height via the pure stickGeomFor().
+//    Bit-identical at vh >= 360; shrinks on short landscape viewports. The on-screen stick visual
+//    (touchStick.js) reads the SAME stickGeom() so the knob stays 1:1 under the finger at any size.
+
+// ST-511 (I545, E74 D3): the live thrust-stick geometry. Default (bit-identical 90/24) until a
+// real viewport height is read; refreshed on create() and on window resize. Shared with the
+// touch-stick visual so input math and the on-screen ring/knob never diverge.
+let _geom = stickGeomFor(0);
+function _refreshGeom() {
+  const h = (typeof window !== 'undefined' && typeof window.innerHeight === 'number') ? window.innerHeight : 0;
+  _geom = stickGeomFor(h);
+}
+_refreshGeom(); // init (node: no window -> default; browser: real height)
+let _resizeAttached = false;
+function _attachResize() {
+  if (_resizeAttached || typeof window === 'undefined' || typeof window.addEventListener !== 'function') return;
+  window.addEventListener('resize', _refreshGeom);
+  _resizeAttached = true;
+}
+function _detachResize() {
+  if (!_resizeAttached || typeof window === 'undefined' || typeof window.removeEventListener !== 'function') return;
+  window.removeEventListener('resize', _refreshGeom);
+  _resizeAttached = false;
+}
+export function stickGeom() { return _geom; } // shared responsive { maxPx, deadzone }
+
 const AIM_OFFSET_PX = 48; // ST-322 (I352): the right-zone touch aims 48 px ABOVE the fingertip (fingertip occlusion ~30-50 px) so the reticle renders above the finger (closes I281 gap #3); touch-only - mouse/keyboard byte-identical
 const FIRE_TAIL = 0.22; // s of firing kept after right-zone release so a tap always launches >=1 bullet (fire interval ~0.18s)
 const PAUSE_COOLDOWN = 0.45;
 
 export function createInput(opts = {}) {
+  _refreshGeom(); _attachResize(); // ST-511: read the responsive stick geometry for this viewport
   const onPause = typeof opts.onPause === 'function' ? opts.onPause : null;
   const onPauseConfirm = typeof opts.onPauseConfirm === 'function' ? opts.onPauseConfirm : null; // ST-268: visual confirmation of the two-finger pause
   const keys = new Set();
@@ -37,14 +63,15 @@ export function createInput(opts = {}) {
 
   function leftThrust() {
     if (!leftTouch) return v2(0, 0);
-    const t = thrustFromDrag(leftTouch.x - leftTouch.sx, leftTouch.y - leftTouch.sy, DEADZONE, MAX_PX); // screen right/down = sim +x/+y (ST-033 convention)
+    const g = stickGeom();
+    const t = thrustFromDrag(leftTouch.x - leftTouch.sx, leftTouch.y - leftTouch.sy, g.deadzone, g.maxPx); // screen right/down = sim +x/+y (ST-033 convention)
     return v2(t.x, t.y);
   }
 
   function leftDragDir() {
     if (!leftTouch) return null;
     const dx = leftTouch.x - leftTouch.sx, dy = leftTouch.y - leftTouch.sy;
-    if (Math.hypot(dx, dy) <= DEADZONE) return null;
+    if (Math.hypot(dx, dy) <= stickGeom().deadzone) return null;
     return v2Norm(v2(dx, dy));
   }
 
@@ -182,6 +209,7 @@ export function createInput(opts = {}) {
     },
     tick,
     dispose() {
+      _detachResize(); // ST-511: release the shared resize listener
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
       window.removeEventListener('pointermove', onMove);

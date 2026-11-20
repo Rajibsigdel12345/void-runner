@@ -6,7 +6,7 @@
 // stub exists only in this file; the production build never sees it).
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ZONE, zoneFor, thrustFromDrag, knobOffset } from '../src/core/touchZones.js';
+import { ZONE, zoneFor, thrustFromDrag, knobOffset, stickGeomFor } from '../src/core/touchZones.js';
 import { createInput } from '../src/render/input.js';
 
 // --- zoneFor ---------------------------------------------------------------
@@ -100,6 +100,22 @@ test('ST-321 knobOffset: degenerate maxPx (<= drag) clamps to the ring', () => {
   assert.equal(k.active, true);
 });
 
+// --- stickGeomFor (ST-511, I545 E74 D3) ------------------------------------
+test('ST-511 stickGeomFor: usable/invalid vh -> shipped 90/24 (bit-identical default)', () => {
+  assert.deepEqual(stickGeomFor(360), { maxPx: 90, deadzone: 24 });
+  assert.deepEqual(stickGeomFor(740), { maxPx: 90, deadzone: 24 });
+  assert.deepEqual(stickGeomFor(1000), { maxPx: 90, deadzone: 24 });
+  assert.deepEqual(stickGeomFor(NaN), { maxPx: 90, deadzone: 24 });
+  assert.deepEqual(stickGeomFor(undefined), { maxPx: 90, deadzone: 24 });
+  assert.deepEqual(stickGeomFor(-1), { maxPx: 90, deadzone: 24 });
+  assert.deepEqual(stickGeomFor(0), { maxPx: 90, deadzone: 24 });
+});
+test('ST-511 stickGeomFor: short landscape shrinks travel, holds 44 px knob floor', () => {
+  assert.deepEqual(stickGeomFor(280), { maxPx: 70, deadzone: 22 });
+  assert.deepEqual(stickGeomFor(200), { maxPx: 56, deadzone: 22 });
+  assert.deepEqual(stickGeomFor(224), { maxPx: 56, deadzone: 22 });
+  assert.deepEqual(stickGeomFor(223), { maxPx: 56, deadzone: 22 });
+});
 // --- input.js dual-zone behaviour ------------------------------------------
 // Minimal window stub: input.js only uses addEventListener/removeEventListener, innerWidth,
 // innerHeight. Saved/restored per test so the in-process runner stays clean.

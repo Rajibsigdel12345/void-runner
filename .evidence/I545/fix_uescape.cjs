@@ -1,0 +1,10 @@
+const fs=require('fs');
+const p='.evidence/I545/i545docs.cjs';
+let s=fs.readFileSync(p,'latin1');
+const before=s.split('\\uXXXX').length-1;
+s=s.split('\\uXXXX').join('\\\\uXXXX');
+fs.writeFileSync(p,s,'latin1');
+const v=fs.readFileSync(p,'latin1');
+console.log('literal \\uXXXX occurrences found+fixed:',before);
+console.log('now double-backslashed count:',v.split('\\\\uXXXX').length-1);
+console.log('FIX_UESC DONE');

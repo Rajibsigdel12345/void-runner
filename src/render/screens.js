@@ -16,6 +16,7 @@ export function createScreens(root, settings = {}) {
   const style = document.createElement('style');
   style.textContent = [
     '@keyframes vrPulse{0%,100%{opacity:1}50%{opacity:0.35}}',
+    '@keyframes vrRotateHint{0%,25%{transform:rotate(0deg)}60%,100%{transform:rotate(90deg)}}',
     '@keyframes vrTitleGlow{0%,100%{filter:drop-shadow(0 0 10px rgba(90,180,255,0.55))}50%{filter:drop-shadow(0 0 22px rgba(130,215,255,0.9))}}',
     '@keyframes vrMenuPan{0%{background-position:0% 0%,0% 0%}50%{background-position:100% 100%,100% 100%}100%{background-position:0% 0%,0% 0%}}',
     '.vr-title{background:linear-gradient(180deg,#e6f4ff 0%,#8fd0ff 45%,#3f7fd8 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:vrTitleGlow 3.4s ease-in-out infinite;}',
@@ -42,7 +43,7 @@ export function createScreens(root, settings = {}) {
     '#screen-menu .vr-settings{z-index:2;}',
     '#screen-menu .vr-settings .vr-settings-groups > div{background:rgba(6,12,30,0.92);}', // opaque so the corner panel reads over the grid edge,
     '@media (max-width:620px),(max-height:480px){.vr-menu-grid{grid-template-columns:1fr !important;max-width:100% !important;}.vr-credit{display:none !important;}#screen-menu .vr-settings{position:static !important;left:auto !important;bottom:auto !important;margin-top:8px !important;z-index:auto !important;}#screen-menu{justify-content:flex-start !important;overflow-y:auto !important;padding:18px 0 !important;}#screen-paused,#screen-gameover,#screen-replays{justify-content:flex-start !important;overflow-y:auto !important;padding:18px 0 !important;}}',
-    '@media (pointer:coarse){.vr-start,.vr-pause-btn{box-sizing:border-box;min-height:44px}#vr-pause-btn{width:44px !important;height:44px !important}.vr-settings input[type=checkbox]{-webkit-appearance:none;appearance:none;box-sizing:border-box;width:44px;height:44px;margin:0;padding:0;border:1px solid #2b4a8a;border-radius:4px;background:rgba(10,18,40,0.8) center/20px 20px no-repeat;cursor:pointer}.vr-settings input[type=checkbox]:checked{background-color:#2b4a8a;background-image:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%3E%3Cpath%20fill=%22none%22%20stroke=%22%23ffe08a%22%20stroke-width=%223.4%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%20d=%22M4%2012.5l5.2%205.2L20%206.5%22/%3E%3C/svg%3E")}.vr-settings input[type=range]{height:44px}.vr-settings select{min-height:44px}}', // ST-324 (I354): 44 px coarse-pointer touch targets (fine/desktop byte-untouched)
+    '@media (pointer:coarse){.vr-start,.vr-pause-btn{box-sizing:border-box;min-height:44px}#vr-pause-btn{width:44px !important;height:44px !important;bottom:calc(16px + env(safe-area-inset-bottom,0px)) !important;right:calc(16px + env(safe-area-inset-right,0px)) !important}.vr-settings input[type=checkbox]{-webkit-appearance:none;appearance:none;box-sizing:border-box;width:44px;height:44px;margin:0;padding:0;border:1px solid #2b4a8a;border-radius:4px;background:rgba(10,18,40,0.8) center/20px 20px no-repeat;cursor:pointer}.vr-settings input[type=checkbox]:checked{background-color:#2b4a8a;background-image:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%3E%3Cpath%20fill=%22none%22%20stroke=%22%23ffe08a%22%20stroke-width=%223.4%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%20d=%22M4%2012.5l5.2%205.2L20%206.5%22/%3E%3C/svg%3E")}.vr-settings input[type=range]{height:44px}.vr-settings select{min-height:44px}}', // ST-324 (I354): 44 px coarse-pointer touch targets (fine/desktop byte-untouched)
   ].join('');
   overlay.appendChild(style);
 
@@ -73,7 +74,7 @@ export function createScreens(root, settings = {}) {
   // ST-279: three-zone one-job layout - top (title), center band (start prompt, clear of the
   // 3D ship hero), bottom zone (cards + actions). DOM only; en text bytes frozen (.evidence/I297).
   menu.style.justifyContent = 'flex-start';
-  menu.style.padding = '24px 0 18px';
+  menu.style.padding = 'calc(24px + env(safe-area-inset-top,0px)) 0 calc(18px + env(safe-area-inset-bottom,0px))';
   const topWrap = document.createElement('div');
   topWrap.className = 'vr-menu-top';
   topWrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:6px;';
