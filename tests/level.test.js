@@ -12,7 +12,7 @@ import {
   isLevelCleared, isFinalLevel, isCampaignComplete, levelNameKey, zoneNameKey
 } from '../src/core/level.js';
 
-const ENEMIES = new Set(['drone', 'mine', 'stinger', 'flyer', 'hunter', 'gunship', 'sentry', 'wasp', 'pod', 'phantom', 'hauler', 'bulwark', 'rock']); // ST-486 (E69): L4 mix vocabulary
+const ENEMIES = new Set(['drone', 'mine', 'stinger', 'flyer', 'hunter', 'gunship', 'sentry', 'wasp', 'pod', 'phantom', 'hauler', 'bulwark', 'sweeper', 'beacon', 'rock']); // ST-486 (E69): L4 mix vocabulary
 const TARGETS = new Set(['golden', 'shielded', 'rapid', 'spread', 'shield', 'magnet', 'overdrive', 'slowmo', 'pod']);
 const HAZARDS = new Set(['calm', 'moderate', 'dense', 'gauntlet']);
 const phSet = (v) => [...String(v).matchAll(/\{([a-zA-Z0-9_]+)\}/g)].map((m) => m[1]).sort().join(',');

@@ -27,6 +27,8 @@ import { createPodRenderer } from './render/podMesh.js'; // ST-448
 import { createPhantomRenderer } from './render/phantomMesh.js'; // ST-485 (E69)
 import { createHaulerRenderer } from './render/haulerMesh.js'; // ST-485 (E69)
 import { createBulwarkRenderer } from './render/bulwarkMesh.js'; // ST-485 (E69)
+import { createSweeperRenderer } from './render/sweeperMesh.js'; // ST-518 (E75)
+import { createBeaconRenderer } from './render/beaconMesh.js'; // ST-518 (E75)
 import { createBossHealth, createBossHealthVertical } from './render/bossHealth.js';
 import { createEnemyBulletRenderer } from './render/enemyBulletMesh.js';
 import { createPowerupRenderer } from './render/powerupMesh.js';
@@ -253,6 +255,8 @@ const podRenders = createPodRenderer(scene); // ST-448
 const phantomRenders = createPhantomRenderer(scene); // ST-485 (E69)
 const haulerRenders = createHaulerRenderer(scene); // ST-485 (E69)
 const bulwarkRenders = createBulwarkRenderer(scene); // ST-485 (E69)
+const sweeperRenders = createSweeperRenderer(scene); // ST-518 (E75)
+const beaconRenders = createBeaconRenderer(scene); // ST-518 (E75)
 // I104: GLB assets (Blender pass) - fire-and-forget load with procedural
 // fallback: renderers start procedural and each asset swaps in as it loads.
 const assetLoader = createAssetLoader();
@@ -286,6 +290,8 @@ else if (name === 'wasp') waspRenders.useGLB(entry.object); // ST-449 (pre-wired
 else if (name === 'phantom') phantomRenders.useGLB(entry.object); // ST-485 (E69): Blender phantom (I519 wiring)
 else if (name === 'hauler') haulerRenders.useGLB(entry.object); // ST-485 (E69): Blender hauler (I519 wiring)
 else if (name === 'bulwark') bulwarkRenders.useGLB(entry.object); // ST-485 (E69): Blender bulwark (I519 wiring)
+else if (name === 'sweeper') sweeperRenders.useGLB(entry.object); // ST-518 (E75): procedural until the GLB lands
+else if (name === 'beacon') beaconRenders.useGLB(entry.object); // ST-518 (E75): procedural until the GLB lands
    else if (name === 'debrisChunk') debris.setGeometry('chunk', entry.object); // ST-381 (I411): GLB over the procedural fallback
    else if (name === 'debrisSliver') debris.setGeometry('sliver', entry.object);
   else if (name === 'arenaRing') arenaRing.useGLB(entry.object); // I212
@@ -424,7 +430,7 @@ let camMode = 'chase'; // ST-416 (I446): active camera mode ('chase'|'overview'|
 let camModeBooted = false; // ST-443 (I476): the boot applySettings (persisted mode) is not a user change - never chip
 let liveSettings = storage.getSettings(); // ST-026: settings panel keeps this fresh (audio consumes in I27)
 // Audio (ST-027): WebAudio synth, initialized on first user gesture.
-const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', waveCleared: 'cleared', gameover: 'gameover', nearmiss: 'swish', mineExplode: 'mine', bossSpawn: 'bossSpawn', bossRing: 'bossRing', bossDeath: 'bossDeath', bossFire: 'bossFire', mineFire: 'mineFire', vortexTelegraph: 'vortexTelegraph', vortexStart: 'vortexStart', droneExplode: 'drone', weaponLevelUp: 'levelUp', rockShieldHit: 'shieldHit', droneDecay: 'droneDecay', wardenSpawn: 'wardenSpawn', wardenArmor: 'shieldHit', wardenDeath: 'wardenDeath', beltHit: 'shieldHit', stingerTelegraph: 'stingerTelegraph', stingerCharge: 'swish', stingerDeath: 'stingerDeath', stingerFizzle: 'droneDecay', flyerSpawn: 'flyerSpawn', flyerDeath: 'flyerDeath', flyerExit: 'droneDecay', hunterTelegraph: 'stingerTelegraph', hunterDash: 'swish', hunterDeath: 'stingerDeath', hunterFizzle: 'droneDecay', gunshipSpawn: 'bossSpawn', gunshipArm: 'vortexTelegraph', gunshipFire: 'bossFire', gunshipHit: 'shieldHit', gunshipDeath: 'wardenDeath', sentrySpawn: 'bossSpawn', sentryCharge: 'stingerTelegraph', sentryFire: 'bossFire', sentryHit: 'shieldHit', sentryDeath: 'stingerDeath', waspSpawn: 'flyerSpawn', waspDash: 'swish', waspDeath: 'drone', podSpawn: 'wardenSpawn', podHit: 'shieldHit', podDeath: 'wardenDeath', phantomSpawn: 'flyerSpawn', phantomCharge: 'stingerTelegraph', phantomStrike: 'bossFire', phantomHit: 'shieldHit', phantomDeath: 'drone', haulerSpawn: 'bossSpawn', haulerTelegraph: 'vortexTelegraph', haulerMineDrop: 'mine', haulerHit: 'shieldHit', haulerDeath: 'wardenDeath', bulwarkSpawn: 'bossSpawn', bulwarkCharge: 'stingerTelegraph', bulwarkFire: 'bossFire', bulwarkNegate: 'shieldHit', bulwarkStun: 'wardenDeath', bulwarkHit: 'shieldHit', bulwarkDeath: 'wardenDeath' }; // ST-484 (E69): cloaker / truck / enforcer cues // ST-232: flyer cues (exit reuses the seeker decay) // ST-229: charger cues (charge whoosh reuses swish; fizzle reuses the seeker decay) // ST-059/ST-117/ST-123/ST-127/ST-129/ST-137, I173: decay + warden get their own cues (warden armor keeps shieldHit)
+const SFX_CUES = { fire: 'shoot', kill: 'kill', hit: 'hit', powerup: 'powerup', shieldPop: 'shieldPop', bomb: 'bomb', wave: 'wave', waveCleared: 'cleared', gameover: 'gameover', nearmiss: 'swish', mineExplode: 'mine', bossSpawn: 'bossSpawn', bossRing: 'bossRing', bossDeath: 'bossDeath', bossFire: 'bossFire', mineFire: 'mineFire', vortexTelegraph: 'vortexTelegraph', vortexStart: 'vortexStart', droneExplode: 'drone', weaponLevelUp: 'levelUp', rockShieldHit: 'shieldHit', droneDecay: 'droneDecay', wardenSpawn: 'wardenSpawn', wardenArmor: 'shieldHit', wardenDeath: 'wardenDeath', beltHit: 'shieldHit', stingerTelegraph: 'stingerTelegraph', stingerCharge: 'swish', stingerDeath: 'stingerDeath', stingerFizzle: 'droneDecay', flyerSpawn: 'flyerSpawn', flyerDeath: 'flyerDeath', flyerExit: 'droneDecay', hunterTelegraph: 'stingerTelegraph', hunterDash: 'swish', hunterDeath: 'stingerDeath', hunterFizzle: 'droneDecay', gunshipSpawn: 'bossSpawn', gunshipArm: 'vortexTelegraph', gunshipFire: 'bossFire', gunshipHit: 'shieldHit', gunshipDeath: 'wardenDeath', sentrySpawn: 'bossSpawn', sentryCharge: 'stingerTelegraph', sentryFire: 'bossFire', sentryHit: 'shieldHit', sentryDeath: 'stingerDeath', waspSpawn: 'flyerSpawn', waspDash: 'swish', waspDeath: 'drone', podSpawn: 'wardenSpawn', podHit: 'shieldHit', podDeath: 'wardenDeath', phantomSpawn: 'flyerSpawn', phantomCharge: 'stingerTelegraph', phantomStrike: 'bossFire', phantomHit: 'shieldHit', phantomDeath: 'drone', haulerSpawn: 'bossSpawn', haulerTelegraph: 'vortexTelegraph', haulerMineDrop: 'mine', haulerHit: 'shieldHit', haulerDeath: 'wardenDeath', bulwarkSpawn: 'bossSpawn', bulwarkCharge: 'stingerTelegraph', bulwarkFire: 'bossFire', bulwarkNegate: 'shieldHit', bulwarkStun: 'wardenDeath', bulwarkHit: 'shieldHit', bulwarkDeath: 'wardenDeath', sweeperSpawn: 'flyerSpawn', sweeperFire: 'bossFire', sweeperHit: 'shieldHit', sweeperDeath: 'stingerDeath', beaconSpawn: 'bossSpawn', beaconCharge: 'stingerTelegraph', beaconRelease: 'bossFire', beaconHit: 'shieldHit', beaconDeath: 'wardenDeath' }; // ST-518 (E75): D3 cues // ST-484 (E69): cloaker / truck / enforcer cues // ST-232: flyer cues (exit reuses the seeker decay) // ST-229: charger cues (charge whoosh reuses swish; fizzle reuses the seeker decay) // ST-059/ST-117/ST-123/ST-127/ST-129/ST-137, I173: decay + warden get their own cues (warden armor keeps shieldHit)
 
 const audio = createAudio();
 audio.setVolume(liveSettings.volume);
@@ -685,6 +691,8 @@ function debrisTint(cls) {
   if (cls === 'sentry') return p.sentry[1];
   if (cls === 'wasp') return p.wasp[1];
   if (cls === 'pod') return p.pod[1];
+  if (cls === 'sweeper') return p.sweeper[1]; // ST-518 (E75)
+  if (cls === 'beacon') return p.beacon[1]; // ST-518 (E75)
   if (cls === 'warden') return p.boss[1]; // warden reads on the boss palette (mirrors its bursts)
   if (cls === 'boss') return p.bossKill[1];
   return p.rock[1]; // rockS/rockM/rockL
@@ -714,7 +722,7 @@ const shakeOff = { x: 0, y: 0, z: 0 };
 const punch = createPunch({ decay: CONFIG.fx.punch.decay, amplitude: CONFIG.fx.punch.amplitude }); // ST-081: directed camera jolt
 const _kpd = { x: 0, y: 0, z: 0 }; // ST-221 (I224): kill-punch direction scratch (no per-kill allocation)
 const _killCh = { punch: 0, ring: 0 }; // ST-238 (I245): kill juice-channel scratch (no per-kill allocation)
-const SW_COLORS = { drone: CONFIG.fx.palette.drone[0], stinger: CONFIG.fx.palette.stinger[0], hunter: CONFIG.fx.palette.hunter[0], gunship: CONFIG.fx.palette.gunship[0], sentry: CONFIG.fx.palette.sentry[0], wasp: CONFIG.fx.palette.wasp[0], pod: CONFIG.fx.palette.pod[0], warden: CONFIG.fx.palette.boss[0], phantom: CONFIG.fx.palette.phantom[0], hauler: CONFIG.fx.palette.hauler[0], bulwark: CONFIG.fx.palette.bulwark[0] }; // ST-485 (E69): E69 class ring colors // ST-238 (I245): per-class ring colors (built once)
+const SW_COLORS = { drone: CONFIG.fx.palette.drone[0], stinger: CONFIG.fx.palette.stinger[0], hunter: CONFIG.fx.palette.hunter[0], gunship: CONFIG.fx.palette.gunship[0], sentry: CONFIG.fx.palette.sentry[0], wasp: CONFIG.fx.palette.wasp[0], pod: CONFIG.fx.palette.pod[0], warden: CONFIG.fx.palette.boss[0], phantom: CONFIG.fx.palette.phantom[0], hauler: CONFIG.fx.palette.hauler[0], bulwark: CONFIG.fx.palette.bulwark[0], sweeper: CONFIG.fx.palette.sweeper[0], beacon: CONFIG.fx.palette.beacon[0] }; // ST-518 (E75) // ST-485 (E69): E69 class ring colors // ST-238 (I245): per-class ring colors (built once)
 let hitStop = 0; // ST-081: sim-freeze seconds remaining (render loop; rendering keeps going)
 const fovKick = createFovKick({ decay: CONFIG.fx.fovKick.decay, max: CONFIG.fx.fovKick.max }); // ST-082: dynamic FOV kick
 let simT = 0; // sim-clock for timed visuals (invuln blink)
@@ -859,7 +867,7 @@ window.__vr = { world, eventTally, juiceTally: () => juiceTally.snapshot(), inpu
   floorDisc, // ST-277 (I294)
   applySettings, liveSettings: () => liveSettings,
   locale: () => getLocale(), setLocale, // ST-375: locale probe + drive (boot applied in applySettings; live via the settings panel)
-  audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, powerupRenders, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, hunterRenders, gunshipRenders, sentryRenders, waspRenders, podRenders, phantomRenders, haulerRenders, bulwarkRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, camMode: () => camMode, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, THREE, scene, // I497: gate RT capture handles (pixel-neutral)
+  audio, markAudioReady, banner, popups, hint, killFeed, tutorial, tutorialActive: () => tutorialActive, dismissTutorial, bloom, reticle, bullets, powerupRenders, shieldRing, rockRenders, mineRenders, droneRenders, stingerRenders, flyerRenders, hunterRenders, gunshipRenders, sentryRenders, waspRenders, podRenders, phantomRenders, haulerRenders, bulwarkRenders, sweeperRenders, beaconRenders, bossMesh, wardenMesh, bossHealth, assetLoader, enemyBulletRenders, stars, vortexFx, skybox, arenaRing, engineTrail, fpsMeter, debugOverlay, adaptive, punch, camera, camLook, camPos, camMode: () => camMode, fovKick, cameraFeel: () => ({ menuOrbitA, bossZoomFov }), toastEl, renderer, THREE, scene, // I497: gate RT capture handles (pixel-neutral)
   backend: rendererBackend, rendererArm, vendorLowpWarns: () => _vendorLowpWarns, render: () => renderer.render(scene, camera), theme: () => _currentTheme, applyTheme, themeDome, warp: () => world.warp, afterburner, zoneTheme }; // ST-434 (I466) B4; ST-486 (I520): zone-palette probe (palette audit) // debug/test handle (expanded in I080; ST-059: vortexFx)
 
 window.addEventListener('pointerdown', markAudioReady, { once: true });
@@ -1040,6 +1048,8 @@ else if (e.type === 'flyerSpawn') toast(tr('toast.flyer')); // ST-232: first spa
     else if (e.type === 'phantomSpawn') toast(tr('toast.phantom')); // ST-484 (E69)
     else if (e.type === 'haulerSpawn') toast(tr('toast.hauler')); // ST-484 (E69)
     else if (e.type === 'bulwarkSpawn') toast(tr('toast.bulwark')); // ST-484 (E69)
+    else if (e.type === 'sweeperSpawn') toast(tr('toast.sweeper')); // ST-518 (E75)
+    else if (e.type === 'beaconSpawn') toast(tr('toast.beacon')); // ST-518 (E75)
     else if (e.type === 'themeSwap') { applyTheme(e.data.theme); banner.showStage(e.data.stage, stageName(e.data.stage, CONFIG)); } // ST-420 (I450): stage tint + STAGE n - name banner (event-driven; null theme = identity)
     else if (e.type === 'zoneEnter') { if (world.mode === 'campaign') zoneTheme.setTarget(zoneThemeFor(e.data.paletteId, CONFIG.levels.palettes), motionOff); } // ST-455 (I488): zone identity crossfade (hazard/enemy mix already ST-453; zone name HUD = ST-457)
     else if (e.type === 'levelIntro') { if (world.mode === 'campaign') storage.setCampaignProgress(e.data.level); } // ST-457 (E64): highest-level continue persistence
@@ -1077,6 +1087,11 @@ else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, 
       else if (e.type === 'bulwarkNegate') particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.max(5, Math.ceil(fxCount * 0.4)), palette: CONFIG.fx.palette.bulwark, speed: 6, life: 0.3 }); // ST-485 (E69): shield-negation sparks (frequent - no shake)
       else if (e.type === 'bulwarkStun') { particles.burst(e.data.pos.x, e.data.pos.y, { count: Math.ceil(fxCount * 1.2), palette: CONFIG.fx.palette.bulwark, speed: 10, life: 0.5, shape: 'ring' }); shockwaves.spawn(e.data.pos.x, e.data.pos.y, { radius: 3.5, color: CONFIG.fx.palette.bulwark[0] }); juiceTally.record('bulwarkStun', { ring: 1 }); } // ST-485 (E69): shield overload (ring, no shake - player reward)
       else if (e.type === 'bulwarkDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount * 2, palette: CONFIG.fx.palette.bulwark, speed: 13, life: 0.75, shape: 'ring' }); shake.trigger(shakeEnergy('bulwarkDeath', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('bulwarkDeath', CONFIG.fx.flashTable)); juiceTally.record('bulwarkDeath', { shake: 1, flash: 1 }); } // ST-485 (E69): enforcer kill (0.8 rung + 0.3 flash)
+      else if (e.type === 'sweeperFire') particles.burst(e.data.pos.x, e.data.pos.y, { count: 4, palette: CONFIG.fx.palette.sweeper, speed: 6, life: 0.2 }); // ST-518 (E75): fan muzzle (arc flare)
+      else if (e.type === 'sweeperDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.sweeper, speed: 10, life: 0.5 }); shake.trigger(shakeEnergy('sweeperDeath', CONFIG.fx.shakeTable)); juiceTally.record('sweeperDeath', { shake: 1 }); } // ST-518 (E75): arc kill (0.45 rung, no flash)
+      else if (e.type === 'beaconCharge') particles.burst(e.data.pos.x, e.data.pos.y, { count: 6, palette: CONFIG.fx.palette.beacon, speed: 3, life: 0.6 }); // ST-518 (E75): charge callout puff (the lamp ramps in the mesh)
+      else if (e.type === 'beaconRelease') particles.burst(e.data.escortPos.x, e.data.escortPos.y, { count: 8, palette: CONFIG.fx.palette.beacon, speed: 7, life: 0.4, shape: 'radial' }); // ST-518 (E75): escort rim ping
+      else if (e.type === 'beaconDeath') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount * 2, palette: CONFIG.fx.palette.beacon, speed: 11, life: 0.7, shape: 'ring' }); shake.trigger(shakeEnergy('beaconDeath', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('beaconDeath', CONFIG.fx.flashTable)); juiceTally.record('beaconDeath', { shake: 1, flash: 1 }); } // ST-518 (E75): signal kill (0.9 rung + 0.4 flash)
 
       else if (e.type === 'bossSpawn') { particles.burst(e.data.pos.x, e.data.pos.y, { count: fxCount, palette: CONFIG.fx.palette.boss, speed: 8, life: 0.7 }); shake.trigger(shakeEnergy('bossSpawn', CONFIG.fx.shakeTable)); flashA = Math.min(0.8, flashA + flashEnergy('bossSpawn', CONFIG.fx.flashTable)); juiceTally.record('bossSpawn', { shake: 1, flash: 1 }); } // ST-055/ST-175
       else if (e.type === 'bossPhase2') { hitStop = Math.max(hitStop, CONFIG.fx.hitStop.bossPhase2); juiceTally.record('bossPhase2', { hitStop: 1 }); } // ST-217: 40 ms hit-stop on enrage entry (hit-stop only - no shake/flash; phase < death in the juice hierarchy)
@@ -1125,6 +1140,8 @@ else if (e.type === 'droneDecay') { particles.burst(e.data.pos.x, e.data.pos.y, 
       else if (e.type === 'phantomDeath') shatter(e.data.pos.x, e.data.pos.y, 'phantom');
       else if (e.type === 'haulerDeath') shatter(e.data.pos.x, e.data.pos.y, 'hauler');
       else if (e.type === 'bulwarkDeath') shatter(e.data.pos.x, e.data.pos.y, 'bulwark');
+      else if (e.type === 'sweeperDeath') shatter(e.data.pos.x, e.data.pos.y, 'sweeper');
+      else if (e.type === 'beaconDeath') shatter(e.data.pos.x, e.data.pos.y, 'beacon');
       else if (e.type === 'wardenDeath') shatter(e.data.pos.x, e.data.pos.y, 'warden');
       else if (e.type === 'bossDeath') shatter(e.data.pos.x, e.data.pos.y, 'boss');
     }
@@ -1274,6 +1291,8 @@ installPrompt.setMenuVisible(st === STATE.MENU); // ST-512 (I546, E74 D4): insta
 phantomRenders.sync(world.phantoms, simT, motionOff); // ST-485 (E69): cloak fade + strike nose ramp (RM-safe state ramps)
 haulerRenders.sync(world.haulers, simT, motionOff); // ST-485 (E69): mine-bay telegraph ramp
 bulwarkRenders.sync(world.bulwarks, simT, motionOff); // ST-485 (E69): shield-core charge ramp + stun dim
+sweeperRenders.sync(world.sweepers, simT, motionOff); // ST-518 (E75): arc cadence pulse + enter materialize (RM-safe state ramps)
+beaconRenders.sync(world.beacons, simT, motionOff); // ST-518 (E75): lamp charge ramp (RM-safe state ramp)
   bossHealth.sync(world.boss); // ST-055
   bossHealthV.sync(world.boss); // ST-456 (E64): campaign vertical bar
   enemyBulletRenders.sync(world.enemyBullets, simT); // ST-056

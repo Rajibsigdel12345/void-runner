@@ -680,6 +680,64 @@ export const CONFIG = {
     maxAge: 60,
   },
 
+  sweeper: {  // ST-518 (E75): SWEEPER - arc triangle (wave 18+). Rim-spawned, homes to a
+    // 12-u hover ring, then sweeps its 120-degree arc at 0.9 rad/s firing a FAN of
+    // 4 bolts every 0.6 s (fanSubArc 0.4, centered on the current facing); 0.7 s
+    // reaim between arcs. 3 hits (+225). No RNG in step().
+    firstWave: 18,
+    perWave: 1,
+    maxConcurrent: 2,
+    palette: {
+      body: { color: 0x434a72 },  // I552 FROZEN WITH MEASUREMENT: rendered mean hue 238.2 (spec 4.1 base 0x2e4a72; tuned R 46 -> 67 across 3 audit passes)  // dark cobalt steel (I552: cobalt-ice, p50 ~82 / hue 240 slot [236.2,243.9])
+      greeble: 0x1c2c44,          // darker deck greebles
+      arc: 0x8fd0ff,              // ice-cobalt emitter glow (the arc IS the attack read)
+    },
+    renderLumaGain: 5.5,          // I552 FROZEN WITH MEASUREMENT (audit .evidence/I552/luma_i552p3.json): sky p50 80.59 hue 238.2 (band 82+-8 / [236.2,243.9]); E57 vs boss dluma 12.19 > 10 (dhue 20.9)
+    radius: 0.9,
+    hp: 3,
+    score: 225,          // kill reward (200 drone < 225 < 250 stinger)
+    speed: 3.2,          // u/s home-in
+    hoverDist: 12,       // u: hover ring around the ship
+    arcSpan: 2.094,      // rad: ~120 deg sweep arc
+    sweepSpeed: 0.9,     // rad/s facing slew
+    cadence: 0.6,        // s: fan cadence
+    fanBolts: 4,         // bolts per fan
+    fanSubArc: 0.4,      // rad: fan spread
+    boltSpeed: 8,        // u/s fan bolts (< 16; <= 1.15x ship 14 = 16.1)
+    enterDur: 0.6,       // s: materialize window
+    reaimDur: 0.7,       // s: no-fire re-acquire
+    rimDist: 15,
+    maxAge: 45,
+  },
+  beacon: {  // ST-518 (E75): BEACON - signal island (wave 19+). Mid-arena spawn
+    // 6-10 u from the ship, stationary: enter (1.0 s) -> idle (0.8 s) -> charge
+    // (1.5 s brightening telegraph - the lamp IS the warning) -> release (2
+    // drones via the drone field; a full drone field drops silently - the
+    // beacon never hard-blocks) -> idle; after 3 releases it is spent.
+    // 8 hits (+750, new top non-boss rung). No RNG in step().
+    firstWave: 19,
+    perWave: 1,
+    maxConcurrent: 1,
+    palette: {
+      body: { color: 0x4a4466 },  // I552 FROZEN WITH MEASUREMENT: rendered mean hue 303.6 (spec 4.1 base 0x4a4452; tuned B 82 -> 102)  // dark gunmetal-plum (I552: orchid-violet, p50 ~45 / hue 300 slot [274.3,315.2])
+      base: 0x332e3a,             // square pedestal
+      lamp: 0xd07aff,             // orchid signal lamp (the only emissive element)
+    },
+    renderLumaGain: 2.5,          // I552 FROZEN WITH MEASUREMENT (audit .evidence/I552/luma_i552p3.json): sky p50 49.2 hue 303.6 (band 45+-8 / [274.3,315.2]); est 2.5 confirmed unchanged (p50 in-band at pass 1)
+    radius: 1.4,
+    hp: 8,
+    score: 750,          // kill reward (600 gunship < 750 < 1000 monolith - new top non-boss rung)
+    speed: 0,            // stationary
+    spawnOffMin: 6,      // u: mid-arena spawn offset from the ship (min)
+    spawnOffMax: 10,     // u (max)
+    idleTime: 0.8,       // s: idle tick
+    chargeTime: 1.5,     // s: brightening telegraph
+    escortCount: 2,      // drones per release
+    releaseCap: 3,       // releases before the beacon is spent
+    enterDur: 1.0,       // s: materialize + callout
+    maxAge: 40,
+  },
+
   flyer: {
     // ST-232: FLYER - evasive sine-weave crosser (wave 9+). The game one pure
     // lead-shot skill target: it never homes, never fires, never rams - you must
@@ -791,6 +849,8 @@ export const CONFIG = {
       phantomDeath: 0.35,  // ST-484 (E69): cloaker kill (0.3 waspDeath < 0.35 < 0.4 mineExplode)
       haulerDeath: 0.7,     // ST-484 (E69): truck kill (0.65 flyerDeath < 0.7 < 0.75 podDeath)
       bulwarkDeath: 0.8,    // ST-484 (E69): enforcer kill (0.75 podDeath < 0.8 < 0.85 gunshipDeath)
+      sweeperDeath: 0.45,   // ST-518 (E75): arc kill (0.4 mineExplode < 0.45 < 0.55 hunterDeath)
+      beaconDeath: 0.9,     // ST-518 (E75): signal kill (0.85 gunshipDeath < 0.9 < 1.0 bossDeath)
       bossSpawn: 0.7,        // boss arrival
       bossDeath: 1.0,        // boss death
       wardenSpawn: 0.5,      // mini-boss arrival
@@ -803,6 +863,7 @@ export const CONFIG = {
       wardenDeath: 0.4,      // mini-boss death
       gunshipDeath: 0.4,    // ST-418: heavy bomber death flash (wardenDeath 0.4)
       podDeath: 0.4,       // ST-448: splitter death flash (wardenDeath 0.4; sentry/wasp deaths: none)
+      beaconDeath: 0.4,     // ST-518 (E75): signal kill flash (wardenDeath/gunshipDeath/podDeath 0.4 rung)
       bomb: 0.35,            // bomb blast
       mineExplode: 0.25,     // mine detonation
       wardenSpawn: 0.25,     // mini-boss arrival
@@ -835,6 +896,8 @@ export const CONFIG = {
       hauler: 0.29,        // ST-484 (E69): truck kill (0.28 sentry < 0.29 < 0.3 gunship)
       bulwark: 0.3,        // ST-484 (E69): enforcer kill (0.29 hauler < 0.3 = the max rung; overdrive -> cap)
       gunship: 0.3,          // ST-418: heavy bomber kill (0.25 flyer < 0.3 = the max rung)
+      sweeper: 0.19,        // ST-518 (E75): arc kill (0.18 l < 0.19 < 0.2 stinger)
+      beacon: 0.3,          // ST-518 (E75): signal kill (0.3 shared max rung)
       overdriveBoost: 0.5,    // combo-heat: x1.5 while overdrive is active
       max: 0.3                // hard cap (L + overdrive 0.27 stays under the fanfare rung)
     },
@@ -858,6 +921,8 @@ export const CONFIG = {
         phantom: 1.5,       // ST-484 (E69): cloaker (radius 0.5)
         hauler: 3.2,        // ST-484 (E69): truck (radius 1.1)
         bulwark: 3.4,       // ST-484 (E69): enforcer (radius 1.2)
+        sweeper: 2.2,       // ST-518 (E75): arc triangle (radius 0.9)
+        beacon: 3.6,        // ST-518 (E75): signal island (radius 1.4)
       }
     },
     punch: {                  // ST-081: camera punch - brief directed jolt (boss death / bomb)
@@ -941,7 +1006,9 @@ export const CONFIG = {
       pod:      [0xa0f0e0, 0x6fd0c0, 0x5f8f86],   // ST-448 teal-green (POD kill - splitter family)
       phantom:  [0xc8ffd8, 0x7dffc8, 0x40c055],  // ST-485 (E69): cloaker-green (PHANTOM kill - cloaker family)
       hauler:   [0xffe0b0, 0xffb45e, 0x975a2d],  // ST-485 (E69): ore-bronze (HAULER kill - truck family)
-      bulwark:  [0xffd0f8, 0xff7de8, 0xaa3c96]   // ST-485 (E69): shield-magenta (BULWARK kill - enforcer family)
+      bulwark:  [0xffd0f8, 0xff7de8, 0xaa3c96],   // ST-485 (E69): shield-magenta (BULWARK kill - enforcer family)
+      sweeper:  [0xe8f4ff, 0x8ec8ff, 0x4a7ac8],  // ST-518 (E75): ice-cobalt (SWEEPER kill - arc family)
+      beacon:   [0xf0d8ff, 0xc07aff, 0x7a3ca8]   // ST-518 (E75): orchid (BEACON kill - signal family)
     },
     enemyBullet: { base: 0x5a1410, emissive: 0xff4a2a, emissiveIntensity: 1.2 }, // ST-248: hot red-orange threat bolt (data-driven; values unchanged)
     // I460/ST-429 A2: shared fresnel silhouette rim on enemy hulls (the I278
@@ -965,7 +1032,9 @@ export const CONFIG = {
         pod:     { color: 0x2a4a45, strength: 0.26 }, // ST-448: dark teal (peak rim luma 17.4)
         phantom: { color: 0x2a5a35, strength: 0.30 }, // ST-485 (E69): dark cloaker-green (peak rim luma 23.1)
         hauler:  { color: 0x5a3a1a, strength: 0.30 }, // ST-485 (E69): dark ore-bronze (peak rim luma 18.8)
-        bulwark: { color: 0x5a2a52, strength: 0.30 }  // ST-485 (E69): dark shield-magenta (peak rim luma 16.5)
+        bulwark: { color: 0x5a2a52, strength: 0.30 },  // ST-485 (E69): dark shield-magenta (peak rim luma 16.5)
+        sweeper: { color: 0x4a86c8, strength: 0.22 },  // ST-518 (E75): dark cobalt (peak rim luma 27.7 <= 29)
+        beacon:  { color: 0x9a5ac8, strength: 0.22 }   // ST-518 (E75): dark orchid (peak rim luma 24.5 <= 29)
       }
     },
     // I460/ST-429 A3: shader-stable ship damage flash - a pre-created unlit
@@ -1147,6 +1216,8 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
       phantom: { count: 5, speed: 7, life: 0.45, scaleMin: 0.35, scaleMax: 0.65 },  // ST-485 (E69): cloaker shards (light)
       hauler: { count: 10, speed: 8, life: 0.70, scaleMin: 0.50, scaleMax: 1.00 },  // ST-485 (E69): truck fragments (heavy)
       bulwark: { count: 12, speed: 9, life: 0.75, scaleMin: 0.60, scaleMax: 1.20 },  // ST-485 (E69): enforcer chaff (heaviest)
+      sweeper: { count: 7, speed: 9, life: 0.55, scaleMin: 0.45, scaleMax: 0.85 },   // ST-518 (E75): arc chaff (wide + flat)
+      beacon:  { count: 12, speed: 8, life: 0.75, scaleMin: 0.55, scaleMax: 1.10 },  // ST-518 (E75): island debris (heavy square)
       boss: { count: 14, speed: 10, life: 0.80, scaleMin: 1.20, scaleMax: 1.80 }
     }
   },
@@ -1209,9 +1280,9 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
       ] },
       { name: 'Zenith Spire', boss: 'archon', zones: [ // ST-517 (E75): final level; 'archon' kind lands D4/ST-519 - until then the monolith tint fallback applies (game.js)
         { name: 'Spire Approach',   length: 100, paletteId: 'zenith-1', hazardProfile: 'moderate', enemyMix: ['phantom', 'drone', 'mine'],            optionalTargets: ['golden'],   checkpointAt: 0 },
-        { name: 'Halo Circuit',     length: 120, paletteId: 'zenith-2', hazardProfile: 'dense',    enemyMix: ['hunter', 'stinger', 'mine'],           optionalTargets: ['shielded'], checkpointAt: 0 },
-        { name: 'Crown Ascent',     length: 130, paletteId: 'zenith-3', hazardProfile: 'gauntlet', enemyMix: ['gunship', 'sentry', 'wasp'],           optionalTargets: ['pod'],      checkpointAt: 0 },
-        { name: 'Archon Threshold', length: 90,  paletteId: 'zenith-4', hazardProfile: 'gauntlet', enemyMix: ['phantom', 'bulwark', 'hunter', 'mine'], optionalTargets: ['rapid', 'shielded'], checkpointAt: 0 }
+        { name: 'Halo Circuit',     length: 120, paletteId: 'zenith-2', hazardProfile: 'dense',    enemyMix: ['hunter', 'stinger', 'sweeper', 'mine'],           optionalTargets: ['shielded'], checkpointAt: 0 },
+        { name: 'Crown Ascent',     length: 130, paletteId: 'zenith-3', hazardProfile: 'gauntlet', enemyMix: ['gunship', 'sentry', 'wasp', 'sweeper'],           optionalTargets: ['pod'],      checkpointAt: 0 },
+        { name: 'Archon Threshold', length: 90,  paletteId: 'zenith-4', hazardProfile: 'gauntlet', enemyMix: ['phantom', 'bulwark', 'hunter', 'mine', 'beacon'], optionalTargets: ['rapid', 'shielded'], checkpointAt: 0 }
       ] },    ],
     palettes: { // zone identity palettes, E57 stage-theme shape {sky, stars, floor, grid, accent}.
       // MODEL ONLY in ST-452 (data): ST-455 consumes these + runs a rendered-luma

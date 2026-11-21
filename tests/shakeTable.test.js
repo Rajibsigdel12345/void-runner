@@ -29,9 +29,11 @@ const PREVIOUS = {
   phantomDeath: 0.35,  // ST-484 (E69): cloaker kill rung (0.3 waspDeath < 0.35 < 0.4 mineExplode)
   haulerDeath: 0.7,     // ST-484 (E69): truck kill rung (0.65 flyerDeath < 0.7 < 0.75 podDeath)
   bulwarkDeath: 0.8,    // ST-484 (E69): enforcer kill rung (0.75 podDeath < 0.8 < 0.85 gunshipDeath)
+  sweeperDeath: 0.45,   // ST-518 (E75): arc kill rung (0.4 mineExplode < 0.45 < 0.55 hunterDeath)
+  beaconDeath: 0.9,     // ST-518 (E75): signal kill rung (0.85 gunshipDeath < 0.9 < 1.0 bossDeath)
 };
 
-test('the table is exactly the nineteen shaking events', () => {
+test('the table is exactly the twenty-one shaking events', () => {
   assert.deepEqual(Object.keys(T).sort(), Object.keys(PREVIOUS).sort());
 });
 

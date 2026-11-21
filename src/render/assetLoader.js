@@ -39,6 +39,8 @@ const ASSETS = {
   phantom: 'assets/enemy_phantom.glb', // ST-485 (E69): arrow hull + 2 canopy pods (I519: render wiring)
   hauler: 'assets/enemy_hauler.glb', // ST-485 (E69): squat armored transport + mine-bay hatch
   bulwark: 'assets/enemy_bulwark.glb', // ST-485 (E69): shield slab + spine + core (I519: render wiring)
+  sweeper: 'assets/enemy_sweeper.glb', // ST-518 (E75): arc triangle (I552: procedural until the GLB lands)
+  beacon: 'assets/enemy_beacon.glb', // ST-518 (E75): signal island (I552: procedural until the GLB lands)
 };
 
 // ST-327 (I358): the one PNG texture asset (Blender floor surface, 8,586 B,

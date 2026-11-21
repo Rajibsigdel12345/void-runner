@@ -15,6 +15,8 @@ import { PodField } from './pod.js'; // ST-448
 import { PhantomField } from './phantom.js'; // ST-484 (E69)
 import { HaulerField } from './hauler.js'; // ST-484 (E69)
 import { BulwarkField } from './bulwark.js'; // ST-484 (E69)
+import { SweeperField } from './sweeper.js'; // ST-518 (E75)
+import { BeaconField } from './beacon.js'; // ST-518 (E75)
 import { Monolith, bossHpForWave, bossBurstVectors } from './boss.js';
 import { Splicer, splicerHpForWave } from './splicer.js';
 import { CampaignBoss } from './campaignBoss.js'; // ST-456 (E64): the campaign end-of-level boss
@@ -53,6 +55,8 @@ this.pods = new PodField(rng, cfg); // ST-448
 this.phantoms = new PhantomField(rng, cfg); // ST-484 (E69)
 this.haulers = new HaulerField(rng, cfg); // ST-484 (E69)
 this.bulwarks = new BulwarkField(rng, cfg); // ST-484 (E69)
+this.sweepers = new SweeperField(rng, cfg); // ST-518 (E75)
+this.beacons = new BeaconField(rng, cfg); // ST-518 (E75)
     this.boss = null; // ST-055
     this.bossRelease = 0; // ST-241: 1 -> 0 over music.intensity.releaseTime after a boss death
     this.enemyBullets = new EnemyBulletField(cfg); // ST-056
@@ -266,6 +270,8 @@ this.spawnPodForWave(wv.startedWave); // ST-448
 this.spawnPhantomForWave(wv.startedWave); // ST-484 (E69)
 this.spawnHaulerForWave(wv.startedWave); // ST-484 (E69)
 this.spawnBulwarkForWave(wv.startedWave); // ST-484 (E69)
+this.spawnSweeperForWave(wv.startedWave); // ST-518 (E75)
+this.spawnBeaconForWave(wv.startedWave); // ST-518 (E75)
       this.scoreKeeper.setCap(capFor(wv.startedWave, this.cfg)); // ST-233: combo cap wave-scaling (W1-2 capLow / W3+ capHigh)
     }
     const wl = this.weaponLevel(); // ST-122: weapon progression by wave
@@ -283,6 +289,8 @@ this.pods.step(edt); // ST-448 (drift only; no shipPos; ST-115: scaled under slo
 this.phantoms.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
 this.haulers.step(edt); // ST-484 (E69; closed-form plod; no shipPos, no RNG)
 this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
+this.sweepers.step(edt, this.ship.pos); // ST-518 (E75; no RNG in step)
+this.beacons.step(edt, this.ship.pos); // ST-518 (E75; no RNG in step)
     if (this.warden) this.warden.step(edt, this.ship.pos); // ST-136 (ST-115: scaled under slow-mo)
     for (const dc of this.drones.decayed) { // I129: seeker battery expired -> self-destruct event (render FX in main.js)
       this.emit('droneDecay', { pos: { x: dc.pos.x, y: dc.pos.y } });
@@ -347,6 +355,23 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
       } else if (be.kind === 'charge') this.emit('bulwarkCharge', { pos: p });
       else this.emit('bulwarkDeath', { pos: p, self: be.self });
     }
+    for (const sw of this.sweepers.drainEvents()) { // ST-518 (E75): fire / death(self-expiry)
+      const p = { x: sw.pos.x, y: sw.pos.y };
+      if (sw.kind === 'fire') {
+        const b = this.enemyBullets.fire(sw.pos, sw.dir, this.cfg.sweeper.boltSpeed);
+        if (b) this.emit('sweeperFire', { pos: p });
+      } else this.emit('sweeperDeath', { pos: p, self: sw.self });
+    }
+    for (const bc of this.beacons.drainEvents()) { // ST-518 (E75): charge / release / death(self-expiry)
+      const p = { x: bc.pos.x, y: bc.pos.y };
+      if (bc.kind === 'release') {
+        for (let i = 0; i < this.cfg.beacon.escortCount; i++) {
+          const e = this.drones.spawn(this.ship.pos);
+          if (e) this.emit('beaconRelease', { beaconPos: p, escortPos: { x: e.pos.x, y: e.pos.y } });
+        }
+      } else if (bc.kind === 'charge') this.emit('beaconCharge', { pos: p });
+      else this.emit('beaconDeath', { pos: p, self: bc.self });
+    }
 
     for (const f of this.mines.takeFires()) { // ST-056
       const b = this.fireAimedBolt(f, this.cfg.enemyBullets.mineSpeed);
@@ -407,12 +432,16 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     this.resolveBulletPhantoms(); // ST-484 (E69)
     this.resolveBulletHaulers(); // ST-484 (E69)
     this.resolveBulletBulwarks(); // ST-484 (E69)
+    this.resolveBulletSweepers(); // ST-518 (E75)
+    this.resolveBulletBeacons(); // ST-518 (E75)
     this.resolveShipSentries(); // ST-448
     this.resolveShipWasps(); // ST-448
     this.resolveShipPods(); // ST-448
     this.resolveShipPhantoms(); // ST-484 (E69)
     this.resolveShipHaulers(); // ST-484 (E69)
     this.resolveShipBulwarks(); // ST-484 (E69)
+    this.resolveShipSweepers(); // ST-518 (E75)
+    this.resolveShipBeacons(); // ST-518 (E75)
     this.resolveShipBoss(); // ST-055
     this.resolveShipWarden(); // ST-136
     this.resolveShipEnemyBullets(); // ST-056
@@ -850,6 +879,8 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     this.phantoms.clear(); // ST-484 (E69)
     this.haulers.clear(); // ST-484 (E69)
     this.bulwarks.clear(); // ST-484 (E69)
+    this.sweepers.clear(); // ST-518 (E75)
+    this.beacons.clear(); // ST-518 (E75)
     this.enemyBullets.clear();
     this.boss = null;
     this.warden = null;
@@ -1368,6 +1399,38 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     }
   }
 
+  /** ST-518 (E75): spawn the wave's sweepers once eligible (wave >= 18, never
+   * boss waves). The first spawn of a run emits 'sweeperSpawn'. */
+  spawnSweeperForWave(wave) {
+    const s = this.cfg.sweeper;
+    if (wave < s.firstWave || wave % this.cfg.boss.everyWave === 0) return;
+    if (!this._zoneAllows("sweeper")) return; // ST-453 (E64): zone mix gate
+    const n = Math.max(0, Math.round(s.perWave * this._hazardRate("enemyRate"))); // ST-453 (E64)
+    for (let i = 0; i < n; i++) {
+      const q = this.sweepers.spawn(this.ship.pos);
+      if (q && !this._sweeperToasted) {
+        this._sweeperToasted = true;
+        this.emit('sweeperSpawn', { pos: { x: q.pos.x, y: q.pos.y }, wave });
+      }
+    }
+  }
+
+  /** ST-518 (E75): spawn the wave's beacon once eligible (wave >= 19, never
+   * boss waves). The first spawn of a run emits 'beaconSpawn'. */
+  spawnBeaconForWave(wave) {
+    const s = this.cfg.beacon;
+    if (wave < s.firstWave || wave % this.cfg.boss.everyWave === 0) return;
+    if (!this._zoneAllows("beacon")) return; // ST-453 (E64): zone mix gate
+    const n = Math.max(0, Math.round(s.perWave * this._hazardRate("enemyRate"))); // ST-453 (E64)
+    for (let i = 0; i < n; i++) {
+      const q = this.beacons.spawn(this.ship.pos);
+      if (q && !this._beaconToasted) {
+        this._beaconToasted = true;
+        this.emit('beaconSpawn', { pos: { x: q.pos.x, y: q.pos.y }, wave });
+      }
+    }
+  }
+
   /** ST-448: bullets damage sentries (3 hits). The kill pays +350 and feeds the combo. */
   resolveBulletSentries() {
     for (const b of this.weapons.bullets) {
@@ -1512,6 +1575,56 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     this.weapons.compact();
   }
 
+  /** ST-518 (E75): bullets damage sweepers (3 hits). The kill pays +225 and
+   * feeds the combo. */
+  resolveBulletSweepers() {
+    const s = this.cfg.sweeper;
+    for (const b of this.weapons.bullets) {
+      if (b.dead) continue;
+      const hit = this.sweepers.sweepers.find(pm => !pm.dead &&
+        Math.hypot(pm.pos.x - b.pos.x, pm.pos.y - b.pos.y) < pm.radius + b.radius);
+      if (!hit) continue;
+      this.onPlayerBulletHit(b.id);
+      const q = this.sweepers.hit(hit.id);
+      for (const be of this.sweepers.drainEvents()) {
+        const p = { x: be.pos.x, y: be.pos.y };
+        if (be.kind === 'hit') this.emit('sweeperHit', { pos: p });
+      }
+      if (q.dead) {
+        const points = this.scoreKeeper.kill(s.score, this.time);
+        this.emit('kill', { pos: { x: q.pos.x, y: q.pos.y }, size: 'sweeper', points,
+          combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), sweeper: true });
+        this.emit('sweeperDeath', { pos: { x: q.pos.x, y: q.pos.y }, self: false });
+      }
+    }
+    this.weapons.compact();
+  }
+
+  /** ST-518 (E75): bullets damage beacons (8 hits). The kill pays +750 and
+   * feeds the combo. */
+  resolveBulletBeacons() {
+    const s = this.cfg.beacon;
+    for (const b of this.weapons.bullets) {
+      if (b.dead) continue;
+      const hit = this.beacons.beacons.find(pm => !pm.dead &&
+        Math.hypot(pm.pos.x - b.pos.x, pm.pos.y - b.pos.y) < pm.radius + b.radius);
+      if (!hit) continue;
+      this.onPlayerBulletHit(b.id);
+      const q = this.beacons.hit(hit.id);
+      for (const be of this.beacons.drainEvents()) {
+        const p = { x: be.pos.x, y: be.pos.y };
+        if (be.kind === 'hit') this.emit('beaconHit', { pos: p });
+      }
+      if (q.dead) {
+        const points = this.scoreKeeper.kill(s.score, this.time);
+        this.emit('kill', { pos: { x: q.pos.x, y: q.pos.y }, size: 'beacon', points,
+          combo: this.scoreKeeper.combo, multiplier: this.scoreKeeper.multiplier, overdrive: this.powerups.active('overdrive'), beacon: true });
+        this.emit('beaconDeath', { pos: { x: q.pos.x, y: q.pos.y }, self: false });
+      }
+    }
+    this.weapons.compact();
+  }
+
   /** ST-448: a sentry touching the ship costs a life (NO score) and is lost. */
   resolveShipSentries() {
     if (this.ship.isInvulnerable || this.lives <= 0) return;
@@ -1609,6 +1722,40 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
   }
 
+  /** ST-518 (E75): a sweeper touching the ship costs a life (NO score) and
+   * is lost. */
+  resolveShipSweepers() {
+    if (this.ship.isInvulnerable || this.lives <= 0) return;
+    const hit = this.sweepers.sweepers.find(pm => !pm.dead &&
+      Math.hypot(pm.pos.x - this.ship.pos.x, pm.pos.y - this.ship.pos.y) < pm.radius + this.cfg.ship.radius);
+    if (!hit) return;
+    this.sweepers.destroy(hit.id);
+    this.emit('sweeperDeath', { pos: { x: hit.pos.x, y: hit.pos.y }, self: false });
+    const livesLeft = this.shipDamage();
+    this.scoreKeeper.onDamage();
+    const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft, source: 'sweeper' });
+    this.ship.damage(v2(nx / n, ny / n));
+    if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
+  }
+
+  /** ST-518 (E75): a beacon touching the ship costs a life (NO score) and
+   * is lost. */
+  resolveShipBeacons() {
+    if (this.ship.isInvulnerable || this.lives <= 0) return;
+    const hit = this.beacons.beacons.find(pm => !pm.dead &&
+      Math.hypot(pm.pos.x - this.ship.pos.x, pm.pos.y - this.ship.pos.y) < pm.radius + this.cfg.ship.radius);
+    if (!hit) return;
+    this.beacons.destroy(hit.id);
+    this.emit('beaconDeath', { pos: { x: hit.pos.x, y: hit.pos.y }, self: false });
+    const livesLeft = this.shipDamage();
+    this.scoreKeeper.onDamage();
+    const nx = this.ship.pos.x - hit.pos.x, ny = this.ship.pos.y - hit.pos.y, n = Math.hypot(nx, ny) || 1;
+    this.emit('hit', { pos: { x: this.ship.pos.x, y: this.ship.pos.y }, knock: { x: nx / n, y: ny / n }, lives: livesLeft, source: 'beacon' });
+    this.ship.damage(v2(nx / n, ny / n));
+    if (livesLeft <= 0) this._onLivesZero(); // ST-453 (E64)
+  }
+
   reset() {
     this.warp = null; this.victory = false; this.currentStage = 1; // ST-419: reset campaign state (mode persists via begin)
     this.levelState = { level: 1, distance: 0, zone: 1, phase: 'zone' }; this._levelStartScore = 0; this._lastZone = 0; // ST-453 (E64)
@@ -1631,12 +1778,16 @@ this.bulwarks.step(edt, this.ship.pos); // ST-484 (E69; no RNG in step)
     this.phantoms.clear(); // ST-484 (E69)
     this.haulers.clear(); // ST-484 (E69)
     this.bulwarks.clear(); // ST-484 (E69)
+    this.sweepers.clear(); // ST-518 (E75)
+    this.beacons.clear(); // ST-518 (E75)
     this._sentryToasted = false; // ST-448
     this._waspToasted = false; // ST-448
     this._podToasted = false; // ST-448
     this._phantomToasted = false; // ST-484 (E69)
     this._haulerToasted = false; // ST-484 (E69)
     this._bulwarkToasted = false; // ST-484 (E69)
+    this._sweeperToasted = false; // ST-518 (E75)
+    this._beaconToasted = false; // ST-518 (E75)
     this.boss = null; // ST-055
     this.bossRelease = 0; // ST-241
     this.warden = null; // ST-136

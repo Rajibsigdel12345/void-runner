@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief); ship 300 -> 850 at I429 (ST-399 remaster, 818-tri fighter; design/asset-spec-ship-remaster.md)).
-const BUDGETS = { ship: 32499, L: 3200, M: 950, S: 380, comet: 650, boss: 1500, shield: 120, emblem: 60, drone: 1800, arenaRing: 120, warden: 1800, chunk: 60, sliver: 50, hunter: 3366, gunship: 2906, sentry: 2934, wasp: 4020, phantom: 3048, bulwark: 3160, hauler: 3920 }; // I541 (ST-507 E73 ship v7) ship 25563 -> 32499 (measured 32,499 t / 740,012 B; span 4.021 / len 2.600 unchanged, MAX_FILE_BYTES 1,048,576 holds) // + I482 (ST-449 sentry/wasp caps 1800/1200; actual 1096/792) + I501 (ST-467 ship v6 real-airship remaster 19000 -> 25563, measured 25,563 t / 581,440 B; pinned tight to measurement - the asset landed 9,137 t under the 34,700 aim so the pre-registered 38,500 was not needed; future growth requires an explicit re-pin) // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276) + I456 (ST-426 rock L/M/S v11 density remaster 2100/520/140 -> 3200/950/380, actual 3000/900/350; boss 750 -> 1500, actual 1425) + I508 (ST-474 E68 legacy-4 remaster) drone/warden caps 100/200 -> 1800/1800 (spec aim 1400) + I509 (ST-475 E68 remaster-4 re-pin WITH measurement) hunter/gunship/sentry/wasp 3366/2596/2934/4020 (wasp 1200 -> 4020: wing-mirror rebuild, double blade 2400 t) + I516 (ST-482 E69 phantom/bulwark 2336/2700, pinned tight to measurement) + I517 (ST-483 E69 hauler 3506, pinned tight to measurement)
+const BUDGETS = { ship: 32499, L: 3200, M: 950, S: 380, comet: 650, boss: 1500, shield: 120, emblem: 60, drone: 1800, arenaRing: 120, warden: 1800, chunk: 60, sliver: 50, hunter: 3366, gunship: 2906, sentry: 2934, wasp: 4020, phantom: 3048, bulwark: 3160, hauler: 3920, sweeper: 3006, beacon: 3144 }; // I552 (ST-518 E75 D3): +sweeper 3006 t (hull 2234 + arc 424 + greeble 348) +beacon 3144 t (base 1564 + tower 1204 + lamp 376), pinned tight to measurement (I552 art phase, measure552.mjs) // I541 (ST-507 E73 ship v7) ship 25563 -> 32499 (measured 32,499 t / 740,012 B; span 4.021 / len 2.600 unchanged, MAX_FILE_BYTES 1,048,576 holds) // + I482 (ST-449 sentry/wasp caps 1800/1200; actual 1096/792) + I501 (ST-467 ship v6 real-airship remaster 19000 -> 25563, measured 25,563 t / 581,440 B; pinned tight to measurement - the asset landed 9,137 t under the 34,700 aim so the pre-registered 38,500 was not needed; future growth requires an explicit re-pin) // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276) + I456 (ST-426 rock L/M/S v11 density remaster 2100/520/140 -> 3200/950/380, actual 3000/900/350; boss 750 -> 1500, actual 1425) + I508 (ST-474 E68 legacy-4 remaster) drone/warden caps 100/200 -> 1800/1800 (spec aim 1400) + I509 (ST-475 E68 remaster-4 re-pin WITH measurement) hunter/gunship/sentry/wasp 3366/2596/2934/4020 (wasp 1200 -> 4020: wing-mirror rebuild, double blade 2400 t) + I516 (ST-482 E69 phantom/bulwark 2336/2700, pinned tight to measurement) + I517 (ST-483 E69 hauler 3506, pinned tight to measurement)
 const MAX_FILE_BYTES = 1048576; // I501 (ST-467 ship v6) EXPLICIT re-pin: 393216 -> 1048576 (ship v6 581,440 B; spec s5 pre-registered 1,048,576; max non-ship stays boss 75.26 KB) // I440 (ST-410 ship remaster v3) EXPLICIT re-pin: 262144 -> 393216 (ship 190,544 B/3254t -> 270,556 B/12400t; I435 was 100*1024 -> 262144 for v2; max non-ship stays boss 75.26 KB)
 
 function parseGlb(file) {
@@ -721,6 +721,12 @@ const ENEMY451_FACET = {
               VR_SponsonR: { p10: 0.3400, p50: 0.5029, p90: 0.5500 },
               VR_Hatch:    { p10: 0.9000, p50: 0.9000, p90: 0.9000 },
               VR_Stack:    { p10: 0.3333, p50: 0.4000, p90: 0.5000 } }, // I534 (ST-500 E72) pins WITH measurement (probe534.mjs; boxy mine-hauler truck v2 ridge remaster)
+  sweeper: { VR_Sweeper_Hull:    { p10: 0.3000, p50: 0.5500, p90: 0.6600 },
+              VR_Sweeper_Arc:     { p10: 0.9000, p50: 0.9000, p90: 0.9000 },
+              VR_Sweeper_Greeble: { p10: 0.3427, p50: 0.3738, p90: 0.4055 } }, // I552 (ST-518 E75 D3) pins WITH measurement (measure552.mjs; wide flat delta + emitter arc + deck greeble)
+  beacon:  { VR_Beacon_Base:  { p10: 0.3400, p50: 0.3680, p90: 0.5200 },
+              VR_Beacon_Tower: { p10: 0.4663, p50: 0.5000, p90: 0.7000 },
+              VR_Beacon_Lamp:  { p10: 0.9500, p50: 0.9500, p90: 0.9500 } }, // I552 (ST-518 E75 D3) pins WITH measurement (measure552.mjs; signal island base + tower + lamp)
 };
 
 function primExtents({ buf, json, binOff }, meshName) {
@@ -951,6 +957,50 @@ test('enemy_hauler.glb: I534 (ST-500 E72) boxy mine-hauler truck v2 - nodes, per
   assert.ok(Math.abs(st.x - 0.2730) / 0.2730 <= 0.1, 'stack X ' + st.x.toFixed(4) + ' ~ 0.2730 (I534)');
   assert.ok(Math.abs(st.y - 0.4420) / 0.4420 <= 0.1, 'stack Y ' + st.y.toFixed(4) + ' ~ 0.4420 (I534)');
   assert.ok(Math.abs(st.z - 0.3600) / 0.3600 <= 0.1, 'stack Z ' + st.z.toFixed(4) + ' ~ 0.3600 (I534)');
+});
+test('enemy_sweeper.glb: I552 (ST-518 E75 D3) wide flat delta sweeper - nodes, per-node tris, extents, arc mirror guard, all-prim COLOR_0', () => {
+  const { buf, json, binOff } = remaster4Bake('enemy_sweeper.glb', 'sweeper');
+  assert.ok(buf.length <= 201 * 1024, 'sweeper under 201 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I552 205,316 B)');
+  const s = meshStats({ buf, json, binOff });
+  for (const n of ['VR_Sweeper_Hull', 'VR_Sweeper_Arc', 'VR_Sweeper_Greeble']) assert.ok(s.nodeNames.includes(n), n + ' node');
+  assert.equal(s.nodeNames.length, 3, 'flat node set (no root nodes)');
+  for (const mat of ['VR_Sweeper_HullMat', 'VR_Sweeper_ArcMat', 'VR_Sweeper_GreebleMat']) assert.ok(s.matNames.includes(mat), mat + ' material');
+  assert.equal(s.totalTris, BUDGETS.sweeper, 'sweeper total tris == ' + BUDGETS.sweeper + ' (I552 re-pin WITH measurement)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Sweeper_Hull').tris, 2234, 'hull 2234 tris (I552 exact)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Sweeper_Arc').tris, 424, 'arc 424 tris (I552 exact)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Sweeper_Greeble').tris, 348, 'greeble 348 tris (I552 exact)');
+  // Per-node extents: I552 TRUE-AXIS measurements (measure552.mjs; 10% band).
+  const he = primExtents({ buf, json, binOff }, 'VR_Sweeper_Hull');
+  assert.ok(Math.abs(he.x - 2.6926) / 2.6926 <= 0.1, 'hull X ' + he.x.toFixed(4) + ' ~ 2.6926 (I552)');
+  assert.ok(Math.abs(he.y - 0.4676) / 0.4676 <= 0.1, 'hull Y ' + he.y.toFixed(4) + ' ~ 0.4676 (I552)');
+  assert.ok(Math.abs(he.z - 2.5325) / 2.5325 <= 0.1, 'hull Z ' + he.z.toFixed(4) + ' ~ 2.5325 (I552)');
+  const ae = primExtents({ buf, json, binOff }, 'VR_Sweeper_Arc');
+  assert.ok(Math.abs(ae.z - 2.4942) / 2.4942 <= 0.1, 'arc Z ' + ae.z.toFixed(4) + ' ~ 2.4942 (I552 sweep span)');
+  assert.ok(Math.abs(ae.cz) <= 0.05, 'arc mirror-symmetric about the hull axis (cz ' + ae.cz.toFixed(4) + '; I552 mirror guard, measured 0.0000)');
+  const ge = primExtents({ buf, json, binOff }, 'VR_Sweeper_Greeble');
+  assert.ok(Math.abs(ge.cz) <= 0.05, 'greeble centered on the hull axis (cz ' + ge.cz.toFixed(4) + '; I552)');
+});
+test('enemy_beacon.glb: I552 (ST-518 E75 D3) signal island beacon - nodes, per-node tris, extents, all-prim COLOR_0', () => {
+  const { buf, json, binOff } = remaster4Bake('enemy_beacon.glb', 'beacon');
+  assert.ok(buf.length <= 204 * 1024, 'beacon under 204 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I552 208,100 B)');
+  const s = meshStats({ buf, json, binOff });
+  for (const n of ['VR_Beacon_Base', 'VR_Beacon_Tower', 'VR_Beacon_Lamp']) assert.ok(s.nodeNames.includes(n), n + ' node');
+  assert.equal(s.nodeNames.length, 3, 'flat node set (no root nodes)');
+  for (const mat of ['VR_Beacon_BaseMat', 'VR_Beacon_TowerMat', 'VR_Beacon_LampMat']) assert.ok(s.matNames.includes(mat), mat + ' material');
+  assert.equal(s.totalTris, BUDGETS.beacon, 'beacon total tris == ' + BUDGETS.beacon + ' (I552 re-pin WITH measurement)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Beacon_Base').tris, 1564, 'base 1564 tris (I552 exact)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Beacon_Tower').tris, 1204, 'tower 1204 tris (I552 exact)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Beacon_Lamp').tris, 376, 'lamp 376 tris (I552 exact)');
+  // Per-node extents: I552 TRUE-AXIS measurements (measure552.mjs; 10% band).
+  const be = primExtents({ buf, json, binOff }, 'VR_Beacon_Base');
+  assert.ok(Math.abs(be.x - 3.3400) / 3.3400 <= 0.1, 'base X ' + be.x.toFixed(4) + ' ~ 3.3400 (I552)');
+  assert.ok(Math.abs(be.y - 0.9000) / 0.9000 <= 0.1, 'base Y ' + be.y.toFixed(4) + ' ~ 0.9000 (I552)');
+  assert.ok(Math.abs(be.z - 3.3800) / 3.3800 <= 0.1, 'base Z ' + be.z.toFixed(4) + ' ~ 3.3800 (I552)');
+  const te = primExtents({ buf, json, binOff }, 'VR_Beacon_Tower');
+  assert.ok(Math.abs(te.y - 1.9450) / 1.9450 <= 0.1, 'tower Y ' + te.y.toFixed(4) + ' ~ 1.9450 (I552)');
+  const le = primExtents({ buf, json, binOff }, 'VR_Beacon_Lamp');
+  assert.ok(Math.abs(le.y - 0.7750) / 0.7750 <= 0.1, 'lamp Y ' + le.y.toFixed(4) + ' ~ 0.7750 (I552)');
+  assert.ok(Math.abs(be.cx) <= 0.05 && Math.abs(be.cz) <= 0.05 && Math.abs(te.cx) <= 0.05 && Math.abs(le.cx) <= 0.05, 'beacon centered on the origin (I552 stationary island)');
 });
 // I212: arena boundary ring (ST-212, cgs-dev-story). I254/ST-245 v2: two-node GLB
 // (VR_ArenaRing band + VR_ArenaRing_Ticks neon accent). The v1 exact-48-tris pin is
