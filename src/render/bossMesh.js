@@ -137,6 +137,9 @@ export function createBossMesh(scene) {
   const core = new THREE.Mesh(bakeCoreGeometry(), coreMat);
   group.add(core);
   const FLASH_WHITE = new THREE.Color(1, 1, 1); // ST-385/E51: hit-flash lerp target (white, not a hue)
+  let monolithGeo = null; // ST-519 (E75): monolith geometry stash (setBossGeometry('monolith') restore; set when the boss GLB lands)
+  let archonGeo = null; // ST-519 (E75): archon GLB geometry stash (VR_Archon_Hull/Crown/Core)
+  let _archonBodyEmissive = null; // ST-519 (E75): archon body x renderLumaGain (HDR emissive, no per-frame alloc)
 
   // ST-290 (I311): attack telegraph - anticipation reads for the boss volleys (sweep ground
   // truth: anticipation IS the player s reaction window). Two scene-level rings (shared unit
@@ -224,6 +227,7 @@ export function createBossMesh(scene) {
     const isSplicer = boss.kind === 'splicer'; // ST-143: variant 2 - teal identity
     const isPrime = boss.prime === true; // ST-420: Monolith Prime (kind stays 'monolith'; gold identity)
     const isAbyssal = boss.abyssal === true; // ST-486 (E69): Necro Reef final boss (kind stays 'monolith')
+    const isArchon = boss.archon === true; // ST-519 (E75): Zenith Spire final boss (kind stays 'monolith')
     const r = isSplicer ? CONFIG.splicer.radius : CONFIG.boss.radius;
     const sizeScale = r / CONFIG.boss.radius; // geometry is baked at the Monolith radius
     group.position.set(boss.pos.x, r * 1.3 + 0.3, boss.pos.y);
@@ -232,10 +236,9 @@ export function createBossMesh(scene) {
     const bodyPulse = isSplicer
       ? 0.30 + 0.30 * (0.5 + 0.5 * Math.sin(t * 4.2))
       : phase2 ? 0.30 + 0.20 * (0.5 + 0.5 * Math.sin(t * 5.6)) : 0.18 + 0.18 * (0.5 + 0.5 * Math.sin(t * 2.4));
-    const bodyHex = isAbyssal ? CONFIG.campaignBoss.abyssal.body : isPrime ? 0xd9a441 : isSplicer ? 0x2dd4bf : phase2 ? 0xb44dff : 0x7a4dff; // ST-486: abyssal necro-magenta; ST-420: prime gold; ST-143: teal vs Monolith purple
-    hullMat.emissive.setHex(bodyHex);
+    const bodyHex = isArchon ? CONFIG.campaignBoss.archon.body : isAbyssal ? CONFIG.campaignBoss.abyssal.body : isPrime ? 0xd9a441 : isSplicer ? 0x2dd4bf : phase2 ? 0xb44dff : 0x7a4dff; // ST-519 (E75): archon body; ST-486: abyssal necro-magenta; ST-420: prime gold; ST-143: teal vs Monolith purple
+    if (isArchon && _archonBodyEmissive) { hullMat.emissive.copy(_archonBodyEmissive); crownMat.emissive.copy(_archonBodyEmissive); } else { hullMat.emissive.setHex(bodyHex); crownMat.emissive.setHex(bodyHex); } // ST-519 (E75): archon body = body x renderLumaGain (HDR emissive, no per-frame alloc)
     hullMat.emissiveIntensity = bodyPulse;
-    crownMat.emissive.setHex(bodyHex);
     crownMat.emissiveIntensity = bodyPulse * 0.9; // the cap carries a touch less
     const k = boss.hitFlash || 0; // ST-385/E51: white hit-flash (sim scalar; 0 at rest)
     if (k > 0) {
@@ -245,12 +248,12 @@ export function createBossMesh(scene) {
       crownMat.emissive.lerp(FLASH_WHITE, k);
       crownMat.emissiveIntensity += sfx * k;
     }
-    coreMat.emissive.setHex(isAbyssal ? CONFIG.campaignBoss.abyssal.core : isPrime ? (phase2 ? 0xffe9a8 : 0xffc94d) : isSplicer ? (phase2 ? 0x7dffea : 0x19e8cf) : (phase2 ? 0xff4d6d : 0x9a6bff)); // ST-486: abyssal core
+    coreMat.emissive.setHex(isArchon ? CONFIG.campaignBoss.archon.core : isAbyssal ? CONFIG.campaignBoss.abyssal.core : isPrime ? (phase2 ? 0xffe9a8 : 0xffc94d) : isSplicer ? (phase2 ? 0x7dffea : 0x19e8cf) : (phase2 ? 0xff4d6d : 0x9a6bff)); // ST-519 (E75): archon core; ST-486: abyssal core
     coreMat.emissiveIntensity = phase2
       ? 1.7 + 0.8 * (0.5 + 0.5 * Math.sin(t * 7.2)) // phase 2: the seam blazes (bloom-threshold cross)
       : 0.85 + 0.45 * (0.5 + 0.5 * Math.sin(t * (isSplicer ? 4.2 : 2.4)));
     // ST-252: rim follows the variant identity (Monolith purple / Splicer teal) with a phase-2 lift.
-    const rimHex = isAbyssal ? CONFIG.campaignBoss.abyssal.rim : isPrime ? CONFIG.stages.monolithPrime.rim : isSplicer ? CONFIG.boss.rim.splicerColor : CONFIG.boss.rim.color; // ST-420: prime gold rim; ST-486: abyssal rim
+    const rimHex = isArchon ? CONFIG.campaignBoss.archon.rim : isAbyssal ? CONFIG.campaignBoss.abyssal.rim : isPrime ? CONFIG.stages.monolithPrime.rim : isSplicer ? CONFIG.boss.rim.splicerColor : CONFIG.boss.rim.color; // ST-519 (E75): archon rim; ST-420: prime gold rim; ST-486: abyssal rim
     const rimLift = phase2 ? CONFIG.boss.rim.phase2Lift : 1;
     rimHull.color.setHex(rimHex);
     rimCrown.color.setHex(rimHex);
@@ -332,9 +335,33 @@ export function createBossMesh(scene) {
       }
       m.geometry = g;
     }
+    monolithGeo = { hull: hullG, crown: crownG, core: coreG }; // ST-519 (E75): stash for setBossGeometry('monolith') restore
   }
 
-  return { sync, mesh: group, useGLB, telestate: () => ({ // ST-290: probe (on-demand alloc, __vr precedent)
+  function useArchonGLB(obj) { // ST-519 (E75): stash VR_Archon_Hull/Crown/Core via name lookup; COLOR_0-safe like useGLB
+    if (!obj) return;
+    const g = { hull: null, crown: null, core: null };
+    obj.traverse((n) => { if (!n.isMesh) return; const nm = n.name || '';
+      if (!g.hull && nm.indexOf('Archon_Hull') >= 0) g.hull = n.geometry;
+      else if (!g.crown && nm.indexOf('Archon_Crown') >= 0) g.crown = n.geometry;
+      else if (!g.core && nm.indexOf('Archon_Core') >= 0) g.core = n.geometry; });
+    for (const k of ['hull', 'crown', 'core']) { const ge = g[k];
+      if (ge && !ge.hasAttribute('color')) { const col = new Float32Array(ge.attributes.position.count * 3).fill(1); ge.setAttribute('color', new THREE.BufferAttribute(col, 3)); } }
+    archonGeo = g;
+  }
+  function setBossGeometry(variant) { // ST-519 (E75): 'archon' | 'monolith'; swaps geoms AND applies the base palette
+    // (the luma audit freezes rAF so sync() never runs). Missing archon GLB keeps monolith geometry (E57 rule-10 fallback).
+    const target = (variant === 'archon') ? archonGeo : monolithGeo;
+    if (target) { for (const [m, k] of [[hull, 'hull'], [crown, 'crown'], [core, 'core']]) if (target[k]) m.geometry = target[k]; }
+    if (variant === 'archon') { const ac = CONFIG.campaignBoss.archon; const gain = (ac.renderLumaGain != null) ? ac.renderLumaGain : 1;
+      _archonBodyEmissive = new THREE.Color(ac.body).multiplyScalar(gain);
+      hullMat.emissive.copy(_archonBodyEmissive); crownMat.emissive.copy(_archonBodyEmissive);
+      coreMat.emissive.setHex(ac.core); rimHull.color.setHex(ac.rim); rimCrown.color.setHex(ac.rim);
+    } else { hullMat.emissive.setHex(0x7a4dff); crownMat.emissive.setHex(0x7a4dff); coreMat.emissive.setHex(0x9a6bff);
+      rimHull.color.setHex(CONFIG.boss.rim.color); rimCrown.color.setHex(CONFIG.boss.rim.color); }
+  }
+
+  return { sync, mesh: group, useGLB, useArchonGLB, setBossGeometry, telestate: () => ({ // ST-290: probe (on-demand alloc, __vr precedent); ST-519 (E75): +archon remesh API
     ringV: ringWarn.mesh.visible, ringS: ringWarn.mesh.scale.x, ringO: teleMat0.opacity, coreI: coreMat.emissiveIntensity, coreHex: coreMat.emissive.getHexString(),
     flashV: ringFlash.mesh.visible, flashS: ringFlash.mesh.scale.x, flashO: teleMat1.opacity,
   }) };

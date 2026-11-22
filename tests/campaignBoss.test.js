@@ -41,6 +41,9 @@ test('I489 campaignBoss: config sanity', () => {
   assert.deepEqual(cb.phases, { 1: 3, 2: 1, 3: 1, 4: 1, 5: 3 }); // ST-486 (E69); ST-517 (E75): L5 archon 3-phase
   assert.ok(cb.abyssal && cb.abyssal.spawnEvery > 0 && cb.abyssal.spawnFirst > 0, 'ST-486 abyssal move-set config');
   assert.ok(Number.isInteger(cb.abyssal.body) && Number.isInteger(cb.abyssal.core) && Number.isInteger(cb.abyssal.rim), 'ST-486 abyssal identity hexes');
+  assert.ok(cb.archon && cb.archon.spawnEvery > 0 && cb.archon.spawnFirst > 0, 'ST-519 archon move-set config');
+  assert.ok(Number.isInteger(cb.archon.body) && Number.isInteger(cb.archon.core) && Number.isInteger(cb.archon.rim), 'ST-519 archon identity hexes');
+  assert.ok(cb.archon.moves && cb.archon.moves.aimEvery.length === 3 && cb.archon.moves.ringEvery[0] === 99, 'ST-519 archon cadence (P0 aimed-only)');
   assert.deepEqual(cb.phaseAt, [1.0, 0.66, 0.33]);
   const w = cb.weak;
   assert.ok(w.r > 0 && w.orbitR > 0 && w.armTime > 0 && w.teleTime > 0 && w.openTime > 0);
@@ -90,7 +93,7 @@ test('I489 campaignBoss: phase counts and starting posture', () => {
   assert.equal(boss(2, 'splicer').phaseCount, 1);
   assert.equal(boss(3, 'prime').phaseCount, 1);
   assert.equal(boss(4, 'abyssal').phaseCount, 1); // ST-486 (E69)
-  assert.equal(boss(5, 'monolith').phaseCount, 3); // ST-517 (E75): L5 3-phase (archon kind lands D4/ST-519; monolith tint fallback)
+  assert.equal(boss(5, 'archon').phaseCount, 3); // ST-519 (I553): L5 archon 3-phase
   for (const l of [1, 2, 3, 4, 5]) {
     const b = boss(l, ['monolith', 'splicer', 'prime', 'abyssal', 'monolith'][l - 1]);
     assert.equal(b.phaseIndex, 0);
@@ -161,7 +164,7 @@ test('I489 campaignBoss: hit deals 1 damage, kill flips alive', () => {
 
 test('I489 campaignBoss: per-level stats', () => {
   const cb = CONFIG.campaignBoss;
-  const tints = ['monolith', 'splicer', 'prime', 'abyssal', 'monolith']; // ST-486 (E69); ST-517 (E75): L5 monolith fallback
+  const tints = ['monolith', 'splicer', 'prime', 'abyssal', 'archon']; // ST-486 (E69); ST-519 (I553): L5 archon tint
   for (const l of [1, 2, 3, 4, 5]) {
     const b = boss(l, tints[l - 1]);
     assert.equal(b.hp, cb.hp[l]);
@@ -187,9 +190,10 @@ test('I489 campaignBoss: canonical kind + prime + isCampaignBoss', () => {
   assert.equal(b4.kind, 'monolith');
   assert.equal(b4.prime, false);
   assert.equal(b4.abyssal, true);
-  const b5 = boss(5, 'monolith'); // ST-517 (E75): archon falls back to monolith tint until D4/ST-519
+  const b5 = boss(5, 'archon'); // ST-519 (I553): L5 archon tint
   assert.equal(b5.kind, 'monolith');
   assert.equal(b5.prime, false);
+  assert.equal(b5.archon, true); // ST-519 (I553)
   assert.ok(b1.isCampaignBoss && b2.isCampaignBoss && b3.isCampaignBoss && b4.isCampaignBoss && b5.isCampaignBoss);
 });
 
@@ -267,4 +271,50 @@ test('ST-486 abyssal: summon cadence - phantom then bulwark alternating, determi
   const m = boss(1, 'monolith');
   m.entered = 1;
   assert.ok(runFrames(m, 1200).every((e) => e.spawn === 0), 'monolith never summons');
+});
+
+test('ST-519 archon: P0 aimed-only (no ring), summons arm at P1 HALO, 7.0 s cadence, deterministic', () => {
+  const b = boss(5, 'archon');
+  b.entered = 1;
+  assert.equal(b._spawnTimer, -1, 'archon summons unarmed at P0');
+  assert.equal(b.teleRing, -1, 'P0 never rings (ringEvery[0] = 99)');
+  const evs = runFrames(b, 60 * 20);
+  assert.ok(evs.every((e) => e.ring === 0), 'P0 aimed-only: no ring event');
+  assert.ok(evs.every((e) => e.spawn === 0), 'no summon before P1');
+  b.hp = Math.ceil(b.maxHp * 0.60);
+  b.step(DT, P);
+  assert.equal(b.phaseIndex, 1, 'P1 HALO reached');
+  assert.equal(b._spawnTimer, CONFIG.campaignBoss.archon.spawnFirst - DT, 'summons armed at P1 then same-step decrement');
+  const spawns = [];
+  for (let i = 0; i < 60 * 40; i++) { const ev = b.step(DT, P); if (ev.spawn) spawns.push(ev.spawn); }
+  assert.ok(spawns.length >= 4, 'archon summons at 7.0 s cadence (got ' + spawns.length + ')');
+  assert.deepEqual(spawns.slice(0, 4), ['phantom', 'bulwark', 'phantom', 'bulwark'], 'phantom first, alternating');
+  const a = boss(5, 'archon'), c = boss(5, 'archon');
+  a.entered = 1; c.entered = 1;
+  a.hp = Math.ceil(a.maxHp * 0.60); c.hp = Math.ceil(c.maxHp * 0.60);
+  a.step(DT, P); c.step(DT, P);
+  let lastA = -1, lastC = -1;
+  for (let i = 0; i < 60 * 12; i++) { if (a.step(DT, P).spawn) lastA = i; if (c.step(DT, P).spawn) lastC = i; }
+  assert.ok(lastA >= 0 && lastA === lastC, 'deterministic summon frame');
+  const seq = () => {
+    const nb = new CampaignBoss(new RNG(2025), CONFIG, { x: 20, y: 0 }, 5, 'archon');
+    nb.entered = 1;
+    const out = [];
+    for (let i = 0; i < 60 * 25; i++) {
+      const ev = nb.step(DT, P);
+      if (ev.aim) out.push('a' + i);
+      if (ev.ring) out.push('r' + i);
+      if (ev.phase) out.push('p' + i);
+      if (ev.spawn) out.push('s' + i + ev.spawn);
+      if (i % 120 === 0) nb.hp = Math.max(1, nb.maxHp - (i / (60 * 25)) * nb.maxHp);
+    }
+    return out;
+  };
+  assert.deepEqual(seq(), seq(), 'archon event sequence deterministic');
+  const ab = boss(4, 'abyssal');
+  ab.entered = 1;
+  const abSpawn = [];
+  for (let i = 0; i < 60 * 20; i++) { if (ab.step(DT, P).spawn) abSpawn.push(i); }
+  assert.ok(abSpawn.length >= 2, 'abyssal still summons');
+  assert.equal(abSpawn[1] - abSpawn[0], 360, 'abyssal cadence unchanged at 6.0 s (not archon 7.0)');
 });

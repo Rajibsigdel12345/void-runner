@@ -59,7 +59,7 @@ test('strings: dynamic key families exist (keys concatenated in the source)', ()
     'hud.mod.fast', 'hud.mod.small', 'hud.mod.inward', 'hud.mod.big',
     'settings.fx.high', 'settings.fx.low', 'settings.fx.off',
     'settings.font_scale.normal', 'settings.font_scale.large', 'settings.font_scale.xl',
-    'boss.splicer', 'boss.monolith',
+    'boss.splicer', 'boss.monolith', 'boss.archon', // ST-519 (E75)
     'state.on', 'state.off', 'state.high', 'state.low',
   ];
   for (const k of families) assert.notEqual(STRINGS.en[k], undefined, 'missing dynamic key ' + k);

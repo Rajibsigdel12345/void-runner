@@ -843,7 +843,7 @@ this.beacons.step(edt, this.ship.pos); // ST-518 (E75; no RNG in step)
     // ST-456 (E64): every level boss is the CampaignBoss (weak point + phases + posture).
     // kind stays canonical ('monolith'/'splicer') so render/strings paths are untouched;
     // tint picks the per-level identity (L3 'prime' = gold monolith).
-    const tint = (kind === 'splicer') ? 'splicer' : (kind === 'monolith-prime') ? 'prime' : (kind === 'abyssal') ? 'abyssal' : 'monolith'; // ST-486 (E69): L4 necro-reef identity
+    const tint = (kind === 'splicer') ? 'splicer' : (kind === 'monolith-prime') ? 'prime' : (kind === 'abyssal') ? 'abyssal' : (kind === 'archon') ? 'archon' : 'monolith'; // ST-486 (E69): L4 necro-reef identity; ST-519 (E75): L5 zenith identity
     this.boss = new CampaignBoss(this.rng, this.cfg, pos, ls.level, tint);
     this._bossPhaseEmitted = false;
     this.bossBurstTimer = this.boss.cfg.boss.burst.every;

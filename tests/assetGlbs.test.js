@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief); ship 300 -> 850 at I429 (ST-399 remaster, 818-tri fighter; design/asset-spec-ship-remaster.md)).
-const BUDGETS = { ship: 32499, L: 3200, M: 950, S: 380, comet: 650, boss: 1500, shield: 120, emblem: 60, drone: 1800, arenaRing: 120, warden: 1800, chunk: 60, sliver: 50, hunter: 3366, gunship: 2906, sentry: 2934, wasp: 4020, phantom: 3048, bulwark: 3160, hauler: 3920, sweeper: 3006, beacon: 3144 }; // I552 (ST-518 E75 D3): +sweeper 3006 t (hull 2234 + arc 424 + greeble 348) +beacon 3144 t (base 1564 + tower 1204 + lamp 376), pinned tight to measurement (I552 art phase, measure552.mjs) // I541 (ST-507 E73 ship v7) ship 25563 -> 32499 (measured 32,499 t / 740,012 B; span 4.021 / len 2.600 unchanged, MAX_FILE_BYTES 1,048,576 holds) // + I482 (ST-449 sentry/wasp caps 1800/1200; actual 1096/792) + I501 (ST-467 ship v6 real-airship remaster 19000 -> 25563, measured 25,563 t / 581,440 B; pinned tight to measurement - the asset landed 9,137 t under the 34,700 aim so the pre-registered 38,500 was not needed; future growth requires an explicit re-pin) // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276) + I456 (ST-426 rock L/M/S v11 density remaster 2100/520/140 -> 3200/950/380, actual 3000/900/350; boss 750 -> 1500, actual 1425) + I508 (ST-474 E68 legacy-4 remaster) drone/warden caps 100/200 -> 1800/1800 (spec aim 1400) + I509 (ST-475 E68 remaster-4 re-pin WITH measurement) hunter/gunship/sentry/wasp 3366/2596/2934/4020 (wasp 1200 -> 4020: wing-mirror rebuild, double blade 2400 t) + I516 (ST-482 E69 phantom/bulwark 2336/2700, pinned tight to measurement) + I517 (ST-483 E69 hauler 3506, pinned tight to measurement)
+const BUDGETS = { ship: 32499, L: 3200, M: 950, S: 380, comet: 650, boss: 1500, shield: 120, emblem: 60, drone: 1800, arenaRing: 120, warden: 1800, chunk: 60, sliver: 50, hunter: 3366, gunship: 2906, sentry: 2934, wasp: 4020, phantom: 3048, bulwark: 3160, hauler: 3920, sweeper: 3006, beacon: 3144, archon: 3108 }; // I553 (ST-519 E75 D4): +archon 3108 t (hull 1916 + crown 752 + core 440), pinned tight to measurement (measure553.mjs) // I552 (ST-518 E75 D3): +sweeper 3006 t (hull 2234 + arc 424 + greeble 348) +beacon 3144 t (base 1564 + tower 1204 + lamp 376), pinned tight to measurement (I552 art phase, measure552.mjs) // I541 (ST-507 E73 ship v7) ship 25563 -> 32499 (measured 32,499 t / 740,012 B; span 4.021 / len 2.600 unchanged, MAX_FILE_BYTES 1,048,576 holds) // + I482 (ST-449 sentry/wasp caps 1800/1200; actual 1096/792) + I501 (ST-467 ship v6 real-airship remaster 19000 -> 25563, measured 25,563 t / 581,440 B; pinned tight to measurement - the asset landed 9,137 t under the 34,700 aim so the pre-registered 38,500 was not needed; future growth requires an explicit re-pin) // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276) + I456 (ST-426 rock L/M/S v11 density remaster 2100/520/140 -> 3200/950/380, actual 3000/900/350; boss 750 -> 1500, actual 1425) + I508 (ST-474 E68 legacy-4 remaster) drone/warden caps 100/200 -> 1800/1800 (spec aim 1400) + I509 (ST-475 E68 remaster-4 re-pin WITH measurement) hunter/gunship/sentry/wasp 3366/2596/2934/4020 (wasp 1200 -> 4020: wing-mirror rebuild, double blade 2400 t) + I516 (ST-482 E69 phantom/bulwark 2336/2700, pinned tight to measurement) + I517 (ST-483 E69 hauler 3506, pinned tight to measurement)
 const MAX_FILE_BYTES = 1048576; // I501 (ST-467 ship v6) EXPLICIT re-pin: 393216 -> 1048576 (ship v6 581,440 B; spec s5 pre-registered 1,048,576; max non-ship stays boss 75.26 KB) // I440 (ST-410 ship remaster v3) EXPLICIT re-pin: 262144 -> 393216 (ship 190,544 B/3254t -> 270,556 B/12400t; I435 was 100*1024 -> 262144 for v2; max non-ship stays boss 75.26 KB)
 
 function parseGlb(file) {
@@ -727,6 +727,9 @@ const ENEMY451_FACET = {
   beacon:  { VR_Beacon_Base:  { p10: 0.3400, p50: 0.3680, p90: 0.5200 },
               VR_Beacon_Tower: { p10: 0.4663, p50: 0.5000, p90: 0.7000 },
               VR_Beacon_Lamp:  { p10: 0.9500, p50: 0.9500, p90: 0.9500 } }, // I552 (ST-518 E75 D3) pins WITH measurement (measure552.mjs; signal island base + tower + lamp)
+  archon:  { VR_Archon_Hull:  { p10: 0.3400, p50: 0.4605, p90: 0.5507 },
+              VR_Archon_Crown: { p10: 0.5055, p50: 0.6039, p90: 0.6591 },
+              VR_Archon_Core:  { p10: 0.3000, p50: 0.5200, p90: 0.9500 } }, // I553 (ST-519 E75 D4) pins WITH measurement (probe553.cjs; Archon throne hull + crown + core)
 };
 
 function primExtents({ buf, json, binOff }, meshName) {
@@ -1287,4 +1290,29 @@ test('debris_sliver.glb: naming, poly budget, shard radius, grayscale COLOR_0 va
     for (const v of [r, g, b]) assert.ok(v >= 0.89 && v <= 1.11, 'COLOR_0 channel in [0.89,1.11]: ' + v.toFixed(3));
     assert.ok(Math.max(Math.abs(r - g), Math.abs(g - b), Math.abs(r - b)) <= 0.02, 'grayscale dev <= 0.02 at vert ' + i + ': ' + r.toFixed(3) + '/' + g.toFixed(3) + '/' + b.toFixed(3));
   }
+});
+
+test('boss_archon.glb: I553 (ST-519 E75 D4) the Archon throne - nodes, per-node tris, extents, mirror guards, all-prim COLOR_0', () => {
+  const { buf, json, binOff } = remaster4Bake('boss_archon.glb', 'archon');
+  assert.ok(buf.length <= 126 * 1024, 'archon under 126 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I553 128,780 B)');
+  const s = meshStats({ buf, json, binOff });
+  for (const n of ['VR_Archon_Hull', 'VR_Archon_Crown', 'VR_Archon_Core']) assert.ok(s.nodeNames.includes(n), n + ' node');
+  assert.equal(s.nodeNames.length, 3, 'flat node set (no root nodes)');
+  for (const mat of ['VR_Archon_HullMat', 'VR_Archon_CrownMat', 'VR_Archon_CoreMat']) assert.ok(s.matNames.includes(mat), mat + ' material');
+  assert.equal(s.totalTris, BUDGETS.archon, 'archon total tris == ' + BUDGETS.archon + ' (I553 re-pin WITH measurement)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Archon_Hull').tris, 1916, 'hull 1916 tris (I553 exact)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Archon_Crown').tris, 752, 'crown 752 tris (I553 exact)');
+  assert.equal(s.prims.find((p) => p.name === 'VR_Archon_Core').tris, 440, 'core 440 tris (I553 exact)');
+  const he = primExtents({ buf, json, binOff }, 'VR_Archon_Hull');
+  assert.ok(Math.abs(he.x - 4.0651) / 4.0651 <= 0.1, 'hull X ' + he.x.toFixed(4) + ' ~ 4.0651 (I553)');
+  assert.ok(Math.abs(he.y - 8.1250) / 8.1250 <= 0.1, 'hull Y ' + he.y.toFixed(4) + ' ~ 8.1250 (I553)');
+  assert.ok(Math.abs(he.z - 4.0651) / 4.0651 <= 0.1, 'hull Z ' + he.z.toFixed(4) + ' ~ 4.0651 (I553)');
+  const ce = primExtents({ buf, json, binOff }, 'VR_Archon_Crown');
+  assert.ok(Math.abs(ce.x - 3.9200) / 3.9200 <= 0.1, 'crown X ' + ce.x.toFixed(4) + ' ~ 3.9200 (I553)');
+  assert.ok(Math.abs(ce.y - 3.4723) / 3.4723 <= 0.1, 'crown Y ' + ce.y.toFixed(4) + ' ~ 3.4723 (I553)');
+  const co = primExtents({ buf, json, binOff }, 'VR_Archon_Core');
+  assert.ok(Math.abs(co.x - 1.2000) / 1.2000 <= 0.1, 'core X ' + co.x.toFixed(4) + ' ~ 1.2000 (I553)');
+  assert.ok(Math.abs(co.y - 1.8000) / 1.8000 <= 0.1, 'core Y ' + co.y.toFixed(4) + ' ~ 1.8000 (I553)');
+  assert.ok(Math.abs(he.cx) <= 0.05 && Math.abs(ce.cx) <= 0.05 && Math.abs(co.cx) <= 0.05, 'archon centered on the X origin (mirror)');
+  assert.ok(co.cz > 0, 'core seam on the +Z face (measured cz ' + co.cz.toFixed(4) + ')');
 });

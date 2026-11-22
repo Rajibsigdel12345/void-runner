@@ -41,6 +41,7 @@ const ASSETS = {
   bulwark: 'assets/enemy_bulwark.glb', // ST-485 (E69): shield slab + spine + core (I519: render wiring)
   sweeper: 'assets/enemy_sweeper.glb', // ST-518 (E75): arc triangle (I552: procedural until the GLB lands)
   beacon: 'assets/enemy_beacon.glb', // ST-518 (E75): signal island (I552: procedural until the GLB lands)
+  bossArchon: 'assets/boss_archon.glb', // ST-519 (E75): the Archon throne (I553: monolith fallback until the GLB loads)
 };
 
 // ST-327 (I358): the one PNG texture asset (Blender floor surface, 8,586 B,

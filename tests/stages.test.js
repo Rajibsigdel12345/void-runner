@@ -167,11 +167,12 @@ test('stages: the warp freezes the sim (game clock frozen) and advances the leve
   assert.ok(ts.data.theme, 'stage 2 has a theme');
 });
 
-test('stages: killing the campaign final (level 5) boss = archon (monolith tint until D4) -> victory gameover (ST-517 E75)', () => {
+test('stages: killing the campaign final (level 5) boss = archon (archon identity) -> victory gameover (ST-517/ST-519 E75)', () => {
   const w = worldWithCampaignBoss(53, 5);
   assert.equal(w.boss.kind, 'monolith');
   assert.equal(w.boss.prime, false);
-  assert.equal(w.boss.abyssal, false); // ST-517 (E75): archon identity lands D4/ST-519; monolith fallback is not abyssal
+  assert.equal(w.boss.abyssal, false); // ST-517 (E75)
+  assert.equal(w.boss.archon, true); // ST-519 (I553): L5 archon identity landed
   assert.equal(w.boss.maxHp, 175); // ST-517: campaignBoss.hp[5]
   assert.equal(w.boss.cfg.boss.burst.every, CONFIG.boss.burst.every); // ST-456: base cfg (Prime is a visual identity)
   assert.equal(w.boss.splitCount, 4); // ST-456: campaignBoss.splitCount

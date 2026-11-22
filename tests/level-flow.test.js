@@ -151,7 +151,7 @@ test('ST-453/ST-486/ST-517: full campaign - 5 level bosses, victory on the final
       all.push(...w.drainEvents());
     }
   }
-  assert.deepEqual(byType(all, 'levelBoss').map(e => e.data.kind), ['monolith', 'splicer', 'monolith', 'monolith', 'monolith']); // ST-486: abyssal keeps kind 'monolith'; ST-517: archon keeps kind 'monolith' until D4/ST-519
+  assert.deepEqual(byType(all, 'levelBoss').map(e => e.data.kind), ['monolith', 'splicer', 'monolith', 'monolith', 'monolith']); // ST-486: abyssal keeps kind 'monolith'; ST-519 (I553): archon keeps canonical kind 'monolith' (tint carries the identity)
   const go = byType(all, 'gameover');
   assert.equal(go.length, 1);
   assert.equal(go[0].data.victory, true);

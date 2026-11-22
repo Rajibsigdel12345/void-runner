@@ -53,8 +53,9 @@ export function createWaveBanner(root) {
     if (anim && anim.warn) { pendingBoss = { n, maxHp, name, kind }; return; } // I465/ST-433: the warning pre-card leads; the intro fires when it ends
     const prime = kind === 'prime'; // ST-420 (I450): Monolith Prime - gold (mirrors startCleared)
     const splicer = kind === 'splicer';
-    const tint = prime ? '#ffe08a' : splicer ? '#7ff0e0' : '#c9a8ff';
-    const glow = prime ? '0 0 26px rgba(255,224,138,0.55), 0 2px 14px rgba(0,0,0,0.9)' : splicer ? '0 0 26px rgba(127,240,224,0.5), 0 2px 14px rgba(0,0,0,0.9)' : '0 0 26px rgba(201,168,255,0.55), 0 2px 14px rgba(0,0,0,0.9)';
+    const archon = kind === 'archon'; // ST-519 (E75): The Archon - zenith violet-indigo
+    const tint = archon ? '#c4b5fd' : prime ? '#ffe08a' : splicer ? '#7ff0e0' : '#c9a8ff'; // ST-519 (E75): archon tint
+    const glow = archon ? '0 0 26px rgba(196,181,253,0.55), 0 2px 14px rgba(0,0,0,0.9)' : prime ? '0 0 26px rgba(255,224,138,0.55), 0 2px 14px rgba(0,0,0,0.9)' : splicer ? '0 0 26px rgba(127,240,224,0.5), 0 2px 14px rgba(0,0,0,0.9)' : '0 0 26px rgba(201,168,255,0.55), 0 2px 14px rgba(0,0,0,0.9)'; // ST-519 (E75): archon glow
     anim = { t: 0, dur: 2.2, text: name || t('banner.boss.monolith'), subText: t('banner.boss_sub',{n, hp:maxHp}), tint, glow };
     el.style.fontSize = 'calc(52px * var(--vr-fs,1))'; // I161: font-scale
     el.style.color = tint;

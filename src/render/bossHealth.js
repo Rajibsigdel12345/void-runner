@@ -27,8 +27,8 @@ export function createBossHealth(root) {
     if (boss.isCampaignBoss) { wrap.style.opacity = '0'; return; } // ST-456: campaign uses the vertical bar (createBossHealthVertical)
     wrap.style.opacity = '1';
     fill.style.width = (Math.max(0, Math.min(1, boss.hpFrac)) * 100) + '%';
-    if (_kind !== (boss.kind + (boss.prime ? ':prime' : ''))) { // ST-420: prime shares kind 'monolith' -> composite discriminator
-      _kind = boss.kind + (boss.prime ? ':prime' : '');
+    if (_kind !== (boss.kind + (boss.prime ? ':prime' : '') + (boss.archon ? ':archon' : ''))) { // ST-420: prime shares kind 'monolith' -> composite discriminator; ST-519 (E75): +archon
+      _kind = boss.kind + (boss.prime ? ':prime' : '') + (boss.archon ? ':archon' : '');
       const prime = boss.prime === true; // Monolith Prime re-tint (gold)
       if (prime) {
         label.textContent = t('boss.monolith_prime');
@@ -76,11 +76,17 @@ export function createBossHealthVertical(root) {
     if (!boss || !boss.alive || !boss.isCampaignBoss) { wrap.style.opacity = '0'; return; }
     wrap.style.opacity = '1';
     fill.style.height = (Math.max(0, Math.min(1, boss.hpFrac)) * 100) + '%';
-    if (_kind !== (boss.kind + (boss.prime ? ':prime' : ''))) {
-      _kind = boss.kind + (boss.prime ? ':prime' : '');
+    if (_kind !== (boss.kind + (boss.prime ? ':prime' : '') + (boss.archon ? ':archon' : ''))) {
+      _kind = boss.kind + (boss.prime ? ':prime' : '') + (boss.archon ? ':archon' : ''); // ST-519 (E75): +archon
       const prime = boss.prime === true;
       const sp = boss.kind === 'splicer';
-      if (prime) {
+      const archon = boss.archon === true; // ST-519 (E75): Zenith Spire final boss (violet-indigo identity)
+      if (archon) {
+        label.textContent = t('boss.archon');
+        label.style.color = 'rgba(205,180,255,0.95)';
+        bar.style.borderColor = 'rgba(150,120,255,0.6)';
+        fill.style.background = 'linear-gradient(0deg,#7c5cff,#c4b5fd)'; // ST-519 (E75): 0deg (sibling match; spec 90deg superseded by house pattern)
+      } else if (prime) {
         label.textContent = t('boss.monolith_prime');
         label.style.color = 'rgba(255,214,120,0.95)';
         bar.style.borderColor = 'rgba(255,201,77,0.6)';

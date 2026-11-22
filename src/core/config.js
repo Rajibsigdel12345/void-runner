@@ -1278,7 +1278,7 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
         { name: 'Bulwark Wall',    length: 120, paletteId: 'reef-3', hazardProfile: 'dense',    enemyMix: ['bulwark', 'stinger', 'wasp'],     optionalTargets: ['pod'],               checkpointAt: 0 },
         { name: 'Necro Gauntlet',  length: 90,  paletteId: 'reef-4', hazardProfile: 'gauntlet', enemyMix: ['phantom', 'hauler', 'bulwark', 'mine'], optionalTargets: ['rapid', 'shielded'], checkpointAt: 0 }
       ] },
-      { name: 'Zenith Spire', boss: 'archon', zones: [ // ST-517 (E75): final level; 'archon' kind lands D4/ST-519 - until then the monolith tint fallback applies (game.js)
+      { name: 'Zenith Spire', boss: 'archon', zones: [ // ST-517 (E75): final level; 'archon' kind landed D4/ST-519 (I553: tint routed in game.js + archon GLB remesh in bossMesh.js)
         { name: 'Spire Approach',   length: 100, paletteId: 'zenith-1', hazardProfile: 'moderate', enemyMix: ['phantom', 'drone', 'mine'],            optionalTargets: ['golden'],   checkpointAt: 0 },
         { name: 'Halo Circuit',     length: 120, paletteId: 'zenith-2', hazardProfile: 'dense',    enemyMix: ['hunter', 'stinger', 'sweeper', 'mine'],           optionalTargets: ['shielded'], checkpointAt: 0 },
         { name: 'Crown Ascent',     length: 130, paletteId: 'zenith-3', hazardProfile: 'gauntlet', enemyMix: ['gunship', 'sentry', 'wasp', 'sweeper'],           optionalTargets: ['pod'],      checkpointAt: 0 },
@@ -1363,6 +1363,12 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
       // body/core/rim = the necro-reef magenta identity (distinct from monolith purple / splicer teal / prime gold).
       // Spawn move set: summon reinforcements at the rim (phantom/bulwark alternating); field maxConcurrent self-caps (phantom 2 / bulwark 1).
       spawnEvery: 6.0, spawnFirst: 5.0, body: 0xd12b7a, core: 0xff4d9e, rim: 0x7a1048
+    },
+    archon: {  // ST-519 (E75): L5 "Zenith Spire" final boss (kind stays 'monolith'; archon GLB remesh in bossMesh.js).
+      // body/core/rim = the zenith violet-indigo identity (distinct from monolith purple 259.1 / abyssal magenta / prime gold / splicer teal).
+      // P0 "CROWN" aimed-only (ringEvery 99); summons begin at the P1 "HALO" transition (deterministic, no RNG draw).
+      moves: { aimEvery: [3.0, 2.2, 1.5], ringEvery: [99, 4.0, 2.8] },
+      spawnEvery: 7.0, spawnFirst: 4.0, body: 0x723f8c, core: 0xa78bfa, rim: 0x2a2150, renderLumaGain: 2.6 // I553 FROZEN WITH MEASUREMENT (audit .evidence/I553/luma_i553p4.json; 4 tuning passes): body base 0x483f7a tuned R 72 -> 114 (0x723f8c) to land hue; gain 5.5 -> 2.6 to land p50. sky p50 88.75 hue 280.9 (band [80,96] / [274,286]); min dhue 21.80 vs boss 259.1 (>= 15.23); E57 clear
     }
   },
   campaign: { warpDuration: 1.6 } // deterministic frozen-sim warp timer (no RNG draws)

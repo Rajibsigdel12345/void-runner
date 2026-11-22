@@ -292,6 +292,7 @@ else if (name === 'hauler') haulerRenders.useGLB(entry.object); // ST-485 (E69):
 else if (name === 'bulwark') bulwarkRenders.useGLB(entry.object); // ST-485 (E69): Blender bulwark (I519 wiring)
 else if (name === 'sweeper') sweeperRenders.useGLB(entry.object); // ST-518 (E75): procedural until the GLB lands
 else if (name === 'beacon') beaconRenders.useGLB(entry.object); // ST-518 (E75): procedural until the GLB lands
+else if (name === 'bossArchon') bossMesh.useArchonGLB(entry.object); // ST-519 (E75): the Archon throne (stash; geometry applied at boss spawn)
    else if (name === 'debrisChunk') debris.setGeometry('chunk', entry.object); // ST-381 (I411): GLB over the procedural fallback
    else if (name === 'debrisSliver') debris.setGeometry('sliver', entry.object);
   else if (name === 'arenaRing') arenaRing.useGLB(entry.object); // I212
@@ -1036,7 +1037,7 @@ function tick(dt, intent) {
     if (haptic) haptics.pulse(haptic);
     if (e.type === 'wave') banner.showWave(e.data.n, e.data.mod, e.data.endless);
     else if (e.type === 'waveCleared') banner.showCleared(e.data.n);
-    else if (e.type === 'bossSpawn') { const _prime = !!(world.boss && world.boss.prime); _lastBossPrime = _prime; banner.showBossWarn(); banner.showBoss(e.data.wave, e.data.hp, _prime ? tr('banner.boss.prime') : (e.data.kind === 'splicer' ? tr('banner.boss.splicer') : tr('banner.boss.monolith')), _prime ? 'prime' : e.data.kind); if (e.data.kind === 'splicer') toast(tr('toast.splicer')); } // I154: kind for variant glow; ST-420 (I450): Prime gold identity (flag on world.boss; payload has no prime) // I465/ST-433 B2: showBossWarn() pre-card leads the intro; ST-135/143: boss intro
+    else if (e.type === 'bossSpawn') { const _prime = !!(world.boss && world.boss.prime); const _archon = !!(world.boss && world.boss.archon); _lastBossPrime = _prime; _lastBossArchon = _archon; bossMesh.setBossGeometry(_archon ? 'archon' : 'monolith'); banner.showBossWarn(); banner.showBoss(e.data.wave, e.data.hp, _archon ? tr('banner.boss.archon') : _prime ? tr('banner.boss.prime') : (e.data.kind === 'splicer' ? tr('banner.boss.splicer') : tr('banner.boss.monolith')), _archon ? 'archon' : _prime ? 'prime' : e.data.kind); if (e.data.kind === 'splicer') toast(tr('toast.splicer')); } // I154: kind for variant glow; ST-420 (I450): Prime gold identity (flag on world.boss; payload has no prime); ST-519 (E75): archon remesh + label // I465/ST-433 B2: showBossWarn() pre-card leads the intro; ST-135/143: boss intro
     else if (e.type === 'wardenSpawn') toast(tr('toast.warden')); // ST-137: mini-boss callout
     else if (e.type === 'stingerSpawn') toast(tr('toast.stinger')); // ST-229: first spawn of the run calls out the charger
 else if (e.type === 'flyerSpawn') toast(tr('toast.flyer')); // ST-232: first spawn of the run calls out the evasive target
@@ -1054,7 +1055,7 @@ else if (e.type === 'flyerSpawn') toast(tr('toast.flyer')); // ST-232: first spa
     else if (e.type === 'zoneEnter') { if (world.mode === 'campaign') zoneTheme.setTarget(zoneThemeFor(e.data.paletteId, CONFIG.levels.palettes), motionOff); } // ST-455 (I488): zone identity crossfade (hazard/enemy mix already ST-453; zone name HUD = ST-457)
     else if (e.type === 'levelIntro') { if (world.mode === 'campaign') storage.setCampaignProgress(e.data.level); } // ST-457 (E64): highest-level continue persistence
     else if (e.type === 'checkpoint') { if (world.mode === 'campaign') toast(tr('toast.checkpoint', { level: e.data.level })); } // ST-457 (E64): checkpoint-resume callout
-    else if (e.type === 'kill') { popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 || e.data.golden || e.data.boss, gold: !!e.data.golden, od: !!e.data.overdrive }); killFeed.add(e.data.boss ? Object.assign({}, e.data, { prime: _lastBossPrime }) : e.data); } // ST-030/052, I153; ST-420 (I450): enrich boss kills with the prime flag
+    else if (e.type === 'kill') { popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points, { big: e.data.multiplier >= 2 || e.data.golden || e.data.boss, gold: !!e.data.golden, od: !!e.data.overdrive }); killFeed.add(e.data.boss ? Object.assign({}, e.data, { prime: _lastBossPrime, archon: _lastBossArchon }) : e.data); } // ST-030/052, I153; ST-420 (I450): enrich boss kills with the prime flag; ST-519 (E75): +archon
     else if (e.type === 'nearmiss') popups.add(e.data.pos.x, e.data.pos.y, '+' + e.data.points); // ST-053 (plain small popup)
     else if (e.type === 'weaponLevelUp') toast(tr('toast.weapon',{level:e.data.level})); // ST-123
     if (!motionOff) {
@@ -1196,6 +1197,7 @@ let _musicIntensity = 0; // I170 (ST-170): last applied music-intensity x (chang
 let _timeWarp = 0; // I172 (ST-172): last applied time-warp x (change-cached)
 let _deathWarpT = 0; // I174 (ST-174): seconds left of the death-slow-mo audio window
 let _lastBossPrime = false; // ST-420 (I450): prime flag of the last spawned boss (kill payload enrichment)
+let _lastBossArchon = false; // ST-519 (E75): archon flag of the last spawned boss (kill payload enrichment)
 let _victory = false; // ST-420 (I450): campaign victory flag for the game-over screen
 function syncVisuals(dt) {
   const st = world.game.state;

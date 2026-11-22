@@ -19,10 +19,11 @@ export class CampaignBoss {
     this.pos = pos;
     const cb = cfg.campaignBoss;
     this.level = level;
-    this.tint = tint; // 'monolith' | 'splicer' | 'prime' | 'abyssal' (ST-486 E69)
+    this.tint = tint; // 'monolith' | 'splicer' | 'prime' | 'abyssal' | 'archon' (ST-519 E75; ST-486 E69)
     this.kind = (tint === 'splicer') ? 'splicer' : 'monolith'; // canonical kind -> reuses the Monolith render color/rim
     this.prime = (tint === 'prime');                            // L3 gold identity (kind stays monolith)
     this.abyssal = (tint === 'abyssal');                    // ST-486 (E69): L4 "Necro Reef" final boss (kind stays monolith)
+    this.archon = (tint === 'archon');                        // ST-519 (E75): L5 "Zenith Spire" final boss (kind stays monolith)
     this._spawnParity = 0;                                  // ST-486: deterministic spawn alternation (no RNG draw)
     this._spawnTimer = this.abyssal ? cb.abyssal.spawnFirst : -1;
     this.isCampaignBoss = true;                                 // gates every NEW campaign behavior
@@ -45,7 +46,7 @@ export class CampaignBoss {
     this._weakTimer = w.armTime;
     // move-set timers (aimed bolt + rock ring), seeded from the STARTING tier
     // (L1 starts phase 0; L2/L3 single-phase start at singlePhaseMoveTier)
-    const moves = cb.moves;
+    const moves = this.archon ? cb.archon.moves : cb.moves; // ST-519 (E75): archon cadence
     const t0 = Math.min(this._moveTier(), moves.aimEvery.length - 1);
     this._aimTimer = moves.aimEvery[t0];
     this._ringTimer = moves.ringEvery[t0];
@@ -62,6 +63,7 @@ export class CampaignBoss {
   }
 
   _moveTier() {
+    if (this.archon) return Math.min(this.phaseIndex, this.cfg.campaignBoss.archon.moves.aimEvery.length - 1); // ST-519 (E75): archon tier cadence
     if (this.phaseCount > 1) return this.phaseIndex;
     const t = this.cfg.campaignBoss.singlePhaseMoveTier;
     return (t != null) ? t : 1;
@@ -112,6 +114,7 @@ export class CampaignBoss {
    */
   step(dt, shipPos) {
     const cb = this.cfg.campaignBoss;
+    const moves = this.archon ? cb.archon.moves : cb.moves; // ST-519 (E75): archon cadence (P0 aimed-only, ringEvery 99)
     this.hitFlash = Math.max(0, this.hitFlash - this.cfg.fx.enemyHitFlash.decay * dt);
     this.entered = Math.min(1, this.entered + dt / cb.enterTime);
     const enraged = (this.phaseCount > 1 && this.phaseIndex >= 2);
@@ -142,27 +145,28 @@ export class CampaignBoss {
         this.postureScale = (posture && posture[np]) || this.postureScale;
         this._rearmWeak();
         phase = 1;
+        if (this.archon && this._spawnTimer < 0) this._spawnTimer = cb.archon.spawnFirst; // ST-519 (E75): archon summons arm at the P1 "HALO" transition
       }
     }
     // move set (gated on entrance)
     let aim = 0, ring = 0;
     if (this.entered >= 1) {
-      const tier = Math.min(this._moveTier(), this.cfg.campaignBoss.moves.aimEvery.length - 1);
-      const aimEvery = cb.moves.aimEvery[tier];
-      const ringEvery = cb.moves.ringEvery[tier];
+      const tier = Math.min(this._moveTier(), moves.aimEvery.length - 1); // ST-519 (E75): archon-aware cadence
+      const aimEvery = moves.aimEvery[tier];
+      const ringEvery = moves.ringEvery[tier];
       this._aimTimer -= dt;
       this._ringTimer -= dt;
       if (this._aimTimer <= 0) { this._aimTimer += aimEvery; aim = 1; }
       if (ringEvery < 90 && this._ringTimer <= 0) { this._ringTimer += ringEvery; ring = 1; }
     }
-    const rtier = Math.min(this._moveTier(), cb.moves.ringEvery.length - 1);
+    const rtier = Math.min(this._moveTier(), moves.ringEvery.length - 1); // ST-519 (E75): archon-aware cadence
     this.teleAim = this._aimTimer;
-    this.teleRing = (cb.moves.ringEvery[rtier] < 90) ? this._ringTimer : -1;
+    this.teleRing = (moves.ringEvery[rtier] < 90) ? this._ringTimer : -1;
     let spawn = 0;
-    if (this.abyssal && this.entered >= 1) { // ST-486 (E69): summon reinforcements at the rim (field maxConcurrent self-caps)
+    if ((this.abyssal || (this.archon && this.phaseIndex >= 1)) && this.entered >= 1 && this._spawnTimer >= 0) { // ST-486 (E69): summon reinforcements at the rim (field maxConcurrent self-caps); ST-519 (E75): archon summons arm at P1
       this._spawnTimer -= dt;
       if (this._spawnTimer <= 0) {
-        this._spawnTimer += this.cfg.campaignBoss.abyssal.spawnEvery;
+        this._spawnTimer += this.archon ? cb.archon.spawnEvery : this.cfg.campaignBoss.abyssal.spawnEvery; // ST-519 (E75): archon cadence
         this._spawnParity ^= 1;
         spawn = (this._spawnParity === 1) ? 'phantom' : 'bulwark'; // phantom first (weaker), then bulwark, alternating
       }

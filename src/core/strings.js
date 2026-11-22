@@ -115,12 +115,14 @@ export const STRINGS = {
   'banner.boss_warn': '!! INBOUND !!', // I465/ST-433 B2: dim-red pre-card before the boss intro
     'banner.boss.splicer': 'THE SPLICER',
     'banner.boss.monolith': 'THE MONOLITH',
+    'banner.boss.archon': 'THE ARCHON', // ST-519 (E75)
   'boss.monolith_prime': 'MONOLITH PRIME',
   'banner.stage': 'STAGE {n}',
   'banner.boss.prime': 'THE MONOLITH PRIME',
     // boss HP bar (short forms)
     'boss.splicer': 'SPLICER',
     'boss.monolith': 'MONOLITH',
+    'boss.archon': 'ARCHON', // ST-519 (E75)
     // kill feed labels
     'feed.warden': 'WARDEN',
     'feed.mine': 'MINE',
@@ -344,11 +346,13 @@ export const STRINGS = {
   'banner.boss_warn': '!! 来袭 !!',
     'banner.boss.splicer': 'THE SPLICER',
     'banner.boss.monolith': 'THE MONOLITH',
+    'banner.boss.archon': '\u6267\u653f\u5b98', // ST-519 (E75)
   'boss.monolith_prime': 'THE MONOLITH PRIME',
   'banner.stage': '第 {n} 阶段',
   'banner.boss.prime': 'THE MONOLITH PRIME',
     'boss.splicer': 'THE SPLICER',
     'boss.monolith': 'THE MONOLITH',
+    'boss.archon': '\u6267\u653f\u5b98', // ST-519 (E75)
     'feed.warden': 'WARDEN',
     'feed.mine': '水雷',
     'feed.seeker': '追踪者',
@@ -565,11 +569,13 @@ export const STRINGS = {
   'banner.boss_warn': '!! 接近中 !!',
     'banner.boss.splicer': 'THE SPLICER',
     'banner.boss.monolith': 'THE MONOLITH',
+    'banner.boss.archon': '\u30a2\u30fc\u30b3\u30f3', // ST-519 (E75)
   'boss.monolith_prime': 'THE MONOLITH PRIME',
     'banner.stage': '第{n}ステワジ',
   'banner.boss.prime': 'THE MONOLITH PRIME',
     'boss.splicer': 'THE SPLICER',
     'boss.monolith': 'THE MONOLITH',
+    'boss.archon': '\u30a2\u30fc\u30b3\u30f3', // ST-519 (E75)
     'feed.warden': 'WARDEN',
     'feed.mine': 'マイン',
     'feed.seeker': 'シーカー',

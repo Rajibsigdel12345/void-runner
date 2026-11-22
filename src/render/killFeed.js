@@ -30,7 +30,7 @@ export function createKillFeed(root) {
   let visible = false;
 
   function label(d) {
-    if (d.size === 'boss' || d.boss) return d.prime ? t('banner.boss.prime') : (d.kind === 'splicer' ? t('banner.boss.splicer') : t('banner.boss.monolith'));
+    if (d.size === 'boss' || d.boss) return d.archon ? t('banner.boss.archon') : d.prime ? t('banner.boss.prime') : (d.kind === 'splicer' ? t('banner.boss.splicer') : t('banner.boss.monolith')); // ST-519 (E75): archon label
     if (d.size === 'warden') return t('feed.warden');
     if (d.size === 'mine') return t('feed.mine');
     if (d.size === 'drone') return t('feed.seeker');
