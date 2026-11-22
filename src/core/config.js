@@ -979,6 +979,33 @@ export const CONFIG = {
       radius: 0.35,
       threshold: 0.72
     },
+    cinematic: {              // D2 (ST-524/I558): webgpu-arm-only cinematic post block (E76 scope section 3) - never read
+                              //   on the classic arms (fxArm gate; default + ?fx=webgl stay byte-identical). Tier policy
+                              //   (setEnabled): High = full chain; Low/Off = bloom 0 (existing), film 0.0 + lensflare 1.0
+                              //   (exact-off uniforms), CA + vignette kept (zero-pass math). DOF is camera-driven (cockpit).
+      dprCap: 1.25,           //   hard DPR cap on the webgpu arm (boot init + applyDprForTier) - the D2 gate cost knob
+      softKnee: 0.25,         //   bloom soft-knee HALF-width: the vendor high-pass becomes smoothstep(0.72-k, 0.72+k, luma)
+                              //   (knee centered on the frozen 0.72 threshold; the classic arm keeps the hard 0.72)
+      ca: {                   //   display-space radial chromatic aberration (ChromaticAberrationNode)
+        strength: 0.0018,     //     UV displacement - subtle (readable fringing at the screen edge, none at center)
+        scale: 1.0
+      },
+      vignette: 0.08,         //   raw-TSL corner vignette (r187 has NO VignetteNode) in display space - modest on purpose:
+                              //   the DOM #vignette overlay already darkens the corners (alpha 0.62) in every arm
+      film: 0.06,             //   FilmNode grain intensity (display space; mix() => exact identity at 0.0 on the Low tier)
+      lensFlare: {            //   screen-space ghost trail off bright regions (the engine glow) - the K1 decision:
+        threshold: 0.5,       //     LensflareNode REPLACES GodraysNode (which needs a shadow-casting scene light + scene
+        ghostSamples: 4,      //     depth - unusable for the engine glow). threshold 1.0 = exactly off (Low tier)
+        ghostSpacing: 0.25,
+        ghostAttenuation: 25,
+        downSampleRatio: 4    //     (the ghost RT renders at 1/4 res)
+      },
+      dof: {                  //   cockpit-only DepthOfField (pipeline B; NEVER in the chase/overview graph - the D2 FPS
+        focusDistance: 20,    //     gate measures chase and must not pay the 7 DoF sub-passes per frame)
+        focalLength: 60,      //     focus 20 u (mid-arena); fully out-of-focus at 20+/-60 u; bokeh size unitless
+        bokehScale: 0.8
+      }
+    },
     palette: {                // ST-086: per-entity particle color palettes (hex, additive-blended)
       rock:     [0xfff0c8, 0xffa44a, 0xd96a2a],  // ST-248: warm ember core -> amber -> deep ember (harmonized to the I257 warm rock)
       golden:   [0xfff0a0, 0xffe070, 0xffc94d],  // ST-249: gold family (ring [0] unchanged; tail 0xfff8dc -> 0xffc94d = the golden rock albedo - the near-white tail sat in the I258 rock-core 0xfff0c8 zone and was the game brightest particle color; pure white stays with the bomb)

@@ -77,9 +77,19 @@ const VENDOR_FILES = [
   'jsm/shaders/CopyShader.js',
   'jsm/shaders/OutputShader.js',
   'jsm/shaders/LuminosityHighPassShader.js',
-  // ST-462 (I496): TSL bloom effect for the ?fx=webgpu arm (BloomNode.js is imported
-  // by webgpuFx.js via the three/addons/ import-map prefix; jsm stays byte-identical in dist).
+  // ST-462 (I496): TSL bloom effect for the ?fx=webgpu arm (imported by webgpuFx.js via
+  // the three/addons/ import-map prefix; jsm stays byte-identical in dist).
+  // ST-524 (I558, E76 D2): the D2 cinematic block adds the chromatic-aberration, lensflare,
+  // film-grain and cockpit depth-of-field TSL nodes - their display-space closure (GaussianBlur
+  // is the DOF's internal blur) is vendored here so the browser can resolve the webgpuFx.js
+  // dynamic import (the pre-D2 list shipped BloomNode only -> the new imports 404'd and the
+  // webgpu arm hung at boot).
   'jsm/tsl/display/BloomNode.js',
+  'jsm/tsl/display/ChromaticAberrationNode.js',
+  'jsm/tsl/display/LensflareNode.js',
+  'jsm/tsl/display/FilmNode.js',
+  'jsm/tsl/display/DepthOfFieldNode.js',
+  'jsm/tsl/display/GaussianBlurNode.js',
 ];
 for (const rel of VENDOR_FILES) {
   const fromV = join(root, 'vendor', rel);

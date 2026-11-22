@@ -103,7 +103,7 @@ const fxArm = armFromQuery(); // I497 (ST-463): single ?fx parse site (rendererF
 const { renderer, rendererBackend, rendererArm } = await createRenderer(fxArm);
 await initFxArm(fxArm); // I497 (ST-463): classic/default never load webgpu+tsl
 console.info('ST-461 renderer backend:', rendererBackend, '(arm: ' + rendererArm + ')'); // info is outside the console 0/0 error/warn pin
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, rendererBackend === 'webgpu' && CONFIG.fx.cinematic && CONFIG.fx.cinematic.dprCap > 0 ? CONFIG.fx.cinematic.dprCap : 2)); // D2 (ST-524/I558): webgpu arm DPR hard cap (the cinematic block pays per-pixel); classic arms keep the 2 cap
 // ST-236 (I243): renderer color/tone pipeline from config (pre-pass three defaults: NoToneMapping + implicit sRGB output).
 // The composer path applies the curve in the OutputPass (bloom threshold stays in linear space); the Low-tier direct
 // render applies it in the material shaders - same curve on both tiers.
@@ -487,6 +487,7 @@ function applySettings(s) {
   camMode = (s.cameraMode === 'overview' || s.cameraMode === 'cockpit') ? s.cameraMode : 'chase'; // ST-416 (I446): validate + fall back to chase
   if (camModeBooted && camMode !== prevCamMode) camChip(tr('toast.cammode', { mode: tr('settings.camera_mode.' + camMode) })); // ST-443 (I476): chip on change from BOTH the V hotkey and the settings panel (both land here); boot never fires
   camModeBooted = true;
+if (bloom && bloom.setCockpit) bloom.setCockpit(camMode === 'cockpit'); // D2 (ST-524/I558): cockpit DOF pipeline switch (webgpu arm; the classic bloom wrapper has no setCockpit - no-op)
   slowmoHintEl.style.transition = motionOff ? 'none' : 'opacity .2s'; // I161: no fade under reduced motion
   setUiScale(); // I70+I71: UI scale = fontScale x viewport (cascades to DOM overlays only; canvas unaffected)
 
@@ -545,7 +546,9 @@ const pauseSettings = createSettingsPanel(storage, applySettings, (tier) => { ad
 // (volume, music, ...) can no longer silently revert an auto-downgraded tier.
 let effectiveTier = liveSettings.fx;
 function applyDprForTier(label) {
-  const target = dprForTier(effectiveTier, window.devicePixelRatio, CONFIG.fx.dpr);
+  const dprCap = (rendererBackend === 'webgpu' && CONFIG.fx.cinematic && CONFIG.fx.cinematic.dprCap > 0) ? CONFIG.fx.cinematic.dprCap : Infinity; // D2 (ST-524/I558): webgpu arm cap clamps BOTH tier caps
+  const dprCaps = dprCap === Infinity ? CONFIG.fx.dpr : { high: Math.min(CONFIG.fx.dpr.high, dprCap), low: Math.min(CONFIG.fx.dpr.low, dprCap) };
+  const target = dprForTier(effectiveTier, window.devicePixelRatio, dprCaps);
   const cur = renderer.getPixelRatio();
   if (Math.abs(target - cur) < 1e-6) return false;
   renderer.setPixelRatio(target);
