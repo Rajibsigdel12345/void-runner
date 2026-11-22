@@ -9,7 +9,8 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
-import { standardMat } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
+import { standardMat, isWebGPU } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
+import { applyTSLGlow } from './tslMaterials.js'; // I557 (ST-523): TSL time-pulsed glow (webgpu arm only)
 
 function bakeHullGeometry() {
   // elongated hexa-disc: 6-segment cylinder flattened, stretched along +X (forward)
@@ -40,7 +41,7 @@ export function createFlyerRenderer(scene) {
   });
   const domeMats = [];
   for (let i = 0; i < POOL; i++) {
-    domeMats.push(new THREE.MeshStandardMaterial({
+    domeMats.push(standardMat({
       color: 0x140a10, roughness: 0.3, metalness: 0.2,
       emissive: new THREE.Color(DOME_IDLE.r, DOME_IDLE.g, DOME_IDLE.b), emissiveIntensity: 0.7,
     }));
@@ -87,6 +88,7 @@ export function createFlyerRenderer(scene) {
   // every other mesh feeds the hull. In-code materials kept (wardenMesh, I220).
   // I460/ST-429 A2: hull silhouette rim (shared I278 pattern; per-role color in CONFIG.enemyRim).
   applyEnemyRim(hullMat, 'flyer');
+if (isWebGPU()) for (const m of domeMats) applyTSLGlow(m, { color: new THREE.Color(DOME_IDLE.r, DOME_IDLE.g, DOME_IDLE.b), base: 0.35, amp: 0.45, speed: 2.6, speed2: 6.3 }).setPulse(1); // I557 (ST-523): dome glow (webgpu arm only)
 
   function useGLB(obj) {
     let hull = null, dome = null;

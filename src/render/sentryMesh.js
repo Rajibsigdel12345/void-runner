@@ -10,7 +10,8 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
-import { standardMat } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
+import { standardMat, isWebGPU } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
+import { applyTSLGlow } from './tslMaterials.js'; // I557 (ST-523): TSL time-pulsed glow (webgpu arm only)
 
 function bakePlatformGeometry() {
   const r = CONFIG.sentry.radius;
@@ -55,12 +56,12 @@ export function createSentryRenderer(scene) {
     color: hullColor, roughness: 0.7, metalness: 0.2, flatShading: true, vertexColors: true,
     emissive: 0x14160f, emissiveIntensity: 0.2,
   });
-  const baseMat = new THREE.MeshStandardMaterial({
+  const baseMat = standardMat({
     color: CONFIG.sentry.palette.base.color, roughness: 0.8, metalness: 0.15, flatShading: true,
   });
   const chargeMats = [];
   for (let i = 0; i < POOL; i++) {
-    chargeMats.push(new THREE.MeshStandardMaterial({
+    chargeMats.push(standardMat({
       color: 0x1a0f04, roughness: 0.3, metalness: 0.2,
       emissive: new THREE.Color(CHARGE_IDLE.r, CHARGE_IDLE.g, CHARGE_IDLE.b), emissiveIntensity: 0.5,
     }));
@@ -112,6 +113,7 @@ export function createSentryRenderer(scene) {
 
   // I460/ST-429 A2: hull silhouette rim (shared pattern; per-role color in CONFIG.enemyRim).
   applyEnemyRim(hullMat, 'sentry');
+if (isWebGPU()) for (const m of chargeMats) applyTSLGlow(m, { color: new THREE.Color(CHARGE_IDLE.r, CHARGE_IDLE.g, CHARGE_IDLE.b), base: 0.28, amp: 0.38, speed: 4.1, speed2: 9.7 }).setPulse(1); // I557 (ST-523): charge glow (webgpu arm only)
 
   function useGLB(obj) {
     let platform = null, base = null, barrel = null, charge = null;

@@ -7,7 +7,8 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
-import { standardMat } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
+import { standardMat, isWebGPU } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
+import { applyTSLGlow } from './tslMaterials.js'; // I557 (ST-523): TSL time-pulsed glow (webgpu arm only)
 
 function bakeHullGeometry() {
   const r = CONFIG.gunship.radius;
@@ -45,12 +46,12 @@ export function createGunshipRenderer(scene) {
     color: hullColor, roughness: 0.72, metalness: 0.2, flatShading: true, vertexColors: true, // I451: painted gunmetal (metalness 0.55 rendered near-black under the scene light; sRGB palette luma ~65 kept as the design value; renderLumaGain restores the band)
     emissive: 0x101418, emissiveIntensity: 0.2,
   });
-  const nacelleMat = new THREE.MeshStandardMaterial({
+  const nacelleMat = standardMat({
     color: CONFIG.gunship.palette.nacelle.color, roughness: 0.65, metalness: 0.25, flatShading: true, // I451: painted (same metalness fix as hull)
   });
   const bayMats = [];
   for (let i = 0; i < POOL; i++) {
-    bayMats.push(new THREE.MeshStandardMaterial({
+    bayMats.push(standardMat({
       color: 0x1a0f04, roughness: 0.3, metalness: 0.2,
       emissive: new THREE.Color(BAY_IDLE.r, BAY_IDLE.g, BAY_IDLE.b), emissiveIntensity: 0.5,
     }));
@@ -101,6 +102,7 @@ export function createGunshipRenderer(scene) {
   // nacelle slots; every other mesh feeds the hull. In-code materials kept (I220).
   // I460/ST-429 A2: hull silhouette rim (shared I278 pattern; per-role color in CONFIG.enemyRim).
   applyEnemyRim(hullMat, 'gunship');
+if (isWebGPU()) for (const m of bayMats) applyTSLGlow(m, { color: new THREE.Color(BAY_IDLE.r, BAY_IDLE.g, BAY_IDLE.b), base: 0.22, amp: 0.3, speed: 2.2, speed2: 5.1 }).setPulse(1); // I557 (ST-523): bay glow (webgpu arm only)
 
   function useGLB(obj) {
     let hull = null, nacelle = null, bay = null;

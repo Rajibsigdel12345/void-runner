@@ -15,7 +15,8 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
-import { standardMat } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
+import { standardMat, isWebGPU } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
+import { applyTSLGlow } from './tslMaterials.js'; // I557 (ST-523): TSL time-pulsed glow (webgpu arm only)
 
 function ensureColor(geo) {
   if (!geo.hasAttribute('color')) {
@@ -63,11 +64,11 @@ export function createPhantomRenderer(scene) {
       color: bodyColor, roughness: 0.5, metalness: 0.2, flatShading: true, vertexColors: true,
       emissive: 0x0f2a14, emissiveIntensity: 0.2, transparent: true, opacity: 0,
     });
-    const podMat = new THREE.MeshStandardMaterial({
+    const podMat = standardMat({
       color: CONFIG.phantom.palette.pod, roughness: 0.6, metalness: 0.15, flatShading: true, vertexColors: true,
       transparent: true, opacity: 0,
     });
-    const noseMat = new THREE.MeshStandardMaterial({
+    const noseMat = standardMat({
       color: 0x10241a, roughness: 0.3, metalness: 0.2,
       emissive: new THREE.Color(ACCENT.r, ACCENT.g, ACCENT.b), emissiveIntensity: 0.6,
       transparent: true, opacity: 0,
@@ -87,6 +88,7 @@ export function createPhantomRenderer(scene) {
   // I460/ST-429 A2: hull silhouette rim (shared pattern; per-role color in CONFIG.enemyRim).
   // Per-slot hull materials (cloak opacity is per-phantom) -> one rimmed material per slot.
   for (const m of slotMats) applyEnemyRim(m.hull, 'phantom');
+if (isWebGPU()) for (const m of slotMats) applyTSLGlow(m.nose, { color: new THREE.Color(ACCENT.r, ACCENT.g, ACCENT.b), base: 0.2, amp: 0.3, speed: 2.4, speed2: 5.9 }).setPulse(1); // I557 (ST-523): nose/cloak-edge glow (webgpu arm only)
 
   /** sync(phantomField, t, motionOff): place the pool; fade with the cloak
    *  opacity; the nose glow ramps over the strike uncloak (RM-safe state ramp). */

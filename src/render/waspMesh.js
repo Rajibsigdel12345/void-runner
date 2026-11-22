@@ -9,6 +9,8 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
+import { standardMat, isWebGPU } from './fxArm.js'; // I557 (ST-523): node materials on the webgpu arm (hull + accents)
+import { applyTSLGlow } from './tslMaterials.js'; // I557 (ST-523): TSL time-pulsed glow (webgpu arm only)
 
 function bakeHullGeometry() {
   const r = CONFIG.wasp.radius;
@@ -42,16 +44,16 @@ export function createWaspRenderer(scene) {
   let wingGeo = bakeWingGeometry();
   let noseGeo = bakeNoseGeometry();
   const hullColor = new THREE.Color(CONFIG.wasp.palette.body.color).multiplyScalar(CONFIG.wasp.renderLumaGain); // I480 rendered-luma audit: WASP 176 (top rung)
-  const hullMat = new THREE.MeshStandardMaterial({
+  const hullMat = standardMat({
     color: hullColor, roughness: 0.55, metalness: 0.2, flatShading: true, vertexColors: true,
     emissive: 0x2a2c10, emissiveIntensity: 0.25,
   });
-  const wingMat = new THREE.MeshStandardMaterial({
+  const wingMat = standardMat({
     color: CONFIG.wasp.palette.wing.color, roughness: 0.7, metalness: 0.15, flatShading: true,
   });
   const noseMats = [];
   for (let i = 0; i < POOL; i++) {
-    noseMats.push(new THREE.MeshStandardMaterial({
+    noseMats.push(standardMat({
       color: 0x140604, roughness: 0.3, metalness: 0.2,
       emissive: new THREE.Color(NOSE_RED.r, NOSE_RED.g, NOSE_RED.b), emissiveIntensity: 0.4,
     }));
@@ -94,6 +96,7 @@ export function createWaspRenderer(scene) {
 
   // I460/ST-429 A2: hull silhouette rim (shared pattern; per-role color in CONFIG.enemyRim).
   applyEnemyRim(hullMat, 'wasp');
+if (isWebGPU()) for (const m of noseMats) applyTSLGlow(m, { color: new THREE.Color(NOSE_RED.r, NOSE_RED.g, NOSE_RED.b), base: 0.25, amp: 0.35, speed: 3.3, speed2: 7.1 }).setPulse(1); // I557 (ST-523): nose glow (webgpu arm only)
 
   function useGLB(obj) {
     let hull = null, wing = null, nose = null;

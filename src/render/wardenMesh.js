@@ -7,7 +7,8 @@ import * as THREE from 'three';
 import { RNG } from '../core/rng.js';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
-import { standardMat } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
+import { standardMat, isWebGPU } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
+import { applyTSLGlow } from './tslMaterials.js'; // I557 (ST-523): TSL time-pulsed glow (webgpu arm only)
 
 function bakeDroneGeometry() {
   const r = CONFIG.warden.radius;
@@ -60,7 +61,7 @@ export function createWardenMesh(scene) {
   // so the "exposed" state reads by silhouette, not just by the orange glow.
   let shapeCuesOn = true;
   const spikeGeo = new THREE.ConeGeometry(r * 0.16, r * 0.55, 4);
-  const spikeMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(0x8fa3c8).multiplyScalar(CONFIG.warden.renderLumaGain), roughness: 0.3, metalness: 0.85, flatShading: true, emissive: 0xff7a3c, emissiveIntensity: 0.5 }); // I511/ST-477: spike collar shares the armor gain (single CONFIG lever)
+  const spikeMat = standardMat({ color: new THREE.Color(0x8fa3c8).multiplyScalar(CONFIG.warden.renderLumaGain), roughness: 0.3, metalness: 0.85, flatShading: true, emissive: 0xff7a3c, emissiveIntensity: 0.5 }); // I511/ST-477: spike collar shares the armor gain (single CONFIG lever)
   const spikes = new THREE.Group();
   for (let i = 0; i < 8; i++) {
     const holder = new THREE.Object3D();

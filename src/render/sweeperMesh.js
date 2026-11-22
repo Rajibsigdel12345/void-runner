@@ -15,7 +15,8 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
-import { standardMat } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
+import { standardMat, isWebGPU } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
+import { applyTSLGlow } from './tslMaterials.js'; // I557 (ST-523): TSL time-pulsed glow (webgpu arm only)
 
 function ensureColor(geo) {
   if (!geo.hasAttribute('color')) {
@@ -73,7 +74,7 @@ export function createSweeperRenderer(scene) {
       color: bodyColor, roughness: 0.5, metalness: 0.2, flatShading: true, vertexColors: true,
       emissive: 0x0a1424, emissiveIntensity: 0.25,
     });
-    const arcMat = new THREE.MeshStandardMaterial({
+    const arcMat = standardMat({
       color: 0x101c2c, roughness: 0.3, metalness: 0.2,
       emissive: new THREE.Color(ARC.r, ARC.g, ARC.b), emissiveIntensity: 0.6,
     });
@@ -93,6 +94,7 @@ export function createSweeperRenderer(scene) {
 
   // I460/ST-429 A2: hull silhouette rim (shared pattern; per-role color in CONFIG.enemyRim).
   for (const m of slotMats) applyEnemyRim(m.hull, 'sweeper');
+if (isWebGPU()) for (const m of slotMats) applyTSLGlow(m.arc, { color: new THREE.Color(ARC.r, ARC.g, ARC.b), base: 0.3, amp: 0.4, speed: 3.5, speed2: 8.3 }).setPulse(1); // I557 (ST-523): arc glow (webgpu arm only)
 
   /** sync(sweeperField, t, motionOff): place the pool (flight level 0.5); yaw
    *  from facing (sweep/reaim) or velocity (enter/approach); enter

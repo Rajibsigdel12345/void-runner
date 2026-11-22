@@ -15,7 +15,8 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
-import { standardMat } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
+import { standardMat, isWebGPU } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
+import { applyTSLGlow } from './tslMaterials.js'; // I557 (ST-523): TSL time-pulsed glow (webgpu arm only)
 
 function ensureColor(geo) {
   if (!geo.hasAttribute('color')) {
@@ -67,12 +68,12 @@ export function createHaulerRenderer(scene) {
     color: bodyColor, roughness: 0.6, metalness: 0.25, flatShading: true, vertexColors: true,
     emissive: 0x1a1006, emissiveIntensity: 0.2,
   });
-  const sponsonMat = new THREE.MeshStandardMaterial({
+  const sponsonMat = standardMat({
     color: CONFIG.hauler.palette.sponson, roughness: 0.75, metalness: 0.2, flatShading: true, vertexColors: true,
   });
   const hatchMats = [];
   for (let i = 0; i < POOL; i++) {
-    hatchMats.push(new THREE.MeshStandardMaterial({
+    hatchMats.push(standardMat({
       color: 0x1a0f04, roughness: 0.3, metalness: 0.2,
       emissive: new THREE.Color(HATCH.r, HATCH.g, HATCH.b), emissiveIntensity: 0.35,
     }));
@@ -94,6 +95,7 @@ export function createHaulerRenderer(scene) {
 
   // I460/ST-429 A2: hull silhouette rim (shared pattern; per-role color in CONFIG.enemyRim).
   applyEnemyRim(hullMat, 'hauler');
+if (isWebGPU()) for (const m of hatchMats) applyTSLGlow(m, { color: new THREE.Color(HATCH.r, HATCH.g, HATCH.b), base: 0.22, amp: 0.3, speed: 2, speed2: 4.9 }).setPulse(1); // I557 (ST-523): hatch glow (webgpu arm only)
 
   /** sync(haulerField, t, motionOff): place the pool; yaw onto the plod
    *  heading; the hatch glow ramps over the mine-drop telegraph (RM-safe). */

@@ -2,6 +2,8 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 import { flameScales } from '../core/flame.js'; // ST-256 (I268): layered flame math (pure core)
+import { isWebGPU, getFxState } from './fxArm.js'; // I557 (ST-523): TSL arm state (webgpu-only ship node materials)
+import { createShipNodeMats } from './shipNodeMats.js'; // I557 (ST-523): webgpu-arm ship material factory
 
 // ST-256 (I268): canvas textures for the layered flame - built once, no per-frame allocs.
 // The falloff map fades the plume toward its tail: cone UV v=1 is the apex and
@@ -57,9 +59,20 @@ export function createShipMesh() {
   // The cockpit cyan emissive stays the FROZEN identity accent - pinned in
   // tests/paletteHarmony.test.js; retune only via a design pass.
   const P = CONFIG.ship.palette;
-  const bodyMat = new THREE.MeshStandardMaterial({ color: P.body.color, metalness: P.body.metalness, roughness: P.body.roughness, emissive: P.body.emissive !== undefined ? P.body.emissive : 0x000000, emissiveIntensity: P.body.emissiveIntensity !== undefined ? P.body.emissiveIntensity : 0, flatShading: true, vertexColors: true }); // G5 (I273): reads COLOR_0 hull-bottom fill
-  const wingMat = new THREE.MeshStandardMaterial({ color: P.wing.color, metalness: P.wing.metalness, roughness: P.wing.roughness, flatShading: true, vertexColors: true }); // I292/ST-275: reads COLOR_0 (wing/fin per-facet value bake; Fin gets white identity)
-  const cockpitMat = new THREE.MeshStandardMaterial({ color: P.cockpit.color, emissive: P.cockpit.emissive, emissiveIntensity: P.cockpit.emissiveIntensity, roughness: P.cockpit.roughness });
+  // I557 (ST-523): webgpu arm only - MeshPhysicalNodeMaterial ship materials (clearcoat
+  // + time-pulsed engine emissive from the frozen flame palette, shipNodeMats.js).
+  // Classic arm: nodeMats = null and the plain materials in the else branch are the
+  // byte-identical I556 path (same constructors, same frozen palette params).
+  const nodeMats = isWebGPU() ? createShipNodeMats(P, CONFIG.ship.flame, getFxState()) : null;
+  let bodyMat, wingMat, cockpitMat;
+  let engineMat = null; // I557 (ST-523): dedicated engine/nozzle glow slot (webgpu arm only)
+  if (nodeMats) {
+    bodyMat = nodeMats.bodyMat; wingMat = nodeMats.wingMat; cockpitMat = nodeMats.cockpitMat; engineMat = nodeMats.engineMat;
+  } else {
+    bodyMat = new THREE.MeshStandardMaterial({ color: P.body.color, metalness: P.body.metalness, roughness: P.body.roughness, emissive: P.body.emissive !== undefined ? P.body.emissive : 0x000000, emissiveIntensity: P.body.emissiveIntensity !== undefined ? P.body.emissiveIntensity : 0, flatShading: true, vertexColors: true }); // G5 (I273): reads COLOR_0 hull-bottom fill
+    wingMat = new THREE.MeshStandardMaterial({ color: P.wing.color, metalness: P.wing.metalness, roughness: P.wing.roughness, flatShading: true, vertexColors: true }); // I292/ST-275: reads COLOR_0 (wing/fin per-facet value bake; Fin gets white identity)
+    cockpitMat = new THREE.MeshStandardMaterial({ color: P.cockpit.color, emissive: P.cockpit.emissive, emissiveIntensity: P.cockpit.emissiveIntensity, roughness: P.cockpit.roughness });
+  }
 
   const bodyGeo = new THREE.ConeGeometry(0.55, 1.7, 4);
   bodyGeo.rotateX(Math.PI / 2); // tip toward +Z (forward in render space)
@@ -92,7 +105,7 @@ ensureWhiteColors(finGeo); // I292/ST-275: wingMat reads COLOR_0 (Fin has no GLB
 const nozzleGeo = new THREE.CylinderGeometry(0.18, 0.3, 0.25, 6);
 nozzleGeo.rotateX(Math.PI / 2); // axis along Z: radiusTop (0.18) faces forward +Z, flare 0.3 at the rear
 ensureWhiteColors(nozzleGeo); // G5 (I273): bodyMat reads COLOR_0
-const nozzle = new THREE.Mesh(nozzleGeo, bodyMat);
+const nozzle = new THREE.Mesh(nozzleGeo, engineMat || bodyMat); // I557 (ST-523): engine glow slot (webgpu arm)
 nozzle.position.set(0, 0, -0.775); // spans z -0.90..-0.65 (flame apex at -0.8 emerges from it)
 shipBody.add(nozzle);
 
@@ -179,6 +192,7 @@ shipBody.add(mouth);
       const nm = (n.material && n.material.name) || '';
       if (nm.indexOf('Cockpit') !== -1) n.material = cockpitMat;
       else if (nm.indexOf('Wing') !== -1) { n.material = wingMat; ensureWhiteColors(n.geometry); } // wing + fin (I292/ST-275: Fin has no COLOR_0 -> white identity)
+      else if (engineMat && /engine|nozzle/i.test(n.name || '')) { n.material = engineMat; ensureWhiteColors(n.geometry); } // I557 (ST-523): engine/nozzle -> dedicated glow slot (webgpu arm only)
       else { n.material = bodyMat; ensureWhiteColors(n.geometry); } // G5 (I273): bodyMat reads COLOR_0
     });
     group.add(obj);
@@ -209,6 +223,7 @@ shipBody.add(mouth);
     // Invuln blink (ST-025): ~6 Hz toggle; disabled under reduced motion.
     group.visible = !(motionOn && ship.isInvulnerable && Math.floor(t * 12) % 2 === 1);
     setFlame(thrustMag || 0, t, motionOn); // ST-063: engine flame
+    if (nodeMats) nodeMats.engineGlow.setPulse(2.2 * (thrustMag || 0)); // I557 (ST-523): one uniform write (webgpu arm only)
   // I460/ST-429 A3: damage-flash envelope (opacity only; RM-gated at fire in main.js).
   if (motionOn && t >= _fT0 && t < _fT1) {
     flashShell.visible = true;

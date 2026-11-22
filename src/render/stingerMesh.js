@@ -7,7 +7,8 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
-import { standardMat } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
+import { standardMat, isWebGPU } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
+import { applyTSLGlow } from './tslMaterials.js'; // I557 (ST-523): TSL time-pulsed glow (webgpu arm only)
 
 function bakeBodyGeometry() {
   // needle dart: octahedron stretched hard along +X (forward)
@@ -39,7 +40,7 @@ export function createStingerRenderer(scene) {
   });
   const coreMats = [];
   for (let i = 0; i < POOL; i++) {
-    coreMats.push(new THREE.MeshStandardMaterial({
+    coreMats.push(standardMat({
       color: 0x0a0f18, roughness: 0.3, metalness: 0.2,
       emissive: new THREE.Color(CORE_IDLE.r, CORE_IDLE.g, CORE_IDLE.b), emissiveIntensity: 0.5,
     }));
@@ -100,6 +101,7 @@ export function createStingerRenderer(scene) {
   // mesh feeds the body. In-code materials are kept (same pattern as wardenMesh, I220).
   // I460/ST-429 A2: body silhouette rim (shared I278 pattern; per-role color in CONFIG.enemyRim).
   applyEnemyRim(bodyMat, 'stinger');
+if (isWebGPU()) for (const m of coreMats) applyTSLGlow(m, { color: new THREE.Color(CORE_IDLE.r, CORE_IDLE.g, CORE_IDLE.b), base: 0.3, amp: 0.4, speed: 3.1, speed2: 7.7 }).setPulse(1); // I557 (ST-523): core glow (webgpu arm only)
 
   function useGLB(obj) {
     let body = null, core = null;

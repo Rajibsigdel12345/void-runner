@@ -8,7 +8,8 @@
 import * as THREE from 'three';
 import { CONFIG } from '../core/config.js';
 import { applyEnemyRim } from './enemyRim.js'; // I460/ST-429 A2: shared fresnel silhouette rim
-import { standardMat } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
+import { standardMat, isWebGPU } from './fxArm.js'; // I497 (ST-463): node material on the webgpu arm
+import { applyTSLGlow } from './tslMaterials.js'; // I557 (ST-523): TSL time-pulsed glow (webgpu arm only)
 
 function bakeHullGeometry() {
   // flat swept manta dart: octahedron squashed in Y (low profile), stretched forward
@@ -46,12 +47,12 @@ export function createHunterRenderer(scene) {
     color: hullColor, roughness: 0.6, metalness: 0.2, flatShading: true, vertexColors: true, // I451: painted rust hull (metalness 0.5 rendered ~3x darker than the palette luma under the scene light; renderLumaGain restores the design band)
     emissive: 0x2a120c, emissiveIntensity: 0.25,
   });
-  const finMat = new THREE.MeshStandardMaterial({
+  const finMat = standardMat({
     color: CONFIG.hunter.palette.fin.color, roughness: 0.75, metalness: 0.15, flatShading: true, // I451: painted fin (same metalness fix as hull)
   });
   const coreMats = [];
   for (let i = 0; i < POOL; i++) {
-    coreMats.push(new THREE.MeshStandardMaterial({
+    coreMats.push(standardMat({
       color: 0x140604, roughness: 0.3, metalness: 0.2,
       emissive: new THREE.Color(CORE_RED.r, CORE_RED.g, CORE_RED.b), emissiveIntensity: 0.5,
     }));
@@ -114,6 +115,7 @@ export function createHunterRenderer(scene) {
   // every other mesh feeds the hull. In-code materials kept (wardenMesh, I220).
   // I460/ST-429 A2: hull silhouette rim (shared I278 pattern; per-role color in CONFIG.enemyRim).
   applyEnemyRim(hullMat, 'hunter');
+if (isWebGPU()) for (const m of coreMats) applyTSLGlow(m, { color: new THREE.Color(CORE_RED.r, CORE_RED.g, CORE_RED.b), base: 0.25, amp: 0.35, speed: 3.7, speed2: 8.9 }).setPulse(1); // I557 (ST-523): core glow (webgpu arm only)
 
   function useGLB(obj) {
     let hull = null, fin = null, core = null;
