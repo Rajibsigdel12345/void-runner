@@ -48,10 +48,10 @@ const totalTris = parsed.reduce((a, p) => a + p.tris, 0);
 // FINAL fleet budgets (I510/ST-476 E68 close - the fleet is frozen until the next art epic
 // re-registers growth WITH MEASUREMENT; caps held at the I509 measured values, headroom for the next epic):
 const BUDGET = {
-totalFilesKB: 3690,  // [I553 (ST-519 E75 D4) RE-PIN WITH MEASUREMENT 3560 -> 3690: +archon 128,780 B; measured 3,666.43 KB (3,754,428 B); headroom 23.57 KB; prior I552: 3,540.67 KB (3,625,648 B)]
-  totalGeoKB: 3620,    // [I553 (ST-519 E75 D4) RE-PIN WITH MEASUREMENT 3490 -> 3620: +archon geo 125,712 B; measured 3,597.01 KB (3,683,334 B); headroom 22.99 KB; prior I552: 3,474.24 KB (3,557,622 B)]
+totalFilesKB: 3900,  // [I554 (ST-520 E75 D5) RE-PIN WITH MEASUREMENT 3690 -> 3900: +216,356 B rock v12 displacement remaster (7 GLBs 227,300 -> 443,656 B); measured 3,877.72 KB (3,970,784 B); headroom 22.28 KB; prior I553: 3,666.43 KB (3,754,428 B)]
+  totalGeoKB: 3830,    // [I554 (ST-520 E75 D5) RE-PIN WITH MEASUREMENT 3620 -> 3830: +216,360 B rock geometry (3,683,334 -> 3,899,694 B); measured 3,808.29 KB; headroom 21.71 KB; prior I553: 3,597.01 KB (3,683,334 B)]
   perFileKB: 760,      // [I541 re-pin WITH MEASUREMENT 600 -> 760 (ST-507 ship v7); max = ship.glb 722.67 KB (740,012 B); max enemy = wasp 302.77 KB (310,036 B)]
-  totalTris: 82200,    // [I553 (ST-519 E75 D4) RE-PIN WITH MEASUREMENT 79,000 -> 82,200: +archon 3,108 t; measured 81,707 t; headroom 493 t; prior I552: 78,599 t]
+  totalTris: 90800,    // [I554 (ST-520 E75 D5) RE-PIN WITH MEASUREMENT 82,200 -> 90,800: +9,030 t rock v12 (9,090 -> 18,120 t); measured 90,737 t; headroom 63 t; prior I553: 81,707 t]
   perFileMats: 4,      // [I510 FINAL holds 4 (I509 re-pin 3 -> 4); max = enemy_sentry.glb 4 part bakes (R-VALUE 2-3 band rule); ship stays 3]
 };
 
