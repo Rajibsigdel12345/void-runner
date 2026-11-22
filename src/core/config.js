@@ -1111,7 +1111,10 @@ export const CONFIG = {
     dolly: {
       startFrac: 0.55,     // dolly begins past this dist/arenaR fraction (0..1)
       rimScale: 1.7,       // offset + look-ahead scale at the rim (9 -> 15.3, 13 -> 22.1)
-      pow: 2               // smoothstep shaping exponent (soft ramp into the rim)
+      pow: 2,              // smoothstep shaping exponent (soft ramp into the rim)
+      speed: {             // ST-525 (I559): speed dolly (CAM-1 "zoom out on the boost")
+        boost: 1.10        // uniform extra scale of height+dolly-back at full speed; ss = 1 at rest (rest pins stay EXACT). Audit-tuned I559: rim dolly dormant on the campaign rail (s = 1.000 across all 5 levels) -> boost dolly is the primary depth lever there
+      }
     },
     overviewHeight: 56,    // ST-416 (I446): OVERVIEW height above arena center (fixed 3/4 view; whole arena |NDC|<=0.85 @16:9/fov60)
     overviewBack: 20,      // ST-416 (I446): OVERVIEW dolly-back (3/4 angle, not straight down)
@@ -1359,7 +1362,7 @@ skill: {            // ST-303 (E33): skill-model telemetry (pure core, E33 adapt
     elevBase: 3.0, elevAmp: 2.4, elevFreq: 0.070, elevPhase: 0.0, // vertical ride (world +Y)
     tangentFloor: 0.15,                    // keep |tangent| bounded away from 0 -> no NaN normalize
     turnScale: 14.0,                       // curvature -> bankRaw gain (clamped to [-1,1])
-    frameFrac: 0.45,                       // how far the look target is pulled toward path-ahead (0..1)
+    frameFrac: 0.0,                        // ST-525 D3 (I559): look stays collinear with the rail (0 = ship + lookAhead along the tangent, no path-ahead pull). 0.45 broke D3 constant framing on curves (SMOKE559: ndcY spread 0.185, yaw 6.99deg at curv 0.39) - 0 pins the ship to one NDC point wherever the ship is on the rail
     frameDist: 11.0,                       // metres along the path that 'ahead' is (framing lead)
     shipBank: 0.55,                        // ship roll (rad) at bankRaw = +/-1
     camRoll: 0.22,                         // camera roll (rad) at bankRaw = +/-1 (subtle, chase only)

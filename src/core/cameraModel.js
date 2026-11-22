@@ -48,18 +48,30 @@ export function dollyFactor(t, dolly) {
  * @param dist  ship distance from the arena center (caller precomputes; == hypot(p.x, p.y))
  * @param arenaR arena radius (CONFIG.arena.radius)
  * @param cfg   CONFIG.camera (needs camHeight, camBack, lookAhead, lookAheadSpeed, dolly)
- * @param out   {camX,camY,camZ,lookX,lookY,lookZ,s,ahead} written in place (no alloc)
+ * @param out   {camX,camY,camZ,lookX,lookY,lookZ,s,ss,ahead} written in place (no alloc)
+ * @param backDir optional {x,y} unit 2D dolly-back direction (default legacy world +Z; campaign = rail tangent)
  */
-export function chaseTargets(p, fwd, spdFrac, dist, arenaR, cfg, out) {
+export function chaseTargets(p, fwd, spdFrac, dist, arenaR, cfg, out, backDir) {
   const s = dollyFactor(arenaR > 0 ? dist / arenaR : 0, cfg.dolly);
-  const h = cfg.camHeight * s;
-  const back = cfg.camBack * s;
+  // ST-525 (I559): speed dolly (CAM-1 "zoom out on the boost") - uniform extra scale ss
+  // of the cam->ship offset ONLY (height + dolly-back). ss = 1 EXACTLY at rest
+  // (spdFrac 0 -> bit-identical framing; frozen rest-state pins hold). Look-ahead
+  // NOT scaled -> view leans slightly forward at speed (dolly-out reads as motion;
+  // ship settles toward screen center). "Zoom in on the brake" dropped by design:
+  // no brake input and rest must stay bit-identical.
+  const sp = cfg.dolly.speed;
+  const ss = sp ? 1 + (sp.boost - 1) * (spdFrac < 0 ? 0 : spdFrac > 1 ? 1 : spdFrac) : 1;
+  const h = cfg.camHeight * s * ss;
+  const back = cfg.camBack * s * ss;
   const ahead = (cfg.lookAhead + cfg.lookAheadSpeed * spdFrac) * s;
-  out.s = s;
-  out.ahead = ahead;
-  out.camX = p.x;
+  out.s = s; out.ss = ss; out.ahead = ahead;
+  // ST-525 (I559): backDir = unit 2D dir the dolly-back offset is applied ALONG.
+  // Default (0,1) = legacy world +Z, kept bit-identical via the null branch.
+  // Campaign passes the RAIL TANGENT (CAM-1 rail-parent invariant) - the D3a audit
+  // measured the legacy fixed offset rotating 354 deg in the rail frame.
+  if (backDir) { out.camX = p.x + back * backDir.x; out.camZ = p.y + back * backDir.y; }
+  else { out.camX = p.x; out.camZ = p.y + back; }
   out.camY = h;
-  out.camZ = p.y + back;
   out.lookX = p.x + fwd.x * ahead;
   out.lookY = 0; // arena plane (main.js overrides for the MENU hero framing)
   out.lookZ = p.y + fwd.y * ahead;
@@ -145,6 +157,21 @@ export function cockpitThrust(tx, ty, aim, out) {
   out.x = -tx * sa - ty * ca;
   out.y = tx * ca - ty * sa;
   return out;
+}
+
+// ST-525 (I559, D3 C-1): the UNDAMPED cockpit aim direction. cockpitThrust must
+// follow the pilot's INTENDED view direction, not the damped nose: while the view
+// swings, world.ship.aim lags by ship.aimEase and the WASD basis rotates with the
+// lag ("the controls don't match"). aimPoint (pointer raycast / touch) is the
+// undamped intent; absent or coincident (dist <= ~0.001) -> damped-nose fallback
+// (legacy, bit-identical). Pure: no ship mutation, no alloc.
+export function cockpitAim(shipPos, aimPoint, fallbackAim) {
+  if (aimPoint) {
+    const dx = aimPoint.x - shipPos.x;
+    const dy = aimPoint.y - shipPos.y;
+    if (dx * dx + dy * dy > 1e-6) return Math.atan2(dy, dx);
+  }
+  return fallbackAim;
 }
 
 // ST-454 (E64, I487): flight-path camera adjustment (E62-preserving). `chase` = chaseTargets

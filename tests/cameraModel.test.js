@@ -1,7 +1,7 @@
 // ST-415 (I445): chase-camera model tests (pure math, DOM-free)
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { clamp01, smoothstep01, dollyFactor, chaseTargets, projectNdc, overviewTargets, cockpitTargets, cockpitThrust } from '../src/core/cameraModel.js';
+import { clamp01, smoothstep01, dollyFactor, chaseTargets, projectNdc, overviewTargets, cockpitTargets, cockpitThrust, cockpitAim } from '../src/core/cameraModel.js';
 import { CONFIG } from '../src/core/config.js';
 
 const CFG = CONFIG.camera; // real config keeps these tests honest
@@ -65,12 +65,14 @@ test('chaseTargets: rim scales offset AND look-ahead by rimScale (uniform)', () 
   assert.ok(Math.abs(c.ahead - CFG.lookAhead * CFG.dolly.rimScale) < 1e-9);
 });
 
-test('chaseTargets: speed still scales the look-ahead on top of the dolly', () => {
+test('chaseTargets: speed still scales the look-ahead on top of the dolly (ss = 1 at rest)', () => {
   const c0 = { ...targets({ x: 0, y: 0 }, { x: 0, y: 1 }, 0) }; // clone: targets() writes the shared scratch in place
   const c1 = { ...targets({ x: 0, y: 0 }, { x: 0, y: 1 }, 1) };
   assert.ok(Math.abs(c0.lookZ - CFG.lookAhead) < 1e-12);
-  assert.ok(Math.abs(c1.lookZ - (CFG.lookAhead + CFG.lookAheadSpeed)) < 1e-12);
-  assert.equal(c0.camY, c1.camY); // dolly is speed-independent
+  assert.ok(Math.abs(c1.lookZ - (CFG.lookAhead + CFG.lookAheadSpeed)) < 1e-12); // look-ahead scales by s only (NOT ss)
+  assert.equal(c0.camY, CFG.camHeight); // rest: ss = 1 (legacy framing)
+  assert.ok(Math.abs(c1.camY - CFG.camHeight * CFG.dolly.speed.boost) < 1e-12); // ST-525: speed dolly scales the height
+  assert.ok(Math.abs(c1.camZ - CFG.camBack * CFG.dolly.speed.boost) < 1e-12); // ST-525: ...and the dolly-back
 });
 
 test('INVARIANT: ship screen-space offset is identical at every arena position (per heading, both speeds)', () => {
@@ -238,4 +240,79 @@ test('cockpitTargets: I504 seat - look drops cockpitLookDrop below the eye (down
   assert.equal(o.camY, CFG.cockpitHeight);
   assert.ok(Math.abs(o.lookY - (CFG.cockpitHeight - CFG.cockpitLookDrop)) < 1e-12);
   assert.ok(o.lookY < o.camY, 'look point is below the eye (nose in frame)');
+});
+
+// ST-525 (I559): speed dolly + rail-aligned backDir + undamped cockpit aim (C-1)
+const legacyTargets559 = (p, h, spdFrac) => {
+  const s = dollyFactor(Math.hypot(p.x, p.y) / R, CFG.dolly);
+  const ahead = (CFG.lookAhead + CFG.lookAheadSpeed * spdFrac) * s;
+  return { s, camX: p.x, camY: CFG.camHeight * s, camZ: p.y + CFG.camBack * s, lookX: p.x + h.x * ahead, lookY: 0, lookZ: p.y + h.y * ahead };
+};
+
+test('ST-525: rest (spdFrac 0) is bit-identical to the legacy model (all POS x HEADS)', () => {
+  for (const p of POS) for (const h of HEADS) {
+    const c = targets(p, h, 0);
+    const l = legacyTargets559(p, h, 0);
+    assert.equal(c.ss, 1, p.n + '/' + h.n + ' ss');
+    for (const k of ['s', 'camX', 'camY', 'camZ', 'lookX', 'lookY', 'lookZ']) assert.equal(c[k], l[k], p.n + '/' + h.n + ' ' + k);
+  }
+});
+
+test('ST-525: speed dolly ss endpoints + monotone; look-ahead NOT ss-scaled', () => {
+  assert.equal(targets({ x: 0, y: 0 }, { x: 0, y: 1 }, 0).ss, 1);
+  assert.ok(Math.abs(targets({ x: 0, y: 0 }, { x: 0, y: 1 }, 1).ss - CFG.dolly.speed.boost) < 1e-12);
+  let prev = 1;
+  for (let i = 0; i <= 20; i++) { const v = targets({ x: 0, y: 0 }, { x: 0, y: 1 }, i / 20).ss; assert.ok(v >= prev - 1e-12); prev = v; }
+  const b = targets({ x: 5, y: -3 }, { x: 0, y: 1 }, 1); // dist ~5.83 < startFrac*26 -> s = 1
+  assert.ok(Math.abs(b.lookZ - (-3 + CFG.lookAhead + CFG.lookAheadSpeed)) < 1e-12, 'look-ahead unscaled by ss');
+  assert.ok(Math.abs(b.camY - CFG.camHeight * CFG.dolly.speed.boost) < 1e-12);
+  assert.ok(Math.abs(b.camZ - (-3 + CFG.camBack * CFG.dolly.speed.boost)) < 1e-12);
+});
+
+test('ST-525: backDir null/undefined = legacy bit-identity; unit dirs rotate the dolly-back offset', () => {
+  const p = { x: 1, y: -2 };
+  const s = dollyFactor(Math.hypot(p.x, p.y) / R, CFG.dolly);
+  const base = { ...targets(p, { x: 0, y: 1 }, 0) };
+  const l = legacyTargets559(p, { x: 0, y: 1 }, 0);
+  for (const k of ['camX', 'camY', 'camZ']) assert.equal(base[k], l[k], 'null backDir ' + k);
+  for (const d of [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }]) {
+    const c = chaseTargets(p, { x: 0, y: 1 }, 0, Math.hypot(p.x, p.y), R, CFG, out, d);
+    assert.ok(Math.abs(Math.hypot(c.camX - p.x, c.camZ - p.y) - CFG.camBack * s) < 1e-9, 'offset magnitude');
+    assert.ok(Math.abs(c.camX - (p.x + CFG.camBack * s * d.x)) < 1e-9 && Math.abs(c.camZ - (p.y + CFG.camBack * s * d.y)) < 1e-9, 'offset direction');
+  }
+});
+
+test('ST-525: rail-aligned backDir -> ship NDC invariant under rigid rotation (rail-parent invariant)', () => {
+  const rot = (v, a) => ({ x: v.x * Math.cos(a) - v.y * Math.sin(a), y: v.x * Math.sin(a) + v.y * Math.cos(a) });
+  const A = 0.9;
+  const p0 = { x: 1, y: -2 }, h0 = { x: 0, y: 1 };
+  const p1 = rot(p0, A), h1 = rot(h0, A);
+  const oA = { camX: 0, camY: 0, camZ: 0, lookX: 0, lookY: 0, lookZ: 0, s: 1, ahead: 0 };
+  const oB = { camX: 0, camY: 0, camZ: 0, lookX: 0, lookY: 0, lookZ: 0, s: 1, ahead: 0 };
+  const nA = { x: 0, y: 0, z: 0 }, nB = { x: 0, y: 0, z: 0 };
+  const cA = chaseTargets(p0, h0, 0, Math.hypot(p0.x, p0.y), R, CFG, oA);
+  const cB = chaseTargets(p1, h1, 0, Math.hypot(p1.x, p1.y), R, CFG, oB, { x: h1.x, y: h1.y });
+  projectNdc(p0.x, 0, p0.y, { x: cA.camX, y: cA.camY, z: cA.camZ }, { x: cA.lookX, y: cA.lookY, z: cA.lookZ }, FOV, ASPECT, nA);
+  projectNdc(p1.x, 0, p1.y, { x: cB.camX, y: cB.camY, z: cB.camZ }, { x: cB.lookX, y: cB.lookY, z: cB.lookZ }, FOV, ASPECT, nB);
+  assert.ok(Math.abs(nA.x - nB.x) < 1e-9 && Math.abs(nA.y - nB.y) < 1e-9, 'rail-parent NDC invariant: ' + JSON.stringify(nA) + ' vs ' + JSON.stringify(nB));
+});
+
+test('ST-525: cockpitAim - undamped pointer bearing when active, damped-nose fallback otherwise', () => {
+  const sp = { x: 0, y: 0 };
+  assert.equal(cockpitAim(sp, null, 0.5), 0.5); // no pointer -> fallback
+  assert.equal(cockpitAim(sp, { x: 0.0001, y: 0.0001 }, 0.5), 0.5); // coincident (dist ~1.4e-4) -> fallback
+  assert.equal(cockpitAim(sp, { x: 0.0005, y: 0.0005 }, 0.5), 0.5); // dist ~7.1e-4 -> fallback
+  assert.equal(cockpitAim(sp, { x: 3, y: 4 }, 0.5), Math.atan2(4, 3));
+  assert.equal(cockpitAim(sp, { x: 0, y: -5 }, 0.5), -Math.PI / 2);
+  assert.equal(cockpitAim({ x: 1, y: 1 }, { x: 4, y: 2 }, 0.5), Math.atan2(1, 3));
+});
+
+test('ST-525: C-1 composition - cockpit thrust basis follows the undamped aim, not the damped nose', () => {
+  const o = {};
+  const undamped = 1.0, damped = 0;
+  // W = screen-up = (0, -1) in the screen-basis convention (screen-up = sim -y at aim -PI/2)
+  cockpitThrust(0, -1, cockpitAim({ x: 0, y: 0 }, { x: Math.cos(undamped), y: Math.sin(undamped) }, damped), o);
+  assert.ok(Math.abs(o.x - Math.cos(undamped)) < 1e-12 && Math.abs(o.y - Math.sin(undamped)) < 1e-12, 'undamped: ' + JSON.stringify(o));
+  cockpitThrust(0, -1, damped, o);
+  assert.ok(Math.abs(o.x - 1) < 1e-12 && Math.abs(o.y) < 1e-12, 'legacy damped-nose fallback: ' + JSON.stringify(o));
 });

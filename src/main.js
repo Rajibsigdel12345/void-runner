@@ -38,7 +38,7 @@ import { createParticles } from './render/particles.js';
 import { createShockwaves } from './render/shockwave.js'; // ST-238 (I245): pooled additive shockwave ring
 import { createDebrisField } from './render/debrisField.js'; // ST-381 (I411): transient 3D death-shatter pool
 import { createShake, createPunch, createFovKick } from './core/fx.js'; // ST-081/ST-082
-import { chaseTargets, overviewTargets, cockpitTargets, flightPathCam, cockpitThrust } from './core/cameraModel.js'; // ST-415 + ST-416 (I445/I446): pure camera targets (chase dolly + overview + cockpit)
+import { chaseTargets, overviewTargets, cockpitTargets, flightPathCam, cockpitThrust, cockpitAim } from './core/cameraModel.js'; // ST-415 + ST-416 (I445/I446): pure camera targets (chase dolly + overview + cockpit) + ST-525 (I559)
 import { pathPoint } from './core/flightPath.js'; // ST-454 (I487): race-line path point (pure core)
 import { levelStartDistance } from './core/level.js'; // ST-454 (I487): campaign cumulative path distance
 import { createFlightPathLine } from './render/flightPathLine.js'; // ST-454 (I487): visible race-line ribbon
@@ -217,6 +217,7 @@ scene.add(flightPathLine.group);
 const fpA = { x: 0, y: 0, elev: 0, tx: 0, ty: 0, curv: 0, bankRaw: 0 }; // ST-454 (I487): path scratch @ D
 const fpB = { x: 0, y: 0, elev: 0, tx: 0, ty: 0, curv: 0, bankRaw: 0 }; // ST-454 (I487): path scratch @ D+frameDist
 const fpCamOut = { x: 0, y: 0, z: 0 }, fpLookOut = { x: 0, y: 0, z: 0 }; // ST-454 (I487): flightPathCam out
+const railBackDir = { x: 0, y: -1 }; // ST-525 D3c (I559): rail back = AGAINST travel (+tangent would place camera in front)
 const SHIP_HOVER = 0.4; // ST-454 (I487): base ship hover height (matches shipMesh.js)
 const vista = createVistaRing(scene, CONFIG.vista); // ST-455 (I488): background vista silhouettes (deterministic; 1 draw call; campaign-gated)
 scene.add(vista.group);
@@ -1028,7 +1029,8 @@ function resolveAimPoint() {
 function tick(dt, intent) {
   if (tutorialActive) return; // I151: freeze the sim while the first-run tutorial is up (render keeps going)
   if (!intent) input.tick(dt); // ST-033: decay touch fire-tail / pause cooldown
-  const it = intent || { thrust: camMode === 'cockpit' ? cockpitThrust(input.state.thrust.x, input.state.thrust.y, world.ship.aim, cockpitThrustOut) : input.state.thrust, aimPoint: resolveAimPoint(), firing: input.state.firing }; // I504 (ST-470): cockpit = camera-relative WASD (screen-up = along the seat axis); chase keeps the screen-basis thrust (bit-identical; the scripted-intent path bypasses this line so the causal harness is untouched)
+  const ap559 = intent ? null : resolveAimPoint(); // ST-525 (I559): one raycast per substep (was inline in the literal below; scripted-intent path still skips it)
+  const it = intent || { thrust: camMode === 'cockpit' ? cockpitThrust(input.state.thrust.x, input.state.thrust.y, cockpitAim(world.ship.pos, ap559, world.ship.aim), cockpitThrustOut) : input.state.thrust, aimPoint: ap559, firing: input.state.firing }; // I504 (ST-470) + ST-525 (I559): cockpit thrust basis follows the UNDAMPED aim (pointer intent); no pointer -> damped-nose fallback (bit-identical); chase screen-basis unchanged; scripted-intent path bypasses this line (causal harness untouched)
   if (intent) { input.state.thrust.x = it.thrust.x; input.state.thrust.y = it.thrust.y; input.state.firing = it.firing; } // I213: mirror scripted intent into the live input state so the render layer (flame, engine trail) tracks the pilot
   if (recorder && !recStopped && world.simActive) recorder.record(it); // ST-191: record exactly the intent the sim receives (one per substep; freezes at stop/death/tutorial)
   world.step(dt, it);
@@ -1338,7 +1340,8 @@ beaconRenders.sync(world.beacons, simT, motionOff); // ST-518 (E75): lamp charge
   // ST-415 (I445): chase targets from the pure camera model (edge-aware dolly: the
   // offset + look-ahead scale uniformly near the rim so the ship's screen offset and
   // the view angle are invariant wherever the ship moves; identity at center).
-  chaseTargets(ship.pos, f, spdFrac, Math.hypot(ship.pos.x, ship.pos.y), CONFIG.arena.radius, CONFIG.camera, camModelOut);
+  if (onPath) { railBackDir.x = -fpA.tx; railBackDir.y = -fpA.ty; } // ST-525 D3c (I559): sign fix - back offset applied AGAINST travel (legacy: ship -Z, cam +Z)
+  chaseTargets(ship.pos, f, spdFrac, Math.hypot(ship.pos.x, ship.pos.y), CONFIG.arena.radius, CONFIG.camera, camModelOut, onPath ? railBackDir : null); // ST-525 (I559): campaign rail-aligned (CAM-1); endless null -> bit-identical
   // ST-219: state-tied camera feel - MENU orbit drift + 2-5% aim lead (eased + capped; dodge-read rule)
   if (st === STATE.MENU && !motionOff) menuOrbitA += dt * CONFIG.camera.menuOrbitRate; // slow drift, motion-gated
   let camTX = camModelOut.camX, camTY = camModelOut.camY, camTZ = camModelOut.camZ;
