@@ -910,3 +910,12 @@ recorded in production/gates.md.
 - Cut ladder (scope-check): C1 lever fails both acceptances -> revert (2.5 -> 2.0) + close accept-with-documentation on the re-characterized wall / C2 (b) holds but (a) fails -> ship + document the wave-13-20 density as the NEW live wall.
 - Risks: R-1 borderline threshold call (H EXACTLY 0.600 in both samples - consistent across 40 runs; I565 re-measurement adjudicates by wall motion) / R-2 RNG stream shift (documented, non-regression) / R-3 the lever exposes the wave-13-20 wall as the next wall (pre-registered acceptance (b) + the C2 residual path) / R-4 cross-mode effect on campaign L1/L3 bosses (registered, documented) / R-5 docs-only dist or BOM drift (disk re-measure + BOM-delta-0 before commit).
 - Status: CLOSED I566 (G77.0 close gate; opened I564).
+
+## E78 - Splicer beatability (post-E77 wave-10 wall) - IN PROGRESS (opened I567)
+- Goal: re-audit the registered post-E77 wave-10 wall (SPLICER-dominant 9/30 in sweep565) on fresh seeds and adjudicate the frozen E70 branch rules BEFORE any lever choice (pre-registered lever [2] splicer.maxHp 30 -> 24).
+- Research: design/e78-splicer-beatability-research.md (I567 MEASURED sweep567: 30/30 died, median death wave 9, wave-10 cluster REPRODUCED 11/30, H = 0.400 EXACT -> BRANCH C accept-with-documentation; composite wall: wave-5 Monolith bolt cluster 10/30 + wave-10 mixed cluster 11/30 (SPLICER 5, residual Monolith bolts 2, rocks 3, gunship 1) + wave-8/9 gunship band 4/30; best run wave 14).
+- Stories: ST-533 (I567) open + re-audit + adjudication - DONE I567 / the lever story VOID / ST-534 (I568) G78.0 close gate - PENDING.
+- Constraints: docs + .evidence only; zero src/assets/vendor/render/i18n; dist byte-identical 6,430,174 B / 203; frozen lever [2] unapplied but remains registered.
+- Cut ladder: N/A (no lever); guard registered: if a future re-audit re-adjudicates the wall SPLICER-dominant, the frozen candidate is lever [2] (single lever, on-failure -> accept, no second lever).
+- Risks: R-1 borderline verdict (0.400 EXACT on the C boundary; paired sample sweep565 in the A band 0.533 - registered) / R-2 composite wall, no single lever (a future balance epic may need multi-step scope) / R-3 speed-9 Monolith/Splicer bolt attribution ambiguity (frozen since I525/I564) / R-4 label hygiene (fixed in the sweep567 clone; JSON authoritative).
+- Status: IN PROGRESS (opened I567; closes I568 at G78.0).
