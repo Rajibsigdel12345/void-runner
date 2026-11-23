@@ -1,6 +1,7 @@
 ﻿﻿﻿﻿﻿﻿﻿# Changelog - Void Runner
 
 ## [Unreleased]- I561: Three enemy ship types (the phantom interceptor, the sweeper and the mine-hauler) now have fully remodeled hulls with more plating and mechanical detail - same shapes, much nicer looks. Nothing else changed.
+- I564: No visible changes - an internal measurement round. We re-ran our automated playability audit of endless mode against the current enemy roster and found the main remaining difficulty wall is the wave-5 boss's ring attack pattern, not the high-wave density we had previously assumed. The fix for that lands next round. Every automated play-check was re-run from scratch and matched its pinned numbers exactly; the game bundle is unchanged at 6,430,172 bytes, under the 7.4 MB limit.
 - I563: Waves now end the moment their last breakable rock is gone - no more long waits once the tough blue rocks start drifting around (wave 8 and beyond). The blue rocks keep drifting as before, part of the scenery now. The same pacing fix also applies in the campaign.
 
 

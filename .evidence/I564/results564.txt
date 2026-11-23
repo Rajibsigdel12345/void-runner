@@ -1,0 +1,43 @@
+I564 / ST-530 R7 KILLING-BLOW RE-AUDIT (post-E69/E75/E76 roster) (10 seeds 52700+i, full director, kiter, cap 36000 ticks)
+rules: .evidence/I525/rules525.md   generated 2026-11-23T06:52:28.012Z   wall ms 3105
+
+PER-RUN:
+seed 56400: died tick 7158 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=51301 kills=193
+seed 56401: died tick 5902 (wave 5) source=bullet clsPrimary=bullet_unknown hits=3 score=38043 kills=147
+seed 56402: died tick 7267 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=53218 kills=193
+seed 56403: died tick 8051 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=47357 kills=181
+seed 56404: died tick 10218 (wave 8) source=bullet clsPrimary=gunship hits=3 score=87190 kills=275
+seed 56405: died tick 5729 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=41637 kills=170
+seed 56406: died tick 6413 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=42194 kills=163
+seed 56407: died tick 13936 (wave 10) source=rock_M clsPrimary=rock_M hits=3 score=134355 kills=431
+seed 56408: died tick 10420 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=136459 kills=404
+seed 56409: died tick 9778 (wave 8) source=rock_S clsPrimary=rock_S hits=3 score=90871 kills=308
+
+KILLING-BLOW TALLY (primary, incl. monolithProbable rocks): {"MONOLITH":5,"bullet_unknown":1,"gunship":1,"rock_M":1,"SPLICER":1,"rock_S":1}
+KILLING-BLOW TALLY (strict, probable rocks excluded):        {"MONOLITH":5,"bullet_unknown":1,"gunship":1,"rock_M":1,"SPLICER":1,"rock_S":1}
+H primary: 6/10   H strict: 6/10
+died runs: 10/10   median death wave: 5
+
+BRANCH DECISION: B (heavyweight wall): dominant MONOLITH -> ST-492 lever [1] boss.ringEvery 2.0 -> 2.5
+
+PER-WAVE 1-20 (median across runs; plannedContent per wave from first run):
+wave 1: startedRuns=10 clearedRuns=10 medianClearSecs=20.916666666666668 plannedContent(run0)=5
+wave 2: startedRuns=10 clearedRuns=10 medianClearSecs=19.741666666666667 plannedContent(run0)=6
+wave 3: startedRuns=10 clearedRuns=10 medianClearSecs=17.891666666666666 plannedContent(run0)=6
+wave 4: startedRuns=10 clearedRuns=10 medianClearSecs=23.316666666666666 plannedContent(run0)=8
+wave 5: startedRuns=10 clearedRuns=4 medianClearSecs=25.808333333333334 plannedContent(run0)=10
+wave 6: startedRuns=4 clearedRuns=4 medianClearSecs=9.075 plannedContent(run0)=6
+wave 7: startedRuns=4 clearedRuns=4 medianClearSecs=13.75 plannedContent(run0)=8
+wave 8: startedRuns=4 clearedRuns=2 medianClearSecs=25.383333333333333 plannedContent(run0)=10
+wave 9: startedRuns=2 clearedRuns=2 medianClearSecs=28.608333333333334 plannedContent(run0)=11
+wave 10: startedRuns=2 clearedRuns=0 medianClearSecs=null plannedContent(run0)=13
+wave 11: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 12: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 13: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 14: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 15: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 16: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 17: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 18: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 19: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 20: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
