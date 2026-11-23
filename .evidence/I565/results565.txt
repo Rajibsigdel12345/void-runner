@@ -1,0 +1,63 @@
+I565 lever validation (30 seeds 56500+i, full director, kiter, cap 36000 ticks)
+rules: .evidence/I525/rules525.md   generated 2026-11-23T07:37:19.499Z   wall ms 13360
+
+PER-RUN:
+seed 56500: died tick 14228 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=130651 kills=411
+seed 56501: died tick 12862 (wave 9) source=rock_M clsPrimary=rock_M hits=3 score=109442 kills=356
+seed 56502: died tick 5799 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=35398 kills=151
+seed 56503: died tick 11526 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=128526 kills=384
+seed 56504: died tick 17555 (wave 13) source=rock_M clsPrimary=rock_M hits=3 score=205288 kills=611
+seed 56505: died tick 6558 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=50303 kills=177
+seed 56506: died tick 13715 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=138795 kills=417
+seed 56507: died tick 15322 (wave 10) source=bullet clsPrimary=bullet_unknown hits=3 score=150067 kills=472
+seed 56508: died tick 11858 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=110944 kills=337
+seed 56509: died tick 4815 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=46121 kills=160
+seed 56510: died tick 7341 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=49737 kills=184
+seed 56511: died tick 7319 (wave 5) source=bullet clsPrimary=bullet_unknown hits=3 score=57970 kills=202
+seed 56512: died tick 12357 (wave 10) source=bullet clsPrimary=bullet_unknown hits=3 score=152577 kills=467
+seed 56513: died tick 13201 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=147885 kills=433
+seed 56514: died tick 16416 (wave 12) source=bullet clsPrimary=gunship hits=3 score=212243 kills=630
+seed 56515: died tick 14435 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=121773 kills=394
+seed 56516: died tick 10864 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=125543 kills=386
+seed 56517: died tick 6486 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=51658 kills=188
+seed 56518: died tick 8166 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=53372 kills=210
+seed 56519: died tick 11994 (wave 10) source=boss_splicer clsPrimary=SPLICER hits=3 score=124561 kills=391
+seed 56520: died tick 8699 (wave 8) source=rock_S clsPrimary=rock_S hits=3 score=78770 kills=262
+seed 56521: died tick 13458 (wave 11) source=rock_M clsPrimary=rock_M hits=3 score=152290 kills=445
+seed 56522: died tick 6370 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=46595 kills=178
+seed 56523: died tick 7229 (wave 5) source=bullet clsPrimary=bullet_unknown hits=3 score=35125 kills=142
+seed 56524: died tick 13521 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=127163 kills=382
+seed 56525: died tick 8800 (wave 8) source=bullet clsPrimary=gunship hits=3 score=89320 kills=278
+seed 56526: died tick 7727 (wave 5) source=bullet clsPrimary=bullet_unknown hits=3 score=56518 kills=195
+seed 56527: died tick 7531 (wave 5) source=bullet clsPrimary=bullet_unknown hits=3 score=68553 kills=235
+seed 56528: died tick 9114 (wave 8) source=rock_M clsPrimary=rock_M hits=3 score=67190 kills=242
+seed 56529: died tick 14376 (wave 12) source=wasp clsPrimary=wasp hits=3 score=188717 kills=567
+
+KILLING-BLOW TALLY (primary, incl. monolithProbable rocks): {"SPLICER":9,"rock_M":4,"MONOLITH":7,"bullet_unknown":6,"gunship":2,"rock_S":1,"wasp":1}
+KILLING-BLOW TALLY (strict, probable rocks excluded):        {"SPLICER":9,"rock_M":4,"MONOLITH":7,"bullet_unknown":6,"gunship":2,"rock_S":1,"wasp":1}
+H primary: 16/10   H strict: 16/10
+died runs: 30/10   median death wave: 9.5
+
+FRACTION H primary: 0.533 (16/30)   BRANCH DECISION: C (accept-with-documentation): no branch condition met (H=16/10 primary, 16/10 strict)
+
+PER-WAVE 1-20 (median across runs; plannedContent per wave from first run):
+wave 1: startedRuns=30 clearedRuns=30 medianClearSecs=23.9 plannedContent(run0)=5
+wave 2: startedRuns=30 clearedRuns=30 medianClearSecs=24.691666666666666 plannedContent(run0)=6
+wave 3: startedRuns=30 clearedRuns=30 medianClearSecs=19.683333333333334 plannedContent(run0)=6
+wave 4: startedRuns=30 clearedRuns=29 medianClearSecs=24.1 plannedContent(run0)=8
+wave 5: startedRuns=30 clearedRuns=19 medianClearSecs=26.316666666666666 plannedContent(run0)=9
+wave 6: startedRuns=19 clearedRuns=19 medianClearSecs=10.4 plannedContent(run0)=6
+wave 7: startedRuns=19 clearedRuns=19 medianClearSecs=13.583333333333334 plannedContent(run0)=8
+wave 8: startedRuns=19 clearedRuns=16 medianClearSecs=17.5 plannedContent(run0)=10
+wave 9: startedRuns=16 clearedRuns=14 medianClearSecs=18.183333333333334 plannedContent(run0)=12
+wave 10: startedRuns=15 clearedRuns=4 medianClearSecs=21.483333333333334 plannedContent(run0)=13
+wave 11: startedRuns=4 clearedRuns=3 medianClearSecs=19.733333333333334 plannedContent(run0)=13
+wave 12: startedRuns=3 clearedRuns=1 medianClearSecs=19.666666666666668 plannedContent(run0)=15
+wave 13: startedRuns=1 clearedRuns=0 medianClearSecs=null plannedContent(run0)=18
+wave 14: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 15: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 16: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 17: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 18: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 19: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 20: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null

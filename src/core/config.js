@@ -270,7 +270,8 @@ export const CONFIG = {
     radius: 3.4,     // big, slow, imposing
     speed: 1.6,      // slow drift toward the ship (always dodgeable)
     turn: 0.8,       // sluggish heading change rad/s
-    ringEvery: 2.0,  // seconds between ring bursts
+    ringEvery: 2.5,  // I565/ST-531 (E77 lever): was 2.0 - the wave-5/15 Monolith ring-burst window was the live
+    // beatability wall (sweep564r30: H = 0.600 EXACT, MONOLITH-dominant); 20% slower burst cadence
     ringCount: 8,    // S rocks per burst (capped by the field's maxConcurrent)
     splitCount: 4,   // M rocks on death
     fireEvery: 2.2,  // ST-056: seconds between aimed bolts
@@ -293,7 +294,7 @@ export const CONFIG = {
       speedMult: 1.3,    // I325/ST-301: was 1.45 (R1b/R1d: P2 contact pressure down - 1.6 -> 2.08 u/s, still dodgeable)
       turnMult: 1.4,    // turn rate (0.8 -> 1.12 rad/s)
       spin: 1.6,        // tumble rad/s in phase 2 (phase 1 is 0.3)
-      ringEveryMult: 0.6 // ring + aimed-bolt cadence multiplier (2.0 -> 1.2 s)
+      ringEveryMult: 0.6 // ring + aimed-bolt cadence multiplier (I565: 2.5 -> 1.5 s)
     },
     burst: {          // ST-134: radial bolt burst - fast, undestroyable (forces dodging)
       every: 4.0,        // seconds between volleys (phase 2: x0.65)
