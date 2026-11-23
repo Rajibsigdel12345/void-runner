@@ -1,0 +1,74 @@
+I571 E79 L-A post-lever acceptance (30 seeds 57100+i, full director, kiter, cap 36000 ticks) - boss retirement (retireAfterWaves 3, endless-only)
+rules: .evidence/I571/rules571.md   generated 2026-11-23T11:38:56.886Z   wall ms 12447
+
+PER-RUN:
+seed 57100: died tick 10360 (wave 8) source=bullet clsPrimary=gunship hits=3 score=107225 kills=334
+seed 57101: died tick 12154 (wave 10) source=rock_S clsPrimary=rock_S hits=3 score=128194 kills=402
+seed 57102: died tick 14577 (wave 12) source=wasp clsPrimary=wasp hits=3 score=160638 kills=481
+seed 57103: died tick 6360 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=50637 kills=187
+seed 57104: died tick 11958 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=143969 kills=434
+seed 57105: died tick 5828 (wave 5) source=bullet clsPrimary=bullet_unknown hits=3 score=36351 kills=141
+seed 57106: died tick 7411 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=60280 kills=223
+seed 57107: died tick 7235 (wave 5) source=bullet clsPrimary=bullet_unknown hits=3 score=56658 kills=203
+seed 57108: died tick 12440 (wave 10) source=rock_S clsPrimary=rock_S hits=3 score=119941 kills=379
+seed 57109: died tick 14192 (wave 10) source=bullet clsPrimary=gunship hits=3 score=156512 kills=468
+seed 57110: died tick 7643 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=51151 kills=197
+seed 57111: died tick 12607 (wave 9) source=bullet clsPrimary=gunship hits=3 score=103517 kills=341
+seed 57112: died tick 12742 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=120862 kills=377
+seed 57113: died tick 13441 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=145937 kills=431
+seed 57114: died tick 10303 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=106927 kills=348
+seed 57115: died tick 14603 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=144191 kills=445
+seed 57116: died tick 12350 (wave 10) source=boss_splicer clsPrimary=SPLICER hits=3 score=110048 kills=353
+seed 57117: died tick 6302 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=50170 kills=190
+seed 57118: died tick 7522 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=42758 kills=168
+seed 57119: died tick 7431 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=59411 kills=218
+seed 57120: died tick 12203 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=129312 kills=381
+seed 57121: died tick 5220 (wave 5) source=bullet clsPrimary=bullet_unknown hits=3 score=36038 kills=127
+seed 57122: died tick 13352 (wave 10) source=bullet clsPrimary=gunship hits=3 score=165344 kills=473
+seed 57123: died tick 16889 (wave 14) source=bullet clsPrimary=sentry hits=3 score=220109 kills=620
+seed 57124: died tick 17766 (wave 13) source=bullet clsPrimary=phantom hits=3 score=224902 kills=654
+seed 57125: died tick 10211 (wave 9) source=rock_S clsPrimary=rock_S hits=3 score=93676 kills=297
+seed 57126: died tick 8632 (wave 8) source=rock_S clsPrimary=rock_S hits=3 score=69867 kills=239
+seed 57127: died tick 10556 (wave 10) source=bullet clsPrimary=bullet_unknown hits=3 score=119800 kills=366
+seed 57128: died tick 11366 (wave 9) source=rock_L clsPrimary=rock_L hits=3 score=118092 kills=368
+seed 57129: died tick 12564 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=123491 kills=378
+
+KILLING-BLOW TALLY (primary, incl. monolithProbable rocks): {"gunship":4,"rock_S":4,"wasp":1,"MONOLITH":6,"SPLICER":8,"bullet_unknown":4,"sentry":1,"phantom":1,"rock_L":1}
+KILLING-BLOW TALLY (strict, probable rocks excluded):        {"gunship":4,"rock_S":4,"wasp":1,"MONOLITH":6,"SPLICER":8,"bullet_unknown":4,"sentry":1,"phantom":1,"rock_L":1}
+H primary: 14/30   H strict: 14/30  
+died runs: 30/30   median death wave: 10
+
+FRACTION H primary: 0.467 (14/30)   BRANCH DECISION: C (accept-with-documentation): no branch condition met (H=14/30 primary, 14/30 strict)
+
+PER-WAVE 1-20 (median across runs; plannedContent per wave from first run):
+wave 1: startedRuns=30 clearedRuns=30 medianClearSecs=22.46666666666667 plannedContent(run0)=5
+wave 2: startedRuns=30 clearedRuns=30 medianClearSecs=19.683333333333334 plannedContent(run0)=6
+wave 3: startedRuns=30 clearedRuns=30 medianClearSecs=18.299999999999997 plannedContent(run0)=6
+wave 4: startedRuns=30 clearedRuns=30 medianClearSecs=19.541666666666668 plannedContent(run0)=8
+wave 5: startedRuns=30 clearedRuns=21 medianClearSecs=23.083333333333332 plannedContent(run0)=10
+wave 6: startedRuns=21 clearedRuns=21 medianClearSecs=10.15 plannedContent(run0)=6
+wave 7: startedRuns=21 clearedRuns=21 medianClearSecs=12.766666666666666 plannedContent(run0)=8
+wave 8: startedRuns=21 clearedRuns=18 medianClearSecs=23.125 plannedContent(run0)=10
+wave 9: startedRuns=19 clearedRuns=16 medianClearSecs=21.59166666666667 plannedContent(run0)=12
+wave 10: startedRuns=16 clearedRuns=3 medianClearSecs=21.55 plannedContent(run0)=15
+wave 11: startedRuns=3 clearedRuns=3 medianClearSecs=21.3 plannedContent(run0)=9
+wave 12: startedRuns=3 clearedRuns=2 medianClearSecs=21.083333333333332 plannedContent(run0)=12
+wave 13: startedRuns=2 clearedRuns=1 medianClearSecs=23.883333333333333 plannedContent(run0)=15
+wave 14: startedRuns=1 clearedRuns=0 medianClearSecs=null plannedContent(run0)=17
+wave 15: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 16: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 17: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 18: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 19: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 20: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+
+L-A ACCEPTANCE (rules571.md sec.3, frozen at I569):
+(a) median death wave >= 10: 10 -> PASS
+(b) wave-10 cluster <= 7/30: 13/30 -> FAIL
+(c) max single source < 0.300 (SPLICER 8/30 = 0.267): PASS
+(d) >= 2/30 reach wave >= 13: 2/30 -> PASS
+(e) 5-harness gate EXACT: verified separately this iteration (CLOSEGATE571, I565 pattern)
+
+L-B TRIGGER READ (rules571.md sec.4, frozen I569): wave-8/9 band (gunship+rock_L+rock_M) = 3/30, median = 10 -> NO TRIGGER (ST-538 VOID)
+
+RETIRES (telemetry): none  (expected ~1-2 per run: Monolith w5->w8, Splicer w10->w13 while still alive)
