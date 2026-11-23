@@ -1,0 +1,5308 @@
+{
+ "tag": "sweep581",
+ "dt": 0.016666666666666666,
+ "cap": 36000,
+ "seeds": [
+  58100,
+  58101,
+  58102,
+  58103,
+  58104,
+  58105,
+  58106,
+  58107,
+  58108,
+  58109,
+  58110,
+  58111,
+  58112,
+  58113,
+  58114,
+  58115,
+  58116,
+  58117,
+  58118,
+  58119,
+  58120,
+  58121,
+  58122,
+  58123,
+  58124,
+  58125,
+  58126,
+  58127,
+  58128,
+  58129
+ ],
+ "frozen": ".evidence/I582/rules581.md",
+ "runs": [
+  {
+   "seed": 58100,
+   "died": true,
+   "deathTick": 13215,
+   "ticks": 13215,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 13215,
+    "source": "bullet",
+    "clsExact": "boss_splicer",
+    "clsPrimary": "SPLICER",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 9.674999999999999,
+     "r": 0.22,
+     "recentMul": [
+      1.075
+     ],
+     "matched": [
+      9
+     ],
+     "ambiguity": false
+    },
+    "wave": 10,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 3,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": {
+      "kind": "splicer",
+      "alive": true,
+      "hp": 24,
+      "maxHp": 30,
+      "phase": 1,
+      "spawnWave": 10
+     },
+     "warden": null
+    },
+    "score": {
+     "kills": 386,
+     "score": 123403,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 6903
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 6781,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 6890,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 13215,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "boss_splicer"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1572,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 23.983
+    },
+    "2": {
+     "startTick": 1705,
+     "clearTick": 2961,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 20.933
+    },
+    "3": {
+     "startTick": 3094,
+     "clearTick": 4210,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 18.6
+    },
+    "4": {
+     "startTick": 4343,
+     "clearTick": 6184,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 30.683
+    },
+    "5": {
+     "startTick": 6317,
+     "clearTick": 7691,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": 22.9
+    },
+    "6": {
+     "startTick": 7824,
+     "clearTick": 8576,
+     "planned": 6,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": 12.533
+    },
+    "7": {
+     "startTick": 8709,
+     "clearTick": 9435,
+     "planned": 8,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 12.1
+    },
+    "8": {
+     "startTick": 9568,
+     "clearTick": 11008,
+     "planned": 10,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": 24
+    },
+    "9": {
+     "startTick": 11141,
+     "clearTick": 12304,
+     "planned": 12,
+     "adj": {
+      "d": 0.959375,
+      "b": 1.0187499999999998,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 14,
+     "clearSecs": 19.383
+    },
+    "10": {
+     "startTick": 12437,
+     "clearTick": null,
+     "planned": 15,
+     "adj": {
+      "d": 1.0625,
+      "b": 1.075,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 18,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58101,
+   "died": true,
+   "deathTick": 6431,
+   "ticks": 6431,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 6431,
+    "source": "bullet",
+    "clsExact": "boss_monolith",
+    "clsPrimary": "MONOLITH",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 7.656249999999999,
+     "r": 0.22,
+     "recentMul": [
+      1.09375
+     ],
+     "matched": [
+      7
+     ],
+     "ambiguity": false
+    },
+    "wave": 5,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 2,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [
+      "overdrive"
+     ],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": {
+      "kind": "monolith",
+      "alive": true,
+      "hp": 38,
+      "maxHp": 64,
+      "phase": 1,
+      "spawnWave": 5
+     },
+     "warden": null
+    },
+    "score": {
+     "kills": 177,
+     "score": 50597,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [],
+   "hitLog": [
+    {
+     "tick": 5974,
+     "source": "rock_M",
+     "lives": 2,
+     "attributed": null
+    },
+    {
+     "tick": 6193,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 6431,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "boss_monolith"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 998,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 14.417
+    },
+    "2": {
+     "startTick": 1131,
+     "clearTick": 2206,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 17.917
+    },
+    "3": {
+     "startTick": 2339,
+     "clearTick": 3774,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 23.917
+    },
+    "4": {
+     "startTick": 3907,
+     "clearTick": 5659,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 29.2
+    },
+    "5": {
+     "startTick": 5792,
+     "clearTick": null,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58102,
+   "died": true,
+   "deathTick": 11037,
+   "ticks": 11037,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 11037,
+    "source": "gunship",
+    "clsExact": "gunship",
+    "clsPrimary": "gunship",
+    "monolithProbable": false,
+    "attribDetail": null,
+    "wave": 9,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 2,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": null,
+     "warden": null
+    },
+    "score": {
+     "kills": 298,
+     "score": 92711,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 6093
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 5911,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 6084,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 11037,
+     "source": "gunship",
+     "lives": 0,
+     "attributed": null
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 897,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 12.733
+    },
+    "2": {
+     "startTick": 1030,
+     "clearTick": 2740,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 28.5
+    },
+    "3": {
+     "startTick": 2873,
+     "clearTick": 3740,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 14.45
+    },
+    "4": {
+     "startTick": 3873,
+     "clearTick": 5347,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 24.567
+    },
+    "5": {
+     "startTick": 5480,
+     "clearTick": 7307,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": 30.45
+    },
+    "6": {
+     "startTick": 7440,
+     "clearTick": 7991,
+     "planned": 6,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": 9.183
+    },
+    "7": {
+     "startTick": 8124,
+     "clearTick": 9077,
+     "planned": 8,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 15.883
+    },
+    "8": {
+     "startTick": 9210,
+     "clearTick": 10904,
+     "planned": 10,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": 28.233
+    },
+    "9": {
+     "startTick": 11037,
+     "clearTick": null,
+     "planned": 12,
+     "adj": {
+      "d": 0.959375,
+      "b": 1.0187499999999998,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 14,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58103,
+   "died": true,
+   "deathTick": 7677,
+   "ticks": 7677,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 7677,
+    "source": "bullet",
+    "clsExact": "boss_monolith",
+    "clsPrimary": "MONOLITH",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 7.65625,
+     "r": 0.22,
+     "recentMul": [
+      1.09375
+     ],
+     "matched": [
+      7
+     ],
+     "ambiguity": false
+    },
+    "wave": 5,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 2,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": {
+      "kind": "monolith",
+      "alive": true,
+      "hp": 1,
+      "maxHp": 64,
+      "phase": 2,
+      "spawnWave": 5
+     },
+     "warden": null
+    },
+    "score": {
+     "kills": 213,
+     "score": 57869,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [],
+   "hitLog": [
+    {
+     "tick": 7120,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 7564,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 7677,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "boss_monolith"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1515,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 23.033
+    },
+    "2": {
+     "startTick": 1648,
+     "clearTick": 3801,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 35.883
+    },
+    "3": {
+     "startTick": 3934,
+     "clearTick": 5122,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 19.8
+    },
+    "4": {
+     "startTick": 5255,
+     "clearTick": 6611,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 22.6
+    },
+    "5": {
+     "startTick": 6744,
+     "clearTick": null,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58104,
+   "died": true,
+   "deathTick": 12639,
+   "ticks": 12639,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 12639,
+    "source": "bullet",
+    "clsExact": "boss_splicer",
+    "clsPrimary": "SPLICER",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 7.5249999999999995,
+     "r": 0.22,
+     "recentMul": [
+      1.075
+     ],
+     "matched": [
+      7
+     ],
+     "ambiguity": false
+    },
+    "wave": 10,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 3,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": {
+      "kind": "splicer",
+      "alive": true,
+      "hp": 25,
+      "maxHp": 30,
+      "phase": 1,
+      "spawnWave": 10
+     },
+     "warden": null
+    },
+    "score": {
+     "kills": 468,
+     "score": 159542,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 6319
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 6190,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 6303,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 12639,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "boss_splicer"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1135,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 16.7
+    },
+    "2": {
+     "startTick": 1268,
+     "clearTick": 2744,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 24.6
+    },
+    "3": {
+     "startTick": 2877,
+     "clearTick": 4188,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 21.85
+    },
+    "4": {
+     "startTick": 4321,
+     "clearTick": 5681,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 22.667
+    },
+    "5": {
+     "startTick": 5814,
+     "clearTick": 7137,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": 22.05
+    },
+    "6": {
+     "startTick": 7270,
+     "clearTick": 8116,
+     "planned": 6,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": 14.1
+    },
+    "7": {
+     "startTick": 8249,
+     "clearTick": 9123,
+     "planned": 8,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 14.567
+    },
+    "8": {
+     "startTick": 9256,
+     "clearTick": 10777,
+     "planned": 10,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": 25.35
+    },
+    "9": {
+     "startTick": 10910,
+     "clearTick": 11984,
+     "planned": 12,
+     "adj": {
+      "d": 0.959375,
+      "b": 1.0187499999999998,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 14,
+     "clearSecs": 17.9
+    },
+    "10": {
+     "startTick": 12117,
+     "clearTick": null,
+     "planned": 15,
+     "adj": {
+      "d": 1.0625,
+      "b": 1.075,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 19,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58105,
+   "died": true,
+   "deathTick": 16609,
+   "ticks": 16609,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 16609,
+    "source": "bullet",
+    "clsExact": "gunship",
+    "clsPrimary": "gunship",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 5.29375,
+     "r": 0.5,
+     "why": "heavy-radius"
+    },
+    "wave": 11,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 3,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": null,
+     "warden": null
+    },
+    "score": {
+     "kills": 441,
+     "score": 143234,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 7703
+    },
+    {
+     "kind": "splicer",
+     "tick": 14891
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 7606,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 10559,
+     "source": "rock_S",
+     "lives": 1,
+     "attributed": null
+    },
+    {
+     "tick": 16609,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "gunship"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1231,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 18.3
+    },
+    "2": {
+     "startTick": 1364,
+     "clearTick": 2966,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 26.7
+    },
+    "3": {
+     "startTick": 3099,
+     "clearTick": 4965,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 31.1
+    },
+    "4": {
+     "startTick": 5098,
+     "clearTick": 7104,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 33.433
+    },
+    "5": {
+     "startTick": 7237,
+     "clearTick": 8959,
+     "planned": 9,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "hold"
+     },
+     "fieldCountAtStart": 9,
+     "clearSecs": 28.7
+    },
+    "6": {
+     "startTick": 9092,
+     "clearTick": 9314,
+     "planned": 6,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": 3.7
+    },
+    "7": {
+     "startTick": 9447,
+     "clearTick": 10169,
+     "planned": 8,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 12.033
+    },
+    "8": {
+     "startTick": 10302,
+     "clearTick": 11684,
+     "planned": 10,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": 23.033
+    },
+    "9": {
+     "startTick": 11817,
+     "clearTick": 14049,
+     "planned": 8,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": 37.2
+    },
+    "10": {
+     "startTick": 14182,
+     "clearTick": 15560,
+     "planned": 11,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 14,
+     "clearSecs": 22.967
+    },
+    "11": {
+     "startTick": 15688,
+     "clearTick": null,
+     "planned": 13,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58106,
+   "died": true,
+   "deathTick": 6694,
+   "ticks": 6694,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 6694,
+    "source": "bullet",
+    "clsExact": "boss_monolith",
+    "clsPrimary": "MONOLITH",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 9.84375,
+     "r": 0.22,
+     "recentMul": [
+      1.09375
+     ],
+     "matched": [
+      9
+     ],
+     "ambiguity": false
+    },
+    "wave": 5,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 2,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": {
+      "kind": "monolith",
+      "alive": true,
+      "hp": 1,
+      "maxHp": 64,
+      "phase": 2,
+      "spawnWave": 5
+     },
+     "warden": null
+    },
+    "score": {
+     "kills": 213,
+     "score": 57920,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [],
+   "hitLog": [
+    {
+     "tick": 5739,
+     "source": "rock_S",
+     "lives": 2,
+     "attributed": null
+    },
+    {
+     "tick": 6578,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 6694,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "boss_monolith"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1207,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 17.9
+    },
+    "2": {
+     "startTick": 1340,
+     "clearTick": 3259,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 31.983
+    },
+    "3": {
+     "startTick": 3392,
+     "clearTick": 4413,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 17.017
+    },
+    "4": {
+     "startTick": 4546,
+     "clearTick": 5392,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 14.1
+    },
+    "5": {
+     "startTick": 5525,
+     "clearTick": null,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58107,
+   "died": true,
+   "deathTick": 18145,
+   "ticks": 18145,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 18145,
+    "source": "wasp",
+    "clsExact": "wasp",
+    "clsPrimary": "wasp",
+    "monolithProbable": false,
+    "attribDetail": null,
+    "wave": 14,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 3,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": null,
+     "warden": null
+    },
+    "score": {
+     "kills": 633,
+     "score": 222816,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 7165
+    },
+    {
+     "kind": "splicer",
+     "tick": 13707
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 6824,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 12604,
+     "source": "rock_M",
+     "lives": 1,
+     "attributed": null
+    },
+    {
+     "tick": 18145,
+     "source": "wasp",
+     "lives": 0,
+     "attributed": null
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1703,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 26.167
+    },
+    "2": {
+     "startTick": 1836,
+     "clearTick": 3089,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 20.883
+    },
+    "3": {
+     "startTick": 3222,
+     "clearTick": 4154,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 15.533
+    },
+    "4": {
+     "startTick": 4287,
+     "clearTick": 6446,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 35.983
+    },
+    "5": {
+     "startTick": 6579,
+     "clearTick": 8020,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": 24.017
+    },
+    "6": {
+     "startTick": 8153,
+     "clearTick": 8722,
+     "planned": 6,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": 9.483
+    },
+    "7": {
+     "startTick": 8855,
+     "clearTick": 9608,
+     "planned": 8,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 12.55
+    },
+    "8": {
+     "startTick": 9741,
+     "clearTick": 10572,
+     "planned": 10,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": 13.85
+    },
+    "9": {
+     "startTick": 10705,
+     "clearTick": 13209,
+     "planned": 12,
+     "adj": {
+      "d": 0.959375,
+      "b": 1.0187499999999998,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 14,
+     "clearSecs": 41.733
+    },
+    "10": {
+     "startTick": 13342,
+     "clearTick": 14706,
+     "planned": 8,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": 22.733
+    },
+    "11": {
+     "startTick": 14834,
+     "clearTick": 15484,
+     "planned": 11,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": 10.833
+    },
+    "12": {
+     "startTick": 15607,
+     "clearTick": 16650,
+     "planned": 14,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 19,
+     "clearSecs": 17.383
+    },
+    "13": {
+     "startTick": 16768,
+     "clearTick": 17942,
+     "planned": 16,
+     "adj": {
+      "d": 0.959375,
+      "b": 1.0187499999999998,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 21,
+     "clearSecs": 19.567
+    },
+    "14": {
+     "startTick": 18055,
+     "clearTick": null,
+     "planned": 19,
+     "adj": {
+      "d": 1.0625,
+      "b": 1.075,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 21,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58108,
+   "died": true,
+   "deathTick": 12651,
+   "ticks": 12651,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 12651,
+    "source": "bullet",
+    "clsExact": "boss_splicer",
+    "clsPrimary": "SPLICER",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 7.525,
+     "r": 0.22,
+     "recentMul": [
+      1.075
+     ],
+     "matched": [
+      7
+     ],
+     "ambiguity": false
+    },
+    "wave": 10,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 3,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": {
+      "kind": "splicer",
+      "alive": true,
+      "hp": 10,
+      "maxHp": 30,
+      "phase": 2,
+      "spawnWave": 10
+     },
+     "warden": null
+    },
+    "score": {
+     "kills": 368,
+     "score": 123419,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 6908
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 6254,
+     "source": "rock_S",
+     "lives": 2,
+     "attributed": null
+    },
+    {
+     "tick": 6737,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 12651,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "boss_splicer"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1775,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 27.367
+    },
+    "2": {
+     "startTick": 1908,
+     "clearTick": 3185,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 21.283
+    },
+    "3": {
+     "startTick": 3318,
+     "clearTick": 3972,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 10.9
+    },
+    "4": {
+     "startTick": 4105,
+     "clearTick": 5934,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 30.483
+    },
+    "5": {
+     "startTick": 6067,
+     "clearTick": 7666,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": 26.65
+    },
+    "6": {
+     "startTick": 7799,
+     "clearTick": 8672,
+     "planned": 6,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": 14.55
+    },
+    "7": {
+     "startTick": 8805,
+     "clearTick": 9556,
+     "planned": 8,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 12.517
+    },
+    "8": {
+     "startTick": 9689,
+     "clearTick": 10638,
+     "planned": 10,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": 15.817
+    },
+    "9": {
+     "startTick": 10771,
+     "clearTick": 12049,
+     "planned": 12,
+     "adj": {
+      "d": 0.959375,
+      "b": 1.0187499999999998,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 14,
+     "clearSecs": 21.3
+    },
+    "10": {
+     "startTick": 12182,
+     "clearTick": null,
+     "planned": 15,
+     "adj": {
+      "d": 1.0625,
+      "b": 1.075,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 18,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58109,
+   "died": true,
+   "deathTick": 5717,
+   "ticks": 5717,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 5717,
+    "source": "bullet",
+    "clsExact": "bullet_unknown",
+    "clsPrimary": "bullet_unknown",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 6.300000000000001,
+     "r": 0.22,
+     "recentMul": [
+      0.9
+     ],
+     "matched": [
+      7
+     ],
+     "ambiguity": false
+    },
+    "wave": 5,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 2,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [
+      "spread"
+     ],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": null,
+     "warden": null
+    },
+    "score": {
+     "kills": 164,
+     "score": 44362,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 5672
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 3824,
+     "source": "rock_M",
+     "lives": 2,
+     "attributed": null
+    },
+    {
+     "tick": 5326,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 5717,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "bullet_unknown"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1250,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 18.617
+    },
+    "2": {
+     "startTick": 1383,
+     "clearTick": 2586,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 8,
+     "clearSecs": 20.05
+    },
+    "3": {
+     "startTick": 2719,
+     "clearTick": 3524,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 13.417
+    },
+    "4": {
+     "startTick": 3657,
+     "clearTick": 4550,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 14.883
+    },
+    "5": {
+     "startTick": 4683,
+     "clearTick": null,
+     "planned": 5,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58110,
+   "died": true,
+   "deathTick": 11536,
+   "ticks": 11536,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 11536,
+    "source": "rock_L",
+    "clsExact": "rock_L",
+    "clsPrimary": "rock_L",
+    "monolithProbable": false,
+    "attribDetail": null,
+    "wave": 8,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 2,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": null,
+     "warden": null
+    },
+    "score": {
+     "kills": 283,
+     "score": 83161,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 8584
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 8486,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 8601,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "bullet_unknown"
+    },
+    {
+     "tick": 11536,
+     "source": "rock_L",
+     "lives": 0,
+     "attributed": null
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1344,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 20.183
+    },
+    "2": {
+     "startTick": 1477,
+     "clearTick": 3083,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 26.767
+    },
+    "3": {
+     "startTick": 3216,
+     "clearTick": 4896,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 28
+    },
+    "4": {
+     "startTick": 5029,
+     "clearTick": 7354,
+     "planned": 7,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "hold"
+     },
+     "fieldCountAtStart": 7,
+     "clearSecs": 38.75
+    },
+    "5": {
+     "startTick": 7487,
+     "clearTick": 9442,
+     "planned": 9,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 9,
+     "clearSecs": 32.583
+    },
+    "6": {
+     "startTick": 9575,
+     "clearTick": 10067,
+     "planned": 6,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": 8.2
+    },
+    "7": {
+     "startTick": 10200,
+     "clearTick": 11249,
+     "planned": 8,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 17.483
+    },
+    "8": {
+     "startTick": 11382,
+     "clearTick": null,
+     "planned": 10,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58111,
+   "died": true,
+   "deathTick": 14460,
+   "ticks": 14460,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 14460,
+    "source": "bullet",
+    "clsExact": "sentry",
+    "clsPrimary": "sentry",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 10.349999999999998,
+     "r": 0.22,
+     "recentMul": [
+      1.15
+     ],
+     "matched": [
+      9
+     ],
+     "ambiguity": false
+    },
+    "wave": 11,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 3,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": null,
+     "warden": null
+    },
+    "score": {
+     "kills": 449,
+     "score": 153594,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 6339
+    },
+    {
+     "kind": "splicer",
+     "tick": 12189
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 13738,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "gunship"
+    },
+    {
+     "tick": 13939,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "gunship"
+    },
+    {
+     "tick": 14460,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "sentry"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1961,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 30.467
+    },
+    "2": {
+     "startTick": 2094,
+     "clearTick": 3220,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 18.767
+    },
+    "3": {
+     "startTick": 3353,
+     "clearTick": 4217,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 14.4
+    },
+    "4": {
+     "startTick": 4350,
+     "clearTick": 5580,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 20.5
+    },
+    "5": {
+     "startTick": 5713,
+     "clearTick": 6851,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": 18.967
+    },
+    "6": {
+     "startTick": 6984,
+     "clearTick": 7832,
+     "planned": 12,
+     "adj": {
+      "d": 1.2,
+      "b": 1.15,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": 14.133
+    },
+    "7": {
+     "startTick": 7965,
+     "clearTick": 8267,
+     "planned": 13,
+     "adj": {
+      "d": 1.2,
+      "b": 1.15,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 13,
+     "clearSecs": 5.033
+    },
+    "8": {
+     "startTick": 8400,
+     "clearTick": 9468,
+     "planned": 14,
+     "adj": {
+      "d": 1.2,
+      "b": 1.15,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 15,
+     "clearSecs": 17.8
+    },
+    "9": {
+     "startTick": 9601,
+     "clearTick": 11105,
+     "planned": 16,
+     "adj": {
+      "d": 1.2,
+      "b": 1.15,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 18,
+     "clearSecs": 25.067
+    },
+    "10": {
+     "startTick": 11238,
+     "clearTick": 12808,
+     "planned": 17,
+     "adj": {
+      "d": 1.2,
+      "b": 1.15,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 19,
+     "clearSecs": 26.167
+    },
+    "11": {
+     "startTick": 12936,
+     "clearTick": null,
+     "planned": 18,
+     "adj": {
+      "d": 1.2,
+      "b": 1.15,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58112,
+   "died": true,
+   "deathTick": 13351,
+   "ticks": 13351,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 13351,
+    "source": "bullet",
+    "clsExact": "boss_splicer",
+    "clsPrimary": "SPLICER",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 8.100000000000001,
+     "r": 0.22,
+     "recentMul": [
+      0.9
+     ],
+     "matched": [
+      9
+     ],
+     "ambiguity": false
+    },
+    "wave": 10,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 3,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": {
+      "kind": "splicer",
+      "alive": true,
+      "hp": 25,
+      "maxHp": 30,
+      "phase": 1,
+      "spawnWave": 10
+     },
+     "warden": null
+    },
+    "score": {
+     "kills": 451,
+     "score": 149414,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 7607
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 6272,
+     "source": "rock_M",
+     "lives": 2,
+     "attributed": null
+    },
+    {
+     "tick": 12149,
+     "source": "rock_M",
+     "lives": 1,
+     "attributed": null
+    },
+    {
+     "tick": 13351,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "boss_splicer"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1839,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 28.433
+    },
+    "2": {
+     "startTick": 1972,
+     "clearTick": 3586,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 26.9
+    },
+    "3": {
+     "startTick": 3719,
+     "clearTick": 4562,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 14.05
+    },
+    "4": {
+     "startTick": 4695,
+     "clearTick": 5938,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 20.717
+    },
+    "5": {
+     "startTick": 6071,
+     "clearTick": 8448,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": 39.617
+    },
+    "6": {
+     "startTick": 8581,
+     "clearTick": 9431,
+     "planned": 6,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": 14.167
+    },
+    "7": {
+     "startTick": 9564,
+     "clearTick": 10394,
+     "planned": 8,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 13.833
+    },
+    "8": {
+     "startTick": 10527,
+     "clearTick": 11151,
+     "planned": 10,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": 10.4
+    },
+    "9": {
+     "startTick": 11284,
+     "clearTick": 12829,
+     "planned": 12,
+     "adj": {
+      "d": 0.959375,
+      "b": 1.0187499999999998,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 14,
+     "clearSecs": 25.75
+    },
+    "10": {
+     "startTick": 12962,
+     "clearTick": null,
+     "planned": 8,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58113,
+   "died": true,
+   "deathTick": 5509,
+   "ticks": 5509,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 5509,
+    "source": "bullet",
+    "clsExact": "boss_monolith",
+    "clsPrimary": "MONOLITH",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 9.84375,
+     "r": 0.22,
+     "recentMul": [
+      1.09375
+     ],
+     "matched": [
+      9
+     ],
+     "ambiguity": false
+    },
+    "wave": 5,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 2,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": {
+      "kind": "monolith",
+      "alive": true,
+      "hp": 44,
+      "maxHp": 64,
+      "phase": 1,
+      "spawnWave": 5
+     },
+     "warden": null
+    },
+    "score": {
+     "kills": 182,
+     "score": 46959,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [],
+   "hitLog": [
+    {
+     "tick": 5175,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 5313,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 5509,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "boss_monolith"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1015,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 14.7
+    },
+    "2": {
+     "startTick": 1148,
+     "clearTick": 3031,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 31.383
+    },
+    "3": {
+     "startTick": 3164,
+     "clearTick": 4106,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 15.7
+    },
+    "4": {
+     "startTick": 4239,
+     "clearTick": 4813,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 9.567
+    },
+    "5": {
+     "startTick": 4946,
+     "clearTick": null,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58114,
+   "died": true,
+   "deathTick": 6596,
+   "ticks": 6596,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 6596,
+    "source": "boss_monolith",
+    "clsExact": "MONOLITH",
+    "clsPrimary": "MONOLITH",
+    "monolithProbable": false,
+    "attribDetail": null,
+    "wave": 5,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 2,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": {
+      "kind": "monolith",
+      "alive": true,
+      "hp": 6,
+      "maxHp": 64,
+      "phase": 2,
+      "spawnWave": 5
+     },
+     "warden": null
+    },
+    "score": {
+     "kills": 133,
+     "score": 36578,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [],
+   "hitLog": [
+    {
+     "tick": 6378,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 6487,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 6596,
+     "source": "boss_monolith",
+     "lives": 0,
+     "attributed": null
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1483,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 7,
+     "clearSecs": 22.5
+    },
+    "2": {
+     "startTick": 1616,
+     "clearTick": 3211,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 26.583
+    },
+    "3": {
+     "startTick": 3344,
+     "clearTick": 4355,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 16.85
+    },
+    "4": {
+     "startTick": 4488,
+     "clearTick": 5869,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 23.017
+    },
+    "5": {
+     "startTick": 6002,
+     "clearTick": null,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58115,
+   "died": true,
+   "deathTick": 13495,
+   "ticks": 13495,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 13495,
+    "source": "bullet",
+    "clsExact": "boss_splicer",
+    "clsPrimary": "SPLICER",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 9.674999999999999,
+     "r": 0.22,
+     "recentMul": [
+      1.075,
+      0.9
+     ],
+     "matched": [
+      9
+     ],
+     "ambiguity": false
+    },
+    "wave": 11,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 3,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": {
+      "kind": "splicer",
+      "alive": true,
+      "hp": 3,
+      "maxHp": 30,
+      "phase": 2,
+      "spawnWave": 10
+     },
+     "warden": null
+    },
+    "score": {
+     "kills": 438,
+     "score": 141891,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 7836
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 7206,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 12471,
+     "source": "rock_S",
+     "lives": 1,
+     "attributed": null
+    },
+    {
+     "tick": 13495,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "boss_splicer"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1413,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 21.333
+    },
+    "2": {
+     "startTick": 1546,
+     "clearTick": 2944,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 23.3
+    },
+    "3": {
+     "startTick": 3077,
+     "clearTick": 4634,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 25.95
+    },
+    "4": {
+     "startTick": 4767,
+     "clearTick": 6518,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 29.183
+    },
+    "5": {
+     "startTick": 6651,
+     "clearTick": 7904,
+     "planned": 9,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "hold"
+     },
+     "fieldCountAtStart": 9,
+     "clearSecs": 20.883
+    },
+    "6": {
+     "startTick": 8037,
+     "clearTick": 8751,
+     "planned": 6,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": 11.9
+    },
+    "7": {
+     "startTick": 8884,
+     "clearTick": 9886,
+     "planned": 8,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 16.7
+    },
+    "8": {
+     "startTick": 10019,
+     "clearTick": 10981,
+     "planned": 10,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": 16.033
+    },
+    "9": {
+     "startTick": 11114,
+     "clearTick": 12194,
+     "planned": 12,
+     "adj": {
+      "d": 0.959375,
+      "b": 1.0187499999999998,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 14,
+     "clearSecs": 18
+    },
+    "10": {
+     "startTick": 12327,
+     "clearTick": 13180,
+     "planned": 15,
+     "adj": {
+      "d": 1.0625,
+      "b": 1.075,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 18,
+     "clearSecs": 14.217
+    },
+    "11": {
+     "startTick": 13308,
+     "clearTick": null,
+     "planned": 9,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58116,
+   "died": true,
+   "deathTick": 5745,
+   "ticks": 5745,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 5745,
+    "source": "bullet",
+    "clsExact": "boss_monolith",
+    "clsPrimary": "MONOLITH",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 9.84375,
+     "r": 0.22,
+     "recentMul": [
+      1.09375
+     ],
+     "matched": [
+      9
+     ],
+     "ambiguity": false
+    },
+    "wave": 5,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 2,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": {
+      "kind": "monolith",
+      "alive": true,
+      "hp": 9,
+      "maxHp": 64,
+      "phase": 2,
+      "spawnWave": 5
+     },
+     "warden": null
+    },
+    "score": {
+     "kills": 158,
+     "score": 41684,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [],
+   "hitLog": [
+    {
+     "tick": 5127,
+     "source": "rock_M",
+     "lives": 2,
+     "attributed": null
+    },
+    {
+     "tick": 5339,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 5745,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "boss_monolith"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1153,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 17
+    },
+    "2": {
+     "startTick": 1286,
+     "clearTick": 2078,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 13.2
+    },
+    "3": {
+     "startTick": 2211,
+     "clearTick": 3334,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 18.717
+    },
+    "4": {
+     "startTick": 3467,
+     "clearTick": 4798,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 22.183
+    },
+    "5": {
+     "startTick": 4931,
+     "clearTick": null,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58117,
+   "died": true,
+   "deathTick": 6825,
+   "ticks": 6825,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 6825,
+    "source": "bullet",
+    "clsExact": "boss_monolith",
+    "clsPrimary": "MONOLITH",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 7.262499999999999,
+     "r": 0.22,
+     "recentMul": [
+      1.0374999999999999
+     ],
+     "matched": [
+      7
+     ],
+     "ambiguity": false
+    },
+    "wave": 5,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 2,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": {
+      "kind": "monolith",
+      "alive": true,
+      "hp": 10,
+      "maxHp": 64,
+      "phase": 2,
+      "spawnWave": 5
+     },
+     "warden": null
+    },
+    "score": {
+     "kills": 200,
+     "score": 56563,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [],
+   "hitLog": [
+    {
+     "tick": 6515,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 6704,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 6825,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "boss_monolith"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1165,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 17.2
+    },
+    "2": {
+     "startTick": 1298,
+     "clearTick": 3321,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 33.717
+    },
+    "3": {
+     "startTick": 3454,
+     "clearTick": 4478,
+     "planned": 6,
+     "adj": {
+      "d": 0.7875,
+      "b": 0.9249999999999999,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "hold"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 17.067
+    },
+    "4": {
+     "startTick": 4611,
+     "clearTick": 5386,
+     "planned": 7,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 7,
+     "clearSecs": 12.917
+    },
+    "5": {
+     "startTick": 5519,
+     "clearTick": null,
+     "planned": 9,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 9,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58118,
+   "died": true,
+   "deathTick": 7664,
+   "ticks": 7664,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 7664,
+    "source": "rock_M",
+    "clsExact": "rock_M",
+    "clsPrimary": "rock_M",
+    "monolithProbable": false,
+    "attribDetail": null,
+    "wave": 8,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 2,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": null,
+     "warden": null
+    },
+    "score": {
+     "kills": 252,
+     "score": 76396,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 5619
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 5469,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 5578,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 7664,
+     "source": "rock_M",
+     "lives": 0,
+     "attributed": null
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1440,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 21.783
+    },
+    "2": {
+     "startTick": 1573,
+     "clearTick": 2947,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 22.9
+    },
+    "3": {
+     "startTick": 3080,
+     "clearTick": 4006,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 15.433
+    },
+    "4": {
+     "startTick": 4139,
+     "clearTick": 4698,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 9.317
+    },
+    "5": {
+     "startTick": 4831,
+     "clearTick": 6208,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": 22.95
+    },
+    "6": {
+     "startTick": 6341,
+     "clearTick": 6832,
+     "planned": 6,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": 8.183
+    },
+    "7": {
+     "startTick": 6965,
+     "clearTick": 7351,
+     "planned": 8,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 6.433
+    },
+    "8": {
+     "startTick": 7484,
+     "clearTick": null,
+     "planned": 10,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58119,
+   "died": true,
+   "deathTick": 8403,
+   "ticks": 8403,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 8403,
+    "source": "bullet",
+    "clsExact": "boss_monolith",
+    "clsPrimary": "MONOLITH",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 9.843749999999998,
+     "r": 0.22,
+     "recentMul": [
+      1.09375
+     ],
+     "matched": [
+      9
+     ],
+     "ambiguity": false
+    },
+    "wave": 5,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 2,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": {
+      "kind": "monolith",
+      "alive": true,
+      "hp": 4,
+      "maxHp": 64,
+      "phase": 2,
+      "spawnWave": 5
+     },
+     "warden": null
+    },
+    "score": {
+     "kills": 212,
+     "score": 58106,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [],
+   "hitLog": [
+    {
+     "tick": 7746,
+     "source": "rock_M",
+     "lives": 2,
+     "attributed": null
+    },
+    {
+     "tick": 7999,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 8403,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "boss_monolith"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1684,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 25.85
+    },
+    "2": {
+     "startTick": 1817,
+     "clearTick": 3629,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 30.2
+    },
+    "3": {
+     "startTick": 3762,
+     "clearTick": 5151,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 23.15
+    },
+    "4": {
+     "startTick": 5284,
+     "clearTick": 7432,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 35.8
+    },
+    "5": {
+     "startTick": 7565,
+     "clearTick": null,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58120,
+   "died": true,
+   "deathTick": 15496,
+   "ticks": 15496,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 15496,
+    "source": "bullet",
+    "clsExact": "gunship",
+    "clsPrimary": "gunship",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 6.221874999999998,
+     "r": 0.5,
+     "why": "heavy-radius"
+    },
+    "wave": 12,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 3,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": null,
+     "warden": null
+    },
+    "score": {
+     "kills": 505,
+     "score": 178320,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 5980
+    },
+    {
+     "kind": "splicer",
+     "tick": 12598
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 5715,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 5930,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 15496,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "gunship"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1246,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 18.55
+    },
+    "2": {
+     "startTick": 1379,
+     "clearTick": 2841,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 24.367
+    },
+    "3": {
+     "startTick": 2974,
+     "clearTick": 3278,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 5.067
+    },
+    "4": {
+     "startTick": 3411,
+     "clearTick": 5035,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 27.067
+    },
+    "5": {
+     "startTick": 5168,
+     "clearTick": 6343,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": 19.583
+    },
+    "6": {
+     "startTick": 6476,
+     "clearTick": 6892,
+     "planned": 6,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": 6.933
+    },
+    "7": {
+     "startTick": 7025,
+     "clearTick": 7827,
+     "planned": 8,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 13.367
+    },
+    "8": {
+     "startTick": 7960,
+     "clearTick": 10301,
+     "planned": 10,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": 39.017
+    },
+    "9": {
+     "startTick": 10434,
+     "clearTick": 11743,
+     "planned": 11,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "hold"
+     },
+     "fieldCountAtStart": 13,
+     "clearSecs": 21.817
+    },
+    "10": {
+     "startTick": 11876,
+     "clearTick": 13213,
+     "planned": 13,
+     "adj": {
+      "d": 0.959375,
+      "b": 1.0187499999999998,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 16,
+     "clearSecs": 22.283
+    },
+    "11": {
+     "startTick": 13341,
+     "clearTick": 14448,
+     "planned": 16,
+     "adj": {
+      "d": 1.0625,
+      "b": 1.075,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": 18.45
+    },
+    "12": {
+     "startTick": 14571,
+     "clearTick": null,
+     "planned": 19,
+     "adj": {
+      "d": 1.165625,
+      "b": 1.1312499999999999,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 21,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58121,
+   "died": true,
+   "deathTick": 15225,
+   "ticks": 15225,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 15225,
+    "source": "bullet",
+    "clsExact": "gunship",
+    "clsPrimary": "gunship",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 5.293749999999999,
+     "r": 0.5,
+     "why": "heavy-radius"
+    },
+    "wave": 11,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 3,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": null,
+     "warden": null
+    },
+    "score": {
+     "kills": 550,
+     "score": 178798,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 6690
+    },
+    {
+     "kind": "splicer",
+     "tick": 13758
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 6609,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 10778,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "gunship"
+    },
+    {
+     "tick": 15225,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "gunship"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1223,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 18.167
+    },
+    "2": {
+     "startTick": 1356,
+     "clearTick": 2411,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 17.583
+    },
+    "3": {
+     "startTick": 2544,
+     "clearTick": 3520,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 16.267
+    },
+    "4": {
+     "startTick": 3653,
+     "clearTick": 5299,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 27.433
+    },
+    "5": {
+     "startTick": 5432,
+     "clearTick": 7850,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": 40.3
+    },
+    "6": {
+     "startTick": 7983,
+     "clearTick": 8777,
+     "planned": 6,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": 13.233
+    },
+    "7": {
+     "startTick": 8910,
+     "clearTick": 9892,
+     "planned": 8,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 16.367
+    },
+    "8": {
+     "startTick": 10025,
+     "clearTick": 11436,
+     "planned": 10,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": 23.517
+    },
+    "9": {
+     "startTick": 11569,
+     "clearTick": 12978,
+     "planned": 8,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": 23.483
+    },
+    "10": {
+     "startTick": 13111,
+     "clearTick": 14315,
+     "planned": 11,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 14,
+     "clearSecs": 20.067
+    },
+    "11": {
+     "startTick": 14443,
+     "clearTick": null,
+     "planned": 13,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58122,
+   "died": true,
+   "deathTick": 13263,
+   "ticks": 13263,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 13263,
+    "source": "boss_splicer",
+    "clsExact": "SPLICER",
+    "clsPrimary": "SPLICER",
+    "monolithProbable": false,
+    "attribDetail": null,
+    "wave": 10,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 3,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": {
+      "kind": "splicer",
+      "alive": true,
+      "hp": 19,
+      "maxHp": 30,
+      "phase": 1,
+      "spawnWave": 10
+     },
+     "warden": null
+    },
+    "score": {
+     "kills": 399,
+     "score": 122417,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 7437
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 6823,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 11783,
+     "source": "rock_S",
+     "lives": 1,
+     "attributed": null
+    },
+    {
+     "tick": 13263,
+     "source": "boss_splicer",
+     "lives": 0,
+     "attributed": null
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 971,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 13.967
+    },
+    "2": {
+     "startTick": 1104,
+     "clearTick": 2781,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 27.95
+    },
+    "3": {
+     "startTick": 2914,
+     "clearTick": 4853,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 32.317
+    },
+    "4": {
+     "startTick": 4986,
+     "clearTick": 6174,
+     "planned": 7,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "hold"
+     },
+     "fieldCountAtStart": 7,
+     "clearSecs": 19.8
+    },
+    "5": {
+     "startTick": 6307,
+     "clearTick": 8121,
+     "planned": 9,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 9,
+     "clearSecs": 30.233
+    },
+    "6": {
+     "startTick": 8254,
+     "clearTick": 8745,
+     "planned": 6,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": 8.183
+    },
+    "7": {
+     "startTick": 8878,
+     "clearTick": 10025,
+     "planned": 8,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 19.117
+    },
+    "8": {
+     "startTick": 10158,
+     "clearTick": 11480,
+     "planned": 10,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": 22.033
+    },
+    "9": {
+     "startTick": 11613,
+     "clearTick": 12949,
+     "planned": 12,
+     "adj": {
+      "d": 0.959375,
+      "b": 1.0187499999999998,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 14,
+     "clearSecs": 22.267
+    },
+    "10": {
+     "startTick": 13082,
+     "clearTick": null,
+     "planned": 8,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58123,
+   "died": true,
+   "deathTick": 8632,
+   "ticks": 8632,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 8632,
+    "source": "rock_M",
+    "clsExact": "rock_M",
+    "clsPrimary": "rock_M",
+    "monolithProbable": false,
+    "attribDetail": null,
+    "wave": 8,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 2,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": null,
+     "warden": null
+    },
+    "score": {
+     "kills": 294,
+     "score": 88493,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 6445
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 5985,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 6468,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "bullet_unknown"
+    },
+    {
+     "tick": 8632,
+     "source": "rock_M",
+     "lives": 0,
+     "attributed": null
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1448,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 21.917
+    },
+    "2": {
+     "startTick": 1581,
+     "clearTick": 2459,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 14.633
+    },
+    "3": {
+     "startTick": 2592,
+     "clearTick": 4139,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 25.783
+    },
+    "4": {
+     "startTick": 4272,
+     "clearTick": 5460,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 19.8
+    },
+    "5": {
+     "startTick": 5593,
+     "clearTick": 6926,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": 22.217
+    },
+    "6": {
+     "startTick": 7059,
+     "clearTick": 7490,
+     "planned": 6,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": 7.183
+    },
+    "7": {
+     "startTick": 7623,
+     "clearTick": 8337,
+     "planned": 8,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 11.9
+    },
+    "8": {
+     "startTick": 8470,
+     "clearTick": null,
+     "planned": 10,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58124,
+   "died": true,
+   "deathTick": 6876,
+   "ticks": 6876,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 6876,
+    "source": "bullet",
+    "clsExact": "boss_monolith",
+    "clsPrimary": "MONOLITH",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 8.100000000000001,
+     "r": 0.22,
+     "recentMul": [
+      0.9
+     ],
+     "matched": [
+      9
+     ],
+     "ambiguity": false
+    },
+    "wave": 5,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 2,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": {
+      "kind": "monolith",
+      "alive": true,
+      "hp": 11,
+      "maxHp": 64,
+      "phase": 2,
+      "spawnWave": 5
+     },
+     "warden": null
+    },
+    "score": {
+     "kills": 169,
+     "score": 45598,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [],
+   "hitLog": [
+    {
+     "tick": 4802,
+     "source": "rock_L",
+     "lives": 2,
+     "attributed": null
+    },
+    {
+     "tick": 6523,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 6876,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "boss_monolith"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1641,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 25.133
+    },
+    "2": {
+     "startTick": 1774,
+     "clearTick": 2979,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 20.083
+    },
+    "3": {
+     "startTick": 3112,
+     "clearTick": 4484,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 22.867
+    },
+    "4": {
+     "startTick": 4617,
+     "clearTick": 6125,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 25.133
+    },
+    "5": {
+     "startTick": 6258,
+     "clearTick": null,
+     "planned": 5,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58125,
+   "died": true,
+   "deathTick": 5997,
+   "ticks": 5997,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 5997,
+    "source": "bullet",
+    "clsExact": "boss_monolith",
+    "clsPrimary": "MONOLITH",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 8.1,
+     "r": 0.22,
+     "recentMul": [
+      0.9
+     ],
+     "matched": [
+      9
+     ],
+     "ambiguity": false
+    },
+    "wave": 5,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 2,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [
+      "spread"
+     ],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": {
+      "kind": "monolith",
+      "alive": true,
+      "hp": 44,
+      "maxHp": 64,
+      "phase": 1,
+      "spawnWave": 5
+     },
+     "warden": null
+    },
+    "score": {
+     "kills": 125,
+     "score": 31257,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [],
+   "hitLog": [
+    {
+     "tick": 4885,
+     "source": "rock_S",
+     "lives": 2,
+     "attributed": null
+    },
+    {
+     "tick": 5719,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 5997,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "boss_monolith"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1935,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 30.033
+    },
+    "2": {
+     "startTick": 2068,
+     "clearTick": 3404,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 22.267
+    },
+    "3": {
+     "startTick": 3537,
+     "clearTick": 4498,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 16.017
+    },
+    "4": {
+     "startTick": 4631,
+     "clearTick": 5191,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 9.333
+    },
+    "5": {
+     "startTick": 5324,
+     "clearTick": null,
+     "planned": 5,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58126,
+   "died": true,
+   "deathTick": 14266,
+   "ticks": 14266,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 14266,
+    "source": "bullet",
+    "clsExact": "bullet_unknown",
+    "clsPrimary": "bullet_unknown",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 7.13125,
+     "r": 0.22,
+     "recentMul": [
+      1.0187499999999998
+     ],
+     "matched": [
+      7
+     ],
+     "ambiguity": false
+    },
+    "wave": 10,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 3,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": null,
+     "warden": null
+    },
+    "score": {
+     "kills": 449,
+     "score": 143787,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 6523
+    },
+    {
+     "kind": "splicer",
+     "tick": 14172
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 6151,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 6418,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 14266,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "bullet_unknown"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1049,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 15.267
+    },
+    "2": {
+     "startTick": 1182,
+     "clearTick": 2463,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 21.35
+    },
+    "3": {
+     "startTick": 2596,
+     "clearTick": 3912,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 21.933
+    },
+    "4": {
+     "startTick": 4045,
+     "clearTick": 5318,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 21.217
+    },
+    "5": {
+     "startTick": 5451,
+     "clearTick": 6958,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": 25.117
+    },
+    "6": {
+     "startTick": 7091,
+     "clearTick": 7648,
+     "planned": 6,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": 9.283
+    },
+    "7": {
+     "startTick": 7781,
+     "clearTick": 8506,
+     "planned": 8,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 12.083
+    },
+    "8": {
+     "startTick": 8639,
+     "clearTick": 10590,
+     "planned": 10,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": 32.517
+    },
+    "9": {
+     "startTick": 10723,
+     "clearTick": 13271,
+     "planned": 12,
+     "adj": {
+      "d": 0.959375,
+      "b": 1.0187499999999998,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 14,
+     "clearSecs": 42.467
+    },
+    "10": {
+     "startTick": 13404,
+     "clearTick": null,
+     "planned": 13,
+     "adj": {
+      "d": 0.959375,
+      "b": 1.0187499999999998,
+      "mod": "none",
+      "lull": false,
+      "reason": "hold"
+     },
+     "fieldCountAtStart": 16,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58127,
+   "died": true,
+   "deathTick": 7181,
+   "ticks": 7181,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 7181,
+    "source": "bullet",
+    "clsExact": "boss_monolith",
+    "clsPrimary": "MONOLITH",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 9.84375,
+     "r": 0.22,
+     "recentMul": [
+      1.09375
+     ],
+     "matched": [
+      9
+     ],
+     "ambiguity": false
+    },
+    "wave": 5,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 2,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": {
+      "kind": "monolith",
+      "alive": true,
+      "hp": 16,
+      "maxHp": 64,
+      "phase": 2,
+      "spawnWave": 5
+     },
+     "warden": null
+    },
+    "score": {
+     "kills": 195,
+     "score": 54406,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [],
+   "hitLog": [
+    {
+     "tick": 6886,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 7049,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 7181,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "boss_monolith"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1163,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 17.167
+    },
+    "2": {
+     "startTick": 1296,
+     "clearTick": 3111,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 30.25
+    },
+    "3": {
+     "startTick": 3244,
+     "clearTick": 4556,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 21.867
+    },
+    "4": {
+     "startTick": 4689,
+     "clearTick": 6292,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": 26.717
+    },
+    "5": {
+     "startTick": 6425,
+     "clearTick": null,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58128,
+   "died": true,
+   "deathTick": 8161,
+   "ticks": 8161,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 8161,
+    "source": "rock_S",
+    "clsExact": "rock_S",
+    "clsPrimary": "rock_S",
+    "monolithProbable": false,
+    "attribDetail": null,
+    "wave": 8,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 2,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": null,
+     "warden": null
+    },
+    "score": {
+     "kills": 249,
+     "score": 71569,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 5954
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 5743,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 5949,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 8161,
+     "source": "rock_S",
+     "lives": 0,
+     "attributed": null
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1800,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 5,
+     "clearSecs": 27.783
+    },
+    "2": {
+     "startTick": 1933,
+     "clearTick": 3379,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 24.1
+    },
+    "3": {
+     "startTick": 3512,
+     "clearTick": 4834,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 22.033
+    },
+    "4": {
+     "startTick": 4967,
+     "clearTick": 4972,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 0.083
+    },
+    "5": {
+     "startTick": 5105,
+     "clearTick": 6460,
+     "planned": 10,
+     "adj": {
+      "d": 1.096875,
+      "b": 1.09375,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 10,
+     "clearSecs": 22.583
+    },
+    "6": {
+     "startTick": 6593,
+     "clearTick": 7168,
+     "planned": 6,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": 9.583
+    },
+    "7": {
+     "startTick": 7301,
+     "clearTick": 7859,
+     "planned": 8,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 9.3
+    },
+    "8": {
+     "startTick": 7992,
+     "clearTick": null,
+     "planned": 10,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": null
+    }
+   }
+  },
+  {
+   "seed": 58129,
+   "died": true,
+   "deathTick": 12604,
+   "ticks": 12604,
+   "totalHits": 3,
+   "killingBlow": {
+    "tick": 12604,
+    "source": "bullet",
+    "clsExact": "boss_splicer",
+    "clsPrimary": "SPLICER",
+    "monolithProbable": false,
+    "attribDetail": {
+     "v": 9.674999999999999,
+     "r": 0.22,
+     "recentMul": [
+      1.075
+     ],
+     "matched": [
+      9
+     ],
+     "ambiguity": false
+    },
+    "wave": 10,
+    "resources": {
+     "hitsTaken": 3,
+     "livesUsed": 3,
+     "weaponLevel": 3,
+     "shield": {
+      "hits": 0,
+      "timeLeft": 0
+     },
+     "activePowerups": [],
+     "bombs": null
+    },
+    "heavyweight": {
+     "boss": {
+      "kind": "splicer",
+      "alive": true,
+      "hp": 9,
+      "maxHp": 30,
+      "phase": 2,
+      "spawnWave": 10
+     },
+     "warden": null
+    },
+    "score": {
+     "kills": 390,
+     "score": 125790,
+     "combo": 0,
+     "maxCombo": 20
+    }
+   },
+   "bossDeaths": [
+    {
+     "kind": "monolith",
+     "tick": 7064
+    }
+   ],
+   "hitLog": [
+    {
+     "tick": 7026,
+     "source": "bullet",
+     "lives": 2,
+     "attributed": "boss_monolith"
+    },
+    {
+     "tick": 12179,
+     "source": "bullet",
+     "lives": 1,
+     "attributed": "boss_splicer"
+    },
+    {
+     "tick": 12604,
+     "source": "bullet",
+     "lives": 0,
+     "attributed": "boss_splicer"
+    }
+   ],
+   "waveTable": {
+    "1": {
+     "startTick": 133,
+     "clearTick": 1533,
+     "planned": 5,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 23.333
+    },
+    "2": {
+     "startTick": 1666,
+     "clearTick": 3287,
+     "planned": 6,
+     "adj": null,
+     "fieldCountAtStart": 6,
+     "clearSecs": 27.017
+    },
+    "3": {
+     "startTick": 3420,
+     "clearTick": 4212,
+     "planned": 6,
+     "adj": {
+      "d": 0.890625,
+      "b": 0.98125,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 6,
+     "clearSecs": 13.2
+    },
+    "4": {
+     "startTick": 4345,
+     "clearTick": 6282,
+     "planned": 8,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 32.283
+    },
+    "5": {
+     "startTick": 6415,
+     "clearTick": 7741,
+     "planned": 9,
+     "adj": {
+      "d": 0.9937499999999999,
+      "b": 1.0374999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "hold"
+     },
+     "fieldCountAtStart": 9,
+     "clearSecs": 22.1
+    },
+    "6": {
+     "startTick": 7874,
+     "clearTick": 8280,
+     "planned": 6,
+     "adj": {
+      "d": 0.6,
+      "b": 0.9,
+      "mod": "gentle",
+      "lull": true,
+      "reason": "hit"
+     },
+     "fieldCountAtStart": 5,
+     "clearSecs": 6.767
+    },
+    "7": {
+     "startTick": 8413,
+     "clearTick": 8993,
+     "planned": 8,
+     "adj": {
+      "d": 0.753125,
+      "b": 0.90625,
+      "mod": "gentle",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 8,
+     "clearSecs": 9.667
+    },
+    "8": {
+     "startTick": 9126,
+     "clearTick": 10154,
+     "planned": 10,
+     "adj": {
+      "d": 0.8562500000000001,
+      "b": 0.9624999999999999,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 11,
+     "clearSecs": 17.133
+    },
+    "9": {
+     "startTick": 10287,
+     "clearTick": 11718,
+     "planned": 12,
+     "adj": {
+      "d": 0.959375,
+      "b": 1.0187499999999998,
+      "mod": "none",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 14,
+     "clearSecs": 23.85
+    },
+    "10": {
+     "startTick": 11851,
+     "clearTick": null,
+     "planned": 15,
+     "adj": {
+      "d": 1.0625,
+      "b": 1.075,
+      "mod": "hard",
+      "lull": false,
+      "reason": "skilled"
+     },
+     "fieldCountAtStart": 18,
+     "clearSecs": null
+    }
+   }
+  }
+ ]
+}

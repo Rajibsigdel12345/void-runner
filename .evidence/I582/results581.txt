@@ -1,0 +1,64 @@
+I582 E82 (30 seeds 58100+i, full director, kiter, cap 36000 ticks) - pre-lever re-audit of the Monolith wave-5 wall (E82 4-branch B/A*/G/C adjudication)
+rules: .evidence/I582/rules581.md   generated 2026-11-23T16:40:45.088Z   wall ms 14625
+
+PER-RUN:
+seed 58100: died tick 13215 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=123403 kills=386
+seed 58101: died tick 6431 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=50597 kills=177
+seed 58102: died tick 11037 (wave 9) source=gunship clsPrimary=gunship hits=3 score=92711 kills=298
+seed 58103: died tick 7677 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=57869 kills=213
+seed 58104: died tick 12639 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=159542 kills=468
+seed 58105: died tick 16609 (wave 11) source=bullet clsPrimary=gunship hits=3 score=143234 kills=441
+seed 58106: died tick 6694 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=57920 kills=213
+seed 58107: died tick 18145 (wave 14) source=wasp clsPrimary=wasp hits=3 score=222816 kills=633
+seed 58108: died tick 12651 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=123419 kills=368
+seed 58109: died tick 5717 (wave 5) source=bullet clsPrimary=bullet_unknown hits=3 score=44362 kills=164
+seed 58110: died tick 11536 (wave 8) source=rock_L clsPrimary=rock_L hits=3 score=83161 kills=283
+seed 58111: died tick 14460 (wave 11) source=bullet clsPrimary=sentry hits=3 score=153594 kills=449
+seed 58112: died tick 13351 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=149414 kills=451
+seed 58113: died tick 5509 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=46959 kills=182
+seed 58114: died tick 6596 (wave 5) source=boss_monolith clsPrimary=MONOLITH hits=3 score=36578 kills=133
+seed 58115: died tick 13495 (wave 11) source=bullet clsPrimary=SPLICER hits=3 score=141891 kills=438
+seed 58116: died tick 5745 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=41684 kills=158
+seed 58117: died tick 6825 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=56563 kills=200
+seed 58118: died tick 7664 (wave 8) source=rock_M clsPrimary=rock_M hits=3 score=76396 kills=252
+seed 58119: died tick 8403 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=58106 kills=212
+seed 58120: died tick 15496 (wave 12) source=bullet clsPrimary=gunship hits=3 score=178320 kills=505
+seed 58121: died tick 15225 (wave 11) source=bullet clsPrimary=gunship hits=3 score=178798 kills=550
+seed 58122: died tick 13263 (wave 10) source=boss_splicer clsPrimary=SPLICER hits=3 score=122417 kills=399
+seed 58123: died tick 8632 (wave 8) source=rock_M clsPrimary=rock_M hits=3 score=88493 kills=294
+seed 58124: died tick 6876 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=45598 kills=169
+seed 58125: died tick 5997 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=31257 kills=125
+seed 58126: died tick 14266 (wave 10) source=bullet clsPrimary=bullet_unknown hits=3 score=143787 kills=449
+seed 58127: died tick 7181 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=54406 kills=195
+seed 58128: died tick 8161 (wave 8) source=rock_S clsPrimary=rock_S hits=3 score=71569 kills=249
+seed 58129: died tick 12604 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=125790 kills=390
+
+KILLING-BLOW TALLY (primary, incl. monolithProbable rocks): {"SPLICER":7,"MONOLITH":11,"gunship":4,"wasp":1,"bullet_unknown":2,"rock_L":1,"sentry":1,"rock_M":2,"rock_S":1}
+KILLING-BLOW TALLY (strict, probable rocks excluded):        {"SPLICER":7,"MONOLITH":11,"gunship":4,"wasp":1,"bullet_unknown":2,"rock_L":1,"sentry":1,"rock_M":2,"rock_S":1}
+H primary: 18/30   H strict: 18/30  
+died runs: 30/30   median death wave: 8
+
+FRACTION H primary: 0.600 (18/30)   BRANCH DECISION: B (Monolith wave-5 wall): B56 12/30 >= 12/30 -> apply the FROZEN E82 lever boss.burst.every 4.0 -> 4.8 (ST-550/I583)
+ADJUDICATION INPUTS: B56 12/30 (wave 5-6 band, any attribution) | M56 11/30 (band AND clsPrimary MONOLITH; E81 def - R-6 comparability only) | M56' 12/30 (band AND [MONOLITH primary OR bullet_unknown + monolithDeath within 180 ticks BEFORE death]; FROZEN E82 def - ADJUDICATED ON M56')
+
+PER-WAVE 1-20 (median across runs; plannedContent per wave from first run):
+wave 1: startedRuns=30 clearedRuns=30 medianClearSecs=20.758333333333333 plannedContent(run0)=5
+wave 2: startedRuns=30 clearedRuns=30 medianClearSecs=24.233333333333334 plannedContent(run0)=6
+wave 3: startedRuns=30 clearedRuns=30 medianClearSecs=17.833333333333336 plannedContent(run0)=6
+wave 4: startedRuns=30 clearedRuns=30 medianClearSecs=22.84166666666667 plannedContent(run0)=8
+wave 5: startedRuns=30 clearedRuns=18 medianClearSecs=23.483333333333334 plannedContent(run0)=10
+wave 6: startedRuns=18 clearedRuns=18 medianClearSecs=9.383333333333333 plannedContent(run0)=6
+wave 7: startedRuns=18 clearedRuns=18 medianClearSecs=12.533333333333333 plannedContent(run0)=8
+wave 8: startedRuns=18 clearedRuns=14 medianClearSecs=22.53333333333333 plannedContent(run0)=10
+wave 9: startedRuns=14 clearedRuns=13 medianClearSecs=23.483333333333334 plannedContent(run0)=12
+wave 10: startedRuns=13 clearedRuns=6 medianClearSecs=22.508333333333333 plannedContent(run0)=15
+wave 11: startedRuns=6 clearedRuns=2 medianClearSecs=14.641666666666666 plannedContent(run0)=13
+wave 12: startedRuns=2 clearedRuns=1 medianClearSecs=17.383333333333333 plannedContent(run0)=14
+wave 13: startedRuns=1 clearedRuns=1 medianClearSecs=19.566666666666666 plannedContent(run0)=16
+wave 14: startedRuns=1 clearedRuns=0 medianClearSecs=null plannedContent(run0)=19
+wave 15: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 16: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 17: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 18: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 19: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 20: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
