@@ -1,0 +1,13 @@
+I585 pre-state measurement (E83 open, ST-552)
+assets: 34 glb, total 4009384 B
+arena_ring.glb 5544 B | asteroid_L.glb 145224 B | asteroid_L_B.glb 145232 B | asteroid_M.glb 44424 B | asteroid_M_B.glb 44428 B | asteroid_S.glb 18016 B | asteroid_S_B.glb 18024 B | asteroid_comet.glb 28308 B | boss.glb 31876 B | boss_archon.glb 128780 B | debris_chunk.glb 4916 B | debris_sliver.glb 4920 B | drone.glb 118828 B | enemy_beacon.glb 208100 B | enemy_bulwark.glb 190584 B | enemy_gunship.glb 215032 B | enemy_hauler.glb 289748 B | enemy_hunter.glb 227496 B | enemy_phantom.glb 343244 B | enemy_sentry.glb 203688 B | enemy_sweeper.glb 129764 B | enemy_wasp.glb 310036 B | flyer.glb 139640 B | powerup_bomb.glb 6620 B | powerup_magnet.glb 5116 B | powerup_overdrive.glb 5496 B | powerup_rapid.glb 6628 B | powerup_shield.glb 7536 B | powerup_slowmo.glb 3888 B | powerup_spread.glb 6628 B | shield.glb 7372 B | ship.glb 740012 B | stinger.glb 133172 B | warden.glb 91064 B
+ship.glb 740012 B
+dist: 2 files, total 4111 B
+asset cap (current, AGENTS.md I561/ST-527): 3,940 KiB (4,034,560 B) / 91,050 t
+dist ceiling 7,400,000 B / tripwire 7,297,600 B / CLOSE FLOOR E82 969,826 B (I584)
+v8 budget pre-registration: GLB target <= 1,400,000 B / hard 1,500,000 B; tris AIM 60,000 / HARD 65,000
+  dist target ~664099 B / hard ~764099 B (code delta 0 expected)
+  close floor at hard ~6635901 B (floor >= 102,400 B)
+  asset cap renegotiation: tris 123551 -> pre-register 123,550 t; size 4769372 B -> pre-register 4,660 KiB (4,771,840 B)
+  v7 density 22.77 B/tri; 60,000 tris -> ~1366218 B; 65,000 tris -> ~1480070 B
+playframe pins: A 22/32,717 (ship 32,499 + 218) / B 52/73,172; causal483 score 11334; pwa491 11/11; tests 1,237/1,237
