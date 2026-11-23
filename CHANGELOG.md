@@ -2,6 +2,8 @@
 
 ## [Unreleased]- I561: Three enemy ship types (the phantom interceptor, the sweeper and the mine-hauler) now have fully remodeled hulls with more plating and mechanical detail - same shapes, much nicer looks. Nothing else changed.
 
+- I562: No visible changes - this was the final check of the visual round. Every automated play-check was re-run from scratch and matched its pinned numbers exactly, and the game bundle stayed at 6,430,089 bytes, under the 7.4 MB limit.
+
 - I560: In cockpit view, your ship now has a small instrument cluster in the corners of the screen: a speed gauge (bottom-left) that fills as you thrust, and a hull + shield cluster (bottom-right) - three hull pips that drop one by one as you take hits and glow ember-red on your last life, plus a shield arc that drains while your shield is up. Simple instrument-style arcs that fade in with the cockpit view; nothing else changed.
 
 - I559: The chase camera in campaign mode now keeps a steady, constant view no matter where you fly - through the tightest curves your ship stays at the same spot on screen while the horizon banks gently with the turn, instead of drifting around. In cockpit view, thrust now points exactly where you're looking, and at full speed the camera pulls back a little so the whole ship is always in frame.
