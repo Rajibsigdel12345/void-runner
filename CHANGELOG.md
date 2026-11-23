@@ -1,6 +1,8 @@
 ﻿﻿﻿﻿﻿﻿﻿# Changelog - Void Runner
 
 ## [Unreleased]- I561: Three enemy ship types (the phantom interceptor, the sweeper and the mine-hauler) now have fully remodeled hulls with more plating and mechanical detail - same shapes, much nicer looks. Nothing else changed.
+- I563: Waves now end the moment their last breakable rock is gone - no more long waits once the tough blue rocks start drifting around (wave 8 and beyond). The blue rocks keep drifting as before, part of the scenery now. The same pacing fix also applies in the campaign.
+
 
 - I562: No visible changes - this was the final check of the visual round. Every automated play-check was re-run from scratch and matched its pinned numbers exactly, and the game bundle stayed at 6,430,089 bytes, under the 7.4 MB limit.
 

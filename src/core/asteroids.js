@@ -154,5 +154,9 @@ export class AsteroidField {
   }
 
   get count() { return this.rocks.length; }
+  /** I563: rocks that can actually die - the ST-138 belt layer is persistent by design (indestructible
+   *  ambient hazard from wave 8 on), so the wave director clears on killableCount, not count: the belt
+   *  must not hold every wave hostage on the 45 s stall timer. */
+  get killableCount() { let n = 0; for (const r of this.rocks) if (!r.belt) n++; return n; }
   clear() { this.rocks.length = 0; this.nextId = 1; } // I190: fresh ID space per run
 }

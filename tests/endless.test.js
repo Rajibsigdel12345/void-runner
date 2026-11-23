@@ -12,7 +12,7 @@ const DT = 1 / 60;
 
 /** Director on an always-empty field (waves clear immediately). */
 function clearedDir(seed) {
-  const field = { count: 0, spawn: () => ({ id: 1 }) };
+  const field = { count: 0, killableCount: 0, spawn: () => ({ id: 1 }) }; // I563: mock exposes killableCount (clear check reads it)
   const dir = new WaveDirector(new RNG(seed), field);
   dir.start();
   return dir;

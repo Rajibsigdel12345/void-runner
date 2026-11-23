@@ -243,3 +243,47 @@ test('ST-242: wave-6 opening is deterministic across identical stagings (x2)', (
   assert.equal(a.n, b.n);
   assert.equal(a.pos, b.pos);
 });
+
+// ---- I563: the ST-138 belt layer must not hold waves hostage on the stall timer ----
+
+test('waves: killableCount excludes the ST-138 belt layer (I563)', () => {
+  const { field, dir } = setup(5631);
+  dir.step(DT); // wave 1 active - all wave-1 rocks spawned
+  assert.ok(field.count > 0, 'wave 1 has rocks');
+  assert.equal(dir.toSpawn, 0, 'wave 1 fully spawned');
+  assert.equal(field.killableCount, field.count, 'no belt rocks yet -> counts agree');
+  const belt = field.spawn('M', 1, null, null, false, null, 0, false, true);
+  assert.ok(belt && belt.belt, 'belt rock spawned and marked');
+  assert.equal(field.count, field.killableCount + 1, 'count includes the belt rock, killableCount excludes it');
+});
+
+test('waves: wave clears in one tick once killables die, belt persists (I563)', () => {
+  const { field, dir } = setup(5632);
+  dir.step(DT); // wave 1 active
+  const belt = field.spawn('M', 1, null, null, false, null, 0, false, true);
+  assert.ok(belt, 'belt rock in the field');
+  for (const r of field.rocks) if (!r.belt) r.dead = true; // player dealt with every killable
+  field.compact();
+  assert.equal(field.count, 1, 'only the belt rock remains');
+  const ev = dir.step(1 / 60); // ONE tick - pre-I563 this needed the full 45 s stall
+  assert.equal(ev.waveCleared, 1, 'normal clear fires with the belt present');
+  assert.equal(ev.stallAdvance, 0, 'no stall wait');
+  assert.equal(dir.state, 'intermission');
+  assert.equal(field.count, 1, 'belt rock survives the clear');
+});
+
+test('waves: belt-only field clears and both belt rocks persist (I563)', () => {
+  const { field, dir } = setup(5633);
+  dir.step(DT); // wave 1 active
+  for (const r of field.rocks) r.dead = true; // everything dealt with
+  field.compact();
+  dir.toSpawn = 0;
+  const b1 = field.spawn('M', 1, null, null, false, null, 0, false, true);
+  const b2 = field.spawn('L', 1, null, null, false, null, 0, false, true);
+  assert.ok(b1 && b2, 'two belt rocks in the field');
+  const ev = dir.step(1 / 60);
+  assert.equal(ev.waveCleared, 1, 'belt-only field clears normally');
+  assert.equal(dir.state, 'intermission');
+  assert.equal(field.count, 2, 'both belt rocks persist');
+  assert.equal(field.killableCount, 0);
+});

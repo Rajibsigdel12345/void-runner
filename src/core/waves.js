@@ -164,7 +164,9 @@ export class WaveDirector {
     }
     if (this.openGate === 0) this.openGate = null; // ST-242: burst exhausted -> normal trickle from the next tick
 
-    if (this.toSpawn === 0 && this.field.count === 0) {
+    // I563: killableCount - the ST-138 belt rocks persist by design (ambient hazard), so a wave clears
+    // the moment its killables are gone; the I42 stallTime above stays only as the safety backstop.
+    if (this.toSpawn === 0 && this.field.killableCount === 0) {
       this.state = 'intermission';
       this.intermission = this.intermissionFor(this.wave + 1); // ST-058
       this.waveElapsed = 0;
