@@ -1,0 +1,21 @@
+﻿=== causal495 (:4200 up) ===
+head: === ARM webgl (frozen classic reference) === | ok   webgl   clickedDemo | ok   webgl   state GAME_OVER
+tail: webgpu  p1 warn tally={"The powerPreference option is currently ignored when calling requestAdapter() on":1,"THREE.AttributeNode: Vertex attribute \"uv\" not found on geometry.":2} | webgpu  p2 console err=0 warn=3 tally={} | CAUSAL495 PASS | 
+causal495: exit=0 marker=FOUND port_free=true
+=== causal483 (:5173 up) ===
+head: ok   clickedDemo | ok   state GAME_OVER | ok   score 11334
+tail: ok   rock S 0.7 | console p1 err/warn=0/0 p2=0/0 | CAUSAL456 PASS | 
+causal483: exit=0 marker=FOUND port_free=true
+=== playframe483 (:5173 up) ===
+head: ok   A: state MENU | ok   A: L exact 22/32717 (I542 (ST-508 G73.0 gate) re-pin WITH MEASUREMENT of the I541 ship v7 swap: 22/25781 -> 22/32717, delta +6,936 = ship GLB 25,563 -> 32,499 exactly (fx=off single scene pass; non-ship 218 unchanged; boss v2 NOT drawn in the MENU A window - contributes 0; identical to the I541 I491 re-pin). I503 (ST-469 boss v2) history: re-pin WITH MEASUREMENT of the ST-467 ship v6 delta 22/17397 -> 22/25781, delta +8,420 = ship GLB 17,143 -> 25,563 (fx=off single scene pass; non-ship 218 unchanged; measured 25,781 in 3 deterministic I503 runs). I471 note: MENU frame draws no enemies; same 22 calls, ship once)  [L=22/32717] | ok   A: P exact 11/180 (I467 re-pin: +1 = B3 starflares additive Points draw call, 0 tri delta)  [P=11/180]
+tail: ok   B: cam finite | console A err/warn=0/0 B=0/0 | PLAYFRAME456 PASS | 
+playframe483: exit=0 marker=FOUND port_free=true
+=== playframe491 (:5173 up) ===
+head: ok   A: state MENU | ok   A: L exact 22/32717 (I541 (ST-507 ship v7) EXPLICIT re-pin WITH MEASUREMENT: 22/25781 -> 22/32717, delta +6,936 = ship GLB 25,563 -> 32,499 exactly (fx=off single scene pass: non-ship 218 tris unchanged). I501 (ST-467 ship v6) EXPLICIT re-pin WITH MEASUREMENT: 22/17361 -> 22/25781, delta +8,420 = ship GLB 17,143 -> 25,563 exactly (fx=off single scene pass: ship + flame + floorDisc 48 + ring + sprite unchanged at 218 non-ship tris). I497 note below still governs the vendor pin. I497 re-pin WITH MEASUREMENT: I494 vendor r160->r187 - r187 CylinderGeometry.generateBody skips the degenerate zero-area tip triangles (radiusTop>0 || y!==0 guard, vendor diff I497 probe) -> the 2 ship flame cones draw half their indices (measured per-frame in the pin frame: 40->20 + 32->16 = -36 tris, all inside the ship group; GLB 17143 / floorDisc 48 / ArenaRing 120 / sprite 2 all unchanged; degenerate tris drew nothing - no visual change). Pre-I494 the pin was 22/17397 (I471); I494..I496 quality bars omitted the playframe regression so the drift went uncaught - I497 work proven innocent (committed I496 baseline worktree renders the identical 22/17361).  [L=22/32717] | ok   A: P exact 11/180 (I467 re-pin: +1 = B3 starflares additive Points draw call, 0 tri delta)  [P=11/180]
+tail: ok   B: cam finite | console A err/warn=0/0 B=0/0 | PLAYFRAME456 PASS | 
+playframe491: exit=0 marker=FOUND port_free=true
+=== pwa491 (:5199 up) ===
+head: PASS - sw: registration active :: {"scope":"http://127.0.0.1:5199/","active":true,"installing":null} | PASS - sw: scope is root :: scope=http://127.0.0.1:5199/ | PASS - sw: controller set on reloaded client (claimed) :: controller=true
+tail: PASS - offline: no NaN in exposed world/camera :: no NaN | PASS - console clean (0 console errors, 0 page errors) :: consoleErr=0 pageErr=0 | SUMMARY 11/11 passed | 
+pwa491: exit=0 marker=FOUND port_free=true
+CLOSEGATE576 HARNESS PASS
