@@ -1,0 +1,64 @@
+I583 E82 (30 seeds 58200+i, full director, kiter, cap 36000 ticks) - post-lever VALIDATION of the FROZEN E82 lever boss.burst.every 4.0 -> 4.8 (ST-550/I583; acceptance (a)-(d) per rules582.md sec.3; (e) = 5-harness gate EXACT, external)
+rules: .evidence/I583/rules582.md   generated 2026-11-23T17:16:28.738Z   wall ms 15447
+
+PER-RUN:
+seed 58200: died tick 11720 (wave 9) source=bullet clsPrimary=gunship hits=3 score=123986 kills=383
+seed 58201: died tick 6802 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=60661 kills=214
+seed 58202: died tick 8498 (wave 6) source=bullet clsPrimary=MONOLITH hits=3 score=64272 kills=253
+seed 58203: died tick 12385 (wave 10) source=rock_M clsPrimary=rock_M hits=3 score=131176 kills=377
+seed 58204: died tick 9883 (wave 8) source=rock_S clsPrimary=rock_S hits=3 score=88031 kills=294
+seed 58205: died tick 12548 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=128334 kills=389
+seed 58206: died tick 8571 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=60103 kills=216
+seed 58207: died tick 13503 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=137182 kills=432
+seed 58208: died tick 17373 (wave 13) source=bullet clsPrimary=sentry hits=3 score=207767 kills=617
+seed 58209: died tick 10270 (wave 8) source=bullet clsPrimary=gunship hits=3 score=104844 kills=329
+seed 58210: died tick 10884 (wave 7) source=rock_S clsPrimary=rock_S hits=3 score=78687 kills=289
+seed 58211: died tick 6336 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=47909 kills=171
+seed 58212: died tick 8248 (wave 5) source=bullet clsPrimary=bullet_unknown hits=3 score=51174 kills=188
+seed 58213: died tick 17131 (wave 12) source=rock_M clsPrimary=rock_M hits=3 score=185780 kills=532
+seed 58214: died tick 14203 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=186222 kills=554
+seed 58215: died tick 7265 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=57591 kills=198
+seed 58216: died tick 10639 (wave 9) source=rock_M clsPrimary=rock_M hits=3 score=93108 kills=306
+seed 58217: died tick 13210 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=122230 kills=365
+seed 58218: died tick 5531 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=43767 kills=172
+seed 58219: died tick 12377 (wave 10) source=boss_splicer clsPrimary=SPLICER hits=3 score=141287 kills=443
+seed 58220: died tick 12066 (wave 10) source=bullet clsPrimary=bullet_unknown hits=3 score=132845 kills=406
+seed 58221: died tick 11675 (wave 8) source=bullet clsPrimary=gunship hits=3 score=121117 kills=378
+seed 58222: died tick 12250 (wave 8) source=bullet clsPrimary=gunship hits=3 score=99234 kills=336
+seed 58223: died tick 15053 (wave 12) source=bullet clsPrimary=mine hits=3 score=197003 kills=585
+seed 58224: died tick 12586 (wave 10) source=bullet clsPrimary=bullet_unknown hits=3 score=130591 kills=396
+seed 58225: died tick 7122 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=38098 kills=159
+seed 58226: died tick 11397 (wave 9) source=bullet clsPrimary=gunship hits=3 score=116410 kills=362
+seed 58227: died tick 11938 (wave 11) source=bullet clsPrimary=gunship hits=3 score=153947 kills=449
+seed 58228: died tick 6473 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=48640 kills=187
+seed 58229: died tick 13486 (wave 10) source=bullet clsPrimary=bullet_unknown hits=3 score=165620 kills=500
+
+KILLING-BLOW TALLY (primary, incl. monolithProbable rocks): {"gunship":6,"MONOLITH":8,"rock_M":3,"rock_S":2,"SPLICER":5,"sentry":1,"bullet_unknown":4,"mine":1}
+KILLING-BLOW TALLY (strict, probable rocks excluded):        {"gunship":6,"MONOLITH":8,"rock_M":3,"rock_S":2,"SPLICER":5,"sentry":1,"bullet_unknown":4,"mine":1}
+H primary: 13/30   H strict: 13/30  
+died runs: 30/30   median death wave: 9
+
+FRACTION H primary: 0.433 (13/30)   ACCEPTANCE (a)-(e): (a) B56 <= 9/30: PASS [9/30, baseline 11/30] | (b) M56' <= 7/30: FAIL [9/30, baseline 11/30] | (c) median death wave >= 9: PASS [measured 9] | (d) >= 3/30 reach wave >= 13: FAIL [measured 1/30; sweep577 6/30; sweep581 1/30] | (e) 5-harness gate EXACT no re-pin: EXTERNAL (run_gate583.cjs)
+ADJUDICATION INPUTS: B56 9/30 (wave 5-6 band, any attribution) | M56 8/30 (band AND clsPrimary MONOLITH; E81 def - R-6 comparability only) | M56' 9/30 (band AND [MONOLITH primary OR bullet_unknown + monolithDeath within 180 ticks BEFORE death]; FROZEN E82 def - ADJUDICATED ON M56')
+
+PER-WAVE 1-20 (median across runs; plannedContent per wave from first run):
+wave 1: startedRuns=30 clearedRuns=30 medianClearSecs=21.666666666666664 plannedContent(run0)=5
+wave 2: startedRuns=30 clearedRuns=30 medianClearSecs=23.458333333333336 plannedContent(run0)=6
+wave 3: startedRuns=30 clearedRuns=30 medianClearSecs=20.275 plannedContent(run0)=6
+wave 4: startedRuns=30 clearedRuns=30 medianClearSecs=24.316666666666666 plannedContent(run0)=8
+wave 5: startedRuns=30 clearedRuns=22 medianClearSecs=24.46666666666667 plannedContent(run0)=10
+wave 6: startedRuns=22 clearedRuns=21 medianClearSecs=10.033333333333333 plannedContent(run0)=6
+wave 7: startedRuns=21 clearedRuns=20 medianClearSecs=12.341666666666667 plannedContent(run0)=8
+wave 8: startedRuns=20 clearedRuns=17 medianClearSecs=17.133333333333333 plannedContent(run0)=10
+wave 9: startedRuns=16 clearedRuns=13 medianClearSecs=19.483333333333334 plannedContent(run0)=12
+wave 10: startedRuns=13 clearedRuns=4 medianClearSecs=14.766666666666666 plannedContent(run0)=9
+wave 11: startedRuns=4 clearedRuns=3 medianClearSecs=34.05 plannedContent(run0)=16
+wave 12: startedRuns=3 clearedRuns=1 medianClearSecs=18.966666666666665 plannedContent(run0)=10
+wave 13: startedRuns=1 clearedRuns=0 medianClearSecs=null plannedContent(run0)=13
+wave 14: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 15: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 16: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 17: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 18: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 19: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 20: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null

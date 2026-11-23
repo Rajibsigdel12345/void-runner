@@ -1,0 +1,23 @@
+ACCEPTANCE (rules582.md sec.3, FROZEN) on sweep582 (post-lever: boss.burst.every 4.0 -> 4.8):
+(a) B56 <= 9/30 [baseline 11/30]: PASS - measured 9/30
+(b) M56' <= 7/30 [baseline 11/30]: FAIL - measured 9/30 (M56 E81 def: 8/30; R-6 comparability only)
+(c) median death wave >= 9: PASS - measured 9 (died 30/30)
+(d) >= 3/30 reach wave >= 13 [sweep577 6/30; sweep581 1/30]: FAIL - measured 1/30
+(e) 5-harness gate EXACT no re-pin: EXTERNAL (run_gate583.cjs)
+VERDICT: C1 -> git restore src/core/config.js + accept-with-documentation + P1/P2/P3 to E83+
+BEST RUNS: 58208 wave 13 (207767 pts) / 58223 wave 12 (197003 pts) / 58214 wave 10 (186222 pts)
+DEATH-WAVE DIST: "wave5 x8 / wave6 x1 / wave7 x1 / wave8 x4 / wave9 x3 / wave10 x9 / wave11 x1 / wave12 x2 / wave13 x1"
+KILLING-BLOW TALLY (primary): {"gunship":6,"MONOLITH":8,"rock_M":3,"rock_S":2,"SPLICER":5,"sentry":1,"bullet_unknown":4,"mine":1}
+
+BAND DEATHS (wave in {5,6}): 9 of 30
+seed 58201: wave 5 tick 6802 source=bullet clsExact=boss_monolith clsPrimary=MONOLITH monDeath=null inFight=true offsetFromW5=736 v=7.656249999999999 base=7 burst-class lives=3 wlevel=2 bombs=null hwBoss={"kind":"monolith","alive":true,"hp":18,"maxHp":64,"phase":2,"spawnWave":5}
+seed 58202: wave 6 tick 8498 source=bullet clsExact=boss_monolith clsPrimary=MONOLITH monDeath=null inFight=true offsetFromW5=1032 v=6.3 base=7 burst-class lives=3 wlevel=2 bombs=null hwBoss={"kind":"monolith","alive":true,"hp":14,"maxHp":64,"phase":2,"spawnWave":5}
+seed 58206: wave 5 tick 8571 source=bullet clsExact=boss_monolith clsPrimary=MONOLITH monDeath=null inFight=true offsetFromW5=1045 v=7.262499999999999 base=7 burst-class lives=3 wlevel=2 bombs=null hwBoss={"kind":"monolith","alive":true,"hp":3,"maxHp":64,"phase":2,"spawnWave":5}
+seed 58211: wave 5 tick 6336 source=bullet clsExact=boss_monolith clsPrimary=MONOLITH monDeath=null inFight=true offsetFromW5=831 v=9.843750000000002 base=9 aimed-class lives=3 wlevel=2 bombs=null hwBoss={"kind":"monolith","alive":true,"hp":32,"maxHp":64,"phase":1,"spawnWave":5}
+seed 58212: wave 5 tick 8248 source=bullet clsExact=bullet_unknown clsPrimary=bullet_unknown monDeath=8218 inFight=false postKillDelta=30 offsetFromW5=846 v=9.3375 base=9 aimed-class lives=3 wlevel=2 bombs=null hwBoss=null
+seed 58215: wave 5 tick 7265 source=bullet clsExact=boss_monolith clsPrimary=MONOLITH monDeath=null inFight=true offsetFromW5=647 v=9.843750000000002 base=9 aimed-class lives=3 wlevel=2 bombs=null hwBoss={"kind":"monolith","alive":true,"hp":35,"maxHp":64,"phase":1,"spawnWave":5}
+seed 58218: wave 5 tick 5531 source=bullet clsExact=boss_monolith clsPrimary=MONOLITH monDeath=null inFight=true offsetFromW5=519 v=7.656250000000001 base=7 burst-class lives=3 wlevel=2 bombs=null hwBoss={"kind":"monolith","alive":true,"hp":35,"maxHp":64,"phase":1,"spawnWave":5}
+seed 58225: wave 5 tick 7122 source=bullet clsExact=boss_monolith clsPrimary=MONOLITH monDeath=null inFight=true offsetFromW5=803 v=8.15625 base=9 aimed-class lives=3 wlevel=2 bombs=null hwBoss={"kind":"monolith","alive":true,"hp":25,"maxHp":64,"phase":2,"spawnWave":5}
+seed 58228: wave 5 tick 6473 source=bullet clsExact=boss_monolith clsPrimary=MONOLITH monDeath=null inFight=true offsetFromW5=740 v=7.656249999999999 base=7 burst-class lives=3 wlevel=2 bombs=null hwBoss={"kind":"monolith","alive":true,"hp":53,"maxHp":64,"phase":1,"spawnWave":5}
+SUMMARY: inFight=8 postKillResidual=1 MONOLITHprimary=8 boltSource=9 of 9
+V-DECODE: burst-class=5 aimed-class=4 ambiguous=0 (of 9 bolt-source deaths)

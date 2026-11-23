@@ -1,0 +1,10 @@
+const fs = require("fs");
+const p = ".evidence/I583/clone_sweep.cjs";
+let s = fs.readFileSync(p, "utf8");
+const bs = String.fromCharCode(92);
+const old = "join(\"" + bs + "n\"));');" ;
+const neu = "join(\"" + bs + bs + "n\"));');" ;
+const n = s.split(old).length - 1;
+if (n !== 1) throw new Error("anchor count=" + n);
+fs.writeFileSync(p, s.replace(old, neu), "utf8");
+console.log("patched line-326 predicate (double backslash)");
