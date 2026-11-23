@@ -45,14 +45,14 @@ const totalSize = parsed.reduce((a, p) => a + p.size, 0);
 const totalGeo = parsed.reduce((a, p) => a + p.geoBytes, 0);
 const totalTris = parsed.reduce((a, p) => a + p.tris, 0);
 
-// FINAL fleet budgets (I510/ST-476 E68 close - the fleet is frozen until the next art epic
-// re-registers growth WITH MEASUREMENT; caps held at the I509 measured values, headroom for the next epic):
+// FINAL fleet budgets (I561/ST-527 E76 D5 - the fleet is frozen until the next art epic
+// re-registers growth WITH MEASUREMENT; caps held at the I561 measured values, headroom for the next epic):
 const BUDGET = {
-totalFilesKB: 3900,  // [I554 (ST-520 E75 D5) RE-PIN WITH MEASUREMENT 3690 -> 3900: +216,356 B rock v12 displacement remaster (7 GLBs 227,300 -> 443,656 B); measured 3,877.72 KB (3,970,784 B); headroom 22.28 KB; prior I553: 3,666.43 KB (3,754,428 B)]
-  totalGeoKB: 3830,    // [I554 (ST-520 E75 D5) RE-PIN WITH MEASUREMENT 3620 -> 3830: +216,360 B rock geometry (3,683,334 -> 3,899,694 B); measured 3,808.29 KB; headroom 21.71 KB; prior I553: 3,597.01 KB (3,683,334 B)]
+totalFilesKB: 3940,  // [I561 (ST-527 E76 D5) RE-PIN WITH MEASUREMENT 3900 -> 3940: +38,600 B 3-ship enemy remaster (724,156 -> 762,756 B); measured 3,915.41 KB (4,009,384 B); headroom 24.59 KB; prior I554: 3,877.72 KB (3,970,784 B)]
+  totalGeoKB: 3870,    // [I561 (ST-527 E76 D5) RE-PIN WITH MEASUREMENT 3830 -> 3870: +40,752 B remaster geometry (3,899,694 -> 3,940,446 B); measured 3,848.09 KB; headroom 21.91 KB; prior I554: 3,808.29 KB (3,899,694 B)]
   perFileKB: 760,      // [I541 re-pin WITH MEASUREMENT 600 -> 760 (ST-507 ship v7); max = ship.glb 722.67 KB (740,012 B); max enemy = wasp 302.77 KB (310,036 B)]
-  totalTris: 90800,    // [I554 (ST-520 E75 D5) RE-PIN WITH MEASUREMENT 82,200 -> 90,800: +9,030 t rock v12 (9,090 -> 18,120 t); measured 90,737 t; headroom 63 t; prior I553: 81,707 t]
-  perFileMats: 4,      // [I510 FINAL holds 4 (I509 re-pin 3 -> 4); max = enemy_sentry.glb 4 part bakes (R-VALUE 2-3 band rule); ship stays 3]
+  totalTris: 91050,    // [I561 (ST-527 E76 D5) RE-PIN WITH MEASUREMENT 90,800 -> 91,050: +240 t remaster (9,974 -> 10,214 t across phantom/sweeper/hauler); measured 90,977 t; headroom 73 t; prior I554: 90,737 t]
+  perFileMats: 5,      // [I561 (ST-527 E76 D5) RE-PIN WITH MEASUREMENT 4 -> 5: max = enemy_hauler.glb 5 part bakes (hull/sponsonL/sponsonR/hatch/stack); prior max = enemy_sentry.glb 4 part bakes; ship stays 3]
 };
 
 test('exactly 34 GLB assets (32 models + arena ring) (I451 -> I553)', () => {
