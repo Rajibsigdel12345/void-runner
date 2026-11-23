@@ -1,0 +1,16 @@
+BAND DEATHS (wave in {5,6}): 11 of 30
+seed 57701: wave 5 tick 6413 source=bullet clsExact=bullet_unknown clsPrimary=bullet_unknown monDeath=6409 inFight=false postKillDelta=4 offsetFromW5=566 v=8.1 base=9 aimed-class lives=3 wlevel=2 bombs=null hwBoss=null
+seed 57705: wave 5 tick 6993 source=bullet clsExact=boss_monolith clsPrimary=MONOLITH monDeath=null inFight=true offsetFromW5=1123 v=7.65625 base=7 burst-class lives=3 wlevel=2 bombs=null hwBoss={"kind":"monolith","alive":true,"hp":34,"maxHp":64,"phase":1,"spawnWave":5}
+seed 57706: wave 5 tick 6606 source=bullet clsExact=boss_monolith clsPrimary=MONOLITH monDeath=null inFight=true offsetFromW5=715 v=6.299999999999999 base=7 burst-class lives=3 wlevel=2 bombs=null hwBoss={"kind":"monolith","alive":true,"hp":16,"maxHp":64,"phase":2,"spawnWave":5}
+seed 57708: wave 5 tick 7049 source=bullet clsExact=bullet_unknown clsPrimary=bullet_unknown monDeath=6995 inFight=false postKillDelta=54 offsetFromW5=804 v=7.656250000000001 base=7 burst-class lives=3 wlevel=2 bombs=null hwBoss=null
+seed 57716: wave 5 tick 6795 source=bullet clsExact=boss_monolith clsPrimary=MONOLITH monDeath=null inFight=true offsetFromW5=639 v=7.656249999999999 base=7 burst-class lives=3 wlevel=2 bombs=null hwBoss={"kind":"monolith","alive":true,"hp":38,"maxHp":64,"phase":1,"spawnWave":5}
+seed 57719: wave 5 tick 6737 source=bullet clsExact=boss_monolith clsPrimary=MONOLITH monDeath=null inFight=true offsetFromW5=876 v=7.656250000000001 base=7 burst-class lives=3 wlevel=2 bombs=null hwBoss={"kind":"monolith","alive":true,"hp":19,"maxHp":64,"phase":2,"spawnWave":5}
+seed 57721: wave 5 tick 6170 source=bullet clsExact=bullet_unknown clsPrimary=bullet_unknown monDeath=6093 inFight=false postKillDelta=77 offsetFromW5=876 v=7.656249999999999 base=7 burst-class lives=3 wlevel=2 bombs=null hwBoss=null
+seed 57723: wave 5 tick 5914 source=bullet clsExact=boss_monolith clsPrimary=MONOLITH monDeath=null inFight=true offsetFromW5=1148 v=7.656250000000001 base=7 burst-class lives=3 wlevel=2 bombs=null hwBoss={"kind":"monolith","alive":true,"hp":3,"maxHp":64,"phase":2,"spawnWave":5}
+seed 57725: wave 5 tick 7045 source=bullet clsExact=bullet_unknown clsPrimary=bullet_unknown monDeath=6973 inFight=false postKillDelta=72 offsetFromW5=1266 v=7.65625 base=7 burst-class lives=3 wlevel=2 bombs=null hwBoss=null
+seed 57728: wave 5 tick 6443 source=bullet clsExact=boss_monolith clsPrimary=MONOLITH monDeath=null inFight=true offsetFromW5=700 v=7.656249999999999 base=7 burst-class lives=3 wlevel=2 bombs=null hwBoss={"kind":"monolith","alive":true,"hp":49,"maxHp":64,"phase":1,"spawnWave":5}
+seed 57729: wave 5 tick 6393 source=bullet clsExact=boss_monolith clsPrimary=MONOLITH monDeath=null inFight=true offsetFromW5=791 v=7.65625 base=7 burst-class lives=3 wlevel=2 bombs=null hwBoss={"kind":"monolith","alive":true,"hp":5,"maxHp":64,"phase":2,"spawnWave":5}
+SUMMARY: inFight=7 postKillResidual=4 MONOLITHprimary=7 boltSource=11 of 11
+V-DECODE: burst-class=10 aimed-class=1 ambiguous=0 (of 11 bolt-source deaths)
+POST-KILL DELTAS (ticks after monolith death): [4, 54, 72, 77]
+OFFSET FROM W5 START (ticks): min=566 max=1266 (s = /60)
