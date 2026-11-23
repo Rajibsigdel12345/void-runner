@@ -1,0 +1,63 @@
+I570 E79 open (30 seeds 56900+i, full director, kiter, cap 36000 ticks) - pre-lever re-audit of the composite post-E77 wall (Branch C cross-check of sweep567)
+rules: .evidence/I570/rules569.md   generated 2026-11-23T10:43:35.891Z   wall ms 12927
+
+PER-RUN:
+seed 56900: died tick 14753 (wave 11) source=bullet clsPrimary=bullet_unknown hits=3 score=173274 kills=493
+seed 56901: died tick 13317 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=162699 kills=503
+seed 56902: died tick 11074 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=120531 kills=357
+seed 56903: died tick 12630 (wave 10) source=rock_L clsPrimary=rock_L hits=3 score=133967 kills=419
+seed 56904: died tick 14653 (wave 10) source=bullet clsPrimary=bullet_unknown hits=3 score=146502 kills=460
+seed 56905: died tick 12344 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=135136 kills=424
+seed 56906: died tick 7528 (wave 5) source=bullet clsPrimary=bullet_unknown hits=3 score=44971 kills=178
+seed 56907: died tick 11107 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=136320 kills=407
+seed 56908: died tick 13254 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=121713 kills=399
+seed 56909: died tick 12893 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=138260 kills=427
+seed 56910: died tick 12988 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=135381 kills=411
+seed 56911: died tick 12932 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=123258 kills=368
+seed 56912: died tick 5992 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=39540 kills=155
+seed 56913: died tick 18322 (wave 14) source=bullet clsPrimary=gunship hits=3 score=233042 kills=634
+seed 56914: died tick 10111 (wave 8) source=rock_M clsPrimary=rock_M hits=3 score=77178 kills=264
+seed 56915: died tick 11671 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=138104 kills=401
+seed 56916: died tick 11275 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=111378 kills=354
+seed 56917: died tick 11959 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=123066 kills=364
+seed 56918: died tick 5409 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=34720 kills=142
+seed 56919: died tick 12011 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=116965 kills=364
+seed 56920: died tick 7388 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=46588 kills=189
+seed 56921: died tick 6589 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=51733 kills=182
+seed 56922: died tick 13752 (wave 10) source=bullet clsPrimary=SPLICER hits=3 score=138504 kills=440
+seed 56923: died tick 6614 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=52290 kills=195
+seed 56924: died tick 15085 (wave 11) source=bullet clsPrimary=gunship hits=3 score=155221 kills=465
+seed 56925: died tick 9319 (wave 8) source=rock_M clsPrimary=rock_M hits=3 score=88650 kills=282
+seed 56926: died tick 16900 (wave 13) source=bullet clsPrimary=phantom hits=3 score=191315 kills=552
+seed 56927: died tick 7710 (wave 5) source=bullet clsPrimary=MONOLITH hits=3 score=67960 kills=238
+seed 56928: died tick 16753 (wave 13) source=rock_M clsPrimary=rock_M hits=3 score=203780 kills=614
+seed 56929: died tick 11247 (wave 10) source=boss_splicer clsPrimary=SPLICER hits=3 score=124990 kills=390
+
+KILLING-BLOW TALLY (primary, incl. monolithProbable rocks): {"bullet_unknown":3,"SPLICER":14,"rock_L":1,"MONOLITH":6,"gunship":2,"rock_M":3,"phantom":1}
+KILLING-BLOW TALLY (strict, probable rocks excluded):        {"bullet_unknown":3,"SPLICER":14,"rock_L":1,"MONOLITH":6,"gunship":2,"rock_M":3,"phantom":1}
+H primary: 20/30   H strict: 20/30  
+died runs: 30/30   median death wave: 10
+
+FRACTION H primary: 0.667 (20/30)   BRANCH DECISION: B (heavyweight wall): dominant SPLICER -> E70 frozen lever [2] splicer.maxHp 30 -> 24
+
+PER-WAVE 1-20 (median across runs; plannedContent per wave from first run):
+wave 1: startedRuns=30 clearedRuns=30 medianClearSecs=21.25 plannedContent(run0)=5
+wave 2: startedRuns=30 clearedRuns=29 medianClearSecs=24.1 plannedContent(run0)=6
+wave 3: startedRuns=30 clearedRuns=30 medianClearSecs=19.266666666666666 plannedContent(run0)=6
+wave 4: startedRuns=30 clearedRuns=29 medianClearSecs=21.05 plannedContent(run0)=8
+wave 5: startedRuns=30 clearedRuns=23 medianClearSecs=22.75 plannedContent(run0)=10
+wave 6: startedRuns=23 clearedRuns=23 medianClearSecs=10.55 plannedContent(run0)=6
+wave 7: startedRuns=23 clearedRuns=23 medianClearSecs=12.4 plannedContent(run0)=8
+wave 8: startedRuns=23 clearedRuns=21 medianClearSecs=19.35 plannedContent(run0)=10
+wave 9: startedRuns=21 clearedRuns=21 medianClearSecs=21.166666666666668 plannedContent(run0)=12
+wave 10: startedRuns=21 clearedRuns=4 medianClearSecs=14.399999999999999 plannedContent(run0)=15
+wave 11: startedRuns=5 clearedRuns=3 medianClearSecs=20.316666666666666 plannedContent(run0)=9
+wave 12: startedRuns=3 clearedRuns=3 medianClearSecs=17.683333333333334 plannedContent(run0)=14
+wave 13: startedRuns=3 clearedRuns=1 medianClearSecs=20.516666666666666 plannedContent(run0)=16
+wave 14: startedRuns=1 clearedRuns=1 medianClearSecs=13.033333333333333 plannedContent(run0)=19
+wave 15: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 16: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 17: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 18: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 19: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
+wave 20: startedRuns=0 clearedRuns=0 medianClearSecs=null plannedContent(run0)=null
