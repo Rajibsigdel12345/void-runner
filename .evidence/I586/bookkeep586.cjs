@@ -1,0 +1,109 @@
+// I586 bookkeeper (E83 ST-553 done: ship v8 BUILT + P1 gate PASS, evidence-only net-zero):
+// epics ST-553 PENDING->DONE + Status line refresh, stories ST-553 append, iterations I586 append,
+// timeline I586 line append, CHANGELOG insert above the I585 line, active NEXT-at-I587 append.
+// Byte-safe: unique-anchor assert + BOM-count assert per file (delta 0). ASCII-only content.
+const fs = require("fs");
+function read(p) { return fs.readFileSync(p, "utf8"); }
+function bomCount(s) { let n = 0; for (let i = 0; i < s.length; i++) if (s.charCodeAt(i) === 0xFEFF) n++; return n; }
+function assertOnce(s, anchor, label) { const i = s.indexOf(anchor); if (i === -1) throw new Error("ANCHOR NOT FOUND: " + label); if (s.indexOf(anchor, i + 1) !== -1) throw new Error("ANCHOR NOT UNIQUE: " + label); }
+function replaceOnce(s, anchor, repl, label) { assertOnce(s, anchor, label); return s.replace(anchor, repl); }
+function assertAscii(s, label) { for (let i = 0; i < s.length; i++) { if (s.charCodeAt(i) > 126) throw new Error("NON-ASCII in " + label + " at " + i); } }
+function write(p, s) { fs.writeFileSync(p, s, "utf8"); }
+
+// ---------- epics.md (CRLF, BOM 3): ST-553 PENDING->DONE + E83 Status line refresh ----------
+{
+  const p = "production/epics.md";
+  const s0 = read(p);
+  const b0 = bomCount(s0);
+  if (!s0.endsWith("\r\n")) throw new Error("epics: expected trailing CRLF");
+  let s1 = replaceOnce(s0,
+    "ST-553 PENDING I586 (v8 build + QA + export to .evidence/I586/ ONLY)",
+    "ST-553 DONE I586 (v8 BUILT 64,884 tris / GLB 1,402,896 B + P1 gate PASS; export to .evidence/I586/ ONLY)",
+    "epics ST-553 line");
+  const statusOld = "- Status: OPEN (opened I585). Pre-state local == origin 7eabf24 (I584, E82 CLOSED accept round, push-verified). Next owner: I586 (ST-553) = the v8 Blender build (.evidence/I586/build_ship_v8.py cloned from the .evidence/I540/build_ship_v7.py pattern; EEVEE audit 960x540 dark world 3 suns, 4 views x (clay+tint) + front/rear sil96; P1 gate: must read as a RIGID AIRSHIP at 96 px, esp. rear [chase cam] + side).";
+  const statusNew = "- Status: OPEN (opened I585; ST-553 DONE I586). v8 BUILT + P1 gate PASS I586 (evidence-only, net-zero src): 64,884 tris (all 6 nodes in [AIM,CAP]; TOTAL under the 65,000 hard; the TOTAL > 60,000 AIM is warn-only + deterministic, no drift), GLB 1,402,896 B (2,896 B over the 1,400,000 target = WARN documented, under the 1,500,000 hard; expected cost of a 64k-tri hero), pinned windows all pass, v7 contract intact (6 nodes / 3 materials / COLOR_0 on Hull+Wings / export flags / axis). P1 gate verdict + method in .evidence/I586/p1gate586.md (10 audit PNGs viewed). Pre-state local == origin 0fc211c (I585, push-verified). Next owner: I587 (ST-554) = THE SWAP (assets/ship.glb <- v8, v7 backed up to .evidence/I587/ship_v7_backup.glb FIRST, asset-cap renegotiation WITH MEASUREMENT, playframe A/B re-pin WITH MEASUREMENT, 5-harness gate).";
+  s1 = replaceOnce(s1, statusOld, statusNew, "epics E83 Status line");
+  if (bomCount(s1) !== b0) throw new Error("epics BOM delta");
+  assertAscii(statusNew, "epics E83 statusNew");
+  write(p, s1);
+  console.log("epics.md OK");
+}
+// ---------- stories.md (tail-LF, BOM 5): ST-553 line append ----------
+{
+  const p = "production/stories.md";
+  const s0 = read(p);
+  const b0 = bomCount(s0);
+  if (!s0.endsWith("\n") || s0.endsWith("\r\n")) throw new Error("stories: expected trailing bare LF");
+  const line = "ST-553 E83 ship v8 build (I586) - DONE I586: Blender 5.2.3 headless full rebuild of the hero ship as the \"Rigid Airship Warship\" (6 node names / 3 materials / COLOR_0 on Hull+Wings / export flags / axis convention = v7 contract FROZEN verbatim) - run6 ALL_DONE: 64,884 tris (HULL 29,380 / WINGS 5,864 / COK 7,596 / FIN 4,484 / ENG 12,522 / NOZ 5,038; all 6 in [AIM,CAP]; TOTAL <= 65,000 hard, > 60,000 AIM = warn-only documented) + GLB 1,402,896 B (2,896 B over the 1,400,000 target WARN documented, under the 1,500,000 hard) + pinned windows all pass (zmin hull -0.3881 / span 4.0125 / len 2.716 / max-y 1.3 / nozzle max-y >= 1.299 / cockpit y-center -0.69 / zmin 0.68; facet spread hull 0.7621 / wings 1.1458) - run history recorded honestly (run1/2 crash on freed-bm print, fixed patch586b; run4 NOZ over CAP; run5 NOZ AIM_FAIL 4,462; run6 = STEPS_S 3->4 + HULL N 120->112 + COK Z 1.10->1.08 = ALL_DONE; COK lever direction corrected: raising Z subdivides MORE, ~146 tris per 0.01 Z) - P1 gate (frozen: must read as a RIGID AIRSHIP at 96 px, esp. rear34 + side) VERDICT PASS no rework (all 10 audit PNGs viewed with view_image; verdict + method in .evidence/I586/p1gate586.md) - net-zero src CONFIRMED (evidence only; assets/ untouched) - quality bar 6/6 (tests 1,237/1,237 / build 0 / dist byte-identical 6,430,174 B / 203 / vendor 4/4 EXACT / BOM delta 0 / hygiene)\n";
+  assertAscii(line, "stories ST-553");
+  const s1 = s0 + line;
+  if (bomCount(s1) !== b0) throw new Error("stories BOM delta");
+  write(p, s1);
+  console.log("stories.md OK");
+}
+
+// ---------- iterations.md (tail-LF, BOM 5): I586 entry append (no blank line before the header) ----------
+{
+  const p = "production/iterations.md";
+  const s0 = read(p);
+  const b0 = bomCount(s0);
+  if (!s0.endsWith("\n")) throw new Error("iterations: expected trailing LF");
+  const entry = "## I586 (ST-553, E83): ship v8 \"Rigid Airship Warship\" BUILT (Blender 5.2.3 headless) + P1 gate PASS (evidence-only, net-zero src)\n\n"
+    + "- Pre-state: local == origin 0fc211c (I585, push-verified). Tree clean apart from the untracked .evidence/I586/.\n"
+    + "- Change: net-zero src. Files: .evidence/I586/ (build_ship_v8.py 54,522 B [8 chunks v8c1..v8c6 concatenated]; ship_v8.glb 1,402,896 B + ship_v8.blend 1,554,474 B; audit586.py 5,134 B + 10 audit PNGs; p1gate586.md 2,135 B; run1-6 logs; patch586a-e + clone586_audit + concat586 + probe586 scripts) + the 6 bookkeeping files updated here.\n"
+    + "- Build result (run6 ALL_DONE): 64,884 tris total (HULL 29,380 [28,000/33,000] / WINGS 5,864 [5,500/7,000] / COK 7,596 [6,500/8,000] / FIN 4,484 [4,000/5,500] / ENG 12,522 [11,500/13,500] / NOZ 5,038 [4,500/5,500] - all 6 in [AIM,CAP]); TOTAL 64,884 <= 65,000 HARD (the > 60,000 AIM is warn-only; the build is deterministic so no drift). Windows: zmin hull -0.3881 (>= -0.399) / span 4.0125 [3.60/4.40] / len 2.716 [2.34/2.86] / max-y 1.3 (<= 1.3005) / nozzle max-y >= 1.299 / cockpit y-center -0.69 [-0.85/-0.55] + zmin 0.68 (>= 0.65); facet spread hull 0.7621 / wings 1.1458 (both >= 0.35). GLB 1,402,896 B = 2,896 B over the 1,400,000 target (WARN, documented - the expected cost of a 64k-tri hero at ~21.6 B/tri), under the 1,500,000 hard.\n"
+    + "- Run history (recorded honestly): run1/run2 crashed on a WING final-print reading a freed bm (fixed by patch586b -> tris_of(ob)). run3 = first full 6-part measurement. run4: NOZ 5,926 over CAP. run5 (patch586d: HULL N 190->120, NOZ STEPS_C 4->3 / STEPS_S 4->3 / SIDES_C 20->16 / bolts 16->8): HULL 29,636 / NOZ 4,462 -> AIM_FAIL NOZ 38 under the 4,500 AIM (COK 7,928 at Z 1.10). run6 (patch586e: NOZ STEPS_S 3->4, HULL N 120->112, COK Z 1.10->1.08): ALL_DONE (table above).\n"
+    + "- Calibration learnings (for I587+): (1) COK lever direction CORRECTED - a prior handoff note was inverted: c5 L101 `sel = z < V8_COK_SUBALLZ_Z` means RAISING Z subdivides MORE (~146 tris per 0.01 Z: Z1.00->6,410 / Z1.08->7,596 / Z1.10->7,928). (2) Nozzle frustums cost ~2x a naive open-frustum estimate (bevel ratio ~2.056); calibrated points (16 bolts,4,4,20)->5,926 / (8,3,3,16)->4,462 / (8,3,4,16)->5,038. (3) HULL = post-sub2B + 5,432 constant greebles; N112 -> 23,948 -> 29,380. (4) Per-node AIM is a HARD SystemExit (not warn-only); only the TOTAL > 60,000 AIM is warn-only. (5) Stale post-bevel1 prints read a freed bm - ignore; only final/PART/TOTAL/GLB/ALL_DONE lines are authoritative.\n"
+    + "- P1 gate (frozen: \"must read as a RIGID AIRSHIP at 96 px (esp. rear34 + side)\"): VERDICT PASS, no rework (the one allowed rework not needed). All 10 audit PNGs viewed with view_image: front_sil96 (long fuselage + top cockpit dome + wide flat wing + a row of 4 sponson/nozzle bumps), rear34_sil96 (long envelope tapering to the bow + wing with sponson row + prominent tail fin - the decisive rigid-airship read), side clay/tint (Zeppelin profile: transverse rib row along a long envelope, pointed bow, tail fin, rear engine cluster + nozzle row, upper command dome), rear34_tint (ribbed envelope + wing panel grid + 5 sponson nozzles; the wing panel faceting reads as riveted plating), f34_tint (riveted panel hull + dark navy cockpit dome + dark fin + sponson nozzles). Verdict + method logged in .evidence/I586/p1gate586.md.\n"
+    + "- Quality bar 6/6 (net-zero; assets/ untouched -> NO browser smoke per the I541 evidence-only precedent): npm test 1,237/1,237; npm run build 0 + vendor 4/4 EXACT (three.module A65DE049A7F38B40 / three.core 7AB0784CD2532367 / three.webgpu F549248412C62B9A / three.tsl 7FF9ACF50F006017, r187); dist byte-identical 6,430,174 B / 203; BOM delta 0 (AGENTS 1 / epics 3 / stories 5 / iterations 5 / timeline 3 / active 0 / CHANGELOG 7); hygiene (all 4 ports 5173/4173/4200/5199 free; zero browser tabs; zero terminals left running).\n"
+    + "- Next I587 (ST-554) = THE SWAP: assets/ship.glb <- .evidence/I586/ship_v8.glb (v7 740,012 B backed up to .evidence/I587/ship_v7_backup.glb FIRST); AGENTS asset-cap renegotiation WITH MEASUREMENT (4,034,560 B / 91,050 t -> 4,771,840 B / 123,550 t; delta = v8 - v7 = +662,884 B / +32,385 t); playframe A/B re-pin WITH MEASUREMENT (scope-check expected A ~60,218 for a 60k-tri ship; v8 actual 64,884 tris -> expect A ~64,200+, re-pin with the REAL measurement; B = the fx=high 2-pass window); 5-harness gate (clone .evidence/I584/run_closegate584.cjs; causal495/483 + pwa491 EXPECTED EXACT per the I541 ship-swap precedent); dist target ~7,090,162 B / hard ~7,190,162 B / tripwire 7,297,600 B (ceiling 7,400,000 KEEP); push delegate Arendt 01a20721-4cb0-73e2-a04a-320271ba1724.\n";
+  assertAscii(entry, "iterations I586");
+  const s1 = s0 + entry;
+  if (bomCount(s1) !== b0) throw new Error("iterations BOM delta");
+  write(p, s1);
+  console.log("iterations.md OK");
+}
+// ---------- timeline.md (LF, BOM 3, trailing \n): I586 line append ----------
+{
+  const p = "production/timeline.md";
+  const s0 = read(p);
+  const b0 = bomCount(s0);
+  if (!s0.endsWith("\n")) throw new Error("timeline: expected trailing LF");
+  const line = "I586 (ST-553, E83) done: the new hero ship is built and passes the readability check - a proper rigid airship: a long riveted envelope with ribbing, a pointed bow, a tall tail fin, four engine nacelles hanging under the wing, and a navy command dome up front. It reads right at tiny sizes (96 px) from every angle, which is what matters in-game. The file is 1.4 MB and 64,884 triangles, so it is heavier than the current ship; the actual swap into the game happens next round with fresh measurements. Nothing in the game changed yet. Bundle unchanged at 6,430,174 bytes, under the 7.4 MB limit with 969,826 bytes of room to spare.\n";
+  assertAscii(line, "timeline I586");
+  const s1 = s0 + line;
+  if (bomCount(s1) !== b0) throw new Error("timeline BOM delta");
+  write(p, s1);
+  console.log("timeline.md OK");
+}
+
+// ---------- CHANGELOG.md (LF, NO trailing NL, BOM 7): I586 line above the I585 line ----------
+{
+  const p = "CHANGELOG.md";
+  const s0 = read(p);
+  const b0 = bomCount(s0);
+  const a = "- I585: ";
+  assertOnce(s0, a, "changelog I585 line");
+  const entry = "- I586: No visible change - the new hero ship (a detailed rigid airship: riveted ribbed hull, pointed bow, tail fin, four engine nacelles, navy command dome) is built and passes its 96-px readability check; the swap into the game lands in the next update with fresh measurements. Bundle unchanged at 6,430,174 bytes, under the 7.4 MB limit with 969,826 bytes of room to spare.\n";
+  assertAscii(entry, "changelog I586");
+  const s1 = s0.replace(a, entry + a);
+  if (bomCount(s1) !== b0) throw new Error("changelog BOM delta");
+  write(p, s1);
+  console.log("CHANGELOG.md OK");
+}
+
+// ---------- active.md (CRLF, BOM 0, trailing \r\n): NEXT-at-I587 line append ----------
+{
+  const p = "production/session-state/active.md";
+  const s0 = read(p);
+  const b0 = bomCount(s0);
+  if (!s0.endsWith("\r\n")) throw new Error("active: expected trailing CRLF");
+  const line = "- NEXT at I587 = ST-554 (E83): THE SWAP - assets/ship.glb <- .evidence/I586/ship_v8.glb (1,402,896 B / 64,884 tris; v7 740,012 B backed up to .evidence/I587/ship_v7_backup.glb FIRST); AGENTS asset-cap renegotiation WITH MEASUREMENT (4,034,560 B / 91,050 t -> 4,771,840 B / 123,550 t; delta v8-v7 = +662,884 B / +32,385 t); playframe A/B re-pin WITH MEASUREMENT (v8 64,884 tris; scope-check expected A ~60,218 for a 60k-tri ship, v8 actual -> expect A ~64,200+, re-pin with the REAL measurement; B = fx=high 2-pass window); 5-harness gate (clone .evidence/I584/run_closegate584.cjs; causal495/483 + pwa491 EXPECTED EXACT per the I541 ship-swap precedent; self-start + self-kill servers); dist target ~7,090,162 B / hard ~7,190,162 B / tripwire 7,297,600 B (ceiling 7,400,000 KEEP); cut ladder C1/C2/C3 frozen in scope-check-E83.md (C3 = decimate v8 toward 1.4 MB or revert the swap from the .evidence/I587 backup); then I588 (ST-555) = G83.0 close + CLOSE FLOOR E83 WITH MEASUREMENT (7,400,000 - new dist); push delegate for I586 = Arendt 01a20721-4cb0-73e2-a04a-320271ba1724 (rotation: Dewey I585, Russell I584) and I587 push = Russell 01a2074b-ac3f-7112-ad6a-a6c9f5653e27.\r\n";
+  assertAscii(line, "active NEXT I587");
+  const s1 = s0 + line;
+  if (bomCount(s1) !== b0) throw new Error("active BOM delta");
+  write(p, s1);
+  console.log("active.md OK");
+}
+
+console.log("BOOKKEEP586 DONE");
