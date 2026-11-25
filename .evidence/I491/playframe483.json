@@ -4,7 +4,7 @@
   "fx": "off",
   "L": {
    "calls": 22,
-   "tris": 32717
+   "tris": 62472
   },
   "P": {
    "calls": 11,
@@ -33,7 +33,7 @@
   },
   "fx": "high",
   "calls": 52,
-  "tris": 73172,
+  "tris": 132682,
   "debrisLive": 0,
   "debrisVis": [
    false,
