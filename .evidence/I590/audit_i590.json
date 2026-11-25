@@ -1,0 +1,300 @@
+[
+ {
+  "name": "drone",
+  "tris": 1516,
+  "bytes": 118828,
+  "b_per_tri": 78.38,
+  "r": 1.4667,
+  "ext": [
+   2.1,
+   1.7,
+   1.1421
+  ],
+  "fills": {
+   "A": 0.0884,
+   "B": 0.0895,
+   "C": 0.1016
+  },
+  "sil96": 0.0932,
+  "nodes": {
+   "VR_Drone": 1516
+  }
+ },
+ {
+  "name": "stinger",
+  "tris": 1732,
+  "bytes": 133172,
+  "b_per_tri": 76.89,
+  "r": 2.1624,
+  "ext": [
+   4.02,
+   1.0774,
+   1.1759
+  ],
+  "fills": {
+   "A": 0.013,
+   "B": 0.0433,
+   "C": 0.013
+  },
+  "sil96": 0.0231,
+  "nodes": {
+   "VR_Stinger_Body": 1572,
+   "VR_Stinger_Core": 160
+  }
+ },
+ {
+  "name": "warden",
+  "tris": 1556,
+  "bytes": 91064,
+  "b_per_tri": 58.52,
+  "r": 3.6188,
+  "ext": [
+   4.8,
+   4.32,
+   3.2682
+  ],
+  "fills": {
+   "A": 0.0284,
+   "B": 0.0268,
+   "C": 0.0373
+  },
+  "sil96": 0.0308,
+  "nodes": {
+   "VR_Warden_Armor": 780,
+   "VR_Warden_Hull": 776
+  }
+ },
+ {
+  "name": "flyer",
+  "tris": 1770,
+  "bytes": 139640,
+  "b_per_tri": 78.89,
+  "r": 1.7169,
+  "ext": [
+   2.55,
+   2.1,
+   0.9371
+  ],
+  "fills": {
+   "A": 0.0341,
+   "B": 0.0282,
+   "C": 0.0616
+  },
+  "sil96": 0.0413,
+  "nodes": {
+   "VR_Flyer_Body": 1528,
+   "VR_Flyer_Dome": 242
+  }
+ },
+ {
+  "name": "enemy_hunter",
+  "tris": 3366,
+  "bytes": 227496,
+  "b_per_tri": 67.59,
+  "r": 1.0112,
+  "ext": [
+   1.32,
+   1.1593,
+   1.002
+  ],
+  "fills": {
+   "A": 0.1502,
+   "B": 0.1603,
+   "C": 0.3152
+  },
+  "sil96": 0.2086,
+  "nodes": {
+   "VR_Hunter_Core": 256,
+   "VR_Hunter_Fin": 972,
+   "VR_Hunter_Hull": 2138
+  }
+ },
+ {
+  "name": "enemy_gunship",
+  "tris": 2906,
+  "bytes": 215032,
+  "b_per_tri": 74.0,
+  "r": 1.89,
+  "ext": [
+   2.95,
+   1.94,
+   1.35
+  ],
+  "fills": {
+   "A": 0.0413,
+   "B": 0.0599,
+   "C": 0.0551
+  },
+  "sil96": 0.0521,
+  "nodes": {
+   "VR_Gunship_Bay": 292,
+   "VR_Gunship_Hull": 1864,
+   "VR_Gunship_Nacelle": 750
+  }
+ },
+ {
+  "name": "enemy_sentry",
+  "tris": 2934,
+  "bytes": 203688,
+  "b_per_tri": 69.42,
+  "r": 1.9421,
+  "ext": [
+   2.76,
+   2.23,
+   1.58
+  ],
+  "fills": {
+   "A": 0.0386,
+   "B": 0.0553,
+   "C": 0.0625
+  },
+  "sil96": 0.0521,
+  "nodes": {
+   "VR_Sentry_Barrel": 582,
+   "VR_Sentry_Base": 324,
+   "VR_Sentry_Charge": 256,
+   "VR_Sentry_Platform": 1772
+  }
+ },
+ {
+  "name": "enemy_wasp",
+  "tris": 4020,
+  "bytes": 310036,
+  "b_per_tri": 77.12,
+  "r": 1.5341,
+  "ext": [
+   1.685,
+   2.46,
+   0.7234
+  ],
+  "fills": {
+   "A": 0.0483,
+   "B": 0.0283,
+   "C": 0.0397
+  },
+  "sil96": 0.0388,
+  "nodes": {
+   "VR_Wasp_Hull": 1356,
+   "VR_Wasp_Nose": 264,
+   "VR_Wasp_Wing": 2400
+  }
+ },
+ {
+  "name": "enemy_phantom",
+  "tris": 4544,
+  "bytes": 343244,
+  "b_per_tri": 75.54,
+  "r": 0.9691,
+  "ext": [
+   1.68,
+   0.75,
+   0.61
+  ],
+  "fills": {
+   "A": 0.0648,
+   "B": 0.1437,
+   "C": 0.0787
+  },
+  "sil96": 0.0957,
+  "nodes": {
+   "VR_Hull": 2680,
+   "VR_Nose": 472,
+   "VR_PodL": 696,
+   "VR_PodR": 696
+  }
+ },
+ {
+  "name": "enemy_hauler",
+  "tris": 3724,
+  "bytes": 289748,
+  "b_per_tri": 77.81,
+  "r": 1.2723,
+  "ext": [
+   1.72,
+   1.1951,
+   1.445
+  ],
+  "fills": {
+   "A": 0.1794,
+   "B": 0.1727,
+   "C": 0.1845
+  },
+  "sil96": 0.1789,
+  "nodes": {
+   "VR_Hatch": 324,
+   "VR_Hull": 2480,
+   "VR_SponsonL": 340,
+   "VR_SponsonR": 340,
+   "VR_Stack": 240
+  }
+ },
+ {
+  "name": "enemy_bulwark",
+  "tris": 3160,
+  "bytes": 190584,
+  "b_per_tri": 60.31,
+  "r": 1.6557,
+  "ext": [
+   1.372,
+   2.18,
+   2.0811
+  ],
+  "fills": {
+   "A": 0.0595,
+   "B": 0.1502,
+   "C": 0.059
+  },
+  "sil96": 0.0896,
+  "nodes": {
+   "VR_Core": 444,
+   "VR_Shield": 1924,
+   "VR_Spine": 792
+  }
+ },
+ {
+  "name": "enemy_sweeper",
+  "tris": 1946,
+  "bytes": 129764,
+  "b_per_tri": 66.68,
+  "r": 1.796,
+  "ext": [
+   2.8,
+   2.16,
+   0.6295
+  ],
+  "fills": {
+   "A": 0.0213,
+   "B": 0.0267,
+   "C": 0.0587
+  },
+  "sil96": 0.0356,
+  "nodes": {
+   "VR_Sweeper_Arc": 404,
+   "VR_Sweeper_Greeble": 476,
+   "VR_Sweeper_Hull": 1066
+  }
+ },
+ {
+  "name": "enemy_beacon",
+  "tris": 3144,
+  "bytes": 208100,
+  "b_per_tri": 66.19,
+  "r": 2.7756,
+  "ext": [
+   3.34,
+   3.38,
+   2.87
+  ],
+  "fills": {
+   "A": 0.0412,
+   "B": 0.0408,
+   "C": 0.0825
+  },
+  "sil96": 0.0548,
+  "nodes": {
+   "VR_Beacon_Base": 1564,
+   "VR_Beacon_Lamp": 376,
+   "VR_Beacon_Tower": 1204
+  }
+ }
+]

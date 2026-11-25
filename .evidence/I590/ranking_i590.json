@@ -1,0 +1,155 @@
+{
+ "method": "composite = (pctAsc(tris) + (100-pctAsc(b/t)) + pctAsc(sil96))/3; bottom-4 = lowest composite; tie-break legacy-4",
+ "rows": [
+  {
+   "name": "stinger",
+   "tris": 1732,
+   "bytes": 133172,
+   "bpt": 76.89,
+   "sil96": 0.0231,
+   "sTri": "16.7",
+   "sBpt": "33.3",
+   "sFill": "0.0",
+   "comp": "16.67"
+  },
+  {
+   "name": "flyer",
+   "tris": 1770,
+   "bytes": 139640,
+   "bpt": 78.89,
+   "sil96": 0.0413,
+   "sTri": "25.0",
+   "sBpt": "0.0",
+   "sFill": "33.3",
+   "comp": "19.44"
+  },
+  {
+   "name": "drone",
+   "tris": 1516,
+   "bytes": 118828,
+   "bpt": 78.38,
+   "sil96": 0.0932,
+   "sTri": "0.0",
+   "sBpt": "8.3",
+   "sFill": "75.0",
+   "comp": "27.78"
+  },
+  {
+   "name": "warden",
+   "tris": 1556,
+   "bytes": 91064,
+   "bpt": 58.52,
+   "sil96": 0.0308,
+   "sTri": "8.3",
+   "sBpt": "100.0",
+   "sFill": "8.3",
+   "comp": "38.89"
+  },
+  {
+   "name": "enemy_sweeper",
+   "tris": 1946,
+   "bytes": 129764,
+   "bpt": 66.68,
+   "sil96": 0.0356,
+   "sTri": "33.3",
+   "sBpt": "75.0",
+   "sFill": "16.7",
+   "comp": "41.67"
+  },
+  {
+   "name": "enemy_gunship",
+   "tris": 2906,
+   "bytes": 215032,
+   "bpt": 74,
+   "sil96": 0.0521,
+   "sTri": "41.7",
+   "sBpt": "50.0",
+   "sFill": "41.7",
+   "comp": "44.44"
+  },
+  {
+   "name": "enemy_wasp",
+   "tris": 4020,
+   "bytes": 310036,
+   "bpt": 77.12,
+   "sil96": 0.0388,
+   "sTri": "91.7",
+   "sBpt": "25.0",
+   "sFill": "25.0",
+   "comp": "47.22"
+  },
+  {
+   "name": "enemy_sentry",
+   "tris": 2934,
+   "bytes": 203688,
+   "bpt": 69.42,
+   "sil96": 0.0521,
+   "sTri": "50.0",
+   "sBpt": "58.3",
+   "sFill": "50.0",
+   "comp": "52.78"
+  },
+  {
+   "name": "enemy_hauler",
+   "tris": 3724,
+   "bytes": 289748,
+   "bpt": 77.81,
+   "sil96": 0.1789,
+   "sTri": "83.3",
+   "sBpt": "16.7",
+   "sFill": "91.7",
+   "comp": "63.89"
+  },
+  {
+   "name": "enemy_beacon",
+   "tris": 3144,
+   "bytes": 208100,
+   "bpt": 66.19,
+   "sil96": 0.0548,
+   "sTri": "58.3",
+   "sBpt": "83.3",
+   "sFill": "58.3",
+   "comp": "66.67"
+  },
+  {
+   "name": "enemy_phantom",
+   "tris": 4544,
+   "bytes": 343244,
+   "bpt": 75.54,
+   "sil96": 0.0957,
+   "sTri": "100.0",
+   "sBpt": "41.7",
+   "sFill": "83.3",
+   "comp": "75.00"
+  },
+  {
+   "name": "enemy_bulwark",
+   "tris": 3160,
+   "bytes": 190584,
+   "bpt": 60.31,
+   "sil96": 0.0896,
+   "sTri": "66.7",
+   "sBpt": "91.7",
+   "sFill": "66.7",
+   "comp": "75.00"
+  },
+  {
+   "name": "enemy_hunter",
+   "tris": 3366,
+   "bytes": 227496,
+   "bpt": 67.59,
+   "sil96": 0.2086,
+   "sTri": "75.0",
+   "sBpt": "66.7",
+   "sFill": "100.0",
+   "comp": "80.56"
+  }
+ ],
+ "bottom4": [
+  "drone",
+  "flyer",
+  "stinger",
+  "warden"
+ ],
+ "divergence": false
+}

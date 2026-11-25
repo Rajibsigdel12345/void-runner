@@ -1,0 +1,38 @@
+{
+  "id": "GATE-OVERRIDE-E84",
+  "epic": "E84",
+  "story": "ST-557",
+  "iteration": "I590",
+  "recorded": "2026-11-26",
+  "pattern": "I570 record+register: any gate divergence/override is recorded and registered in .evidence BEFORE any build",
+  "gate": "sil96 continuity gate (frozen scope-check-E84: per-role fill within +/-15% of the ST-557 audit baseline)",
+  "note": "The +/-15% mechanism STANDS for every ship. The two overrides below re-baseline the band for the two ships whose audit baseline IS the defect (audit-proven, F3/F4 in design/e84-enemy-remaster-research.md). The scope-check build brief requires sil96 fill +30-50% vs current where tris allow, which a strict baseline band would forbid for exactly these two ships.",
+  "overrides": [
+    {
+      "id": "GATE-OVERRIDE-E84-S1",
+      "ship": "stinger",
+      "baseline_sil96": 0.0231,
+      "strict_band": [0.0196, 0.0266],
+      "target_band": [0.030, 0.040],
+      "target_center": 0.035,
+      "center_delta_pct_vs_baseline": 52,
+      "evidence": ".evidence/I590/audit_i590.json: fills A 0.013 / B 0.0433 / C 0.013 - side views are a 1px line at 96 px; longest ship in the fleet (ext 4.02 x 1.08 x 1.18) with the least presence (research doc F3).",
+      "justification": "The v1 baseline is the defect itself: capping v2 at strict +15% (0.0266) would keep the 1px-line silhouette. The +52% center sits at the top of the scope-check +30-50% fill goal, justified by the 1px-line defect."
+    },
+    {
+      "id": "GATE-OVERRIDE-E84-S2",
+      "ship": "warden",
+      "baseline_sil96": 0.0308,
+      "strict_band": [0.0262, 0.0354],
+      "target_band": [0.045, 0.060],
+      "target_center": 0.0525,
+      "center_delta_pct_vs_baseline": 70,
+      "evidence": ".evidence/I590/audit_i590.json: fills A 0.0284 / B 0.0268 / C 0.0373 - scattered-slab reading, tank role failing at silhouette level; best B/t in the fleet (58.52) = cheapest fix (research doc F4).",
+      "justification": "The v1 baseline is the defect itself: the turret-bulwark brief (squat wide hex slab + turret hump + 3 thick symmetric slabs) requires a solid fill the strict band (max 0.0354) cannot reach. The +70% center is anchored at the fleet median 0.0521, so warden v2 reads as fleet-normal solid, not oversized."
+    }
+  ],
+  "not_overridden": [
+    { "ship": "drone", "baseline_sil96": 0.0932, "strict_band": [0.0792, 0.1072], "reason": "baseline is sound (top-5 fleet fill); the defect is shape identity, fixed within the strict band" },
+    { "ship": "flyer", "baseline_sil96": 0.0413, "strict_band": [0.0351, 0.0475], "reason": "baseline is the real shape; the defect is identity, fixed within the strict band" }
+  ]
+}
