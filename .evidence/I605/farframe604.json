@@ -1,0 +1,2523 @@
+{
+  "res": {
+    "meta": {
+      "fov": 60,
+      "aspect": 1.7777777777777777,
+      "arenaR": 26,
+      "band": 18.2,
+      "azTau": 0.25,
+      "deadband": 0.0001,
+      "dt": 0.016666666666666666,
+      "gates": [
+        "G0",
+        "G1",
+        "G2"
+      ],
+      "expectedFromFarframe603": {
+        "bRim": [
+          0,
+          0.3788
+        ],
+        "bIn": [
+          0,
+          0.4055
+        ],
+        "cRim": [
+          0,
+          0.5733
+        ],
+        "cIn": [
+          0,
+          0.5981
+        ],
+        "shipRim": [
+          0,
+          -0.1428
+        ]
+      }
+    },
+    "a": {
+      "positions": 12,
+      "checksPerArm": 36,
+      "worst": {
+        "G0": {
+          "maxDx": 0,
+          "maxDy": 0
+        },
+        "G1": {
+          "maxDx": 0,
+          "maxDy": 0
+        },
+        "G2": {
+          "maxDx": 0,
+          "maxDy": 0
+        }
+      }
+    },
+    "b": {
+      "G0": {
+        "N/rim": {
+          "ndc": {
+            "x": 2.1757327119288894e-17,
+            "y": 0.37880200419569326
+          },
+          "depth": 49.30928022732821,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "N/in": {
+          "ndc": {
+            "x": 2.3293360635014938e-17,
+            "y": 0.4055448375905611
+          },
+          "depth": 37.52361069981849,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/rim": {
+          "ndc": {
+            "x": -1.150416029185668e-9,
+            "y": 0.3788020041956934
+          },
+          "depth": 49.3092802273282,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/in": {
+          "ndc": {
+            "x": -1.2316336147911645e-9,
+            "y": 0.4055448375905611
+          },
+          "depth": 37.52361069981849,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/rim": {
+          "ndc": {
+            "x": 2.3008320023639466e-9,
+            "y": 0.3788020041956934
+          },
+          "depth": 49.3092802273282,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/in": {
+          "ndc": {
+            "x": 2.463267169620907e-9,
+            "y": 0.4055448375905611
+          },
+          "depth": 37.52361069981849,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/rim": {
+          "ndc": {
+            "x": 1.1504160120606377e-9,
+            "y": 0.3788020041956934
+          },
+          "depth": 49.3092802273282,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/in": {
+          "ndc": {
+            "x": 1.2316335964571339e-9,
+            "y": 0.4055448375905611
+          },
+          "depth": 37.52361069981849,
+          "inFront": true,
+          "inFrustum": true
+        }
+      },
+      "G1": {
+        "N/rim": {
+          "ndc": {
+            "x": 2.1757327119288894e-17,
+            "y": 0.37880200419569326
+          },
+          "depth": 49.30928022732821,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "N/in": {
+          "ndc": {
+            "x": 2.3293360635014938e-17,
+            "y": 0.4055448375905611
+          },
+          "depth": 37.52361069981849,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/rim": {
+          "ndc": {
+            "x": -1.150416029185668e-9,
+            "y": 0.3788020041956934
+          },
+          "depth": 49.3092802273282,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/in": {
+          "ndc": {
+            "x": -1.2316336147911645e-9,
+            "y": 0.4055448375905611
+          },
+          "depth": 37.52361069981849,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/rim": {
+          "ndc": {
+            "x": 2.3008320023639466e-9,
+            "y": 0.3788020041956934
+          },
+          "depth": 49.3092802273282,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/in": {
+          "ndc": {
+            "x": 2.463267169620907e-9,
+            "y": 0.4055448375905611
+          },
+          "depth": 37.52361069981849,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/rim": {
+          "ndc": {
+            "x": 1.1504160120606377e-9,
+            "y": 0.3788020041956934
+          },
+          "depth": 49.3092802273282,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/in": {
+          "ndc": {
+            "x": 1.2316335964571339e-9,
+            "y": 0.4055448375905611
+          },
+          "depth": 37.52361069981849,
+          "inFront": true,
+          "inFrustum": true
+        }
+      },
+      "G2": {
+        "N/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.37880200419569326
+          },
+          "depth": 49.30928022732821,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "N/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.4055448375905611
+          },
+          "depth": 37.52361069981849,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/rim": {
+          "ndc": {
+            "x": -1.150416029185668e-9,
+            "y": 0.3788020041956934
+          },
+          "depth": 49.3092802273282,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/in": {
+          "ndc": {
+            "x": -1.2316336147911645e-9,
+            "y": 0.4055448375905611
+          },
+          "depth": 37.52361069981849,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/rim": {
+          "ndc": {
+            "x": 2.3008320023639466e-9,
+            "y": 0.3788020041956934
+          },
+          "depth": 49.3092802273282,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/in": {
+          "ndc": {
+            "x": 2.463267169620907e-9,
+            "y": 0.4055448375905611
+          },
+          "depth": 37.52361069981849,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/rim": {
+          "ndc": {
+            "x": 1.1504160120606377e-9,
+            "y": 0.3788020041956934
+          },
+          "depth": 49.3092802273282,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/in": {
+          "ndc": {
+            "x": 1.2316335964571339e-9,
+            "y": 0.4055448375905611
+          },
+          "depth": 37.52361069981849,
+          "inFront": true,
+          "inFrustum": true
+        }
+      }
+    },
+    "c": {
+      "G0": {
+        "N/rim": {
+          "ndc": {
+            "x": 3.293067992618581e-17,
+            "y": 0.5733336400732377
+          },
+          "depth": 71.83010546459182,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "N/in": {
+          "ndc": {
+            "x": 3.435546538668124e-17,
+            "y": 0.5981396093462771
+          },
+          "depth": 55.54027088962938,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/rim": {
+          "ndc": {
+            "x": -1.7412057019394136e-9,
+            "y": 0.5733336400732377
+          },
+          "depth": 71.83010546459182,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/in": {
+          "ndc": {
+            "x": -1.8165410601347434e-9,
+            "y": 0.5981396093462771
+          },
+          "depth": 55.54027088962938,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/rim": {
+          "ndc": {
+            "x": 3.4824113191091594e-9,
+            "y": 0.5733336400732377
+          },
+          "depth": 71.83010546459182,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/in": {
+          "ndc": {
+            "x": 3.63308203183216e-9,
+            "y": 0.5981396093462771
+          },
+          "depth": 55.54027088962938,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/rim": {
+          "ndc": {
+            "x": 1.7412056760199204e-9,
+            "y": 0.5733336400732377
+          },
+          "depth": 71.83010546459182,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/in": {
+          "ndc": {
+            "x": 1.8165410330938125e-9,
+            "y": 0.5981396093462771
+          },
+          "depth": 55.54027088962938,
+          "inFront": true,
+          "inFrustum": true
+        }
+      },
+      "G1": {
+        "N/rim": {
+          "ndc": {
+            "x": 3.293067992618581e-17,
+            "y": 0.5733336400732377
+          },
+          "depth": 71.83010546459182,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "N/in": {
+          "ndc": {
+            "x": 3.435546538668124e-17,
+            "y": 0.5981396093462771
+          },
+          "depth": 55.54027088962938,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/rim": {
+          "ndc": {
+            "x": -1.7412057019394136e-9,
+            "y": 0.5733336400732377
+          },
+          "depth": 71.83010546459182,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/in": {
+          "ndc": {
+            "x": -1.8165410601347434e-9,
+            "y": 0.5981396093462771
+          },
+          "depth": 55.54027088962938,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/rim": {
+          "ndc": {
+            "x": 3.4824113191091594e-9,
+            "y": 0.5733336400732377
+          },
+          "depth": 71.83010546459182,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/in": {
+          "ndc": {
+            "x": 3.63308203183216e-9,
+            "y": 0.5981396093462771
+          },
+          "depth": 55.54027088962938,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/rim": {
+          "ndc": {
+            "x": 1.7412056760199204e-9,
+            "y": 0.5733336400732377
+          },
+          "depth": 71.83010546459182,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/in": {
+          "ndc": {
+            "x": 1.8165410330938125e-9,
+            "y": 0.5981396093462771
+          },
+          "depth": 55.54027088962938,
+          "inFront": true,
+          "inFrustum": true
+        }
+      },
+      "G2": {
+        "N/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5733336400732377
+          },
+          "depth": 71.83010546459182,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "N/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5981396093462771
+          },
+          "depth": 55.54027088962938,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/rim": {
+          "ndc": {
+            "x": -1.7412057019394136e-9,
+            "y": 0.5733336400732377
+          },
+          "depth": 71.83010546459182,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/in": {
+          "ndc": {
+            "x": -1.8165410601347434e-9,
+            "y": 0.5981396093462771
+          },
+          "depth": 55.54027088962938,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/rim": {
+          "ndc": {
+            "x": 3.4824113191091594e-9,
+            "y": 0.5733336400732377
+          },
+          "depth": 71.83010546459182,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/in": {
+          "ndc": {
+            "x": 3.63308203183216e-9,
+            "y": 0.5981396093462771
+          },
+          "depth": 55.54027088962938,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/rim": {
+          "ndc": {
+            "x": 1.7412056760199204e-9,
+            "y": 0.5733336400732377
+          },
+          "depth": 71.83010546459182,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/in": {
+          "ndc": {
+            "x": 1.8165410330938125e-9,
+            "y": 0.5981396093462771
+          },
+          "depth": 55.54027088962938,
+          "inFront": true,
+          "inFrustum": true
+        }
+      }
+    },
+    "d": {
+      "G0": {
+        "N2S": {
+          "steps": 120,
+          "maxAbsDeg": 90,
+          "maxRelDeg": 169.05,
+          "maxCamTravel": 27.792,
+          "maxNdcDrift": 0.3267,
+          "driftFail": 1,
+          "boxFailAll": 18,
+          "boxFailSampled": 1,
+          "shipFrameFail": 0,
+          "centerFrameFail": 24,
+          "frames": [
+            {
+              "i": 0,
+              "x": 0,
+              "y": 26,
+              "dist": 26,
+              "dollyUsed": true,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 10,
+              "x": 0,
+              "y": 21.67,
+              "dist": 21.67,
+              "dollyUsed": true,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 20,
+              "x": 0,
+              "y": 17.33,
+              "dist": 17.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 30,
+              "x": 0,
+              "y": 13,
+              "dist": 13,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 40,
+              "x": 0,
+              "y": 8.67,
+              "dist": 8.67,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 50,
+              "x": 0,
+              "y": 4.33,
+              "dist": 4.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 60,
+              "x": 0,
+              "y": 0,
+              "dist": 0,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 70,
+              "x": 0,
+              "y": -4.33,
+              "dist": 4.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 80,
+              "x": 0,
+              "y": -8.67,
+              "dist": 8.67,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 90,
+              "x": 0,
+              "y": -13,
+              "dist": 13,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 100,
+              "x": 0,
+              "y": -17.33,
+              "dist": 17.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 110,
+              "x": 0,
+              "y": -21.67,
+              "dist": 21.67,
+              "dollyUsed": true,
+              "azRelDeg": -96.9,
+              "shipNdc": {
+                "x": 0.024,
+                "y": 0.185
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 120,
+              "x": 0,
+              "y": -26,
+              "dist": 26,
+              "dollyUsed": true,
+              "azRelDeg": -93.5,
+              "shipNdc": {
+                "x": 0.012,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            }
+          ]
+        },
+        "S2N": {
+          "steps": 120,
+          "maxAbsDeg": 90,
+          "maxRelDeg": 129.28,
+          "maxCamTravel": 24.806,
+          "maxNdcDrift": 0.3166,
+          "driftFail": 1,
+          "boxFailAll": 121,
+          "boxFailSampled": 7,
+          "shipFrameFail": 0,
+          "centerFrameFail": 24,
+          "frames": [
+            {
+              "i": 0,
+              "x": 0,
+              "y": -26,
+              "dist": 26,
+              "dollyUsed": true,
+              "azRelDeg": 101.6,
+              "shipNdc": {
+                "x": -0.04,
+                "y": 0.181
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 10,
+              "x": 0,
+              "y": -21.67,
+              "dist": 21.67,
+              "dollyUsed": true,
+              "azRelDeg": -176.5,
+              "shipNdc": {
+                "x": -0.157,
+                "y": -0.041
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 20,
+              "x": 0,
+              "y": -17.33,
+              "dist": 17.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 30,
+              "x": 0,
+              "y": -13,
+              "dist": 13,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 40,
+              "x": 0,
+              "y": -8.67,
+              "dist": 8.67,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 50,
+              "x": 0,
+              "y": -4.33,
+              "dist": 4.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 60,
+              "x": 0,
+              "y": 0,
+              "dist": 0,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 70,
+              "x": 0,
+              "y": 4.33,
+              "dist": 4.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 80,
+              "x": 0,
+              "y": 8.67,
+              "dist": 8.67,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 90,
+              "x": 0,
+              "y": 13,
+              "dist": 13,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 100,
+              "x": 0,
+              "y": 17.33,
+              "dist": 17.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 110,
+              "x": 0,
+              "y": 21.67,
+              "dist": 21.67,
+              "dollyUsed": true,
+              "azRelDeg": 96.7,
+              "shipNdc": {
+                "x": -0.024,
+                "y": 0.185
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 120,
+              "x": 0,
+              "y": 26,
+              "dist": 26,
+              "dollyUsed": true,
+              "azRelDeg": 93.5,
+              "shipNdc": {
+                "x": -0.012,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            }
+          ]
+        },
+        "W2E": {
+          "steps": 120,
+          "maxAbsDeg": 32.17,
+          "maxRelDeg": 79.16,
+          "maxCamTravel": 17.853,
+          "maxNdcDrift": 0.2457,
+          "driftFail": 2,
+          "boxFailAll": 121,
+          "boxFailSampled": 7,
+          "shipFrameFail": 0,
+          "centerFrameFail": 15,
+          "frames": [
+            {
+              "i": 0,
+              "x": -26,
+              "y": 0,
+              "dist": 26,
+              "dollyUsed": true,
+              "azRelDeg": 95.8,
+              "shipNdc": {
+                "x": -0.155,
+                "y": -0.046
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 10,
+              "x": -21.67,
+              "y": 0,
+              "dist": 21.67,
+              "dollyUsed": true,
+              "azRelDeg": 136.8,
+              "shipNdc": {
+                "x": -0.096,
+                "y": -0.119
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 20,
+              "x": -17.33,
+              "y": 0,
+              "dist": 17.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.032
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 30,
+              "x": -13,
+              "y": 0,
+              "dist": 13,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.032
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 40,
+              "x": -8.67,
+              "y": 0,
+              "dist": 8.67,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.032
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 50,
+              "x": -4.33,
+              "y": 0,
+              "dist": 4.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.032
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 60,
+              "x": 0,
+              "y": 0,
+              "dist": 0,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.032
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 70,
+              "x": 4.33,
+              "y": 0,
+              "dist": 4.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.032
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 80,
+              "x": 8.67,
+              "y": 0,
+              "dist": 8.67,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.032
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 90,
+              "x": 13,
+              "y": 0,
+              "dist": 13,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.032
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 100,
+              "x": 17.33,
+              "y": 0,
+              "dist": 17.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.032
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 110,
+              "x": 21.67,
+              "y": 0,
+              "dist": 21.67,
+              "dollyUsed": true,
+              "azRelDeg": 6.8,
+              "shipNdc": {
+                "x": -0.024,
+                "y": 0.185
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 120,
+              "x": 26,
+              "y": 0,
+              "dist": 26,
+              "dollyUsed": true,
+              "azRelDeg": 3.5,
+              "shipNdc": {
+                "x": -0.012,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            }
+          ]
+        }
+      },
+      "G1": {
+        "N2S": {
+          "steps": 120,
+          "maxAbsDeg": 90,
+          "maxRelDeg": 11.61,
+          "maxCamTravel": 2.829,
+          "maxNdcDrift": 0.0271,
+          "driftFail": 0,
+          "boxFailAll": 17,
+          "boxFailSampled": 1,
+          "shipFrameFail": 0,
+          "centerFrameFail": 37,
+          "frames": [
+            {
+              "i": 0,
+              "x": 0,
+              "y": 26,
+              "dist": 26,
+              "dollyUsed": true,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 10,
+              "x": 0,
+              "y": 21.67,
+              "dist": 21.67,
+              "dollyUsed": true,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 20,
+              "x": 0,
+              "y": 17.33,
+              "dist": 17.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 30,
+              "x": 0,
+              "y": 13,
+              "dist": 13,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 40,
+              "x": 0,
+              "y": 8.67,
+              "dist": 8.67,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 50,
+              "x": 0,
+              "y": 4.33,
+              "dist": 4.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 60,
+              "x": 0,
+              "y": 0,
+              "dist": 0,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 70,
+              "x": 0,
+              "y": -4.33,
+              "dist": 4.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 80,
+              "x": 0,
+              "y": -8.67,
+              "dist": 8.67,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 90,
+              "x": 0,
+              "y": -13,
+              "dist": 13,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 100,
+              "x": 0,
+              "y": -17.33,
+              "dist": 17.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 110,
+              "x": 0,
+              "y": -21.67,
+              "dist": 21.67,
+              "dollyUsed": true,
+              "azRelDeg": 164.4,
+              "shipNdc": {
+                "x": 0.146,
+                "y": -0.068
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 120,
+              "x": 0,
+              "y": -26,
+              "dist": 26,
+              "dollyUsed": true,
+              "azRelDeg": -144.2,
+              "shipNdc": {
+                "x": 0.147,
+                "y": 0.075
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            }
+          ]
+        },
+        "S2N": {
+          "steps": 120,
+          "maxAbsDeg": 90,
+          "maxRelDeg": 129.28,
+          "maxCamTravel": 24.806,
+          "maxNdcDrift": 0.3166,
+          "driftFail": 2,
+          "boxFailAll": 121,
+          "boxFailSampled": 7,
+          "shipFrameFail": 0,
+          "centerFrameFail": 33,
+          "frames": [
+            {
+              "i": 0,
+              "x": 0,
+              "y": -26,
+              "dist": 26,
+              "dollyUsed": true,
+              "azRelDeg": 101.6,
+              "shipNdc": {
+                "x": -0.04,
+                "y": 0.181
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 10,
+              "x": 0,
+              "y": -21.67,
+              "dist": 21.67,
+              "dollyUsed": true,
+              "azRelDeg": -176.5,
+              "shipNdc": {
+                "x": -0.157,
+                "y": -0.041
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 20,
+              "x": 0,
+              "y": -17.33,
+              "dist": 17.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 30,
+              "x": 0,
+              "y": -13,
+              "dist": 13,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 40,
+              "x": 0,
+              "y": -8.67,
+              "dist": 8.67,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 50,
+              "x": 0,
+              "y": -4.33,
+              "dist": 4.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 60,
+              "x": 0,
+              "y": 0,
+              "dist": 0,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 70,
+              "x": 0,
+              "y": 4.33,
+              "dist": 4.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 80,
+              "x": 0,
+              "y": 8.67,
+              "dist": 8.67,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 90,
+              "x": 0,
+              "y": 13,
+              "dist": 13,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 100,
+              "x": 0,
+              "y": 17.33,
+              "dist": 17.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 110,
+              "x": 0,
+              "y": 21.67,
+              "dist": 21.67,
+              "dollyUsed": true,
+              "azRelDeg": 165.8,
+              "shipNdc": {
+                "x": -0.162,
+                "y": 0.008
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 120,
+              "x": 0,
+              "y": 26,
+              "dist": 26,
+              "dollyUsed": true,
+              "azRelDeg": 128.9,
+              "shipNdc": {
+                "x": -0.119,
+                "y": 0.123
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            }
+          ]
+        },
+        "W2E": {
+          "steps": 120,
+          "maxAbsDeg": 26.22,
+          "maxRelDeg": 64.64,
+          "maxCamTravel": 14.817,
+          "maxNdcDrift": 0.1442,
+          "driftFail": 2,
+          "boxFailAll": 121,
+          "boxFailSampled": 7,
+          "shipFrameFail": 0,
+          "centerFrameFail": 26,
+          "frames": [
+            {
+              "i": 0,
+              "x": -26,
+              "y": 0,
+              "dist": 26,
+              "dollyUsed": true,
+              "azRelDeg": 95.8,
+              "shipNdc": {
+                "x": -0.155,
+                "y": -0.046
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 10,
+              "x": -21.67,
+              "y": 0,
+              "dist": 21.67,
+              "dollyUsed": true,
+              "azRelDeg": 136.8,
+              "shipNdc": {
+                "x": -0.096,
+                "y": -0.119
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 20,
+              "x": -17.33,
+              "y": 0,
+              "dist": 17.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.032
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 30,
+              "x": -13,
+              "y": 0,
+              "dist": 13,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.032
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 40,
+              "x": -8.67,
+              "y": 0,
+              "dist": 8.67,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.032
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 50,
+              "x": -4.33,
+              "y": 0,
+              "dist": 4.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.032
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 60,
+              "x": 0,
+              "y": 0,
+              "dist": 0,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.032
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 70,
+              "x": 4.33,
+              "y": 0,
+              "dist": 4.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.032
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 80,
+              "x": 8.67,
+              "y": 0,
+              "dist": 8.67,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.032
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 90,
+              "x": 13,
+              "y": 0,
+              "dist": 13,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.032
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 100,
+              "x": 17.33,
+              "y": 0,
+              "dist": 17.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.032
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 110,
+              "x": 21.67,
+              "y": 0,
+              "dist": 21.67,
+              "dollyUsed": true,
+              "azRelDeg": 90.7,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.034
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 120,
+              "x": 26,
+              "y": 0,
+              "dist": 26,
+              "dollyUsed": true,
+              "azRelDeg": 46.6,
+              "shipNdc": {
+                "x": -0.135,
+                "y": 0.1
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            }
+          ]
+        }
+      },
+      "G2": {
+        "N2S": {
+          "steps": 120,
+          "maxAbsDeg": 90,
+          "maxRelDeg": 11.61,
+          "maxCamTravel": 2.829,
+          "maxNdcDrift": 0.0271,
+          "driftFail": 0,
+          "boxFailAll": 17,
+          "boxFailSampled": 1,
+          "shipFrameFail": 0,
+          "centerFrameFail": 37,
+          "frames": [
+            {
+              "i": 0,
+              "x": 0,
+              "y": 26,
+              "dist": 26,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 10,
+              "x": 0,
+              "y": 21.67,
+              "dist": 21.67,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 20,
+              "x": 0,
+              "y": 17.33,
+              "dist": 17.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 30,
+              "x": 0,
+              "y": 13,
+              "dist": 13,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 40,
+              "x": 0,
+              "y": 8.67,
+              "dist": 8.67,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 50,
+              "x": 0,
+              "y": 4.33,
+              "dist": 4.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 60,
+              "x": 0,
+              "y": 0,
+              "dist": 0,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 70,
+              "x": 0,
+              "y": -4.33,
+              "dist": 4.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 80,
+              "x": 0,
+              "y": -8.67,
+              "dist": 8.67,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 90,
+              "x": 0,
+              "y": -13,
+              "dist": 13,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 100,
+              "x": 0,
+              "y": -17.33,
+              "dist": 17.33,
+              "dollyUsed": false,
+              "azRelDeg": 90,
+              "shipNdc": {
+                "x": 0,
+                "y": -0.143
+              },
+              "inBox": true,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 110,
+              "x": 0,
+              "y": -21.67,
+              "dist": 21.67,
+              "dollyUsed": true,
+              "azRelDeg": 164.4,
+              "shipNdc": {
+                "x": 0.146,
+                "y": -0.068
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 120,
+              "x": 0,
+              "y": -26,
+              "dist": 26,
+              "dollyUsed": true,
+              "azRelDeg": -144.2,
+              "shipNdc": {
+                "x": 0.147,
+                "y": 0.075
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            }
+          ]
+        },
+        "S2N": {
+          "steps": 120,
+          "maxAbsDeg": 12.62,
+          "maxRelDeg": 10.86,
+          "maxCamTravel": 4.063,
+          "maxNdcDrift": 0.039,
+          "driftFail": 0,
+          "boxFailAll": 121,
+          "boxFailSampled": 7,
+          "shipFrameFail": 0,
+          "centerFrameFail": 5,
+          "frames": [
+            {
+              "i": 0,
+              "x": 0,
+              "y": -26,
+              "dist": 26,
+              "dollyUsed": true,
+              "azRelDeg": 101.6,
+              "shipNdc": {
+                "x": -0.04,
+                "y": 0.181
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 10,
+              "x": 0,
+              "y": -21.67,
+              "dist": 21.67,
+              "dollyUsed": true,
+              "azRelDeg": -176.5,
+              "shipNdc": {
+                "x": -0.157,
+                "y": -0.041
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 20,
+              "x": 0,
+              "y": -17.33,
+              "dist": 17.33,
+              "dollyUsed": true,
+              "azRelDeg": -156.9,
+              "shipNdc": {
+                "x": -0.136,
+                "y": -0.083
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 30,
+              "x": 0,
+              "y": -13,
+              "dist": 13,
+              "dollyUsed": true,
+              "azRelDeg": 148.1,
+              "shipNdc": {
+                "x": -0.151,
+                "y": 0.063
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 40,
+              "x": 0,
+              "y": -8.67,
+              "dist": 8.67,
+              "dollyUsed": true,
+              "azRelDeg": 119.8,
+              "shipNdc": {
+                "x": -0.097,
+                "y": 0.147
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 50,
+              "x": 0,
+              "y": -4.33,
+              "dist": 4.33,
+              "dollyUsed": true,
+              "azRelDeg": 105.3,
+              "shipNdc": {
+                "x": -0.053,
+                "y": 0.176
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 60,
+              "x": 0,
+              "y": 0,
+              "dist": 0,
+              "dollyUsed": true,
+              "azRelDeg": 97.9,
+              "shipNdc": {
+                "x": -0.027,
+                "y": 0.184
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 70,
+              "x": 0,
+              "y": 4.33,
+              "dist": 4.33,
+              "dollyUsed": true,
+              "azRelDeg": 94,
+              "shipNdc": {
+                "x": -0.014,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 80,
+              "x": 0,
+              "y": 8.67,
+              "dist": 8.67,
+              "dollyUsed": true,
+              "azRelDeg": 92.1,
+              "shipNdc": {
+                "x": -0.007,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 90,
+              "x": 0,
+              "y": 13,
+              "dist": 13,
+              "dollyUsed": true,
+              "azRelDeg": 91.1,
+              "shipNdc": {
+                "x": -0.004,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 100,
+              "x": 0,
+              "y": 17.33,
+              "dist": 17.33,
+              "dollyUsed": true,
+              "azRelDeg": 90.5,
+              "shipNdc": {
+                "x": -0.002,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 110,
+              "x": 0,
+              "y": 21.67,
+              "dist": 21.67,
+              "dollyUsed": true,
+              "azRelDeg": 90.3,
+              "shipNdc": {
+                "x": -0.001,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 120,
+              "x": 0,
+              "y": 26,
+              "dist": 26,
+              "dollyUsed": true,
+              "azRelDeg": 90.1,
+              "shipNdc": {
+                "x": -0.001,
+                "y": 0.187
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            }
+          ]
+        },
+        "W2E": {
+          "steps": 120,
+          "maxAbsDeg": 2.23,
+          "maxRelDeg": 5.82,
+          "maxCamTravel": 1.85,
+          "maxNdcDrift": 0.0157,
+          "driftFail": 0,
+          "boxFailAll": 121,
+          "boxFailSampled": 7,
+          "shipFrameFail": 0,
+          "centerFrameFail": 20,
+          "frames": [
+            {
+              "i": 0,
+              "x": -26,
+              "y": 0,
+              "dist": 26,
+              "dollyUsed": true,
+              "azRelDeg": 95.8,
+              "shipNdc": {
+                "x": -0.155,
+                "y": -0.046
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 10,
+              "x": -21.67,
+              "y": 0,
+              "dist": 21.67,
+              "dollyUsed": true,
+              "azRelDeg": 136.8,
+              "shipNdc": {
+                "x": -0.096,
+                "y": -0.119
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 20,
+              "x": -17.33,
+              "y": 0,
+              "dist": 17.33,
+              "dollyUsed": true,
+              "azRelDeg": 146.6,
+              "shipNdc": {
+                "x": -0.076,
+                "y": -0.129
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 30,
+              "x": -13,
+              "y": 0,
+              "dist": 13,
+              "dollyUsed": true,
+              "azRelDeg": 119,
+              "shipNdc": {
+                "x": -0.127,
+                "y": -0.094
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 40,
+              "x": -8.67,
+              "y": 0,
+              "dist": 8.67,
+              "dollyUsed": true,
+              "azRelDeg": 104.9,
+              "shipNdc": {
+                "x": -0.147,
+                "y": -0.067
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 50,
+              "x": -4.33,
+              "y": 0,
+              "dist": 4.33,
+              "dollyUsed": true,
+              "azRelDeg": 97.7,
+              "shipNdc": {
+                "x": -0.154,
+                "y": -0.051
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 60,
+              "x": 0,
+              "y": 0,
+              "dist": 0,
+              "dollyUsed": true,
+              "azRelDeg": 93.9,
+              "shipNdc": {
+                "x": -0.157,
+                "y": -0.042
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 70,
+              "x": 4.33,
+              "y": 0,
+              "dist": 4.33,
+              "dollyUsed": true,
+              "azRelDeg": 92,
+              "shipNdc": {
+                "x": -0.158,
+                "y": -0.037
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 80,
+              "x": 8.67,
+              "y": 0,
+              "dist": 8.67,
+              "dollyUsed": true,
+              "azRelDeg": 91,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.034
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 90,
+              "x": 13,
+              "y": 0,
+              "dist": 13,
+              "dollyUsed": true,
+              "azRelDeg": 90.5,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.033
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 100,
+              "x": 17.33,
+              "y": 0,
+              "dist": 17.33,
+              "dollyUsed": true,
+              "azRelDeg": 90.3,
+              "shipNdc": {
+                "x": -0.159,
+                "y": -0.033
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": false
+            },
+            {
+              "i": 110,
+              "x": 21.67,
+              "y": 0,
+              "dist": 21.67,
+              "dollyUsed": true,
+              "azRelDeg": 52.9,
+              "shipNdc": {
+                "x": -0.145,
+                "y": 0.08
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            },
+            {
+              "i": 120,
+              "x": 26,
+              "y": 0,
+              "dist": 26,
+              "dollyUsed": true,
+              "azRelDeg": 27.2,
+              "shipNdc": {
+                "x": -0.089,
+                "y": 0.154
+              },
+              "inBox": false,
+              "shipFramed": true,
+              "centerIn": true
+            }
+          ]
+        }
+      }
+    }
+  },
+  "summary": {
+    "G0": {
+      "a": true,
+      "b": true,
+      "c": true,
+      "frozenD": false,
+      "amendedD": false,
+      "perCross": {
+        "N2S": {
+          "maxAbsDeg": 90,
+          "maxRelDeg": 169.05,
+          "boxFailSampled": 1,
+          "boxFailAll": 18,
+          "shipFrameFail": 0,
+          "centerFrameFail": 24,
+          "maxNdcDrift": 0.3267,
+          "maxCamTravel": 27.792,
+          "driftFail": 1
+        },
+        "S2N": {
+          "maxAbsDeg": 90,
+          "maxRelDeg": 129.28,
+          "boxFailSampled": 7,
+          "boxFailAll": 121,
+          "shipFrameFail": 0,
+          "centerFrameFail": 24,
+          "maxNdcDrift": 0.3166,
+          "maxCamTravel": 24.806,
+          "driftFail": 1
+        },
+        "W2E": {
+          "maxAbsDeg": 32.17,
+          "maxRelDeg": 79.16,
+          "boxFailSampled": 7,
+          "boxFailAll": 121,
+          "shipFrameFail": 0,
+          "centerFrameFail": 15,
+          "maxNdcDrift": 0.2457,
+          "maxCamTravel": 17.853,
+          "driftFail": 2
+        }
+      }
+    },
+    "G1": {
+      "a": true,
+      "b": true,
+      "c": true,
+      "frozenD": false,
+      "amendedD": false,
+      "perCross": {
+        "N2S": {
+          "maxAbsDeg": 90,
+          "maxRelDeg": 11.61,
+          "boxFailSampled": 1,
+          "boxFailAll": 17,
+          "shipFrameFail": 0,
+          "centerFrameFail": 37,
+          "maxNdcDrift": 0.0271,
+          "maxCamTravel": 2.829,
+          "driftFail": 0
+        },
+        "S2N": {
+          "maxAbsDeg": 90,
+          "maxRelDeg": 129.28,
+          "boxFailSampled": 7,
+          "boxFailAll": 121,
+          "shipFrameFail": 0,
+          "centerFrameFail": 33,
+          "maxNdcDrift": 0.3166,
+          "maxCamTravel": 24.806,
+          "driftFail": 2
+        },
+        "W2E": {
+          "maxAbsDeg": 26.22,
+          "maxRelDeg": 64.64,
+          "boxFailSampled": 7,
+          "boxFailAll": 121,
+          "shipFrameFail": 0,
+          "centerFrameFail": 26,
+          "maxNdcDrift": 0.1442,
+          "maxCamTravel": 14.817,
+          "driftFail": 2
+        }
+      }
+    },
+    "G2": {
+      "a": true,
+      "b": true,
+      "c": true,
+      "frozenD": false,
+      "amendedD": true,
+      "perCross": {
+        "N2S": {
+          "maxAbsDeg": 90,
+          "maxRelDeg": 11.61,
+          "boxFailSampled": 1,
+          "boxFailAll": 17,
+          "shipFrameFail": 0,
+          "centerFrameFail": 37,
+          "maxNdcDrift": 0.0271,
+          "maxCamTravel": 2.829,
+          "driftFail": 0
+        },
+        "S2N": {
+          "maxAbsDeg": 12.62,
+          "maxRelDeg": 10.86,
+          "boxFailSampled": 7,
+          "boxFailAll": 121,
+          "shipFrameFail": 0,
+          "centerFrameFail": 5,
+          "maxNdcDrift": 0.039,
+          "maxCamTravel": 4.063,
+          "driftFail": 0
+        },
+        "W2E": {
+          "maxAbsDeg": 2.23,
+          "maxRelDeg": 5.82,
+          "boxFailSampled": 7,
+          "boxFailAll": 121,
+          "shipFrameFail": 0,
+          "centerFrameFail": 20,
+          "maxNdcDrift": 0.0157,
+          "maxCamTravel": 1.85,
+          "driftFail": 0
+        }
+      }
+    }
+  }
+}
