@@ -277,3 +277,5 @@ I599 (ST-564, E86) done: the cockpit controls now point exactly where the view l
 I600 (ST-565, E86) done: the cockpit view now has a subtle dashboard and canopy frame around it, so first-person flight feels like sitting in a real cockpit. It fades in and out with the cockpit camera and never gets in the way of the instruments or the crosshair.
 
 I601 (ST-566, E86) done: no visible change - we measured exactly how much of the arena you can still see from the edge. The framing is the same wherever you fly; from most edges you can see the whole way back to the far side, and the few rim angles where you cannot are now measured and on the improvement list.
+
+I602 (ST-567, E86) done: no visible change - the cockpit work is closed out. The flight controls, the first-person view, and its frame all passed the full regression gauntlet, and the game was re-verified stable end to end. A few camera-visibility edge cases from the far-framing measurement were logged for a future improvement pass.

@@ -1,0 +1,13 @@
+const fs = require('fs');
+const R = (f) => fs.readFileSync('E:/Game/' + f, 'latin1');
+const j = (o) => console.log(JSON.stringify(o));
+const ag = R('AGENTS.md');
+const i4 = ag.indexOf('4. `npm run build` dist/ total stays under');
+j({ ag_item4: ag.slice(i4, i4 + 700) });
+const st = R('production/stories.md');
+const iSt = st.indexOf('ST-567');
+const s = st.lastIndexOf('\n', iSt) + 1; const e = st.indexOf('\n', iSt);
+j({ st567: st.slice(s, e) });
+const sc = R('production/scope-check-E86.md');
+const iV = sc.indexOf('## Verification evidence');
+j({ sc_evidence: sc.slice(iV, sc.indexOf('## DoD', iV)) });

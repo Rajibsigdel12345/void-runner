@@ -1,0 +1,12 @@
+const fs = require('fs');
+const R = (f) => fs.readFileSync('E:/Game/' + f, 'latin1');
+const ag = R('AGENTS.md');
+const i85 = ag.indexOf('CLOSE FLOOR E85');
+const s = ag.lastIndexOf(';', i85);
+console.log('E85 CLAUSE REGION:', JSON.stringify(ag.slice(s, i85 + 420)));
+const i84 = ag.indexOf('CLOSE FLOOR E84');
+console.log('E84 present:', i84 >= 0);
+const i83 = ag.indexOf('CLOSE FLOOR E83');
+console.log('E83 present:', i83 >= 0);
+const n86 = ag.split('CLOSE FLOOR E86').length - 1;
+console.log('E86 occurrences:', n86);

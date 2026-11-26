@@ -76,7 +76,11 @@ Scope-fit verdict: all three residuals are bounded and cheap - one one-line wiri
 
 ## Verification evidence
 
-(to be filled at close: per-story evidence WITH MEASUREMENT + quality bar + the 5-harness gate + CLOSE FLOOR E86)
+- ST-564 (I599): probe599 PASS n=11 (cockpit 8 angles settled, drift 0.012-0.019 deg, diffEnd 0.003-0.004 deg; chase 3 angles 0.000 deg from world +y; no 180-deg flip in the non-gate regression demo; consoleErrors 0) + the basis-identity unit test appended (npm test 1,238 at I599).
+- ST-565 (I600): smoke600 PASS [z 40, opacity 1<->0 with cockpit mode, 7 static gradient layers, HUD z 55 above frame, RM transition none, consoleErrors 0; 2 art-tune iterations, final struts 35/145deg edge-to-edge] + regression 2/2 EXACT + dist 6,853,589 B / 204 (+1,672 B vs I599 6,851,917).
+- ST-566 (I601): FARFRAME601 PASS exit 0 (pure node, farframe601.json committed -f): (a) position invariance PASS at in 20.8 + rim 26 (ship NDC (0,-0.1428) at all 3 positions, maxDx 0 / maxDy 0 vs tol 0.005) - the I445 invariant measured end-to-end for the first time; (b) 3/4 arena center in-frustum from rim [N (0,0.3788)/E (-0.6706,0.1339)/W (0.6706,0.1339) in; S (0,-3.463) OUT below, depth 7.06]; (c) 1/4 opposite rim [N (0,0.5733) in; S depth -12.5975 behind the camera; E/W x-stretch 1.3002 OUT] -> root cause: fixed world +Z endless dolly (backDir null) sits outside the arena only for the N rim; 3 residuals registered E87+ (S-rim center below / S-rim opposite rim behind camera / E+W-rim opposite rim x-stretch 1.30) per the I596 accept-with-documentation pattern; NO code change (frozen scope honored).
+- ST-567 (I602): CLOSEGATE602 HARNESS PASS 5/5 EXACT zero re-pins (run_closegate602.cjs cloned from the I597 runner; ports 4200/5173/5199 self-started + self-killed, port_free=true each): causal495 [3-arm seed-9876: webgl EXACT + default EXACT + webgpu report-only] / causal483 [score 11334 EXACT] / playframe483 + playframe491 [A L 22/62,472 + P 11/180 EXACT, B EXACT, cam finite, console 0/0] / pwa491 [SUMMARY 11/11: SW active + root scope + controller + offline boot + no NaN + console clean].
+- Quality bar across the epic: npm test 1,238/1,238 (I599..I601, zero src drift), build 0, vendor 4/4 EXACT (A65DE049A7F38B40 / 7AB0784CD2532367 / F549248412C62B9A / 7FF9ACF50F006017), fresh dist re-measure at close EXACT 6,853,589 B / 204 (byte-identical to I600/I601 - no src change since I600). CLOSE FLOOR E86 = 546,411 B (7,400,000 - 6,853,589; headroom >= 102,400 B floor -> cut ladder NOT invoked).
 
 ## DoD
 
