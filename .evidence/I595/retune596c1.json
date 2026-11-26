@@ -1,0 +1,28 @@
+{
+ "rule": "C1 second iteration from luma_i595_post.json",
+ "firstPost": {
+  "warden": {
+   "sky_p50": 141.81
+  },
+  "drone": {
+   "sky_p50": 195.63
+  }
+ },
+ "c1": {
+  "warden": {
+   "oldGain": 3.71,
+   "newGain": 3.13,
+   "note": "armor 0x8fa3c8 saturates to white at gain > 1.78; hull 0x2c3548 b-channel unsaturates below 3.54"
+  },
+  "drone": {
+   "oldHex": "0x69808e",
+   "scale": 0.94096,
+   "channels": [
+    99,
+    120,
+    134
+   ],
+   "newHex": "0x637886"
+  }
+ }
+}

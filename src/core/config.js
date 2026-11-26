@@ -357,7 +357,7 @@ export const CONFIG = {
     spin: 0.9,      // body tumble rad/s
     splitCount: 2,  // S rocks on death
     score: 400,      // kill reward (seeker 200, Monolith 1000)
-    renderLumaGain: 4.5, // I511/ST-477 in-game re-audit: the I508 v2 GLB bake renders p50 83.9 (was 123.8 legacy); gain restores the ~120 ladder rung (hue 176 teal unchanged)
+    renderLumaGain: 3.13, // I596/ST-562 E85 re-tune (G1+C1): v2 bake renders 145.02 pre (rung 119.49); first pin 3.71 rendered 141.81 - armor 0x8fa3c8 base saturates white at gain > 1.78, so the linear rule under-corrects (R-1: saturation + ACES); C1 = round2(3.71 x 119.49/141.81) (WITH MEASUREMENT: luma_i595_pre/post.json; hue 177 teal)
   },
   belt: {
     // ST-138: the ASTEROID BELT - from wave 8, one drifting INDESTRUCTIBLE rock joins
@@ -401,7 +401,7 @@ export const CONFIG = {
     firstWave: 8,       // drones start appearing from this wave (after mines at 5)
     perWave: 1,         // drones added each eligible wave
     maxConcurrent: 6,
-    palette: { body: { color: 0x6f8796 } }, // I282/ST-267: steel-cyan mid (sRGB luma ~131, above the skybox mid-band ~128; the GLB COLOR_0 value bake multiplies on top - bright nose, dark belly)
+    palette: { body: { color: 0x637886 } }, // I596/ST-562 E85 re-tune (H1+C1): v2 bake renders 194.63 pre (rung 184.08); first pin 0x69808e rendered 195.63 - additive emissive 0x37d5ff x0.7-1.0 dominates the base share (R-1); C1 per-channel x0.94096 -> 99/120/134 (WITH MEASUREMENT: luma_i595_pre/post.json; hue 189.5 steel-cyan)
     radius: 0.7,        // slightly smaller than a mine
     speed: 4.4,         // u/s - agile seeker, faster than mines (3.2), < ship.maxSpeed (14)
     turn: 3.2,          // max heading change rad/s (tighter pursuit than a mine)

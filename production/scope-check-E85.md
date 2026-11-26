@@ -71,7 +71,26 @@ Expected values are projections from the per-face bake ratio; the PRE audit (fir
 
 ## Verification evidence
 
-- (filled as ST-562/ST-563 land: pre/post JSONs, the 4 computed levers WITH MEASUREMENT, E57 table, test/build/dist/vendor results, close-gate 5/5, CLOSE FLOOR E85.)
+ST-562 (I596, luma re-pin) - the 4 levers WITH MEASUREMENT:
+- warden renderLumaGain 4.5 -> 3.71 (G1 first pin) -> 3.13 (C1; final).
+- drone palette.body.color 0x6f8796 -> 0x69808e (H1 first pin) -> 0x637886 (C1; final).
+- stinger renderLumaGain 2.2 - UNTOUCHED (N1 no-churn: pre 111.89 vs target 108.89, |delta| 3.00 <= 5).
+- flyer renderLumaGain 1.3 - UNTOUCHED (N1 no-churn: pre 93.22 vs target 94.22, |delta| 1.00 <= 5).
+
+Audit: .evidence/I595/luma_audit595.mjs (clone of luma_audit519.mjs, the 4 frozen changes, line-diff verified) on the dev server :5173 (self-started/self-killed); 3 runs (pre / first post / C1 post) all consoleErrors 0; n > 0 for all 26 role/backdrop windows (table596.cjs).
+
+T1 (post <= 8 p50 of the I519 sky-p50 target), sky backdrop:
+- warden: target 119.49 / pre 145.02 / first 141.81 / final 139.61 (floor 135.2, hue 176.7 vs 179.1) -> MISS +20.12.
+- drone: target 184.08 / pre 194.63 / first 195.63 / final 194.49 (floor 195.21, hue 189.5 vs 189.5) -> MISS +10.41.
+- stinger: target 108.89 / pre 111.89 / final 111.89 -> N1 untouched (delta +3.00).
+- flyer: target 94.22 / pre 93.22 / final 93.22 -> N1 untouched (delta -1.00).
+
+C1 (the single allowed second iteration) EXHAUSTED on both T1-missed roles -> frozen-rule outcome = accept-with-documentation + 2 residuals registered for E86+ (warden +20.12, drone +10.41). Root causes: warden armor 0x8fa3c8 saturates to white at gain > 1.78 (hull 0x2c3548 b-channel saturates below gain 3.54) so the linear G1 rule under-corrects; the drone's additive emissive 0x37d5ff x0.7-1.0 dominates the base share so the hex lever under-corrects (its first pin even moved p50 the wrong way, 194.63 -> 195.63).
+H1 drone hue: 189.5 vs target 189.5 (off 0.0) PASS. E1 (E57 rule-1, collision iff dluma <= 10 AND dhue <= 40): zero collisions among the 4 re-tuned roles and the other 9. R1 (9 regression roles, <= 2 p50 pre vs final): ALL PASS, max |delta| 0.07 - hunter 116.11 / sentry 136.73 / wasp 150.55 / phantom 106.5 / hauler 48.68 / bulwark 35.12 / gunship 70.37 / boss 68.24 / ship 77.16.
+
+Quality bar I596: npm test 1,237/1,237 / npm run build 0 / dist 6,851,951 B / 203 (measure596.cjs; +1 B vs the 6,851,950 I595 baseline, within the pre-registered +/- 200 B budget; under tripwire 7,297,600 / ceiling 7,400,000) / vendor 4/4 EXACT (A65DE049A7F38B40 / 7AB0784CD2532367 / F549248412C62B9A / 7FF9ACF50F006017).
+
+ST-563 (I597, G85.0 close): PENDING - close gate 5/5 + CLOSE FLOOR E85 fill at the close.
 
 ## DoD
 

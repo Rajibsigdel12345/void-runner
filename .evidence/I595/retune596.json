@@ -1,0 +1,60 @@
+{
+ "rule": "N1/G1/H1 from scope-check-E85",
+ "pre": {
+  "warden": {
+   "sky_p50": 145.02,
+   "sky_hue": 177,
+   "floor_p50": 141.47,
+   "delta_sky": 25.53,
+   "n1": false
+  },
+  "stinger": {
+   "sky_p50": 111.89,
+   "sky_hue": 221.1,
+   "floor_p50": 115.47,
+   "delta_sky": 3,
+   "n1": true
+  },
+  "flyer": {
+   "sky_p50": 93.22,
+   "sky_hue": 337.3,
+   "floor_p50": 92.79,
+   "delta_sky": -1,
+   "n1": true
+  },
+  "drone": {
+   "sky_p50": 194.63,
+   "sky_hue": 189.7,
+   "floor_p50": 194.7,
+   "delta_sky": 10.55,
+   "n1": false
+  }
+ },
+ "retune": {
+  "warden": {
+   "action": "G1 re-pin",
+   "oldGain": 4.5,
+   "newGain": 3.71,
+   "floorProjection": 116.56,
+   "i519floor": 113.37
+  },
+  "stinger": {
+   "action": "N1 no-churn - lever UNTOUCHED"
+  },
+  "flyer": {
+   "action": "N1 no-churn - lever UNTOUCHED"
+  },
+  "drone": {
+   "action": "H1 re-pin",
+   "scale": 0.945795,
+   "channels": [
+    105,
+    128,
+    142
+   ],
+   "newHex": "0x69808e",
+   "floorProjection": 184.15,
+   "i519floor": 184.01
+  }
+ }
+}
