@@ -7317,3 +7317,14 @@ Next: E56 closed at I443 - await the next user directive; standing deferrals unc
 - Bookkeeping: epics E84 header OPEN->CLOSED I594 (G84.0) + Stories ST-561 PENDING->DONE + Status line -> CLOSED / stories ST-561 line / timeline I594 / active NEXT at I595 [open E85 via scope-check FIRST: luma re-tune head] / CHANGELOG I594 line above the I593 anchor (.evidence/I594/bookkeep594.cjs, 8-patch, all count===1, BOM delta 0).
 - E84 CLOSED (4/4: ST-556..561). Residuals carried to E85: (1) drone/warden renderLumaGain re-tune (I593 DIVERGENCE 1: v2 hulls bake ~2x brighter [warden hull p50 0.9697 vs legacy 0.4737]; warden gain 4.5 legacy-tuned) - the legacy-4 backup in .evidence/I593/backup/ stays as the revert source until the re-tune lands; (2) P1/P2/P3 balance levers stay registered.
 - Next I595: open E85 via cgs-scope-check FIRST (production/scope-check-E85.md, FROZEN before any src change) - head story = the luma re-tune (measure COLOR_0 p50 for all 4 v2 ships vs the legacy-4 backup, re-pin affected renderLumaGain WITH MEASUREMENT, 5-harness gate). Push delegate for I594 per rotation (I593 Arendt -> I594 Dewey; Arendt session no longer resumable, Dewey 01a20760-b402-74a2-b164-e13208b85f07 live).
+
+I595 (E85 open): Remastered-4 render-luma re-tune epic opened (I593 DIVERGENCE 1 residual)
+
+## I595 (E85): OPEN - E85 scope-check FROZEN
+
+- Goal: re-pin the 4 remastered-role levers (warden/stinger/flyer renderLumaGain + drone palette hex) so the v2 1.0-centered bright bakes render back on the I511-tuned / I519-validated ladder rungs (warden 119.49 / stinger 108.89 / flyer 94.22 / drone 184.08 sky p50).
+- Changed files: production/scope-check-E85.md (FROZEN, 10,114 B, DoD last) + epics E85 block (OPEN I595) + stories ST-562/ST-563 PENDING + active NEXT at I596 + timeline + CHANGELOG; zero src/assets/vendor.
+- Recon (tree-verified I595): gain mechanism per mesh module (wardenMesh L39/47/64 hardcoded 0x2c3548/0x8fa3c8 x CONFIG.warden.renderLumaGain; stingerMesh L38 + flyerMesh L39 palette x gain; droneMesh palette raw, NO gain - the hex IS the lever); zero tests pin the 4 levers (paletteHarmony.test.js asserts fx.palette/ship/boss/flame only; assetGlbs.test.js ENEMY_FACET pins the GLB COLOR_0 bakes which stay untouched - no re-bake in E85); I519 JSON = the target rungs (last full-fleet in-game audit, post-I511 tuning, on the legacy GLBs); I593 ENEMY_FACET re-pins give the per-face bake ratios (warden 2.05x / drone 1.91x / stinger 1.24x / flyer 1.12x); worldR = audit mask-window parameter only (zero src/ usage, grep-verified).
+- Push verification: git ls-remote origin main = c9b48aadafd8... = local HEAD (the I594 Dewey push LANDED; tree clean).
+- Verification: docs-only - npm test 1,237/1,237 / build 0 / dist re-measure byte-identical 6,851,950 B / 203 / vendor 4/4 EXACT.
+- Hygiene: all 4 ports free, zero tabs, zero terminals.
