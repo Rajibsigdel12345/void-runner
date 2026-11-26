@@ -1,0 +1,60 @@
+{
+ "cockpitOn": {
+  "exists": true,
+  "zIndex": "40",
+  "opacity": "1",
+  "pointerEvents": "none",
+  "position": "fixed",
+  "rect": {
+   "x": 0,
+   "y": 0,
+   "w": 1280,
+   "h": 720
+  },
+  "layers": 7,
+  "transitionInline": "opacity 0.3s",
+  "zStrip": "55",
+  "zGaugeSpeed": "55",
+  "zGaugeHull": "55",
+  "zDot": "55"
+ },
+ "cockpitOff": {
+  "exists": true,
+  "zIndex": "40",
+  "opacity": "0",
+  "pointerEvents": "none",
+  "position": "fixed",
+  "rect": {
+   "x": 0,
+   "y": 0,
+   "w": 1280,
+   "h": 720
+  },
+  "layers": 7,
+  "transitionInline": "opacity 0.3s",
+  "zStrip": "55",
+  "zGaugeSpeed": "55",
+  "zGaugeHull": "55",
+  "zDot": "55"
+ },
+ "reducedMotion": {
+  "exists": true,
+  "zIndex": "40",
+  "opacity": "1",
+  "pointerEvents": "none",
+  "position": "fixed",
+  "rect": {
+   "x": 0,
+   "y": 0,
+   "w": 1280,
+   "h": 720
+  },
+  "layers": 7,
+  "transitionInline": "none",
+  "zStrip": "55",
+  "zGaugeSpeed": "55",
+  "zGaugeHull": "55",
+  "zDot": "55"
+ },
+ "consoleErrors": []
+}

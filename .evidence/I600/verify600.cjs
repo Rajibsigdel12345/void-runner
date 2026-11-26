@@ -1,0 +1,24 @@
+const fs = require("fs");
+function rd(p){ return fs.readFileSync(p,"latin1"); }
+const sc = rd("production/scope-check-E86.md");
+const scLines = sc.split("\n");
+scLines.forEach((l,i)=>{ if(/ST-565/.test(l) && l.indexOf("+1,672 B")>=0) console.log("SC ROW: " + JSON.stringify(l.slice(0,120) + " ... " + l.slice(-330))); });
+const ep = rd("production/epics.md");
+const epos = ep.indexOf("ST-565 (I600)");
+console.log("EP: " + JSON.stringify(ep.slice(epos, epos+300)));
+const st = rd("production/stories.md");
+const spos = st.indexOf("- ST-565 E86 cockpit interior frame DOM (I600) - DONE I600:");
+console.log("ST HEAD: " + (spos<0 ? "NOT FOUND" : JSON.stringify(st.slice(spos, spos+120))));
+const stEnd = st.indexOf("vendor 4/4 EXACT).", spos);
+console.log("ST TAIL: " + (stEnd<0 ? "NOT FOUND" : JSON.stringify(st.slice(stEnd-220, stEnd+20))));
+const it = rd("production/iterations.md");
+const itPos = it.indexOf("- I600 (ST-565, E86):");
+console.log("IT HEAD: " + JSON.stringify(it.slice(itPos, itPos+150)));
+console.log("IT TAIL: " + JSON.stringify(it.slice(-240)));
+const tl = rd("production/timeline.md");
+console.log("TL TAIL: " + JSON.stringify(tl.slice(-330)));
+const ac = rd("production/session-state/active.md");
+console.log("AC TAIL: " + JSON.stringify(ac.slice(-330)));
+const ch = rd("CHANGELOG.md");
+const cpos = ch.indexOf("- I600: ");
+console.log("CH: " + JSON.stringify(ch.slice(cpos-40, cpos+260)));

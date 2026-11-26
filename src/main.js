@@ -55,6 +55,7 @@ import { createHUD } from './render/hud.js';
 import { createReticle } from './render/reticle.js';
 import { createBearingStrip } from './render/bearingStrip.js'; // ST-444 (I477): cockpit-only bearing strip (2D canvas, 0 new 3D draw calls)
 import { createGauges } from './render/gauges.js'; // ST-526 (I560, E76 D4): cockpit instrument cluster - speed/hull/shield arc gauges (3 DOM canvases, 0 new 3D draw calls)
+import { createCockpitFrame } from './render/cockpitFrame.js'; // ST-565 (I600, E86): cockpit interior frame (DOM chrome; 0 new 3D draw calls)
 import { createTouchStick } from './render/touchStick.js'; // ST-321 (I351): on-screen thrust stick (coarse-only)
 import { createRotateHint } from './render/rotateHint.js'; // ST-511 (I545, E74 D2): rotate-to-landscape hint (coarse+portrait only)
 import { createInstallButton } from './render/installPrompt.js'; // ST-512 (I546, E74 D4): PWA install affordance (beforeinstallprompt + menu gated)
@@ -531,6 +532,7 @@ function camChip(msg) {
 }
 const bearingStrip = createBearingStrip(); // ST-444 (I477): cockpit-only bearing strip (DOM canvas overlay; 0 new 3D draw calls)
 const gauges = createGauges(); // ST-526 (I560, E76 D4): cockpit instrument cluster (DOM canvas overlay; 0 new 3D draw calls)
+const cockpitFrame = createCockpitFrame(); // ST-565 (I600, E86): cockpit interior frame (DOM overlay; 0 new 3D draw calls)
 const adaptive = createAdaptiveQuality(CONFIG.adaptive, (info) => {
   if (info.type === 'autoDowngrade') {
     applyFxTier(info.tier, 'auto-downgrade'); // ST-225: particles + bloom + DPR + marker in one place
@@ -1340,6 +1342,7 @@ beaconRenders.sync(world.beacons, simT, motionOff); // ST-518 (E75): lamp charge
   const spdFrac = Math.min(1, ship.speed / CONFIG.ship.maxSpeed); // ST-082: 0..1 speed fraction
   bearingStrip.update({ on: st === STATE.PLAYING && camMode === 'cockpit', shipX: ship.pos.x, shipZ: ship.pos.y, fwdX: f.x, fwdZ: f.y, arenaR: CONFIG.arena.radius, reducedMotion: motionOff }); // ST-444 (I477): cockpit bearing strip (DOM canvas, 0 3D draw calls)
   gauges.update({ on: st === STATE.PLAYING && camMode === 'cockpit', speedFrac: spdFrac, lives: world.lives, maxLives: CONFIG.ship.lives, shielding: world.powerups.isShielding(), shieldFrac: world.powerups.timeLeft.shield / CONFIG.powerup.types.shield.dur, reducedMotion: motionOff }); // ST-526 (I560): cockpit gauges (DOM canvas, 0 3D draw calls)
+  cockpitFrame.update({ on: st === STATE.PLAYING && camMode === 'cockpit', reducedMotion: motionOff }); // ST-565 (I600, E86): cockpit interior frame (fades with the mode; 0 3D draw calls)
   // ST-415 (I445): chase targets from the pure camera model (edge-aware dolly: the
   // offset + look-ahead scale uniformly near the rim so the ship's screen offset and
   // the view angle are invariant wherever the ship moves; identity at center).
