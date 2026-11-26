@@ -38,7 +38,7 @@ import { createParticles } from './render/particles.js';
 import { createShockwaves } from './render/shockwave.js'; // ST-238 (I245): pooled additive shockwave ring
 import { createDebrisField } from './render/debrisField.js'; // ST-381 (I411): transient 3D death-shatter pool
 import { createShake, createPunch, createFovKick } from './core/fx.js'; // ST-081/ST-082
-import { chaseTargets, overviewTargets, cockpitTargets, flightPathCam, cockpitThrust, cockpitAim } from './core/cameraModel.js'; // ST-415 + ST-416 (I445/I446): pure camera targets (chase dolly + overview + cockpit) + ST-525 (I559)
+import { chaseTargets, overviewTargets, cockpitTargets, flightPathCam, cockpitThrust, cockpitAim, azimuthDamp } from './core/cameraModel.js'; // ST-569 (I604, E87): +azimuthDamp // ST-415 + ST-416 (I445/I446): pure camera targets (chase dolly + overview + cockpit) + ST-525 (I559)
 import { pathPoint } from './core/flightPath.js'; // ST-454 (I487): race-line path point (pure core)
 import { levelStartDistance } from './core/level.js'; // ST-454 (I487): campaign cumulative path distance
 import { createFlightPathLine } from './render/flightPathLine.js'; // ST-454 (I487): visible race-line ribbon
@@ -220,6 +220,8 @@ const fpA = { x: 0, y: 0, elev: 0, tx: 0, ty: 0, curv: 0, bankRaw: 0 }; // ST-45
 const fpB = { x: 0, y: 0, elev: 0, tx: 0, ty: 0, curv: 0, bankRaw: 0 }; // ST-454 (I487): path scratch @ D+frameDist
 const fpCamOut = { x: 0, y: 0, z: 0 }, fpLookOut = { x: 0, y: 0, z: 0 }; // ST-454 (I487): flightPathCam out
 const railBackDir = { x: 0, y: -1 }; // ST-525 D3c (I559): rail back = AGAINST travel (+tangent would place camera in front)
+const heldRadialAzR2 = { a: Math.PI / 2 }; // ST-569 (I604, E87): endless banded radial dolly - held camera azimuth (rad); init = the legacy +Z dolly azimuth so band entry is continuous; damped via azimuthDamp (tau = dolly.azTau)
+const endlessBackDirR2 = { x: 0, y: 1 }; // ST-569 (I604, E87): radial backDir out (no per-frame alloc)
 const SHIP_HOVER = 0.4; // ST-454 (I487): base ship hover height (matches shipMesh.js)
 const vista = createVistaRing(scene, CONFIG.vista); // ST-455 (I488): background vista silhouettes (deterministic; 1 draw call; campaign-gated)
 scene.add(vista.group);
@@ -1347,7 +1349,18 @@ beaconRenders.sync(world.beacons, simT, motionOff); // ST-518 (E75): lamp charge
   // offset + look-ahead scale uniformly near the rim so the ship's screen offset and
   // the view angle are invariant wherever the ship moves; identity at center).
   if (onPath) { railBackDir.x = -fpA.tx; railBackDir.y = -fpA.ty; } // ST-525 D3c (I559): sign fix - back offset applied AGAINST travel (legacy: ship -Z, cam +Z)
-  chaseTargets(ship.pos, f, spdFrac, Math.hypot(ship.pos.x, ship.pos.y), CONFIG.arena.radius, CONFIG.camera, camModelOut, onPath ? railBackDir : null); // ST-525 (I559): campaign rail-aligned (CAM-1); endless null -> bit-identical
+  // ST-569 (I604, E87): endless banded radial dolly (R2, farframe603) - when the ship is near the rim (dist >= band * arenaR) the camera sits behind the ship along the line through the arena center, so the arena center and the opposite rim stay in-frustum from every edge; inside the band the legacy world +Z dolly applies (bit-identical, the I445 invariance). The radial direction is a held azimuth damped via azimuthDamp (tau = dolly.azTau) so arena-center crossings swing smoothly (frozen ceiling 30 deg/frame). Campaign rail / MENU / PAUSED / GAME_OVER / REPLAY paths byte-untouched.
+  const shipDistR2 = Math.hypot(ship.pos.x, ship.pos.y);
+  let endlessBackDirOutR2 = null;
+  if (!onPath && st === STATE.PLAYING && shipDistR2 > 0.5) {
+    heldRadialAzR2.a = azimuthDamp(heldRadialAzR2.a, Math.atan2(ship.pos.y, ship.pos.x), dt, CONFIG.camera.dolly.azTau);
+    if (shipDistR2 >= CONFIG.camera.dolly.band * CONFIG.arena.radius) {
+      endlessBackDirR2.x = Math.cos(heldRadialAzR2.a);
+      endlessBackDirR2.y = Math.sin(heldRadialAzR2.a);
+      endlessBackDirOutR2 = endlessBackDirR2;
+    }
+  }
+  chaseTargets(ship.pos, f, spdFrac, shipDistR2, CONFIG.arena.radius, CONFIG.camera, camModelOut, onPath ? railBackDir : endlessBackDirOutR2); // ST-525 (I559) campaign rail-aligned; ST-569 (I604, E87) endless banded radial (null inside the band -> bit-identical)
   // ST-219: state-tied camera feel - MENU orbit drift + 2-5% aim lead (eased + capped; dodge-read rule)
   if (st === STATE.MENU && !motionOff) menuOrbitA += dt * CONFIG.camera.menuOrbitRate; // slow drift, motion-gated
   let camTX = camModelOut.camX, camTY = camModelOut.camY, camTZ = camModelOut.camZ;

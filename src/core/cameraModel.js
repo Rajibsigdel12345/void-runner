@@ -194,3 +194,23 @@ export function flightPathCam(chase, path, pathAhead, cfg, outCam, outLook) {
   outLook.x = lx; outLook.y = ly; outLook.z = lz;
   return { cam: outCam, look: outLook };
 }
+
+/**
+ * ST-569 (I604, E87): shortest-arc exponential angular damping (pure; no DOM/three).
+ * k = 1 - exp(-dt/tau): move a fixed fraction of the remaining (wrapped) angular error
+ * per step, independent of frame rate. Identity when prev == target. Drives the endless
+ * banded radial dolly held camera azimuth (caps the per-frame swing across
+ * arena-center crossings; tau 0.25 s -> 12 deg/frame at 60 fps from a 180 deg flip).
+ * @param prev held azimuth (rad)
+ * @param target target azimuth (rad)
+ * @param dt step (s)
+ * @param tau time constant (s); must be > 0
+ * @returns damped azimuth (rad)
+ */
+export function azimuthDamp(prev, target, dt, tau) {
+  const k = 1 - Math.exp(-((dt > 0 ? dt : 0) / (tau > 0 ? tau : 1e-6)));
+  let diff = target - prev;
+  while (diff > Math.PI) diff -= 2 * Math.PI;
+  while (diff <= -Math.PI) diff += 2 * Math.PI;
+  return prev + diff * k;
+}

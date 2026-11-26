@@ -1,7 +1,7 @@
 // ST-415 (I445): chase-camera model tests (pure math, DOM-free)
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { clamp01, smoothstep01, dollyFactor, chaseTargets, projectNdc, overviewTargets, cockpitTargets, cockpitThrust, cockpitAim } from '../src/core/cameraModel.js';
+import { clamp01, smoothstep01, dollyFactor, chaseTargets, projectNdc, overviewTargets, cockpitTargets, cockpitThrust, cockpitAim, azimuthDamp } from '../src/core/cameraModel.js'; // ST-569 (I604, E87): +azimuthDamp
 import { CONFIG } from '../src/core/config.js';
 
 const CFG = CONFIG.camera; // real config keeps these tests honest
@@ -335,4 +335,54 @@ test('ST-564 (I599): cockpit thrust basis == view direction - screen-up is nose-
     cockpitThrust(-1, 0, a, o); // A -> left of nose = (sin a, -cos a)
     assert.ok(Math.abs(o.x - sa) < 1e-9 && Math.abs(o.y + ca) < 1e-9, 'A@' + a.toFixed(3) + ': ' + JSON.stringify(o));
   }
+});
+
+// ST-569 (I604, E87): azimuthDamp - held-azimuth exponential damping (endless banded radial dolly)
+test('azimuthDamp: identity (prev == target)', () => {
+  for (let i = 0; i < 24; i++) {
+    const a = (i / 24) * 2 * Math.PI;
+    assert.ok(Math.abs(azimuthDamp(a, a, 1 / 60, 0.25) - a) < 1e-12, 'identity @' + a.toFixed(3));
+  }
+});
+
+test('azimuthDamp: 1-step factor == 1 - exp(-dt/tau) (dt-consistent)', () => {
+  const dt = 1 / 60, tau = 0.25;
+  const k = 1 - Math.exp(-dt / tau);
+  const cases = [[0, Math.PI / 2], [0.3, -1.1], [-2.5, 2.5], [3.0, -3.0], [Math.PI / 2, -Math.PI / 2]];
+  for (const [prev, target] of cases) {
+    let diff = target - prev;
+    while (diff > Math.PI) diff -= 2 * Math.PI;
+    while (diff <= -Math.PI) diff += 2 * Math.PI;
+    const got = azimuthDamp(prev, target, dt, tau);
+    assert.ok(Math.abs(got - (prev + diff * k)) < 1e-9, 'factor @' + prev + ',' + target);
+  }
+});
+
+test('azimuthDamp: convergence 0 -> pi, monotone, no overshoot (120 steps @ 60 fps, tau 0.25)', () => {
+  let a = 0, prevA = 0;
+  for (let i = 0; i < 120; i++) {
+    a = azimuthDamp(a, Math.PI, 1 / 60, 0.25);
+    assert.ok(a >= prevA - 1e-12 && a <= Math.PI + 1e-12, 'monotone/no-overshoot step ' + i);
+    prevA = a;
+  }
+  assert.ok(Math.abs(a - Math.PI) < Math.PI / 180, 'within 1 deg of pi, got ' + a.toFixed(5));
+});
+
+test('azimuthDamp: wraparound takes the shortest arc (-170 deg -> +170 deg goes through 180)', () => {
+  const from = -170 * Math.PI / 180, to = 170 * Math.PI / 180;
+  const step = azimuthDamp(from, to, 1 / 60, 0.25);
+  assert.ok(step < from, 'moves toward -180 deg (short way), got ' + (step * 180 / Math.PI).toFixed(2) + ' deg');
+  assert.ok(from - step < 1.5 * Math.PI / 180, 'first step ~1.29 deg, got ' + ((from - step) * 180 / Math.PI).toFixed(2) + ' deg');
+});
+
+test('azimuthDamp: crossing pi/2 -> -pi/2 max per-frame step <= 30 deg (frozen E87 ceiling)', () => {
+  let a = Math.PI / 2;
+  let maxStep = 0;
+  for (let i = 0; i < 180; i++) {
+    const next = azimuthDamp(a, -Math.PI / 2, 1 / 60, 0.25);
+    maxStep = Math.max(maxStep, Math.abs(next - a));
+    a = next;
+    if (Math.abs(a + Math.PI / 2) < 1e-4) break;
+  }
+  assert.ok(maxStep <= (30 * Math.PI) / 180, 'max step ' + (maxStep * 180 / Math.PI).toFixed(2) + ' deg');
 });
