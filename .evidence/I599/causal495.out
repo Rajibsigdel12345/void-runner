@@ -1,0 +1,72 @@
+=== ARM webgl (frozen classic reference) ===
+ok   webgl   clickedDemo
+ok   webgl   state GAME_OVER
+ok   webgl   score 11334
+ok   webgl   kills 57
+ok   webgl   wave 2
+ok   webgl   combo 15
+ok   webgl   shots 198
+ok   webgl   acc 0.2878787878787879
+ok   webgl   time 36.14999999999923
+ok   webgl   replay 2169
+ok   webgl   replay 2220
+ok   webgl   replay speed 4
+ok   webgl   afterQ MENU
+ok   webgl   glb all-ready
+ok   webgl   rock L 2.2
+ok   webgl   rock M 1.3
+ok   webgl   rock S 0.7
+ok   webgl   meta arm  {"p1":{"backend":"webgl2","arm":"webgl"},"p2":{"backend":"webgl2","arm":"webgl"}}
+ok   webgl   meta backend  {"p1":{"backend":"webgl2","arm":"webgl"},"p2":{"backend":"webgl2","arm":"webgl"}}
+ok   webgl   p1 errors 0  []
+ok   webgl   p2 errors 0  []
+ok   webgl   console 0/0 (p1)  []
+ok   webgl   console 0/0 (p2)  []
+=== ARM default (C3: auto -> classic) backend=webgl2 ===
+ok   default clickedDemo
+ok   default state GAME_OVER
+ok   default score 11334
+ok   default kills 57
+ok   default wave 2
+ok   default combo 15
+ok   default shots 198
+ok   default acc 0.2878787878787879
+ok   default time 36.14999999999923
+ok   default replay 2169
+ok   default replay 2220
+ok   default replay speed 4
+ok   default afterQ MENU
+ok   default glb all-ready
+ok   default rock L 2.2
+ok   default rock M 1.3
+ok   default rock S 0.7
+ok   default meta arm  {"p1":{"backend":"webgl2","arm":"auto"},"p2":{"backend":"webgl2","arm":"auto"}}
+ok   default meta backend  {"p1":{"backend":"webgl2","arm":"auto"},"p2":{"backend":"webgl2","arm":"auto"}}
+ok   default p1 errors 0  []
+ok   default p2 errors 0  []
+ok   default console 0/0 (p1)  []
+ok   default console 0/0 (p2)  []
+=== ARM webgpu (EXPERIMENTAL opt-in, report-only) backend=webgpu ===
+ok   webgpu  clickedDemo
+ok   webgpu  state GAME_OVER
+ok   webgpu  score 11334
+ok   webgpu  kills 57
+ok   webgpu  wave 2
+ok   webgpu  combo 15
+ok   webgpu  shots 198
+ok   webgpu  acc 0.2878787878787879
+ok   webgpu  time 36.14999999999923
+ok   webgpu  replay 2169
+ok   webgpu  replay 2220
+ok   webgpu  replay speed 4
+ok   webgpu  afterQ MENU
+ok   webgpu  glb all-ready
+ok   webgpu  rock L 2.2
+ok   webgpu  rock M 1.3
+ok   webgpu  rock S 0.7
+ok   webgpu  meta arm  {"p1":{"backend":"webgpu","arm":"webgpu"},"p2":{"backend":"webgpu","arm":"webgpu"}}
+ok   webgpu  meta backend webgpu  {"p1":{"backend":"webgpu","arm":"webgpu"},"p2":{"backend":"webgpu","arm":"webgpu"}}
+webgpu  p1 console err=0 warn=3 tally={}
+webgpu  p1 warn tally={"The powerPreference option is currently ignored when calling requestAdapter() on":1,"THREE.AttributeNode: Vertex attribute \"uv\" not found on geometry.":2}
+webgpu  p2 console err=0 warn=3 tally={}
+CAUSAL495 PASS

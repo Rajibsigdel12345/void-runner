@@ -1,0 +1,117 @@
+{
+  "angles": [
+    {
+      "k": 0,
+      "aDeg": 0,
+      "settled": true,
+      "noseDeg": -41.11926574731564,
+      "driftDeg": 0.01929249789344249,
+      "speed": 11.71072718699356,
+      "velDirDeg": -41.12257501556835,
+      "diffEndDeg": 0.0033092682527134953
+    },
+    {
+      "k": 1,
+      "aDeg": 45,
+      "settled": true,
+      "noseDeg": -19.64044000269036,
+      "driftDeg": 0.012521642852010182,
+      "speed": 11.204859035853906,
+      "velDirDeg": -19.637591647159955,
+      "diffEndDeg": 0.0028483555304064075
+    },
+    {
+      "k": 2,
+      "aDeg": 90,
+      "settled": true,
+      "noseDeg": 9.105970347408224,
+      "driftDeg": 0.011872945897326563,
+      "speed": 11.331942059396983,
+      "velDirDeg": 9.10861784734984,
+      "diffEndDeg": 0.002647499941615576
+    },
+    {
+      "k": 3,
+      "aDeg": 135,
+      "settled": true,
+      "noseDeg": 41.544668526667024,
+      "driftDeg": 0.013818137551382937,
+      "speed": 11.331942054353407,
+      "velDirDeg": 41.54774896522455,
+      "diffEndDeg": 0.0030804385575218356
+    },
+    {
+      "k": 4,
+      "aDeg": 180,
+      "settled": true,
+      "noseDeg": 76.66858442832444,
+      "driftDeg": 0.014788292471201274,
+      "speed": 11.204859029602854,
+      "velDirDeg": 76.67194291651244,
+      "diffEndDeg": 0.003358488188002659
+    },
+    {
+      "k": 5,
+      "aDeg": 225,
+      "settled": true,
+      "noseDeg": 114.29587678786994,
+      "driftDeg": 0.015374154116361788,
+      "speed": 11.20485902827421,
+      "velDirDeg": 114.29931794441714,
+      "diffEndDeg": 0.003441156547212429
+    },
+    {
+      "k": 6,
+      "aDeg": 270,
+      "settled": true,
+      "noseDeg": 153.4554562027348,
+      "driftDeg": 0.015514502540663094,
+      "speed": 11.204859027372889,
+      "velDirDeg": 153.45897928308636,
+      "diffEndDeg": 0.003523080351560653
+    },
+    {
+      "k": 7,
+      "aDeg": 315,
+      "settled": true,
+      "noseDeg": 193.22806259273563,
+      "driftDeg": 0.015688566345720665,
+      "speed": 11.204859026830151,
+      "velDirDeg": -166.76837571355784,
+      "diffEndDeg": 0.0035616937065672295
+    }
+  ],
+  "chase": [
+    {
+      "aDeg": 0,
+      "speed": 11.204859051791335,
+      "velDirDeg": 90,
+      "diffFromPlusYDeg": 0
+    },
+    {
+      "aDeg": 90,
+      "speed": 11.204859051791335,
+      "velDirDeg": 90,
+      "diffFromPlusYDeg": 0
+    },
+    {
+      "aDeg": 180,
+      "speed": 11.204859051791335,
+      "velDirDeg": 90,
+      "diffFromPlusYDeg": 0
+    }
+  ],
+  "regression": {
+    "aimStartDeg": -760.2081389149353,
+    "aimEndDeg": -904.7433649196053,
+    "driftDeg": 144.53522600467005,
+    "speed": 8.03443568054456,
+    "velDirDeg": -108.75644637766064,
+    "diffEndDeg": 75.98691854194472
+  },
+  "consoleErrors": [],
+  "pass": true,
+  "reasons": [],
+  "nAngles": 8,
+  "nChase": 3
+}
