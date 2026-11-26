@@ -1,7 +1,7 @@
 // ST-415 (I445): chase-camera model tests (pure math, DOM-free)
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { clamp01, smoothstep01, dollyFactor, chaseTargets, projectNdc, overviewTargets, cockpitTargets, cockpitThrust, cockpitAim, azimuthDamp } from '../src/core/cameraModel.js'; // ST-569 (I604, E87): +azimuthDamp
+import { clamp01, smoothstep01, dollyFactor, chaseTargets, projectNdc, overviewTargets, cockpitTargets, cockpitThrust, cockpitAim, azimuthDamp, radialDollyDir } from '../src/core/cameraModel.js'; // ST-572 (I606, E87): +radialDollyDir
 import { CONFIG } from '../src/core/config.js';
 
 const CFG = CONFIG.camera; // real config keeps these tests honest
@@ -385,4 +385,29 @@ test('azimuthDamp: crossing pi/2 -> -pi/2 max per-frame step <= 30 deg (frozen E
     if (Math.abs(a + Math.PI / 2) < 1e-4) break;
   }
   assert.ok(maxStep <= (30 * Math.PI) / 180, 'max step ' + (maxStep * 180 / Math.PI).toFixed(2) + ' deg');
+});
+
+
+test('radialDollyDir: deadband identity - converged held at the legacy azimuth inside the band -> backDir null (exact legacy branch)', () => {
+  const out = { a: Math.PI / 2, backDir: null, bd: { x: 0, y: 1 } };
+  for (let i = 0; i < 60; i++) radialDollyDir(out.a, Math.atan2(1, 0), 5, CFG.dolly.band * ARENA, 1 / 60, CFG.dolly.azTau, CFG.dolly.azDeadband, out);
+  assert.equal(out.backDir, null, 'converged held at legacy -> backDir null');
+  assert.ok(Math.abs(out.a - Math.PI / 2) < 1e-6, 'held stays at the legacy azimuth, got ' + out.a.toFixed(6));
+});
+
+test('radialDollyDir: outside the deadband - radial dolly active, backDir = (cos a, sin a) on the persistent slot', () => {
+  const out = { a: Math.PI / 2, backDir: null, bd: { x: 0, y: 1 } };
+  for (let i = 0; i < 5; i++) radialDollyDir(out.a, 0, ARENA, CFG.dolly.band * ARENA, 1 / 60, CFG.dolly.azTau, CFG.dolly.azDeadband, out);
+  assert.equal(out.backDir, out.bd, 'backDir aliases the persistent bd slot (no alloc)');
+  assert.ok(Math.abs(out.backDir.x - Math.cos(out.a)) < 1e-12 && Math.abs(out.backDir.y - Math.sin(out.a)) < 1e-12, 'backDir = (cos a, sin a)');
+  for (let i = 0; i < 295; i++) radialDollyDir(out.a, 0, ARENA, CFG.dolly.band * ARENA, 1 / 60, CFG.dolly.azTau, CFG.dolly.azDeadband, out);
+  assert.ok(Math.abs(out.a) < 1e-3, 'held converges to the radial (0), got ' + out.a.toFixed(6));
+  assert.equal(out.backDir, out.bd, 'dolly still active at the converged radial');
+});
+
+test('radialDollyDir: wraparound convergence - start -pi/2, target pi/2, 300 steps -> a ~ pi/2 and backDir -> null', () => {
+  const out = { a: -Math.PI / 2, backDir: { x: 1, y: 0 }, bd: { x: 1, y: 0 } };
+  for (let i = 0; i < 300; i++) radialDollyDir(out.a, Math.PI / 2, ARENA, CFG.dolly.band * ARENA, 1 / 60, CFG.dolly.azTau, CFG.dolly.azDeadband, out);
+  assert.ok(Math.abs(out.a - Math.PI / 2) < 1e-4, 'converged to the legacy azimuth, got ' + out.a.toFixed(6));
+  assert.equal(out.backDir, null, 'backDir null once the held is inside the deadband of legacy');
 });

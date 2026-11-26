@@ -1117,7 +1117,8 @@ export const CONFIG = {
         boost: 1.10        // uniform extra scale of height+dolly-back at full speed; ss = 1 at rest (rest pins stay EXACT). Audit-tuned I559: rim dolly dormant on the campaign rail (s = 1.000 across all 5 levels) -> boost dolly is the primary depth lever there
       },
       band: 0.7,           // ST-569 (I604, E87): banded radial dolly (R2, farframe603) - the radial backDir applies only when dist >= band * arenaR; inside the band the legacy world +Z dolly applies -> the I445 invariance stays bit-identical in the inner arena
-      azTau: 0.25          // ST-569 (I604, E87): held radial-azimuth damping time constant (s) for azimuthDamp - caps the per-frame camera swing across arena-center crossings (12 deg/frame at 60 fps from a 180 deg flip; frozen ceiling 30 deg/frame)
+      azTau: 0.25,         // ST-569 (I604, E87): held radial-azimuth damping time constant (s) for radialDollyDir - caps the per-frame camera swing across arena-center crossings (12 deg/frame at 60 fps from a 180 deg flip; frozen ceiling 30 deg/frame)
+      azDeadband: 1e-4     // ST-572 (I606, E87): G2 damped dolly direction - the radial backDir applies only while abs(wrap(held - PI/2)) >= azDeadband; inside the deadband backDir = null = the exact legacy world +Z branch (bit-identical; a converged held always falls back to the legacy view)
     },
     overviewHeight: 56,    // ST-416 (I446): OVERVIEW height above arena center (fixed 3/4 view; whole arena |NDC|<=0.85 @16:9/fov60)
     overviewBack: 20,      // ST-416 (I446): OVERVIEW dolly-back (3/4 angle, not straight down)

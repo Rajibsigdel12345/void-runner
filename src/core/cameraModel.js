@@ -214,3 +214,38 @@ export function azimuthDamp(prev, target, dt, tau) {
   while (diff <= -Math.PI) diff += 2 * Math.PI;
   return prev + diff * k;
 }
+
+/**
+ * ST-572 (I606, E87): G2 damped dolly DIRECTION (pure; no DOM/three; no per-frame alloc).
+ * The held camera azimuth damps toward the ship's radial line while outside the band
+ * (dist >= band) and toward the legacy +Z azimuth (PI/2) while inside it - ALWAYS, so a
+ * crossing never re-applies a stale held azimuth in one frame (the I605 re-entry whip:
+ * 169 deg ship-relative cam step + 27.8 u teleport at the S band re-entry). The radial
+ * backDir applies while abs(wrap(a - PI/2)) >= deadband; inside the deadband
+ * out.backDir = null = the exact legacy branch (chaseTargets' null path).
+ * @param prevHeld held azimuth from the previous frame (rad)
+ * @param targetAz ship radial azimuth Math.atan2(py, px) (rad); used only when dist >= band
+ * @param dist ship distance from the arena center
+ * @param band band distance (CONFIG.camera.dolly.band * CONFIG.arena.radius)
+ * @param dt step (s)
+ * @param tau azimuthDamp time constant (s)
+ * @param deadband deadband (rad), CONFIG.camera.dolly.azDeadband
+ * @param out { a, backDir, bd } - out.a = new held azimuth (always written); out.backDir =
+ *        out.bd (the caller's persistent {x,y}, written in place) when the radial dolly
+ *        applies, else null; out.bd is never reallocated.
+ */
+export function radialDollyDir(prevHeld, targetAz, dist, band, dt, tau, deadband, out) {
+  const a = azimuthDamp(prevHeld, dist >= band ? targetAz : Math.PI / 2, dt, tau);
+  let diff = a - Math.PI / 2;
+  while (diff > Math.PI) diff -= 2 * Math.PI;
+  while (diff <= -Math.PI) diff += 2 * Math.PI;
+  out.a = a;
+  if (Math.abs(diff) >= deadband) {
+    out.bd.x = Math.cos(a);
+    out.bd.y = Math.sin(a);
+    out.backDir = out.bd;
+  } else {
+    out.backDir = null;
+  }
+  return out;
+}
