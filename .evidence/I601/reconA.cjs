@@ -1,0 +1,14 @@
+const fs = require("fs");
+const s = fs.readFileSync("src/core/cameraModel.js", "latin1");
+console.log("SIZE " + s.length);
+const ex = [];
+const lines = s.split("\n");
+lines.forEach((l, i) => { if (/^export /.test(l)) ex.push("L" + (i + 1) + " " + l.slice(0, 110)); });
+console.log("EXPORTS:\n" + ex.join("\n"));
+console.log("DOM-FREE CHECK: document: " + /document\s*[.[]/.test(s) + " | window: " + /window\s*[.[]/.test(s) + " | three import: " + /from\s+["']three/.test(s) + " | localStorage: " + /localStorage/.test(s));
+console.log("IMPORTS:");
+lines.forEach((l, i) => { if (/^import /.test(l)) console.log("L" + (i + 1) + " " + l); });
+const i1 = s.indexOf("function chaseTargets");
+console.log("chaseTargets ctx: " + JSON.stringify(s.slice(Math.max(0, i1 - 120), i1 + 700)));
+const i2 = s.indexOf("function projectNdc");
+console.log("projectNdc ctx: " + JSON.stringify(s.slice(Math.max(0, i2 - 120), i2 + 700)));

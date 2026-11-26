@@ -1,0 +1,10 @@
+const fs = require("fs");
+const s = fs.readFileSync("src/core/cameraModel.js", "latin1");
+const lines = s.split("\n");
+console.log("=== projectNdc L89-111 ===");
+for(let i=88;i<111;i++) console.log("L"+(i+1)+" "+lines[i]);
+const m = fs.readFileSync("src/main.js", "latin1");
+const i = m.indexOf("chaseTargets(ship.pos");
+console.log("=== main.js chase block (L~1345-1385) ===");
+const block = m.slice(i - 200, i + 1800);
+console.log(block);

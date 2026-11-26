@@ -275,3 +275,5 @@ I598 (E86 open) done: no visible change - the cockpit-feel round is open. We re-
 I599 (ST-564, E86) done: the cockpit controls now point exactly where the view looks - the reported inversion where W read as "back" at some angles is gone (the thrust direction followed the raw pointer while the camera followed the eased nose; both now follow the eased nose). An 8-angle instrumented drive confirmed the ship goes exactly where it faces at every heading, the chase camera is unchanged, and the old 180-degree-flip failure mode can no longer happen.
 
 I600 (ST-565, E86) done: the cockpit view now has a subtle dashboard and canopy frame around it, so first-person flight feels like sitting in a real cockpit. It fades in and out with the cockpit camera and never gets in the way of the instruments or the crosshair.
+
+I601 (ST-566, E86) done: no visible change - we measured exactly how much of the arena you can still see from the edge. The framing is the same wherever you fly; from most edges you can see the whole way back to the far side, and the few rim angles where you cannot are now measured and on the improvement list.

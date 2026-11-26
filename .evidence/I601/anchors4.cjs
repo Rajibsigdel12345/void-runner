@@ -1,0 +1,10 @@
+const fs = require('fs');
+const R = (f) => fs.readFileSync('E:/Game/' + f, 'latin1');
+const ep = R('production/epics.md');
+const iS = ep.indexOf('Stories: ST-564');
+const s = ep.lastIndexOf('\n', iS) + 1; const e = ep.indexOf('\n', iS);
+console.log('STORIES LINE FULL:', JSON.stringify(ep.slice(s, e)));
+const ac = R('production/session-state/active.md');
+let i = -1; const hits = [];
+while ((i = ac.indexOf('NEXT at I6', i + 1)) >= 0) hits.push(i);
+console.log('AC NEXT hits:', hits.length, hits.map((h) => ac.slice(h, h + 14)));

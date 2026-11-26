@@ -1,0 +1,340 @@
+{
+  "meta": {
+    "fov": 60,
+    "aspect": 1.7777777777777777,
+    "arenaR": 26,
+    "dolly": {
+      "startFrac": 0.55,
+      "rimScale": 1.7,
+      "pow": 2,
+      "speed": {
+        "boost": 1.1
+      }
+    },
+    "camHeight": 9,
+    "camBack": 13,
+    "lookAhead": 2.6,
+    "tol": 0.005,
+    "backDir": "null (legacy world +Z, endless per main.js)"
+  },
+  "a_invariance": {
+    "in": {
+      "dist": 20.8,
+      "s": 1.237914462753156,
+      "shipNdc": [
+        {
+          "x": 0,
+          "y": -0.1428
+        },
+        {
+          "x": 0,
+          "y": -0.1428
+        },
+        {
+          "x": 0,
+          "y": -0.1428
+        }
+      ],
+      "maxDx": 0,
+      "maxDy": 0,
+      "pass": true
+    },
+    "rim": {
+      "dist": 26,
+      "s": 1.7,
+      "shipNdc": [
+        {
+          "x": 0,
+          "y": -0.1428
+        },
+        {
+          "x": 0,
+          "y": -0.1428
+        },
+        {
+          "x": 0,
+          "y": -0.1428
+        }
+      ],
+      "maxDx": 0,
+      "maxDy": 0,
+      "pass": true
+    },
+    "centerRef": {
+      "s": 1,
+      "ship": {
+        "x": 0,
+        "y": -0.1428
+      }
+    }
+  },
+  "b_centerFromRim": {
+    "N/rim": {
+      "s": 1.7,
+      "center": {
+        "ndc": {
+          "x": 0,
+          "y": 0.3788
+        },
+        "depth": 49.3093,
+        "inFront": true,
+        "inFrustum": true,
+        "stretch": {
+          "ax": 0,
+          "ay": 0.3788
+        }
+      },
+      "centerInFrustum": true
+    },
+    "N/in": {
+      "s": 1.237914462753156,
+      "center": {
+        "ndc": {
+          "x": 0,
+          "y": 0.4055
+        },
+        "depth": 37.5236,
+        "inFront": true,
+        "inFrustum": true,
+        "stretch": {
+          "ax": 0,
+          "ay": 0.4055
+        }
+      },
+      "centerInFrustum": true
+    },
+    "E/rim": {
+      "s": 1.7,
+      "center": {
+        "ndc": {
+          "x": -0.6706,
+          "y": 0.1339
+        },
+        "depth": 30.7419,
+        "inFront": true,
+        "inFrustum": true,
+        "stretch": {
+          "ax": 0.6706,
+          "ay": 0.1339
+        }
+      },
+      "centerInFrustum": true
+    },
+    "E/in": {
+      "s": 1.237914462753156,
+      "center": {
+        "ndc": {
+          "x": -0.7403,
+          "y": 0.1478
+        },
+        "depth": 22.6888,
+        "inFront": true,
+        "inFrustum": true,
+        "stretch": {
+          "ax": 0.7403,
+          "ay": 0.1478
+        }
+      },
+      "centerInFrustum": true
+    },
+    "S/rim": {
+      "s": 1.7,
+      "center": {
+        "ndc": {
+          "x": 0,
+          "y": -3.463
+        },
+        "depth": 7.0629,
+        "inFront": true,
+        "inFrustum": false,
+        "stretch": {
+          "ax": 0,
+          "ay": 3.463
+        }
+      },
+      "centerInFrustum": false
+    },
+    "S/in": {
+      "s": 1.237914462753156,
+      "center": {
+        "ndc": {
+          "x": 0,
+          "y": -5.3407
+        },
+        "depth": 3.7312,
+        "inFront": true,
+        "inFrustum": false,
+        "stretch": {
+          "ax": 0,
+          "ay": 5.3407
+        }
+      },
+      "centerInFrustum": false
+    },
+    "W/rim": {
+      "s": 1.7,
+      "center": {
+        "ndc": {
+          "x": 0.6706,
+          "y": 0.1339
+        },
+        "depth": 30.7419,
+        "inFront": true,
+        "inFrustum": true,
+        "stretch": {
+          "ax": 0.6706,
+          "ay": 0.1339
+        }
+      },
+      "centerInFrustum": true
+    },
+    "W/in": {
+      "s": 1.237914462753156,
+      "center": {
+        "ndc": {
+          "x": 0.7403,
+          "y": 0.1478
+        },
+        "depth": 22.6888,
+        "inFront": true,
+        "inFrustum": true,
+        "stretch": {
+          "ax": 0.7403,
+          "ay": 0.1478
+        }
+      },
+      "centerInFrustum": true
+    }
+  },
+  "c_oppRim": {
+    "N/rim": {
+      "s": 1.7,
+      "opp": {
+        "ndc": {
+          "x": 0,
+          "y": 0.5733
+        },
+        "depth": 71.8301,
+        "inFront": true,
+        "inFrustum": true,
+        "stretch": {
+          "ax": 0,
+          "ay": 0.5733
+        }
+      },
+      "oppInFrustum": true
+    },
+    "N/in": {
+      "s": 1.237914462753156,
+      "opp": {
+        "ndc": {
+          "x": 0,
+          "y": 0.5981
+        },
+        "depth": 55.5403,
+        "inFront": true,
+        "inFrustum": true,
+        "stretch": {
+          "ax": 0,
+          "ay": 0.5981
+        }
+      },
+      "oppInFrustum": true
+    },
+    "E/rim": {
+      "s": 1.7,
+      "opp": {
+        "ndc": {
+          "x": -1.3002,
+          "y": 0.2597
+        },
+        "depth": 34.9606,
+        "inFront": true,
+        "inFrustum": false,
+        "stretch": {
+          "ax": 1.3002,
+          "ay": 0.2597
+        }
+      },
+      "oppInFrustum": false
+    },
+    "E/in": {
+      "s": 1.237914462753156,
+      "opp": {
+        "ndc": {
+          "x": -1.4069,
+          "y": 0.281
+        },
+        "depth": 26.0638,
+        "inFront": true,
+        "inFrustum": false,
+        "stretch": {
+          "ax": 1.4069,
+          "ay": 0.281
+        }
+      },
+      "oppInFrustum": false
+    },
+    "S/rim": {
+      "s": 1.7,
+      "opp": {
+        "ndc": null,
+        "depth": -12.5975,
+        "inFront": false,
+        "inFrustum": false,
+        "stretch": null
+      },
+      "oppInFrustum": false
+    },
+    "S/in": {
+      "s": 1.237914462753156,
+      "opp": {
+        "ndc": null,
+        "depth": -11.9971,
+        "inFront": false,
+        "inFrustum": false,
+        "stretch": null
+      },
+      "oppInFrustum": false
+    },
+    "W/rim": {
+      "s": 1.7,
+      "opp": {
+        "ndc": {
+          "x": 1.3002,
+          "y": 0.2597
+        },
+        "depth": 34.9606,
+        "inFront": true,
+        "inFrustum": false,
+        "stretch": {
+          "ax": 1.3002,
+          "ay": 0.2597
+        }
+      },
+      "oppInFrustum": false
+    },
+    "W/in": {
+      "s": 1.237914462753156,
+      "opp": {
+        "ndc": {
+          "x": 1.4069,
+          "y": 0.281
+        },
+        "depth": 26.0638,
+        "inFront": true,
+        "inFrustum": false,
+        "stretch": {
+          "ax": 1.4069,
+          "ay": 0.281
+        }
+      },
+      "oppInFrustum": false
+    }
+  },
+  "results": {
+    "a": "PASS",
+    "b_rim": "3/4 (center in-frustum from rim)",
+    "c_rim": "1/4 (opposite rim in-front + in-frustum)"
+  }
+}
