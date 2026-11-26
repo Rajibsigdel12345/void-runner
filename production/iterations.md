@@ -7340,3 +7340,15 @@ I595 (E85 open): Remastered-4 render-luma re-tune epic opened (I593 DIVERGENCE 1
 - Quality bar 4/4: npm test 1,237/1,237 / npm run build 0 / fresh dist re-measured 6,851,951 B / 203 (measure596.cjs; +1 B vs the 6,851,950 I595 baseline, within the pre-registered +/- 200 B budget; well under tripwire 7,297,600 / ceiling 7,400,000) / vendor 4/4 EXACT (A65DE049A7F38B40 / 7AB0784CD2532367 / F549248412C62B9A / 7FF9ACF50F006017).
 - Hygiene: stray dev server (session 2995 / PID on :5173) killed, all 4 ports free verified, zero tabs, zero terminals.
 - Push: I595 commit d1bbf7b verified landed on origin main (git ls-remote = d1bbf7b328f6...); I596 commit push delegated to Dewey 01a20760-b402-74a2-b164-e13208b85f07.
+
+## I597 (ST-563, E85): G85.0 CLOSE - E85 complete (2/2: ST-562/563), net code delta = 2 config lines
+
+- Goal: close E85 (remastered-4 render-luma re-tune) with the G85.0 close gate: 5-harness regression EXACT, fresh dist re-measure, CLOSE FLOOR E85 WITH MEASUREMENT, AGENTS item-4 refresh.
+- Changed files: AGENTS.md (item-4 refresh) + production/scope-check-E85.md (ST-563 evidence line filled) + bookkeeping (epics E85 header->CLOSED I597 (G85.0) + ST-563 DONE + Status CLOSED / stories ST-563 line PENDING->DONE / active NEXT at I598 / timeline / CHANGELOG).
+- Close gate 5/5 EXACT zero re-pins (.evidence/I597/run_closegate597.cjs, clone of the I594 runner; ports self-started/self-killed, all 4 free after): causal495 CAUSAL495 PASS (3 arms seed-9876: webgl frozen classic reference + default EXACT; webgpu report-only) / causal483 CAUSAL456 PASS score 11334 / playframe483 PLAYFRAME456 PASS (A 22/62,472 + P 11/180, B 52/132,682, console 0/0) / playframe491 PLAYFRAME456 PASS (same pins) / pwa491 SUMMARY 11/11.
+- Quality bar: npm test 1,237/1,237 + npm run build 0 (re-verified I596, no src change since) / fresh dist re-measured BYTE-IDENTICAL 6,851,951 B / 203 (measure597.cjs; byte-identical to I596 - config value swaps change no geometry/draw calls) / vendor 4/4 EXACT (A65DE049A7F38B40 / 7AB0784CD2532367 / F549248412C62B9A / 7FF9ACF50F006017).
+- CLOSE FLOOR E85 = 548,049 B WITH MEASUREMENT (7,400,000 - 6,851,951 fresh dist re-measured EXACT; headroom >= 102,400 B floor -> cut ladder NOT invoked).
+- AGENTS.md item-4 refresh: chain extended (I594/I595 docs-only = unchanged 6,851,950 / 203 -> 6,851,951 (I596, +1 B: remastered-4 luma re-pin config swap) / I597 = unchanged 6,851,951 / 203) + CLOSE FLOOR E85 clause at head, E84 demoted to prior (byte-safe splice; BOM 1 preserved, BOM delta 0).
+- E85 CLOSED (2/2: ST-562 DONE I596 [accept-with-documentation; 2 T1 residuals warden +20.12 / drone +10.41 registered E86+], ST-563 DONE I597). Legacy-4 backup .evidence/I593/backup/ retired as the revert source (remains on disk, gitignored).
+- Hygiene: all 4 ports free, zero tabs, zero terminals.
+- Push: I596 commit d0831f0 push delegated to Dewey (landing verified next turn via git ls-remote); I597 commit push delegated to Dewey 01a20760-b402-74a2-b164-e13208b85f07.

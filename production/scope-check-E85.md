@@ -90,7 +90,7 @@ H1 drone hue: 189.5 vs target 189.5 (off 0.0) PASS. E1 (E57 rule-1, collision if
 
 Quality bar I596: npm test 1,237/1,237 / npm run build 0 / dist 6,851,951 B / 203 (measure596.cjs; +1 B vs the 6,851,950 I595 baseline, within the pre-registered +/- 200 B budget; under tripwire 7,297,600 / ceiling 7,400,000) / vendor 4/4 EXACT (A65DE049A7F38B40 / 7AB0784CD2532367 / F549248412C62B9A / 7FF9ACF50F006017).
 
-ST-563 (I597, G85.0 close): PENDING - close gate 5/5 + CLOSE FLOOR E85 fill at the close.
+ST-563 (I597, G85.0 close) DONE I597: close gate 5/5 EXACT zero re-pins (.evidence/I597/run_closegate597.cjs: causal495 CAUSAL495 PASS [webgl+default EXACT seed-9876; webgpu report-only] / causal483 CAUSAL456 PASS score 11334 / playframe483+491 PLAYFRAME456 PASS [A 22/62,472 + P 11/180, B 52/132,682, console 0/0] / pwa491 SUMMARY 11/11; ports self-started/self-killed, all 4 free after) + fresh dist re-measured byte-identical 6,851,951 B / 203 (measure597.cjs) + CLOSE FLOOR E85 = 548,049 B WITH MEASUREMENT (7,400,000 - 6,851,951; headroom >= 102,400 B floor -> cut ladder NOT invoked) + AGENTS.md item-4 refresh (chain extended; E85 clause at head, E84 demoted to prior) + E85 CLOSED (2/2: ST-562/563).
 
 ## DoD
 
