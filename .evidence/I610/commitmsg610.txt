@@ -1,0 +1,39 @@
+I610 (ST-575, E88): G88.0 close gate - E88 CLOSED (6/6 EXACT zero re-pins, CLOSE FLOOR E88 = 2,215,516 B) + I609 (ST-574) MESHopt atomic landing (dist 6,854,378 -> 5,184,484 B / 205, -1,669,894 B, bit-identical decode)
+
+I609 (ST-574) - MESHopt atomic landing:
+- All 34 GLBs re-encoded with EXT_meshopt_compression (INDICES mode only for
+  index views, byteStride on every view, logical main bufferView fields).
+  Lossless: decode is bit-identical to the original geometry (verify609 34/34,
+  all 270 buffer views; double-encode deterministic).
+- Decoder vendored raw (not minified) pinned D428E73A000057C6 (29,256 B),
+  added via GLTFLoader.addMeshoptDecoder in assetLoader.js (await ready).
+  r187 GLTFLoader THROWS without the decoder - no silent fallback.
+- Fleet: 4,431,160 B -> 2,731,884 B (x1.622); 123,188 tris EXACT.
+- dist: 6,854,378 -> 5,184,484 B / 205 files (-1,669,894 B).
+- Re-pins WITH MEASUREMENT (I593 tight-to-measured pattern; the +15% rule
+  deviation documented in the scope-check AMENDMENT): totalFilesKB 2668 /
+  perFileKB 1105 (ship 1,103.99 KB) / totalGeoKB 4261 / totalTris 123,188 /
+  perFileMats 5 / MAX_FILE_BYTES 1,300,000 (ship 1,130,488 B).
+- Cut ladder: C1 condition met NOT executed (subset would measure worse);
+  C2 literal fired (5,184,484 > 4,200,000) ADAPTED per I495 C3 (3-4x
+  expectation vs measured 1.622x documented with cause).
+- npm test 1,246/1,246; build 0; vendor 4/4 + decoder raw pin EXACT.
+
+I610 (ST-575) - G88.0 close gate:
+- CLOSEGATE610 HARNESS PASS (6/6) EXACT, ZERO re-pins: causal495 (3-arm
+  seed-9876: webgl + default EXACT, webgpu report-only) / causal483 (score
+  11334) / playframe483 + playframe491 (A 22/62,472 + P 11/180, B 52/132,682,
+  console 0/0) / pwa491 (11/11) / NEW glbsmoke610 (34/34 GLBs via the vendored
+  decoder on the dist arm, 123,188 t EXACT, 69 unique meshes, 0 console
+  err/warn, no NaN, state PLAYING).
+- Fresh dist re-measure 5,184,484 B / 205 EXACT.
+- CLOSE FLOOR E88 = 2,215,516 B WITH MEASUREMENT (7,400,000 - 5,184,484;
+  headroom >= 102,400 B floor -> cut ladder NOT invoked; E88 CLOSED I610).
+- scope-check-E88.md: Verification evidence per story + AMENDMENT (x1.622 vs
+  3-4x + cause, C1 met-not-executed, C2 fired-adapted, tight pins vs +15%
+  rule, bug log, close floor = E89 growth envelope).
+- ADR vendor-r187-adr.md + ST-574 addendum (10,412 -> 14,277 B).
+- AGENTS.md refresh: item-4 dist chain + CLOSE FLOOR E88 clause + asset line
+  + new Assets bullet (encode609 pattern for future Blender assets).
+- E89 opens next (I611): the Blender art pass on the freed 2,215,516 B
+  headroom (ship v9 Mk.II ~100-120k t, boss remaster, enemy v3 x5).

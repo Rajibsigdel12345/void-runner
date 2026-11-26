@@ -154,3 +154,68 @@ main.js boot: top-level-await createRenderer + await renderer.init() (the r187 W
 Measured backend reality: the probe env HAS a real WebGPU device (requestAdapter OK on Chrome/Windows; the powerPreference-ignored crbug 369219127 warn is benign). The ?fx=webgpu (auto) arm held sim pins EXACT (core is three-independent) BUT logged NodeBuilder console errors - 16x "THREE.NodeBuilder: ShaderMaterial is not compatible" + 1x "RawShaderMaterial is not compatible" (the classic custom materials - starfield shells, flame/afterburner, rim sites - have no TSL program under r187 WebGPU) + 4x uv-attribute warns.
 DECISION (C3 branch, ADAPTED - measured trigger differs, outcome pre-registered identical): the literal C3 condition (WebGPU unavailable) was NOT met; instead the WebGPU-real arm failed the console 0/0 quality bar for a shipping default (the NodeBuilder errors above). Executed: shipping default = classic WebGLRenderer (no silent look drift: byte-same render path as I494; ab495 fxON 0.002 / fxOFF 0.001 mean). ?fx=webgpu stays the documented EXPERIMENTAL opt-in; ?fx=webgl stays the frozen reference. The NodeBuilder material fixes ARE the staged ST-462 (TSL FX) / ST-463 (TSL material conversions) work; the ST-464 close gate re-evaluates the default -> webgpu flip once the probe console is clean.
 Dist size (C1 EXECUTED, measured): the r187 superset minified dist = 3,536,694 B (171 files) > the old 3,250,000 B ceiling -> ceiling renegotiated 3,250,000 -> 3,650,000 B; headroom 113,306 B >= the 102,400 B close floor (E64 governance contract).
+
+## ST-574 addendum (I609 - EXT_meshopt_compression GLB pipeline, E88)
+
+Decision: all 34 Blender GLBs ship EXT_meshopt_compressed (meshopt level 2,
+LOSSLESS, bit-identical decode). Fleet 4,431,160 -> 2,731,884 B (x1.622,
+-1,699,276 B); dist 6,854,378 -> 5,184,484 B / 205 files (measured WITH
+MEASUREMENT; -1,669,894 B). The 123,188-tri contract and every per-asset
+pin are UNCHANGED - decode is bit-identical, so render pins stay EXACT.
+
+Decoder (vendored, RAW pin - jsm files are never minified, dist = raw):
+  jsm/libs/meshopt_decoder.module.js  raw sha256-16 D428E73A000057C6 (29,256 B)
+  build.mjs VENDOR_FILES += the file; vendor.mjs enforces the raw pin;
+  NOT in the 4-bundle VENDOR_MINIFY list (the 4 dist-min pins stay EXACT).
+
+Runtime wiring (src/render/assetLoader.js): import MeshoptDecoder from
+'three/addons/libs/meshopt_decoder.module.js' + loader.setMeshoptDecoder(...)
++ await MeshoptDecoder.ready in loadAll() before the decode burst. r187
+GLTFLoader carries the extension handler inline and THROWS without a
+decoder: there is no silent fallback to compressed bytes.
+
+Encoder contract (.evidence/I609/encode609.cjs, re-runnable):
+- INDICES mode ONLY for index views - TRIANGLES is not bit-identical for
+  degenerate / winding-duplicate tris (the arena rocks have both).
+- byteStride written on ALL views (attributes AND indices): three.js
+  passes bufferView byteStride verbatim as the decoder size.
+- JSON main bufferView fields keep LOGICAL (post-decode) byteOffset/
+  byteLength; the extension carries the compressed byteOffset/byteLength/
+  count/byteStride/mode/filter. buffers[0].byteLength stays logical.
+
+Bugs found + fixed landing this (recorded per the governance contract):
+- Encoder A: buildGLB allocated 12+jp+bp instead of 28+jp+bp -> 16 B BIN
+  truncation (fixed in encode609.cjs).
+- Encoder B: byteStride written only on ATTRIBUTES views -> NaN index
+  decode (fixed in encode609.cjs).
+- Verify 1: verify script passed bufferView.count (undefined - count lives
+  on the extension) as decode count -> every decode -3 "Malformed buffer
+  data" (fixed: ext.count).
+- Verify 2: ship.glb's original BIN chunk carries 2 legal bytes of 4-byte
+  tail padding (logical 1,397,870 vs chunk 1,397,872; the other 33 files
+  ended on boundaries by luck) (fixed: allow [0,3] zero tail pad on a
+  4-aligned chunk).
+- Test patcher (I609 session): parseGlb logical-size loop used
+  ext.byteLength (compressed span) instead of the main byteLength ->
+  Buffer.set out-of-bounds (fixed: main fields are always logical).
+
+Verify gate: verify609.cjs 34/34 PASS (all 270 buffer views decode
+byte-identical to .evidence/I609/orig/ + manifest.sha256; double-encode
+determinism confirmed). Node tests decode via node_modules/meshoptimizer
+(CJS, target-first, Buffer directly); tests/assetGlbs.test.js parseGlb
+rebuilds the logical buffer so every read site is unchanged; file-size
+caps RE-PIN WITH MEASUREMENT (MAX_FILE_BYTES 1,500,000 -> 1,300,000;
+assetPerf totalFilesKB 4328 -> 2668, perFileKB 1400 -> 1105 - tight-to-
+measured, the I593 house pattern, deviating from the scope-check's
+"+15%" pre-registration which is recorded in the amendment).
+
+Budget governance (E88 scope-check amendment, WITH MEASUREMENT): the
+pre-registered 3-4x compression expectation missed (level-2 meshopt is
+~1.25x on float32 attributes, ~2x on indices; 3-4x assumed lossy
+territory, which the bit-identical contract forbids) -> measured x1.622.
+Cut ladder C2's literal trigger (dist > 4,200,000 B) FIRED (5,184,484 B);
+ADAPTED per the I495 C3 precedent: the measured trigger is recorded and
+the swap is KEPT (reverting would give E89 no headroom at all); the
+pre-registered "expected ~3.6-3.9 MB" is superseded by the measured
+5,184,484 B. Close floor at G88.0: 7,400,000 - 5,184,484 = 2,215,516 B
+(>= the 102,400 B floor -> the C1..Cn cut ladder is NOT invoked at close).

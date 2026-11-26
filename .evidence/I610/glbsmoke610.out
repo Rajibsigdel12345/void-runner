@@ -1,0 +1,8 @@
+ok   34 GLB asset names present  [n=34]
+ok   34/34 loaded via the vendored decoder  [ready=34]
+ok   total triangles 123,188 EXACT  [tris=123188]
+ok   all position floats finite  [bad=0]
+ok   0 real console errors (no 404s on dist)  [err=[]]
+ok   play segment: no NaN on ship/camera  [state=PLAYING]
+meshes=69 consoleErr=0 consoleWarn=0
+GLBSMOKE610 PASS

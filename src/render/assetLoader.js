@@ -4,6 +4,7 @@
 // in (via onAsset) as it resolves. A failed load warns and keeps the
 // procedural stand-in - no boot gate.
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js'; // I609 (ST-574 E88): EXT_meshopt_compression
 import { TextureLoader, SRGBColorSpace } from 'three';
 
 const ASSETS = {
@@ -55,6 +56,7 @@ const TEXTURES = {
 
 export function createAssetLoader() {
   const loader = new GLTFLoader();
+  loader.setMeshoptDecoder(MeshoptDecoder); // I609 (ST-574 E88): decode the meshopt-compressed GLB buffer views
   const texLoader = new TextureLoader(); // ST-327: PNG branch
   const ready = {};
   const listeners = [];
@@ -108,7 +110,8 @@ export function createAssetLoader() {
     });
   }
 
-  function loadAll() {
+  async function loadAll() {
+    await MeshoptDecoder.ready; // I609 (ST-574 E88): wasm ready before the decode burst (GLTFLoader's async decode also awaits it)
     const jobs = Object.keys(ASSETS).map((n) => loadOne(n, ASSETS[n]));
     jobs.push(...Object.keys(TEXTURES).map((n) => loadTexture(n, TEXTURES[n])));
     return Promise.all(jobs);

@@ -29,3 +29,12 @@ for (const [rel, wantBytes] of [['three.webgpu.js', 1350894], ['three.tsl.js', 1
 rmSync(join(dst, 'jsm'), { recursive: true, force: true });
 cpSync(srcJsm, join(dst, 'jsm'), { recursive: true });
 console.log('vendor: three.module.js + three.core.js + three.webgpu.js + three.tsl.js + examples/jsm copied to vendor/ (r187 classic + WebGPU closure)');
+
+// I609 (ST-574 E88): meshopt decoder raw pin (ships byte-identical to dist - not in the 4-bundle minify list)
+{
+  const b = readFileSync(join(dst, 'jsm', 'libs', 'meshopt_decoder.module.js'));
+  if (b.length !== 29256) throw new Error('vendor: jsm/libs/meshopt_decoder.module.js size ' + b.length + ' != pinned 29256');
+  const h = createHash('sha256').update(b).digest('hex').slice(0, 16).toUpperCase();
+  if (h !== 'D428E73A000057C6') throw new Error('vendor: meshopt_decoder sha256-16(raw) ' + h + ' != pinned D428E73A000057C6');
+  console.log('vendor: jsm/libs/meshopt_decoder.module.js sha256-16(raw) ' + h + ' (' + b.length + ' B)');
+}

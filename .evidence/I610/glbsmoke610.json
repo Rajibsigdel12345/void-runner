@@ -1,0 +1,11 @@
+{
+ "glbCount": 34,
+ "readyN": 34,
+ "totalTris": 123188,
+ "meshes": 69,
+ "badFloats": 0,
+ "nanPlay": false,
+ "state": "PLAYING",
+ "consoleErrN": 0,
+ "consoleWarnN": 0
+}

@@ -65,6 +65,8 @@ const VENDOR_FILES = [
   'three.tsl.js',
   // I104: GLTFLoader (Blender-pass GLB assets) + its BufferGeometryUtils dep
   'jsm/loaders/GLTFLoader.js',
+  // I609 (ST-574 E88): meshopt decoder (EXT_meshopt_compression; ships raw - NOT in the 4-bundle VENDOR_MINIFY list; raw sha256-16 D428E73A000057C6 pinned in vendor.mjs)
+  'jsm/libs/meshopt_decoder.module.js',
   'jsm/utils/BufferGeometryUtils.js',
   'jsm/utils/SkeletonUtils.js',
   'jsm/postprocessing/EffectComposer.js',

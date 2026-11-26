@@ -8,6 +8,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CONFIG } from '../src/core/config.js';
+import { createRequire } from 'node:module';
+
+const requireCjs = createRequire(import.meta.url);
+const MeshoptDecoder = requireCjs(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'node_modules', 'meshoptimizer', 'meshopt_decoder.cjs'));
+await MeshoptDecoder.ready; // I609 (ST-574 E88): EXT_meshopt_compression - the meshopt wasm must be ready before any decode (same wasm the browser GLTFLoader uses)
 
 const ASSET_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'assets');
 const GLB_MAGIC = 0x46546c67; // 'glTF'
@@ -16,7 +21,7 @@ const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief); ship 300 -> 850 at I429 (ST-399 remaster, 818-tri fighter; design/asset-spec-ship-remaster.md)).
 const BUDGETS = { ship: 62254, L: 6000, M: 1800, S: 700, comet: 1120, boss: 1500, shield: 120, emblem: 60, drone: 2080, arenaRing: 120, warden: 2290, chunk: 60, stinger: 2396, flyer: 2264, sliver: 50, hunter: 3366, gunship: 2906, sentry: 2934, wasp: 4020, phantom: 4544, bulwark: 3160, hauler: 3724, sweeper: 1946, beacon: 3144, archon: 3108 }; // I554 (ST-520 E75 D5) rock v12 RE-PIN WITH MEASUREMENT: L/M/S/comet 3200/950/380/650 -> 6000/1800/700/1120 (measure554.cjs; pinned tight to measurement; supersedes I456 rock caps) // I553 (ST-519 E75 D4): +archon 3108 t (hull 1916 + crown 752 + core 440), pinned tight to measurement (measure553.mjs) // I552 (ST-518 E75 D3): +sweeper 3006 t (hull 2234 + arc 424 + greeble 348) +beacon 3144 t (base 1564 + tower 1204 + lamp 376), pinned tight to measurement (I552 art phase, measure552.mjs) // I541 (ST-507 E73 ship v7) ship 25563 -> 32499 (measured 32,499 t / 740,012 B; span 4.021 / len 2.600 unchanged, MAX_FILE_BYTES 1,048,576 holds) // + I482 (ST-449 sentry/wasp caps 1800/1200; actual 1096/792) + I501 (ST-467 ship v6 real-airship remaster 19000 -> 25563, measured 25,563 t / 581,440 B; pinned tight to measurement - the asset landed 9,137 t under the 34,700 aim so the pre-registered 38,500 was not needed; future growth requires an explicit re-pin) // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276) + I456 (ST-426 rock L/M/S v11 density remaster 2100/520/140 -> 3200/950/380, actual 3000/900/350; boss 750 -> 1500, actual 1425) + I508 (ST-474 E68 legacy-4 remaster) drone/warden caps 100/200 -> 1800/1800 (spec aim 1400) + I509 (ST-475 E68 remaster-4 re-pin WITH measurement) hunter/gunship/sentry/wasp 3366/2596/2934/4020 (wasp 1200 -> 4020: wing-mirror rebuild, double blade 2400 t) + I516 (ST-482 E69 phantom/bulwark 2336/2700, pinned tight to measurement) + I517 (ST-483 E69 hauler 3506, pinned tight to measurement) + I587 (ST-554 E83 ship v8 swap) ship 32499 -> 62254 (measured 62,254 t post-GLB-import / 1,402,896 B; build-space 64,884 t, GLTF export dedupe -2,630; span 4.0125 / len 2.7160 hold the I454 windows; .evidence/I587/repin_measure587b.mjs) // I593 (ST-560 E84) legacy-4 v2 RE-PIN WITH MEASUREMENT: drone 1800 -> 2080 / warden 1800 -> 2290; stinger 2396 / flyer 2264 keys ADDED (measure593.cjs post-GLB: set 6,574 -> 9,030 t)
-const MAX_FILE_BYTES = 1500000; // I587 (ST-554 E83 ship v8 swap) EXPLICIT re-pin WITH MEASUREMENT: 1,048,576 -> 1,500,000 (ship v8 1,402,896 B; scope-check-E83 pre-registered 1,400,000 B target / 1,500,000 B hard; max non-ship stays boss 75.26 KB) // I501 (ST-467 ship v6) EXPLICIT re-pin: 393216 -> 1048576 (ship v6 581,440 B; spec s5 pre-registered 1,048,576; max non-ship stays boss 75.26 KB) // I440 (ST-410 ship remaster v3) EXPLICIT re-pin: 262144 -> 393216 (ship 190,544 B/3254t -> 270,556 B/12400t; I435 was 100*1024 -> 262144 for v2; max non-ship stays boss 75.26 KB)
+const MAX_FILE_BYTES = 1300000; // I609 (ST-574 E88) RE-PIN WITH MEASUREMENT: 1,500,000 -> 1,300,000 (compressed ship file 1,130,488 B; max non-ship enemy_phantom 163,884 B) // I587 (ST-554 E83 ship v8 swap) EXPLICIT re-pin WITH MEASUREMENT: 1,048,576 -> 1,500,000 (ship v8 1,402,896 B; scope-check-E83 pre-registered 1,400,000 B target / 1,500,000 B hard; max non-ship stays boss 75.26 KB) // I501 (ST-467 ship v6) EXPLICIT re-pin: 393216 -> 1048576 (ship v6 581,440 B; spec s5 pre-registered 1,048,576; max non-ship stays boss 75.26 KB) // I440 (ST-410 ship remaster v3) EXPLICIT re-pin: 262144 -> 393216 (ship 190,544 B/3254t -> 270,556 B/12400t; I435 was 100*1024 -> 262144 for v2; max non-ship stays boss 75.26 KB)
 
 function parseGlb(file) {
   const buf = fs.readFileSync(path.join(ASSET_DIR, file));
@@ -26,6 +31,7 @@ function parseGlb(file) {
   const declared = buf.readUInt32LE(8);
   assert.equal(version, 2, file + ': expected glTF 2.0');
   assert.equal(declared, buf.length, file + ': declared length != file size');
+  const fileSize = buf.length;
   let off = 12; let json = null; let binOff = -1;
   while (off < buf.length) {
     const len = buf.readUInt32LE(off);
@@ -39,7 +45,30 @@ function parseGlb(file) {
   }
   assert.ok(json, file + ': no JSON chunk');
   assert.ok(binOff >= 0, file + ': no BIN chunk');
-  return { buf, json, binOff };
+  // I609 (ST-574 E88): EXT_meshopt_compression - the BIN chunk holds meshopt-compressed views;
+  // rebuild the LOGICAL (post-decode) buffer so every read site below is unchanged.
+  if (!(json.extensionsRequired || []).includes('EXT_meshopt_compression')) {
+    return { buf, json, binOff, fileSize };
+  }
+  let logicalSize = 0;
+  for (const bv of json.bufferViews || []) {
+    const ext = bv.extensions && bv.extensions.EXT_meshopt_compression;
+    const end = (bv.byteOffset || 0) + bv.byteLength; // I609 fix: main bufferView fields hold the LOGICAL dims; ext.byteLength is the compressed span
+    if (end > logicalSize) logicalSize = end;
+  }
+  const logical = Buffer.alloc(logicalSize);
+  for (const bv of json.bufferViews || []) {
+    const ext = bv.extensions && bv.extensions.EXT_meshopt_compression;
+    const base = bv.byteOffset || 0;
+    if (ext) {
+      const out = Buffer.alloc(ext.count * ext.byteStride);
+      MeshoptDecoder.decodeGltfBuffer(out, ext.count, ext.byteStride, buf.subarray(binOff + ext.byteOffset, binOff + ext.byteOffset + ext.byteLength), ext.mode, ext.filter || 0);
+      logical.set(out, base);
+    } else {
+      logical.set(buf.subarray(binOff + base, binOff + base + bv.byteLength), base);
+    }
+  }
+  return { buf: logical, json, binOff: 0, fileSize };
 }
 
 function meshStats({ buf, json, binOff }) {
@@ -70,8 +99,8 @@ function meshStats({ buf, json, binOff }) {
 }
 
 test('ship.glb: container, naming, poly budget, silhouette dimensions', () => {
-  const { buf, json, binOff } = parseGlb('ship.glb');
-  assert.ok(buf.length < MAX_FILE_BYTES, 'ship.glb under the 1,500,000 B cap (I587)');
+  const { buf, json, binOff, fileSize } = parseGlb('ship.glb');
+  assert.ok(fileSize < MAX_FILE_BYTES, 'ship.glb ' + fileSize + ' B under the 1,300,000 B cap (I609 meshopt file 1,130,488 B)');
   const s = meshStats({ buf, json, binOff });
   assert.ok(s.nodeNames.includes('VR_Ship_Hull'), 'VR_Ship_Hull node');
   assert.ok(s.nodeNames.includes('VR_Ship_Cockpit'), 'VR_Ship_Cockpit node');
@@ -145,8 +174,8 @@ test('ship.glb: container, naming, poly budget, silhouette dimensions', () => {
 
 test('asteroid L/M/S: naming, poly budgets, radii match CONFIG (+/-5%)', () => {
   for (const size of ['L', 'M', 'S']) {
-    const { buf, json, binOff } = parseGlb('asteroid_' + size + '.glb');
-    assert.ok(buf.length < MAX_FILE_BYTES, 'asteroid_' + size + '.glb under 100 KB');
+    const { buf, json, binOff, fileSize } = parseGlb('asteroid_' + size + '.glb');
+    assert.ok(fileSize < MAX_FILE_BYTES, 'asteroid_' + size + '.glb under 100 KB');
     const s = meshStats({ buf, json, binOff });
     assert.ok(s.nodeNames.includes('VR_Rock_' + size), 'VR_Rock_' + size + ' node');
     assert.ok(s.matNames.includes('VR_Rock'), 'VR_Rock material');
@@ -219,7 +248,7 @@ function facetLumas({ buf, json, binOff }) {
 }
 test('asteroid L/M/S: COLOR_0 mottling band + warm order + facet luma spread (I257 -> I264 -> I279 -> I302 -> I303)', () => {
   for (const size of ['L', 'M', 'S']) {
-    const { buf, json, binOff } = parseGlb('asteroid_' + size + '.glb');
+    const { buf, json, binOff, fileSize } = parseGlb('asteroid_' + size + '.glb');
     for (const m of json.meshes || []) for (const p of m.primitives || []) {
       assert.ok(p.attributes.COLOR_0 !== undefined, size + ' primitive has COLOR_0');
       const acc = json.accessors[p.attributes.COLOR_0];
@@ -275,8 +304,8 @@ test('asteroid L/M/S: COLOR_0 mottling band + warm order + facet luma spread (I2
 test('asteroid L/M/S _B: naming, poly budgets, radii match CONFIG (+/-5%) (I420)', () => {
   const A_TRIS = { L: 6000, M: 1800, S: 700 }; // I554 (ST-520 E75 D5) rock v12 RE-PIN WITH MEASUREMENT 3000/900/350 -> 6000/1800/700 (B built from NEW A via I420 recipe, same topology; measure554.cjs: A 6000/1800/700 == B 6000/1800/700) // I441 (ST-411): L 490 -> 1980 (v10 remaster; L_B same topology -> equal-tris assert holds); I436 (ST-406): M 134 -> 500 (v9 subdivided pass; M_B same topology -> equal-tris assert holds); I456 (ST-426): L/M/S v11 density remaster 1980/500/134 -> 3000/900/350 (B built from NEW A via I420 recipe, same topology)
   for (const size of ['L', 'M', 'S']) {
-    const { buf, json, binOff } = parseGlb('asteroid_' + size + '_B.glb');
-    assert.ok(buf.length < MAX_FILE_BYTES, 'asteroid_' + size + '_B.glb under 100 KB');
+    const { buf, json, binOff, fileSize } = parseGlb('asteroid_' + size + '_B.glb');
+    assert.ok(fileSize < MAX_FILE_BYTES, 'asteroid_' + size + '_B.glb under 100 KB');
     const s = meshStats({ buf, json, binOff });
     assert.ok(s.nodeNames.includes('VR_Rock_' + size + '_B'), 'VR_Rock_' + size + '_B node');
     assert.ok(s.matNames.includes('VR_Rock'), 'VR_Rock material');
@@ -292,7 +321,7 @@ test('asteroid L/M/S _B: naming, poly budgets, radii match CONFIG (+/-5%) (I420)
 
 test('asteroid L/M/S _B: COLOR_0 mottling band + warm order + facet luma spread (I420 E52)', () => {
   for (const size of ['L', 'M', 'S']) {
-    const { buf, json, binOff } = parseGlb('asteroid_' + size + '_B.glb');
+    const { buf, json, binOff, fileSize } = parseGlb('asteroid_' + size + '_B.glb');
     for (const m of json.meshes || []) for (const p of m.primitives || []) {
       assert.ok(p.attributes.COLOR_0 !== undefined, size + '_B primitive has COLOR_0');
       const acc = json.accessors[p.attributes.COLOR_0];
@@ -357,7 +386,7 @@ test('all GLBs: index accessors spec-conformant (I264b audit-misread correction 
   const files = fs.readdirSync(ASSET_DIR).filter((f) => f.endsWith('.glb')).sort();
   assert.ok(files.length >= 24, 'expected >= 24 GLBs in assets/ (I410: 21; I420: 24 incl. B-variant rocks)');
   for (const file of files) {
-    const { buf, json, binOff } = parseGlb(file);
+    const { buf, json, binOff, fileSize } = parseGlb(file);
     for (const m of json.meshes || []) {
       for (const p of m.primitives || []) {
         assert.ok(p.indices !== undefined, file + ' ' + (m.name || '?') + ' primitive is indexed');
@@ -388,8 +417,8 @@ test('all GLBs: index accessors spec-conformant (I264b audit-misread correction 
 // the JSON declared the accessor but the BIN held uninitialized memory). Materials remain
 // in the file; bossMesh.js ignores them (in-code palette, I248 pattern).
 test('boss.glb: naming, poly budget, cross-section and height vs spec (ST-252)', () => {
-  const { buf, json, binOff } = parseGlb('boss.glb');
-  assert.ok(buf.length <= 84 * 1024, 'boss.glb ' + buf.length + ' B <= 84 KB (ST-252 budget)');
+  const { buf, json, binOff, fileSize } = parseGlb('boss.glb');
+  assert.ok(fileSize <= 18 * 1024, 'boss.glb ' + fileSize + ' B <= 18 KB (I609 meshopt 17,008 B; ST-252 budget)');
   const s = meshStats({ buf, json, binOff });
   assert.ok(s.nodeNames.includes('VR_Boss_Hull'), 'VR_Boss_Hull node');
   assert.ok(s.nodeNames.includes('VR_Boss_Crown'), 'VR_Boss_Crown node');
@@ -467,8 +496,8 @@ test('boss.glb: naming, poly budget, cross-section and height vs spec (ST-252)',
   }
 });
 test('shield.glb: naming, poly budget, unit radius (I210)', () => {
-  const { buf, json, binOff } = parseGlb('shield.glb');
-  assert.ok(buf.length < MAX_FILE_BYTES, 'shield.glb under 100 KB');
+  const { buf, json, binOff, fileSize } = parseGlb('shield.glb');
+  assert.ok(fileSize < MAX_FILE_BYTES, 'shield.glb under 100 KB');
   const s = meshStats({ buf, json, binOff });
   assert.ok(s.nodeNames.includes('VR_Shield'), 'VR_Shield node');
   assert.ok(s.matNames.includes('VR_Shield'), 'VR_Shield material');
@@ -531,8 +560,8 @@ const PU_FACET = {
 
 test('powerup emblems: naming, poly budgets, normalized extents, grayscale COLOR_0 value bake (I211 -> I288)', () => {
   for (const [file, target] of Object.entries(EMBLEM_TARGETS)) {
-    const { buf, json, binOff } = parseGlb(file + '.glb');
-    assert.ok(buf.length < MAX_FILE_BYTES, file + '.glb under 100 KB');
+    const { buf, json, binOff, fileSize } = parseGlb(file + '.glb');
+    assert.ok(fileSize < MAX_FILE_BYTES, file + '.glb under 100 KB');
     const s = meshStats({ buf, json, binOff });
     const node = EMBLEM_NODES[file];
     assert.ok(s.nodeNames.includes(node), node + ' node');
@@ -582,8 +611,8 @@ test('powerup emblems: naming, poly budgets, normalized extents, grayscale COLOR
 // I593 (ST-560 E84) v2 boomerang SWAP re-pin WITH measurement (measure593.cjs): 52,284 B / 2,080 t;
 // extents x 2.0857 / y 1.1354 / z 1.7000 (raw vertex space; y/z swapped vs the I508 build orientation).
 test('drone.glb: I508 (ST-474) E68 seeker-fly remaster - naming, poly budget, union extents (I211 superseded)', () => {
-  const { buf, json, binOff } = parseGlb('drone.glb');
-  assert.ok(buf.length < MAX_FILE_BYTES, 'drone.glb under 1 MB');
+  const { buf, json, binOff, fileSize } = parseGlb('drone.glb');
+  assert.ok(fileSize < MAX_FILE_BYTES, 'drone.glb under 1 MB');
   const s = meshStats({ buf, json, binOff });
   assert.ok(s.nodeNames.includes('VR_Drone'), 'VR_Drone node (single merged node)');
   assert.ok(s.matNames.includes('VR_Drone'), 'VR_Drone material (I593 v2: VR_ naming without the I508 Mat suffix - vestigial, in-code JS material governs)');
@@ -657,7 +686,7 @@ function enemyFacetLumas({ buf, json, binOff }) {
 }
 test('drone/stinger/flyer: every prim carries the I508 grayscale COLOR_0 bake; per-prim facet pins (I282 -> I508)', () => {
   for (const name of ['drone', 'stinger', 'flyer']) {
-    const { buf, json, binOff } = parseGlb(name + '.glb');
+    const { buf, json, binOff, fileSize } = parseGlb(name + '.glb');
     const st = meshStats({ buf, json, binOff });
     assert.ok(st.totalTris <= BUDGETS[name], name + ' tris ' + st.totalTris + ' <= ' + BUDGETS[name] + ' (I593 v2 re-pin)');
     assert.ok(st.totalTris >= LEGACY_FLOOR[name], name + ' tris ' + st.totalTris + ' >= ' + LEGACY_FLOOR[name] + ' (I508 legacy-4 measured floor - no silent simplification)');
@@ -757,7 +786,7 @@ function primExtents({ buf, json, binOff }, meshName) {
 function remaster4Bake(file, asset) {
   // I509: validate the full remaster-4 COLOR_0 contract per prim and pin per-node facet
   // lumas (reuses enemyFacetLumasPrim - identical algorithm to the I508 legacy-4 test).
-  const { buf, json, binOff } = parseGlb(file);
+  const { buf, json, binOff, fileSize } = parseGlb(file);
   let colorPrims = 0;
   for (const m of json.meshes || []) for (const p of m.primitives || []) {
     const mn = m.name || 'mesh';
@@ -787,11 +816,11 @@ function remaster4Bake(file, asset) {
     }
   }
   assert.equal(colorPrims, Object.keys(ENEMY451_FACET[asset]).length, file + ': prim count matches the I509 pin table');
-  return { buf, json, binOff };
+  return { buf, json, binOff, fileSize };
 }
 test('enemy_hunter.glb: I509 (ST-475 E68) remaster-4 needle fighter - nodes, per-node tris, extents, all-prim COLOR_0', () => {
-  const { buf, json, binOff } = remaster4Bake('enemy_hunter.glb', 'hunter');
-  assert.ok(buf.length <= 228 * 1024, 'hunter under 228 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I509 227,496 B)');
+  const { buf, json, binOff, fileSize } = remaster4Bake('enemy_hunter.glb', 'hunter');
+  assert.ok(fileSize <= 106 * 1024, 'hunter under 106 KB (measured ' + (fileSize / 1024).toFixed(2) + ' KB; I609 meshopt 104,884 B; I509 raw 227,496 B)');
   const s = meshStats({ buf, json, binOff });
   for (const n of ['VR_Hunter_Hull', 'VR_Hunter_Fin', 'VR_Hunter_Core']) assert.ok(s.nodeNames.includes(n), n + ' node');
   assert.equal(s.nodeNames.length, 3, 'flat node set (no root nodes)');
@@ -813,8 +842,8 @@ test('enemy_hunter.glb: I509 (ST-475 E68) remaster-4 needle fighter - nodes, per
 });
 
 test('enemy_gunship.glb: I536 (ST-502 E72) brute bomber v2 - nodes, per-node tris, extents, all-prim COLOR_0', () => {
-  const { buf, json, binOff } = remaster4Bake('enemy_gunship.glb', 'gunship');
-  assert.ok(buf.length <= 210 * 1024, 'gunship under 210 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I536 215,032 B)');
+  const { buf, json, binOff, fileSize } = remaster4Bake('enemy_gunship.glb', 'gunship');
+  assert.ok(fileSize <= 106 * 1024, 'gunship under 106 KB (measured ' + (fileSize / 1024).toFixed(2) + ' KB; I609 meshopt 105,444 B; I536 raw 215,032 B)');
   const s = meshStats({ buf, json, binOff });
   for (const n of ['VR_Gunship_Hull', 'VR_Gunship_Nacelle', 'VR_Gunship_Bay']) assert.ok(s.nodeNames.includes(n), n + ' node');
   assert.equal(s.nodeNames.length, 3, 'flat node set (no root nodes)');
@@ -837,8 +866,8 @@ test('enemy_gunship.glb: I536 (ST-502 E72) brute bomber v2 - nodes, per-node tri
 });
 
 test('enemy_sentry.glb: I509 (ST-475 E68) remaster-4 floating watchtower - nodes, per-node tris, extents, all-prim COLOR_0', () => {
-  const { buf, json, binOff } = remaster4Bake('enemy_sentry.glb', 'sentry');
-  assert.ok(buf.length <= 204 * 1024, 'sentry under 204 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I509 203,688 B)');
+  const { buf, json, binOff, fileSize } = remaster4Bake('enemy_sentry.glb', 'sentry');
+  assert.ok(fileSize <= 89 * 1024, 'sentry under 89 KB (measured ' + (fileSize / 1024).toFixed(2) + ' KB; I609 meshopt 88,660 B; I509 raw 203,688 B)');
   const s = meshStats({ buf, json, binOff });
   for (const n of ['VR_Sentry_Platform', 'VR_Sentry_Base', 'VR_Sentry_Barrel', 'VR_Sentry_Charge']) assert.ok(s.nodeNames.includes(n), n + ' node');
   assert.equal(s.nodeNames.length, 4, 'flat node set (no root nodes)');
@@ -862,8 +891,8 @@ test('enemy_sentry.glb: I509 (ST-475 E68) remaster-4 floating watchtower - nodes
 });
 
 test('enemy_wasp.glb: I509 (ST-475 E68) remaster-4 swift dart + wing-mirror rebuild - nodes, per-node tris, extents, all-prim COLOR_0', () => {
-  const { buf, json, binOff } = remaster4Bake('enemy_wasp.glb', 'wasp');
-  assert.ok(buf.length <= 310 * 1024, 'wasp under 310 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I509 post-fix 310,036 B)');
+  const { buf, json, binOff, fileSize } = remaster4Bake('enemy_wasp.glb', 'wasp');
+  assert.ok(fileSize <= 132 * 1024, 'wasp under 132 KB (measured ' + (fileSize / 1024).toFixed(2) + ' KB; I609 meshopt 131,712 B; I509 raw 310,036 B)');
   const s = meshStats({ buf, json, binOff });
   for (const n of ['VR_Wasp_Hull', 'VR_Wasp_Wing', 'VR_Wasp_Nose']) assert.ok(s.nodeNames.includes(n), n + ' node');
   assert.equal(s.nodeNames.length, 3, 'flat node set (no root nodes)');
@@ -884,8 +913,8 @@ test('enemy_wasp.glb: I509 (ST-475 E68) remaster-4 swift dart + wing-mirror rebu
 });
 
 test('enemy_phantom.glb: I561 (ST-527 E76 D5) phantom interceptor remaster - nodes, per-node tris, extents, all-prim COLOR_0', () => {
-  const { buf, json, binOff } = remaster4Bake('enemy_phantom.glb', 'phantom');
-  assert.ok(buf.length <= 336 * 1024, 'phantom under 336 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I561 343,244 B)');
+  const { buf, json, binOff, fileSize } = remaster4Bake('enemy_phantom.glb', 'phantom');
+  assert.ok(fileSize <= 164 * 1024, 'phantom under 164 KB (measured ' + (fileSize / 1024).toFixed(2) + ' KB; I609 meshopt 163,884 B; I561 raw 343,244 B)');
   const s = meshStats({ buf, json, binOff });
   for (const n of ['VR_Hull', 'VR_PodL', 'VR_PodR', 'VR_Nose']) assert.ok(s.nodeNames.includes(n), n + ' node');
   assert.equal(s.nodeNames.length, 4, 'flat node set (no root nodes)');
@@ -910,8 +939,8 @@ test('enemy_phantom.glb: I561 (ST-527 E76 D5) phantom interceptor remaster - nod
 });
 
 test('enemy_bulwark.glb: I535 (ST-501 E72) hex-shield guardian v2 - nodes, per-node tris, extents, all-prim COLOR_0', () => {
-  const { buf, json, binOff } = remaster4Bake('enemy_bulwark.glb', 'bulwark');
-  assert.ok(buf.length <= 187 * 1024, 'bulwark under 187 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I535 190,584 B)');
+  const { buf, json, binOff, fileSize } = remaster4Bake('enemy_bulwark.glb', 'bulwark');
+  assert.ok(fileSize <= 85 * 1024, 'bulwark under 85 KB (measured ' + (fileSize / 1024).toFixed(2) + ' KB; I609 meshopt 84,860 B; I535 raw 190,584 B)');
   const s = meshStats({ buf, json, binOff });
   for (const n of ['VR_Shield', 'VR_Core', 'VR_Spine']) assert.ok(s.nodeNames.includes(n), n + ' node');
   assert.equal(s.nodeNames.length, 3, 'flat node set (no root nodes)');
@@ -934,8 +963,8 @@ test('enemy_bulwark.glb: I535 (ST-501 E72) hex-shield guardian v2 - nodes, per-n
   assert.ok(Math.abs(sp.z - 0.8000) / 0.8000 <= 0.1, 'spine Z ' + sp.z.toFixed(4) + ' ~ 0.8000 (I535)');
 });
 test('enemy_hauler.glb: I561 (ST-527 E76 D5) mine-hauler remaster - nodes, per-node tris, extents, sponson mirror guard, all-prim COLOR_0', () => {
-  const { buf, json, binOff } = remaster4Bake('enemy_hauler.glb', 'hauler');
-  assert.ok(buf.length <= 284 * 1024, 'hauler under 284 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I561 289,748 B)');
+  const { buf, json, binOff, fileSize } = remaster4Bake('enemy_hauler.glb', 'hauler');
+  assert.ok(fileSize <= 139 * 1024, 'hauler under 139 KB (measured ' + (fileSize / 1024).toFixed(2) + ' KB; I609 meshopt 139,040 B; I561 raw 289,748 B)');
   const s = meshStats({ buf, json, binOff });
   for (const n of ['VR_Hull', 'VR_SponsonL', 'VR_SponsonR', 'VR_Hatch', 'VR_Stack']) assert.ok(s.nodeNames.includes(n), n + ' node');
   assert.equal(s.nodeNames.length, 5, 'flat node set (no root nodes)');
@@ -969,8 +998,8 @@ test('enemy_hauler.glb: I561 (ST-527 E76 D5) mine-hauler remaster - nodes, per-n
   assert.ok(Math.abs(st.z - 0.3700) / 0.3700 <= 0.1, 'stack Z ' + st.z.toFixed(4) + ' ~ 0.3700 (I561)');
 });
 test('enemy_sweeper.glb: I561 (ST-527 E76 D5) sweeper remaster - nodes, per-node tris, extents, arc mirror guard, all-prim COLOR_0', () => {
-  const { buf, json, binOff } = remaster4Bake('enemy_sweeper.glb', 'sweeper');
-  assert.ok(buf.length <= 127 * 1024, 'sweeper under 127 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I561 129,764 B)');
+  const { buf, json, binOff, fileSize } = remaster4Bake('enemy_sweeper.glb', 'sweeper');
+  assert.ok(fileSize <= 55 * 1024, 'sweeper under 55 KB (measured ' + (fileSize / 1024).toFixed(2) + ' KB; I609 meshopt 54,220 B; I561 raw 129,764 B)');
   const s = meshStats({ buf, json, binOff });
   for (const n of ['VR_Sweeper_Hull', 'VR_Sweeper_Arc', 'VR_Sweeper_Greeble']) assert.ok(s.nodeNames.includes(n), n + ' node');
   assert.equal(s.nodeNames.length, 3, 'flat node set (no root nodes)');
@@ -991,8 +1020,8 @@ test('enemy_sweeper.glb: I561 (ST-527 E76 D5) sweeper remaster - nodes, per-node
   assert.ok(Math.abs(ge.cz) <= 0.05, 'greeble centered on the hull axis (cz ' + ge.cz.toFixed(4) + '; I552)');
 });
 test('enemy_beacon.glb: I552 (ST-518 E75 D3) signal island beacon - nodes, per-node tris, extents, all-prim COLOR_0', () => {
-  const { buf, json, binOff } = remaster4Bake('enemy_beacon.glb', 'beacon');
-  assert.ok(buf.length <= 204 * 1024, 'beacon under 204 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I552 208,100 B)');
+  const { buf, json, binOff, fileSize } = remaster4Bake('enemy_beacon.glb', 'beacon');
+  assert.ok(fileSize <= 89 * 1024, 'beacon under 89 KB (measured ' + (fileSize / 1024).toFixed(2) + ' KB; I609 meshopt 88,204 B; I552 raw 208,100 B)');
   const s = meshStats({ buf, json, binOff });
   for (const n of ['VR_Beacon_Base', 'VR_Beacon_Tower', 'VR_Beacon_Lamp']) assert.ok(s.nodeNames.includes(n), n + ' node');
   assert.equal(s.nodeNames.length, 3, 'flat node set (no root nodes)');
@@ -1016,9 +1045,9 @@ test('enemy_beacon.glb: I552 (ST-518 E75 D3) signal island beacon - nodes, per-n
 // (VR_ArenaRing band + VR_ArenaRing_Ticks neon accent). The v1 exact-48-tris pin is
 // replaced by the two-node counts (band 48 + ticks 12 = 60), documented here.
 test('arena_ring.glb: 2 nodes (band+ticks), 60 tris, flat unit ring, +Y normals, COLOR_0 value bake (I212/I254/I299)', () => {
-  const { buf, json, binOff } = parseGlb('arena_ring.glb');
-  assert.ok(buf.length < MAX_FILE_BYTES, 'arena_ring.glb under 100 KB');
-assert.ok(buf.length <= 5700, 'arena_ring.glb v3 <= 5.7 KB raw (' + buf.length + ' B); I254 4032 -> I299 5544 (COLOR_0 bake)'); // I299
+  const { buf, json, binOff, fileSize } = parseGlb('arena_ring.glb');
+  assert.ok(fileSize < MAX_FILE_BYTES, 'arena_ring.glb under 100 KB');
+assert.ok(fileSize <= 5200, 'arena_ring.glb v3 <= 5.2 KB file (' + fileSize + ' B); I254 4032 -> I299 5544 (COLOR_0 bake) -> I609 5048 (meshopt)'); // I299
   const s = meshStats({ buf, json, binOff });
   assert.ok(s.nodeNames.includes('VR_ArenaRing'), 'VR_ArenaRing node');
 assert.ok(s.nodeNames.includes('VR_ArenaRing_Ticks'), 'VR_ArenaRing_Ticks node (I254)');
@@ -1152,8 +1181,8 @@ function wardenFacetLumas({ buf, json, binOff }, p) {
   return { p10: q(0.1), p50: q(0.5), p90: q(0.9) };
 }
 test('warden.glb: naming, poly budget, hull/armor radii, grayscale COLOR_0 value bake (I220 -> I289 -> I508)', () => {
-  const { buf, json, binOff } = parseGlb('warden.glb');
-  assert.ok(buf.length <= 96 * 1024, 'warden.glb under 96 KB (I508 re-pin 40 -> 96 KB; I593 v2 measured 64,448 B)');
+  const { buf, json, binOff, fileSize } = parseGlb('warden.glb');
+  assert.ok(fileSize <= 49 * 1024, 'warden.glb ' + fileSize + ' B <= 49 KB (I609 meshopt 49,020 B; I508 re-pin 40 -> 96 KB; I593 v2 raw 64,448 B)');
   const s = meshStats({ buf, json, binOff });
   assert.ok(s.nodeNames.includes('VR_Warden_Hull'), 'VR_Warden_Hull node');
   assert.ok(s.nodeNames.includes('VR_Warden_Armor'), 'VR_Warden_Armor node');
@@ -1207,8 +1236,8 @@ test('warden.glb: naming, poly budget, hull/armor radii, grayscale COLOR_0 value
 // Node VR_Rock_Comet, mat VR_Rock_Comet.
 const COMET_FACET = { p10: 0.6946, p50: 0.7689, p90: 0.8862, mean: 0.7817 }; // I554 (ST-520 E75 D5) comet v12 RE-PIN WITH MEASUREMENT (590t/15,968B -> 1120t/28,308B, cratered head + tapered ion tail): 0.7172/0.7606/0.8559/0.7756 -> 0.6946/0.7689/0.8862/0.7817 (measure554.cjs; xspan 2.5716 -> 2.8124, head maxperp 0.560 within 0.58 +/-12%, warm 490 / cool 78) // I441 (ST-411): 0.7312/0.7413/0.8075/0.7547 -> 0.7172/0.7606/0.8559/0.7756 (v3)
 test('asteroid_comet.glb: naming, poly budget, single mesh/prim, shape, COLOR_0 warm-head/cool-tail gradient (I344, re-baked I421)', () => {
-  const { buf, json, binOff } = parseGlb('asteroid_comet.glb');
-  assert.ok(buf.length <= 28308, 'asteroid_comet.glb ' + buf.length + ' B <= 28,308 B (I554 ST-520 rock v12 re-pin WITH MEASUREMENT 20000 -> 28308; I441 v3 was [15,968])');
+  const { buf, json, binOff, fileSize } = parseGlb('asteroid_comet.glb');
+  assert.ok(fileSize <= 22732, 'asteroid_comet.glb ' + fileSize + ' B <= 22,732 B (I609 meshopt 22,052 B; I554 ST-520 rock v12 re-pin 20000 -> 28308; I441 v3 was [15,968])');
   const s2 = meshStats({ buf, json, binOff });
   assert.ok(s2.nodeNames.includes('VR_Rock_Comet'), 'VR_Rock_Comet node');
   assert.ok(s2.matNames.includes('VR_Rock_Comet'), 'VR_Rock_Comet material');
@@ -1252,8 +1281,8 @@ test('asteroid_comet.glb: naming, poly budget, single mesh/prim, shape, COLOR_0 
 });
 
 test('debris_chunk.glb: naming, poly budget, shard radius, grayscale COLOR_0 value bake (I410/ST-380)', () => {
-  const { buf, json, binOff } = parseGlb('debris_chunk.glb');
-  assert.ok(buf.length <= 12000, 'debris_chunk.glb ' + buf.length + ' B <= 12 KB (ST-380 budget)');
+  const { buf, json, binOff, fileSize } = parseGlb('debris_chunk.glb');
+  assert.ok(fileSize <= 12000, 'debris_chunk.glb ' + fileSize + ' B <= 12 KB (I609 meshopt 4,632 B; ST-380 budget)');
   const s = meshStats({ buf, json, binOff });
   assert.ok(s.nodeNames.includes('VR_Debris_Chunk'), 'VR_Debris_Chunk node');
   assert.ok(s.matNames.includes('VR_Debris'), 'VR_Debris material');
@@ -1276,8 +1305,8 @@ test('debris_chunk.glb: naming, poly budget, shard radius, grayscale COLOR_0 val
 });
 
 test('debris_sliver.glb: naming, poly budget, shard radius, grayscale COLOR_0 value bake (I410/ST-380)', () => {
-  const { buf, json, binOff } = parseGlb('debris_sliver.glb');
-  assert.ok(buf.length <= 12000, 'debris_sliver.glb ' + buf.length + ' B <= 12 KB (ST-380 budget)');
+  const { buf, json, binOff, fileSize } = parseGlb('debris_sliver.glb');
+  assert.ok(fileSize <= 12000, 'debris_sliver.glb ' + fileSize + ' B <= 12 KB (I609 meshopt 4,588 B; ST-380 budget)');
   const s = meshStats({ buf, json, binOff });
   assert.ok(s.nodeNames.includes('VR_Debris_Sliver'), 'VR_Debris_Sliver node');
   assert.ok(s.matNames.includes('VR_Debris'), 'VR_Debris material');
@@ -1300,8 +1329,8 @@ test('debris_sliver.glb: naming, poly budget, shard radius, grayscale COLOR_0 va
 });
 
 test('boss_archon.glb: I553 (ST-519 E75 D4) the Archon throne - nodes, per-node tris, extents, mirror guards, all-prim COLOR_0', () => {
-  const { buf, json, binOff } = remaster4Bake('boss_archon.glb', 'archon');
-  assert.ok(buf.length <= 126 * 1024, 'archon under 126 KB (measured ' + (buf.length / 1024).toFixed(2) + ' KB; I553 128,780 B)');
+  const { buf, json, binOff, fileSize } = remaster4Bake('boss_archon.glb', 'archon');
+  assert.ok(fileSize <= 60 * 1024, 'archon under 60 KB (measured ' + (fileSize / 1024).toFixed(2) + ' KB; I609 meshopt 58,916 B; I553 raw 128,780 B)');
   const s = meshStats({ buf, json, binOff });
   for (const n of ['VR_Archon_Hull', 'VR_Archon_Crown', 'VR_Archon_Core']) assert.ok(s.nodeNames.includes(n), n + ' node');
   assert.equal(s.nodeNames.length, 3, 'flat node set (no root nodes)');

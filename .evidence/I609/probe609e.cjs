@@ -1,0 +1,20 @@
+const fs = require('fs');
+const { MeshoptEncoder } = require('E:/Game/node_modules/meshoptimizer/meshopt_encoder.js');
+const MeshoptDecoder = require('E:/Game/node_modules/meshoptimizer/meshopt_decoder.cjs');
+(async () => {
+  await MeshoptEncoder.ready; await MeshoptDecoder.ready;
+  const buf = fs.readFileSync('E:/Game/assets/arena_ring.glb');
+  const jsonLen = buf.readUInt32LE(12);
+  const off = 20 + jsonLen + 4 + 8;
+  const src = new Uint8Array(buf.subarray(off + 1728, off + 1728 + 288));
+  const e2 = MeshoptEncoder.encodeIndexBuffer(src, 144, 2);
+  const d2 = new Uint8Array(288);
+  MeshoptDecoder.decodeIndexBuffer(d2, 144, 2, new Uint8Array(e2));
+  const s = new Uint16Array(Buffer.from(src.buffer, src.byteOffset, 288));
+  const d = new Uint16Array(d2.buffer);
+  let diffs = [];
+  for (let i = 0; i < 144; i++) if (d[i] !== s[i]) diffs.push([i, s[i], d[i]]);
+  console.log('diffs: ' + JSON.stringify(diffs.slice(0, 10)) + ' total ' + diffs.length);
+  console.log('src head: ' + Array.from(s.slice(0, 16)).join(','));
+  console.log('dec head: ' + Array.from(d.slice(0, 16)).join(','));
+})().catch(e => console.error('FAIL ' + (e && e.stack || e)));
