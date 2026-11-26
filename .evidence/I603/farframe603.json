@@ -1,0 +1,711 @@
+{
+  "meta": {
+    "fov": 60,
+    "aspect": 1.7777777777777777,
+    "arenaR": 26,
+    "band": 18.2,
+    "cands": [
+      "R0",
+      "R1",
+      "R2"
+    ]
+  },
+  "cands": {
+    "R0": {
+      "b": {
+        "N/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.3788
+          },
+          "depth": 49.3093,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "N/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.4055
+          },
+          "depth": 37.5236,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/rim": {
+          "ndc": {
+            "x": -0.6706,
+            "y": 0.1339
+          },
+          "depth": 30.7419,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/in": {
+          "ndc": {
+            "x": -0.7403,
+            "y": 0.1478
+          },
+          "depth": 22.6888,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/rim": {
+          "ndc": {
+            "x": 0,
+            "y": -3.463
+          },
+          "depth": 7.0629,
+          "inFront": true,
+          "inFrustum": false
+        },
+        "S/in": {
+          "ndc": {
+            "x": 0,
+            "y": -5.3407
+          },
+          "depth": 3.7312,
+          "inFront": true,
+          "inFrustum": false
+        },
+        "W/rim": {
+          "ndc": {
+            "x": 0.6706,
+            "y": 0.1339
+          },
+          "depth": 30.7419,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/in": {
+          "ndc": {
+            "x": 0.7403,
+            "y": 0.1478
+          },
+          "depth": 22.6888,
+          "inFront": true,
+          "inFrustum": true
+        }
+      },
+      "c": {
+        "N/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5733
+          },
+          "depth": 71.8301,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "N/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5981
+          },
+          "depth": 55.5403,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/rim": {
+          "ndc": {
+            "x": -1.3002,
+            "y": 0.2597
+          },
+          "depth": 34.9606,
+          "inFront": true,
+          "inFrustum": false
+        },
+        "E/in": {
+          "ndc": {
+            "x": -1.4069,
+            "y": 0.281
+          },
+          "depth": 26.0638,
+          "inFront": true,
+          "inFrustum": false
+        },
+        "S/rim": {
+          "ndc": null,
+          "depth": -12.5975,
+          "inFront": false,
+          "inFrustum": false
+        },
+        "S/in": {
+          "ndc": null,
+          "depth": -11.9971,
+          "inFront": false,
+          "inFrustum": false
+        },
+        "W/rim": {
+          "ndc": {
+            "x": 1.3002,
+            "y": 0.2597
+          },
+          "depth": 34.9606,
+          "inFront": true,
+          "inFrustum": false
+        },
+        "W/in": {
+          "ndc": {
+            "x": 1.4069,
+            "y": 0.281
+          },
+          "depth": 26.0638,
+          "inFront": true,
+          "inFrustum": false
+        }
+      },
+      "a1": {
+        "in": {
+          "maxDx": 0,
+          "maxDy": 0,
+          "ships": [
+            {
+              "x": 0,
+              "y": -0.1428
+            },
+            {
+              "x": 0,
+              "y": -0.1428
+            },
+            {
+              "x": 0,
+              "y": -0.1428
+            }
+          ]
+        },
+        "rim": {
+          "maxDx": 0,
+          "maxDy": 0,
+          "ships": [
+            {
+              "x": 0,
+              "y": -0.1428
+            },
+            {
+              "x": 0,
+              "y": -0.1428
+            },
+            {
+              "x": 0,
+              "y": -0.1428
+            }
+          ]
+        }
+      },
+      "a2": {
+        "N/rim": {
+          "x": 0,
+          "y": -0.1428
+        },
+        "E/rim": {
+          "x": 0.1592,
+          "y": -0.0318
+        },
+        "S/rim": {
+          "x": 0,
+          "y": 0.1875
+        },
+        "W/rim": {
+          "x": -0.1592,
+          "y": -0.0318
+        }
+      }
+    },
+    "R1": {
+      "b": {
+        "N/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.3788
+          },
+          "depth": 49.3093,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "N/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.4055
+          },
+          "depth": 37.5236,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.3788
+          },
+          "depth": 49.3093,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.4055
+          },
+          "depth": 37.5236,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.3788
+          },
+          "depth": 49.3093,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.4055
+          },
+          "depth": 37.5236,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.3788
+          },
+          "depth": 49.3093,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.4055
+          },
+          "depth": 37.5236,
+          "inFront": true,
+          "inFrustum": true
+        }
+      },
+      "c": {
+        "N/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5733
+          },
+          "depth": 71.8301,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "N/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5981
+          },
+          "depth": 55.5403,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5733
+          },
+          "depth": 71.8301,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5981
+          },
+          "depth": 55.5403,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5733
+          },
+          "depth": 71.8301,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5981
+          },
+          "depth": 55.5403,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5733
+          },
+          "depth": 71.8301,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5981
+          },
+          "depth": 55.5403,
+          "inFront": true,
+          "inFrustum": true
+        }
+      },
+      "a1": {
+        "in": {
+          "maxDx": 0.2908,
+          "maxDy": 0.2473,
+          "ships": [
+            {
+              "x": -0.1592,
+              "y": -0.0318
+            },
+            {
+              "x": 0,
+              "y": -0.1428
+            },
+            {
+              "x": 0.1316,
+              "y": 0.1045
+            }
+          ]
+        },
+        "rim": {
+          "maxDx": 0.2908,
+          "maxDy": 0.2473,
+          "ships": [
+            {
+              "x": -0.1592,
+              "y": -0.0318
+            },
+            {
+              "x": 0,
+              "y": -0.1428
+            },
+            {
+              "x": 0.1316,
+              "y": 0.1045
+            }
+          ]
+        }
+      },
+      "a2": {
+        "N/rim": {
+          "x": 0,
+          "y": -0.1428
+        },
+        "E/rim": {
+          "x": 0,
+          "y": -0.1428
+        },
+        "S/rim": {
+          "x": 0,
+          "y": -0.1428
+        },
+        "W/rim": {
+          "x": 0,
+          "y": -0.1428
+        }
+      }
+    },
+    "R2": {
+      "b": {
+        "N/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.3788
+          },
+          "depth": 49.3093,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "N/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.4055
+          },
+          "depth": 37.5236,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.3788
+          },
+          "depth": 49.3093,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.4055
+          },
+          "depth": 37.5236,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.3788
+          },
+          "depth": 49.3093,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.4055
+          },
+          "depth": 37.5236,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.3788
+          },
+          "depth": 49.3093,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.4055
+          },
+          "depth": 37.5236,
+          "inFront": true,
+          "inFrustum": true
+        }
+      },
+      "c": {
+        "N/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5733
+          },
+          "depth": 71.8301,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "N/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5981
+          },
+          "depth": 55.5403,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5733
+          },
+          "depth": 71.8301,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "E/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5981
+          },
+          "depth": 55.5403,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5733
+          },
+          "depth": 71.8301,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "S/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5981
+          },
+          "depth": 55.5403,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/rim": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5733
+          },
+          "depth": 71.8301,
+          "inFront": true,
+          "inFrustum": true
+        },
+        "W/in": {
+          "ndc": {
+            "x": 0,
+            "y": 0.5981
+          },
+          "depth": 55.5403,
+          "inFront": true,
+          "inFrustum": true
+        }
+      },
+      "a1": {
+        "in": {
+          "maxDx": 0.2908,
+          "maxDy": 0.2473,
+          "ships": [
+            {
+              "x": -0.1592,
+              "y": -0.0318
+            },
+            {
+              "x": 0,
+              "y": -0.1428
+            },
+            {
+              "x": 0.1316,
+              "y": 0.1045
+            }
+          ]
+        },
+        "rim": {
+          "maxDx": 0.2908,
+          "maxDy": 0.2473,
+          "ships": [
+            {
+              "x": -0.1592,
+              "y": -0.0318
+            },
+            {
+              "x": 0,
+              "y": -0.1428
+            },
+            {
+              "x": 0.1316,
+              "y": 0.1045
+            }
+          ]
+        }
+      },
+      "a2": {
+        "N/rim": {
+          "x": 0,
+          "y": -0.1428
+        },
+        "E/rim": {
+          "x": 0,
+          "y": -0.1428
+        },
+        "S/rim": {
+          "x": 0,
+          "y": -0.1428
+        },
+        "W/rim": {
+          "x": 0,
+          "y": -0.1428
+        }
+      }
+    }
+  },
+  "crossingR2hold": {
+    "steps": 120,
+    "maxJumpDeg": 90,
+    "totalCamTravel": 96.2,
+    "samples": [
+      {
+        "i": 0,
+        "y": 26,
+        "dist": 26,
+        "camAz": 1.571,
+        "shipNdc": {
+          "x": 0,
+          "y": -0.1428
+        },
+        "centerIn": true
+      },
+      {
+        "i": 20,
+        "y": 17.33,
+        "dist": 17.33,
+        "camAz": 1.571,
+        "shipNdc": {
+          "x": 0,
+          "y": -0.1428
+        },
+        "centerIn": true
+      },
+      {
+        "i": 40,
+        "y": 8.67,
+        "dist": 8.67,
+        "camAz": 1.571,
+        "shipNdc": {
+          "x": 0,
+          "y": -0.1428
+        },
+        "centerIn": true
+      },
+      {
+        "i": 60,
+        "y": 0,
+        "dist": 0,
+        "camAz": 1.571,
+        "shipNdc": {
+          "x": 0,
+          "y": -0.1428
+        },
+        "centerIn": true
+      },
+      {
+        "i": 80,
+        "y": -8.67,
+        "dist": 8.67,
+        "camAz": 1.571,
+        "shipNdc": {
+          "x": 0,
+          "y": -0.1428
+        },
+        "centerIn": false
+      },
+      {
+        "i": 100,
+        "y": -17.33,
+        "dist": 17.33,
+        "camAz": -1.571,
+        "shipNdc": {
+          "x": 0,
+          "y": -0.1428
+        },
+        "centerIn": false
+      },
+      {
+        "i": 120,
+        "y": -26,
+        "dist": 26,
+        "camAz": -1.571,
+        "shipNdc": {
+          "x": 0,
+          "y": 0.1875
+        },
+        "centerIn": true
+      }
+    ]
+  }
+}

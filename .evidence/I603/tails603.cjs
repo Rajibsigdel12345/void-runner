@@ -1,0 +1,10 @@
+const fs = require('fs');
+const R = (f) => fs.readFileSync('E:/Game/' + f, 'latin1');
+const j = (o) => console.log(JSON.stringify(o));
+const ep = R('production/epics.md');
+j({ ep_tail: ep.slice(-200) });
+const st = R('production/stories.md');
+j({ st_tail: st.slice(-160) });
+const sc = R('production/scope-check-E86.md');
+const iD = sc.indexOf('## DoD');
+j({ sc_dod: sc.slice(iD, iD + 400) });

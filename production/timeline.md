@@ -279,3 +279,5 @@ I600 (ST-565, E86) done: the cockpit view now has a subtle dashboard and canopy 
 I601 (ST-566, E86) done: no visible change - we measured exactly how much of the arena you can still see from the edge. The framing is the same wherever you fly; from most edges you can see the whole way back to the far side, and the few rim angles where you cannot are now measured and on the improvement list.
 
 I602 (ST-567, E86) done: no visible change - the cockpit work is closed out. The flight controls, the first-person view, and its frame all passed the full regression gauntlet, and the game was re-verified stable end to end. A few camera-visibility edge cases from the far-framing measurement were logged for a future improvement pass.
+
+I603 (E87 open): no visible change - the fix for seeing the whole arena from every edge is designed and measured. The numbers show that moving the camera to sit behind the ship along the line through the arena center, but only when the ship is near the edge, lets you see all the way back from every direction while the flight feel in the middle of the arena stays exactly as it is now; it is scoped for the next update.
