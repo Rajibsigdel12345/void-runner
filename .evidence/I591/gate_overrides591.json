@@ -1,0 +1,65 @@
+{
+  "id": "GATE-OVERRIDE-E84-R2",
+  "epic": "E84",
+  "story": "ST-558",
+  "iteration": "I591",
+  "recorded": "2026-11-26",
+  "pattern": "I570 record+register: gate divergence recorded + registered in .evidence BEFORE any build. Supersedes the I590 S1/S2 entries only; .evidence/I590/gate_overrides.json is untouched.",
+  "gate": "sil96 continuity gate (frozen scope-check-E84: per-role fill within +/-15% of the ST-557 audit baseline)",
+  "note": "The +/-15% mechanism STANDS for drone + flyer (strict bands unchanged). The I590 S1/S2 override bands are UNREACHABLE in the measured audit space for the frozen extent bands (audit scale bug, measured this iteration - see gate_divergence591.md): a solid ship inside the bands cannot exceed sil96 ~0.0246 (warden, M~4.75) / ~0.0286 (stinger, M~4.02), below both override band floors. This register re-baselines to the measured ceiling (Option A) and pre-registers the stinger re-baseline for I592.",
+  "scale_bug": "audit_i591.py: ship scaled to max-extent 1.0, ortho frame max(inplane)*1.04 in original units -> measured fill = true_area / (M^2 * (max(inplane)*1.04)^2); 1 unit renders at 96/(M*1.04) px (pngprobe591: drone 44px/96 = 1/2.184 exact).",
+  "overrides": [
+    {
+      "id": "GATE-OVERRIDE-E84-S1",
+      "ship": "stinger",
+      "status": "SUPERSEDED-I592-PENDING",
+      "superseded_by": "GATE-OVERRIDE-E84-S1-R2-PREREG",
+      "note": "band [0.030, 0.040] sits above the solid-box ceiling 0.0281-0.0286 at M~4.02; S1-R2 decided WITH MEASUREMENT at I592"
+    },
+    {
+      "id": "GATE-OVERRIDE-E84-S2",
+      "ship": "warden",
+      "status": "SUPERSEDED-BY-S2-R2",
+      "superseded_by": "GATE-OVERRIDE-E84-S2-R2",
+      "note": "band [0.045, 0.060] sits ~2x above the solid-box ceiling 0.0214-0.0246 at M~4.75"
+    },
+    {
+      "id": "GATE-OVERRIDE-E84-S2-R2",
+      "ship": "warden",
+      "baseline_sil96": 0.0111,
+      "baseline_note": "warden_v2 pre-rework as-written (audit_i591.json); the v1 legacy 0.0308 is NOT comparable (3.26-tall slab outside the height band, different M)",
+      "target_band": [0.018, 0.026],
+      "target_center": 0.022,
+      "ceiling_sil96": [0.0214, 0.0246],
+      "center_pct_of_ceiling": "85-97",
+      "applied": "I591 WITH MEASUREMENT (audit_i591.py); one tune round pre-authorized if < 0.0185",
+      "justification": "center true fill ~0.50 normalized = fleet-normal solidity (gunship 0.45 / sentry 0.40 / hauler 0.53); the solid-bulwark brief reads fleet-normal, not oversized"
+    },
+    {
+      "id": "GATE-OVERRIDE-E84-S1-R2-PREREG",
+      "ship": "stinger",
+      "baseline_sil96": 0.0231,
+      "target_band": [0.024, 0.028],
+      "target_center": 0.026,
+      "ceiling_sil96": [0.0281, 0.0286],
+      "center_pct_of_ceiling": "85-95",
+      "applied": "I592 WITH MEASUREMENT",
+      "justification": "v2 goal is silhouette CHARACTER (canard/needle); the legacy 1px-line reading was a framing artifact (27-px-tall featureless bar)"
+    }
+  ],
+  "not_overridden": [
+    {
+      "ship": "drone",
+      "baseline_sil96": 0.0932,
+      "strict_band": [0.0792, 0.1072],
+      "status": "STRICT UNCHANGED",
+      "note": "v2 build measures 0.0784 (0.0008 below floor): ARM_ZT +0.03 nudge pre-authorized (arm tops +0.03 everywhere; extents/height/topology unchanged, core apex ~0.7354 stays max z); expected 0.080-0.087; one second nudge round +0.03 pre-authorized if measured < 0.0810"
+    },
+    {
+      "ship": "flyer",
+      "baseline_sil96": 0.0413,
+      "strict_band": [0.0351, 0.0475],
+      "status": "STRICT UNCHANGED (I592)"
+    }
+  ]
+}

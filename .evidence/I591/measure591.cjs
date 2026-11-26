@@ -1,0 +1,13 @@
+const fs = require("fs");
+let total = 0, files = 0;
+(function walk(d) { for (const e of fs.readdirSync(d, {withFileTypes:true})) { const p = d + '/' + e.name; if (e.isDirectory()) walk(p); else { files++; total += fs.statSync(p).size; } } })('E:/Game/dist');
+const a = fs.readdirSync('E:/Game/assets').filter(f => f.endsWith('.glb'));
+let at = 0; for (const f of a) at += fs.statSync('E:/Game/assets/' + f).size;
+console.log('dist:', files, 'files,', total, 'B (expect 7,093,058 byte-identical / tripwire 7,297,600 / ceiling 7,400,000)');
+console.log('assets:', a.length, 'glb, total', at, 'B (current cap 4,563 KiB; E84 renegotiation 4,800,512 B / 124,158 t at ST-560)');
+const { execSync } = require('child_process');
+const h = (f) => { const s = fs.readFileSync('E:/Game/dist/vendor/' + f, 'latin1'); const crypto = require('crypto'); return crypto.createHash('sha256').update(s).digest('hex').slice(0, 16).toUpperCase(); };
+console.log('three.module.js', h('three.module.min.js'));
+console.log('three.core.js', h('three.core.min.js'));
+console.log('three.webgpu.js', h('three.webgpu.min.js'));
+console.log('three.tsl.js', h('three.tsl.min.js'));
