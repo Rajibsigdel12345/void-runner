@@ -1,0 +1,12 @@
+PASS - sw: registration active :: {"scope":"http://127.0.0.1:5199/","active":true,"installing":null}
+PASS - sw: scope is root :: scope=http://127.0.0.1:5199/
+PASS - sw: controller set on reloaded client (claimed) :: controller=true
+PASS - online: page boots (__vr defined)
+PASS - manifest: GET 200 + manifest+json :: status=200 ct=application/manifest+json
+PASS - manifest: display standalone :: display=standalone
+PASS - manifest: has 512 png icon (any+maskable) :: [{"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"},{"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"}]
+PASS - manifest: start_url + scope :: start_url=. scope=.
+PASS - offline: page boots from cache (__vr defined) :: booted=true
+PASS - offline: no NaN in exposed world/camera :: no NaN
+PASS - console clean (0 console errors, 0 page errors) :: consoleErr=0 pageErr=0
+SUMMARY 11/11 passed
