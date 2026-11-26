@@ -15,7 +15,7 @@ const CHUNK_JSON = 0x4e4f534a; // 'JSON'
 const CHUNK_BIN = 0x004e4942; // 'BIN'
 
 // Poly budgets (design/asset-spec.md; L amended 200 -> 320 at I105; L/M/S 320/120/80 -> 500/140/140 at I307 (bump+crater relief); ship 300 -> 850 at I429 (ST-399 remaster, 818-tri fighter; design/asset-spec-ship-remaster.md)).
-const BUDGETS = { ship: 62254, L: 6000, M: 1800, S: 700, comet: 1120, boss: 1500, shield: 120, emblem: 60, drone: 1800, arenaRing: 120, warden: 1800, chunk: 60, sliver: 50, hunter: 3366, gunship: 2906, sentry: 2934, wasp: 4020, phantom: 4544, bulwark: 3160, hauler: 3724, sweeper: 1946, beacon: 3144, archon: 3108 }; // I554 (ST-520 E75 D5) rock v12 RE-PIN WITH MEASUREMENT: L/M/S/comet 3200/950/380/650 -> 6000/1800/700/1120 (measure554.cjs; pinned tight to measurement; supersedes I456 rock caps) // I553 (ST-519 E75 D4): +archon 3108 t (hull 1916 + crown 752 + core 440), pinned tight to measurement (measure553.mjs) // I552 (ST-518 E75 D3): +sweeper 3006 t (hull 2234 + arc 424 + greeble 348) +beacon 3144 t (base 1564 + tower 1204 + lamp 376), pinned tight to measurement (I552 art phase, measure552.mjs) // I541 (ST-507 E73 ship v7) ship 25563 -> 32499 (measured 32,499 t / 740,012 B; span 4.021 / len 2.600 unchanged, MAX_FILE_BYTES 1,048,576 holds) // + I482 (ST-449 sentry/wasp caps 1800/1200; actual 1096/792) + I501 (ST-467 ship v6 real-airship remaster 19000 -> 25563, measured 25,563 t / 581,440 B; pinned tight to measurement - the asset landed 9,137 t under the 34,700 aim so the pre-registered 38,500 was not needed; future growth requires an explicit re-pin) // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276) + I456 (ST-426 rock L/M/S v11 density remaster 2100/520/140 -> 3200/950/380, actual 3000/900/350; boss 750 -> 1500, actual 1425) + I508 (ST-474 E68 legacy-4 remaster) drone/warden caps 100/200 -> 1800/1800 (spec aim 1400) + I509 (ST-475 E68 remaster-4 re-pin WITH measurement) hunter/gunship/sentry/wasp 3366/2596/2934/4020 (wasp 1200 -> 4020: wing-mirror rebuild, double blade 2400 t) + I516 (ST-482 E69 phantom/bulwark 2336/2700, pinned tight to measurement) + I517 (ST-483 E69 hauler 3506, pinned tight to measurement) + I587 (ST-554 E83 ship v8 swap) ship 32499 -> 62254 (measured 62,254 t post-GLB-import / 1,402,896 B; build-space 64,884 t, GLTF export dedupe -2,630; span 4.0125 / len 2.7160 hold the I454 windows; .evidence/I587/repin_measure587b.mjs)
+const BUDGETS = { ship: 62254, L: 6000, M: 1800, S: 700, comet: 1120, boss: 1500, shield: 120, emblem: 60, drone: 2080, arenaRing: 120, warden: 2290, chunk: 60, stinger: 2396, flyer: 2264, sliver: 50, hunter: 3366, gunship: 2906, sentry: 2934, wasp: 4020, phantom: 4544, bulwark: 3160, hauler: 3724, sweeper: 1946, beacon: 3144, archon: 3108 }; // I554 (ST-520 E75 D5) rock v12 RE-PIN WITH MEASUREMENT: L/M/S/comet 3200/950/380/650 -> 6000/1800/700/1120 (measure554.cjs; pinned tight to measurement; supersedes I456 rock caps) // I553 (ST-519 E75 D4): +archon 3108 t (hull 1916 + crown 752 + core 440), pinned tight to measurement (measure553.mjs) // I552 (ST-518 E75 D3): +sweeper 3006 t (hull 2234 + arc 424 + greeble 348) +beacon 3144 t (base 1564 + tower 1204 + lamp 376), pinned tight to measurement (I552 art phase, measure552.mjs) // I541 (ST-507 E73 ship v7) ship 25563 -> 32499 (measured 32,499 t / 740,012 B; span 4.021 / len 2.600 unchanged, MAX_FILE_BYTES 1,048,576 holds) // + I482 (ST-449 sentry/wasp caps 1800/1200; actual 1096/792) + I501 (ST-467 ship v6 real-airship remaster 19000 -> 25563, measured 25,563 t / 581,440 B; pinned tight to measurement - the asset landed 9,137 t under the 34,700 aim so the pre-registered 38,500 was not needed; future growth requires an explicit re-pin) // I210 + I211 + I212 + I220 + I307 + I344 (comet) + I410 (debris) + I421 (comet re-bake) + I429 (ST-399 ship remaster 300 -> 850, actual 818; tighter than pre-registered ~1200) + I430 (ST-400 boss remaster 250 -> 750, actual 650) + I435 (ST-405 ship remaster v2 850 -> 4500, actual 3254) + I436 (ST-406 M v9 subdivided realism 140 -> 520, actual 500; M_B same topology) + I440 (ST-410 ship remaster v3 4500 -> 14000, actual 12400) + I441 (ST-411 rock L/L_B v10 remaster 500 -> 2100, actual 1980; comet re-bake 200 -> 650, actual 590) + I451 (ST-421 enemy GLBs: hunter 1432t / gunship 1688t, cap 2400) + I454 (ST-424 ship v4 "real airship" 14000 -> 19000, actual 14276) + I456 (ST-426 rock L/M/S v11 density remaster 2100/520/140 -> 3200/950/380, actual 3000/900/350; boss 750 -> 1500, actual 1425) + I508 (ST-474 E68 legacy-4 remaster) drone/warden caps 100/200 -> 1800/1800 (spec aim 1400) + I509 (ST-475 E68 remaster-4 re-pin WITH measurement) hunter/gunship/sentry/wasp 3366/2596/2934/4020 (wasp 1200 -> 4020: wing-mirror rebuild, double blade 2400 t) + I516 (ST-482 E69 phantom/bulwark 2336/2700, pinned tight to measurement) + I517 (ST-483 E69 hauler 3506, pinned tight to measurement) + I587 (ST-554 E83 ship v8 swap) ship 32499 -> 62254 (measured 62,254 t post-GLB-import / 1,402,896 B; build-space 64,884 t, GLTF export dedupe -2,630; span 4.0125 / len 2.7160 hold the I454 windows; .evidence/I587/repin_measure587b.mjs) // I593 (ST-560 E84) legacy-4 v2 RE-PIN WITH MEASUREMENT: drone 1800 -> 2080 / warden 1800 -> 2290; stinger 2396 / flyer 2264 keys ADDED (measure593.cjs post-GLB: set 6,574 -> 9,030 t)
 const MAX_FILE_BYTES = 1500000; // I587 (ST-554 E83 ship v8 swap) EXPLICIT re-pin WITH MEASUREMENT: 1,048,576 -> 1,500,000 (ship v8 1,402,896 B; scope-check-E83 pre-registered 1,400,000 B target / 1,500,000 B hard; max non-ship stays boss 75.26 KB) // I501 (ST-467 ship v6) EXPLICIT re-pin: 393216 -> 1048576 (ship v6 581,440 B; spec s5 pre-registered 1,048,576; max non-ship stays boss 75.26 KB) // I440 (ST-410 ship remaster v3) EXPLICIT re-pin: 262144 -> 393216 (ship 190,544 B/3254t -> 270,556 B/12400t; I435 was 100*1024 -> 262144 for v2; max non-ship stays boss 75.26 KB)
 
 function parseGlb(file) {
@@ -579,18 +579,20 @@ test('powerup emblems: naming, poly budgets, normalized extents, grayscale COLOR
 // node/prim (VR_Drone), per-face grayscale COLOR_0 value bake (hash3 bands + bright eye).
 // Union bbox class target 1.41 (I508 measured half-diag 1.467 = 1.04x). Pin WITH measurement:
 // 118,828 B / 1,516 t; extents x 2.1000 / y 1.1421 / z 1.7000 (raw vertex space).
+// I593 (ST-560 E84) v2 boomerang SWAP re-pin WITH measurement (measure593.cjs): 52,284 B / 2,080 t;
+// extents x 2.0857 / y 1.1354 / z 1.7000 (raw vertex space; y/z swapped vs the I508 build orientation).
 test('drone.glb: I508 (ST-474) E68 seeker-fly remaster - naming, poly budget, union extents (I211 superseded)', () => {
   const { buf, json, binOff } = parseGlb('drone.glb');
   assert.ok(buf.length < MAX_FILE_BYTES, 'drone.glb under 1 MB');
   const s = meshStats({ buf, json, binOff });
   assert.ok(s.nodeNames.includes('VR_Drone'), 'VR_Drone node (single merged node)');
-  assert.ok(s.matNames.includes('VR_DroneMat'), 'VR_DroneMat material (vestigial - in-code JS material governs)');
-  assert.ok(s.totalTris <= BUDGETS.drone, 'drone tris ' + s.totalTris + ' <= 1800 (E68 legacy-4 cap)');
-  assert.ok(s.totalTris >= 1400, 'drone tris ' + s.totalTris + ' >= 1400 (E68 legacy-4 aim - no silent simplification)');
+  assert.ok(s.matNames.includes('VR_Drone'), 'VR_Drone material (I593 v2: VR_ naming without the I508 Mat suffix - vestigial, in-code JS material governs)');
+  assert.ok(s.totalTris <= BUDGETS.drone, 'drone tris ' + s.totalTris + ' <= 2080 (I593 v2 re-pin)');
+  assert.ok(s.totalTris >= 1516, 'drone tris ' + s.totalTris + ' >= 1516 (I508 legacy-4 measured floor - no silent simplification)');
   const e = extents({ buf, json, binOff });
-  assert.ok(Math.abs(e.x - 2.10) / 2.10 <= 0.10, 'drone X extent ' + e.x.toFixed(3) + ' ~ 2.10 (I508 pin)');
-  assert.ok(Math.abs(e.y - 1.1421) / 1.1421 <= 0.10, 'drone Y extent ' + e.y.toFixed(3) + ' ~ 1.1421 (I508 pin)');
-  assert.ok(Math.abs(e.z - 1.70) / 1.70 <= 0.10, 'drone Z extent ' + e.z.toFixed(3) + ' ~ 1.70 (I508 pin)');
+  assert.ok(Math.abs(e.x - 2.0857) / 2.0857 <= 0.10, 'drone X extent ' + e.x.toFixed(3) + ' ~ 2.0857 (I593 v2 pin)');
+  assert.ok(Math.abs(e.y - 1.1354) / 1.1354 <= 0.10, 'drone Y extent ' + e.y.toFixed(3) + ' ~ 1.1354 (I593 v2 pin)');
+  assert.ok(Math.abs(e.z - 1.7000) / 1.7000 <= 0.10, 'drone Z extent ' + e.z.toFixed(3) + ' ~ 1.7000 (I593 v2 pin)');
 });
 
 
@@ -603,12 +605,14 @@ test('drone.glb: I508 (ST-474) E68 seeker-fly remaster - naming, poly budget, un
 // -> assert [0.25, 1.00]. Per-prim percentile pins are the I508 measurements (pre-I508 I282
 // file-level pins were drone 0.570/0.830/1.180, stinger 0.580/0.760/0.980, flyer 0.320/0.820/1.120).
 const ENEMY_FACET = {
-  drone:   { VR_Drone:        { p10: 0.30,   p50: 0.5332, p90: 0.6467 } }, // I508 (ST-474) per-prim re-pin WITH measurement
-  stinger: { VR_Stinger_Body: { p10: 0.34,   p50: 0.4504, p90: 0.579 },
+  drone:   { VR_Drone:        { p10: 0.5167, p50: 1.0186, p90: 1.4275 } }, // I593 (ST-560 E84) v2 re-pin WITH measurement (I508: 0.30/0.5332/0.6467)
+  stinger: { VR_Stinger_Body: { p10: 0.55,   p50: 0.5573, p90: 1.00 }, // I593 v2 re-pin WITH measurement (I508: 0.34/0.4504/0.579)
              VR_Stinger_Core: { p10: 0.94,   p50: 0.94,   p90: 0.94 } },
-  flyer:   { VR_Flyer_Body:   { p10: 0.3823, p50: 0.5741, p90: 0.6275 },
-             VR_Flyer_Dome:   { p10: 0.92,   p50: 0.92,   p90: 0.92 } },
+  flyer:   { VR_Flyer_Body:   { p10: 0.55,   p50: 0.6421, p90: 1.00 }, // I593 v2 re-pin WITH measurement (I508: 0.3823/0.5741/0.6275)
+             VR_Flyer_Dome:   { p10: 0.94,   p50: 0.94,   p90: 0.94 } }, // I593 v2 re-pin WITH measurement (I508: 0.92 flat)
 };
+const ENEMY_DOMAIN_MAX = { drone: 1.55, stinger: 1.00, flyer: 1.00 }; // I593 (ST-560 E84) COLOR_0 domain re-pin WITH MEASUREMENT (measure593.cjs): drone v2 1.0-centered bright-bake accents reach 1.55 (I591 P-gate approved); stinger/flyer v2 stay within 1.00. I508 domain was [0.25, 1.00] for all three.
+const LEGACY_FLOOR = { drone: 1516, stinger: 1732, flyer: 1770 }; // I593: I508 legacy-4 measured tri floors (no silent simplification below the superseded ships)
 function enemyFacetLumasPrim({ buf, json, binOff }, prim) {
   // I508: per-prim per-face luma through the index accessor (vertex-split colors:
   // COLOR_0 count == POSITION count). Replaces the I282 whole-file "last COLOR_0 prim" reader.
@@ -654,6 +658,9 @@ function enemyFacetLumas({ buf, json, binOff }) {
 test('drone/stinger/flyer: every prim carries the I508 grayscale COLOR_0 bake; per-prim facet pins (I282 -> I508)', () => {
   for (const name of ['drone', 'stinger', 'flyer']) {
     const { buf, json, binOff } = parseGlb(name + '.glb');
+    const st = meshStats({ buf, json, binOff });
+    assert.ok(st.totalTris <= BUDGETS[name], name + ' tris ' + st.totalTris + ' <= ' + BUDGETS[name] + ' (I593 v2 re-pin)');
+    assert.ok(st.totalTris >= LEGACY_FLOOR[name], name + ' tris ' + st.totalTris + ' >= ' + LEGACY_FLOOR[name] + ' (I508 legacy-4 measured floor - no silent simplification)');
     let colorPrims = 0;
     for (const m of json.meshes || []) for (const p of m.primitives || []) {
       const mn = m.name || 'mesh';
@@ -671,7 +678,7 @@ test('drone/stinger/flyer: every prim carries the I508 grayscale COLOR_0 bake; p
         const g = buf.readFloatLE(base + i * stride * 4 + 4);
         const b = buf.readFloatLE(base + i * stride * 4 + 8);
         assert.ok(Math.abs(r - g) <= 0.02 && Math.abs(g - b) <= 0.02, name + ' COLOR_0 grayscale at ' + i + ': ' + [r, g, b].map((x) => x.toFixed(3)).join(','));
-        assert.ok(r >= 0.25 && r <= 1.00, name + ' COLOR_0 in [0.25,1.00] I508 value domain at ' + i + ': ' + r.toFixed(3));
+        assert.ok(r >= 0.25 && r <= ENEMY_DOMAIN_MAX[name], name + ' COLOR_0 in [0.25,' + ENEMY_DOMAIN_MAX[name] + '] I508->I593 value domain at ' + i + ': ' + r.toFixed(3));
       }
       const f = enemyFacetLumasPrim({ buf, json, binOff }, p);
       const E = ENEMY_FACET[name][mn];
@@ -1121,8 +1128,8 @@ assert.ok(s.matNames.includes('VR_ArenaRing_Ticks'), 'VR_ArenaRing_Ticks materia
 // Geometry UNCHANGED (tris/radii pins below hold). The 8 in-code spike cones are
 // not part of the GLB.
 const WARDEN_FACET = {
-  VR_Warden_Armor: { p10: 0.38, p50: 0.38, p90: 0.673 },  // I508 (ST-474): side slabs flat 0.38, top slab higher (pre-I508 0.5945/1.0/1.25)
-  VR_Warden_Hull:  { p10: 0.28, p50: 0.4737, p90: 0.70 }, // I508 (ST-474): hex hull + merged core weak spot (pre-I508 0.703/1.1287/1.25)
+  VR_Warden_Armor: { p10: 0.5149, p50: 0.9351, p90: 1.3726 },  // I593 (ST-560 E84) v2 re-pin WITH measurement (I508: 0.38/0.38/0.673)
+  VR_Warden_Hull:  { p10: 0.6524, p50: 0.9697, p90: 1.3456 }, // I593 v2 re-pin WITH measurement (I508: 0.28/0.4737/0.70)
 };
 function wardenFacetLumas({ buf, json, binOff }, p) {
   // Per-prim variant of enemyFacetLumas (that reader picks a single primitive; the
@@ -1146,12 +1153,12 @@ function wardenFacetLumas({ buf, json, binOff }, p) {
 }
 test('warden.glb: naming, poly budget, hull/armor radii, grayscale COLOR_0 value bake (I220 -> I289 -> I508)', () => {
   const { buf, json, binOff } = parseGlb('warden.glb');
-  assert.ok(buf.length <= 96 * 1024, 'warden.glb under 96 KB (I508 re-pin 40 -> 96 KB; measured 91,064 B)');
+  assert.ok(buf.length <= 96 * 1024, 'warden.glb under 96 KB (I508 re-pin 40 -> 96 KB; I593 v2 measured 64,448 B)');
   const s = meshStats({ buf, json, binOff });
   assert.ok(s.nodeNames.includes('VR_Warden_Hull'), 'VR_Warden_Hull node');
   assert.ok(s.nodeNames.includes('VR_Warden_Armor'), 'VR_Warden_Armor node');
-  assert.ok(s.matNames.includes('VR_Warden_HullMat'), 'VR_Warden_HullMat material (I508; vestigial - in-code JS material governs)');
-  assert.ok(s.matNames.includes('VR_Warden_ArmorMat'), 'VR_Warden_ArmorMat material (I508)');
+  assert.ok(s.matNames.includes('VR_Warden_Hull'), 'VR_Warden_Hull material (I593 v2: VR_ naming without the I508 Mat suffix - vestigial, in-code JS material governs)');
+  assert.ok(s.matNames.includes('VR_Warden_Armor'), 'VR_Warden_Armor material (I593 v2: VR_ naming without the I508 Mat suffix)');
   for (const m of json.meshes || []) for (const p of m.primitives || []) {
     const mn = m.name || 'mesh';
     assert.ok(p.attributes.COLOR_0 !== undefined, mn + ' primitive has COLOR_0 (I289/I508 value bake)');
@@ -1167,7 +1174,7 @@ test('warden.glb: naming, poly budget, hull/armor radii, grayscale COLOR_0 value
       const gv = buf.readFloatLE(base + i * stride * 4 + 4);
       const bv2 = buf.readFloatLE(base + i * stride * 4 + 8);
       assert.ok(Math.abs(rv - gv) <= 0.02 && Math.abs(gv - bv2) <= 0.02, mn + ' COLOR_0 grayscale at ' + i + ': ' + [rv, gv, bv2].map((x) => x.toFixed(3)).join(','));
-      assert.ok(rv >= 0.25 && rv <= 1.00, mn + ' COLOR_0 in [0.25,1.00] I508 value domain at ' + i + ': ' + rv.toFixed(3));
+      assert.ok(rv >= 0.25 && rv <= 1.55, mn + ' COLOR_0 in [0.25,1.55] I593 v2 value domain at ' + i + ': ' + rv.toFixed(3));
     }
     const f = wardenFacetLumas({ buf, json, binOff }, p);
     const E = WARDEN_FACET[mn];
@@ -1176,18 +1183,18 @@ test('warden.glb: naming, poly budget, hull/armor radii, grayscale COLOR_0 value
       assert.ok(Math.abs(f[k] - E[k]) <= 0.005, mn + ' facet ' + k + ' ' + f[k].toFixed(4) + ' ~ ' + E[k] + ' (I508 bake pin)');
     }
   }
-  assert.ok(s.totalTris <= BUDGETS.warden, 'warden tris ' + s.totalTris + ' <= 1800 (E68 legacy-4 cap)');
-  assert.ok(s.totalTris >= 1400, 'warden tris ' + s.totalTris + ' >= 1400 (E68 legacy-4 aim - no silent simplification)');
+  assert.ok(s.totalTris <= BUDGETS.warden, 'warden tris ' + s.totalTris + ' <= 2290 (I593 v2 re-pin)');
+  assert.ok(s.totalTris >= 1556, 'warden tris ' + s.totalTris + ' >= 1556 (I508 legacy-4 measured floor - no silent simplification)');
   const hull = s.prims.find((p) => p.name.includes('Hull'));
   const armor = s.prims.find((p) => p.name.includes('Armor'));
   const r = CONFIG.warden.radius;
-  // I508 re-pins WITH measurement (supersede the I220/I289 procedural-plate pins): hull = 6-gon
-  // hex hull + front core weak spot (dome + spikes + brackets merged) -> maxRadius 2.1848
-  // (~r*1.285; pre-I508 the r*1.25 spike cap); armor = three 4.8-long slabs -> maxRadius 3.4111
-  // (keeps the union bbox ~3.99 class; pre-I508 ~r*1.55 = 2.635).
+  // I593 (ST-560 E84) v2 re-pins WITH measurement (supersede I508): hull = hex fortress + parapet +
+  // turret -> maxRadius 2.4790 (~r*1.458); armor = 3 mounted bracketed slabs -> maxRadius 2.3841
+  // (v3 slabs sit ON the hull surface - mounted, not protruding; I508 slabs protruded to 3.4111;
+  // the in-code spike collar at r*1.35 = 2.295 now embeds in the hull mass - documented residual).
   assert.ok(hull.maxRadius >= r * 0.95, 'hull covers the logical body (' + hull.maxRadius.toFixed(3) + ')');
-  assert.ok(Math.abs(hull.maxRadius - 2.1848) / 2.1848 <= 0.10, 'hull max radius ' + hull.maxRadius.toFixed(3) + ' ~ 2.1848 (I508 pin)');
-  assert.ok(Math.abs(armor.maxRadius - 3.4111) / 3.4111 <= 0.10, 'armor outer radius ' + armor.maxRadius.toFixed(3) + ' ~ 3.4111 (I508 pin)');
+  assert.ok(Math.abs(hull.maxRadius - 2.4790) / 2.4790 <= 0.10, 'hull max radius ' + hull.maxRadius.toFixed(3) + ' ~ 2.4790 (I593 v2 pin)');
+  assert.ok(Math.abs(armor.maxRadius - 2.3841) / 2.3841 <= 0.10, 'armor outer radius ' + armor.maxRadius.toFixed(3) + ' ~ 2.3841 (I593 v2 pin)');
 });
 
 // I371 (ST-338 E41 comet re-bake; supersedes the I344 note): comet rock variant
