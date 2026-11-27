@@ -1,7 +1,7 @@
 // ST-415 (I445): chase-camera model tests (pure math, DOM-free)
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { clamp01, smoothstep01, dollyFactor, chaseTargets, projectNdc, overviewTargets, cockpitTargets, cockpitThrust, cockpitAim, azimuthDamp, radialDollyDir } from '../src/core/cameraModel.js'; // ST-572 (I606, E87): +radialDollyDir
+import { clamp01, smoothstep01, dollyFactor, chaseTargets, projectNdc, overviewTargets, cockpitTargets, cockpitThrust, cockpitAim, cockpitThrustBasis, azimuthDamp, radialDollyDir } from '../src/core/cameraModel.js'; // ST-572 (I606, E87): +radialDollyDir
 import { CONFIG } from '../src/core/config.js';
 
 const CFG = CONFIG.camera; // real config keeps these tests honest
@@ -410,4 +410,30 @@ test('radialDollyDir: wraparound convergence - start -pi/2, target pi/2, 300 ste
   for (let i = 0; i < 300; i++) radialDollyDir(out.a, Math.PI / 2, ARENA, CFG.dolly.band * ARENA, 1 / 60, CFG.dolly.azTau, CFG.dolly.azDeadband, out);
   assert.ok(Math.abs(out.a - Math.PI / 2) < 1e-4, 'converged to the legacy azimuth, got ' + out.a.toFixed(6));
   assert.equal(out.backDir, null, 'backDir null once the held is inside the deadband of legacy');
+});
+
+// ST-587 (I627, E91 D3): cockpit thrust basis toggle (Nose default | View pointer-follow with +/-90 flip guard)
+const CTB = (basis, nose, view) => cockpitThrustBasis(basis, nose, view, { aim: 0 }).aim;
+
+test('cockpitThrustBasis: nose default (explicit nose + unknown values) stays on the nose', () => {
+  assert.equal(CTB('nose', 0.5, 0.1), 0.5);
+  assert.equal(CTB(undefined, 0.5, 0.1), 0.5);
+  assert.equal(CTB('bogus', -0.2, 1.0), -0.2);
+  assert.equal(CTB('nose', Math.PI, -Math.PI), Math.PI); // seam: nose wins outright, no wrap needed
+});
+
+test('cockpitThrustBasis: view follows the pointer while inside +/-90deg of the nose', () => {
+  assert.equal(CTB('view', 0, 0.2), 0.2);
+  assert.equal(CTB('view', 0, -0.9), -0.9); // just inside 90deg
+  assert.equal(CTB('view', 0.5, 0.5), 0.5); // d = 0
+  assert.equal(CTB('view', Math.PI - 0.01, -Math.PI + 0.02), -Math.PI + 0.02); // seam wrap, |d| < 90deg
+});
+
+test('cockpitThrustBasis: flip guard reverts to the nose at/past +/-90deg (deterministic tie)', () => {
+  assert.equal(CTB('view', 0, Math.PI / 2), 0); // exactly +90deg -> nose (tie)
+  assert.equal(CTB('view', 0, -Math.PI / 2), 0); // exactly -90deg -> nose (tie)
+  assert.equal(CTB('view', 0, 1.5708), 0); // just past +90deg
+  assert.equal(CTB('view', 0, -2.1), 0); // past -90deg
+  assert.equal(CTB('view', 0, Math.PI), 0); // 180deg behind -> nose
+  assert.equal(CTB('view', 0.3, 0.3 + 2.0), 0.3); // non-zero nose, offset past 90deg
 });

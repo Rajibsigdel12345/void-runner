@@ -38,7 +38,7 @@ import { createParticles } from './render/particles.js';
 import { createShockwaves } from './render/shockwave.js'; // ST-238 (I245): pooled additive shockwave ring
 import { createDebrisField } from './render/debrisField.js'; // ST-381 (I411): transient 3D death-shatter pool
 import { createShake, createPunch, createFovKick } from './core/fx.js'; // ST-081/ST-082
-import { chaseTargets, overviewTargets, cockpitTargets, flightPathCam, cockpitThrust, cockpitAim, radialDollyDir } from './core/cameraModel.js'; // ST-572 (I606, E87): azimuthDamp -> radialDollyDir (G2 damped dolly direction; azimuthDamp stays exported, now used inside radialDollyDir) // ST-415 + ST-416 (I445/I446): pure camera targets (chase dolly + overview + cockpit) + ST-525 (I559)
+import { chaseTargets, overviewTargets, cockpitTargets, flightPathCam, cockpitThrust, cockpitAim, cockpitThrustBasis, radialDollyDir } from './core/cameraModel.js'; // ST-572 (I606, E87): azimuthDamp -> radialDollyDir (G2 damped dolly direction; azimuthDamp stays exported, now used inside radialDollyDir) // ST-415 + ST-416 (I445/I446): pure camera targets (chase dolly + overview + cockpit) + ST-525 (I559)
 import { pathPoint } from './core/flightPath.js'; // ST-454 (I487): race-line path point (pure core)
 import { levelStartDistance } from './core/level.js'; // ST-454 (I487): campaign cumulative path distance
 import { createFlightPathLine } from './render/flightPathLine.js'; // ST-454 (I487): visible race-line ribbon
@@ -839,7 +839,7 @@ const gunNdc = new THREE.Vector3();   // I626 (ST-586): nose-gun NDC scratch
 
 // follow-camera state
 const shipFwd = { x: 0, y: 0 }; // ST-074: scratch for ship.forward()
-const cockpitThrustOut = { x: 0, y: 0 }; const cockpitDragOut = { x: 0, y: 0 }; // I504 (ST-470): scratch for cockpit camera-relative thrust/aim rotation (no per-frame alloc)
+const cockpitThrustOut = { x: 0, y: 0 }; const cockpitDragOut = { x: 0, y: 0 }; const cockpitBasisOut = { aim: 0 }; // I504 (ST-470) + ST-587 (I627): scratch for cockpit camera-relative thrust/aim rotation + thrust basis (no per-frame alloc)
 const camModelOut = { camX: 0, camY: 0, camZ: 0, lookX: 0, lookY: 0, lookZ: 0, s: 1, ahead: 0 }; // ST-415 (I445): chase-target scratch (no per-frame alloc)
 const camPos = { x: 0, y: 9, z: 13 };
 const camLook = { x: 0, y: 0, z: 0 };
@@ -1024,7 +1024,7 @@ function resolveAimPoint() {
   }
   if (input.touchDrag) { // ST-268 (ST-033 carryover): while left-drag-thrusting, aim along the drag (fire forward)
     const sp = world.ship.pos;
-    const drag = camMode === 'cockpit' ? cockpitThrust(input.touchDrag.x, input.touchDrag.y, world.ship.aim, cockpitDragOut) : input.touchDrag; // I504 (ST-470): camera-relative in cockpit (chase keeps the screen-basis identity)
+    const drag = camMode === 'cockpit' ? cockpitThrust(input.touchDrag.x, input.touchDrag.y, cockpitThrustBasis(liveSettings.cockpitThrust, world.ship.aim, world.ship.aim, cockpitBasisOut).aim, cockpitDragOut) : input.touchDrag; // I504 (ST-470) + ST-587 (I627): camera-relative in cockpit via the settings thrust basis; touch has no separate pointer view aim, so both bases resolve to the nose (parity); chase keeps the screen-basis identity
     return { x: sp.x + drag.x * 10, y: sp.y + drag.y * 10 };
   }
   if (!input.pointer.active) return null;
@@ -1039,7 +1039,8 @@ function tick(dt, intent) {
   if (tutorialActive) return; // I151: freeze the sim while the first-run tutorial is up (render keeps going)
   if (!intent) input.tick(dt); // ST-033: decay touch fire-tail / pause cooldown
   const ap559 = intent ? null : resolveAimPoint(); // ST-525 (I559): one raycast per substep (was inline in the literal below; scripted-intent path still skips it)
-  const it = intent || { thrust: camMode === 'cockpit' ? cockpitThrust(input.state.thrust.x, input.state.thrust.y, world.ship.aim, cockpitThrustOut) : input.state.thrust, aimPoint: ap559, firing: input.state.firing }; // I504 (ST-470) + ST-564 (I599): cockpit thrust basis = the DAMPED nose = the cockpit camera view direction (the seat looks along ship.aim, so screen-up is always nose-forward; the I559 undamped-pointer basis could flip 180deg when the pointer raycast landed behind the ship, making W read as back / S as forward). ap559 STAYS the aimPoint (firing/aiming intent); touch path already used ship.aim; chase screen-basis unchanged; scripted-intent path bypasses this line (causal harness untouched)
+  const ctAim = (intent || camMode !== 'cockpit') ? world.ship.aim : cockpitThrustBasis(liveSettings.cockpitThrust, world.ship.aim, cockpitAim(world.ship.pos, ap559, world.ship.aim), cockpitBasisOut).aim; // ST-587 (I627, E91 D3): cockpit thrust basis - 'nose' (default) = the I599 damped-nose behavior bit-identical; 'view' = the pointer aim while it stays within +/-90deg of the nose (flip guard; exactly-90deg tie -> nose, deterministic). Scripted-intent path bypasses (causal harness untouched).
+  const it = intent || { thrust: camMode === 'cockpit' ? cockpitThrust(input.state.thrust.x, input.state.thrust.y, ctAim, cockpitThrustOut) : input.state.thrust, aimPoint: ap559, firing: input.state.firing }; // I504 (ST-470) + ST-564 (I599): cockpit thrust basis = the DAMPED nose = the cockpit camera view direction (the seat looks along ship.aim, so screen-up is always nose-forward; the I559 undamped-pointer basis could flip 180deg when the pointer raycast landed behind the ship, making W read as back / S as forward). ap559 STAYS the aimPoint (firing/aiming intent); touch path already used ship.aim; chase screen-basis unchanged; scripted-intent path bypasses this line (causal harness untouched)
   if (intent) { input.state.thrust.x = it.thrust.x; input.state.thrust.y = it.thrust.y; input.state.firing = it.firing; } // I213: mirror scripted intent into the live input state so the render layer (flame, engine trail) tracks the pilot
   if (recorder && !recStopped && world.simActive) recorder.record(it); // ST-191: record exactly the intent the sim receives (one per substep; freezes at stop/death/tutorial)
   world.step(dt, it);

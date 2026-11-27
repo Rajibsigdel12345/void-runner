@@ -22,6 +22,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   fx: 'high',       // 'high' | 'low' | 'off' particle/fx tier (I26 panel, I25 particles honor, ST-224 off)
   reducedMotion: false, // disable shake/flash (I25 honors)
   cameraMode: 'chase',    // ST-416 (I446): 'chase'|'overview'|'cockpit' (V cycles; panel select)
+  cockpitThrust: 'nose',    // ST-587 (I627, E91 D3): 'nose'|'view' cockpit thrust basis (default = ST-564 stable nose)
   fontScale: 1,         // UI text scale 1 | 1.25 | 1.5 (I70; applied as --vr-fs)
   shapeCues: true,      // colorblind-friendly silhouette cues (I155; asteroidRenderer/wardenMesh honor)
   music: true,          // generative ambient music bed on/off (I158; audio.js bed)
@@ -134,7 +135,7 @@ this.campaignKey = keys.campaignKey || 'voidrunner.campaign'; // ST-457 (E64): c
     return this._write(this.bestKey, { version: STORE_VERSION, value: s });
   }
 
-  /** @returns {{volume:number, sfx:boolean, fx:string, cameraMode:string, reducedMotion:boolean, fontScale:number, shapeCues:boolean, music:boolean, colorblindPreview:boolean, slowmoHint:boolean, locale:string}} saved settings merged over defaults. */
+  /** @returns {{volume:number, sfx:boolean, fx:string, cameraMode:string, cockpitThrust:string, reducedMotion:boolean, fontScale:number, shapeCues:boolean, music:boolean, colorblindPreview:boolean, slowmoHint:boolean, locale:string}} saved settings merged over defaults. */
   getSettings() {
     const d = this._readVersioned(this.settingsKey);
     const out = { ...DEFAULT_SETTINGS };
@@ -143,6 +144,7 @@ this.campaignKey = keys.campaignKey || 'voidrunner.campaign'; // ST-457 (E64): c
     if (typeof d.sfx === 'boolean') out.sfx = d.sfx;
     if (d.fx === 'high' || d.fx === 'low' || d.fx === 'off') out.fx = d.fx; // ST-224: 3-tier
     if (d.cameraMode === 'chase' || d.cameraMode === 'overview' || d.cameraMode === 'cockpit') out.cameraMode = d.cameraMode; // ST-416 (I446)
+    if (d.cockpitThrust === 'nose' || d.cockpitThrust === 'view') out.cockpitThrust = d.cockpitThrust; // ST-587 (I627): 2-way thrust basis
     if (typeof d.reducedMotion === 'boolean') out.reducedMotion = d.reducedMotion;
     if (FONT_SCALES.includes(d.fontScale)) out.fontScale = d.fontScale; // I70
     if (typeof d.shapeCues === "boolean") out.shapeCues = d.shapeCues; // I155
@@ -162,6 +164,7 @@ this.campaignKey = keys.campaignKey || 'voidrunner.campaign'; // ST-457 (E64): c
     if (typeof merged.sfx === 'boolean') clean.sfx = merged.sfx;
     if (merged.fx === 'high' || merged.fx === 'low' || merged.fx === 'off') clean.fx = merged.fx; // ST-224: 3-tier
     if (merged.cameraMode === 'chase' || merged.cameraMode === 'overview' || merged.cameraMode === 'cockpit') clean.cameraMode = merged.cameraMode; // ST-416 (I446)
+    if (merged.cockpitThrust === 'nose' || merged.cockpitThrust === 'view') clean.cockpitThrust = merged.cockpitThrust; // ST-587 (I627)
     if (typeof merged.reducedMotion === 'boolean') clean.reducedMotion = merged.reducedMotion;
     if (FONT_SCALES.includes(merged.fontScale)) clean.fontScale = merged.fontScale; // I70
     if (typeof merged.shapeCues === "boolean") clean.shapeCues = merged.shapeCues; // I155

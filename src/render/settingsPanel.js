@@ -147,6 +147,14 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   camMode.addEventListener('change', () => emit({ cameraMode: camMode.value }));
   visCard.appendChild(styleCtl(camMode));
 
+  const ctRow = row(t('settings.cockpit_thrust'), visCard); // ST-587 (I627, E91 D3): cockpit thrust basis (nose = stable / view = pointer)
+  const ctSel = document.createElement('select');
+  for (const b of ['nose', 'view']) { const o = document.createElement('option'); o.value = b; o.textContent = t('settings.cockpit_thrust.' + b); ctSel.appendChild(o); }
+  ctSel.value = s0.cockpitThrust || 'nose';
+  ctSel.setAttribute('aria-label', t('settings.cockpit_thrust_aria'));
+  ctSel.addEventListener('change', () => emit({ cockpitThrust: ctSel.value }));
+  visCard.appendChild(styleCtl(ctSel));
+
   // ST-375: LANGUAGE card (3-way EN/zh/ja; locale content tables land in ST-376 - options keep NATIVE names)
   const langCard = card(t('settings.language'));
   const langSel = document.createElement('select');
@@ -173,7 +181,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
   hint.style.cssText = 'font-size:calc(11px * var(--vr-fs,1));letter-spacing:2px;opacity:0.55;';
   wrap.appendChild(hint);
 
-  const order = [vol, sfx, music, fxSel, rm, fontSel, cues, cbPreview, smHint, camMode, langSel]; // I158; ST-375: + language select; ST-416: + camera mode (matches DOM order)
+  const order = [vol, sfx, music, fxSel, rm, fontSel, cues, cbPreview, smHint, camMode, ctSel, langSel]; // I158; ST-375: + language select; ST-416: + camera mode (matches DOM order)
 
   function moveFocus(from, dir) {
     const i = order.indexOf(from);
@@ -216,6 +224,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
     cbPreview.checked = s.colorblindPreview; // I158
     smHint.checked = s.slowmoHint; // I158
     camMode.value = s.cameraMode || 'chase'; // ST-416
+    ctSel.value = s.cockpitThrust || 'nose'; // ST-587 (I627)
     langSel.value = s.locale; // ST-375
   }
 
@@ -237,6 +246,7 @@ export function createSettingsPanel(storage, onChange, onFxPreview) {
     cbRow.textContent = t('settings.colorblind'); cbPreview.setAttribute('aria-label', t('settings.colorblind_aria'));
     smRow.textContent = t('settings.slowmo_hint'); smHint.setAttribute('aria-label', t('settings.slowmo_hint_aria'));
     camModeRow.textContent = t('settings.camera_mode'); camMode.setAttribute('aria-label', t('settings.camera_mode_aria')); for (const o of camMode.options) o.textContent = t('settings.camera_mode.' + o.value); // ST-416
+    ctRow.textContent = t('settings.cockpit_thrust'); ctSel.setAttribute('aria-label', t('settings.cockpit_thrust_aria')); for (const o of ctSel.options) o.textContent = t('settings.cockpit_thrust.' + o.value); // ST-587 (I627)
     langSel.setAttribute('aria-label', t('settings.language_aria'));
     hint.textContent = t('settings.kbd_hint');
   }); // ST-375

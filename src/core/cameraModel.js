@@ -174,6 +174,26 @@ export function cockpitAim(shipPos, aimPoint, fallbackAim) {
   return fallbackAim;
 }
 
+
+// ST-587 (I627, E91 D3): cockpit thrust BASIS toggle (settings.cockpitThrust 'nose'|'view').
+// 'nose' (default) = the ST-564 (I599) behavior: always thrust along the damped nose, so
+// W is always nose-forward and the pointer can never invert the controls. 'view' thrusts
+// along the pointer aim while the pointer stays within +/-90deg of the nose: the flip guard
+// (|d| >= PI/2 reverts to the nose) means W can never read as back, and the exactly-90deg
+// tie goes to the nose deterministically. `d` is wrapped to (-PI, PI] first so the seam at
+// +/-180deg compares correctly. out.aim written in place (no per-frame alloc).
+export function cockpitThrustBasis(basis, noseAim, viewAim, out) {
+  if (basis === 'view') {
+    let d = viewAim - noseAim;
+    while (d > Math.PI) d -= 2 * Math.PI;
+    while (d <= -Math.PI) d += 2 * Math.PI;
+    if (Math.abs(d) < Math.PI / 2) { out.aim = viewAim; return out; }
+  }
+  out.aim = noseAim;
+  return out;
+}
+
+
 // ST-454 (E64, I487): flight-path camera adjustment (E62-preserving). `chase` = chaseTargets
 // output ({camX,camY,camZ, lookX,lookY,lookZ}); `path` = pathPoint at the ship's distance;
 // `pathAhead` = pathPoint frameDist ahead. (a) vertical LIFT of the whole rig by path.elev
