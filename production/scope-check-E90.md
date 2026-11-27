@@ -72,3 +72,12 @@ At open (I620): I619 close gate 6/6 EXACT (CLOSEGATE619) + push 2e158dd landing 
 ## Next owner
 
 I621 = ST-581 rocks v13 D1 in Blender (the I554 rock build source is the starting point; research notes above are the design brief).
+
+## AMENDMENT (I622) - ST-582 Archon v2 D2
+
+- Trigger: first encode of Archon v2 (11,076 t post-GLB) = 252,332 B, 2,332 B (0.9%) OVER the frozen 250,000 B D2 ceiling.
+- Root cause: measured compressibility 22.8 B/t vs the plan's 20.8 B/t - box-greeble geometry (band studs, exhaust boxes) compresses worst (low vertex reuse); the plan's ratio assumed mostly nprism/torus/gplate mass.
+- C2 (250,000 -> 180,000 B, 12,000 -> 8,500 t) analyzed and NOT invoked: at the measured 22.8 B/t, 180,000 B requires ~7,900 t = a 41% model gut, against the standing user detail directive; the 0.9% overrun did not warrant the fallback's scope.
+- Action taken (proportional): 336 t trim of the worst-compressing, base/occluded, low-visual-value elements (24 band studs = 288 t + 4 rear-exhaust boxes = 48 t); build-script hull floor 6000 -> 5600 (AMENDMENT comment in build_archon_v2.py); gameplay-angle (f34) re-view confirmed the studs are invisible in play.
+- Outcome: 10,740 t post-GLB (hull 5,688 / crown 3,184 / core 1,868) -> encoded 241,800 B; the 250,000 B D2 ceiling is HELD (margin 8,200 B, 96.7%). C2 is hereby AMENDED: the trim path above supersedes the 180,000 B fallback for D2; C1/C3/C4 unchanged. The remaining E90 landings (D3 garnish, D4 close gate) proceed on the original pre-registrations.
+- Evidence: .evidence/I622/ (build_archon_v2.py + audit_glb622.cjs CONTRACT_PASS + probe622.cjs + encode622.cjs ENC622_DONE + patch_trim2622.cjs + 12-angle view audit + orig/ backup byte-verified).
