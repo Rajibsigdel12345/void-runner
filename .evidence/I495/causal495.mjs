@@ -91,14 +91,14 @@ function gateSim(tag, R, expBackend, expArm) {
   const has = (arr, v) => (arr || []).some((x) => typeof x === 'number' && Math.abs(x - v) < 1e-9);
   check(tag + ' clickedDemo', R.clickedDemo === true);
   check(tag + ' state GAME_OVER', R.S.state === 'GAME_OVER');
-  check(tag + ' score 11509', has(statsFlat, 11509)); // I632 G92.0 RE-PIN WITH MEASUREMENT: 11334 -> 11509, delta +175 = the I631 wave-1 clear bonus (min(500, 150 + 25*1) = 175; DEMO PILOT autoplay genuinely clears wave 1 before dying in wave 2; overdrive not active at the clear - undoubled 175, not 350). All other pins unchanged.
-  check(tag + ' kills 57', has(statsFlat, 57));
+  check(tag + ' score 13350', has(statsFlat, 13350)); // I639 (ST-597, E94 D1) RE-PIN WITH MEASUREMENT: 11509 -> 13350 = the E94 wave-pacing change (leftover.max 2 -> 4) shifting the DEMO PILOT causal run (3-4 rock straggler remainder takes the 10 s grace band instead of the 45 s backstop wall; wave boundary ~35 s sooner than the backstop would). Dev-measured I639: score 13350, kills 63, shots 171, acc 0.3684210526315789, time 31.183333333332843, replay idx 1871 (time delta -4.9667 s = -298 frames @60fps = the replay idx delta exactly). Prior basis I632 G92.0: 11334 -> 11509 (+175).
+  check(tag + ' kills 63', has(statsFlat, 63)); // I639 RE-PIN WITH MEASUREMENT (see the score pin above): 57 -> 63
   check(tag + ' wave 2', has(statsFlat, 2) || (statsFlat || []).includes('W2'));
   check(tag + ' combo 15', has(statsFlat, 15));
-  check(tag + ' shots 198', has(statsFlat, 198));
-  check(tag + ' acc 0.2878787878787879', has(statsFlat, 0.2878787878787879));
-  check(tag + ' time 36.14999999999923', has(statsFlat, 36.14999999999923));
-  check(tag + ' replay 2169', has(rvFlat, 2169));
+  check(tag + ' shots 171', has(statsFlat, 171)); // I639 RE-PIN WITH MEASUREMENT (see the score pin above): 198 -> 171
+  check(tag + ' acc 0.3684210526315789', has(statsFlat, 0.3684210526315789)); // I639 RE-PIN WITH MEASUREMENT (see the score pin above): 57/198 -> 63/171
+  check(tag + ' time 31.183333333332843', has(statsFlat, 31.183333333332843)); // I639 RE-PIN WITH MEASUREMENT (see the score pin above): -4.9667 s
+  check(tag + ' replay 1871', has(rvFlat, 1871)); // I639 RE-PIN WITH MEASUREMENT (see the score pin above): 2169 -> 1871 (-298 frames)
   check(tag + ' replay 2220', has(rvFlat, 2220));
   check(tag + ' replay speed 4', has(rvFlat, 4));
   check(tag + ' afterQ MENU', R.afterQ === 'MENU');
@@ -130,14 +130,14 @@ console.log('=== ARM webgpu (EXPERIMENTAL opt-in, report-only) backend=' + G.met
   const has = (arr, v) => (arr || []).some((x) => typeof x === 'number' && Math.abs(x - v) < 1e-9);
   check('webgpu  clickedDemo', G.clickedDemo === true);
   check('webgpu  state GAME_OVER', G.S.state === 'GAME_OVER');
-  check('webgpu  score 11509', has(statsFlat, 11509)); // I632 G92.0 RE-PIN WITH MEASUREMENT: 11334 -> 11509, delta +175 = the I631 wave-1 clear bonus (report-only arm; same basis as the webgl/default arms).
-  check('webgpu  kills 57', has(statsFlat, 57));
+  check('webgpu  score 13350', has(statsFlat, 13350)); // I639 (ST-597, E94 D1) RE-PIN WITH MEASUREMENT: 11509 -> 13350 = the E94 wave-pacing change (leftover.max 2 -> 4) shifting the DEMO PILOT causal run (3-4 rock straggler remainder takes the 10 s grace band instead of the 45 s backstop wall; wave boundary ~35 s sooner than the backstop would). Dev-measured I639: score 13350, kills 63, shots 171, acc 0.3684210526315789, time 31.183333333332843, replay idx 1871 (time delta -4.9667 s = -298 frames @60fps = the replay idx delta exactly). Prior basis I632 G92.0: 11334 -> 11509 (+175). (report-only arm; same basis as the webgl/default arms)
+  check('webgpu  kills 63', has(statsFlat, 63)); // I639 RE-PIN WITH MEASUREMENT (see the score pin above): 57 -> 63
   check('webgpu  wave 2', has(statsFlat, 2) || (statsFlat || []).includes('W2'));
   check('webgpu  combo 15', has(statsFlat, 15));
-  check('webgpu  shots 198', has(statsFlat, 198));
-  check('webgpu  acc 0.2878787878787879', has(statsFlat, 0.2878787878787879));
-  check('webgpu  time 36.14999999999923', has(statsFlat, 36.14999999999923));
-  check('webgpu  replay 2169', has(rvFlat, 2169));
+  check('webgpu  shots 171', has(statsFlat, 171)); // I639 RE-PIN WITH MEASUREMENT (see the score pin above): 198 -> 171
+  check('webgpu  acc 0.3684210526315789', has(statsFlat, 0.3684210526315789)); // I639 RE-PIN WITH MEASUREMENT (see the score pin above): 57/198 -> 63/171
+  check('webgpu  time 31.183333333332843', has(statsFlat, 31.183333333332843)); // I639 RE-PIN WITH MEASUREMENT (see the score pin above): -4.9667 s
+  check('webgpu  replay 1871', has(rvFlat, 1871)); // I639 RE-PIN WITH MEASUREMENT (see the score pin above): 2169 -> 1871 (-298 frames)
   check('webgpu  replay 2220', has(rvFlat, 2220));
   check('webgpu  replay speed 4', has(rvFlat, 4));
   check('webgpu  afterQ MENU', G.afterQ === 'MENU');

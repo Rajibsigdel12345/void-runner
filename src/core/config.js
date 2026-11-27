@@ -207,7 +207,8 @@ export const CONFIG = {
     maxConcurrentCap: 24,
     intermission: 2.2,
     stallTime: 45,       // I42: wave advances after 45s without a clear (leftover rocks carry over)
-    leftover: { max: 2, stall: 10 }, // I630: leftover grace - killables down to <= max -> the wave advances after stall s (leftovers carry over, same as the stallTime backstop)
+    leftover: { max: 4, stall: 10 }, // I630/I639: leftover grace - killables down to <= max -> the wave advances after stall s (leftovers carry over, same as the stallTime backstop; I639: max 2 -> 4 so 3-4 slow stragglers get the grace instead of the 45 s wall)
+    stragglerBeacon: { cap: 6 }, // I639 (ST-598): render gate - amber beacons on the held killables while the hold runs AND the remaining count is <= cap
     clearBonus: { base: 150, perWave: 25, cap: 500 }, // I631: clear reward beat - flat bonus on a true clear (doubled under overdrive via bonus()); stall/grace advances pay nothing
     spawnMinPlayerDist: 8, // I34: rim spawn keeps at least this far from the ship
     breatherOpenFrac: 0.5, // ST-242: a breather wave (right after a boss, ST-092) opens with this fraction of the normal open batch

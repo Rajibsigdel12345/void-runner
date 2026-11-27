@@ -122,6 +122,24 @@ export class WaveDirector {
     return 'S';
   }
 
+  /** I639 (ST-597): the live "field hold" - null when the wave is not being held on surviving
+   *  killables, otherwise { remaining, timeLeft, graced } so the render/DOM layer can show the
+   *  player what the game is doing while the hold runs (ST-598: straggler beacons + the banner
+   *  countdown). Pure: reads the field + the existing timers, no RNG, no side effects.
+   *  graced = the I630 grace band (k <= leftover.max, clocked on leftoverT); otherwise the I42
+   *  stallTime backstop (clocked on waveElapsed). */
+  get hold() {
+    if (this.state !== 'active' || this.toSpawn !== 0) return null;
+    const k = this.field.killableCount;
+    if (k === 0) return null;
+    const lo = this.cfg.wave.leftover;
+    const graced = lo.stall > 0 && k <= lo.max;
+    const timeLeft = graced
+      ? Math.max(0, lo.stall - this.leftoverT)
+      : Math.max(0, this.cfg.wave.stallTime - this.waveElapsed);
+    return { remaining: k, timeLeft, graced };
+  }
+
   /** @returns {{startedWave:number, waveCleared:number, stallAdvance:number}} */
   step(dt, playerPos = null) {
     const ev = { startedWave: 0, waveCleared: 0, stallAdvance: 0 };
