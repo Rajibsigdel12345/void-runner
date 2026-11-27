@@ -65,7 +65,7 @@ OUT (frozen): any src/core or gameplay change; camera / render / lighting / post
 
 ## Cut ladder (pre-registered)
 
-C1: ship v10 100-110k t -> 90-100k t (the ratio-variance rule IS the first step of C1). C2: drop the gunship remaster (E93 = ship + phantom only; gunship v3 deferred to a future round). C3: ship 90-100k t -> 80-90k t (last resort). Invoke ONLY if dist at the G93.0 close gate would exceed 7,297,600 B, or a quality-bar failure forces a size cut. Never silent.
+C1: ship v10 100-110k t -> 90-100k t (the ratio-variance rule IS the first step of C1) I634 INVOCATION: the 100-110k band was unattainable under the 1,800,000 B ceiling at the measured v10 encode ratio (run8/run9 builds: ~17.5 B/t -> 100k t = 1.75M-1.83M encoded, at/over the ceiling); C1 step 1 (90-100k t) invoked -> landed 93,730 t build / 90,321 t GLB / 1,642,960 B encoded (ceiling 91.3%); C2/C3 NOT invoked.. C2: drop the gunship remaster (E93 = ship + phantom only; gunship v3 deferred to a future round). C3: ship 90-100k t -> 80-90k t (last resort). Invoke ONLY if dist at the G93.0 close gate would exceed 7,297,600 B, or a quality-bar failure forces a size cut. Never silent.
 
 ## Deferrals (out of E93, queue intact)
 

@@ -91,7 +91,7 @@ function gateSim(tag, R, expBackend, expArm) {
   const has = (arr, v) => (arr || []).some((x) => typeof x === 'number' && Math.abs(x - v) < 1e-9);
   check(tag + ' clickedDemo', R.clickedDemo === true);
   check(tag + ' state GAME_OVER', R.S.state === 'GAME_OVER');
-  check(tag + ' score 11334', has(statsFlat, 11334));
+  check(tag + ' score 11509', has(statsFlat, 11509)); // I632 G92.0 RE-PIN WITH MEASUREMENT: 11334 -> 11509, delta +175 = the I631 wave-1 clear bonus (min(500, 150 + 25*1) = 175; DEMO PILOT autoplay genuinely clears wave 1 before dying in wave 2; overdrive not active at the clear - undoubled 175, not 350). All other pins unchanged.
   check(tag + ' kills 57', has(statsFlat, 57));
   check(tag + ' wave 2', has(statsFlat, 2) || (statsFlat || []).includes('W2'));
   check(tag + ' combo 15', has(statsFlat, 15));
@@ -130,7 +130,7 @@ console.log('=== ARM webgpu (EXPERIMENTAL opt-in, report-only) backend=' + G.met
   const has = (arr, v) => (arr || []).some((x) => typeof x === 'number' && Math.abs(x - v) < 1e-9);
   check('webgpu  clickedDemo', G.clickedDemo === true);
   check('webgpu  state GAME_OVER', G.S.state === 'GAME_OVER');
-  check('webgpu  score 11334', has(statsFlat, 11334));
+  check('webgpu  score 11509', has(statsFlat, 11509)); // I632 G92.0 RE-PIN WITH MEASUREMENT: 11334 -> 11509, delta +175 = the I631 wave-1 clear bonus (report-only arm; same basis as the webgl/default arms).
   check('webgpu  kills 57', has(statsFlat, 57));
   check('webgpu  wave 2', has(statsFlat, 2) || (statsFlat || []).includes('W2'));
   check('webgpu  combo 15', has(statsFlat, 15));
