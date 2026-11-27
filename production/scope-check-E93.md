@@ -54,7 +54,7 @@ OUT (frozen): any src/core or gameplay change; camera / render / lighting / post
 - E93 close target: dist <= 7,297,600 B; envelope = 658,833 B (= CLOSE FLOOR E92).
 - Per-asset post-encode ceilings (FROZEN):
   - ship v10 <= 1,800,000 B (vs v9 1,441,348 B: delta <= +358,652 B)
-  - phantom v7 <= 300,000 B (vs 239,140 B: delta <= +60,860 B)
+  - phantom v7 <= 300,000 B (vs 239,140 B: delta <= +60,860 B) I635 INVOCATION: YES a surface-res trim was needed to hold the FROZEN 300,000 B ceiling at the final greeble level (body tube 104->99 / pod 28->26 / nose collar (16,5)->(14,4) / +1 nose greeble box; the ~9-10k t target is not FROZEN and yielded to the FROZEN ceiling at the measured ~34.5 B/t smooth-surface encode ratio); landed 8,230 t / 299,136 B encoded (ceiling 99.7%, margin 864 B) - the delta is +59,996 B, inside the +60,860 B pre-registration with 864 B to spare.
   - gunship v3 <= 180,000 B (vs 105,444 B: delta <= +74,556 B)
   - code + docs across the epic <= 40,000 B
   - Worst case: 6,638,767 + 358,652 + 60,860 + 74,556 + 40,000 = 7,172,835 B -> margin 124,765 B to the close target.
