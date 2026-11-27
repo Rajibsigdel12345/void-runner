@@ -1278,6 +1278,12 @@ installPrompt.setMenuVisible(st === STATE.MENU); // ST-512 (I546, E74 D4): insta
   reticle.sync(world.ship, st === STATE.PLAYING && !(inRun && camMode === 'cockpit'), false); // I44: only while playing; I504 (ST-470): 3D fire-line hidden in cockpit (replaced by the small screen-center dot on the bearing-strip HUD)
   bullets.sync(world.weapons);
   bullets.setLevel(world.weaponLevel(), st === STATE.PLAYING && world.powerups.active('overdrive')); // ST-123, ST-248: overdrive heat shift
+  { // I640 (ST-598): amber straggler beacons - while the wave hold runs (WaveDirector.hold) the surviving
+    // normal rocks pulse amber so the clear-in-progress reads at a glance; +0 draw calls (material swap
+    // on pooled meshes; priority belt > golden > straggler > normal in the renderer)
+    const hold = world.waves.hold;
+    rockRenders.setStragglerBeacon((st === STATE.PLAYING || st === STATE.PAUSED) && !!hold && hold.remaining <= CONFIG.wave.stragglerBeacon.cap);
+  }
   rockRenders.sync(world.field, simT); // ST-139
   mineRenders.sync(world.mines, simT); // ST-054
   droneRenders.sync(world.drones, simT); // ST-117

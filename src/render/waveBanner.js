@@ -117,7 +117,7 @@ export function createWaveBanner(root) {
       if (anim.t >= anim.dur) { const pb = pendingBoss; pendingBoss = null; resetHidden(); if (pb) startBoss(pb.n, pb.maxHp, pb.name, pb.kind); } // I465/ST-433: warning -> intro handoff (I154/I161/I167/I321 as before)
       return;
     }
-    // idle: intermission countdown
+    // idle: intermission countdown; I640 (ST-598): + straggler-hold "clearing field" sub-line
     if (waves && waves.state === 'intermission') {
       const txt = t('banner.countdown',{n:Math.max(0, waves.intermission).toFixed(1)});
       if (lastCountdown !== txt) {
@@ -125,6 +125,17 @@ export function createWaveBanner(root) {
         el.firstChild.nodeValue = '';
         sub.textContent = txt;
         el.style.fontSize = '0'; // hide the empty big line (I161: 0 stays 0 at any scale)
+      }
+      el.style.opacity = '0.6';
+    } else if (waves && waves.state === 'active' && waves.hold) {
+      // I640 (ST-598): the wave holds on surviving stragglers (WaveDirector.hold) - make the wait
+      // visible with the same sub-only countdown pattern; falls through to the hide block on exit.
+      const txt = t('banner.clearing', { n: Math.max(0, waves.hold.timeLeft).toFixed(1) });
+      if (lastCountdown !== txt) {
+        lastCountdown = txt;
+        el.firstChild.nodeValue = '';
+        sub.textContent = txt;
+        el.style.fontSize = '0';
       }
       el.style.opacity = '0.6';
     } else if (el.style.opacity !== '0') {

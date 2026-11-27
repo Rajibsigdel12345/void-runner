@@ -79,6 +79,13 @@ export function createAsteroidRenderer(scene) {
   function setRim(s) { if (setRimTsl) setRimTsl(s); else if (rimU && typeof s === 'number' && isFinite(s)) rimU.uRimStrength.value = s; } // I497 (ST-463)
   // ST-052: golden rock - bright emissive so bloom (High FX) makes it glow.
   const matGold = new THREE.MeshStandardMaterial({ color: 0xffc94d, emissive: 0xffa018, emissiveIntensity: 1.6, roughness: 0.3, metalness: 0.55, flatShading: true, vertexColors: true }); // I209: vertexColors
+  // I640 (ST-598): amber straggler beacon - while the wave hold runs (WaveDirector.hold) the surviving
+  // normal rocks pulse amber so the clear-in-progress reads at a glance. Plain standard material (no
+  // onBeforeCompile rim): same program family as mat/matBelt/matGold -> +0 programs, +0 draw calls
+  // (material swap on the pooled meshes). Priority belt > golden > straggler > normal (below).
+  const matStraggler = new THREE.MeshStandardMaterial({ color: 0x9a7a4a, roughness: 0.9, metalness: 0.1, flatShading: true, emissive: 0xffa018, emissiveIntensity: 0.5, vertexColors: true });
+  let stragglerBeaconOn = false;
+  function setStragglerBeacon(on) { stragglerBeaconOn = on === true; } // I640 (ST-598): driven by main.js from WaveDirector.hold
   // ST-127: shielded rock - additive energy shell rendered as a CHILD of the rock mesh (hidden by
   // default; the rock's visible=false hides it with the parent). Three shared materials keyed by
   // armor level: the shell DIMS on every absorbed hit so the player can read hits-left at a glance.
@@ -110,12 +117,13 @@ export function createAsteroidRenderer(scene) {
 
   function sync(field, t = 0) {
     matBelt.emissiveIntensity = 0.4 + 0.45 * (0.5 + 0.5 * Math.sin((t || 0) * 1.8)); // ST-139: slow cold hum (0.4..0.85)
+    matStraggler.emissiveIntensity = 0.4 + 0.45 * (0.5 + 0.5 * Math.sin((t || 0) * 1.8)); // I640 (ST-598): same slow amber hum (0.4..0.85) as the belt
     let i = 0;
     for (const r of field.rocks) {
       if (r.dead || i >= max) continue;
       const m = pool[i++];
       m.geometry = (r.size === 'S' && r.variant === 2 && glbComet) ? glbComet : ((glbGeo[r.size] && glbGeo[r.size][r.variant % glbGeo[r.size].length]) || geos[r.size][r.variant]); // I104 GLB when loaded; I344 (ST-316) comet on S slot 2; I420 (ST-390 E52) per-variant A/B by r.variant%len (comet ternary first; || fallback for load-order holes)
-      m.material = r.belt ? matBelt : (r.golden ? matGold : mat); // ST-052/ST-139
+      m.material = r.belt ? matBelt : (r.golden ? matGold : (stragglerBeaconOn ? matStraggler : mat)); // ST-052/ST-139; I640 (ST-598): priority belt > golden > straggler > normal
       const shell = m.children[0]; // ST-127: shield shell tracks armor (dim = 1 hit away)
       if (r.shielded) {
         shell.material = shellMats[Math.max(0, Math.min(2, r.armor - 1))]; // armor 3/2/1 -> bright/mid/faint
@@ -186,5 +194,5 @@ export function createAsteroidRenderer(scene) {
   // warm key light reads instead of the blue-violet nebula washing them periwinkle.
   function setEnvIntensity(v) { if (typeof v === 'number' && isFinite(v)) mat.envMapIntensity = v; }
 
-  return { sync, pool, setGLB, setCometGLB, setShieldGLB, setShapeCues, setEnvIntensity, setRim };
+  return { sync, pool, setGLB, setCometGLB, setShieldGLB, setShapeCues, setEnvIntensity, setRim, setStragglerBeacon }; // I640 (ST-598): +straggler beacon
 }

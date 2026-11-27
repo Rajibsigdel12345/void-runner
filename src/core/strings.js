@@ -112,6 +112,7 @@ export const STRINGS = {
     'banner.cleared': 'CLEARED',
     'banner.cleared_bonus': 'WAVE {n} + {p}',
     'banner.countdown': 'NEXT WAVE IN {n}',
+    'banner.clearing': 'CLEARING FIELD IN {n}', // I640 (ST-598): straggler-hold countdown sub-line
     'banner.boss_sub': 'WAVE {n} \u00b7 {hp} HP',
   'banner.boss_warn': '!! INBOUND !!', // I465/ST-433 B2: dim-red pre-card before the boss intro
     'banner.boss.splicer': 'THE SPLICER',
@@ -348,6 +349,7 @@ export const STRINGS = {
     'banner.cleared': '清除完毕',
     'banner.cleared_bonus': '波次 {n} + {p}',
     'banner.countdown': '下一波 {n}',
+    'banner.clearing': '清除剩余 {n}', // I640 (ST-598)
     'banner.boss_sub': '波次 {n} · {hp} HP',
   'banner.boss_warn': '!! 来袭 !!',
     'banner.boss.splicer': 'THE SPLICER',
@@ -576,6 +578,7 @@ export const STRINGS = {
     'banner.cleared': 'クリア',
     'banner.cleared_bonus': 'ワーベ {n} + {p}',
     'banner.countdown': '次ウェーブまで {n}',
+    'banner.clearing': '掃覇中 {n}', // I640 (ST-598)
     'banner.boss_sub': 'ウェーブ {n} ・ {hp} HP',
   'banner.boss_warn': '!! 接近中 !!',
     'banner.boss.splicer': 'THE SPLICER',
