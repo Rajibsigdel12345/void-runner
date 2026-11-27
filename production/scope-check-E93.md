@@ -99,3 +99,6 @@ At open (I633): I632 close gate 6/6 (CLOSEGATE632; fleet step re-run standalone 
 ## Next owner
 
 I634 = ST-593 ship v10 in Blender (the .evidence/I612/ lineage: build_ship_v9.py + ship_v9.blend are the starting point).
+## CLOSE
+
+I637 (ST-596, G93.0): E93 CLOSED. CLOSEGATE637 6/6 (causal 11,509 EXACT + playframes EXACT zero re-pins A 22/92,435 + P 11/2,076 / B 52/200,808 + pwa491 11/11 + fleet628 34/34 GLB / 201,245 t / console 0-0); fresh dist re-measure EXACT 6,966,899 B / 205; CLOSE FLOOR E93 = 330,701 B (>= 102,400 B floor, cut ladder NOT invoked). All 3 D-landings (ship v10 I634 / phantom v7 I635 / gunship v3 I636) landed under their FROZEN ceilings with trim ladders uninvoked. AGENTS.md refreshed (9 occurrence==1-asserted patches WITH MEASUREMENT).
