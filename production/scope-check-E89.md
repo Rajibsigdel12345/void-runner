@@ -89,3 +89,13 @@ At open (I611): I610 close gate 6/6 EXACT (CLOSEGATE610) + push b091895 verified
 ## Next owner
 
 I612 = ST-577 ship v9 Mk.II D1 in Blender (the .evidence/I587/ v8 build source is the starting point).
+
+## Verification evidence (G89.0, I619)
+
+- CLOSEGATE619 HARNESS PASS (6/6) EXACT, zero re-pins: causal495 CAUSAL495 PASS (3-arm seed-9876: webgl + default EXACT, webgpu report-only) score 11334 / causal483 score 11334 EXACT / playframe483 + playframe491 A 22/82,369 + P 11/180, B 52/172,476 EXACT UNCHANGED, console 0/0 / pwa491 SUMMARY 11/11 / fleet619 34/34 GLB 159,141 t EXACT, 69 unique meshes, 0 console err/warn, no NaN.
+- Fresh dist re-measure 6,011,544 B / 205 files EXACT (byte-identical to I618; docs-only close); close target <= 7,297,600 B held with 1,286,056 B margin.
+- CLOSE FLOOR E89 = 7,400,000 - 6,011,544 = 1,388,456 B WITH MEASUREMENT (headroom >= 102,400 B floor -> cut ladder C1..C3 NOT invoked at close; C1 was pre-registered at open and landed at I612, no deviation -> no AMENDMENT needed).
+- E89 consumed 827,060 B (6,011,544 - 5,184,484) of the 2,113,116 B close-target envelope across 7 remaster landings (ship v9 + boss v3 + enemy v3 x5).
+- AGENTS.md refreshed WITH MEASUREMENT (asset line + item-4 chain + close floor).
+- DoD met: ST-576..ST-580 all DONE; E89 header CLOSED at G89.0; 34-GLB contract intact; dist measured <= 7,297,600 B; vendor 4/4 EXACT + decoder raw pin intact; hygiene clean (0 tabs, all 4 ports free, no terminals left).
+- E89 CLOSED I619.
