@@ -834,6 +834,8 @@ window.addEventListener('keydown', (e) => {
 const raycaster = new THREE.Raycaster();
 const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 const aimWorld = new THREE.Vector3();
+const gunWorld = new THREE.Vector3(); // I626 (ST-586): nose-gun world position (cockpit aim-tick)
+const gunNdc = new THREE.Vector3();   // I626 (ST-586): nose-gun NDC scratch
 
 // follow-camera state
 const shipFwd = { x: 0, y: 0 }; // ST-074: scratch for ship.forward()
@@ -1407,6 +1409,21 @@ beaconRenders.sync(world.beacons, simT, motionOff); // ST-518 (E75): lamp charge
   camera.position.x += shakeOff.x;
   camera.position.y += shakeOff.y;
   camera.position.z += shakeOff.z;
+  // I626 (ST-586, E91 D2): cockpit ship presence - the nose gun is the first-person
+  // view-model; the crosshair anchors to its muzzle. Visible ONLY in cockpit PLAYING
+  // (hidden in chase/overview/MENU/PAUSED/REPLAY -> 0 added draw calls in every pin frame).
+  const cockpitOn = st === STATE.PLAYING && camMode === 'cockpit';
+  if (shipMesh.gun.visible !== cockpitOn) shipMesh.gun.visible = cockpitOn;
+  if (cockpitOn) {
+    const g = CONFIG.ship.gun;
+    gunWorld.set(ship.pos.x + f.x * g.z, SHIP_HOVER + g.y, ship.pos.y + f.y * g.z);
+    camera.updateMatrixWorld(); // refresh matrixWorldInverse (render re-updates later; one extra inverse)
+    gunNdc.copy(gunWorld).applyMatrix4(camera.matrixWorldInverse);
+    if (gunNdc.z < 0) { // in front of the camera (camera space looks down -Z)
+      gunNdc.copy(gunWorld).project(camera);
+      bearingStrip.setAim((gunNdc.x * 0.5 + 0.5) * window.innerWidth, (-gunNdc.y * 0.5 + 0.5) * window.innerHeight);
+    }
+  }
   stars.update(simT, camera, !motionOff); // I60: twinkle + parallax (frozen when reduced motion)
   popups.sync(dt, motionOff); // ST-030: after follow-camera + shake
   killFeed.sync(dt, motionOff); // I153

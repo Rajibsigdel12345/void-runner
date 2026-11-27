@@ -143,6 +143,7 @@ export const CONFIG = {
       glow:  { color: 0xffb347, opacity: 0.40, size: 1.1 },               // soft additive glow sprite at the nozzle root (no geometry)
       flicker: { amp: 0.15, speed: 40, amp2: 0.10, speed2: 77 }          // deterministic two-sine flicker (motion-gated; reduced-motion = steady)
     },
+    gun: { z: 1.15, y: 1.23 }   // I626 (ST-586, E91 D2): forward gun TOWER - pedestal from the nose ridge (y ~0.5 at z ~1.1) up to the barrel axis (y 1.23): the eye->barrel line clears the canopy top (1.29 at z 0.69) by 0.06; depression ~15.1 deg puts the aim tick ~485 px of 720; shared by shipMesh.js (mesh) and main.js (aim-tick projection)
   },
 
   weapon: {
@@ -1122,8 +1123,8 @@ export const CONFIG = {
     },
     overviewHeight: 56,    // ST-416 (I446): OVERVIEW height above arena center (fixed 3/4 view; whole arena |NDC|<=0.85 @16:9/fov60)
     overviewBack: 20,      // ST-416 (I446): OVERVIEW dolly-back (3/4 angle, not straight down)
-    cockpitHeight: 1.02,   // ST-416 (I446); I504 (ST-470): COCKPIT eye height above the arena plane (SHIP_HOVER 0.4 + 0.62 above the ship center plane; v6 canopy top 0.13 u below the eye = in-frame bottom)
-    cockpitSetback: 0.15,  // ST-416 (I446); I504 (ST-470): COCKPIT seat setback behind the ship center (along facing; 0.55 -> 0.15 moves the seat forward so the nose + canopy frame the view)
+    cockpitHeight: 1.90,   // ST-416 (I446); I504 (ST-470); I626 (ST-586, E91 D2): 1.02 -> 1.25 -> 1.80 -> 1.90 (model y 1.50 at seat z 0.15: 0.12 above the deck top ~1.38, and the eye->gun line clears the canopy top 1.29 at its apex)
+    cockpitSetback: 0.15,  // ST-416 (I446); I504 (ST-470); I626 (ST-586, E91 D2): 0.15 -> 0.30 -> 0.20 -> 0.15 (seat z 0.15, on the deck centerline just behind the canopy (z 0.40); the gun tower frames the seat ahead)
     cockpitLookFar: 60,    // ST-416 (I446): COCKPIT look-ahead along the heading (horizon)
     cockpitLookSpeed: 40,   // ST-444 (I477): extra COCKPIT look-ahead at full speed (lean into the motion; spdFrac 0 -> exactly cockpitLookFar, bit-identical to the legacy fixed 60)
     cockpitLookDrop: 4.0,   // I550 (ST-516): G-c cockpit bow framing - look point drops this far below the eye (~3.8 deg down-pitch at lookFar 60; 2405-vert bow sweep: 644 in-frame, yMin -0.967, centerBand 12, horizonY 0.109, minD 0.433 -> bow frames the bottom, crosshair zone clean; supersedes I504 1.2 which left the nose below the frame)

@@ -132,5 +132,12 @@ export function createBearingStrip() {
     if (on) drawFrame(opts.shipX, opts.shipZ, opts.fwdX, opts.fwdZ, opts.arenaR);
   }
 
-  return { update, el: canvas, elDot: dot, elTicks: xhTicks };
+  function setAim(sx, sy) {
+    // I626 (ST-586, E91 D2): reposition the crosshair (dot + 4 ticks) to the projected
+    // nose-gun screen point (muzzle reads as the aim indicator). Position only - opacity
+    // is owned by update() (the cockpit fade). Keeps the dot id + opacity contract (smoke504).
+    for (let i = 0; i < xh.length; i++) { xh[i].style.left = sx + 'px'; xh[i].style.top = sy + 'px'; }
+  }
+
+  return { update, setAim, el: canvas, elDot: dot, elTicks: xhTicks };
 }

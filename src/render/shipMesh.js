@@ -176,6 +176,31 @@ shipBody.add(mouth);
   /** flash(t): arm the damage-flash envelope starting at sim time t (no-op while it decays - the envelope just restarts). */
   function flash(t) { _fT0 = t; _fT1 = t + HITF.dur; }
 
+  // I626 (ST-586, E91 D2): procedural nose gun - the cockpit view-model. Parented to
+  // the group (NOT shipBody) so the useGLB swap keeps it. Hidden by default; main.js
+  // toggles visible in cockpit PLAYING only (0 added draw calls in every pin frame).
+  const G = CONFIG.ship.gun;
+  const gun = new THREE.Group();
+  gun.name = 'ship_gun';
+  gun.position.set(0, G.y, G.z); // I626: forward gun tower on the nose ridge (z 1.15, y 1.23) - the eye->barrel line clears the canopy top
+  const gunMat = new THREE.MeshStandardMaterial({ color: 0x2b2f37, metalness: 0.75, roughness: 0.45 }); // standard PBR: works on both renderer arms
+  const barrelGeo = new THREE.CylinderGeometry(0.05, 0.11, 0.6, 10);
+  barrelGeo.rotateX(Math.PI / 2); // axis along Z: narrow tip (0.05) faces forward +Z
+  const barrel = new THREE.Mesh(barrelGeo, gunMat);
+  barrel.position.set(0, 0, 0.18); // I626: spans model z ~1.03..1.57 - the tip (1.57) protrudes past the nose tip (hull z max 1.43)
+  gun.add(barrel);
+  const mountGeo = new THREE.BoxGeometry(0.26, 0.16, 0.34);
+  const mount = new THREE.Mesh(mountGeo, gunMat);
+  mount.position.set(0, -0.06, -0.02); // base plate where the barrel meets the hull
+  gun.add(mount);
+  const pedestalGeo = new THREE.CylinderGeometry(0.15, 0.24, 0.62, 4); // I626: tapered 4-sided column = the gun tower pedestal
+  pedestalGeo.rotateY(Math.PI / 4); // flats face fwd/aft, corners outboard
+  const pedestal = new THREE.Mesh(pedestalGeo, gunMat);
+  pedestal.position.set(0, -0.41, -0.02); // local y -0.10..-0.72: top meets the mount base (y 1.13), feet on the nose ridge (~y 0.5 at z ~1.1)
+  gun.add(pedestal);
+  gun.visible = false; // main.js toggles visible in cockpit PLAYING only
+  group.add(gun);
+
   group.position.y = 0.4; // hover just above the arena plane
 
   // I104: useGLB(obj) - swap the procedural body for the Blender ship.
@@ -235,5 +260,5 @@ shipBody.add(mouth);
   }
   }
 
-  return { group, sync, flash, flame: flameMid, flameCore, flameGlow: glowSprite, useGLB };
+  return { group, sync, flash, flame: flameMid, flameCore, flameGlow: glowSprite, useGLB, gun };
 }
