@@ -287,3 +287,70 @@ test('waves: belt-only field clears and both belt rocks persist (I563)', () => {
   assert.equal(field.count, 2, 'both belt rocks persist');
   assert.equal(field.killableCount, 0);
 });
+
+test('waves: leftover grace - 2 stragglers advance the wave after leftover.stall (I630)', () => {
+  const { field, dir } = setup(901);
+  dir.step(DT); // wave 1 active
+  const keep = field.rocks.slice(0, 2);
+  for (const r of field.rocks) if (keep.indexOf(r) === -1) r.dead = true;
+  field.compact();
+  assert.equal(field.killableCount, 2, 'two stragglers left');
+  const S = 1 / 60;
+  let adv = 0;
+  for (let i = 0; i < Math.ceil((CONFIG.wave.leftover.stall - 0.5) / S); i++) { const ev = dir.step(S); if (ev.stallAdvance) { adv = ev.stallAdvance; break; } }
+  assert.equal(adv, 0, 'no advance before the grace window');
+  for (let i = 0; i < 60; i++) { const ev = dir.step(S); if (ev.stallAdvance) { adv = ev.stallAdvance; break; } }
+  assert.equal(adv, 2, 'grace advanced to wave 2');
+  assert.equal(field.count, 2, 'stragglers carried, none deleted');
+});
+
+test('waves: leftover grace - 3 stragglers never fire the grace (stallTime backstop only) (I630)', () => {
+  const { field, dir } = setup(902);
+  dir.step(DT); // wave 1 active
+  const keep = field.rocks.slice(0, 3);
+  for (const r of field.rocks) if (keep.indexOf(r) === -1) r.dead = true;
+  field.compact();
+  assert.equal(field.killableCount, 3, 'three stragglers left');
+  const S = 1 / 60;
+  let adv = 0, atStep = -1;
+  for (let i = 1; i <= Math.ceil(CONFIG.wave.stallTime / S) + 2; i++) { const ev = dir.step(S); if (ev.stallAdvance) { adv = ev.stallAdvance; atStep = i; break; } }
+  assert.equal(adv, 2, 'advanced via the backstop');
+  assert.ok(DT + atStep * S >= CONFIG.wave.stallTime - 1e-6, 'advance at the 45 s stall wall (incl. the first-step DT), not the 10 s grace: step ' + atStep);
+});
+
+test('waves: leftover grace - timer resets when the killable count rises again (I630)', () => {
+  const { field, dir } = setup(903);
+  dir.step(DT); // wave 1 active
+  const keep = field.rocks.slice(0, 2);
+  for (const r of field.rocks) if (keep.indexOf(r) === -1) r.dead = true;
+  field.compact();
+  const S = 1 / 60;
+  for (let i = 0; i < 8 / S; i++) dir.step(S); // 8 s of the grace window
+  assert.ok(dir.leftoverT > 7.9, 'grace timer running: ' + dir.leftoverT);
+  field.spawn('M', 1); // a third killable appears
+  dir.step(S);
+  assert.equal(dir.leftoverT, 0, 'timer reset while count > max');
+  const extra = field.rocks[field.rocks.length - 1];
+  extra.dead = true; field.compact(); // kill it again -> back to 2
+  assert.equal(field.killableCount, 2);
+  for (let i = 0; i < Math.ceil((CONFIG.wave.leftover.stall - 1) / S); i++) { const ev = dir.step(S); assert.equal(ev.stallAdvance, 0, 'timer restarted from zero'); }
+  for (let i = 0; i < 60; i++) { const ev = dir.step(S); if (ev.stallAdvance) break; }
+  assert.equal(dir.wave, 2, 'advance only after a full fresh grace window');
+});
+
+test('waves: true clear stays immediate and resets the grace state (I630)', () => {
+  const { field, dir } = setup(904);
+  dir.step(DT); // wave 1 active
+  const keep = field.rocks.slice(0, 2);
+  for (const r of field.rocks) if (keep.indexOf(r) === -1) r.dead = true;
+  field.compact();
+  const S = 1 / 60;
+  for (let i = 0; i < 5 / S; i++) dir.step(S); // 5 s of the grace window
+  assert.ok(dir.leftoverT > 4.9, 'grace timer running');
+  field.clear(); // the last two die
+  const ev = dir.step(S);
+  assert.equal(ev.waveCleared, 1, 'immediate clear - no grace wait');
+  assert.equal(ev.stallAdvance, 0);
+  assert.equal(dir.leftoverT, 0, 'grace state reset on a true clear');
+  assert.equal(dir.state, 'intermission');
+});

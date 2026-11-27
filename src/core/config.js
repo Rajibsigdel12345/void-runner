@@ -207,6 +207,7 @@ export const CONFIG = {
     maxConcurrentCap: 24,
     intermission: 2.2,
     stallTime: 45,       // I42: wave advances after 45s without a clear (leftover rocks carry over)
+    leftover: { max: 2, stall: 10 }, // I630: leftover grace - killables down to <= max -> the wave advances after stall s (leftovers carry over, same as the stallTime backstop)
     spawnMinPlayerDist: 8, // I34: rim spawn keeps at least this far from the ship
     breatherOpenFrac: 0.5, // ST-242: a breather wave (right after a boss, ST-092) opens with this fraction of the normal open batch
     breatherMinRocks: 3 // ST-242: floor on a breather open batch

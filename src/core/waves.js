@@ -12,6 +12,7 @@ export class WaveDirector {
     this.intermission = 0;
     this.state = 'idle'; // idle | intermission | active
     this.waveElapsed = 0; // I42: active time of the current wave (stall timer)
+    this.leftoverT = 0; // I630: leftover grace timer (straggler backstop)
     this.activeMod = 'none'; // ST-051: none | fast | small | inward | big (ST-228)
     this.openGate = null; // ST-242: opening-batch budget (null = normal trickle, pre-ST-242 bit-identical)
     this.onDecide = null; // ST-304 (I329): wave start decision hook; null = pre-I329 bit-identical
@@ -24,13 +25,14 @@ export class WaveDirector {
     this.toSpawn = 0;
     this.intermission = this.intermissionFor(1); // ST-058
     this.state = 'intermission';
+    this.leftoverT = 0; // I630
     this.activeMod = 'none';
     this.openGate = null;
     this.activeAdj = null; // ST-304 (I329)
     this.rockAllowed = true; // ST-453 (I486)
   }
 
-  reset() { this.state = 'idle'; this.wave = 0; this.toSpawn = 0; this.intermission = 0; this.waveElapsed = 0; this.activeMod = 'none'; this.openGate = null; this.activeAdj = null; this.rockAllowed = true; }
+  reset() { this.state = 'idle'; this.wave = 0; this.toSpawn = 0; this.intermission = 0; this.waveElapsed = 0; this.leftoverT = 0; this.activeMod = 'none'; this.openGate = null; this.activeAdj = null; this.rockAllowed = true; }
 
   get speedMult() {
     let m = Math.min(this.cfg.wave.speedCap, 1 + this.cfg.wave.speedPerWave * this.wave);
@@ -167,21 +169,32 @@ export class WaveDirector {
     // I563: killableCount - the ST-138 belt rocks persist by design (ambient hazard), so a wave clears
     // the moment its killables are gone; the I42 stallTime above stays only as the safety backstop.
     if (this.toSpawn === 0 && this.field.killableCount === 0) {
+      this.leftoverT = 0; // I630: a true clear resets the grace state
       this.state = 'intermission';
       this.intermission = this.intermissionFor(this.wave + 1); // ST-058
       this.waveElapsed = 0;
       ev.waveCleared = this.wave;
-    } else if (this.waveElapsed >= this.cfg.wave.stallTime) {
-      // I42: stall advance - the wave moves on even if rocks survive. Leftovers
-      // carry into the next wave (not deleted, not sped up); no intermission.
-      this.wave += 1;
-      this.activeAdj = this.onDecide ? this.onDecide(this.wave) : null; // ST-304 (I329)
-      this.toSpawn = this.activeAdj ? Math.round(this.contentFor(this.wave) * this.activeAdj.d) : this.contentFor(this.wave); // ST-058 / ST-304
-      this.waveElapsed = 0;
-      this.activeMod = this._modFor(this.wave); // ST-051 / ST-304 (I329)
-      this.openGate = this.openBudgetFor(this.wave); // ST-242
-      ev.stallAdvance = this.wave;
-      ev.startedWave = this.wave; // same "WAVE n" banner flow as a normal start
+    } else {
+      // I630: leftover grace - a few drifting stragglers no longer hold the wave on the
+      // 45 s wall: once the killables are down to leftover.max or fewer, the wave advances
+      // after leftover.stall s through the EXISTING stall semantics below (leftovers carry
+      // over, no intermission). The timer resets the moment the condition stops holding
+      // (a split or trickle refill lifts the count back above max). No new RNG draws.
+      const lo = this.cfg.wave.leftover;
+      this.leftoverT = (this.toSpawn === 0 && this.field.killableCount <= lo.max) ? this.leftoverT + dt : 0;
+      if (this.waveElapsed >= this.cfg.wave.stallTime || (lo.stall > 0 && this.leftoverT >= lo.stall)) {
+        // I42: stall advance - the wave moves on even if rocks survive. Leftovers
+        // carry into the next wave (not deleted, not sped up); no intermission.
+        this.wave += 1;
+        this.activeAdj = this.onDecide ? this.onDecide(this.wave) : null; // ST-304 (I329)
+        this.toSpawn = this.activeAdj ? Math.round(this.contentFor(this.wave) * this.activeAdj.d) : this.contentFor(this.wave); // ST-058 / ST-304
+        this.waveElapsed = 0;
+        this.leftoverT = 0; // I630
+        this.activeMod = this._modFor(this.wave); // ST-051 / ST-304 (I329)
+        this.openGate = this.openBudgetFor(this.wave); // ST-242
+        ev.stallAdvance = this.wave;
+        ev.startedWave = this.wave; // same "WAVE n" banner flow as a normal start
+      }
     }
     return ev;
   }
