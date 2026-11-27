@@ -41,8 +41,9 @@ export function createWaveBanner(root) {
     anim = { t: 0, dur: 1.8, text: t('banner.wave',{n}), subText: parts.join(' \u00b7 ') };
     el.style.fontSize = 'calc(40px * var(--vr-fs,1))'; // I161: font-scale
   }
-  function startCleared(n) { // I154: gold big "CLEARED" + wave sub
-    anim = { t: 0, dur: 1.2, text: t('banner.cleared'), subText: t('banner.wave',{n}), tint: '#ffe08a', glow: '0 0 22px rgba(255,224,138,0.35), 0 2px 14px rgba(0,0,0,0.9)' };
+  function startCleared(n, bonus) { // I154: gold big "CLEARED" + wave sub; I631: + bonus sub-line
+    const sub = bonus > 0 ? t('banner.cleared_bonus', { n, p: bonus }) : t('banner.wave', { n }); // I631: reward beat (no bonus -> old sub)
+    anim = { t: 0, dur: 1.2, text: t('banner.cleared'), subText: sub, tint: '#ffe08a', glow: '0 0 22px rgba(255,224,138,0.35), 0 2px 14px rgba(0,0,0,0.9)' };
     el.style.fontSize = 'calc(40px * var(--vr-fs,1))'; // I161: font-scale
   }
   function showBossWarn() { // I465/ST-433 B2: dim-red warning pre-card (sub-only, big line hidden)

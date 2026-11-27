@@ -1,4 +1,4 @@
-﻿// Void Runner - world orchestrator (ST-012). Pure core: no DOM, no three.
+﻿﻿﻿// Void Runner - world orchestrator (ST-012). Pure core: no DOM, no three.
 // Per-frame data flow: intent in -> step -> events out (drained by render/audio/hud).
 import { Ship } from './ship.js';
 import { Weapons } from './weapons.js';
@@ -276,7 +276,12 @@ this.spawnBeaconForWave(wv.startedWave); // ST-518 (E75)
     }
     const wl = this.weaponLevel(); // ST-122: weapon progression by wave
     if (wl > this._wlevel) { this._wlevel = wl; this.emit('weaponLevelUp', { level: wl }); }
-    if (wv.waveCleared) this.emit('waveCleared', { n: wv.waveCleared });
+    if (wv.waveCleared) { // I631: clear reward beat - flat bonus (ST-057: doubled under overdrive via bonus())
+      const cb = this.cfg.wave.clearBonus; // I631
+      const pts = Math.min(cb.cap, cb.base + cb.perWave * wv.waveCleared); // I631: flat, capped
+      this.scoreKeeper.bonus(pts); // I631: flat bonus, does not touch the combo chain (ST-053)
+      this.emit('waveCleared', { n: wv.waveCleared, bonus: pts }); // I631: banner sub-line
+    }
     this.mines.step(edt, this.ship.pos); // ST-054 (ST-115: scaled under slow-mo)
     this.drones.step(edt, this.ship.pos); // ST-117 (ST-115: scaled under slow-mo)
     this.stingers.step(edt, this.ship.pos); // ST-229 (ST-115: scaled under slow-mo)

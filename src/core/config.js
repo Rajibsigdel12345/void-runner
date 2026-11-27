@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿// ALL tunables live here (balance table). See design/gdd.md for rationale.
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿// ALL tunables live here (balance table). See design/gdd.md for rationale.
 export const CONFIG = {
   // ST-431 (I463, E60 B1): role-named palette - the single role-truth section for
   // every world/UI color (threejs-game-studio material kit: bodyPrimary/hazard/
@@ -208,6 +208,7 @@ export const CONFIG = {
     intermission: 2.2,
     stallTime: 45,       // I42: wave advances after 45s without a clear (leftover rocks carry over)
     leftover: { max: 2, stall: 10 }, // I630: leftover grace - killables down to <= max -> the wave advances after stall s (leftovers carry over, same as the stallTime backstop)
+    clearBonus: { base: 150, perWave: 25, cap: 500 }, // I631: clear reward beat - flat bonus on a true clear (doubled under overdrive via bonus()); stall/grace advances pay nothing
     spawnMinPlayerDist: 8, // I34: rim spawn keeps at least this far from the ship
     breatherOpenFrac: 0.5, // ST-242: a breather wave (right after a boss, ST-092) opens with this fraction of the normal open batch
     breatherMinRocks: 3 // ST-242: floor on a breather open batch

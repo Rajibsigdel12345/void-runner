@@ -110,6 +110,7 @@ export const STRINGS = {
     'banner.wave': 'WAVE {n}',
     'banner.endless': 'ENDLESS',
     'banner.cleared': 'CLEARED',
+    'banner.cleared_bonus': 'WAVE {n} + {p}',
     'banner.countdown': 'NEXT WAVE IN {n}',
     'banner.boss_sub': 'WAVE {n} \u00b7 {hp} HP',
   'banner.boss_warn': '!! INBOUND !!', // I465/ST-433 B2: dim-red pre-card before the boss intro
@@ -345,6 +346,7 @@ export const STRINGS = {
     'banner.wave': '波次 {n}',
     'banner.endless': '无尽',
     'banner.cleared': '清除完毕',
+    'banner.cleared_bonus': '波次 {n} + {p}',
     'banner.countdown': '下一波 {n}',
     'banner.boss_sub': '波次 {n} · {hp} HP',
   'banner.boss_warn': '!! 来袭 !!',
@@ -572,6 +574,7 @@ export const STRINGS = {
     'banner.wave': 'ウェーブ {n}',
     'banner.endless': 'エンドレス',
     'banner.cleared': 'クリア',
+    'banner.cleared_bonus': 'ワーベ {n} + {p}',
     'banner.countdown': '次ウェーブまで {n}',
     'banner.boss_sub': 'ウェーブ {n} ・ {hp} HP',
   'banner.boss_warn': '!! 接近中 !!',

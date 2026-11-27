@@ -1,4 +1,4 @@
-﻿﻿﻿﻿// Void Runner - boot (I12: World orchestrator drives ship/weapons/asteroids/collisions)
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿// Void Runner - boot (I12: World orchestrator drives ship/weapons/asteroids/collisions)
 import * as THREE from 'three';
 import { createStarfield } from './render/starfield.js';
 import { createSkybox } from './render/skybox.js'; // I212
@@ -1051,7 +1051,7 @@ function tick(dt, intent) {
     const haptic = e.type === 'hit' ? 'hit' : e.type === 'gameover' ? 'death' : e.type === 'bomb' ? 'bomb' : e.type === 'powerup' ? 'pickup' : null; // ST-322 (I353): touch haptics at the SFX dispatch (coarse + feature-gated inside haptics)
     if (haptic) haptics.pulse(haptic);
     if (e.type === 'wave') banner.showWave(e.data.n, e.data.mod, e.data.endless);
-    else if (e.type === 'waveCleared') banner.showCleared(e.data.n);
+    else if (e.type === 'waveCleared') banner.showCleared(e.data.n, e.data.bonus);
     else if (e.type === 'bossSpawn') { const _prime = !!(world.boss && world.boss.prime); const _archon = !!(world.boss && world.boss.archon); _lastBossPrime = _prime; _lastBossArchon = _archon; bossMesh.setBossGeometry(_archon ? 'archon' : 'monolith'); banner.showBossWarn(); banner.showBoss(e.data.wave, e.data.hp, _archon ? tr('banner.boss.archon') : _prime ? tr('banner.boss.prime') : (e.data.kind === 'splicer' ? tr('banner.boss.splicer') : tr('banner.boss.monolith')), _archon ? 'archon' : _prime ? 'prime' : e.data.kind); if (e.data.kind === 'splicer') toast(tr('toast.splicer')); } // I154: kind for variant glow; ST-420 (I450): Prime gold identity (flag on world.boss; payload has no prime); ST-519 (E75): archon remesh + label // I465/ST-433 B2: showBossWarn() pre-card leads the intro; ST-135/143: boss intro
     else if (e.type === 'wardenSpawn') toast(tr('toast.warden')); // ST-137: mini-boss callout
     else if (e.type === 'stingerSpawn') toast(tr('toast.stinger')); // ST-229: first spawn of the run calls out the charger

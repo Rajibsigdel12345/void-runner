@@ -1,6 +1,7 @@
 ﻿﻿﻿﻿﻿﻿﻿# Changelog - Void Runner
 
 ## [Unreleased]
+- I631: Clearing a wave now pays a small bonus - 150 points plus 25 per wave, capped at 500, doubled under overdrive - shown as a sub-line under the golden CLEARED banner. Waves that advance on the safety timers still pay nothing.
 - I630: The long waits at the end of a wave are gone. When a wave's killables were down to the last couple of drifting rocks, the wave used to hold on until a 45-second safety timer ran out. Now the wave moves on 10 seconds after at most 2 killable rocks remain, and the leftovers carry over into the next wave exactly as before. Clearing everything still ends the wave instantly.
 - I628: No visible change - the cockpit round's final gate passed: all six automated regression batteries came back clean (determinism exact on every arm, the menu and in-play render fingerprints exact with nothing to re-pin, offline install 11/11, and all 34 models loading at the exact 189,495-triangle total with zero console errors), and the round is officially closed. The download is 6,638,132 bytes across 205 files, under the limit with 659,468 bytes of room to spare.
 - I627: The first-person cockpit gets a steering setting: Nose (the default - always nose-forward, the behavior you have today) or View, where thrust follows the pointer while it stays within 90 degrees of the bow and falls back to the nose beyond that, so the controls can never flip around. Touch controls and every other view are unchanged. The download is 6,638,132 bytes across 205 files.
