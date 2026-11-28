@@ -85,3 +85,12 @@ At open (I646): I645 close gate 6/6 (CLOSEGATE645, zero re-pins) + push 0943949 
 ## Next owner
 
 I647 = ST-605: apply P2+P3 (config.js:306 + :281, ONE pass) + sweep647 (30 fresh seeds 64600+i, rules647.md FROZEN PRE-RUN in .evidence/I647/, line-asserted clone of the .evidence/I644 sweep643 harness) + frozen acceptance (a)-(e) OR C1 (git restore config.js [BOTH levers] + accept-with-documentation + P4/P5/P6 to E97+ WITH the sweep647 record).
+
+## Amendments
+### C1 INVOKED at I647 (ST-605) - P2+P3 lever pair validated, acceptance (d) FAILED, both levers reverted
+
+- Lever (applied per the frozen adjudication as ONE pass, validated, then reverted): src/core/config.js:306 boss.burst.speed 7.0 -> 6.0 + src/core/config.js:281 boss.fireEvery 2.2 -> 2.6 (two lines; occurrence==1-asserted; git diff exactly 2 lines).
+- sweep647 (.evidence/I647/, 30 fresh seeds 64600+i, rules647.md FROZEN PRE-RUN, wall ms 5483): 30/30 died, median death wave 10, reach wave >= 13 = 2/30 (64608 wave 14 + 64622 wave 15). B56 4/30 | M56' 3/30 | M56 0/30 (R-6 comparability only). Killing-blow tally (primary) {"SPLICER":13,"bullet_unknown":5,"MINE":1,"rock_S":5,"gunship":5,"MONOLITH":1}; H primary 14/30.
+- Acceptance: (a) B56 <= 9/30 PASS [4/30; pre-lever sweep642 10/30] / (b) M56' <= 7/30 PASS [3/30; pre-lever 10/30] / (c) median death wave >= 9 PASS [10; pre-lever 9] / (d) reach wave >= 13 >= 3/30 FAIL [2/30; pre-lever 1/30; sweep577 ref 6/30] / (e) GATE647 6/6 harness battery EXACT zero re-pins PASS (external runner run_gate647.cjs; port-free at every step).
+- Interpretation (recorded as-is, no re-derivation): the pair decisively broke the wave-5/6 wall - B56 10 -> 4 (best in band lineage 10/7/9/12/11/12/9/10/13 -> 4), M56' 10 -> 3, median 9 -> 10 - the best measured result in the E77 -> E96 lineage - but the frozen reach13 threshold was missed by one seed. The pressure relocated to wave 10, where the SPLICER fleet now does most of the killing (13/30 primary); the wall moved rather than shrank.
+- Action: git restore src/core/config.js (BOTH levers; committed tree byte-identical to I646) + accept-with-documentation + P4 (offsetSpin 0.45 -> 0.30) / P5 (everyMult 0.65 -> 0.75) / P6 (enemyBullets.speed 9 -> 8) + structural aimed-pressure to E97+ WITH the sweep647 record (top E97 candidate: re-run P2+P3 WITH the record). E96 closes at G96.0 as an accept round (E78/E80/E81/E82/E95 pattern). ONE pass, no second fiddle - satisfied.
