@@ -84,4 +84,14 @@ At open (I642): I641 close gate 6/6 (CLOSEGATE641, zero re-pins) + push 0a639b5 
 
 ## Next owner
 
-I643 = ST-601 sweep642 pre-lever re-audit (rules642.md FROZEN PRE-RUN in .evidence/I643/; clone base .evidence/I582/sweep581.mjs 17,773 B line-asserted; seeds 64200+i; full director from wave 1; I328 kiter verbatim; cap 36000 ticks @ 1/60; in-process zero servers/tabs).
+I645 = ST-603 G95.0 CLOSE (accept round, E78/E80/E81/E82 pattern): clone .evidence/I641/run_close641.cjs -> .evidence/I645/run_close645.cjs (label CLOSEGATE645, OUTDIR .evidence/I645/), 6/6 gate + fleet smoke + fresh dist re-measure vs 7,297,600 B + CLOSE FLOOR E95 WITH MEASUREMENT + AGENTS.md refresh (item-4 chain append I642/I643/I644 docs-only + deferrals P2/P3 + band lineage .../10/13) + E95 CLOSED..
+
+## Amendments
+
+### C1 INVOKED at I644 (ST-602) - P1 lever validated, acceptance FAILED (a)-(d), lever reverted
+
+- Lever (applied per the frozen adjudication, validated, then reverted): src/core/config.js:305 boss.burst.count 12 -> 9 (one line; applied state carried the comment '(E95 P1: 30deg -> 40deg corridors)').
+- sweep643 (.evidence/I644/, 30 fresh seeds 64300+i, rules643.md FROZEN PRE-RUN, wall ms 5383): 30/30 died, median death wave 8, reach wave >= 13 = 0/30. B56 13/30 | M56' 13/30 | M56 6/30 (R-6 comparability only). Killing-blow tally (primary) {"rock_M":5,"MONOLITH":6,"gunship":2,"bullet_unknown":9,"SPLICER":7,"rock_S":1}; H primary 13/30.
+- Acceptance: (a) B56 <= 9/30 FAIL [13/30; pre-lever sweep642 10/30] / (b) M56' <= 7/30 FAIL [13/30; pre-lever 10/30] / (c) median death wave >= 9 FAIL [8; pre-lever 9] / (d) reach wave >= 13 >= 3/30 FAIL [0/30; pre-lever 1/30] / (e) GATE644 6/6 harness battery EXACT zero re-pins PASS (external runner run_gate644.cjs).
+- Interpretation (recorded as-is, no re-derivation): MONOLITH primary 10 -> 6/30 (the corridor-widener DID reduce direct burst kills) but bullet_unknown 2 -> 9/30 and the band composition got WORSE (10 -> 13/30) - the residual is aimed-pressure/bullet residency, not the radial corridors. Risk R-1 named this exact failure mode ('if (b) still fails, the residual is aimed-pressure/HP, not corridors - C1 executes').
+- Action: git restore src/core/config.js (count 12 restored; committed tree byte-identical to I643) + accept-with-documentation + P2 (burst.speed 7.0 -> 6.0) / P3 (fireEvery 2.2 -> 2.6) deferred to E96+ WITH the sweep643 measurement record. E95 closes at G95.0 as an accept round (E78/E80/E81/E82 pattern). ONE pass, no second fiddle - satisfied.
